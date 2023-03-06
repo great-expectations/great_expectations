@@ -27,7 +27,6 @@ class ColumnMax(ColumnAggregateMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
             try:
@@ -44,7 +43,6 @@ class ColumnMax(ColumnAggregateMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
         return sa.func.max(column)
@@ -55,7 +53,6 @@ class ColumnMax(ColumnAggregateMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
             try:

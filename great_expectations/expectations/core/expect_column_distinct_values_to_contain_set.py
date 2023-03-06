@@ -250,7 +250,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
+            warn_deprecated_parse_strings_as_datetimes()
             warn_deprecated_parse_strings_as_datetimes()
             parsed_value_set = parse_value_set(value_set)
             observed_value_counts.index = pd.to_datetime(observed_value_counts.index)

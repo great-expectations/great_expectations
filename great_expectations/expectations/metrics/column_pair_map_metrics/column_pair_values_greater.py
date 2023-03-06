@@ -43,7 +43,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
             try:
@@ -102,7 +101,6 @@ class ColumnPairValuesAGreaterThanB(ColumnPairMapMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
             temp_column_A = F.to_date(column_A)

@@ -33,7 +33,6 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
         if value_set is None:
@@ -58,7 +57,6 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
         if value_set is None or len(value_set) == 0:
@@ -78,7 +76,6 @@ class ColumnValuesNotInSet(ColumnMapMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
         return ~column.isin(value_set)

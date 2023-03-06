@@ -40,7 +40,6 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
             try:
@@ -85,7 +84,6 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             metric_value_kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
         # check if column is any type that could have na (numeric types)

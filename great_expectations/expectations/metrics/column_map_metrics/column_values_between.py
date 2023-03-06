@@ -50,7 +50,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
             allow_cross_type_comparisons = False
 
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
             if min_value is not None:
@@ -243,7 +242,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         **kwargs
     ):
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
             if min_value is not None:
@@ -312,7 +310,6 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
         **kwargs
     ):
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
             warn_deprecated_parse_strings_as_datetimes()
 
             if min_value is not None:
