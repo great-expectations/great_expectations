@@ -13,11 +13,6 @@ import warnings
 
 from packaging.version import Version
 
-try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
-
 
 def sqlalchemy_version_check(version: str | Version) -> None:
     """Check if the sqlalchemy version is supported or warn if not.
