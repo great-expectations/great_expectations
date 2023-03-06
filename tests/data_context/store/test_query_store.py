@@ -1,3 +1,6 @@
+import warnings
+from unittest import mock
+
 import pytest
 
 import tests.test_utils as test_utils
@@ -80,12 +83,16 @@ def test_queries_with_return_types(sqlalchemy_query_store_specified_return_type)
 
 
 @pytest.mark.unit
-def test_init_query_store_with_dict_credentials():
+@mock.patch("great_expectations.data_context.store.query_store.create_engine")
+def test_init_query_store_with_dict_credentials(mock_create_engine):
     """credentials can take a dict of params to pass to either URL() (< v0.14.0) or
     URL.create() (>= v0.14.0) depending on the sqlalchemy version."""
     credentials = {"drivername": "postgresql+psycopg2", "username": "some_user"}
-    query_store = SqlAlchemyQueryStore(credentials=credentials)
-    assert query_store.engine
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")  # No warnings allowed
+        SqlAlchemyQueryStore(credentials=credentials)
+
+    mock_create_engine.assert_called_once()
 
 
 @pytest.mark.integration
