@@ -9,7 +9,7 @@ from great_expectations.core.batch import (
     BatchDataType,
     BatchDefinition,
     BatchMarkers,
-    _get_x_batch_request_class,
+    _get_x_batch_class,
 )
 
 if TYPE_CHECKING:
@@ -143,13 +143,41 @@ class BatchManager:
         self._active_batch_id = None
 
     def load_batch_list(self, batch_list: List[Batch]) -> None:
+        print(
+            f"\n[ALEX_TEST] [BatchManager.load_batch_list()] SELF._EXECUTION_ENGINE:\n{self._execution_engine} ; TYPE: {str(type(self._execution_engine))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [BatchManager.load_batch_list()] BATCH_LIST:\n{batch_list} ; TYPE: {str(type(batch_list))} ; NUM: {len(batch_list)}"
+        )
         batch: Batch
         for batch in batch_list:
+            print(
+                f"\n[ALEX_TEST] [BatchManager.load_batch_list()] BATCH-0:\\; TYPE: {str(type(batch))}"
+            )
             try:
+                # TODO: <Alex>ALEX</Alex>
+                a = _get_x_batch_class()
+                b = type(batch)
+                print(
+                    f"\n[ALEX_TEST] [BatchManager.load_batch_list()] _GET_X_BATCH_REQUEST_CLASS():\n{a} ; TYPE: {str(type(a))}"
+                )
+                print(
+                    f"\n[ALEX_TEST] [BatchManager.load_batch_list()] TYPE(BATCH):\n{b} ; TYPE: {str(type(b))}"
+                )
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # assert isinstance(batch, Batch) or type(batch) == _get_x_batch_class(), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
+                # TODO: <Alex>ALEX</Alex>
                 assert isinstance(
-                    batch, (Batch, _get_x_batch_request_class())
+                    batch, (Batch, _get_x_batch_class())
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
+                print(
+                    f"\n[ALEX_TEST] [BatchManager.load_batch_list()] BATCH-1:; TYPE: {str(type(batch))}"
+                )
             except AssertionError as e:
+                print(
+                    f"\n[ALEX_TEST] [BatchManager.load_batch_list()] BATCH-ASSERTION-ERROR?!!!:\n{e} ; TYPE: {str(type(e))}"
+                )
                 logger.error(str(e))
 
             self._execution_engine.load_batch_data(
