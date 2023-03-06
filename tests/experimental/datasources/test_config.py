@@ -4,7 +4,7 @@ import json
 import pathlib
 import re
 from pprint import pformat as pf
-from pprint import pprint
+from pprint import pprint as pp
 from typing import Callable, List
 
 import pydantic
@@ -22,14 +22,6 @@ from great_expectations.experimental.datasources.sql_datasource import (
     ColumnSplitterYearAndMonth,
     TableAsset,
 )
-
-pp: Callable[[GxConfig], None]
-try:
-    import devtools  # noqa: disable=E0602
-
-    pp = devtools.debug
-except ImportError:
-    pp = pprint
 
 p = pytest.param
 
