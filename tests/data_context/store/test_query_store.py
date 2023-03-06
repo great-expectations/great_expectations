@@ -14,7 +14,7 @@ def basic_sqlalchemy_query_store(titanic_sqlite_db):
 
 
 @pytest.fixture()
-def test_basic_sqlalchemy_query_store_connection_string(
+def basic_sqlalchemy_query_store_connection_string(
     titanic_sqlite_db_connection_string,
 ):
     credentials = {"connection_string": titanic_sqlite_db_connection_string}
@@ -59,9 +59,9 @@ def test_basic_query(basic_sqlalchemy_query_store):
 
 
 @pytest.mark.integration
-def test_query_connection_string(test_basic_sqlalchemy_query_store_connection_string):
+def test_query_connection_string(basic_sqlalchemy_query_store_connection_string):
     assert (
-        test_basic_sqlalchemy_query_store_connection_string.get("q1")
+        basic_sqlalchemy_query_store_connection_string.get("q1")
         == "SELECT DISTINCT PClass FROM titanic;"
     )
 
@@ -77,6 +77,15 @@ def test_queries_with_return_types(sqlalchemy_query_store_specified_return_type)
 
     with pytest.raises(ValueError):
         sqlalchemy_query_store_specified_return_type.get_query_result("error_query")
+
+
+@pytest.mark.unit
+def test_init_query_store_with_dict_credentials():
+    """credentials can take a dict of params to pass to either URL() (< v0.14.0) or
+    URL.create() (>= v0.14.0) depending on the sqlalchemy version."""
+    credentials = {"drivername": "postgresql+psycopg2", "username": "some_user"}
+    query_store = SqlAlchemyQueryStore(credentials=credentials)
+    assert query_store.engine
 
 
 @pytest.mark.integration
