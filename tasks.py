@@ -467,7 +467,7 @@ def docker(
 @invoke.task(
     aliases=("schema", "schemas"),
     help={
-        "sync": "Update the json schemas at `great_expectations/experimental/datasources/schemas`",
+        "sync": "Update the json schemas at `great_expectations/datasource/fluent/schemas`",
         "indent": "Indent size for nested json objects. Default: 4",
         "clean": "Delete all schema files and sub directories."
         " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
@@ -495,7 +495,7 @@ def type_schema(
     )
 
     schema_dir_root: Final[pathlib.Path] = (
-        GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
+        GX_ROOT_DIR / "datasource" / "fluent" / "schemas"
     )
     if clean:
         file_count = len(list(schema_dir_root.glob("**/*.json")))
