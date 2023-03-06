@@ -2,8 +2,9 @@ import copy
 import functools
 import json
 import pathlib
-from pprint import pprint, pformat as pf
 import re
+from pprint import pformat as pf
+from pprint import pprint
 from typing import Callable, List
 
 import pydantic
