@@ -2,8 +2,8 @@ import copy
 import functools
 import json
 import pathlib
+import pprint
 import re
-from pprint import pformat as pf
 from typing import Callable, List
 
 import pydantic
@@ -22,10 +22,13 @@ from great_expectations.experimental.datasources.sql_datasource import (
     TableAsset,
 )
 
+pp: Callable[[GxConfig], None]
 try:
-    from devtools import debug as pp  # noqa: disable=E0602
+    import devtools  # noqa: disable=E0602
+
+    pp = devtools.debug
 except ImportError:
-    from pprint import pprint as pp
+    pp = pprint.pprint
 
 p = pytest.param
 
@@ -229,7 +232,7 @@ class TestExcludeUnsetAssetFields:
         gx_config = GxConfig.parse_obj({"xdatasources": {"my_ds": ds_dict}})
 
         gx_config_dict = gx_config.dict()
-        print(f"gx_config_dict\n{pf(gx_config_dict)}")
+        print(f"gx_config_dict\n{pprint.pformat(gx_config_dict)}")
         assert (
             asset_dict == gx_config_dict["xdatasources"]["my_ds"]["assets"][asset_name]
         )
@@ -286,14 +289,14 @@ def test_catch_bad_top_level_config(
     expected_error_loc: tuple,
     expected_msg: str,
 ):
-    print(f"  config\n{pf(config)}\n")
+    print(f"  config\n{pprint.pformat(config)}\n")
     with pytest.raises(pydantic.ValidationError) as exc_info:
         loaded = GxConfig.parse_obj(config)
         print(f"Erroneously loaded config\n{loaded}\n")
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
     all_errors = exc_info.value.errors()
-    print(f"\nErrors dict\n{pf(all_errors)}")
+    print(f"\nErrors dict\n{pprint.pformat(all_errors)}")
 
     assert len(all_errors) == 1, "Expected 1 error"
     assert expected_error_loc == all_errors[0]["loc"]
@@ -346,7 +349,7 @@ def test_catch_bad_asset_configs(
             "assets": {bad_asset_config["name"]: bad_asset_config},
         }
     }
-    print(f"  Config\n{pf(config)}\n")
+    print(f"  Config\n{pprint.pformat(config)}\n")
 
     with pytest.raises(pydantic.ValidationError) as exc_info:
         GxConfig.parse_obj({"xdatasources": config})
@@ -422,7 +425,7 @@ def test_dict_config_round_trip(
     inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
     dumped: dict = from_dict_gx_config.dict()
-    print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
+    print(f"  Dumped Dict ->\n\n{pprint.pformat(dumped)}\n")
 
     re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
@@ -536,7 +539,7 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     )
 
     dumped: dict = from_dict_default_pandas_config.dict()
-    print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
+    print(f"  Dumped Dict ->\n\n{pprint.pformat(dumped)}\n")
 
     datasource_without_default_pandas_data_asset_config_dict = copy.deepcopy(
         DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT

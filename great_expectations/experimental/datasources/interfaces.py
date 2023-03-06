@@ -308,8 +308,10 @@ def _sort_batches_with_none_metadata_values(
         if a.metadata[key] is not None:  # b.metadata[key] is None
             return 1
 
-        # This line should never be reached.
-        return 0
+        # This line should never be reached; hence, "ValueError" with corresponding error message is raised.
+        raise ValueError(
+            f'Unexpected Batch metadata key combination, "{a.metadata[key]}" and "{b.metadata[key]}", was encountered.'
+        )
 
     return _compare_function
 

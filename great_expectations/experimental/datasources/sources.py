@@ -14,7 +14,7 @@ from typing import (
     Union,
 )
 
-from typing_extensions import Final
+from typing_extensions import Final, TypeAlias
 
 from great_expectations.experimental.datasources.signatures import _merge_signatures
 from great_expectations.experimental.datasources.type_lookup import TypeLookup
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.validator.validator import Validator
 
-SourceFactoryFn = Callable[..., "Datasource"]
+SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
 
 logger = logging.getLogger(__name__)
 
