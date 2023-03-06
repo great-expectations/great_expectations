@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     ClassVar,
     Generator,
     List,
@@ -11,8 +12,7 @@ from typing import (
     Union,
 )
 
-from _typeshed import Incomplete
-from typing_extensions import Final
+from typing_extensions import Final, TypeAlias
 
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,  # noqa: TCH001
@@ -21,6 +21,7 @@ from great_expectations.experimental.context import DataContext as DataContext
 
 if TYPE_CHECKING:
     import pathlib
+    from logging import Logger
 
     import pydantic
     from pydantic.networks import PostgresDsn
@@ -45,8 +46,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.experimental.datasources.sqlite_datasource import SqliteDsn
 
-SourceFactoryFn: Incomplete
-logger: Incomplete
+SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
+logger: Logger
 DEFAULT_PANDAS_DATASOURCE_NAME: Final[str]
 DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str]
 
