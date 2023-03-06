@@ -40,8 +40,8 @@
     ],
     "additionalProperties": false,
     "definitions": {
-        "BatchSorter": {
-            "title": "BatchSorter",
+        "Sorter": {
+            "title": "Sorter",
             "type": "object",
             "properties": {
                 "key": {
@@ -75,7 +75,7 @@
                     "title": "Order By",
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/BatchSorter"
+                        "$ref": "#/definitions/Sorter"
                     }
                 },
                 "batching_regex": {

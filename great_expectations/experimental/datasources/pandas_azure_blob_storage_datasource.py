@@ -26,8 +26,8 @@ from great_expectations.experimental.datasources.signatures import _merge_signat
 
 if TYPE_CHECKING:
     from great_expectations.experimental.datasources.interfaces import (
-        BatchSorter,
-        BatchSortersDefinition,
+        Sorter,
+        SortersDefinition,
     )
 
 
@@ -126,7 +126,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         container: str,
         name_starts_with: str = "",
         delimiter: str = "/",
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
         """Adds a CSV DataAsst to the present "PandasAzureBlobStorageDatasource" object.
@@ -137,15 +137,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
         )
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
 
         asset = CSVAsset(
             name=name,
@@ -184,7 +182,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         container: str,
         name_starts_with: str = "",
         delimiter: str = "/",
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
         """Adds an Excel DataAsst to the present "PandasAzureBlobStorageDatasource" object.
@@ -195,15 +193,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
         )
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
 
         asset = ExcelAsset(
             name=name,
@@ -242,7 +238,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         container: str,
         name_starts_with: str = "",
         delimiter: str = "/",
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
         """Adds a JSON DataAsst to the present "PandasAzureBlobStorageDatasource" object.
@@ -253,15 +249,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
         )
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
 
         asset = JSONAsset(
             name=name,
@@ -300,7 +294,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         container: str,
         name_starts_with: str = "",
         delimiter: str = "/",
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
         """Adds a Parquet DataAsst to the present "PandasAzureBlobStorageDatasource" object.
@@ -311,15 +305,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[BatchSorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
         )
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = ParquetAsset(
             name=name,
             batching_regex=batching_regex_pattern,

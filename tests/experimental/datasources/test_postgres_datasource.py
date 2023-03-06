@@ -14,7 +14,7 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.experimental.datasources.interfaces import (
     BatchRequest,
     BatchRequestOptions,
-    BatchSorter,
+    Sorter,
     TestConnectionError,
 )
 from great_expectations.experimental.datasources.postgres_datasource import (
@@ -680,8 +680,8 @@ def test_sort_batch_list_by_unknown_key(create_source: CreateSourceFixture):
 def test_table_asset_sorter_parsing(order_by: list):
     """Ensure that arguments to `order_by` are parsed correctly regardless if they are lists of dicts or a list of strings"""
     expected_sorters = [
-        BatchSorter(key="year"),
-        BatchSorter(key="month", reverse=True),
+        Sorter(key="year"),
+        Sorter(key="month", reverse=True),
     ]
 
     table_asset = TableAsset(
