@@ -213,25 +213,37 @@ _PANDAS_ASSET_MODELS = _generate_pandas_data_asset_models(
 )
 
 
-ClipboardAsset = _PANDAS_ASSET_MODELS.get("clipboard", _PandasDataAsset)
-CSVAsset = _PANDAS_ASSET_MODELS.get("csv", _PandasDataAsset)
-ExcelAsset = _PANDAS_ASSET_MODELS.get("excel", _PandasDataAsset)
-FeatherAsset = _PANDAS_ASSET_MODELS.get("feather", _PandasDataAsset)
-GBQAsset = _PANDAS_ASSET_MODELS.get("gbq", _PandasDataAsset)
-HDFAsset = _PANDAS_ASSET_MODELS.get("hdf", _PandasDataAsset)
-HTMLAsset = _PANDAS_ASSET_MODELS.get("html", _PandasDataAsset)
-JSONAsset = _PANDAS_ASSET_MODELS.get("json", _PandasDataAsset)
-ORCAsset = _PANDAS_ASSET_MODELS.get("orc", _PandasDataAsset)
-ParquetAsset = _PANDAS_ASSET_MODELS.get("parquet", _PandasDataAsset)
-PickleAsset = _PANDAS_ASSET_MODELS.get("pickle", _PandasDataAsset)
-SQLAsset = _PANDAS_ASSET_MODELS.get("sql", _PandasDataAsset)
-SQLQueryAsset = _PANDAS_ASSET_MODELS.get("sql_query", _PandasDataAsset)
-SQLTableAsset = _PANDAS_ASSET_MODELS.get("sql_table", _PandasDataAsset)
-SASAsset = _PANDAS_ASSET_MODELS.get("sas", _PandasDataAsset)
-SPSSAsset = _PANDAS_ASSET_MODELS.get("spss", _PandasDataAsset)
-StataAsset = _PANDAS_ASSET_MODELS.get("stata", _PandasDataAsset)
-TableAsset = _PANDAS_ASSET_MODELS.get("table", _PandasDataAsset)
-XMLAsset = _PANDAS_ASSET_MODELS.get(
+ClipboardAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
+    "clipboard", _PandasDataAsset
+)
+CSVAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("csv", _PandasDataAsset)
+ExcelAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("excel", _PandasDataAsset)
+FeatherAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
+    "feather", _PandasDataAsset
+)
+GBQAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("gbq", _PandasDataAsset)
+HDFAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("hdf", _PandasDataAsset)
+HTMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("html", _PandasDataAsset)
+JSONAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("json", _PandasDataAsset)
+ORCAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("orc", _PandasDataAsset)
+ParquetAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
+    "parquet", _PandasDataAsset
+)
+PickleAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
+    "pickle", _PandasDataAsset
+)
+SQLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sql", _PandasDataAsset)
+SQLQueryAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
+    "sql_query", _PandasDataAsset
+)
+SQLTableAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
+    "sql_table", _PandasDataAsset
+)
+SASAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("sas", _PandasDataAsset)
+SPSSAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("spss", _PandasDataAsset)
+StataAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("stata", _PandasDataAsset)
+TableAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get("table", _PandasDataAsset)
+XMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
     "xml", _PandasDataAsset
 )  # read_xml doesn't exist for pandas < 1.3
 
