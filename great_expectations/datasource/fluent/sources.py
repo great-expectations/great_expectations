@@ -148,6 +148,9 @@ class _SourceFactories:
 
         datasource_type_lookup[ds_type] = ds_type_name
         logger.debug(f"'{ds_type_name}' added to `type_lookup`")
+        factory_fn.__name__ = method_name
+        public_api(factory_fn)
+
         cls.__source_factories[method_name] = factory_fn
         return ds_type_name
 
@@ -209,6 +212,7 @@ class _SourceFactories:
             _add_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
                 _add_asset_factory, asset_type, exclude={"type"}
             )
+            _add_asset_factory.__name__ = add_asset_factory_method_name
             setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
 
             # add the public api decorator
