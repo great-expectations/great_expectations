@@ -21,7 +21,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import FileDataContext
+from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -38,9 +38,36 @@ from great_expectations.util import (
 )
 from great_expectations.validator.validator import Validator
 
+
 yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
+
+
+@pytest.fixture
+def dummy_data_context() -> AbstractDataContext:
+    class DummyDataContext:
+        def __init__(self) -> None:
+            self._usage_statistics_handler = None
+
+    return cast(AbstractDataContext, DummyDataContext())
+
+
+@pytest.fixture
+def dummy_validator() -> Validator:
+    class DummyValidator:
+        pass
+
+    return cast(Validator, DummyValidator())
+
+
+@pytest.fixture
+def batch_request_as_dict() -> Dict[str, str]:
+    return {
+        "datasource_name": "my_datasource",
+        "data_connector_name": "my_basic_data_connector",
+        "data_asset_name": "Titanic_1911",
+    }
 
 
 @pytest.fixture
@@ -77,7 +104,7 @@ def common_action_list() -> List[dict]:
 
 
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
-    with pytest.raises(TypeError):
+    with pytest.raises(AttributeError):
         Checkpoint(name="my_checkpoint", data_context="foo", config_version=1)
 
 
@@ -1475,14 +1502,13 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
 
 @pytest.mark.unit
 def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified_in_constructor(
-    in_memory_runtime_context,
+    dummy_data_context,
+    dummy_validator,
     batch_request_as_dict,
     common_action_list,
 ):
-    class DummyValidator:
-        pass
-
-    validator = cast(Validator, DummyValidator)
+    context = dummy_data_context
+    validator = dummy_validator
 
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     with pytest.raises(
@@ -1491,7 +1517,7 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
     ):
         _ = Checkpoint(
             name="my_checkpoint",
-            data_context=in_memory_runtime_context,
+            data_context=context,
             config_version=1,
             run_name_template="%Y-%M-foo-bar-template",
             expectation_suite_name="my_expectation_suite",
@@ -1503,14 +1529,13 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
 
 @pytest.mark.unit
 def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_validator_are_specified_in_constructor(
-    in_memory_runtime_context,
+    dummy_data_context,
+    dummy_validator,
     batch_request_as_dict,
     common_action_list,
 ):
-    class DummyValidator:
-        pass
-
-    validator = cast(Validator, DummyValidator)
+    context = dummy_data_context
+    validator = dummy_validator
 
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     with pytest.raises(
@@ -1519,7 +1544,7 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_in_validations_and_va
     ):
         _ = Checkpoint(
             name="my_checkpoint",
-            data_context=in_memory_runtime_context,
+            data_context=context,
             config_version=1,
             run_name_template="%Y-%M-foo-bar-template",
             expectation_suite_name="my_expectation_suite",
@@ -1560,21 +1585,19 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.unit
-def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_specified_in_run(
-    in_memory_runtime_context,
+def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_validator_are_specified_in_run(
+    dummy_data_context,
+    dummy_validator,
     batch_request_as_dict,
     common_action_list,
 ):
-    class DummyValidator:
-        pass
+    context = dummy_data_context
+    validator = dummy_validator
 
-    validator = cast(Validator, DummyValidator)
-
-    batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     with pytest.raises(gx_exceptions.CheckpointError) as e:
         _ = Checkpoint(
             name="my_checkpoint",
-            data_context=in_memory_runtime_context,
+            data_context=context,
             config_version=1,
             run_name_template="%Y-%M-foo-bar-template",
             expectation_suite_name="my_expectation_suite",
@@ -1592,20 +1615,19 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_and_validator_are_spe
 
 @pytest.mark.unit
 def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_validations_and_validator_is_specified_in_run(
-    in_memory_runtime_context,
+    dummy_data_context,
+    dummy_validator,
     batch_request_as_dict,
     common_action_list,
 ):
-    class DummyValidator:
-        pass
-
-    validator = cast(Validator, DummyValidator)
+    context = dummy_data_context
+    validator = dummy_validator
 
     batch_request: BatchRequest = BatchRequest(**batch_request_as_dict)
     with pytest.raises(gx_exceptions.CheckpointError) as e:
         _ = Checkpoint(
             name="my_checkpoint",
-            data_context=in_memory_runtime_context,
+            data_context=context,
             config_version=1,
             run_name_template="%Y-%M-foo-bar-template",
             expectation_suite_name="my_expectation_suite",
