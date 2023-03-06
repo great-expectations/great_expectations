@@ -281,7 +281,7 @@ class TestDynamicPandasAssets:
             {"filepath_or_buffer": csv_path / "yellow_tripdata_sample_2018-04.csv"}
         )
         batch_request = (
-            empty_data_context.sources.add_pandas(  # type: ignore[attr-defined]
+            empty_data_context.sources.add_pandas(  # type: ignore[attr-defined] # .build_batch_request
                 "my_pandas",
             )
             .add_csv_asset(
