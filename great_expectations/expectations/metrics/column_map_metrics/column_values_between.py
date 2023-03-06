@@ -1,5 +1,4 @@
 import datetime
-import warnings
 from typing import Optional, Union
 
 import pandas as pd
@@ -15,6 +14,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 
 class ColumnValuesBetween(ColumnMapMetricProvider):
@@ -51,13 +51,7 @@ class ColumnValuesBetween(ColumnMapMetricProvider):
 
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
             if min_value is not None:
                 try:
@@ -250,13 +244,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
     ):
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
             if min_value is not None:
                 try:
@@ -325,13 +313,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
     ):
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
             if min_value is not None:
                 try:

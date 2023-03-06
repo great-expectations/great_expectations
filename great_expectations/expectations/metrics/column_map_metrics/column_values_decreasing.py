@@ -1,5 +1,4 @@
 import datetime
-import warnings
 from typing import Any, Dict
 
 import pandas as pd
@@ -17,6 +16,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_partial
+from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 
 class ColumnValuesDecreasing(ColumnMapMetricProvider):
@@ -41,13 +41,7 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
         )
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
             try:
                 temp_column = column.map(parse)
@@ -92,13 +86,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
         )
         if parse_strings_as_datetimes:
             # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
