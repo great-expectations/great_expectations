@@ -38,10 +38,6 @@ def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
 
         matches: List[str] = regex_for_deprecation_comments.findall(contents)
         warning_count: int = contents.count("DeprecationWarning")
-        warning_function_count: int = contents.count(
-            "warn_deprecated_parse_strings_as_datetimes()"
-        )
-        warning_count += warning_function_count
         assert (
             len(matches) == warning_count
         ), f"Either a 'deprecated-v...' comment or 'DeprecationWarning' call is missing from {file}"
