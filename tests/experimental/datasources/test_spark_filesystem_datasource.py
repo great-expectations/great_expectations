@@ -15,7 +15,7 @@ from great_expectations.experimental.datasources.data_asset.data_connector impor
     FilesystemDataConnector,
 )
 from great_expectations.experimental.datasources.interfaces import (
-    BatchSortersDefinition,
+    SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.experimental.datasources.spark_file_path_datasource import (
@@ -268,7 +268,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
 )
 def test_spark_sorter(
     spark_filesystem_datasource: SparkFilesystemDatasource,
-    order_by: BatchSortersDefinition,
+    order_by: SortersDefinition,
 ):
     # Verify test directory has files we expect
     years = ["2018", "2019", "2020"]

@@ -32,10 +32,10 @@ from great_expectations.experimental.datasources.interfaces import (
     Batch,
     BatchRequest,
     BatchRequestOptions,
-    BatchSorter,
-    BatchSortersDefinition,
     DataAsset,
     Datasource,
+    Sorter,
+    SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.util import NotImported
@@ -881,7 +881,7 @@ class SQLDatasource(Datasource):
         name: str,
         table_name: str,
         schema_name: Optional[str] = None,
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
 
@@ -889,16 +889,14 @@ class SQLDatasource(Datasource):
             name: The name of this table asset.
             table_name: The table where the data resides.
             schema_name: The schema that holds the table.
-            order_by: A list of BatchSorters or BatchSorter strings.
+            order_by: A list of Sorters or Sorter strings.
 
         Returns:
             The table asset that is added to the datasource.
             The type of this object will match the necessary type for this datasource.
             eg, it could be a TableAsset or a SqliteTableAsset.
         """
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = self._TableAsset(
             name=name,
             table_name=table_name,
@@ -911,23 +909,21 @@ class SQLDatasource(Datasource):
         self,
         name: str,
         query: str,
-        order_by: Optional[BatchSortersDefinition] = None,
+        order_by: Optional[SortersDefinition] = None,
     ) -> QueryAsset:
         """Adds a query asset to this datasource.
 
         Args:
             name: The name of this table asset.
             query: The SELECT query to selects the data to validate. It must begin with the "SELECT".
-            order_by: A list of BatchSorters or BatchSorter strings.
+            order_by: A list of Sorters or Sorter strings.
 
         Returns:
             The query asset that is added to the datasource.
             The type of this object will match the necessary type for this datasource.
             eg, it could be a QueryAsset or a SqliteQueryAsset.
         """
-        order_by_sorters: list[BatchSorter] = self.parse_order_by_sorters(
-            order_by=order_by
-        )
+        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = self._QueryAsset(
             name=name,
             query=query,
