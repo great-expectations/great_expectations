@@ -155,7 +155,7 @@ def multibatch_pandas_data(
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
     )
-    batch_request = asset.build_batch_request({"year": "2020"})
+    batch_request = asset.build_batch_request({"year": "2020"})  # type: ignore[attr-defined]
     return context, pandas_ds, asset, batch_request
 
 
