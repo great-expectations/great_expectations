@@ -17,26 +17,7 @@ from typing_extensions import Final
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,  # noqa: TCH001
 )
-from great_expectations.datasource import (
-    BaseDatasource as BaseDatasource,
-)
-from great_expectations.datasource import (
-    LegacyDatasource as LegacyDatasource,
-)
 from great_expectations.experimental.context import DataContext as DataContext
-from great_expectations.experimental.datasources import (
-    PandasDatasource as PandasDatasource,
-)
-from great_expectations.experimental.datasources.interfaces import (
-    DataAsset as DataAsset,
-)
-from great_expectations.experimental.datasources.interfaces import (
-    Datasource as Datasource,
-)
-from great_expectations.experimental.datasources.type_lookup import (
-    TypeLookup as TypeLookup,
-)
-from great_expectations.validator.validator import Validator as Validator
 
 if TYPE_CHECKING:
     import pathlib
@@ -46,6 +27,7 @@ if TYPE_CHECKING:
 
     from great_expectations.experimental.datasources import (
         PandasAzureBlobStorageDatasource,
+        PandasDatasource,
         PandasFilesystemDatasource,
         PandasGoogleCloudStorageDatasource,
         PandasS3Datasource,
@@ -56,6 +38,10 @@ if TYPE_CHECKING:
         SparkS3Datasource,
         SQLDatasource,
         SqliteDatasource,
+    )
+    from great_expectations.experimental.datasources.interfaces import (
+        DataAsset,
+        Datasource,
     )
     from great_expectations.experimental.datasources.sqlite_datasource import SqliteDsn
 
