@@ -3,7 +3,7 @@ import os
 from setuptools import find_packages, setup
 
 with open(
-    os.path.join(os.path.dirname(__file__), "./PACKAGE_VERSION")
+    os.path.join(os.path.dirname(__file__), "./PACKAGE_VERSION")  # noqa: PTH118, PTH120
 ) as versionfile:  # noqa: PTH118, PTH120
     version = versionfile.read().strip()
 

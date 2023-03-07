@@ -140,8 +140,8 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                     # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
                     icon: Optional[str] = general.get(attr)
                     if icon and os.path.exists(icon):  # noqa: PTH110
-                        package_name: str = os.path.basename(
-                            os.getcwd()
+                        package_name: str = os.path.basename(  # noqa: PTH119
+                            os.getcwd()  # noqa: PTH109
                         )  # noqa: PTH119, PTH109
                         url: str = os.path.join(  # noqa: PTH118
                             "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
@@ -172,8 +172,8 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                 # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
                 picture_path: Optional[str] = expert.get("picture")
                 if picture_path and os.path.exists(picture_path):  # noqa: PTH110
-                    package_name: str = os.path.basename(
-                        os.getcwd()
+                    package_name: str = os.path.basename(  # noqa: PTH119
+                        os.getcwd()  # noqa: PTH109
                     )  # noqa: PTH119, PTH109
                     url: str = os.path.join(  # noqa: PTH118
                         "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",

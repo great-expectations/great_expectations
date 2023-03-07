@@ -419,7 +419,7 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
         ),  # noqa: PTH118
     )
