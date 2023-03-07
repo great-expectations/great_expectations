@@ -161,7 +161,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
-            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
+            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
         )
         asset._test_connection_error_message = (
             AzureBlobStorageDataConnector.build_test_connection_error_message(
