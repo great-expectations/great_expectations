@@ -15,6 +15,7 @@ from typing import (
 
 from typing_extensions import Final, TypeAlias
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 

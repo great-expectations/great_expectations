@@ -7,6 +7,7 @@ from typing import Optional, Union
 
 from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
