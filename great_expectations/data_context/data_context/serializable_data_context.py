@@ -454,10 +454,8 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def does_config_exist_on_disk(cls, context_root_dir: PathStr) -> bool:
         """Return True if the great_expectations.yml exists on disk."""
-        return (
-            os.path.isfile(  # noqa: PTH113
-                os.path.join(context_root_dir, cls.GX_YML)  # noqa: PTH118
-            ),
+        return os.path.isfile(  # noqa: PTH113
+            os.path.join(context_root_dir, cls.GX_YML)  # noqa: PTH118
         )
 
     @classmethod
