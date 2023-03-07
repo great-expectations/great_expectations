@@ -236,7 +236,7 @@ class TestMetaDatasource:
             type: str = "bar"
 
         class FooBarDatasource(Datasource):
-            asset_types: ClassVar = [FooAsset, BarAsset]
+            asset_types: ClassVar[List[Type[DataAsset]]] = [FooAsset, BarAsset]
             type: str = "foo_bar"
 
             @property
@@ -301,7 +301,7 @@ class TestMisconfiguredMetaDatasource:
 
             class BadAssetDatasource(Datasource):
                 type: str = "valid"
-                asset_types: ClassVar = [MissingTypeAsset]
+                asset_types: ClassVar[List[Type[DataAsset]]] = [MissingTypeAsset]
 
                 @property
                 def execution_engine_type(self) -> Type[ExecutionEngine]:

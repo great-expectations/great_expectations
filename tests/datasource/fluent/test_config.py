@@ -35,7 +35,7 @@ PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
 COMPLEX_CONFIG_DICT = {
-    "xdatasources": {
+    "fluent_datasources": {
         "my_pg_ds": {
             "connection_string": "postgresql://userName:@hostname/dbName",
             "name": "my_pg_ds",
@@ -97,7 +97,7 @@ COMPLEX_CONFIG_DICT = {
 COMPLEX_CONFIG_JSON = json.dumps(COMPLEX_CONFIG_DICT)
 
 SIMPLE_DS_DICT = {
-    "xdatasources": {
+    "fluent_datasources": {
         "my_ds": {
             "name": "my_ds",
             "type": "sql",
@@ -107,7 +107,7 @@ SIMPLE_DS_DICT = {
 }
 
 COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
-    "xdatasources": {
+    "fluent_datasources": {
         "my_ds": {
             "name": "my_ds",
             "type": "sql",
@@ -140,7 +140,7 @@ COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
 }
 
 DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
-    "xdatasources": {
+    "fluent_datasources": {
         DEFAULT_PANDAS_DATASOURCE_NAME: {
             "type": "pandas",
             "name": DEFAULT_PANDAS_DATASOURCE_NAME,
@@ -222,12 +222,13 @@ class TestExcludeUnsetAssetFields:
             "base_directory": pathlib.Path(__file__),
             "assets": {asset_name: asset_dict},
         }
-        gx_config = GxConfig.parse_obj({"xdatasources": {"my_ds": ds_dict}})
+        gx_config = GxConfig.parse_obj({"fluent_datasources": {"my_ds": ds_dict}})
 
         gx_config_dict = gx_config.dict()
         print(f"gx_config_dict\n{pf(gx_config_dict)}")
         assert (
-            asset_dict == gx_config_dict["xdatasources"]["my_ds"]["assets"][asset_name]
+            asset_dict
+            == gx_config_dict["fluent_datasources"]["my_ds"]["assets"][asset_name]
         )
 
 
@@ -261,16 +262,16 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
 @pytest.mark.parametrize(
     ["config", "expected_error_loc", "expected_msg"],
     [
-        p({}, ("xdatasources",), "field required", id="no datasources"),
+        p({}, ("fluent_datasources",), "field required", id="no datasources"),
         p(
             {
-                "xdatasources": {
+                "fluent_datasources": {
                     "my_bad_ds_missing_type": {
                         "name": "my_bad_ds_missing_type",
                     }
                 }
             },
-            ("xdatasources",),
+            ("fluent_datasources",),
             "'my_bad_ds_missing_type' is missing a 'type' entry",
             id="missing 'type' field",
         ),
@@ -302,7 +303,7 @@ def test_catch_bad_top_level_config(
     [
         p(
             {"name": "missing `table_name`", "type": "table"},
-            ("xdatasources", "assets", "missing `table_name`", "table_name"),
+            ("fluent_datasources", "assets", "missing `table_name`", "table_name"),
             "field required",
             id="missing `table_name`",
         ),
@@ -317,7 +318,7 @@ def test_catch_bad_top_level_config(
                 },
             },
             (
-                "xdatasources",
+                "fluent_datasources",
                 "assets",
                 "unknown splitter",
                 "column_splitter",
@@ -345,7 +346,7 @@ def test_catch_bad_asset_configs(
     print(f"  Config\n{pf(config)}\n")
 
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        GxConfig.parse_obj({"xdatasources": config})
+        GxConfig.parse_obj({"fluent_datasources": config})
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -502,7 +503,7 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT["xdatasources"][  # type: ignore[index]
+    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT["fluent_datasources"][  # type: ignore[index]
         "my_pg_ds"
     ][
         "assets"
@@ -526,7 +527,7 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     )
     assert (
         DEFAULT_PANDAS_DATA_ASSET_NAME
-        not in from_dict_default_pandas_config.xdatasources[
+        not in from_dict_default_pandas_config.fluent_datasources[
             DEFAULT_PANDAS_DATASOURCE_NAME
         ].assets
     )
@@ -537,7 +538,7 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     datasource_without_default_pandas_data_asset_config_dict = copy.deepcopy(
         DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
     )
-    datasource_without_default_pandas_data_asset_config_dict["xdatasources"][
+    datasource_without_default_pandas_data_asset_config_dict["fluent_datasources"][
         DEFAULT_PANDAS_DATASOURCE_NAME
     ]["assets"].pop(DEFAULT_PANDAS_DATA_ASSET_NAME)
     assert datasource_without_default_pandas_data_asset_config_dict == dumped
@@ -553,11 +554,11 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     only_default_pandas_datasource_and_data_asset_config_dict = copy.deepcopy(
         DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
     )
-    only_default_pandas_datasource_and_data_asset_config_dict["xdatasources"][
+    only_default_pandas_datasource_and_data_asset_config_dict["fluent_datasources"][
         DEFAULT_PANDAS_DATASOURCE_NAME
     ]["assets"].pop("my_csv_asset")
 
     from_dict_only_default_pandas_config = GxConfig.parse_obj(
         only_default_pandas_datasource_and_data_asset_config_dict
     )
-    assert from_dict_only_default_pandas_config.xdatasources == {}
+    assert from_dict_only_default_pandas_config.fluent_datasources == {}

@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-_ZEP_STYLE_DESCRIPTION: Final[str] = "Fluent Datasources"
+_FLUENT_STYLE_DESCRIPTION: Final[str] = "Fluent Datasources"
 
 _MISSING_FLUENT_DATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
     {
@@ -43,7 +43,7 @@ class GxConfig(FluentBaseModel):
     """Represents the full fluent configuration file."""
 
     fluent_datasources: Dict[str, Datasource] = Field(
-        ..., description=_ZEP_STYLE_DESCRIPTION
+        ..., description=_FLUENT_STYLE_DESCRIPTION
     )
 
     @property
