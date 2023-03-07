@@ -38,8 +38,8 @@ from great_expectations.validator.validator import Validator  # noqa: TCH001
 if TYPE_CHECKING:
     from great_expectations.core.batch import JSONValues
     from great_expectations.datasource import LegacyDatasource
-    from great_expectations.experimental.datasources.interfaces import (
-        Datasource as XDatasource,
+    from great_expectations.datasource.fluent.interfaces import (
+        Datasource as FluentDatasource,
     )
 
 
@@ -359,10 +359,10 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
 
 def select_datasource(
     context: FileDataContext, datasource_name: Optional[str] = None
-) -> Union[BaseDatasource, LegacyDatasource, XDatasource, None]:
+) -> Union[BaseDatasource, LegacyDatasource, FluentDatasource, None]:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
-    data_source: Union[BaseDatasource, LegacyDatasource, XDatasource, None] = None
+    data_source: Union[BaseDatasource, LegacyDatasource, FluentDatasource, None] = None
 
     if datasource_name is None:
         data_sources: List[BaseDatasource] = cast(

@@ -38,7 +38,7 @@ def construct_file_migrator() -> Callable:
             primary_stores=context.stores,
             datasource_store=context._datasource_store,
             variables=context.variables,
-            zep_config=context.zep_config,
+            fluent_config=context.fluent_config,
         )
 
     return _construct_file_migrator
@@ -147,7 +147,7 @@ def test_migrate_transfers_experimental_datasources(
     datasource_name = "my_experimental_datasource_awaiting_migration"
 
     context.sources.add_pandas(datasource_name)
-    context._synchronize_zep_datasources()
+    context._synchronize_fluent_datasources()
 
     # Construct and run migrator
     tmp_path.mkdir(exist_ok=True)
