@@ -54,8 +54,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-# this allows us to include dataframe in the json schema
-PandasDataFrame = TypeVar("pandas.core.frame.DataFrame")
+# this enables us to include dataframe in the json schema
+_PandasDataFrameT = TypeVar("_PandasDataFrameT")
 
 
 class PandasDatasourceError(Exception):
@@ -242,10 +242,10 @@ XMLAsset = _PANDAS_ASSET_MODELS.get(
 )  # read_xml doesn't exist for pandas < 1.3
 
 
-class DataFrameAsset(_PandasDataAsset):
+class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: PandasDataFrame = pydantic.Field(..., exclude=True, repr=False)
+    dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
