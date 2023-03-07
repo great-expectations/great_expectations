@@ -127,6 +127,8 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         self,
         name: str,
         batching_regex: Union[re.Pattern, str],
+        header: bool = False,
+        infer_schema: bool = False,
         prefix: str = "",
         delimiter: str = "/",
         max_results: int = 1000,
@@ -137,6 +139,8 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         Args:
             name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            header: boolean (default False) indicating whether or not first line of CSV file is header line
+            infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
@@ -149,6 +153,8 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
+            header=header,
+            inferSchema=infer_schema,
             order_by=order_by_sorters,
         )
         asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
