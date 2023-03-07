@@ -91,11 +91,11 @@ class EphemeralDataContext(AbstractDataContext):
         Returns:
             A FileDataContext with an updated config to reflect the state of the current context.
         """
-        self._synchronize_zep_datasources()
+        self._synchronize_fluent_datasources()
         migrator = FileMigrator(
             primary_stores=self.stores,
             datasource_store=self._datasource_store,
             variables=self.variables,
-            zep_config=self.zep_config,
+            fluent_config=self.fluent_config,
         )
         return migrator.migrate()

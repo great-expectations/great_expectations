@@ -9,7 +9,7 @@ from great_expectations.core.batch import (
     BatchDataType,
     BatchDefinition,
     BatchMarkers,
-    _get_x_batch_class,
+    _get_fluent_batch_class,
 )
 
 if TYPE_CHECKING:
@@ -147,7 +147,7 @@ class BatchManager:
         for batch in batch_list:
             try:
                 assert isinstance(
-                    batch, (Batch, _get_x_batch_class())
+                    batch, (Batch, _get_fluent_batch_class())
                 ), "Batch objects provided to BatchManager must be formal Great Expectations Batch typed objects."
             except AssertionError as e:
                 logger.error(str(e))
