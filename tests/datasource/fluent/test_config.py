@@ -19,7 +19,7 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    ColumnSplitterYearAndMonth,
+    SplitterYearAndMonth,
     TableAsset,
 )
 
@@ -47,7 +47,7 @@ COMPLEX_CONFIG_DICT = {
                     "type": "table",
                 },
                 "with_splitter": {
-                    "column_splitter": {
+                    "splitter": {
                         "column_name": "my_column",
                         "method_name": "split_on_year_and_month",
                     },
@@ -312,7 +312,7 @@ def test_catch_bad_top_level_config(
                 "name": "unknown splitter",
                 "type": "table",
                 "table_name": "pool",
-                "column_splitter": {
+                "splitter": {
                     "method_name": "not_a_valid_method_name",
                     "column_name": "foo",
                 },
@@ -321,7 +321,7 @@ def test_catch_bad_top_level_config(
                 "fluent_datasources",
                 "assets",
                 "unknown splitter",
-                "column_splitter",
+                "splitter",
                 "method_name",
             ),
             "unexpected value; permitted:",
@@ -374,14 +374,14 @@ def test_catch_bad_asset_configs(
         )
     ],
 )
-def test_general_column_splitter_errors(
+def test_general_splitter_errors(
     inject_engine_lookup_double,
     bad_column_kwargs: dict,
     expected_error_type: str,
     expected_msg: str,
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        ColumnSplitterYearAndMonth(**bad_column_kwargs)
+        SplitterYearAndMonth(**bad_column_kwargs)
 
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
@@ -480,8 +480,8 @@ def test_splitters_deserialization(
     table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
-    assert isinstance(table_asset.column_splitter, ColumnSplitterYearAndMonth)
-    assert table_asset.column_splitter.method_name == "split_on_year_and_month"
+    assert isinstance(table_asset.splitter, SplitterYearAndMonth)
+    assert table_asset.splitter.method_name == "split_on_year_and_month"
 
 
 # TDD Tests for future work
