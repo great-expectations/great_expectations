@@ -279,7 +279,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         self._validate_batch_request(batch_request)
         batch_list: List[Batch] = []
 
-        batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)  # type: ignore[attr-defined]  # unaware of alias
+        batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
         data, markers = execution_engine.get_batch_data_and_markers(
             batch_spec=batch_spec
