@@ -3,14 +3,15 @@ Expectations for detecting trends, seasonality, outliers, etc. in time series da
 
 Author: Abe Gong ([abegong](https://github.com/abegong))
 
-[PyPi Link](https://pypi/python.org/pypi/time_series_expectations)
-
 ### Overview
 This package currently contains...
 
 * Expectations for detecting trends, seasonality, outliers, etc. in time series data
 * An abstract base class for creating additional time series Expectations based on column aggregate metrics.
 * Methods for generating time series data for testing purposes.
+
+**Warning**
+This package is experimental, a work in progress.
 
 ### Expectations
 
