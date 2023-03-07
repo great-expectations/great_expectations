@@ -30,6 +30,11 @@ module.exports = {
           type: 'category',
           label: 'Data Contexts',
           items: [
+            {
+              type: 'doc',
+              id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
+              label: 'How to initialize a Filesystem Data Context in Python'
+            },
             'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
             'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
             'guides/setup/configuring_data_contexts/how_to_configure_credentials',
