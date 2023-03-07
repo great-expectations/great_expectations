@@ -215,8 +215,6 @@ select = [
     "TCH", # flake8-type-checking-tch
     # https://beta.ruff.rs/docs/rules/#flake8-pyi-pyi
     "PYI", # flake8-pyi - type stub files
-    # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
-    "PTH", # use-pathlib - use pathlib for os.path and glob operations
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
@@ -242,8 +240,6 @@ ignore = [
     "TCH003", # typing-only-standard-library-import
     # gives false positives if we use try imports and type-checking import
     "TCH004", # runtime-import-in-type-checking-block
-    # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
-    "PTH123", # pathlib-open - this would force pathlib usage anytime open or with open was used.
 ]
 extend-exclude = [
     "docs/*",
