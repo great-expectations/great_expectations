@@ -4,7 +4,7 @@ import copy
 import logging
 import re
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
@@ -242,19 +242,22 @@ class FilePathDataConnector(DataConnector):
             list of data_references that are not matched by configuration.
         """
 
-        def _matching_criterion(batch_definition_list: List[BatchDefinition]) -> bool:
+        def _matching_criterion(
+            batch_definition_list: Union[List[BatchDefinition], None]
+        ) -> bool:
             return (
                 (batch_definition_list is not None)
                 if matched
                 else (batch_definition_list is None)
             )
 
+        data_reference_mapped_element: Tuple[str, Union[List[BatchDefinition], None]]
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
                 filter(
-                    lambda batch_definition_list: _matching_criterion(
-                        batch_definition_list=batch_definition_list
+                    lambda data_reference_mapped_element: _matching_criterion(
+                        batch_definition_list=data_reference_mapped_element[1]
                     ),
                     self._get_data_references_cache().items(),
                 )
