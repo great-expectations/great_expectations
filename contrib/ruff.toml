@@ -7,6 +7,8 @@ extend-ignore = [
     # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
     # This is likely to be a high-touch rule that most contribs don't need to care about.
     "TCH001",
+    # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
+    "PTH",
 ]
 
 [isort]
