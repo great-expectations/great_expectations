@@ -36,7 +36,7 @@ logger = logging.getLogger(__file__)
 # apply markers to entire test module
 pytestmark = [
     pytest.mark.skipif(
-        PANDAS_VERSION < 1.2, reason=f"ZEP pandas not supported on {PANDAS_VERSION}"
+        PANDAS_VERSION < 1.2, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
     )
 ]
 

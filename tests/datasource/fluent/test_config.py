@@ -106,7 +106,7 @@ SIMPLE_DS_DICT = {
     }
 }
 
-COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT = {
+COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
     "fluent_datasources": {
         "my_ds": {
             "name": "my_ds",
@@ -238,8 +238,8 @@ class TestExcludeUnsetAssetFields:
         p(GxConfig.parse_obj, SIMPLE_DS_DICT, id="simple pg config dict"),
         p(
             GxConfig.parse_obj,
-            COMBINED_ZEP_AND_OLD_STYLE_CFG_DICT,
-            id="zep + old style config",
+            COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT,
+            id="fluent + old style config",
         ),
         p(GxConfig.parse_raw, json.dumps(SIMPLE_DS_DICT), id="simple pg json"),
         p(GxConfig.parse_obj, COMPLEX_CONFIG_DICT, id="complex dict"),

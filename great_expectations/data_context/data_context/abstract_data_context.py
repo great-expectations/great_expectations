@@ -243,7 +243,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
     # instance attribute type annotations
-    zep_config: GxConfig
+    fluent_config: GxConfig
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
@@ -256,7 +256,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override those set in config_variables.yml and the environment
         """
-        self.zep_config = self._load_zep_config()
+        self.fluent_config = self._load_fluent_config()
 
         if runtime_environment is None:
             runtime_environment = {}
@@ -321,7 +321,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     validation_operator_config,
                 )
 
-        self._attach_zep_config_datasources(self.zep_config)
+        self._attach_fluent_config_datasources(self.fluent_config)
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -5425,28 +5425,28 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def _load_zep_config(self) -> GxConfig:
+    def _load_fluent_config(self) -> GxConfig:
         """Called at beginning of DataContext __init__"""
         logger.info(
-            f"{self.__class__.__name__} has not implemented `_load_zep_config()` returning empty `GxConfig`"
+            f"{self.__class__.__name__} has not implemented `_load_fluent_config()` returning empty `GxConfig`"
         )
         return GxConfig(fluent_datasources={})
 
-    def _attach_zep_config_datasources(self, config: GxConfig):
+    def _attach_fluent_config_datasources(self, config: GxConfig):
         """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
-            logger.info(f"Loaded '{ds_name}' from ZEP config")
+            logger.info(f"Loaded '{ds_name}' from fluent config")
             self._attach_datasource_to_context(datasource)
 
-    def _synchronize_zep_datasources(self) -> Dict[str, FluentDatasource]:
+    def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
-        Update `self.zep_config.fluent_datasources` with any newly added datasources.
-        Should be called before serializing `zep_config`.
+        Update `self.fluent_config.fluent_datasources` with any newly added datasources.
+        Should be called before serializing `fluent_config`.
         """
         fluent_datasources = self.fluent_datasources
         if fluent_datasources:
-            self.zep_config.fluent_datasources.update(fluent_datasources)
-        return self.zep_config.fluent_datasources
+            self.fluent_config.fluent_datasources.update(fluent_datasources)
+        return self.fluent_config.fluent_datasources
 
     @staticmethod
     def _resolve_id_and_ge_cloud_id(

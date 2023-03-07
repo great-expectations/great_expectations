@@ -41,11 +41,11 @@ def _models_and_schema_dirs() -> Generator[
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    ["zep_ds_or_asset_model", "schema_dir"],
+    ["fluent_ds_or_asset_model", "schema_dir"],
     [pytest.param(t[0], t[1], id=t[2]) for t in _models_and_schema_dirs()],
 )
 def test_vcs_schemas_match(
-    zep_ds_or_asset_model: Type[Datasource | DataAsset], schema_dir: pathlib.Path
+    fluent_ds_or_asset_model: Type[Datasource | DataAsset], schema_dir: pathlib.Path
 ):
     """
     Test that json schemas for each DataSource and DataAsset match the current schema
@@ -84,7 +84,7 @@ def test_vcs_schemas_match(
     print(f"python version: {sys.version.split()[0]}")
     print(f"pandas version: {PANDAS_VERSION}\n")
 
-    schema_path = schema_dir.joinpath(f"{zep_ds_or_asset_model.__name__}.json")
+    schema_path = schema_dir.joinpath(f"{fluent_ds_or_asset_model.__name__}.json")
 
     # TODO: remove this logic and make this fail once all json schemas are working
     if schema_path.name in (
@@ -99,11 +99,11 @@ def test_vcs_schemas_match(
 
     schema_as_dict = json.loads(json_str)
     _sort_required_lists(schema_as_dict=schema_as_dict)
-    zep_ds_or_asset_model_as_dict = zep_ds_or_asset_model.schema()
-    _sort_required_lists(schema_as_dict=zep_ds_or_asset_model_as_dict)
+    fluent_ds_or_asset_model_as_dict = fluent_ds_or_asset_model.schema()
+    _sort_required_lists(schema_as_dict=fluent_ds_or_asset_model_as_dict)
 
     assert (
-        schema_as_dict == zep_ds_or_asset_model_as_dict
+        schema_as_dict == fluent_ds_or_asset_model_as_dict
     ), "Schemas are out of sync. Run `invoke schema --sync`. Also check your pandas version."
 
 

@@ -507,7 +507,7 @@ def type_schema(
     datasource_dir: pathlib.Path = schema_dir_root
 
     if not sync:
-        print("--------------------\nRegistered ZEP types\n--------------------\n")
+        print("--------------------\nRegistered Fluent types\n--------------------\n")
 
     for name, model in _iter_all_registered_types():
 

@@ -355,26 +355,26 @@ class FileDataContextVariables(DataContextVariables):
         """
         Persist any changes made to variables utilizing the configured Store.
         """
-        # overridden in order to prevent calling `instantiate_class_from_config` on ZEP objects
+        # overridden in order to prevent calling `instantiate_class_from_config` on fluent objects
         # parent class does not have access to the `data_context`
-        with self._zep_objects_stash():
+        with self._fluent_objects_stash():
             save_result = super().save_config()
         return save_result
 
     @contextlib.contextmanager
-    def _zep_objects_stash(
+    def _fluent_objects_stash(
         self: FileDataContextVariables,
     ) -> Generator[None, None, None]:
         """
-        Temporarily remove and stash zep objects from the datacontext.
+        Temporarily remove and stash fluent objects from the datacontext.
         Replace them once the with block ends.
 
         NOTE: This could be generalized into a stand-alone context manager function,
-        but it would need to take in the data_context containing the zep objects.
+        but it would need to take in the data_context containing the fluent objects.
         """
         config_fluent_datasources_stash: Dict[
             str, FluentDatasource
-        ] = self.data_context._synchronize_zep_datasources()
+        ] = self.data_context._synchronize_fluent_datasources()
         try:
             if config_fluent_datasources_stash:
                 logger.info(
@@ -383,7 +383,7 @@ class FileDataContextVariables(DataContextVariables):
                 for fluent_datasource_name in config_fluent_datasources_stash.keys():
                     self.data_context.datasources.pop(fluent_datasource_name)
                 # this would be `deep_copy'ed in `instantiate_class_from_config` too
-                self.data_context.zep_config.fluent_datasources = {}
+                self.data_context.fluent_config.fluent_datasources = {}
             yield
         except Exception:
             raise
@@ -393,7 +393,7 @@ class FileDataContextVariables(DataContextVariables):
                     f"Replacing {len(config_fluent_datasources_stash)} stashed `FluentDatasource`s"
                 )
                 self.data_context.datasources.update(config_fluent_datasources_stash)
-                self.data_context.zep_config.fluent_datasources = (
+                self.data_context.fluent_config.fluent_datasources = (
                     config_fluent_datasources_stash
                 )
 

@@ -30,7 +30,7 @@ class FileMigrator:
         - context.stores
         - context._datasource_store
         - context.variables
-        - context.zep_config
+        - context.fluent_config
     """
 
     def __init__(
@@ -38,12 +38,12 @@ class FileMigrator:
         primary_stores: dict[str, Store],
         datasource_store: DatasourceStore,
         variables: DataContextVariables,
-        zep_config: GxConfig,
+        fluent_config: GxConfig,
     ) -> None:
         self._primary_stores = primary_stores
         self._datasource_store = datasource_store
         self._variables = variables
-        self._zep_config = zep_config
+        self._fluent_config = fluent_config
 
     def migrate(self) -> FileDataContext:
         """Migrate your in-memory Data Context to a file-backed one.
@@ -129,7 +129,7 @@ class FileMigrator:
         target_context.build_data_docs()
 
     def _migrate_fluent_datasources(self, target_context: FileDataContext) -> None:
-        target_context.zep_config = self._zep_config
+        target_context.fluent_config = self._fluent_config
         target_context._save_project_config()
 
     def _migrate_data_docs_site_configs(

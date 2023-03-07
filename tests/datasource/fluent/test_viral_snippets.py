@@ -33,7 +33,7 @@ def db_file() -> pathlib.Path:
 
 
 @pytest.fixture
-def zep_config_dict(db_file) -> dict:
+def fluent_config_dict(db_file) -> dict:
     return {
         "fluent_datasources": {
             "my_sql_ds": {
@@ -61,11 +61,11 @@ def zep_config_dict(db_file) -> dict:
 
 
 @pytest.fixture
-def zep_only_config(zep_config_dict: dict) -> GxConfig:
-    """Creates a ZEP `GxConfig` object and ensures it contains at least one `Datasource`"""
-    zep_config = GxConfig.parse_obj(zep_config_dict)
-    assert zep_config.datasources
-    return zep_config
+def fluent_only_config(fluent_config_dict: dict) -> GxConfig:
+    """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
+    fluent_config = GxConfig.parse_obj(fluent_config_dict)
+    assert fluent_config.datasources
+    return fluent_config
 
 
 @pytest.fixture
@@ -85,23 +85,23 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
 
 
 @pytest.fixture
-def zep_yaml_config_file(
-    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+def fluent_yaml_config_file(
+    file_dc_config_dir_init: pathlib.Path, fluent_only_config: GxConfig
 ) -> pathlib.Path:
     """
     Dump the provided GxConfig to a temporary path. File is removed during test teardown.
 
-    Append ZEP config to default config file
+    Append fluent config to default config file
     """
     config_file_path = file_dc_config_dir_init / FileDataContext.GX_YML
 
     assert config_file_path.exists() is True
 
     with open(config_file_path, mode="a") as f_append:
-        yaml_string = "\n# ZEP\n" + zep_only_config.yaml()
+        yaml_string = "\n# Fluent\n" + fluent_only_config.yaml()
         f_append.write(yaml_string)
 
-    for ds_name in zep_only_config.datasources.keys():
+    for ds_name in fluent_only_config.datasources.keys():
         assert ds_name in yaml_string
 
     logger.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
@@ -110,45 +110,45 @@ def zep_yaml_config_file(
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def zep_file_context(zep_yaml_config_file: pathlib.Path) -> FileDataContext:
+def fluent_file_context(fluent_yaml_config_file: pathlib.Path) -> FileDataContext:
     context = get_context(
-        context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
+        context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
     )
     assert isinstance(context, FileDataContext)
     return context
 
 
 def test_load_an_existing_config(
-    zep_yaml_config_file: pathlib.Path, zep_only_config: GxConfig
+    fluent_yaml_config_file: pathlib.Path, fluent_only_config: GxConfig
 ):
     context = get_context(
-        context_root_dir=zep_yaml_config_file.parent, cloud_mode=False
+        context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
     )
 
-    assert context.zep_config == zep_only_config
+    assert context.fluent_config == fluent_only_config
 
 
-def test_serialize_zep_config(zep_file_context: FileDataContext):
-    dumped_yaml: str = zep_file_context.zep_config.yaml()
+def test_serialize_fluent_config(fluent_file_context: FileDataContext):
+    dumped_yaml: str = fluent_file_context.fluent_config.yaml()
     print(f"  Dumped Config\n\n{dumped_yaml}\n")
 
-    assert zep_file_context.zep_config.datasources
+    assert fluent_file_context.fluent_config.datasources
 
-    for ds_name, datasource in zep_file_context.zep_config.datasources.items():
+    for ds_name, datasource in fluent_file_context.fluent_config.datasources.items():
         assert ds_name in dumped_yaml
 
         for asset_name in datasource.assets.keys():
             assert asset_name in dumped_yaml
 
 
-def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
-    datasource = zep_file_context.get_datasource("my_sql_ds")
+def test_fluent_simple_validate_workflow(fluent_file_context: FileDataContext):
+    datasource = fluent_file_context.get_datasource("my_sql_ds")
     assert isinstance(datasource, Datasource)
     batch_request = datasource.get_asset("my_asset").build_batch_request(
         {"year": 2019, "month": 1}
     )
 
-    validator = zep_file_context.get_validator(batch_request=batch_request)
+    validator = fluent_file_context.get_validator(batch_request=batch_request)
     result = validator.expect_column_max_to_be_between(
         column="passenger_count", min_value=1, max_value=12
     )
@@ -156,31 +156,31 @@ def test_zep_simple_validate_workflow(zep_file_context: FileDataContext):
     assert result["success"] is True
 
 
-def test_save_project_does_not_break(zep_file_context: FileDataContext):
-    print(zep_file_context.zep_config)
-    zep_file_context._save_project_config()
+def test_save_project_does_not_break(fluent_file_context: FileDataContext):
+    print(fluent_file_context.fluent_config)
+    fluent_file_context._save_project_config()
 
 
-def test_variables_save_config_does_not_break(zep_file_context: FileDataContext):
-    print(zep_file_context.zep_config)
-    print(zep_file_context.variables)
-    zep_file_context.variables.save_config()
+def test_variables_save_config_does_not_break(fluent_file_context: FileDataContext):
+    print(fluent_file_context.fluent_config)
+    print(fluent_file_context.variables)
+    fluent_file_context.variables.save_config()
 
 
-def test_save_datacontext_persists_zep_config(
-    file_dc_config_dir_init: pathlib.Path, zep_only_config: GxConfig
+def test_save_datacontext_persists_fluent_config(
+    file_dc_config_dir_init: pathlib.Path, fluent_only_config: GxConfig
 ):
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
 
     initial_yaml = config_file.read_text()
-    for ds_name in zep_only_config.datasources:
+    for ds_name in fluent_only_config.datasources:
         assert ds_name not in initial_yaml
 
     context: FileDataContext = get_context(
         context_root_dir=config_file.parent, cloud_mode=False
     )
 
-    context.zep_config = zep_only_config
+    context.fluent_config = fluent_only_config
     context._save_project_config()
 
     final_yaml = config_file.read_text()
@@ -188,13 +188,13 @@ def test_save_datacontext_persists_zep_config(
 
     print("\n".join(diff))
 
-    for ds_name in zep_only_config.datasources:
+    for ds_name in fluent_only_config.datasources:
         assert ds_name in final_yaml
 
 
-def test_add_and_save_zep_datasource(
+def test_add_and_save_fluent_datasource(
     file_dc_config_dir_init: pathlib.Path,
-    zep_only_config: GxConfig,
+    fluent_only_config: GxConfig,
     db_file: pathlib.Path,
 ):
     datasource_name = "save_ds_test"

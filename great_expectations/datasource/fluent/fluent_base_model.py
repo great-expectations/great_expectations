@@ -40,7 +40,7 @@ _Self = TypeVar("_Self", bound="FluentBaseModel")
 
 class FluentBaseModel(pydantic.BaseModel):
     """
-    Base model for most ZEP pydantic models.
+    Base model for most fluent datasource related pydantic models.
 
     Adds yaml dumping and parsing methods.
 
