@@ -402,7 +402,7 @@ def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
     ]
     batch_kwargs = {
         "datasource": "rad_datasource",
-        "path": os.path.join(base_dir, "f1.csv"),
+        "path": os.path.join(base_dir, "f1.csv"),  # noqa: PTH118
     }
     batch = context.get_batch(batch_kwargs, "default")
     expectation_suite, validation_results = BasicSuiteBuilderProfiler.profile(

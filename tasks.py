@@ -422,7 +422,9 @@ def docker(
 
     _exit_with_error_if_not_in_repo_root(task_name="docker")
 
-    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    filedir = os.path.realpath(
+        os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
+    )
 
     cmds = ["docker"]
 
@@ -552,8 +554,10 @@ def type_schema(
 
 def _exit_with_error_if_not_in_repo_root(task_name: str):
     """Exit if the command was not run from the repository root."""
-    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
-    curdir = os.path.realpath(os.getcwd())
+    filedir = os.path.realpath(
+        os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
+    )
+    curdir = os.path.realpath(os.getcwd())  # noqa: PTH109
     exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
     if filedir != curdir:
         raise invoke.Exit(

@@ -37,7 +37,7 @@ def empty_expectation_suite():
 @pytest.fixture
 def file_data_asset(tmp_path):
     tmp_path = str(tmp_path)
-    path = os.path.join(tmp_path, "file_data_asset.txt")
+    path = os.path.join(tmp_path, "file_data_asset.txt")  # noqa: PTH118
     with open(path, "w+") as file:
         file.write(json.dumps([0, 1, 2, 3, 4]))
 
@@ -229,13 +229,13 @@ def test_validate_invalid_parameters(
 @pytest.mark.unit
 def test_gen_directory_tree_str(tmpdir):
     project_dir = str(tmpdir.mkdir("project_dir"))
-    os.mkdir(os.path.join(project_dir, "BBB"))
-    with open(os.path.join(project_dir, "BBB", "bbb.txt"), "w") as f:
+    os.mkdir(os.path.join(project_dir, "BBB"))  # noqa: PTH102, PTH118
+    with open(os.path.join(project_dir, "BBB", "bbb.txt"), "w") as f:  # noqa: PTH118
         f.write("hello")
-    with open(os.path.join(project_dir, "BBB", "aaa.txt"), "w") as f:
+    with open(os.path.join(project_dir, "BBB", "aaa.txt"), "w") as f:  # noqa: PTH118
         f.write("hello")
 
-    os.mkdir(os.path.join(project_dir, "AAA"))
+    os.mkdir(os.path.join(project_dir, "AAA"))  # noqa: PTH102, PTH118
 
     res = gx.util.gen_directory_tree_str(project_dir)
     print(res)
