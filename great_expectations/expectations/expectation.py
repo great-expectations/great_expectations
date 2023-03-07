@@ -1526,7 +1526,9 @@ class Expectation(metaclass=MetaExpectation):
         """Only meant to be called by self._get_examples"""
         results = []
         found = glob.glob(
-            os.path.join(_TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"),  # noqa: PTH118
+            os.path.join(  # noqa: PTH118
+                _TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"
+            ),
             recursive=True,
         )
         if found:

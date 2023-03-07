@@ -158,7 +158,9 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
             # filepath_template is always specified with forward slashes, but it is then
             # used to (1) dynamically construct and evaluate a regex, and (2) split the provided (observed) filepath
             if self.platform_specific_separator:
-                filepath_template = os.path.join(*self.filepath_template.split("/"))  # noqa: PTH118
+                filepath_template = os.path.join(  # noqa: PTH118
+                    *self.filepath_template.split("/")
+                )
                 filepath_template = filepath_template.replace("\\", "\\\\")
             else:
                 filepath_template = self.filepath_template
@@ -267,9 +269,14 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
                     )
                 )
             else:
-                self.full_base_directory = os.path.join(root_directory, base_directory)  # noqa: PTH118
+                self.full_base_directory = os.path.join(  # noqa: PTH118
+                    root_directory, base_directory
+                )
 
-        os.makedirs(str(os.path.dirname(self.full_base_directory)), exist_ok=True)  # noqa: PTH103, PTH120
+        os.makedirs(  # noqa: PTH103
+            str(os.path.dirname(self.full_base_directory)),  # noqa: PTH120
+            exist_ok=True,
+        )
         # Initialize with store_backend_id if not part of an HTMLSiteStore
         if not self._suppress_store_backend_id:
             _ = self.store_backend_id
@@ -347,7 +354,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
             os.path.join(self.full_base_directory, *prefix)  # noqa: PTH118
         ):
             for file_ in files:
-                full_path, file_name = os.path.split(os.path.join(root, file_))  # noqa: PTH118
+                full_path, file_name = os.path.split(
+                    os.path.join(root, file_)  # noqa: PTH118
+                )
                 relative_path = os.path.relpath(
                     full_path,
                     self.full_base_directory,
@@ -377,7 +386,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
         """
         try:
             while (
-                not os.listdir(curpath) and os.path.exists(curpath) and mroot != curpath  # noqa: PTH110
+                not os.listdir(curpath)
+                and os.path.exists(curpath)  # noqa: PTH110
+                and mroot != curpath  # noqa: PTH110
             ):
                 f2 = os.path.dirname(curpath)  # noqa: PTH120
                 os.rmdir(curpath)  # noqa: PTH106
@@ -422,7 +433,9 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
     def _has_key(self, key):
         return os.path.isfile(  # noqa: PTH113
-            os.path.join(self.full_base_directory, self._convert_key_to_filepath(key))  # noqa: PTH118
+            os.path.join(  # noqa: PTH118
+                self.full_base_directory, self._convert_key_to_filepath(key)
+            )
         )
 
     @property
@@ -1005,7 +1018,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         return blob_service_client.get_container_client(self.container)
 
     def _get(self, key):
-        az_blob_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))  # noqa: PTH118
+        az_blob_key = os.path.join(  # noqa: PTH118
+            self.prefix, self._convert_key_to_filepath(key)
+        )
         return (
             self._container_client.download_blob(az_blob_key).readall().decode("utf-8")
         )
@@ -1014,7 +1029,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
         from azure.storage.blob import ContentSettings
 
-        az_blob_key = os.path.join(self.prefix, self._convert_key_to_filepath(key))  # noqa: PTH118
+        az_blob_key = os.path.join(  # noqa: PTH118
+            self.prefix, self._convert_key_to_filepath(key)
+        )
 
         if isinstance(value, str):
             if az_blob_key.endswith(".html"):
@@ -1062,7 +1079,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
 
     def get_url_for_key(self, key, protocol=None):
         az_blob_key = self._convert_key_to_filepath(key)
-        az_blob_path = os.path.join(self.container, self.prefix, az_blob_key)  # noqa: PTH118
+        az_blob_path = os.path.join(  # noqa: PTH118
+            self.container, self.prefix, az_blob_key
+        )
 
         return "https://{}.blob.core.windows.net/{}".format(
             self._container_client.account_name,
@@ -1076,7 +1095,9 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     def _move(self, source_key, dest_key, **kwargs) -> None:
         source_blob_path = self._convert_key_to_filepath(source_key)
         if not source_blob_path.startswith(self.prefix):
-            source_blob_path = os.path.join(self.prefix, source_blob_path)  # noqa: PTH118
+            source_blob_path = os.path.join(  # noqa: PTH118
+                self.prefix, source_blob_path
+            )
         dest_blob_path = self._convert_key_to_filepath(dest_key)
         if not dest_blob_path.startswith(self.prefix):
             dest_blob_path = os.path.join(self.prefix, dest_blob_path)  # noqa: PTH118

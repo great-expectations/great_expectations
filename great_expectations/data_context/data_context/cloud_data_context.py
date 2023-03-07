@@ -212,7 +212,9 @@ class CloudDataContext(SerializableDataContext):
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )
-        return os.path.abspath(os.path.expanduser(context_root_dir))  # noqa: PTH111, PTH100
+        return os.path.abspath(  # noqa: PTH100
+            os.path.expanduser(context_root_dir)  # noqa: PTH111
+        )
 
     @classmethod
     def retrieve_data_context_config_from_cloud(

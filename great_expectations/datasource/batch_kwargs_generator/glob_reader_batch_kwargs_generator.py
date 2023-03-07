@@ -101,7 +101,10 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     def base_directory(self):
         # If base directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if os.path.isabs(self._base_directory) or self._datasource.data_context is None:  # noqa: PTH117
+        if (
+            os.path.isabs(self._base_directory)  # noqa: PTH117
+            or self._datasource.data_context is None
+        ):
             return self._base_directory
         else:
             return os.path.join(  # noqa: PTH118

@@ -357,7 +357,9 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         suppress_usage_message=True,
         assume_yes=True,
     )
-    edit_notebook_path: str = os.path.join(uncommitted_dir, "edit_warning.ipynb")  # noqa: PTH118
+    edit_notebook_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "edit_warning.ipynb"
+    )
     assert os.path.isfile(edit_notebook_path)  # noqa: PTH113
 
     run_notebook(
@@ -597,7 +599,9 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
         suppress_usage_message=True,
         assume_yes=True,
     )
-    edit_notebook_path: str = os.path.join(uncommitted_dir, "edit_warning.ipynb")  # noqa: PTH118
+    edit_notebook_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "edit_warning.ipynb"
+    )
     assert os.path.isfile(edit_notebook_path)  # noqa: PTH113
 
     run_notebook(

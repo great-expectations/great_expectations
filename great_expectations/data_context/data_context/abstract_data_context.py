@@ -231,7 +231,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     # test_yml_config module so AbstractDataContext is not so cluttered.
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser("~/.great_expectations/great_expectations.conf"),  # noqa: PTH111
+        os.path.expanduser(  # noqa: PTH111
+            "~/.great_expectations/great_expectations.conf"
+        ),
         "/etc/great_expectations.conf",
     ]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
@@ -5412,7 +5414,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             self.root_directory, config_variables_filepath  # type: ignore[arg-type]
         )
 
-        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)  # noqa: PTH103, PTH120
+        os.makedirs(  # noqa: PTH103
+            os.path.dirname(config_variables_filepath), exist_ok=True  # noqa: PTH120
+        )
         if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
             logger.info(
                 "Creating new substitution_variables file at {config_variables_filepath}".format(
