@@ -27,7 +27,7 @@ def test_deprecation_warnings_are_accompanied_by_appropriate_comment(
     """
     What does this test do and why?
 
-    For every invokation of 'DeprecationWarning', there must be a corresponding
+    For every invocation of 'DeprecationWarning', there must be a corresponding
     comment with the following format: 'deprecated-v<MAJOR>.<MINOR>.<PATCH>'.
 
     This test is meant to capture instances where one or the other is missing.

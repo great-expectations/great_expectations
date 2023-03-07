@@ -16,6 +16,7 @@ from great_expectations.types import DictDot, SerializableDictDot, safe_deep_cop
 from great_expectations.util import deep_filter_properties_iterable, load_class
 
 if TYPE_CHECKING:
+    from great_expectations.experimental.datasources.interfaces import Batch as XBatch
     from great_expectations.experimental.datasources.interfaces import (
         BatchRequest as XBatchRequest,
     )
@@ -44,10 +45,17 @@ except ImportError:
     )
 
 
-def _get_x_batch_request_class() -> Type[XBatchRequest]:
+def _get_x_batch_request_class() -> Type[XBatch]:
     """Using this function helps work around circular import dependncies."""
     module_name = "great_expectations.experimental.datasources.interfaces"
     class_name = "BatchRequest"
+    return load_class(class_name=class_name, module_name=module_name)
+
+
+def _get_x_batch_class() -> Type[XBatch]:
+    """Using this function helps work around circular import dependncies."""
+    module_name = "great_expectations.experimental.datasources.interfaces"
+    class_name = "Batch"
     return load_class(class_name=class_name, module_name=module_name)
 
 
