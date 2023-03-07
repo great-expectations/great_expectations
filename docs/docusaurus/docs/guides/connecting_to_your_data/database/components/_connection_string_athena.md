@@ -1,4 +1,9 @@
+import SqlAlchemy2 from '/docs/components/warnings/_sql_alchemy2.md'
+
 In order for Great Expectations to connect to Athena, you will need to provide a connection string.  To determine your connection string, reference the examples below and the [PyAthena documentation](https://github.com/laughingman7743/PyAthena#sqlalchemy).
+
+
+<SqlAlchemy2 />
 
 The following urls don't include credentials as it is recommended to use either the instance profile or the boto3 configuration file.
 
