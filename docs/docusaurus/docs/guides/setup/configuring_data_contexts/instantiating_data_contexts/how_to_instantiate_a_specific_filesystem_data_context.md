@@ -1,5 +1,5 @@
 ---
-title: How to initialize a Filesystem Data Context in Python
+title: How to instantiate a specific Filesystem Data Context
 tag: [how-to, setup]
 keywords: [Great Expectations, Data Context, Filesystem]
 
@@ -11,19 +11,22 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 <!-- ### 1. Import Great Expectations -->
 import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
 
-<!--- ### 2. Verify the content of the Data Context -->
+<!--- ### 3. Verify the content of the Data Context -->
 import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
 
 ## Introduction
 
-A <TechnicalTag tag="data_context" text="Data Context" /> will be required in almost all Python scripts utilizing GX, and will be implemented behind the scenes when using GX's <TechnicalTag tag="cli" text="CLI" />.
+A <TechnicalTag tag="data_context" text="Data Context" /> contains the configurations for <TechnicalTag tag="expectation" text="Expectations" />, <TechnicalTag tag="store" text="Metadata Stores" />, <TechnicalTag tag="data_docs" text="Data Docs" />, <TechnicalTag tag="checkpoint" text="Checkpoints" />, and all things related to working with Great Expectations.  
 
-This guide will demonstrate how to initialize, instantiate, and verify the contents of a Filesystem Data Context from through Python code.
+If you are using GX for multiple projects you may wish to utilize a different Data Context for each one.  This guide will demonstrate how to instantiate a specific Filesystem Data Context so that you can switch between sets of previously defined GX configurations.
 
 ## Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
+- A previously initialized Filesystem Data Context
+    - [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
+    - [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md))
 - A passion for data quality
 
 </Prerequisites>
@@ -34,28 +37,26 @@ This guide will demonstrate how to initialize, instantiate, and verify the conte
 
 <GxImport />
 
-### 2. Determine the folder to initialize the Data Context in
+### 2. Specify a folder containing a previously initialized Filesystem Data Context
 
-For purposes of this example, we will assume that we have an empty folder to initialize our Filesystem Data Context in:
+Each Filesystem Data Context has a root folder in which it was initialized.  This root folder will be used to indicate which specific Filesystem Data Context should be instantiated.
 
 ```python title="Python code"
-path_to_empty_folder = '/my_gx_project/'
+path_to_context_root_folder = '/my_gx_project/'
 ```
 
 ### 2. Run GX's `get_context(...)` method
 
-We will provide our empty folder's path to the GX library's `get_context(...)` method as the `context_root_dir` parameter.  Because we are providing a path to an empty folder `get_context(...)` will initialize a Filesystem Data Context at that location.
-
-For convenience, the `get_context(...)` method will then instantiate and return the newly initialized Data Context, which we can keep in a Python variable.
+We provide our Filesystem Data Context's root folder path to the GX library's `get_context(...)` method as the `context_root_dir` parameter.  Because we are providing a path to an existing Data Context, the `get_context(...)` method will instantiate and return the Data Context at that location.
 
 ```python title="Python code"
-context = gx.get_context(context_root_dir=path_to_empty_folder)
+context = gx.get_context(context_root_dir=path_to_context_root_folder)
 ```
 
-:::info What if the folder is not empty?
-If the `context_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context present, the `get_context(...)` method will initialize a Filesystem Data Context at that location even if other files and folders are present.  This allows you to easily initialize a Filesystem Data Context in a folder that contains your source data or other project related contents.
+:::info What if the folder does not contain a Data Context?
+If the `context_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context present, the `get_context(...)` method will initialize a new Filesystem Data Context at that location.
 
-If a Data Context already exists at the provided `path`, the `get_context(...)` method will not re-initialize it.  Instead, `get_context(...)` will simply instantiate and return the existing Data Context as is.
+The `get_context(...)` method will then instantiate and return the newly initialized Data Context.
 :::
 
 
@@ -65,7 +66,7 @@ If a Data Context already exists at the provided `path`, the `get_context(...)` 
 
 ## Next steps
 
-For guidance on further customizing your Data Context's configurations for <TechnicalTag tag="store" text="Metadata Stores" /> and <TechnicalTag tag="data_docs" text="Data Docs" />, please see:
+For guidance on further customizing your Data Context's configurations for Metadata Stores and Data Docs, please see:
 - [How to configure an Expectation Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)
 - [How to configure a Validation Result Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.md)
 - [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
@@ -79,9 +80,6 @@ If you are content with the default configuration of your Data Context, you can 
 ## Additional information
 
 ### Related guides
-
-To initialize a Filesystem Data Context from the terminal, please see:
-- [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
 
 <!-- TODO
 To instantiate an existing Data Context, reference:
