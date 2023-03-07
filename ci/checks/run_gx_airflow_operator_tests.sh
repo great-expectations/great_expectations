@@ -25,7 +25,7 @@ pip freeze | grep great-expectations
 echo "Using great expectations version ^^^"
 
 echo "Uninstall Great Expectations installed by airflow provider"
-pip uninstall great-expectations
+pip uninstall -y great-expectations
 echo "Using great expectations version vvv"
 pip freeze | grep great-expectations
 echo "Using great expectations version ^^^"
