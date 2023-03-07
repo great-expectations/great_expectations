@@ -15,6 +15,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
 )
+from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     DataConnector,
 )
@@ -395,7 +396,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         return [
             BatchDefinition(
                 datasource_name=self._datasource_name,
-                data_connector_name="fluent",
+                data_connector_name=_DATA_CONNECTOR_NAME,
                 data_asset_name=self._data_asset_name,
                 batch_identifiers=IDDict(batch_identifiers),
             )

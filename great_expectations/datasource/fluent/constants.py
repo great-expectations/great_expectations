@@ -9,3 +9,5 @@ _FIELDS_ALWAYS_SET: Final[Set[str]] = {
     "assets",
     "type",
 }
+
+_DATA_CONNECTOR_NAME: Final[str] = "fluent"
