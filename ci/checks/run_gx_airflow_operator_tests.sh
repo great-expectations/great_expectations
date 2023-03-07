@@ -3,7 +3,15 @@
 # Run tests defined in the Great Expectations Airflow Operator
 
 # Install GX from it's repo
-cd ../../
+echo "ls vvv"
+ls
+echo "ls ^^^"
+
+cd ..
+
+echo "ls vvv"
+ls
+echo "ls ^^^"
 pip install -c constraints-dev.txt -e ".[test]"
 
 echo "Using great expectations version vvv"
