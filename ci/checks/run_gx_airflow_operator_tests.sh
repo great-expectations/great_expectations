@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Run tests defined in the Great Expectations Airflow Operator
+REPO_ROOT=$(pwd)
 
 echo "Using great expectations version vvv"
 pwd
@@ -31,7 +32,7 @@ pip freeze | grep great-expectations
 echo "Using great expectations version ^^^"
 
 # Install GX from it's repo
-cd ../great_expectations
+cd $REPO_ROOT
 pip install -c constraints-dev.txt -e ".[test]"
 
 echo "Using great expectations version vvv"
