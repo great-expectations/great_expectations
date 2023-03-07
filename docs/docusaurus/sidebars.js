@@ -23,7 +23,18 @@ module.exports = {
           label: 'Installation',
           items: [
             'guides/setup/installation/local',
-            'guides/setup/installation/hosted_environment'
+            'guides/setup/installation/hosted_environment',
+            {
+              type: 'category',
+              label: 'Optional dependencies for cloud storage',
+              items: [
+                {
+                  type: 'doc',
+                  id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3',
+                  label: 'How to set up GX to work with Data on AWS S3'
+                }
+              ]
+            }
           ]
         },
         {
