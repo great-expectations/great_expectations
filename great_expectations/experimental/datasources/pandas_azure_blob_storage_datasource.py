@@ -110,10 +110,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if self._azure_client is None:
+        try:
+            _ = self._get_azure_client()
+        except Exception as e:
             raise TestConnectionError(
-                "Unable to load azure.storage.blob.BlobServiceClient (it is required for PandasAzureBlobStorageDatasource)."
-            )
+                "Attempt to connect to datasource failed with the following error message: "
+                f"{str(e)}"
+            ) from e
 
         if self.assets and test_assets:
             for asset in self.assets.values():
