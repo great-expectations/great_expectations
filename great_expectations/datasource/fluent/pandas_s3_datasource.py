@@ -26,6 +26,7 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
+
     from great_expectations.datasource.fluent.interfaces import (
         Sorter,
         SortersDefinition,

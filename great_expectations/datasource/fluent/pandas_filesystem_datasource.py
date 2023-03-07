@@ -24,7 +24,6 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 )
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 
-
 logger = logging.getLogger(__name__)
 
 
