@@ -70,8 +70,14 @@ def test_basic_instantiation():
         "alpha-2.csv",
         "alpha-3.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 3
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "alpha-1.csv",
+        "alpha-2.csv",
+        "alpha-3.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     # Missing "data_asset_name" argument.
     with pytest.raises(TypeError):
@@ -120,12 +126,14 @@ def test_instantiation_batching_regex_does_not_match_paths():
         "alpha-2.csv",
         "alpha-3.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 0
+    assert my_data_connector.get_matched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_references()[:3] == [
         "alpha-1.csv",
         "alpha-2.csv",
         "alpha-3.csv",
     ]
-    assert len(my_data_connector.get_unmatched_data_references()) == 3
+    assert my_data_connector.get_unmatched_data_reference_count() == 3
 
 
 @pytest.mark.integration
@@ -565,8 +573,14 @@ def test_return_only_unique_batch_definitions():
         "A/file_2.csv",
         "A/file_3.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 3
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "A/file_1.csv",
+        "A/file_2.csv",
+        "A/file_3.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     expected: List[BatchDefinition] = [
         BatchDefinition(
@@ -646,8 +660,14 @@ def test_alpha():
         "test_dir_alpha/B.csv",
         "test_dir_alpha/C.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 4
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "test_dir_alpha/A.csv",
+        "test_dir_alpha/B.csv",
+        "test_dir_alpha/C.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -719,8 +739,10 @@ def test_foxtrot():
     )
     assert my_data_connector.get_data_reference_count() == 0
     assert my_data_connector.get_data_references()[:3] == []
+    assert my_data_connector.get_matched_data_reference_count() == 0
+    assert my_data_connector.get_matched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
@@ -737,8 +759,14 @@ def test_foxtrot():
         "test_dir_foxtrot/A/A-2.csv",
         "test_dir_foxtrot/A/A-3.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 3
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "test_dir_foxtrot/A/A-1.csv",
+        "test_dir_foxtrot/A/A-2.csv",
+        "test_dir_foxtrot/A/A-3.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
@@ -755,8 +783,14 @@ def test_foxtrot():
         "test_dir_foxtrot/B/B-2.txt",
         "test_dir_foxtrot/B/B-3.txt",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 3
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "test_dir_foxtrot/B/B-1.txt",
+        "test_dir_foxtrot/B/B-2.txt",
+        "test_dir_foxtrot/B/B-3.txt",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_data_connector = S3DataConnector(
         datasource_name="my_file_path_datasource",
@@ -773,8 +807,14 @@ def test_foxtrot():
         "test_dir_foxtrot/C/C-2018.csv",
         "test_dir_foxtrot/C/C-2019.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 3
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "test_dir_foxtrot/C/C-2017.csv",
+        "test_dir_foxtrot/C/C-2018.csv",
+        "test_dir_foxtrot/C/C-2019.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_batch_request = BatchRequest(
         datasource_name="my_file_path_datasource",
