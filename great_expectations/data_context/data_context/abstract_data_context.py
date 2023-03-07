@@ -108,13 +108,13 @@ from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
-from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.experimental.datasources.config import GxConfig
-from great_expectations.experimental.datasources.interfaces import Batch as XBatch
-from great_expectations.experimental.datasources.interfaces import (
-    Datasource as XDatasource,
+from great_expectations.datasource.fluent.config import GxConfig
+from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
+from great_expectations.datasource.fluent.interfaces import (
+    Datasource as FluentDatasource,
 )
-from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
@@ -243,7 +243,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
     # instance attribute type annotations
-    zep_config: GxConfig
+    fluent_config: GxConfig
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
@@ -256,7 +256,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override those set in config_variables.yml and the environment
         """
-        self.zep_config = self._load_zep_config()
+        self.fluent_config = self._load_fluent_config()
 
         if runtime_environment is None:
             runtime_environment = {}
@@ -321,7 +321,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                     validation_operator_config,
                 )
 
-        self._attach_zep_config_datasources(self.zep_config)
+        self._attach_fluent_config_datasources(self.fluent_config)
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -697,11 +697,11 @@ class AbstractDataContext(ConfigPeer, ABC):
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _attach_datasource_to_context(self, datasource: XDatasource):
+    def _attach_datasource_to_context(self, datasource: FluentDatasource):
         # We currently don't allow one to overwrite a datasource with this internal method
         if datasource.name in self.datasources:
             raise gx_exceptions.DataContextError(
-                f"Can not write the experimental datasource {datasource.name} because a datasource of that "
+                f"Can not write the fluent datasource {datasource.name} because a datasource of that "
                 "name already exists in the data context."
             )
         self.datasources[datasource.name] = datasource
@@ -1118,7 +1118,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             datasource_name = arg1
         try:
-            datasource: LegacyDatasource | BaseDatasource | XDatasource = (
+            datasource: LegacyDatasource | BaseDatasource | FluentDatasource = (
                 self.get_datasource(datasource_name=datasource_name)
             )
             if issubclass(type(datasource), BaseDatasource):
@@ -1186,14 +1186,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
         datasource_name: Optional[Any] = batch_kwargs.get("datasource")
-        datasource: LegacyDatasource | BaseDatasource | XDatasource
+        datasource: LegacyDatasource | BaseDatasource | FluentDatasource
         if isinstance(datasource_name, str):
             datasource = self.get_datasource(datasource_name)
         else:
             datasource = self.get_datasource(None)  #  type: ignore[arg-type]
         assert not isinstance(
-            datasource, XDatasource
-        ), "Experimental Datasource cannot be built from batch_kwargs"
+            datasource, FluentDatasource
+        ), "Fluent Datasource cannot be built from batch_kwargs"
         batch = datasource.get_batch(  #  type: ignore[union-attr]
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
@@ -1412,7 +1412,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def get_datasource(
         self, datasource_name: str = "default"
-    ) -> Union[LegacyDatasource, BaseDatasource, XDatasource]:
+    ) -> Union[LegacyDatasource, BaseDatasource, FluentDatasource]:
         """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
         Args:
@@ -2445,7 +2445,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
-        batch_list: Sequence[Union[Batch, XBatch]],
+        batch_list: Sequence[Union[Batch, FluentBatch]],
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
@@ -2475,13 +2475,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         datasource_name: str = batch_list[-1].batch_definition.datasource_name
-        datasource: LegacyDatasource | BaseDatasource | XDatasource = self.datasources[
-            datasource_name
-        ]
+        datasource: LegacyDatasource | BaseDatasource | FluentDatasource = (
+            self.datasources[datasource_name]
+        )
         execution_engine: ExecutionEngine
-        if isinstance(datasource, XDatasource):
+        if isinstance(datasource, FluentDatasource):
             batch = batch_list[-1]
-            assert isinstance(batch, XBatch)
+            assert isinstance(batch, FluentBatch)
             execution_engine = batch.data.execution_engine
         elif isinstance(datasource, BaseDatasource):
             execution_engine = datasource.execution_engine
@@ -3828,8 +3828,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
                     assert not isinstance(
-                        datasource, XDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
+                        datasource, FluentDatasource
+                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
                     data_asset_names[
                         datasource_name
                     ] = datasource.get_available_data_asset_names(
@@ -3839,8 +3839,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
                 assert not isinstance(
-                    datasource, XDatasource
-                ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
+                    datasource, FluentDatasource
+                ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
                 # 20230120 - Chetan - I believe this is a latent bug - we should not be doing string-based indexing
                 #                     within a list. This will result in a runtime error.
                 datasource_names[  # type:ignore[call-overload]
@@ -3859,8 +3859,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 try:
                     datasource = self.get_datasource(datasource_name)
                     assert not isinstance(
-                        datasource, XDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
+                        datasource, FluentDatasource
+                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
                     data_asset_names[
                         datasource_name
                     ] = datasource.get_available_data_asset_names()
@@ -4443,16 +4443,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def datasources(
         self,
-    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, XDatasource]]:
+    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, FluentDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
     @property
-    def xdatasources(self) -> Dict[str, XDatasource]:
+    def fluent_datasources(self) -> Dict[str, FluentDatasource]:
         return {
             name: ds
             for (name, ds) in self.datasources.items()
-            if isinstance(ds, XDatasource)
+            if isinstance(ds, FluentDatasource)
         }
 
     @property
@@ -5425,28 +5425,28 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def _load_zep_config(self) -> GxConfig:
+    def _load_fluent_config(self) -> GxConfig:
         """Called at beginning of DataContext __init__"""
         logger.info(
-            f"{self.__class__.__name__} has not implemented `_load_zep_config()` returning empty `GxConfig`"
+            f"{self.__class__.__name__} has not implemented `_load_fluent_config()` returning empty `GxConfig`"
         )
-        return GxConfig(xdatasources={})
+        return GxConfig(fluent_datasources={})
 
-    def _attach_zep_config_datasources(self, config: GxConfig):
+    def _attach_fluent_config_datasources(self, config: GxConfig):
         """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
-            logger.info(f"Loaded '{ds_name}' from ZEP config")
+            logger.info(f"Loaded '{ds_name}' from fluent config")
             self._attach_datasource_to_context(datasource)
 
-    def _synchronize_zep_datasources(self) -> Dict[str, XDatasource]:
+    def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
-        Update `self.zep_config.xdatasources` with any newly added datasources.
-        Should be called before serializing `zep_config`.
+        Update `self.fluent_config.fluent_datasources` with any newly added datasources.
+        Should be called before serializing `fluent_config`.
         """
-        xdatasources = self.xdatasources
-        if xdatasources:
-            self.zep_config.xdatasources.update(xdatasources)
-        return self.zep_config.xdatasources
+        fluent_datasources = self.fluent_datasources
+        if fluent_datasources:
+            self.fluent_config.fluent_datasources.update(fluent_datasources)
+        return self.fluent_config.fluent_datasources
 
     @staticmethod
     def _resolve_id_and_ge_cloud_id(
