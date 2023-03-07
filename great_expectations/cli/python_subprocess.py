@@ -20,7 +20,7 @@ def execute_shell_command(command: str) -> int:
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
-    cwd: str = os.getcwd()
+    cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)
@@ -66,7 +66,7 @@ def execute_shell_command_with_progress_polling(command: str) -> int:
     :param command: bash command -- as if typed in a shell/Terminal window
     :return: status code -- 0 if successful; all other values (1 is the most common) indicate an error
     """
-    cwd: str = os.getcwd()
+    cwd: str = os.getcwd()  # noqa: PTH109
 
     path_env_var: str = os.pathsep.join([os.environ.get("PATH", os.defpath), cwd])
     env: dict = dict(os.environ, PATH=path_env_var)

@@ -151,12 +151,12 @@ def _write_checkpoint_to_disk(
     context: DataContext, checkpoint: Dict, checkpoint_name: str
 ) -> str:
     # TODO this should be the responsibility of the DataContext
-    checkpoint_dir = os.path.join(
+    checkpoint_dir = os.path.join(  # noqa: PTH118
         context.root_directory,
         DataContextConfigDefaults.CHECKPOINTS_BASE_DIRECTORY.value,
     )
-    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")
-    os.makedirs(checkpoint_dir, exist_ok=True)
+    checkpoint_file = os.path.join(checkpoint_dir, f"{checkpoint_name}.yml")  # noqa: PTH118
+    os.makedirs(checkpoint_dir, exist_ok=True)  # noqa: PTH103
     with open(checkpoint_file, "w") as f:
         yaml.dump(checkpoint, f)
     return checkpoint_file
@@ -165,7 +165,7 @@ def _write_checkpoint_to_disk(
 def _load_checkpoint_yml_template() -> dict:
     # TODO this should be the responsibility of the DataContext
     template_file = file_relative_path(
-        __file__, os.path.join("..", "data_context", "checkpoint_template.yml")
+        __file__, os.path.join("..", "data_context", "checkpoint_template.yml")  # noqa: PTH118
     )
     with open(template_file) as f:
         template = yaml.load(f)
@@ -315,11 +315,11 @@ def checkpoint_script(checkpoint, directory) -> None:
     _ = toolkit.load_checkpoint(context, checkpoint, usage_event)
 
     script_name = f"run_{checkpoint}.py"
-    script_path = os.path.join(
+    script_path = os.path.join(  # noqa: PTH118
         context.root_directory, context.GX_UNCOMMITTED_DIR, script_name
     )
 
-    if os.path.isfile(script_path):
+    if os.path.isfile(script_path):  # noqa: PTH113
         toolkit.exit_with_failure_message_and_stats(
             context,
             usage_event,
@@ -350,7 +350,7 @@ def _load_script_template() -> str:
 def _write_checkpoint_script_to_disk(
     context_directory: str, checkpoint_name: str, script_path: str
 ) -> None:
-    script_full_path = os.path.abspath(os.path.join(script_path))
+    script_full_path = os.path.abspath(os.path.join(script_path))  # noqa: PTH118, PTH100
     template = _load_script_template().format(checkpoint_name, context_directory)
     linted_code = lint_code(template)
     with open(script_full_path, "w") as f:

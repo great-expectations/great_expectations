@@ -94,7 +94,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
 def safe_remove(path):
     if path is not None:
         try:
-            os.remove(path)
+            os.remove(path)  # noqa: PTH107
         except OSError as e:
             print(e)
 
@@ -106,14 +106,14 @@ def create_files_in_directory(
     for file_name in file_name_list:
         splits = file_name.split("/")
         for i in range(1, len(splits)):
-            subdirectories.append(os.path.join(*splits[:i]))
+            subdirectories.append(os.path.join(*splits[:i]))  # noqa: PTH118
     subdirectories = set(subdirectories)
 
     for subdirectory in subdirectories:
-        os.makedirs(os.path.join(directory, subdirectory), exist_ok=True)
+        os.makedirs(os.path.join(directory, subdirectory), exist_ok=True)  # noqa: PTH118, PTH103
 
     for file_name in file_name_list:
-        file_path = os.path.join(directory, file_name)
+        file_path = os.path.join(directory, file_name)  # noqa: PTH118
         with open(file_path, "w") as f_:
             f_.write(file_content_fn())
 
@@ -1028,7 +1028,7 @@ def working_directory(directory: PathStr):
     Reference:
     https://stackoverflow.com/questions/431684/equivalent-of-shell-cd-command-to-change-the-working-directory/431747#431747
     """
-    owd = os.getcwd()
+    owd = os.getcwd()  # noqa: PTH109
     try:
         os.chdir(directory)
         yield directory

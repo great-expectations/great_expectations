@@ -362,7 +362,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
                 "%Y%m%dT%H%M%S.%fZ"
             )
         except (ValueError, TypeError):
-            source_path = os.path.join(
+            source_path = os.path.join(  # noqa: PTH118
                 store_backend.full_base_directory,
                 store_backend._convert_key_to_filepath(source_key),
             )
@@ -387,7 +387,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
-                source_path = os.path.join(store_backend.prefix, source_path)
+                source_path = os.path.join(store_backend.prefix, source_path)  # noqa: PTH118
             source_object = s3.Object(store_backend.bucket, source_path)
             source_object_last_mod = source_object.last_modified.strftime(
                 "%Y%m%dT%H%M%S.%fZ"
@@ -411,7 +411,7 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
-                source_path = os.path.join(store_backend.prefix, source_path)
+                source_path = os.path.join(store_backend.prefix, source_path)  # noqa: PTH118
             source_blob_created_time = bucket.get_blob(
                 source_path
             ).time_created.strftime("%Y%m%dT%H%M%S.%fZ")
@@ -612,7 +612,7 @@ Would you like to proceed with the project upgrade?\
         current_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y%m%dT%H%M%S.%fZ"
         )
-        dest_path = os.path.join(
+        dest_path = os.path.join(  # noqa: PTH118
             self.data_context._context_root_directory,
             "uncommitted",
             "logs",
@@ -620,7 +620,7 @@ Would you like to proceed with the project upgrade?\
             f"UpgradeHelperV11_{current_time}.json",
         )
         dest_dir, dest_filename = os.path.split(dest_path)
-        os.makedirs(dest_dir, exist_ok=True)
+        os.makedirs(dest_dir, exist_ok=True)  # noqa: PTH103
 
         with open(dest_path, "w") as outfile:
             json.dump(self.upgrade_log, outfile, indent=2)

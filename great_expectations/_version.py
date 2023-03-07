@@ -117,7 +117,7 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
     rootdirs = []
 
     for i in range(3):
-        dirname = os.path.basename(root)
+        dirname = os.path.basename(root)  # noqa: PTH119
         if dirname.startswith(parentdir_prefix):
             return {
                 "version": dirname[len(parentdir_prefix) :],
@@ -128,7 +128,7 @@ def versions_from_parentdir(parentdir_prefix, root, verbose):
             }
         else:
             rootdirs.append(root)
-            root = os.path.dirname(root)  # up a level
+            root = os.path.dirname(root)  # up a level  # noqa: PTH120
 
     if verbose:
         print(
@@ -525,7 +525,7 @@ def get_versions():
         # tree (where the .git directory might live) to this file. Invert
         # this to find the root from __file__.
         for _ in cfg.versionfile_source.split("/"):
-            root = os.path.dirname(root)
+            root = os.path.dirname(root)  # noqa: PTH120
     except NameError:
         return {
             "version": "0+unknown",

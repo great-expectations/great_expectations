@@ -132,8 +132,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-_TEST_DEFS_DIR = os.path.join(
-    os.path.dirname(__file__),
+_TEST_DEFS_DIR = os.path.join(  # noqa: PTH118
+    os.path.dirname(__file__),  # noqa: PTH120
     "..",
     "..",
     "tests",
@@ -1526,7 +1526,7 @@ class Expectation(metaclass=MetaExpectation):
         """Only meant to be called by self._get_examples"""
         results = []
         found = glob.glob(
-            os.path.join(_TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"),
+            os.path.join(_TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"),  # noqa: PTH118
             recursive=True,
         )
         if found:
