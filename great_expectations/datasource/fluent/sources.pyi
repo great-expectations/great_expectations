@@ -9,7 +9,6 @@ from typing import (
     List,
     NamedTuple,
     Type,
-    Union,
 )
 
 from typing_extensions import Final, TypeAlias
