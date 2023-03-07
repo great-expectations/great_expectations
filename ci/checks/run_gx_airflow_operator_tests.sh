@@ -39,4 +39,5 @@ echo "Using great expectations version vvv"
 pip freeze | grep great-expectations
 echo "Using great expectations version ^^^"
 
+cd ../airflow-provider-great-expectations
 pytest
