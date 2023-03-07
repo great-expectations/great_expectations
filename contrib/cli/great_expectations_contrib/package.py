@@ -140,7 +140,9 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                     # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
                     icon: Optional[str] = general.get(attr)
                     if icon and os.path.exists(icon):  # noqa: PTH110
-                        package_name: str = os.path.basename(os.getcwd())  # noqa: PTH119, PTH109
+                        package_name: str = os.path.basename(
+                            os.getcwd()
+                        )  # noqa: PTH119, PTH109
                         url: str = os.path.join(  # noqa: PTH118
                             "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
                             package_name,
@@ -170,7 +172,9 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
                 # If it is, we need to convert to the HTTPS path that will show up when merged into `develop`.
                 picture_path: Optional[str] = expert.get("picture")
                 if picture_path and os.path.exists(picture_path):  # noqa: PTH110
-                    package_name: str = os.path.basename(os.getcwd())  # noqa: PTH119, PTH109
+                    package_name: str = os.path.basename(
+                        os.getcwd()
+                    )  # noqa: PTH119, PTH109
                     url: str = os.path.join(  # noqa: PTH118
                         "https://raw.githubusercontent.com/great-expectations/great_expectations/develop/contrib",
                         package_name,
@@ -266,7 +270,9 @@ class GreatExpectationsContribPackageManifest(SerializableDictDot):
     def _identify_user_package() -> str:
         # Guaranteed to have a dir named '<MY_PACKAGE>_expectations' through Cookiecutter validation
         packages = [
-            d for d in os.listdir() if os.path.isdir(d) and d.endswith("_expectations")  # noqa: PTH112
+            d
+            for d in os.listdir()
+            if os.path.isdir(d) and d.endswith("_expectations")  # noqa: PTH112
         ]
 
         # A sanity check in case the user modifies the Cookiecutter template in unexpected ways

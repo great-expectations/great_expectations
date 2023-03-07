@@ -418,7 +418,10 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     schema: StructType = spark_df_taxi_data_schema
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
-        __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")  # noqa: PTH118
+        __file__,
+        os.path.join(
+            "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+        ),  # noqa: PTH118
     )
 
     datasource_config: dict = {
