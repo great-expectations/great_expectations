@@ -148,7 +148,9 @@ class SiteBuilder:
         custom_styles_directory = None
         plugins_directory = data_context.plugins_directory
         if plugins_directory and os.path.isdir(  # noqa: PTH112
-            os.path.join(plugins_directory, "custom_data_docs", "styles")  # noqa: PTH118
+            os.path.join(  # noqa: PTH118
+                plugins_directory, "custom_data_docs", "styles"
+            )
         ):
             custom_styles_directory = os.path.join(  # noqa: PTH118
                 plugins_directory, "custom_data_docs", "styles"
@@ -610,7 +612,9 @@ class DefaultSiteIndexBuilder:
             )
         else:
             filepath = (
-                os.path.join("expectations", *expectation_suite_name.split("."))  # noqa: PTH118
+                os.path.join(  # noqa: PTH118
+                    "expectations", *expectation_suite_name.split(".")
+                )
                 + ".html"
             )
 

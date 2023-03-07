@@ -121,4 +121,6 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
 
 
 def _get_full_path_to_ge_dir(target_directory: str) -> str:
-    return os.path.abspath(os.path.join(target_directory, FileDataContext.GX_DIR))  # noqa: PTH118, PTH100
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(target_directory, FileDataContext.GX_DIR)  # noqa: PTH118
+    )

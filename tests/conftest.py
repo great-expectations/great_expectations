@@ -868,7 +868,9 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)  # noqa: PTH118, PTH103
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
@@ -1087,7 +1089,9 @@ def deterministic_asset_dataconnector_context(
 
     project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)  # noqa: PTH118, PTH103
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
     data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(

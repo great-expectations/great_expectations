@@ -342,6 +342,8 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             if base_dir[0:5] in ["s3://", "gs://"]:
                 return batch_kwargs
             if not os.path.isabs(base_dir):  # noqa: PTH117
-                batch_kwargs["path"] = os.path.join("..", "..", base_dir)  # noqa: PTH118
+                batch_kwargs["path"] = os.path.join(  # noqa: PTH118
+                    "..", "..", base_dir
+                )
 
         return batch_kwargs

@@ -359,7 +359,9 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
 def _write_checkpoint_script_to_disk(
     context_directory: str, checkpoint_name: str, script_path: str
 ) -> None:
-    script_full_path: str = os.path.abspath(os.path.join(script_path))  # noqa: PTH118, PTH100
+    script_full_path: str = os.path.abspath(  # noqa: PTH100
+        os.path.join(script_path)  # noqa: PTH118
+    )
     template: str = _load_script_template().format(checkpoint_name, context_directory)
     linted_code: str = lint_code(code=template)
     with open(script_full_path, "w") as f:

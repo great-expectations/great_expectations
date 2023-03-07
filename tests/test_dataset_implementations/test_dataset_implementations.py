@@ -14,7 +14,9 @@ from great_expectations.self_check.util import (
 )
 
 dir_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
-test_config_path = os.path.join(dir_path, "test_dataset_implementations.json")  # noqa: PTH118
+test_config_path = os.path.join(  # noqa: PTH118
+    dir_path, "test_dataset_implementations.json"
+)
 test_config = json.load(open(test_config_path), object_pairs_hook=OrderedDict)
 test_datasets = test_config["test_datasets"]
 

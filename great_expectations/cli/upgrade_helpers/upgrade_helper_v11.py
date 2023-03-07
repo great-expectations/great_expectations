@@ -387,7 +387,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
-                source_path = os.path.join(store_backend.prefix, source_path)  # noqa: PTH118
+                source_path = os.path.join(  # noqa: PTH118
+                    store_backend.prefix, source_path
+                )
             source_object = s3.Object(store_backend.bucket, source_path)
             source_object_last_mod = source_object.last_modified.strftime(
                 "%Y%m%dT%H%M%S.%fZ"
@@ -411,7 +413,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
         except (ValueError, TypeError):
             source_path = store_backend._convert_key_to_filepath(source_key)
             if not source_path.startswith(store_backend.prefix):
-                source_path = os.path.join(store_backend.prefix, source_path)  # noqa: PTH118
+                source_path = os.path.join(  # noqa: PTH118
+                    store_backend.prefix, source_path
+                )
             source_blob_created_time = bucket.get_blob(
                 source_path
             ).time_created.strftime("%Y%m%dT%H%M%S.%fZ")

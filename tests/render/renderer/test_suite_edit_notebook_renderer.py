@@ -79,7 +79,9 @@ def _create_custom_notebooks_context(path, ge_yml_name):
         ),
         os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)  # noqa: PTH118, PTH103
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
     return context_path
 
 

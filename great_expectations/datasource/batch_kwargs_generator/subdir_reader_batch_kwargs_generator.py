@@ -111,7 +111,9 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         # If the generator asset names a single known *file*, return ONLY that
         for extension in self.known_extensions:
             if os.path.isfile(  # noqa: PTH113
-                os.path.join(self.base_directory, data_asset_name + extension)  # noqa: PTH118
+                os.path.join(  # noqa: PTH118
+                    self.base_directory, data_asset_name + extension
+                )
             ):
                 return [data_asset_name]
         if os.path.isfile(os.path.join(self.base_directory, data_asset_name)):  # noqa: PTH118, PTH113
@@ -121,7 +123,9 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         return [
             path
             for (path, type) in self._get_valid_file_options(
-                base_directory=os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
+                base_directory=os.path.join(  # noqa: PTH118
+                    self.base_directory, data_asset_name
+                )
             )
         ]
 
@@ -168,7 +172,9 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
                 for extension in self.known_extensions:
                     if os.path.isfile(  # noqa: PTH113
-                        os.path.join(self.base_directory, data_asset_name + extension)  # noqa: PTH118
+                        os.path.join(  # noqa: PTH118
+                            self.base_directory, data_asset_name + extension
+                        )
                     ):
                         path = os.path.join(  # noqa: PTH118
                             self.base_directory, data_asset_name + extension
@@ -202,7 +208,9 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 elif os.path.isdir(os.path.join(self.base_directory, file_option)):  # noqa: PTH118, PTH112
                     # Make sure there's at least one valid file inside the subdir
                     subdir_options = self._get_valid_file_options(
-                        base_directory=os.path.join(base_directory, file_option)  # noqa: PTH118
+                        base_directory=os.path.join(  # noqa: PTH118
+                            base_directory, file_option
+                        )
                     )
                     if (
                         len(subdir_options) > 0
@@ -238,7 +246,9 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             )
         else:
             for extension in self.known_extensions:
-                path = os.path.join(self.base_directory, data_asset_name + extension)  # noqa: PTH118
+                path = os.path.join(  # noqa: PTH118
+                    self.base_directory, data_asset_name + extension
+                )
                 if os.path.isfile(path):  # noqa: PTH113
                     return iter(
                         [
@@ -255,7 +265,9 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                     ", ".join(map(str, self.known_extensions)),
                 ),
                 batch_kwargs=PathBatchKwargs(
-                    path=os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
+                    path=os.path.join(  # noqa: PTH118
+                        self.base_directory, data_asset_name
+                    )
                 ),
             )
 

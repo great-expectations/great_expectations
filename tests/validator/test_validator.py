@@ -50,7 +50,9 @@ def yellow_trip_pandas_data_context(
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)  # noqa: PTH118, PTH103
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
     data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
