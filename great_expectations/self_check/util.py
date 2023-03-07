@@ -3376,8 +3376,8 @@ def generate_sqlite_db_path():
         str: An absolute path to the ephemeral db within the created temporary directory.
     """
     tmp_dir = str(tempfile.mkdtemp())
-    abspath = os.path.abspath(
-        os.path.join(
+    abspath = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             tmp_dir,
             "sqlite_db"
             + "".join(

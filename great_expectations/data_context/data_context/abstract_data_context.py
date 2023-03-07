@@ -231,7 +231,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     # test_yml_config module so AbstractDataContext is not so cluttered.
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser("~/.great_expectations/great_expectations.conf"),
+        os.path.expanduser(  # noqa: PTH111
+            "~/.great_expectations/great_expectations.conf"
+        ),
         "/etc/great_expectations.conf",
     ]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
@@ -267,7 +269,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._variables = self._init_variables()
 
         # Init plugin support
-        if self.plugins_directory is not None and os.path.exists(
+        if self.plugins_directory is not None and os.path.exists(  # noqa: PTH110
             self.plugins_directory
         ):
             sys.path.append(self.plugins_directory)
@@ -567,7 +569,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             if self.root_directory:
-                checkpoint_store_directory: str = os.path.join(
+                checkpoint_store_directory: str = os.path.join(  # noqa: PTH118
                     self.root_directory,
                     DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
                 )
@@ -633,7 +635,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ):
                 return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
             if self.root_directory:
-                checkpoint_store_directory: str = os.path.join(
+                checkpoint_store_directory: str = os.path.join(  # noqa: PTH118
                     self.root_directory,
                     DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
                 )
@@ -4092,11 +4094,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if not directory_path:
             return False
 
-        profiler_directory_path: str = os.path.join(
+        profiler_directory_path: str = os.path.join(  # noqa: PTH118
             directory_path,
             DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
         )
-        return os.path.isdir(profiler_directory_path)
+        return os.path.isdir(profiler_directory_path)  # noqa: PTH112
 
     @staticmethod
     def _get_global_config_value(
@@ -4228,10 +4230,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         if path is None:
             return None
-        if os.path.isabs(path):
+        if os.path.isabs(path):  # noqa: PTH117
             return path
         else:
-            return os.path.join(self.root_directory, path)  # type: ignore[arg-type]
+            return os.path.join(self.root_directory, path)  # type: ignore[arg-type]  # noqa: PTH118
 
     def _apply_global_config_overrides(
         self, config: DataContextConfig
@@ -5408,12 +5410,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
             )
 
-        config_variables_filepath = os.path.join(
+        config_variables_filepath = os.path.join(  # noqa: PTH118
             self.root_directory, config_variables_filepath  # type: ignore[arg-type]
         )
 
-        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
-        if not os.path.isfile(config_variables_filepath):
+        os.makedirs(  # noqa: PTH103
+            os.path.dirname(config_variables_filepath), exist_ok=True  # noqa: PTH120
+        )
+        if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
             logger.info(
                 "Creating new substitution_variables file at {config_variables_filepath}".format(
                     config_variables_filepath=config_variables_filepath
