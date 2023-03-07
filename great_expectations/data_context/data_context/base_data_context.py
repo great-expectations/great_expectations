@@ -172,7 +172,7 @@ def BaseDataContext(
     )
 
     if context_root_dir is not None:
-        context_root_dir = os.path.abspath(context_root_dir)
+        context_root_dir = os.path.abspath(context_root_dir)  # noqa: PTH100
     # initialize runtime_environment as empty dict if None
     runtime_environment = runtime_environment or {}
 

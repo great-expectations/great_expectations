@@ -85,7 +85,7 @@ class SerializableDataContext(AbstractDataContext):
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        config_filepath = os.path.join(self.root_directory, self.GX_YML)
+        config_filepath = os.path.join(self.root_directory, self.GX_YML)  # noqa: PTH118
 
         logger.debug(
             f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
@@ -198,25 +198,27 @@ class SerializableDataContext(AbstractDataContext):
             DataContext
         """
 
-        if not os.path.isdir(project_root_dir):  # type: ignore[arg-type]
+        if not os.path.isdir(project_root_dir):  # type: ignore[arg-type]  # noqa: PTH112
             raise gx_exceptions.DataContextError(
                 "The project_root_dir must be an existing directory in which "
                 "to initialize a new DataContext"
             )
 
-        gx_dir = os.path.join(project_root_dir, cls.GX_DIR)  # type: ignore[arg-type]
-        os.makedirs(gx_dir, exist_ok=True)
+        gx_dir = os.path.join(project_root_dir, cls.GX_DIR)  # type: ignore[arg-type]  # noqa: PTH118
+        os.makedirs(gx_dir, exist_ok=True)  # noqa: PTH103
         cls._scaffold_directories(gx_dir)
 
-        if os.path.isfile(os.path.join(gx_dir, cls.GX_YML)):
+        if os.path.isfile(os.path.join(gx_dir, cls.GX_YML)):  # noqa: PTH118, PTH113
             message = f"""Warning. An existing `{cls.GX_YML}` was found here: {gx_dir}.
     - No action was taken."""
             warnings.warn(message)
         else:
             cls._write_project_template_to_disk(gx_dir, usage_statistics_enabled)
 
-        uncommitted_dir = os.path.join(gx_dir, cls.GX_UNCOMMITTED_DIR)
-        if os.path.isfile(os.path.join(uncommitted_dir, "config_variables.yml")):
+        uncommitted_dir = os.path.join(gx_dir, cls.GX_UNCOMMITTED_DIR)  # noqa: PTH118
+        if os.path.isfile(  # noqa: PTH113
+            os.path.join(uncommitted_dir, "config_variables.yml")  # noqa: PTH118
+        ):
             message = """Warning. An existing `config_variables.yml` was found here: {}.
     - No action was taken.""".format(
                 uncommitted_dir
@@ -230,9 +232,11 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def all_uncommitted_directories_exist(cls, gx_dir: PathStr) -> bool:
         """Check if all uncommitted directories exist."""
-        uncommitted_dir = os.path.join(gx_dir, cls.GX_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(gx_dir, cls.GX_UNCOMMITTED_DIR)  # noqa: PTH118
         for directory in cls.UNCOMMITTED_DIRECTORIES:
-            if not os.path.isdir(os.path.join(uncommitted_dir, directory)):
+            if not os.path.isdir(  # noqa: PTH112
+                os.path.join(uncommitted_dir, directory)  # noqa: PTH118
+            ):
                 return False
 
         return True
@@ -240,19 +244,21 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def config_variables_yml_exist(cls, gx_dir: PathStr) -> bool:
         """Check if all config_variables.yml exists."""
-        path_to_yml = os.path.join(gx_dir, cls.GX_YML)
+        path_to_yml = os.path.join(gx_dir, cls.GX_YML)  # noqa: PTH118
 
         # TODO this is so brittle and gross
         with open(path_to_yml) as f:
             config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
-        config_var_path = os.path.join(gx_dir, config_var_path)
-        return os.path.isfile(config_var_path)
+        config_var_path = os.path.join(gx_dir, config_var_path)  # noqa: PTH118
+        return os.path.isfile(config_var_path)  # noqa: PTH113
 
     @classmethod
     def _write_config_variables_template_to_disk(cls, uncommitted_dir: str) -> None:
-        os.makedirs(uncommitted_dir, exist_ok=True)
-        config_var_file = os.path.join(uncommitted_dir, "config_variables.yml")
+        os.makedirs(uncommitted_dir, exist_ok=True)  # noqa: PTH103
+        config_var_file = os.path.join(  # noqa: PTH118
+            uncommitted_dir, "config_variables.yml"
+        )
         with open(config_var_file, "w") as template:
             template.write(CONFIG_VARIABLES_TEMPLATE)
 
@@ -260,7 +266,7 @@ class SerializableDataContext(AbstractDataContext):
     def _write_project_template_to_disk(
         cls, gx_dir: PathStr, usage_statistics_enabled: bool = True
     ) -> None:
-        file_path = os.path.join(gx_dir, cls.GX_YML)
+        file_path = os.path.join(gx_dir, cls.GX_YML)  # noqa: PTH118
         with open(file_path, "w") as template:
             if usage_statistics_enabled:
                 template.write(PROJECT_TEMPLATE_USAGE_STATISTICS_ENABLED)
@@ -270,38 +276,49 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def _scaffold_directories(cls, base_dir: PathStr) -> None:
         """Safely create GE directories for a new project."""
-        os.makedirs(base_dir, exist_ok=True)
-        with open(os.path.join(base_dir, ".gitignore"), "w") as f:
+        os.makedirs(base_dir, exist_ok=True)  # noqa: PTH103
+        with open(os.path.join(base_dir, ".gitignore"), "w") as f:  # noqa: PTH118
             f.write("uncommitted/")
 
         for directory in cls.BASE_DIRECTORIES:
             if directory == "plugins":
-                plugins_dir = os.path.join(base_dir, directory)
-                os.makedirs(plugins_dir, exist_ok=True)
-                os.makedirs(
-                    os.path.join(plugins_dir, "custom_data_docs"), exist_ok=True
+                plugins_dir = os.path.join(base_dir, directory)  # noqa: PTH118
+                os.makedirs(plugins_dir, exist_ok=True)  # noqa: PTH103
+                os.makedirs(  # noqa: PTH103
+                    os.path.join(plugins_dir, "custom_data_docs"),  # noqa: PTH118
+                    exist_ok=True,  # noqa: PTH118
                 )
-                os.makedirs(
-                    os.path.join(plugins_dir, "custom_data_docs", "views"),
+                os.makedirs(  # noqa: PTH103
+                    os.path.join(  # noqa: PTH118
+                        plugins_dir, "custom_data_docs", "views"
+                    ),
                     exist_ok=True,
                 )
-                os.makedirs(
-                    os.path.join(plugins_dir, "custom_data_docs", "renderers"),
+                os.makedirs(  # noqa: PTH103
+                    os.path.join(  # noqa: PTH118
+                        plugins_dir, "custom_data_docs", "renderers"
+                    ),
                     exist_ok=True,
                 )
-                os.makedirs(
-                    os.path.join(plugins_dir, "custom_data_docs", "styles"),
+                os.makedirs(  # noqa: PTH103
+                    os.path.join(  # noqa: PTH118
+                        plugins_dir, "custom_data_docs", "styles"
+                    ),
                     exist_ok=True,
                 )
                 cls._scaffold_custom_data_docs(plugins_dir)
             else:
-                os.makedirs(os.path.join(base_dir, directory), exist_ok=True)
+                os.makedirs(  # noqa: PTH103
+                    os.path.join(base_dir, directory), exist_ok=True  # noqa: PTH118
+                )
 
-        uncommitted_dir = os.path.join(base_dir, cls.GX_UNCOMMITTED_DIR)
+        uncommitted_dir = os.path.join(base_dir, cls.GX_UNCOMMITTED_DIR)  # noqa: PTH118
 
         for new_directory in cls.UNCOMMITTED_DIRECTORIES:
-            new_directory_path = os.path.join(uncommitted_dir, new_directory)
-            os.makedirs(new_directory_path, exist_ok=True)
+            new_directory_path = os.path.join(  # noqa: PTH118
+                uncommitted_dir, new_directory
+            )
+            os.makedirs(new_directory_path, exist_ok=True)  # noqa: PTH103
 
     @classmethod
     def _scaffold_custom_data_docs(cls, plugins_dir: PathStr) -> None:
@@ -310,7 +327,7 @@ class SerializableDataContext(AbstractDataContext):
             __file__,
             "../../render/view/static/styles/data_docs_custom_styles_template.css",
         )
-        styles_destination_path = os.path.join(
+        styles_destination_path = os.path.join(  # noqa: PTH118
             plugins_dir, "custom_data_docs", "styles", "data_docs_custom_styles.css"
         )
         shutil.copyfile(styles_template, styles_destination_path)
@@ -324,15 +341,21 @@ class SerializableDataContext(AbstractDataContext):
         yml_path = None
         gx_home_environment = os.getenv("GX_HOME")
         if gx_home_environment:
-            gx_home_environment = os.path.expanduser(gx_home_environment)
-            if os.path.isdir(gx_home_environment) and os.path.isfile(
-                os.path.join(gx_home_environment, "great_expectations.yml")
+            gx_home_environment = os.path.expanduser(  # noqa: PTH111
+                gx_home_environment
+            )
+            if os.path.isdir(  # noqa: PTH112
+                gx_home_environment
+            ) and os.path.isfile(  # noqa: PTH112, PTH113
+                os.path.join(  # noqa: PTH118
+                    gx_home_environment, "great_expectations.yml"
+                )
             ):
                 result = gx_home_environment
         else:
             yml_path = cls._find_context_yml_file()
             if yml_path:
-                result = os.path.dirname(yml_path)
+                result = os.path.dirname(yml_path)  # noqa: PTH120
 
         if result is None:
             raise gx_exceptions.ConfigNotFoundError()
@@ -406,30 +429,36 @@ class SerializableDataContext(AbstractDataContext):
         """Search for the yml file starting here and moving upward."""
         yml_path = None
         if search_start_dir is None:
-            search_start_dir = os.getcwd()
+            search_start_dir = os.getcwd()  # noqa: PTH109
 
         for i in range(4):
             logger.debug(
                 f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
-            potential_ge_dir = os.path.join(search_start_dir, cls.GX_DIR)
+            potential_ge_dir = os.path.join(  # noqa: PTH118
+                search_start_dir, cls.GX_DIR
+            )
 
-            if os.path.isdir(potential_ge_dir):
-                potential_yml = os.path.join(potential_ge_dir, cls.GX_YML)
-                if os.path.isfile(potential_yml):
+            if os.path.isdir(potential_ge_dir):  # noqa: PTH112
+                potential_yml = os.path.join(  # noqa: PTH118
+                    potential_ge_dir, cls.GX_YML
+                )
+                if os.path.isfile(potential_yml):  # noqa: PTH113
                     yml_path = potential_yml
                     logger.debug(f"Found config file at {str(yml_path)}")
                     break
             # move up one directory
-            search_start_dir = os.path.dirname(search_start_dir)
+            search_start_dir = os.path.dirname(search_start_dir)  # noqa: PTH120
 
         return yml_path
 
     @classmethod
     def does_config_exist_on_disk(cls, context_root_dir: PathStr) -> bool:
         """Return True if the great_expectations.yml exists on disk."""
-        return os.path.isfile(os.path.join(context_root_dir, cls.GX_YML))
+        return os.path.isfile(  # noqa: PTH113
+            os.path.join(context_root_dir, cls.GX_YML)  # noqa: PTH118
+        )
 
     @classmethod
     def is_project_initialized(cls, ge_dir: PathStr) -> bool:
