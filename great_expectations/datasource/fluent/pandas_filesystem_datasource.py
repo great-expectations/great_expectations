@@ -7,6 +7,7 @@ from typing import Optional, Union
 
 from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -27,7 +28,10 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class PandasFilesystemDatasource(_PandasFilePathDatasource):
+    """Pandas based Datasource for local filesystem based data assets."""
+
     # instance attributes
     type: Literal["pandas_filesystem"] = "pandas_filesystem"
 
@@ -53,6 +57,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
+    @public_api
     def add_csv_asset(
         self,
         name: str,
@@ -98,6 +103,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
         return self.add_asset(asset=asset)
 
+    @public_api
     def add_excel_asset(
         self,
         name: str,
@@ -145,6 +151,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
         return self.add_asset(asset=asset)
 
+    @public_api
     def add_json_asset(
         self,
         name: str,
@@ -192,6 +199,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
         return self.add_asset(asset=asset)
 
+    @public_api
     def add_parquet_asset(
         self,
         name: str,
