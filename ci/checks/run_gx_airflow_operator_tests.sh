@@ -3,41 +3,17 @@
 # Run tests defined in the Great Expectations Airflow Operator
 REPO_ROOT=$(pwd)
 
-echo "Using great expectations version vvv"
-pwd
-pip freeze | grep great-expectations
-ls
-echo "Using great expectations version ^^^"
-
 # Install the airflow provider from it's repo
 cd ..
 git clone https://github.com/astronomer/airflow-provider-great-expectations.git
-
 cd airflow-provider-great-expectations
-
-echo "Using great expectations version vvv"
-pip freeze | grep great-expectations
-echo "Using great expectations version ^^^"
-
 pip install -e '.[tests]'
 
-echo "Using great expectations version vvv"
-pip freeze | grep great-expectations
-echo "Using great expectations version ^^^"
-
-echo "Uninstall Great Expectations installed by airflow provider"
+echo "Uninstall Great Expectations installed by Airflow Provider and install from PR commit"
 pip uninstall -y great-expectations
-echo "Using great expectations version vvv"
-pip freeze | grep great-expectations
-echo "Using great expectations version ^^^"
-
-# Install GX from it's repo
 cd $REPO_ROOT
 pip install -c constraints-dev.txt -e ".[test]"
 
-echo "Using great expectations version vvv"
-pip freeze | grep great-expectations
-echo "Using great expectations version ^^^"
-
+echo "Run Great Expectations Airflow Provider Tests"
 cd ../airflow-provider-great-expectations
 pytest
