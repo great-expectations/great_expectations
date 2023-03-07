@@ -26,11 +26,11 @@ logger = logging.getLogger(__name__)
 
 def pytest_generate_tests(metafunc):  # noqa: C901 - 38
     # Load all the JSON files in the directory
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     expectation_dirs = [
         dir_
         for dir_ in os.listdir(dir_path)
-        if os.path.isdir(os.path.join(dir_path, dir_))
+        if os.path.isdir(os.path.join(dir_path, dir_))  # noqa: PTH118, PTH112
     ]
 
     parametrized_tests = []

@@ -295,7 +295,7 @@ class TestDynamicPandasAssets:
             )
             .add_csv_asset(
                 "my_csv",
-                batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
                 **extra_kwargs,
             )
             .build_batch_request({"year": "2018"})

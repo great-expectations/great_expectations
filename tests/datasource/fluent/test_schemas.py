@@ -91,7 +91,6 @@ def test_vcs_schemas_match(
         "SqliteTableAsset.json",
         "SqliteQueryAsset.json",
         "SASAsset.json",
-        "PandasSASAsset.json",
     ):
         pytest.xfail(f"{schema_path.name} does not exist")
 

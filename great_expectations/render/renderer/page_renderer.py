@@ -364,7 +364,7 @@ class ValidationResultsPageRenderer(Renderer):
             + str(expectation_suite_name).split(".")
         )
         expectation_suite_path = (
-            f"{os.path.join(*expectation_suite_path_components)}.html"
+            f"{os.path.join(*expectation_suite_path_components)}.html"  # noqa: PTH118
         )
         # TODO: deprecate dual batch api support in 0.14
         batch_kwargs = (
