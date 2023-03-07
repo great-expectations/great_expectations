@@ -429,7 +429,7 @@ def test_default_pandas_datasource_name_conflict(
         name=DEFAULT_PANDAS_DATASOURCE_NAME, class_name="PandasDatasource"
     )
     with pytest.raises(DefaultPandasDatasourceError):
-        pandas_datasource = empty_data_context.sources.pandas_default
+        _ = empty_data_context.sources.pandas_default
 
     # the datasource name is available
     empty_data_context.datasources.pop(DEFAULT_PANDAS_DATASOURCE_NAME)
@@ -473,7 +473,7 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext):
     assert len(empty_data_context.sources.pandas_default.assets) == 2
     assert all(
         [
-            asset.dataframe.equals(df)  # type: ignore[attr-defined]  # unaware of alias
+            asset.dataframe.equals(df)  # type: ignore[attr-defined]
             for asset in empty_data_context.sources.pandas_default.assets.values()
         ]
     )
