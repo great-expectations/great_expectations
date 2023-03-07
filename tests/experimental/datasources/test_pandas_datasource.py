@@ -439,6 +439,13 @@ def test_default_pandas_datasource_name_conflict(
 
 
 def test_dataframe_asset(empty_data_context: AbstractDataContext):
+    # validates that a dataframe object is passed
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
+
+    errors_dict = exc_info.value.errors()[0]
+    assert errors_dict["loc"][0] == "dataframe"
+
     df = pd.DataFrame(
         data={
             "foo": [1, 2, 3],
@@ -446,6 +453,7 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext):
         }
     )
 
+    # correct working behavior with read method
     validator = empty_data_context.sources.pandas_default.read_dataframe(dataframe=df)
     assert isinstance(validator, Validator)
     assert isinstance(
@@ -455,6 +463,7 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext):
         DataFrameAsset,
     )
 
+    # correct working behavior with add method
     dataframe_asset_name = "my_dataframe_asset"
     dataframe_asset = empty_data_context.sources.pandas_default.add_dataframe_asset(
         name=dataframe_asset_name, dataframe=df
