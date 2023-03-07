@@ -28,3 +28,23 @@ def sqlalchemy_version_check(version: str | Version) -> None:
             "SQLAlchemy v2.0.0 or later is not yet supported by Great Expectations.",
             UserWarning,
         )
+
+
+def is_version_greater_or_equal(
+    version: str | Version, compare_version: str | Version
+) -> bool:
+    """Check if the version is greater or equal to the compare_version.
+
+    Args:
+        version: Current version.
+        compare_version: Version to compare to.
+
+    Returns:
+        Boolean indicating if the version is greater or equal to the compare version.
+    """
+    if isinstance(version, str):
+        version = Version(version)
+    if isinstance(compare_version, str):
+        compare_version = Version(compare_version)
+
+    return version >= compare_version

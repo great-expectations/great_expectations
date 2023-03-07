@@ -94,14 +94,16 @@ class SerializableDataContext(AbstractDataContext):
         try:
             with open(config_filepath, "w") as outfile:
 
-                zep_datasources = self._synchronize_zep_datasources()
-                if zep_datasources:
-                    self.zep_config.datasources.update(zep_datasources)
+                fluent_datasources = self._synchronize_fluent_datasources()
+                if fluent_datasources:
+                    self.fluent_config.datasources.update(fluent_datasources)
                     logger.info(
-                        f"Saving {len(self.zep_config.datasources)} ZEP Datasources to {config_filepath}"
+                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
                     )
-                    zep_json_dict: dict[str, JSONValues] = self.zep_config._json_dict()
-                    self.config._commented_map.update(zep_json_dict)
+                    fluent_json_dict: dict[
+                        str, JSONValues
+                    ] = self.fluent_config._json_dict()
+                    self.config._commented_map.update(fluent_json_dict)
 
                 self.config.to_yaml(outfile)
         except PermissionError as e:
