@@ -36,6 +36,16 @@ module.exports = {
               label: 'How to initialize a Filesystem Data Context in Python'
             },
             'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
+            {
+              type: 'doc',
+              id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context',
+              label: 'How to quickly instantiate a Data Context'
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context',
+              label: 'How to instantiate a specific Filesystem Data Context'
+            },
             'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
             'guides/setup/configuring_data_contexts/how_to_configure_credentials',
             'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'
