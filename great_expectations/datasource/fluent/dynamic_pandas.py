@@ -34,6 +34,7 @@ from pydantic import Field, FilePath
 # from pydantic.typing import resolve_annotations
 from typing_extensions import Final, Literal, TypeAlias
 
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,  # noqa: TCH001
 )
@@ -158,6 +159,8 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
             ),
         )
     },
+    # sql
+    "con": {"con": _FieldSpec(Union[ConfigStr, str], ...)},  # type: ignore[arg-type]
     # misc
     "filepath_or_buffer": {"filepath_or_buffer": _FieldSpec(FilePath, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
