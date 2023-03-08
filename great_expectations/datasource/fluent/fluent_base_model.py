@@ -20,6 +20,7 @@ from typing import (
 import pydantic
 from ruamel.yaml import YAML
 
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
 
 if TYPE_CHECKING:
@@ -231,6 +232,7 @@ class FluentBaseModel(pydantic.BaseModel):
         # deprecated - use exclude_unset instead
         skip_defaults: bool | None = None,
         # custom
+        config_provider: _ConfigurationProvider | None = None,
         _substitute_config: bool = False,  # NOTE: or just pass the config provider?
     ) -> dict[str, Any]:
         """
@@ -250,8 +252,8 @@ class FluentBaseModel(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
-        if _substitute_config and self._config_provider:
-            from great_expectations.datasource.fluent.config_str import ConfigStr
+        if _substitute_config or config_provider:
+            config_provider = config_provider or self._config_provider
 
             logger.warning(
                 f"{self.__class__.__name__} - sub config\n{self._config_provider}\n"
@@ -259,7 +261,8 @@ class FluentBaseModel(pydantic.BaseModel):
             subbed_config: dict = {}
             for k, v in result.items():
                 if isinstance(v, ConfigStr):
-                    v = v.get_config_value(self._config_provider)
+                    v = v.get_config_value(config_provider)
+                # TODO: do this for deeply nested items too
                 subbed_config[k] = v
             return subbed_config
         return result
