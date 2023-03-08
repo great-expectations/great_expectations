@@ -20,7 +20,7 @@ from typing_extensions import Literal, Protocol, Self
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.datasource.fluent.cfg_sub import ConfigStr
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )

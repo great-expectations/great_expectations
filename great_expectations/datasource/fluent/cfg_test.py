@@ -1,7 +1,7 @@
 from typing import Optional
 
 import great_expectations as gx
-from great_expectations.datasource.fluent.cfg_sub import ConfigStr, SecretStr
+from great_expectations.datasource.fluent.config_str import ConfigStr, SecretStr
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 
 context = gx.get_context(cloud_mode=False)
