@@ -195,7 +195,7 @@ def test_complex_regex_example_with_implicit_data_asset_names():
     # Test for an unknown data_connector
     with pytest.raises(ValueError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = my_data_connector.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -975,15 +975,17 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
 
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: InferredAssetS3DataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "my_inferred_asset_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: InferredAssetS3DataConnector = (  # noqa: F841
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "my_inferred_asset_filesystem_data_connector",
+                    "execution_engine": PandasExecutionEngine(),
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 
@@ -1040,15 +1042,17 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters():
 
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: InferredAssetS3DataConnector = instantiate_class_from_config(
-            config=my_data_connector_yaml,
-            runtime_environment={
-                "name": "my_inferred_asset_filesystem_data_connector",
-                "execution_engine": PandasExecutionEngine(),
-            },
-            config_defaults={
-                "module_name": "great_expectations.datasource.data_connector"
-            },
+        my_data_connector: InferredAssetS3DataConnector = (  # noqa: F841
+            instantiate_class_from_config(
+                config=my_data_connector_yaml,
+                runtime_environment={
+                    "name": "my_inferred_asset_filesystem_data_connector",
+                    "execution_engine": PandasExecutionEngine(),
+                },
+                config_defaults={
+                    "module_name": "great_expectations.datasource.data_connector"
+                },
+            )
         )
 
 
