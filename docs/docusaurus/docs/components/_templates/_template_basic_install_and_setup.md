@@ -25,7 +25,7 @@ import InstallDependencies from '/docs/components/setup/dependencies/_sql_instal
 import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation.md'
 
 <!-- ## Next steps -->
-[//]: # (TODO: import )
+import LinksAfterInstallingGx from '/docs/components/setup/next_steps/_links_after_installing_gx.md'
 
 
 ## Introduction
@@ -63,8 +63,9 @@ import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation
 <GxVerifyInstallation />
 
 
-[//]: # (TODO: ## Next steps)
+## Next steps
 
+Now that you have installed GX along with the dependencies necessary for working with your source data, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX components, as well as provide you with access to GX's Python API.
 
-
+<LinksAfterInstallingGx />
 
