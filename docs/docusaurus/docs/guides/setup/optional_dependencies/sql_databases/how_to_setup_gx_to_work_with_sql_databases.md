@@ -57,7 +57,7 @@ This guide will walk you through best practices for creating your GX Python envi
 
 ### 3. Install GX with optional dependencies for SQL databases
 
-<InstallDependencies install_key="sqlalchemy" database_name="SQL"/>
+<InstallDependencies install_key="sqlalchemy" database_name="SQL databases"/>
 
 ### 4. Verify that GX has been installed correctly
 
