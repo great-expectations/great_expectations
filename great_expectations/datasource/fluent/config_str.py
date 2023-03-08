@@ -17,12 +17,11 @@ class ConfigStr(SecretStr):
     def __init__(
         self,
         template_str: str,
-        config_provider: _ConfigurationProvider | None = None,
     ) -> None:
         # TODO: do the config sub immediately and save it to `_secret_value`?
         # or do at at access time in `get_secret_value`
         self.template_str: str = template_str
-        self.config_provider: _ConfigurationProvider | None = config_provider
+        self.config_provider: _ConfigurationProvider | None = None
         # TODO: does this still make sense?
         if self.config_provider:
             self._secret_value = self.get_config_value()
