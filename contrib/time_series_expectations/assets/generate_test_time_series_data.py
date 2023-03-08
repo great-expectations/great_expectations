@@ -46,7 +46,7 @@ def generate_time_series_data_and_plot(
             holiday_alpha=1000,
             outlier_alpha=outlier_alpha,
         )
-    
+
     elif grain == "hourly":
         generator = HourlyTimeSeriesGenerator()
         df = generator.generate_df(
@@ -130,11 +130,9 @@ generate_time_series_data_and_plot(
 )
 
 
-
-
 generate_time_series_data_and_plot(
     grain="hourly",
-    size=24*180,
+    size=24 * 180,
     intercept=100,
     trend=0.05,
     hourly_seasonality=3,
@@ -144,7 +142,7 @@ generate_time_series_data_and_plot(
 
 generate_time_series_data_and_plot(
     grain="hourly",
-    size=24*180,
+    size=24 * 180,
     intercept=100,
     trend=0.05,
     hourly_seasonality=3,
@@ -154,7 +152,7 @@ generate_time_series_data_and_plot(
 
 generate_time_series_data_and_plot(
     grain="hourly",
-    size=24*180,
+    size=24 * 180,
     intercept=100,
     trend=0.05,
     hourly_seasonality=3,
@@ -164,7 +162,7 @@ generate_time_series_data_and_plot(
 
 generate_time_series_data_and_plot(
     grain="hourly",
-    size=24*180,
+    size=24 * 180,
     intercept=100,
     trend=0.05,
     hourly_seasonality=3,

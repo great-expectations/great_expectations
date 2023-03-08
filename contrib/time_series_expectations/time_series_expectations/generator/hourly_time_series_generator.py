@@ -53,10 +53,13 @@ class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
 
         time_range = np.arange(size)
 
-        hourly_seasonality_series = self._generate_hourly_seasonality(
-            time_range=time_range,
-            hourly_seasonality_params=hourly_seasonality_params,
-        ) * hourly_seasonality
+        hourly_seasonality_series = (
+            self._generate_hourly_seasonality(
+                time_range=time_range,
+                hourly_seasonality_params=hourly_seasonality_params,
+            )
+            * hourly_seasonality
+        )
 
         hourly_outliers = self._generate_posneg_pareto(outlier_alpha, size)
 
@@ -66,10 +69,13 @@ class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
             weekday_dummy_params=weekday_dummy_params,
             annual_seasonality_params=annual_seasonality_params,
             holiday_alpha=holiday_alpha,
-            outlier_alpha=1000000,#outlier_alpha,
+            outlier_alpha=1000000,  # outlier_alpha,
             noise_scale=noise_scale,
         )
-        return np.exp(hourly_seasonality_series) * np.repeat(daily_time_series, 24)[:size] + hourly_outliers
+        return (
+            np.exp(hourly_seasonality_series) * np.repeat(daily_time_series, 24)[:size]
+            + hourly_outliers
+        )
 
     def generate_df(
         self,
