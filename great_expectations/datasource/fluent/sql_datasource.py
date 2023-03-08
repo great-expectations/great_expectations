@@ -20,6 +20,7 @@ from typing_extensions import Literal, Protocol, Self
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.datasource.fluent.cfg_sub import ConfigStr
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -820,13 +821,13 @@ class SQLDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
-    connection_string: str
+    connection_string: Union[ConfigStr, str]
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
     assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
 
     # private attrs
-    _cached_connection_string: str = pydantic.PrivateAttr("")
+    _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
     _engine: Union[sa.engine.Engine, None] = pydantic.PrivateAttr(None)
 
     # These are instance var because ClassVars can't contain Type variables. See
@@ -842,7 +843,11 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.engine.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                self._engine = sqlalchemy.create_engine(self.connection_string)
+                if isinstance(self.connection_string, ConfigStr):
+                    connection_string = self.connection_string.get_config_value()
+                else:
+                    connection_string = self.connection_string
+                self._engine = sqlalchemy.create_engine(connection_string)
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
