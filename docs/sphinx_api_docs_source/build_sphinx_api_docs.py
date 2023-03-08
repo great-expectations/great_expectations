@@ -32,11 +32,14 @@ from urllib.parse import urlparse
 import invoke
 from bs4 import BeautifulSoup
 
-from scripts.check_public_api_docstrings import (
+from docs.sphinx_api_docs_source.check_public_api_docstrings import (
     get_public_api_definitions,
     get_public_api_module_level_function_definitions,
 )
-from scripts.public_api_report import Definition, get_shortest_dotted_path
+from docs.sphinx_api_docs_source.public_api_report import (
+    Definition,
+    get_shortest_dotted_path,
+)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
@@ -65,17 +68,23 @@ class SidebarEntry:
 class SphinxInvokeDocsBuilder:
     """Utility class to support building API docs using Sphinx and Invoke."""
 
-    def __init__(self, ctx: invoke.context.Context, base_path: pathlib.Path) -> None:
+    def __init__(
+        self,
+        ctx: invoke.context.Context,
+        api_docs_source_path: pathlib.Path,
+        repo_root: pathlib.Path,
+    ) -> None:
         """Creates SphinxInvokeDocsBuilder instance.
 
         Args:
             ctx: Invoke context for use in running commands.
-            base_path: Path command is run in for use in determining relative paths.
+            api_docs_source_path: Path to the api docs source. Where sphinx-build is run, should include conf.py.
+            repo_root: Path to the repo root.
         """
         self.ctx = ctx
-        self.base_path = base_path
-        self.docs_path = base_path.parent
-        self.repo_root = self.docs_path.parent
+        self.base_path = api_docs_source_path
+        self.docs_path = api_docs_source_path.parent
+        self.repo_root = repo_root
         self.gx_path = self.repo_root / "great_expectations"
 
         self.temp_sphinx_html_dir = self.repo_root / "temp_sphinx_api_docs_build_dir"
@@ -134,11 +143,11 @@ class SphinxInvokeDocsBuilder:
     def _build_html_api_docs_in_temp_folder(self):
         """Builds html api documentation in temporary folder."""
 
-        sphinx_api_docs_source_dir = pathlib.Path.cwd()
+        sphinx_api_docs_source_dir = self.base_path
         if sphinx_api_docs_source_dir not in sys.path:
             sys.path.append(str(sphinx_api_docs_source_dir))
 
-        cmd = f"sphinx-build -M html ./ {self.temp_sphinx_html_dir} -E"
+        cmd = f"sphinx-build -M html {self.base_path} {self.temp_sphinx_html_dir} -E"
         self.ctx.run(cmd, echo=True, pty=True)
         logger.debug("Raw Sphinx HTML generated.")
 

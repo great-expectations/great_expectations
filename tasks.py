@@ -14,13 +14,13 @@ import json
 import os
 import pathlib
 import shutil
-import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Union
 
 import invoke
 from typing_extensions import Final
 
-from scripts import check_public_api_docstrings
+from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
+from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
 try:
     from tests.integration.usage_statistics import usage_stats_utils
@@ -182,7 +182,7 @@ def hooks(
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
-@invoke.task(aliases=["docstring"], iterable=("paths",))
+@invoke.task(aliases=("docstring",), iterable=("paths",))
 def docstrings(ctx: Context, paths: list[str] | None = None):
     """
     Check public API docstrings.
@@ -191,8 +191,6 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
     To pass multiple items:
         invoke docstrings -p=great_expectations/core -p=great_expectations/util.py
     """
-    scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
-    sys.path.append(str(scripts_path))
 
     if paths:
         select_paths = [pathlib.Path(p) for p in paths]
@@ -560,6 +558,54 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
     curdir = os.path.realpath(os.getcwd())  # noqa: PTH109
     exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
     if filedir != curdir:
+        raise invoke.Exit(
+            exit_message,
+            code=1,
+        )
+
+
+@invoke.task
+def docs(ctx):
+    """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="docs", correct_dir=repo_root
+    )
+    sphinx_api_docs_source_dir = repo_root / "docs" / "sphinx_api_docs_source"
+
+    doc_builder = SphinxInvokeDocsBuilder(
+        ctx=ctx, api_docs_source_path=sphinx_api_docs_source_dir, repo_root=repo_root
+    )
+
+    doc_builder.build_docs()
+
+
+@invoke.task(name="public-api")
+def public_api_task(ctx):
+    """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="public-api", correct_dir=repo_root
+    )
+
+    public_api_report.main()
+
+
+def _exit_with_error_if_not_run_from_correct_dir(
+    task_name: str, correct_dir: Union[pathlib.Path, None] = None
+) -> None:
+    """Exit if the command was not run from the correct directory."""
+    if not correct_dir:
+        correct_dir = pathlib.Path(
+            os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+        )
+    curdir = pathlib.Path(os.path.realpath(os.getcwd()))
+    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file."
+    if correct_dir != curdir:
         raise invoke.Exit(
             exit_message,
             code=1,

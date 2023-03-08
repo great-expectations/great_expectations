@@ -4,7 +4,7 @@ from typing import List, Union
 
 import pytest
 
-from scripts.public_api_report import (
+from docs.sphinx_api_docs_source.public_api_report import (
     CodeParser,
     CodeReferenceFilter,
     Definition,
