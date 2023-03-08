@@ -41,6 +41,16 @@ module.exports = {
                   id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs'
                 }
               ]
+            },
+            {
+              type: 'category',
+              label: 'Optional dependencies for SQL databases',
+              items: [
+                {
+                  type: 'doc',
+                  id: 'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases'
+                }
+              ]
             }
           ]
         },
