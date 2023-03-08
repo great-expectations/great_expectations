@@ -136,15 +136,15 @@ class LinkChecker:
         return path.replace("/", os.path.sep)
 
     def _get_absolute_path(self, path: str) -> str:
-        return os.path.join(self._docs_root, self._get_os_path(path))
+        return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
 
     def _get_relative_path(self, file: str, path: str) -> str:
         # link should be relative to the location of the current file
-        directory = os.path.dirname(file)
-        return os.path.join(directory, self._get_os_path(path))
+        directory = os.path.dirname(file)  # noqa: PTH120
+        return os.path.join(directory, self._get_os_path(path))  # noqa: PTH118
 
     def _get_docroot_path(self, path: str) -> str:
-        return os.path.join(self._docs_root, self._get_os_path(path))
+        return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
 
     def _check_absolute_link(
         self, link: str, file: str, path: str
@@ -155,7 +155,7 @@ class LinkChecker:
         md_file = self._get_absolute_path(path).rstrip("/") + ".md"
         logger.debug(f"Absolute link {link} resolved to path {md_file}")
 
-        if not os.path.isfile(md_file):
+        if not os.path.isfile(md_file):  # noqa: PTH113
             logger.info(f"Absolute link {link} in file {file} was not found")
             return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
@@ -168,7 +168,7 @@ class LinkChecker:
         logger.debug(f"Checking absolute image {link} in file {file}")
 
         image_file = self._get_absolute_path(path)
-        if not os.path.isfile(image_file):
+        if not os.path.isfile(image_file):  # noqa: PTH113
             logger.info(f"Absolute image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
         else:
@@ -183,7 +183,7 @@ class LinkChecker:
         md_file = self._get_relative_path(file, path)
         logger.debug(f"Relative link {link} resolved to path {md_file}")
 
-        if not os.path.isfile(md_file):
+        if not os.path.isfile(md_file):  # noqa: PTH113
             logger.info(f"Relative link {link} in file {file} was not found")
             return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
@@ -196,7 +196,7 @@ class LinkChecker:
         logger.debug(f"Checking relative image {link} in file {file}")
 
         image_file = self._get_relative_path(file, path)
-        if not os.path.isfile(image_file):
+        if not os.path.isfile(image_file):  # noqa: PTH113
             logger.info(f"Relative image {link} in file {file} was not found")
             return LinkReport(link, file, f"Image {image_file} not found")
         else:
@@ -209,7 +209,7 @@ class LinkChecker:
         logger.debug(f"Checking docroot link {link} in file {file}")
 
         md_file = self._get_docroot_path(path)
-        if not os.path.isfile(md_file):
+        if not os.path.isfile(md_file):  # noqa: PTH113
             logger.info(f"Docroot link {link} in file {file} was not found")
             return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
@@ -325,7 +325,7 @@ def scan_docs(
 ) -> None:
     if docs_root is None:
         docs_root = path
-    elif not os.path.isdir(docs_root):
+    elif not os.path.isdir(docs_root):  # noqa: PTH112
         click.echo(f"Docs root path: {docs_root} is not a directory")
         exit(1)
 
@@ -333,13 +333,13 @@ def scan_docs(
     result: List[LinkReport] = list()
     checker = LinkChecker(path, docs_root, site_prefix, skip_external)
 
-    if os.path.isdir(path):
+    if os.path.isdir(path):  # noqa: PTH112
         # if the path is a directory, get all .md files within it
         for file in glob.glob(f"{path}/**/*.md", recursive=True):
             report = checker.check_file(file)
             if report:
                 result.extend(report)
-    elif os.path.isfile(path):
+    elif os.path.isfile(path):  # noqa: PTH113
         # else we support checking one file at a time
         result.extend(checker.check_file(path))
     else:

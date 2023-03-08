@@ -71,13 +71,17 @@ def generate_time_series_data_and_plot(
         raise ValueError(f"Invalid grain: {grain}")
 
     df.to_csv(
-        os.path.join(file_relative_path(__file__, "data"), f"{filename}.csv"),
+        os.path.join(  # noqa: PTH118
+            file_relative_path(__file__, "data"), f"{filename}.csv"
+        ),  # noqa: PTH118
         index=None,
     )
 
     plt.plot(df.y)
     plt.savefig(
-        os.path.join(file_relative_path(__file__, "pics"), f"{filename}.png"),
+        os.path.join(  # noqa: PTH118
+            file_relative_path(__file__, "pics"), f"{filename}.png"
+        ),  # noqa: PTH118
     )
     plt.clf()
 

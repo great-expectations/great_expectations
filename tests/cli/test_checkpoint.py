@@ -1439,7 +1439,7 @@ def test_checkpoint_run_on_non_existent_validations(
 
     stdout: str = result.stdout
     assert (
-        'Checkpoint "no_validations" must contain either a batch_request or validations.'
+        'Checkpoint "no_validations" must be called with a validator or contain either a batch_request or validations.'
         in stdout
     )
 

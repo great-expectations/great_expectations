@@ -105,7 +105,7 @@ class ConfigurationBundle:
         # to all Data Contexts.
         datasource_configs: List[DatasourceConfig] = []
         for datasource_name in datasource_names:
-            datasource_config = self._context._datasource_store.retrieve_by_name(  # type: ignore[attr-defined]
+            datasource_config = self._context._datasource_store.retrieve_by_name(
                 datasource_name=datasource_name
             )
             datasource_config.name = datasource_name

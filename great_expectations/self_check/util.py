@@ -106,14 +106,14 @@ try:
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructType
 except ImportError:
-    SparkDataFrame = type(None)
-    SparkSession = None
-    StructType = None
+    SparkDataFrame = type(None)  # type: ignore[assignment,misc]
+    SparkSession = None  # type: ignore[assignment,misc]
+    StructType = None  # type: ignore[assignment,misc]
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
 except ImportError:
-    spark_DataFrame = type(None)
+    spark_DataFrame = type(None)  # type: ignore[assignment,misc]
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -3376,8 +3376,8 @@ def generate_sqlite_db_path():
         str: An absolute path to the ephemeral db within the created temporary directory.
     """
     tmp_dir = str(tempfile.mkdtemp())
-    abspath = os.path.abspath(
-        os.path.join(
+    abspath = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             tmp_dir,
             "sqlite_db"
             + "".join(

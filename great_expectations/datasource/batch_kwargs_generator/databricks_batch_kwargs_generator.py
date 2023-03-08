@@ -27,7 +27,7 @@ class DatabricksTableBatchKwargsGenerator(BatchKwargsGenerator):
             logger.error(
                 "Unable to load spark context; install optional spark dependency for support."
             )
-            self.spark = None
+            self.spark = None  # type: ignore[assignment]
 
     def get_available_data_asset_names(self):
         if self.spark is None:

@@ -70,7 +70,7 @@ def init(target_directory, view, usage_stats) -> None:  # noqa: C901 - 21
     It scaffolds directories, sets up notebooks, creates a project file, and
     appends to a `.gitignore` file.
     """
-    target_directory = os.path.abspath(target_directory)
+    target_directory = os.path.abspath(target_directory)  # noqa: PTH100
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
 
@@ -222,4 +222,6 @@ def _slack_setup(context):
 
 
 def _get_full_path_to_ge_dir(target_directory):
-    return os.path.abspath(os.path.join(target_directory, FileDataContext.GX_DIR))
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(target_directory, FileDataContext.GX_DIR)  # noqa: PTH118
+    )

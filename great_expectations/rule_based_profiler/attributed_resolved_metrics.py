@@ -32,7 +32,7 @@ try:
     from pyspark.sql import Row as pyspark_sql_Row
 except ImportError:
     logger.debug("No spark SQLContext available.")
-    pyspark_sql_Row = None
+    pyspark_sql_Row = None  # type: ignore[assignment,misc]
 
 
 def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
