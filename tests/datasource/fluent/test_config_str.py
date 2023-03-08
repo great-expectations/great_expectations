@@ -106,11 +106,8 @@ def test_config_substitution_dict(
     )
     m.config_field.config_provider = env_config_provider
 
-    # TODO: remove one of these
-    d1 = m.dict(config_provider=env_config_provider)
-    assert d1["config_field"] == "success"
-    d2 = m.dict(_substitute_config=True)
-    assert d2["config_field"] == "success"
+    d = m.dict(config_provider=env_config_provider)
+    assert d["config_field"] == "success"
 
 
 def test_config_nested_substitution_dict(

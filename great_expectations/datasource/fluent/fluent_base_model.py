@@ -54,14 +54,6 @@ class FluentBaseModel(pydantic.BaseModel):
     https://docs.pydantic.dev/usage/exporting_models/
     """
 
-    _config_provider: _ConfigurationProvider | None = pydantic.PrivateAttr(None)
-
-    def __init__(
-        self, *, _config_provider: _ConfigurationProvider | None = None, **data: Any
-    ):
-        super().__init__(**data)
-        self._config_provider = _config_provider
-
     class Config:
         extra = pydantic.Extra.forbid
 
@@ -233,7 +225,6 @@ class FluentBaseModel(pydantic.BaseModel):
         skip_defaults: bool | None = None,
         # custom
         config_provider: _ConfigurationProvider | None = None,
-        _substitute_config: bool = False,  # NOTE: or just pass the config provider?
     ) -> dict[str, Any]:
         """
         Generate a dictionary representation of the model, optionally specifying which
@@ -252,11 +243,9 @@ class FluentBaseModel(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
-        if _substitute_config or config_provider:
-            config_provider = config_provider or self._config_provider
-
+        if config_provider:
             logger.warning(
-                f"{self.__class__.__name__} - sub config\n{self._config_provider}\n"
+                f"{self.__class__.__name__}.dict() - substituting config values"
             )
             subbed_config: dict = {}
             for k, v in result.items():
