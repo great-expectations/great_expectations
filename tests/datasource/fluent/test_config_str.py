@@ -105,8 +105,6 @@ def test_config_substitution_alternate(
 def test_config_substitution_dict(
     monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
 ):
-    """TODO: maybe don't do this"""
-
     class MyClass(FluentBaseModel):
         normal_field: str
         secret_field: SecretStr
@@ -121,14 +119,44 @@ def test_config_substitution_dict(
     )
     m.config_field.config_provider = env_config_provider
 
+    # TODO: remove one of these
     d1 = m.dict(config_provider=env_config_provider)
     assert d1["config_field"] == "success"
     d2 = m.dict(_substitute_config=True)
     assert d2["config_field"] == "success"
 
 
+def test_config_nested_substitution_dict(
+    monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
+):
+    class MyClass(FluentBaseModel):
+        normal_field: str
+        secret_field: SecretStr
+        config_field: ConfigStr
+
+    monkeypatch.setenv("MY_ENV_VAR", "success")
+
+    class MyCollection(FluentBaseModel):
+        my_classes: List[MyClass] = []
+
+    MyCollection.update_forward_refs(MyClass=MyClass)
+
+    m = MyCollection(
+        my_classes=[
+            MyClass(
+                normal_field="normal",
+                secret_field="secret",  # type: ignore[arg-type]
+                config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+            )
+        ]
+    )
+
+    d = m.dict(config_provider=env_config_provider)
+    assert d["my_classes"][0]["config_field"] == "success"
+
+
 @pytest.mark.parametrize("method", ["yaml", "dict", "json"])
-def test_serialization(monkeypatch: MonkeyPatch, method: str):
+def test_serialization_returns_original(monkeypatch: MonkeyPatch, method: str):
     class MyClass(FluentBaseModel):
         normal_field: str
         secret_field: SecretStr
@@ -148,7 +176,7 @@ def test_serialization(monkeypatch: MonkeyPatch, method: str):
 
 
 @pytest.mark.parametrize("method", ["yaml", "dict", "json"])
-def test_nested_serialization(monkeypatch: MonkeyPatch, method: str):
+def test_nested_serialization_returns_original(monkeypatch: MonkeyPatch, method: str):
     class MyClass(FluentBaseModel):
         normal_field: str
         secret_field: SecretStr
