@@ -1,4 +1,4 @@
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 from contextlib import contextmanager
 from pprint import pprint
@@ -10,7 +10,6 @@ from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     BatchRequestOptions,
@@ -25,6 +24,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
     SplitterYearAndMonth,
     TableAsset,
 )
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from tests.datasource.fluent.conftest import (
     Dialect,
     MockSaEngine,

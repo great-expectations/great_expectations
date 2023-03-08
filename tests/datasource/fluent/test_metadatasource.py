@@ -1,12 +1,16 @@
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 import copy
 import inspect
-from typing import List, Type
+import logging
+import pathlib
+from pprint import pformat as pf
+from typing import ClassVar, Dict, List, Optional, Type, Union
 
 import pytest
+from pydantic import DirectoryPath, validate_arguments
 
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     BatchRequestOptions,
@@ -18,16 +22,7 @@ from great_expectations.datasource.fluent.sources import (
     TypeRegistrationError,
     _SourceFactories,
 )
-
-import logging
-import pathlib
-from pprint import pformat as pf
-from typing import ClassVar, Dict, Optional, Union
-
-from pydantic import DirectoryPath, validate_arguments
-
-from great_expectations.datasource.fluent.config import GxConfig
-
+from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 

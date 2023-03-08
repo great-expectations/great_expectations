@@ -1,4 +1,4 @@
-from __future__ import annotations  # noqa: I001
+from __future__ import annotations
 
 import logging
 from contextlib import contextmanager
@@ -12,12 +12,12 @@ from great_expectations.core.batch_spec import (
     BatchMarkers,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.datasource.fluent.interfaces import Datasource
-from great_expectations.datasource.fluent.sources import _SourceFactories
 
 logger = logging.getLogger(__name__)
 
