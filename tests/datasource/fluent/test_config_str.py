@@ -212,8 +212,8 @@ class TestSecretMasking:
         monkeypatch.setenv("MY_SECRET", "dont_serialize_me")
         m = MyClass(
             normal_field="normal",
-            secret_field="my_secret",
-            config_field=r"${MY_SECRET}",
+            secret_field="my_secret",  # type: ignore[arg-type]
+            config_field=r"${MY_SECRET}",  # type: ignore[arg-type]
         )
 
         # attach the config_provider so that config substitution is possible
