@@ -65,7 +65,7 @@ condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsN
     "'"
 )
 not_null = CaselessLiteral(".notnull()").setResultsName("notnull")
-condition = (column_name + not_null).setParseAction(_set_notnull) ^ (
+condition = (column_name + not_null).setParseAction(_set_notnull).leave_whitespace() ^ (
     column_name + ops + (fnumber ^ condition_value)
 )
 
@@ -121,6 +121,8 @@ class RowCondition(SerializableDictDot):
 
 def _parse_great_expectations_condition(row_condition: str):
     try:
+        # this is where hte problem is happening
+        # breakpoint()
         return condition.parseString(row_condition)
     except ParseException:
         raise ConditionParserError(f"unable to parse condition: {row_condition}")
@@ -174,6 +176,8 @@ def generate_condition_by_operator(column, op, value):
 
 
 def parse_condition_to_sqlalchemy(row_condition: str) -> ColumnElement:
+    # it is just the SQL alchemy portion
+    # this is where we must do something different?
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
