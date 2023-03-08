@@ -118,7 +118,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             prefix: S3 prefix
             delimiter: S3 delimiter
             max_keys: S3 max_keys (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+/-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex

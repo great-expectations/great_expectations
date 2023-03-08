@@ -140,7 +140,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "{+/-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -196,7 +196,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "{+/-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -252,7 +252,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "{+/-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -308,7 +308,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "{+/-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(

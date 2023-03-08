@@ -72,7 +72,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             name: The name of the CSV asset
             batching_regex: regex pattern that matches CSV filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "{+/-} key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/-  key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -118,7 +118,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             name: The name of the Excel asset
             batching_regex: regex pattern that matches Excel filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "{+/-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -166,7 +166,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             name: The name of the JSON asset
             batching_regex: regex pattern that matches JSON filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "{+/-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -214,7 +214,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             name: The name of the Parquet asset
             batching_regex: regex pattern that matches Parquet filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "{+/-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
