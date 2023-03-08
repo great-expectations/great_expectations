@@ -251,7 +251,7 @@ class FluentBaseModel(pydantic.BaseModel):
             skip_defaults=skip_defaults,
         )
         if _substitute_config and self._config_provider:
-            from great_expectations.datasource.fluent.cfg_sub import ConfigStr
+            from great_expectations.datasource.fluent.config_str import ConfigStr
 
             logger.warning(
                 f"{self.__class__.__name__} - sub config\n{self._config_provider}\n"
