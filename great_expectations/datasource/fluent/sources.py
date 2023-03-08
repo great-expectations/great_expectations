@@ -279,10 +279,11 @@ class _SourceFactories:
                 # using try/except because hasattr will fail to find pydantic PrivateAttrs
                 try:
                     datasource._data_context = self._data_context
-                except AttributeError:
+                except ValueError:
                     logger.debug(
-                        f'Failed to attach data context to datasource "{name}" because {datasource.__name__} has no attribute "_data_context".'
+                        f'Failed to attach data context to datasource "{name}" because {datasource} has no attribute "_data_context".'
                     )
+                    pass
                 # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
                 self._data_context._attach_datasource_to_context(datasource)
                 return datasource
