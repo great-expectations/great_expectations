@@ -566,5 +566,5 @@ stages:
               versionSpec: '3.8'
             displayName: 'Use Python 3.8'
 
-          - script: cd docs/docusaurus && bash ../build_docs
+          - script: cd docs/docusaurus && yarn install && bash ../build_docs
             name: TestBuildDocs
