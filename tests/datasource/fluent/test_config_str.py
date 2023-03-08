@@ -175,13 +175,52 @@ def test_nested_serialization_returns_original(monkeypatch: MonkeyPatch, method:
 
 class TestSecretMasking:
     def test_validation_error(self):
-        pass
+        class MyUnionFields(FluentBaseModel):
+            config_field: ConfigStr
+            dsn_field: pydantic.PostgresDsn
+            union_field: Union[ConfigStr, pydantic.PostgresDsn]
+
+        with pytest.raises(pydantic.ValidationError) as exc_info:
+            m = MyUnionFields(
+                config_field="invalid_config",  # type: ignore[arg-type]
+                dsn_field="postgress://:invalid_config@localhost",  # type: ignore[arg-type]
+                union_field="invalid_config",  # type: ignore[arg-type]
+            )
+            print(m)
+        assert "invalid_config" not in str(exc_info.value)
 
     def test_repr(self):
-        pass
+        m = MyClass(
+            normal_field="normal",
+            secret_field="secret",  # type: ignore[arg-type]
+            config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+        )
+        assert repr(m.config_field) == r"ConfigStr('${MY_ENV_VAR}')"
 
     def test_str(self):
-        pass
+        m = MyClass(
+            normal_field="normal",
+            secret_field="secret",  # type: ignore[arg-type]
+            config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+        )
+        assert str(m.config_field) == r"${MY_ENV_VAR}"
 
-    def test_serialization(self):
-        pass
+    def test_serialization(
+        self, monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
+    ):
+        monkeypatch.setenv("MY_SECRET", "dont_serialize_me")
+        m = MyClass(
+            normal_field="normal",
+            secret_field="my_secret",  # type: ignore[arg-type]
+            config_field=r"${MY_SECRET}",  # type: ignore[arg-type]
+        )
+
+        # attach the config_provider so that config substitution is possible
+        m.config_field.config_provider = env_config_provider
+
+        # but it should not actually be used
+        for dumped_str in [str(m.dict()), m.yaml(), m.json()]:
+            print(dumped_str, "\n\n")
+            assert "my_secret" not in dumped_str
+            assert "dont_serialize_me" not in dumped_str
+            assert r"${MY_SECRET}" in dumped_str
