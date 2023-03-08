@@ -1,11 +1,10 @@
 ---
-[//]: # (TODO: title: How to set up GX to work with)
+[//]: # (TODO: title: How to set up GX to work with general $TODO$)
 tag: [how-to, setup]
-keywords: [Great Expectations]
-
+[//]: # (TODO: keywords: [Great Expectations, SQL, $TODO$])
 ---
 
-[//]: # (TODO: # How to set up Great Expectations to work with)
+[//]: # (TODO: # How to set up Great Expectations to work with general $TODO$)
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
@@ -19,17 +18,15 @@ import PythonCheckVersion from '/docs/components/setup/python_environment/_pytho
 import PythonCreateVenv from '/docs/components/setup/python_environment/_python_create_venv.md'
 import TipPythonOrPython3Executable from '/docs/components/setup/python_environment/_tip_python_or_python3_executable.md'
 
-<!-- ### 3. Install GX with optional dependencies for ABS -->
-[//]: # (TODO: import InstallDependencies from 'README.md')
+<!-- ### 3. Install GX with optional dependencies for ??? -->
+import InstallDependencies from '/docs/components/setup/dependencies/_sql_install_dependencies.mdx'
 
 <!-- ### 4. Verify that GX has been installed correctly -->
 import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation.md'
 
-
-
-
 <!-- ## Next steps -->
-import AbsFurtherConfiguration from '/docs/components/setup/next_steps/_links_for_adding_azure_blob_storage_configurations_to_data_context.md'
+[//]: # (TODO: import )
+
 
 ## Introduction
 
@@ -57,14 +54,13 @@ import AbsFurtherConfiguration from '/docs/components/setup/next_steps/_links_fo
 
 <PythonCreateVenv />
 
-### 3. Install GX with optional dependencies for Azure Blob Storage
+[//]: # (TODO: ### 3. Install GX with optional dependencies for $TODO$)
 
-<AbsInstallDependencies />
+[//]: # (TODO: <InstallDependencies install_key="sqlalchemy" database_name="SQL"/>)
 
 ### 4. Verify that GX has been installed correctly
 
 <GxVerifyInstallation />
-
 
 
 [//]: # (TODO: ## Next steps)
