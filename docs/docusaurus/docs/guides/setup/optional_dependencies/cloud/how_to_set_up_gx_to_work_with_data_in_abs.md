@@ -11,7 +11,7 @@ import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
 <!-- ## Prerequisites -->
-import PrereqAbsConfiguredAnAbsAccount from '/docs/components/prerequisites/_abs_configured_an_azure_storage_account.md'
+import PrereqAbsConfiguredAnAbsAccount from '/docs/components/prerequisites/_abs_configured_an_azure_storage_account_and_kept_connection_string.md'
 
 <!-- ### 1. Check your Python version -->
 import PythonCheckVersion from '/docs/components/setup/python_environment/_python_check_version.mdx'
