@@ -1,3 +1,4 @@
+from math import ceil
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -30,6 +31,7 @@ class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
     def _generate_hourly_time_series(
         self,
         size: int,
+        hourly_seasonality: float,
         hourly_seasonality_params: Optional[List[Tuple[float, float]]] = None,
         trend_params: Optional[List[TrendParams]] = None,
         weekday_dummy_params: Optional[List[float]] = None,
@@ -51,26 +53,29 @@ class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
 
         time_range = np.arange(size)
 
-        hourly_seasonality = self._generate_hourly_seasonality(
+        hourly_seasonality_series = self._generate_hourly_seasonality(
             time_range=time_range,
             hourly_seasonality_params=hourly_seasonality_params,
-        )
+        ) * hourly_seasonality
+
+        hourly_outliers = self._generate_posneg_pareto(outlier_alpha, size)
 
         daily_time_series = self._generate_daily_time_series(
-            int(size / 24),
-            trend_params,
-            weekday_dummy_params,
-            annual_seasonality_params,
-            holiday_alpha,
-            outlier_alpha,
-            noise_scale,
+            size=ceil(size / 24),
+            trend_params=trend_params,
+            weekday_dummy_params=weekday_dummy_params,
+            annual_seasonality_params=annual_seasonality_params,
+            holiday_alpha=holiday_alpha,
+            outlier_alpha=1000000,#outlier_alpha,
+            noise_scale=noise_scale,
         )
-        return np.exp(hourly_seasonality) * np.repeat(daily_time_series, 24)
+        return np.exp(hourly_seasonality_series) * np.repeat(daily_time_series, 24)[:size] + hourly_outliers
 
     def generate_df(
         self,
         size: Optional[int] = 90 * 24,  # 90 days worth of data
         start_date: Optional[str] = "2018-01-01",
+        hourly_seasonality: float = 1.0,
         hourly_seasonality_params: Optional[List[Tuple[float, float]]] = None,
         trend_params: Optional[List[TrendParams]] = None,
         weekday_dummy_params: Optional[List[float]] = None,
@@ -105,6 +110,7 @@ class HourlyTimeSeriesGenerator(DailyTimeSeriesGenerator):
                 "ds": pd.date_range(start_date, periods=size, freq="60min"),
                 "y": self._generate_hourly_time_series(
                     size=size,
+                    hourly_seasonality=hourly_seasonality,
                     hourly_seasonality_params=hourly_seasonality_params,
                     trend_params=trend_params,
                     weekday_dummy_params=weekday_dummy_params,
