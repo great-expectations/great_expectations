@@ -44,7 +44,7 @@ def test_sqlalchemy_datasource_custom_data_asset(
 
     # We should now see updated configs
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
@@ -144,7 +144,7 @@ def test_create_sqlalchemy_datasource(data_context_parameterized_expectation_sui
 
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "uncommitted/config_variables.yml",
         ),
