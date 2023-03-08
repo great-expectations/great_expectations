@@ -24,8 +24,16 @@ import InstallDependencies from '/docs/components/setup/dependencies/_sql_instal
 <!-- ### 4. Verify that GX has been installed correctly -->
 import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation.md'
 
+<!-- ### 5. Initialize a Data Context to store your credentials -->
+import InitializeDataContextFromCli from '/docs/components/setup/data_context/_filesystem_data_context_initialize_with_cli.md'
+import VerifyDataContextInitializedFromCli from '/docs/components/setup/data_context/_filesystem_data_context_verify_initialization_from_cli.md'
+
+<!-- ### 6. Configure the `config_variables.yml` file with your credentials -->
+[//]: # (TODO: import ConfigureCredentialsInDataContext from '/docs/components/setup/dependencies/_postgresql_configure_credentials_in_config_variables_yml.md')
+
+
 <!-- ## Next steps -->
-import LinksAfterInstallingGx from '/docs/components/setup/next_steps/_links_after_installing_gx.md'
+[//]: # (TODO: import FurtherConfiguration from '/docs/components/setup/next_steps/_links_after_installing_gx.md')
 
 
 ## Introduction
@@ -62,10 +70,22 @@ import LinksAfterInstallingGx from '/docs/components/setup/next_steps/_links_aft
 
 <GxVerifyInstallation />
 
+[//]: # (TODO: ### 5. Initialize a Data Context to store your PostgreSQL credentials)
+
+<InitializeDataContextFromCli />
+
+:::info Verifying the Data Context initialized successfully
+
+<VerifyDataContextInitializedFromCli />
+
+:::
+
+[//]: # (TODO: ### 6. Configure the `config_variables.yml` file with your PostgreSQL credentials)
+
+<ConfigureCredentialsInDataContext />
 
 ## Next steps
 
-Now that you have installed GX along with the dependencies necessary for working with your source data, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX components, as well as provide you with access to GX's Python API.
+<FurtherConfiguration />
 
-<LinksAfterInstallingGx />
 
