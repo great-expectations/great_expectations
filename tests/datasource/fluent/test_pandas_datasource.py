@@ -6,6 +6,7 @@ import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
+import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
@@ -15,8 +16,10 @@ from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.pandas_datasource import (
     CSVAsset,
+    DataFrameAsset,
     TableAsset,
     _PandasDataAsset,
+    _DYNAMIC_ASSET_TYPES,
 )
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
@@ -146,7 +149,7 @@ class TestDynamicPandasAssets:
         assert type_name in PandasDatasource._type_lookup
         assert type_name in asset_class_names
 
-    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    @pytest.mark.parametrize("asset_class", _DYNAMIC_ASSET_TYPES)
     def test_add_asset_method_exists_and_is_functional(
         self, asset_class: Type[_PandasDataAsset]
     ):
@@ -178,7 +181,7 @@ class TestDynamicPandasAssets:
         # importantly check that the method creates (or attempts to create) the intended asset
         assert exc_info.value.model == asset_class
 
-    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    @pytest.mark.parametrize("asset_class", _DYNAMIC_ASSET_TYPES)
     def test_add_asset_method_signature(self, asset_class: Type[_PandasDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
@@ -207,7 +210,7 @@ class TestDynamicPandasAssets:
             assert param_name in add_asset_method_sig.parameters
             print("✅")
 
-    @pytest.mark.parametrize("asset_class", PandasDatasource.asset_types)
+    @pytest.mark.parametrize("asset_class", _DYNAMIC_ASSET_TYPES)
     def test_minimal_validation(self, asset_class: Type[_PandasDataAsset]):
         """
         These parametrized tests ensures that every `PandasDatasource` asset model does some minimal
@@ -403,18 +406,16 @@ def test_default_pandas_datasource_get_and_set(
     assert pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
 
     # ensure we overwrite the ephemeral data asset if no name is passed
-    validator = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
-    assert isinstance(validator, Validator)
+    _ = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
     assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
     assert len(pandas_datasource.assets) == 1
 
     # ensure we get an additional named asset when one is passed
     expected_csv_data_asset_name = "my_csv_asset"
-    validator = pandas_datasource.read_csv(
+    _ = pandas_datasource.read_csv(
         asset_name=expected_csv_data_asset_name,
         filepath_or_buffer=valid_file_path,
     )
-    assert isinstance(validator, Validator)
     csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name]
     assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2
@@ -428,10 +429,51 @@ def test_default_pandas_datasource_name_conflict(
         name=DEFAULT_PANDAS_DATASOURCE_NAME, class_name="PandasDatasource"
     )
     with pytest.raises(DefaultPandasDatasourceError):
-        pandas_datasource = empty_data_context.sources.pandas_default
+        _ = empty_data_context.sources.pandas_default
 
     # the datasource name is available
     empty_data_context.datasources.pop(DEFAULT_PANDAS_DATASOURCE_NAME)
     pandas_datasource = empty_data_context.sources.pandas_default
     assert isinstance(pandas_datasource, PandasDatasource)
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
+
+
+def test_dataframe_asset(empty_data_context: AbstractDataContext):
+    # validates that a dataframe object is passed
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
+
+    errors_dict = exc_info.value.errors()[0]
+    assert errors_dict["loc"][0] == "dataframe"
+
+    df = pd.DataFrame(
+        data={
+            "foo": [1, 2, 3],
+            "bar": [4, 5, 6],
+        }
+    )
+
+    # correct working behavior with read method
+    validator = empty_data_context.sources.pandas_default.read_dataframe(dataframe=df)
+    assert isinstance(validator, Validator)
+    assert isinstance(
+        empty_data_context.sources.pandas_default.assets[
+            DEFAULT_PANDAS_DATA_ASSET_NAME
+        ],
+        DataFrameAsset,
+    )
+
+    # correct working behavior with add method
+    dataframe_asset_name = "my_dataframe_asset"
+    dataframe_asset = empty_data_context.sources.pandas_default.add_dataframe_asset(
+        name=dataframe_asset_name, dataframe=df
+    )
+    assert isinstance(dataframe_asset, DataFrameAsset)
+    assert dataframe_asset.name == "my_dataframe_asset"
+    assert len(empty_data_context.sources.pandas_default.assets) == 2
+    assert all(
+        [
+            asset.dataframe.equals(df)  # type: ignore[attr-defined]
+            for asset in empty_data_context.sources.pandas_default.assets.values()
+        ]
+    )

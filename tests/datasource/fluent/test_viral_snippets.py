@@ -45,7 +45,7 @@ def fluent_config_dict(db_file) -> dict:
                         "name": "my_asset",
                         "table_name": "yellow_tripdata_sample_2019_01",
                         "type": "table",
-                        "column_splitter": {
+                        "splitter": {
                             "column_name": "pickup_datetime",
                             "method_name": "split_on_year_and_month",
                         },

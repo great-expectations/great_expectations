@@ -27,8 +27,8 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 # noinspection PyUnresolvedReferences
 
-test_root_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+test_root_path = os.path.dirname(  # noqa: PTH120
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
 
 
@@ -54,7 +54,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
         numeric_rule={
-            "profile_path": os.path.join(
+            "profile_path": os.path.join(  # noqa: PTH118
                 test_root_path,
                 "data_profiler_files",
                 "profile.pkl",
@@ -91,7 +91,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
         batch_request=batch_request,
         exclude_column_names=exclude_column_names,
         numeric_rule={
-            "profile_path": os.path.join(
+            "profile_path": os.path.join(  # noqa: PTH118
                 test_root_path,
                 "data_profiler_files",
                 "profile.pkl",

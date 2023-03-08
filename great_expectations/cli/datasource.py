@@ -270,7 +270,7 @@ class BaseDatasourceNewYamlHelper:
     def create_notebook(self, context: FileDataContext) -> str:
         """Create a datasource_new notebook and save it to disk."""
         renderer = self.get_notebook_renderer(context)
-        notebook_path = os.path.join(
+        notebook_path = os.path.join(  # noqa: PTH118
             context.root_directory,
             context.GX_UNCOMMITTED_DIR,
             "datasource_new.ipynb",

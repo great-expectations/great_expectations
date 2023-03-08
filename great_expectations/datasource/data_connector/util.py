@@ -316,13 +316,13 @@ def sanitize_prefix(text: str) -> str:
     Takes in a given user-prefix and cleans it to work with file-system traversal methods
     (i.e. add '/' to the end of a string meant to represent a directory)
     """
-    _, ext = os.path.splitext(text)
+    _, ext = os.path.splitext(text)  # noqa: PTH122
     if ext:
         # Provided prefix is a filename so no adjustment is necessary
         return text
 
     # Provided prefix is a directory (so we want to ensure we append it with '/')
-    return os.path.join(text, "")
+    return os.path.join(text, "")  # noqa: PTH118
 
 
 def sanitize_prefix_for_s3(text: str) -> str:
