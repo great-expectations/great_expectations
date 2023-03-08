@@ -330,7 +330,7 @@ def test_filesystem_data_asset_batching_regex(
         ),
     ],
 )
-def test_column_splitter(
+def test_splitter(
     empty_data_context,
     database,
     table_name,

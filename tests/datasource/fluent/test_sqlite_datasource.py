@@ -141,7 +141,7 @@ def create_sqlite_source() -> Callable[
         ),
     ],
 )
-def test_sqlite_specific_column_splitter(
+def test_sqlite_specific_splitter(
     create_sqlite_source,
     add_splitter_method_name,
     splitter_kwargs,

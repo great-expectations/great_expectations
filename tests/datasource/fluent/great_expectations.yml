@@ -12,7 +12,7 @@ fluent_datasources:
         type: table
         name: with_splitter
         table_name: another_table
-        column_splitter:
+        splitter:
               method_name: split_on_year_and_month
               column_name: my_column
       with_sorters:
