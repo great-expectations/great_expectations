@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import hashlib
 import logging
@@ -340,9 +342,9 @@ Bucket: {error}"""
             df = reader_fn(path, **reader_options)
 
         elif isinstance(batch_spec, PandasBatchSpec):
-            reader_method: str = batch_spec.reader_method
-            reader_options: dict[str, Any] = batch_spec.reader_options
-            reader_fn: Callable = self._get_reader_fn(reader_method)
+            reader_method = batch_spec.reader_method
+            reader_options = batch_spec.reader_options
+            reader_fn = self._get_reader_fn(reader_method)
             reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
                 **reader_options
             )
