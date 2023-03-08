@@ -22,6 +22,15 @@ def test_condition_parser():
     assert res["fnumber"] == "5"
 
 
+def test_condition_parser_with_spaces_in_value():
+    res = _parse_great_expectations_condition('col("pk_2") == "Two Two"')
+    assert res["column"] == "pk_2"
+    assert res["op"] == ">"
+    print(res)
+    # TODO: what should be the assertion here?:
+    # assert res["fnumber"] == "5"
+
+
 def test_parse_condition_to_spark(spark_session):
     res = parse_condition_to_spark('col("foo") > 5')
     # This is mostly a demonstrative test; it may be brittle. I do not know how to test
