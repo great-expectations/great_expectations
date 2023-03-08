@@ -406,7 +406,7 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
         data_connector_name
     ].base_directory
     titanic_csv_destination_file_path: str = str(
-        os.path.join(base_directory, "Titanic_19120414.csv")
+        os.path.join(base_directory, "Titanic_19120414.csv")  # noqa: PTH118
     )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
@@ -810,7 +810,8 @@ def test__data_source_batch_spec_passthrough(tmp_path_factory):
         tmp_path_factory.mktemp("test__data_source_v013_batch_spec_passthrough")
     )
     with open(
-        os.path.join(base_directory, "csv_with_extra_header_rows.csv"), "w"
+        os.path.join(base_directory, "csv_with_extra_header_rows.csv"),  # noqa: PTH118
+        "w",
     ) as f_:
         f_.write(
             """--- extra ---
@@ -960,7 +961,7 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_batch_request(
     # copy files into tmp directory
     taxi_file: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "test_sets",
             "taxi_yellow_tripdata_samples",
@@ -1025,7 +1026,7 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
     # copy files into tmp directory
     taxi_file: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "test_sets",
             "taxi_yellow_tripdata_samples",

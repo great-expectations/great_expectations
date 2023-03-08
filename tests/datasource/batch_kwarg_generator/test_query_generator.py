@@ -74,10 +74,10 @@ def test_partition_id(basic_sqlalchemy_datasource):
 def test_get_available_data_asset_names_for_query_path(empty_data_context):
     # create queries path
     context_path = empty_data_context.root_directory
-    query_path = os.path.join(
+    query_path = os.path.join(  # noqa: PTH118
         context_path, "datasources/mydatasource/generators/mygenerator"
     )
-    os.makedirs(query_path, exist_ok=True)
+    os.makedirs(query_path, exist_ok=True)  # noqa: PTH103
     shutil.copy(
         file_relative_path(__file__, "../../test_fixtures/dummy.sql"), query_path
     )
@@ -98,15 +98,17 @@ def test_build_batch_kwargs_for_query_path(
     generator_name = "my_generator"
     query_str = "SELECT * FROM my_table"
 
-    default_sql_files_directory = os.path.join(
+    default_sql_files_directory = os.path.join(  # noqa: PTH118
         base_directory,
         "datasources",
         basic_sqlalchemy_datasource.name,
         "generators",
         generator_name,
     )
-    os.makedirs(default_sql_files_directory)
-    with open(os.path.join(default_sql_files_directory, "example.sql"), "w") as outfile:
+    os.makedirs(default_sql_files_directory)  # noqa: PTH103
+    with open(
+        os.path.join(default_sql_files_directory, "example.sql"), "w"  # noqa: PTH118
+    ) as outfile:
         outfile.write(query_str)
 
     generator = QueryBatchKwargsGenerator(

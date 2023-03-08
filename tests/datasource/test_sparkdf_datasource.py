@@ -30,7 +30,7 @@ def test_parquet_folder_connection_path(tmp_path_factory):
             pytest.skip("Pandas version < 23 is no longer compatible with pyarrow")
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     basepath = str(tmp_path_factory.mktemp("parquet_context"))
-    df1.to_parquet(os.path.join(basepath, "test.parquet"))
+    df1.to_parquet(os.path.join(basepath, "test.parquet"))  # noqa: PTH118
 
     return basepath
 
@@ -63,7 +63,7 @@ def test_sparkdf_datasource_custom_data_asset(
 
     # We should now see updated configs
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
@@ -116,7 +116,7 @@ def test_force_reuse_spark_context(
     data = {"col1": [0, 1, 2], "col2": ["a", "b", "c"]}
 
     spark_df = spark.createDataFrame(pd.DataFrame(data))
-    tmp_parquet_filename = os.path.join(
+    tmp_parquet_filename = os.path.join(  # noqa: PTH118
         tmp_path_factory.mktemp(dataset_name).as_posix(), dataset_name
     )
     spark_df.write.format("parquet").save(tmp_parquet_filename)
@@ -249,7 +249,7 @@ def test_create_sparkdf_datasource(
 
     # Note that pipe is special in yml, so let's also check to see that it was properly serialized
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
@@ -283,7 +283,9 @@ def test_standalone_spark_parquet_datasource(
     ]
     batch = datasource.get_batch(
         batch_kwargs={
-            "path": os.path.join(test_parquet_folder_connection_path, "test.parquet")
+            "path": os.path.join(  # noqa: PTH118
+                test_parquet_folder_connection_path, "test.parquet"
+            )
         }
     )
     assert isinstance(batch, Batch)
@@ -294,7 +296,9 @@ def test_standalone_spark_parquet_datasource(
     # Limit should also work
     batch = datasource.get_batch(
         batch_kwargs={
-            "path": os.path.join(test_parquet_folder_connection_path, "test.parquet"),
+            "path": os.path.join(  # noqa: PTH118
+                test_parquet_folder_connection_path, "test.parquet"
+            ),
             "limit": 2,
         }
     )
@@ -324,7 +328,9 @@ def test_standalone_spark_csv_datasource(
     ]
     batch = datasource.get_batch(
         batch_kwargs={
-            "path": os.path.join(test_folder_connection_path_csv, "test.csv"),
+            "path": os.path.join(  # noqa: PTH118
+                test_folder_connection_path_csv, "test.csv"
+            ),
             "reader_options": {"header": True},
         }
     )
@@ -362,8 +368,8 @@ def test_standalone_spark_passthrough_datasource(
         res = batch.expect_column_to_exist("not_a_column")
         assert res.success is False
         batch.save_expectation_suite()
-        assert os.path.isfile(
-            os.path.join(
+        assert os.path.isfile(  # noqa: PTH113
+            os.path.join(  # noqa: PTH118
                 data_context_parameterized_expectation_suite.root_directory,
                 "expectations/new_suite.json",
             )
@@ -393,14 +399,19 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
     )
 
     with open(
-        os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w"
+        os.path.join(  # noqa: PTH118
+            basepath, "idonotlooklikeacsvbutiam.notrecognized"
+        ),
+        "w",
     ) as newfile:
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_batch(
             batch_kwargs={
-                "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
+                "path": os.path.join(  # noqa: PTH118
+                    basepath, "idonotlooklikeacsvbutiam.notrecognized"
+                )
             }
         )
         assert "Unable to determine reader for path" in exc.value.message
@@ -408,7 +419,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_batch(
             batch_kwargs={
-                "path": os.path.join(
+                "path": os.path.join(  # noqa: PTH118
                     basepath, "idonotlooklikeacsvbutiam.notrecognized"
                 ),
                 "reader_method": "blarg",
@@ -419,7 +430,7 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_batch(
             batch_kwargs={
-                "path": os.path.join(
+                "path": os.path.join(  # noqa: PTH118
                     basepath, "idonotlooklikeacsvbutiam.notrecognized"
                 ),
                 "reader_method": "excel",
@@ -429,7 +440,9 @@ def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):
 
     batch = datasource.get_batch(
         batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
+            "path": os.path.join(  # noqa: PTH118
+                basepath, "idonotlooklikeacsvbutiam.notrecognized"
+            ),
             "reader_method": "csv",
             "reader_options": {"header": True},
         }

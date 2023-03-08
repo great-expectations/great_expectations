@@ -1334,9 +1334,9 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
     base_directory = str(
         tmp_path_factory.mktemp("test_basic_instantiation_with_nested_directories")
     )
-    os.makedirs(os.path.join(base_directory, "foo"))
+    os.makedirs(os.path.join(base_directory, "foo"))  # noqa: PTH118, PTH103
     create_files_in_directory(
-        directory=os.path.join(base_directory, "foo"),
+        directory=os.path.join(base_directory, "foo"),  # noqa: PTH118
         file_name_list=[
             "alpha-1.csv",
             "alpha-2.csv",
@@ -1352,7 +1352,7 @@ def test_basic_instantiation_with_nested_directories(tmp_path_factory):
             "pattern": "alpha-(.*)\\.csv",
             "group_names": ["index"],
         },
-        base_directory=os.path.join(base_directory, "foo"),
+        base_directory=os.path.join(base_directory, "foo"),  # noqa: PTH118
         assets={"alpha": {}},
     )
 

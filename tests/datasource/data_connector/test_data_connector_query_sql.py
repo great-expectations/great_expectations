@@ -17,7 +17,7 @@ from great_expectations.datasource import SimpleSqlalchemyDatasource
 def create_db_and_instantiate_simple_sql_datasource():
     data_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "..",
             "test_sets",

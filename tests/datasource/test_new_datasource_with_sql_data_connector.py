@@ -114,7 +114,9 @@ def test_basic_instantiation_with_ConfiguredAssetSqlDataConnector_splitting(sa):
 
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     # This is a basic integration test demonstrating a Datasource containing a SQL data_connector
     # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
@@ -199,7 +201,9 @@ def test_instantiation_with_ConfiguredAssetSqlDataConnector_round_trip_to_config
     context: DataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     config: str = f"""
     name: my_datasource
@@ -266,7 +270,9 @@ def test_basic_instantiation_with_InferredAssetSqlDataConnector_splitting(sa):
 
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     # This is a basic integration test demonstrating an Datasource containing a SQL data_connector
     # It also shows how to instantiate a SQLite SqlAlchemyExecutionEngine
@@ -358,7 +364,9 @@ def test_instantiation_with_InferredAssetSqlDataConnector_round_trip_to_config_s
     context: DataContext = empty_data_context
     db_file: Union[bytes, str] = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     config: str = f"""
     name: my_datasource
@@ -443,7 +451,9 @@ def test_SimpleSqlalchemyDatasource(empty_data_context):
 
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     # Absolutely minimal starting config
@@ -800,7 +810,9 @@ def test_skip_inapplicable_tables(empty_data_context):
 
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     my_sql_datasource = context.test_yaml_config(
