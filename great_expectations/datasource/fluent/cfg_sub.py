@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+import logging
+from typing import TYPE_CHECKING
 
 from pydantic import SecretStr
 
 from great_expectations.core.config_substitutor import TEMPLATE_STR_REGEX
-from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
+
+LOGGER = logging.getLogger(__name__)
 
 
 class ConfigStr(SecretStr):
@@ -21,15 +23,21 @@ class ConfigStr(SecretStr):
         # or do at at access time in `get_secret_value`
         self.template_str: str = template_str
         self.config_provider: _ConfigurationProvider | None = config_provider
-        self._secret_value: str = self._config_sub(template_str)
+        # TODO: does this still make sense?
+        if self.config_provider:
+            self._secret_value = self.get_config_value()
+        else:
+            self._secret_value: str = ""
 
-    def _config_sub(self, template_str: str) -> str:
-        # TODO: do the config sub
-        return "my_real_config_value"
-
-    def get_config_value(self) -> str:
-        # alias for get_secret_value
-        return self.get_secret_value()
+    def get_config_value(
+        self, config_provider: _ConfigurationProvider | None = None
+    ) -> str:
+        config_provider = config_provider or self.config_provider
+        if not config_provider:
+            raise ValueError(
+                f"No `config_provider` present, cannot resolve '{self.template_str}'"
+            )
+        return config_provider.substitute_config(self.template_str)
 
     def _display(self) -> str:
         return str(self)
@@ -57,39 +65,3 @@ class ConfigStr(SecretStr):
         # the value returned from the previous validator
         yield cls._validate_template_str_format
         yield cls.validate
-
-
-if __name__ == "__main__":
-
-    class MyClass(FluentBaseModel):
-        normal_field: str
-        secret_field: SecretStr
-        config_field: ConfigStr
-        invalid_config_field: Optional[ConfigStr] = None
-
-    for v in MyClass.__get_validators__():
-        print(v)
-
-    m = MyClass(
-        normal_field="normal",
-        secret_field="secret",  # type: ignore[arg-type]
-        config_field=r"${MY_CONFIG}",  # type: ignore[arg-type]
-        # invalid_config_field="no template",  # type: ignore[arg-type]
-    )
-    print(m)
-    print(m.secret_field)
-    print(m.config_field)
-    assert str(m.config_field) == r"${MY_CONFIG}", str(m.config_field)
-    # TODO: dump the original value to yaml
-    print("dict\n", m.dict())
-    print(
-        "json\n",
-        m.json(),
-    )
-    # print(
-    #     "json\n",
-    #     m.json(
-    #         encoder=lambda v: v.get_secret_value() if v else None,
-    #     ),
-    # )
-    print("yaml\n", m.yaml())

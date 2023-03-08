@@ -25,6 +25,7 @@ from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
+    from great_expectations.core.config_provider import _ConfigurationProvider
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,14 @@ class FluentBaseModel(pydantic.BaseModel):
     Also prevents passing along unset kwargs to BatchSpec.
     https://docs.pydantic.dev/usage/exporting_models/
     """
+
+    _config_provider: _ConfigurationProvider | None = pydantic.PrivateAttr(None)
+
+    def __init__(
+        self, *, _config_provider: _ConfigurationProvider | None = None, **data: Any
+    ):
+        super().__init__(**data)
+        self._config_provider = _config_provider
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -221,6 +230,8 @@ class FluentBaseModel(pydantic.BaseModel):
         exclude_none: bool = False,
         # deprecated - use exclude_unset instead
         skip_defaults: bool | None = None,
+        # custom
+        _substitute_config: bool = False,  # NOTE: or just pass the config provider?
     ) -> dict[str, Any]:
         """
         Generate a dictionary representation of the model, optionally specifying which
@@ -230,7 +241,7 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
-        return super().dict(
+        result = super().dict(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -239,6 +250,19 @@ class FluentBaseModel(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
+        if _substitute_config and self._config_provider:
+            from great_expectations.datasource.fluent.cfg_sub import ConfigStr
+
+            logger.warning(
+                f"{self.__class__.__name__} - sub config\n{self._config_provider}\n"
+            )
+            subbed_config: dict = {}
+            for k, v in result.items():
+                if isinstance(v, ConfigStr):
+                    v = v.get_config_value(self._config_provider)
+                subbed_config[k] = v
+            return subbed_config
+        return result
 
     def __str__(self):
         return self.yaml()

@@ -408,7 +408,7 @@ class Datasource(
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
-            exclude=self._EXCLUDED_EXEC_ENG_ARGS
+            exclude=self._EXCLUDED_EXEC_ENG_ARGS, _substitute_config=True
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
