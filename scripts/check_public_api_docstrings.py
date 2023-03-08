@@ -108,9 +108,8 @@ def run_ruff(paths: List[pathlib.Path]) -> List[str]:
     cmds = ["ruff", "--select", "D"] + [str(p) for p in paths]
     raw_results: subprocess.CompletedProcess = subprocess.run(
         cmds,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
+        capture_output=True,
+        text=True,
     )
 
     # Check to make sure `ruff` actually ran

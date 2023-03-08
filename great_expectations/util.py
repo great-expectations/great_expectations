@@ -1094,7 +1094,7 @@ def gen_directory_tree_str(startpath):
     for root, dirs, files in tuples:
         level = root.replace(startpath, "").count(os.sep)
         indent = " " * 4 * level
-        output_str += f"{indent}{os.path.basename(root)}/\n"
+        output_str += f"{indent}{os.path.basename(root)}/\n"  # noqa: PTH119
         subindent = " " * 4 * (level + 1)
 
         files.sort()
@@ -2152,3 +2152,20 @@ def numpy_quantile(
         )
 
     return quantile
+
+
+class NotImported:
+    def __init__(self, message: str):
+        self.__dict__["gx_error_message"] = message
+
+    def __getattr__(self, attr: str) -> Any:
+        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
+
+    def __setattr__(self, key: str, value: Any) -> None:
+        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
+
+    def __call__(self, *args, **kwargs) -> Any:
+        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
+
+    def __str__(self) -> str:
+        return self.__dict__["gx_error_message"]

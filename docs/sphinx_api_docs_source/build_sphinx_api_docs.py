@@ -102,7 +102,9 @@ class SphinxInvokeDocsBuilder:
 
         self._build_html_api_docs_in_temp_folder()
 
+        logger.info("Creating mdx files from HTML for serving with docusaurus.")
         self._create_mdx_files_for_docusaurus_from_sphinx_html()
+        logger.info("Created mdx files for serving with docusaurus.")
 
         self._remove_md_stubs()
 
@@ -157,7 +159,7 @@ class SphinxInvokeDocsBuilder:
         # Read the generated html and process the content for conversion to mdx
         # Write out to .mdx file using the relative file directory structure
         for html_file_path in self._get_generated_html_file_paths():
-            logger.info(f"Processing: {str(html_file_path.absolute())}")
+            logger.debug(f"Processing: {str(html_file_path.absolute())}")
             with open(html_file_path.absolute()) as f:
 
                 html_file_contents = f.read()
@@ -170,11 +172,9 @@ class SphinxInvokeDocsBuilder:
                     sidebar_entry=self._get_sidebar_entry(html_file_path=html_file_path)
                 )
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                logger.info(f"Writing out mdx file: {str(output_path.absolute())}")
+                logger.debug(f"Writing out mdx file: {str(output_path.absolute())}")
                 with open(output_path, "w") as fout:
                     fout.write(doc_str)
-
-        logger.info("Created mdx files for serving with docusaurus.")
 
     def _get_generated_html_file_paths(self):
         """Collect html file paths from Sphinx-generated html, skipping known index paths."""
@@ -489,7 +489,13 @@ class SphinxInvokeDocsBuilder:
         dotted_import = get_shortest_dotted_path(
             definition=definition, repo_root_path=self.repo_root
         )
-        return f"""# {class_name}
+        return f"""```{{eval-rst}}
+
+:orphan:
+
+```
+
+# {class_name}
 
 ```{{eval-rst}}
 .. autoclass:: {dotted_import}
@@ -508,12 +514,19 @@ class SphinxInvokeDocsBuilder:
         dotted_path_prefix = self._get_dotted_path_prefix(definition=definition)
         file_name = dotted_path_prefix.split(".")[-1]
 
-        return f"""# {file_name}
+        return f"""```{{eval-rst}}
+
+:orphan:
+
+```
+
+# {file_name}
 
 ```{{eval-rst}}
 .. automodule:: {dotted_path_prefix}
    :members:
    :inherited-members:
+   :noindex:
 
 ```
 """
