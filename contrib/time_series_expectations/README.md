@@ -58,10 +58,11 @@ See the script that creates examples (`assets/generate_test_time_series_data.py`
 * Add SQL implementation for `expect_column_pair_values_to_match_prophet_date_model` and other row-level metrics.
 * Add Data Assistants for creating time series Expectations
 * Add better renderers for time series Expectations, including graphs produced by `altair`
+* Publish package to pypi
 
 ### Design notes on future class hierarchy
 
-As all of those use cases are realized, we imagine the full class hiereachy for time series Expectations to evolve into this:
+As all of those use cases are realized, we imagine the full class hierarchy for time series Expectations to evolve into this:
 
     *TableExpectation* (ABC)
         *BatchAggregateStatisticExpectation* (ABC)
