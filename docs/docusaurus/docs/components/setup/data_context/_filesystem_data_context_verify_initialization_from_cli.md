@@ -1,8 +1,6 @@
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-Once Great Expectations finishes executing your `great_expectations init` command, verifying that your Data Context was created is as simple as checking the contents of the folder that you ran the `init` command from.
-
-After running the `init` command, your `great_expectations` directory will contain all of the important components of a local Great Expectations deployment. This is what the directory structure looks like:
+You can verify that your Filesystem Data Context was initialized correctly by checking the contents of the folder it was initialized in. This is what the directory structure should like:
 
 - `great_expectations.yml` contains the main configuration of your deployment.
 - The `expectations` directory stores all your <TechnicalTag relative="../../" tag="expectation" text="Expectations" /> as JSON files. If you want to store them somewhere else, you can change that later.

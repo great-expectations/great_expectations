@@ -4,6 +4,4 @@ To install Great Expectations with the optional dependencies needed to work with
 python pip install great_expectations[gcp]
 ```
 
-<!-- TODO list installed packages
-This will install Great Expectations and the `bigquery` package.
--->
+This will install Great Expectations and additional packages for interacting with Google Cloud Storage.
