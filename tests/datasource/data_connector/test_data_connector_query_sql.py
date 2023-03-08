@@ -100,7 +100,7 @@ def test_data_connector_query_non_recognized_param(
     # Test 3: batch_identifiers is not dict
     with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        batch_definition_list = (
+        batch_definition_list = (  # noqa: F841
             my_sql_datasource.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
                     datasource_name="taxi_multi_batch_sql_datasource",
@@ -175,7 +175,7 @@ def test_data_connector_query_illegal_index_and_limit_combination(
     )
     with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(

@@ -192,7 +192,7 @@ def test_spark_kwargs_are_passed_through(
         dataset_name
     ).config
     assert datasource_config["spark_config"] == {}
-    assert datasource_config["force_reuse_spark_context"] == True
+    assert datasource_config["force_reuse_spark_context"] == True  # noqa: E712
 
 
 def test_create_sparkdf_datasource(
@@ -338,10 +338,12 @@ def test_standalone_spark_passthrough_datasource(
 ):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    datasource = data_context_parameterized_expectation_suite.add_datasource(
-        "spark_source",
-        module_name="great_expectations.datasource",
-        class_name="SparkDFDatasource",
+    datasource = (  # noqa: F841
+        data_context_parameterized_expectation_suite.add_datasource(
+            "spark_source",
+            module_name="great_expectations.datasource",
+            class_name="SparkDFDatasource",
+        )
     )
 
     # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the

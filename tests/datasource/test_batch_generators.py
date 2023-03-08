@@ -9,7 +9,7 @@ from great_expectations.datasource.batch_kwargs_generator import (
 try:
     from unittest import mock
 except ImportError:
-    from unittest import mock
+    from unittest import mock  # noqa: F401
 
 
 def test_file_kwargs_generator(

@@ -116,4 +116,4 @@ def test_build_batch_kwargs_for_query_path(
 
     assert isinstance(batch_kwargs, SqlAlchemyDatasourceQueryBatchKwargs)
     assert batch_kwargs.query == query_str
-    assert batch_kwargs.query_parameters == None
+    assert batch_kwargs.query_parameters == None  # noqa: E711

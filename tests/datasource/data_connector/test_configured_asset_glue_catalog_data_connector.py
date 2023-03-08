@@ -311,7 +311,7 @@ def test_get_batch_definition_list_from_batch_request(glue_titanic_catalog):
             without_partitions:
                 database_name: db_test
                 table_name: tb_titanic_with_partitions
-        """,
+        """,  # noqa: F541
     )
     my_data_connector: ConfiguredAssetAWSGlueDataCatalogDataConnector = (
         instantiate_class_from_config(

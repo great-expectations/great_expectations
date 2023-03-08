@@ -53,7 +53,7 @@ def test_subdir_reader_path_partitioning(basic_pandas_datasource, tmp_path_facto
         for kwargs in subdir_reader_generator.get_iterator(data_asset_name="asset_2")
     ]
     with pytest.raises(BatchKwargsError):
-        not_an_asset_kwargs = [
+        not_an_asset_kwargs = [  # noqa: F841
             kwargs
             for kwargs in subdir_reader_generator.get_iterator(
                 data_asset_name="not_an_asset"

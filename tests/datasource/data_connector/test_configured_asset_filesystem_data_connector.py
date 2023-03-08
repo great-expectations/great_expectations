@@ -1159,7 +1159,7 @@ def test_return_all_batch_definitions_sorted_sorter_named_that_does_not_match_gr
     )
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        my_data_connector: ConfiguredAssetFilesystemDataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
                 runtime_environment={
@@ -1220,7 +1220,7 @@ def test_return_all_batch_definitions_too_many_sorters(tmp_path_factory):
     )
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: ConfiguredAssetFilesystemDataConnector = (
+        my_data_connector: ConfiguredAssetFilesystemDataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config=my_data_connector_yaml,
                 runtime_environment={

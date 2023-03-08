@@ -169,7 +169,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(
         "md5", 2, lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[-1 * d :]
     )
 
-    conn: sa.engine.Connection = engine.connect()
+    conn: sa.engine.Connection = engine.connect()  # noqa: F841
 
     # Build a SqlAlchemyDataset using that database
     return SqlAlchemyExecutionEngine(
