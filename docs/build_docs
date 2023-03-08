@@ -31,13 +31,22 @@ echo -e "${ORANGE}Installing dev dependencies.${NC}"
 echo -e "${ORANGE}Building sphinx API docs.${NC}"
 echo "PATH vvv"
 echo $PATH
-# /opt/hostedtoolcache/Python/3.8.16/x64/bin:/opt/hostedtoolcache/Python/3.8.16/x64:/home/vsts/.local/bin:/opt/pipx_bin:/home/vsts/.cargo/bin:/home/vsts/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/vsts/.dotnet/tools:/snap/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 echo "PATH ^^^"
 PATH="./scripts:$PATH"
+PATH="scripts:$PATH"
 echo "PATH vvv"
 echo $PATH
-# /opt/hostedtoolcache/Python/3.8.16/x64/bin:/opt/hostedtoolcache/Python/3.8.16/x64:/home/vsts/.local/bin:/opt/pipx_bin:/home/vsts/.cargo/bin:/home/vsts/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/vsts/.dotnet/tools:/snap/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 echo "PATH ^^^"
+
+echo "PYTHONPATH vvv"
+echo $PYTHONPATH
+echo "PYTHONPATH ^^^"
+PYTHONPATH="./scripts:$PYTHONPATH"
+PYTHONPATH="scripts:$PYTHONPATH"
+echo "PYTHONPATH vvv"
+echo $PYTHONPATH
+echo "PYTHONPATH ^^^"
+
 
 (cd ../sphinx_api_docs_source; invoke docs)
 
