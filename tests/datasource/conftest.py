@@ -147,7 +147,9 @@ def test_cases_for_sql_data_connector_sqlite_connection_url(sa):
 
     db_file_path: str = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     return get_sqlite_connection_url(db_file_path)
@@ -169,7 +171,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(
         "md5", 2, lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[-1 * d :]
     )
 
-    conn: sa.engine.Connection = engine.connect()
+    conn: sa.engine.Connection = engine.connect()  # noqa: F841
 
     # Build a SqlAlchemyDataset using that database
     return SqlAlchemyExecutionEngine(
