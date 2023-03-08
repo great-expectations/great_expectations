@@ -24,6 +24,7 @@ from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
+from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
@@ -121,7 +122,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
         batch_definition = BatchDefinition(
             datasource_name=self.datasource.name,
-            data_connector_name="fluent",
+            data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
             batch_identifiers=IDDict(batch_request.options),
             batch_spec_passthrough=None,
@@ -294,7 +295,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
 
         batch_definition = BatchDefinition(
             datasource_name=self.datasource.name,
-            data_connector_name="experimental",
+            data_connector_name=_DATA_CONNECTOR_NAME,
             data_asset_name=self.name,
             batch_identifiers=IDDict(batch_request.options),
             batch_spec_passthrough=None,

@@ -8,8 +8,8 @@ from great_expectations.self_check.util import build_pandas_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
-test_root_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+test_root_path = os.path.dirname(  # noqa: PTH120
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
 
 
@@ -31,7 +31,7 @@ def test_data_profiler_column_profile_report_metric_pd():
         )
     )
 
-    profile_path = os.path.join(
+    profile_path = os.path.join(  # noqa: PTH118
         test_root_path,
         "data_profiler_files",
         "profile.pkl",

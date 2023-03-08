@@ -22,38 +22,38 @@
                 "$ref": "#/definitions/Sorter"
             }
         },
-        "column_splitter": {
-            "title": "Column Splitter",
+        "splitter": {
+            "title": "Splitter",
             "anyOf": [
                 {
-                    "$ref": "#/definitions/ColumnSplitterColumnValue"
+                    "$ref": "#/definitions/SplitterColumnValue"
                 },
                 {
-                    "$ref": "#/definitions/ColumnSplitterMultiColumnValue"
+                    "$ref": "#/definitions/SplitterMultiColumnValue"
                 },
                 {
-                    "$ref": "#/definitions/ColumnSplitterDividedInteger"
+                    "$ref": "#/definitions/SplitterDividedInteger"
                 },
                 {
-                    "$ref": "#/definitions/ColumnSplitterModInteger"
+                    "$ref": "#/definitions/SplitterModInteger"
                 },
                 {
-                    "$ref": "#/definitions/ColumnSplitterYear"
+                    "$ref": "#/definitions/SplitterYear"
                 },
                 {
-                    "$ref": "#/definitions/ColumnSplitterYearAndMonth"
+                    "$ref": "#/definitions/SplitterYearAndMonth"
                 },
                 {
-                    "$ref": "#/definitions/ColumnSplitterYearAndMonthAndDay"
+                    "$ref": "#/definitions/SplitterYearAndMonthAndDay"
                 },
                 {
-                    "$ref": "#/definitions/ColumnSplitterDatetimePart"
+                    "$ref": "#/definitions/SplitterDatetimePart"
                 },
                 {
-                    "$ref": "#/definitions/ColumnSplitterHashedColumn"
+                    "$ref": "#/definitions/SplitterHashedColumn"
                 },
                 {
-                    "$ref": "#/definitions/ColumnSplitterConvertedDateTime"
+                    "$ref": "#/definitions/SplitterConvertedDateTime"
                 }
             ]
         },
@@ -86,8 +86,8 @@
                 "key"
             ]
         },
-        "ColumnSplitterColumnValue": {
-            "title": "ColumnSplitterColumnValue",
+        "SplitterColumnValue": {
+            "title": "SplitterColumnValue",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -109,8 +109,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterMultiColumnValue": {
-            "title": "ColumnSplitterMultiColumnValue",
+        "SplitterMultiColumnValue": {
+            "title": "SplitterMultiColumnValue",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -135,8 +135,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterDividedInteger": {
-            "title": "ColumnSplitterDividedInteger",
+        "SplitterDividedInteger": {
+            "title": "SplitterDividedInteger",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -163,8 +163,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterModInteger": {
-            "title": "ColumnSplitterModInteger",
+        "SplitterModInteger": {
+            "title": "SplitterModInteger",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -191,8 +191,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterYear": {
-            "title": "ColumnSplitterYear",
+        "SplitterYear": {
+            "title": "SplitterYear",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -214,8 +214,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterYearAndMonth": {
-            "title": "ColumnSplitterYearAndMonth",
+        "SplitterYearAndMonth": {
+            "title": "SplitterYearAndMonth",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -237,8 +237,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterYearAndMonthAndDay": {
-            "title": "ColumnSplitterYearAndMonthAndDay",
+        "SplitterYearAndMonthAndDay": {
+            "title": "SplitterYearAndMonthAndDay",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -260,8 +260,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterDatetimePart": {
-            "title": "ColumnSplitterDatetimePart",
+        "SplitterDatetimePart": {
+            "title": "SplitterDatetimePart",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -291,8 +291,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterHashedColumn": {
-            "title": "ColumnSplitterHashedColumn",
+        "SplitterHashedColumn": {
+            "title": "SplitterHashedColumn",
             "description": "Split on hash value of a column.\n\nArgs:\n    hash_digits: The number of digits to truncate the hash to.\n    method_name: Literal[\"split_on_hashed_column\"]",
             "type": "object",
             "properties": {
@@ -319,9 +319,9 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterConvertedDateTime": {
-            "title": "ColumnSplitterConvertedDateTime",
-            "description": "A column splitter than can be used for sql engines that represents datetimes as strings.\n\nThe SQL engine that this currently supports is SQLite since it stores its datetimes as\nstrings.\nThe DatetimeColumnSplitter will also work for SQLite and may be more intuitive.",
+        "SplitterConvertedDateTime": {
+            "title": "SplitterConvertedDateTime",
+            "description": "A splitter than can be used for sql engines that represents datetimes as strings.\n\nThe SQL engine that this currently supports is SQLite since it stores its datetimes as\nstrings.\nThe DatetimeSplitter will also work for SQLite and may be more intuitive.",
             "type": "object",
             "properties": {
                 "column_name": {
