@@ -13,6 +13,14 @@ from great_expectations.core.config_provider import (
 from great_expectations.datasource.fluent.config_str import ConfigStr, SecretStr
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 
+pytestmark = pytest.mark.unit
+
+
+class MyClass(FluentBaseModel):
+    normal_field: str
+    secret_field: SecretStr
+    config_field: ConfigStr
+
 
 @pytest.fixture
 def env_config_provider() -> _ConfigurationProvider:
@@ -34,11 +42,6 @@ def test_config_provider_substitution(
 
 
 def test_config_str_validation():
-    class MyClass(FluentBaseModel):
-        normal_field: str
-        secret_field: SecretStr
-        config_field: ConfigStr
-
     with pytest.raises(pydantic.ValidationError, match="ConfigStr"):
         m = MyClass(
             normal_field="normal", secret_field="secret", config_field="invalid config"
@@ -66,11 +69,6 @@ def test_as_union_file_type(input_value, expected):
 def test_config_substitution(
     monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
 ):
-    class MyClass(FluentBaseModel):
-        normal_field: str
-        secret_field: SecretStr
-        config_field: ConfigStr
-
     monkeypatch.setenv("MY_ENV_VAR", "success")
 
     m = MyClass(
@@ -85,12 +83,6 @@ def test_config_substitution_alternate(
     monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
 ):
     """TODO: maybe don't do this"""
-
-    class MyClass(FluentBaseModel):
-        normal_field: str
-        secret_field: SecretStr
-        config_field: ConfigStr
-
     monkeypatch.setenv("MY_ENV_VAR", "success")
 
     m = MyClass(
@@ -105,11 +97,6 @@ def test_config_substitution_alternate(
 def test_config_substitution_dict(
     monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
 ):
-    class MyClass(FluentBaseModel):
-        normal_field: str
-        secret_field: SecretStr
-        config_field: ConfigStr
-
     monkeypatch.setenv("MY_ENV_VAR", "success")
 
     m = MyClass(
@@ -129,11 +116,6 @@ def test_config_substitution_dict(
 def test_config_nested_substitution_dict(
     monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
 ):
-    class MyClass(FluentBaseModel):
-        normal_field: str
-        secret_field: SecretStr
-        config_field: ConfigStr
-
     monkeypatch.setenv("MY_ENV_VAR", "success")
 
     class MyCollection(FluentBaseModel):
@@ -157,11 +139,6 @@ def test_config_nested_substitution_dict(
 
 @pytest.mark.parametrize("method", ["yaml", "dict", "json"])
 def test_serialization_returns_original(monkeypatch: MonkeyPatch, method: str):
-    class MyClass(FluentBaseModel):
-        normal_field: str
-        secret_field: SecretStr
-        config_field: ConfigStr
-
     monkeypatch.setenv("MY_ENV_VAR", "dont_serialize_me")
 
     m = MyClass(
@@ -177,11 +154,6 @@ def test_serialization_returns_original(monkeypatch: MonkeyPatch, method: str):
 
 @pytest.mark.parametrize("method", ["yaml", "dict", "json"])
 def test_nested_serialization_returns_original(monkeypatch: MonkeyPatch, method: str):
-    class MyClass(FluentBaseModel):
-        normal_field: str
-        secret_field: SecretStr
-        config_field: ConfigStr
-
     class MyCollection(FluentBaseModel):
         my_classes: List[MyClass] = []
 
