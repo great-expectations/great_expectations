@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from typing import Callable, List, Union
+
 import pydantic
 import pytest
 from pytest import MonkeyPatch
-from typing import Union, Callable
 
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
@@ -121,8 +122,33 @@ def test_serialization(monkeypatch: MonkeyPatch, method: str):
     assert r"${MY_ENV_VAR}" in dumped
 
 
-def test_nested_serialization():
-    pass
+@pytest.mark.parametrize("method", ["yaml", "dict", "json"])
+def test_nested_serialization(monkeypatch: MonkeyPatch, method: str):
+    class MyClass(FluentBaseModel):
+        normal_field: str
+        secret_field: SecretStr
+        config_field: ConfigStr
+
+    class MyCollection(FluentBaseModel):
+        my_classes: List[MyClass] = []
+
+    MyCollection.update_forward_refs(MyClass=MyClass)
+
+    monkeypatch.setenv("MY_ENV_VAR", "dont_serialize_me")
+
+    m = MyCollection(
+        my_classes=[
+            MyClass(
+                normal_field="normal",
+                secret_field="secret",  # type: ignore[arg-type]
+                config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+            )
+        ]
+    )
+    serialize_method: Callable = getattr(m, method)
+    dumped = str(serialize_method())
+    assert "dont_serialize_me" not in dumped
+    assert r"${MY_ENV_VAR}" in dumped
 
 
 class TestSecretMasking:
