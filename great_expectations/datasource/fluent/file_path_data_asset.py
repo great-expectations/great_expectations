@@ -195,7 +195,7 @@ class _FilePathDataAsset(DataAsset):
                     exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                     exclude_unset=True,
                     by_alias=True,
-                    # TODO: config sub here
+                    config_provider=self._datasource._config_provider,
                 ),
             }
             batch_spec.update(batch_spec_options)
