@@ -9,6 +9,9 @@ tag: [how-to, setup]
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
+<!-- ## Introduction -->
+import IntroInstallPythonGxAndDependencies from '/docs/components/setup/installation/_intro_python_environment_with_dependencies.mdx'
+
 <!-- ## Prerequisites -->
 
 <!-- ### 1. Check your Python version -->
@@ -38,7 +41,7 @@ import VerifyDataContextInitializedFromCli from '/docs/components/setup/data_con
 
 ## Introduction
 
-[//]: # (TODO: This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with $TODO$.)
+[//]: # (TODO:<IntroInstallPythonGxAndDependencies dependencies="$TODO$" />)
 
 ## Prerequisites
 
