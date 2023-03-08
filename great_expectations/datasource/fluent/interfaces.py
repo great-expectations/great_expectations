@@ -46,6 +46,7 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -375,6 +376,7 @@ class Datasource(
     # private attrs
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
+    _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -409,7 +411,7 @@ class Datasource(
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
-            exclude=self._EXCLUDED_EXEC_ENG_ARGS, _substitute_config=True
+            exclude=self._EXCLUDED_EXEC_ENG_ARGS, config_provider=self._config_provider
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
