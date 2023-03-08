@@ -84,7 +84,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
             if root_directory:
                 query_store_backend = {
                     "class_name": "TupleFilesystemStoreBackend",
-                    "base_directory": os.path.join(
+                    "base_directory": os.path.join(  # noqa: PTH118
                         datasource.data_context.root_directory,
                         "datasources",
                         datasource.name,

@@ -50,8 +50,8 @@ try:
     import pyspark
     from pyspark.sql import SparkSession  # noqa: F401
 except ImportError:
-    pyspark = None
-    SparkSession = None
+    pyspark = None  # type: ignore[assignment]
+    SparkSession = None  # type: ignore[assignment,misc]
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -59,7 +59,7 @@ except ImportError:
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None
+    StructType = None  # type: ignore[assignment,misc]
 
 
 try:
@@ -101,8 +101,8 @@ SCHEMAS = {
 
 if TYPE_CHECKING:
     import numpy.typing as npt
+    from pyspark.sql import SparkSession  # noqa: TCH004 # try imported above
     from ruamel.yaml.comments import CommentedMap
-
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
@@ -832,7 +832,7 @@ def get_or_create_spark_application(
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
-) -> SparkSession:
+) -> SparkSession | None:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
