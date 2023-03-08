@@ -29,6 +29,9 @@ echo -e "${ORANGE}Installing dev dependencies.${NC}"
 (cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
 echo -e "${ORANGE}Building sphinx API docs.${NC}"
+echo "PATH vvv"
+echo $PATH
+echo "PATH ^^^"
 (cd ../sphinx_api_docs_source; invoke docs)
 
 if [ "$PULL_REQUEST" == "false" ]

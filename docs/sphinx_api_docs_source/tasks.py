@@ -21,6 +21,10 @@ def docs(ctx):
     if scripts_path not in sys.path:
         sys.path.append(str(scripts_path))
 
+    print("sys.path vvv")
+    print(sys.path)
+    print("sys.path ^^^")
+
     sphinx_api_docs_source_dir = pathlib.Path.cwd()
 
     _exit_with_error_if_not_run_from_correct_dir(
