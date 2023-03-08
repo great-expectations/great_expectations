@@ -3,7 +3,7 @@ from __future__ import annotations
 import pydantic
 import pytest
 from pytest import MonkeyPatch
-from typing import Union
+from typing import Union, Callable
 
 from great_expectations.core.config_provider import (
     _ConfigurationProvider,
@@ -101,8 +101,24 @@ def test_config_substitution_alternate(
     assert m.config_field.get_config_value() == "success"
 
 
-def test_serialization():
-    pass
+@pytest.mark.parametrize("method", ["yaml", "dict", "json"])
+def test_serialization(monkeypatch: MonkeyPatch, method: str):
+    class MyClass(FluentBaseModel):
+        normal_field: str
+        secret_field: SecretStr
+        config_field: ConfigStr
+
+    monkeypatch.setenv("MY_ENV_VAR", "dont_serialize_me")
+
+    m = MyClass(
+        normal_field="normal",
+        secret_field="secret",  # type: ignore[arg-type]
+        config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+    )
+    serialize_method: Callable = getattr(m, method)
+    dumped = str(serialize_method())
+    assert "dont_serialize_me" not in dumped
+    assert r"${MY_ENV_VAR}" in dumped
 
 
 def test_nested_serialization():
