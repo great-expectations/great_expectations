@@ -50,7 +50,6 @@ class ConfigStr(SecretStr):
 
     @classmethod
     def _validate_template_str_format(cls, v):
-        print(f"_validate_template_str_format - {v}")
         if TEMPLATE_STR_REGEX.match(v):
             return v
         raise ValueError(
