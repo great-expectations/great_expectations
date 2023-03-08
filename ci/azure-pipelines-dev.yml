@@ -552,3 +552,19 @@ stages:
 
           - script: ./ci/checks/run_gx_airflow_operator_tests.sh
             name: RunAirflowProviderTests
+
+  - stage: test_build_docs
+    dependsOn: [scope_check, lint, import_ge, custom_checks]
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: test_build_docs
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
+          - script: ./docs/build_docs
+            name: TestBuildDocs
