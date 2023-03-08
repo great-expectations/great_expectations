@@ -65,6 +65,8 @@ condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsN
     "'"
 )
 not_null = CaselessLiteral(".notnull()").setResultsName("notnull")
+# leave_whitespace() is a method that I think will help, but the error currently still remains
+# https://pyparsing-docs.readthedocs.io/en/latest/HowToUsePyparsing.html is a helpful website
 condition = (column_name + not_null).setParseAction(_set_notnull).leave_whitespace() ^ (
     column_name + ops + (fnumber ^ condition_value)
 )
@@ -121,7 +123,7 @@ class RowCondition(SerializableDictDot):
 
 def _parse_great_expectations_condition(row_condition: str):
     try:
-        # this is where hte problem is happening
+        # this is where the error is happening
         # breakpoint()
         return condition.parseString(row_condition)
     except ParseException:
@@ -176,8 +178,7 @@ def generate_condition_by_operator(column, op, value):
 
 
 def parse_condition_to_sqlalchemy(row_condition: str) -> ColumnElement:
-    # it is just the SQL alchemy portion
-    # this is where we must do something different?
+    # does something different need to happen here?
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:

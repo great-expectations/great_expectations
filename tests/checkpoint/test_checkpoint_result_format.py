@@ -374,6 +374,7 @@ def test_sql_with_expectation_and_row_condition(
         checkpoint_name="my_checkpoint",
     )
     evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+    # this EVR result will contain the error
     print(evrs)
     # index_column_names: List[str] = evrs[0]["results"][0]["result"][
     #     "unexpected_index_column_names"
