@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark
 except ImportError:
-    pyspark = None
+    pyspark = None  # type: ignore[assignment]
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )

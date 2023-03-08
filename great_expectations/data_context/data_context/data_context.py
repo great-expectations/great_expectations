@@ -241,4 +241,4 @@ def _init_context_root_directory(
             else context_root_dir
         )
 
-    return os.path.abspath(os.path.expanduser(context_root_dir))
+    return os.path.abspath(os.path.expanduser(context_root_dir))  # noqa: PTH111, PTH100
