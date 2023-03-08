@@ -106,10 +106,13 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if self._azure_client is None:
+        try:
+            _ = self._get_azure_client()
+        except Exception as e:
             raise TestConnectionError(
-                "Unable to load azure.storage.blob.BlobServiceClient (it is required for SparkAzureBlobStorageDatasource)."
-            )
+                "Attempt to connect to datasource failed with the following error message: "
+                f"{str(e)}"
+            ) from e
 
         if self.assets and test_assets:
             for asset in self.assets.values():
@@ -120,6 +123,8 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         name: str,
         batching_regex: Union[re.Pattern, str],
         container: str,
+        header: bool = False,
+        infer_schema: bool = False,
         name_starts_with: str = "",
         delimiter: str = "/",
         order_by: Optional[SortersDefinition] = None,
@@ -130,6 +135,8 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
             container: container name for Microsoft Azure Blob Storage
+            header: boolean (default False) indicating whether or not first line of CSV file is header line
+            infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
             order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
@@ -141,6 +148,8 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
+            header=header,
+            inferSchema=infer_schema,
             order_by=order_by_sorters,
         )
         asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
@@ -152,7 +161,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             container=container,
             name_starts_with=name_starts_with,
             delimiter=delimiter,
-            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
+            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
         )
         asset._test_connection_error_message = (
             AzureBlobStorageDataConnector.build_test_connection_error_message(

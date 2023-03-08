@@ -30,56 +30,66 @@ def data_context_with_bad_notebooks(tmp_path_factory):
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
     custom_notebook_assets_dir = "notebook_assets"
 
-    os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(asset_config_path, "my_dag_node"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        os.path.join(  # noqa: PTH118
+            fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir,
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
-        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+        os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
 
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
     shutil.copytree(
-        os.path.join(fixture_dir, custom_notebook_assets_dir),
-        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
+        os.path.join(fixture_dir, custom_notebook_assets_dir),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", custom_notebook_assets_dir
+            )
+        ),
     )
     return get_context(context_root_dir=context_path)
 
 
 def _create_custom_notebooks_context(path, ge_yml_name):
     project_path = str(path.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
-    os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(asset_config_path, "my_dag_node"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, ge_yml_name),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        os.path.join(fixture_dir, ge_yml_name),  # noqa: PTH118
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir,
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
-        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+        os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
     return context_path
 
 
@@ -1433,11 +1443,11 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_doc
     # part of this test.
     context = titanic_data_context_no_data_docs
     root_dir = context.root_directory
-    uncommitted_dir = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir = os.path.join(root_dir, "uncommitted")  # noqa: PTH118
     suite_name = "warning"
 
     context.add_expectation_suite(suite_name)
-    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
+    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")  # noqa: PTH118
     batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
     batch = context.get_batch(batch_kwargs, suite_name)
     batch.expect_table_column_count_to_equal(1)
@@ -1479,8 +1489,10 @@ def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_doc
         batch_kwargs=json_batch_kwargs,
         usage_event="test_notebook_execution",
     )
-    edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
-    assert os.path.isfile(edit_notebook_path)
+    edit_notebook_path = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "edit_warning.ipynb"
+    )
+    assert os.path.isfile(edit_notebook_path)  # noqa: PTH113
 
     with open(edit_notebook_path) as f:
         nb = nbformat.read(f, as_version=4)

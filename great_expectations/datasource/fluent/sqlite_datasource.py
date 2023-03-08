@@ -6,12 +6,12 @@ import pydantic
 from typing_extensions import Literal, Self
 
 from great_expectations.datasource.fluent.sql_datasource import (
-    ColumnSplitter,
-    SQLDatasource,
-    _ColumnSplitterOneColumnOneParam,
+    QueryAsset as SqlQueryAsset,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    QueryAsset as SqlQueryAsset,
+    Splitter,
+    SQLDatasource,
+    _SplitterOneColumnOneParam,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset as SqlTableAsset,
@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 # See SqliteDatasource, SqliteTableAsset, and SqliteQueryAsset below.
 
 
-class ColumnSplitterHashedColumn(_ColumnSplitterOneColumnOneParam):
+class SplitterHashedColumn(_SplitterOneColumnOneParam):
     """Split on hash value of a column.
 
     Args:
@@ -62,12 +62,12 @@ class ColumnSplitterHashedColumn(_ColumnSplitterOneColumnOneParam):
         return {self.column_name: options["hash"]}
 
 
-class ColumnSplitterConvertedDateTime(_ColumnSplitterOneColumnOneParam):
-    """A column splitter than can be used for sql engines that represents datetimes as strings.
+class SplitterConvertedDateTime(_SplitterOneColumnOneParam):
+    """A splitter than can be used for sql engines that represents datetimes as strings.
 
     The SQL engine that this currently supports is SQLite since it stores its datetimes as
     strings.
-    The DatetimeColumnSplitter will also work for SQLite and may be more intuitive.
+    The DatetimeSplitter will also work for SQLite and may be more intuitive.
     """
 
     # date_format_strings syntax is documented here:
@@ -109,9 +109,7 @@ class SqliteDsn(pydantic.AnyUrl):
     host_required = False
 
 
-SqliteColumnSplitter = Union[
-    ColumnSplitter, ColumnSplitterHashedColumn, ColumnSplitterConvertedDateTime
-]
+SqliteSplitter = Union[Splitter, SplitterHashedColumn, SplitterConvertedDateTime]
 
 
 class _SQLiteAssetMixin:
@@ -119,7 +117,7 @@ class _SQLiteAssetMixin:
         self: Self, column_name: str, hash_digits: int
     ) -> Self:
         return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            ColumnSplitterHashedColumn(
+            SplitterHashedColumn(
                 method_name="split_on_hashed_column",
                 column_name=column_name,
                 hash_digits=hash_digits,
@@ -130,7 +128,7 @@ class _SQLiteAssetMixin:
         self: Self, column_name: str, date_format_string: str
     ) -> Self:
         return self._add_splitter(  # type: ignore[attr-defined]  # This is a mixin for a _SQLAsset
-            ColumnSplitterConvertedDateTime(
+            SplitterConvertedDateTime(
                 method_name="split_on_converted_datetime",
                 column_name=column_name,
                 date_format_string=date_format_string,
@@ -140,12 +138,12 @@ class _SQLiteAssetMixin:
 
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
     type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]  # override superclass value
-    column_splitter: Optional[SqliteColumnSplitter] = None  # type: ignore[assignment]  # override superclass type
+    splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
     type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]  # override superclass value
-    column_splitter: Optional[SqliteColumnSplitter] = None  # type: ignore[assignment]  # override superclass type
+    splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteDatasource(SQLDatasource):

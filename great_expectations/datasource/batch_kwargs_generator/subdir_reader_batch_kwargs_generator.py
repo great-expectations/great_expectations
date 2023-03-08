@@ -81,15 +81,18 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     def base_directory(self):
         # If base directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if os.path.isabs(self._base_directory) or self._datasource.data_context is None:
+        if (
+            os.path.isabs(self._base_directory)  # noqa: PTH117
+            or self._datasource.data_context is None
+        ):
             return self._base_directory
         else:
-            return os.path.join(
+            return os.path.join(  # noqa: PTH118
                 self._datasource.data_context.root_directory, self._base_directory
             )
 
     def get_available_data_asset_names(self):
-        if not os.path.isdir(self.base_directory):
+        if not os.path.isdir(self.base_directory):  # noqa: PTH112
             return {"names": [], "is_complete_list": True}
         known_assets = self._get_valid_file_options(base_directory=self.base_directory)
         return {"names": known_assets, "is_complete_list": True}
@@ -110,18 +113,24 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
         # If the generator asset names a single known *file*, return ONLY that
         for extension in self.known_extensions:
-            if os.path.isfile(
-                os.path.join(self.base_directory, data_asset_name + extension)
+            if os.path.isfile(  # noqa: PTH113
+                os.path.join(  # noqa: PTH118
+                    self.base_directory, data_asset_name + extension
+                )
             ):
                 return [data_asset_name]
-        if os.path.isfile(os.path.join(self.base_directory, data_asset_name)):
+        if os.path.isfile(  # noqa: PTH113
+            os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
+        ):
             return [data_asset_name]
 
         # Otherwise, subdir files are partition ids
         return [
             path
             for (path, type) in self._get_valid_file_options(
-                base_directory=os.path.join(self.base_directory, data_asset_name)
+                base_directory=os.path.join(  # noqa: PTH118
+                    self.base_directory, data_asset_name
+                )
             )
         ]
 
@@ -148,12 +157,12 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             # Find the path
             path = None
             for extension in self.known_extensions:
-                if os.path.isfile(
-                    os.path.join(
+                if os.path.isfile(  # noqa: PTH113
+                    os.path.join(  # noqa: PTH118
                         self.base_directory, data_asset_name, partition_id + extension
                     )
                 ):
-                    path = os.path.join(
+                    path = os.path.join(  # noqa: PTH118
                         self.base_directory, data_asset_name, partition_id + extension
                     )
 
@@ -163,14 +172,20 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 )
                 # Fall through to this case in the event that there is not a subdir available, or if partition_id was
                 # not provided
-                if os.path.isfile(os.path.join(self.base_directory, data_asset_name)):
-                    path = os.path.join(self.base_directory, data_asset_name)
+                if os.path.isfile(  # noqa: PTH113
+                    os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
+                ):
+                    path = os.path.join(  # noqa: PTH118
+                        self.base_directory, data_asset_name
+                    )
 
                 for extension in self.known_extensions:
-                    if os.path.isfile(
-                        os.path.join(self.base_directory, data_asset_name + extension)
+                    if os.path.isfile(  # noqa: PTH113
+                        os.path.join(  # noqa: PTH118
+                            self.base_directory, data_asset_name + extension
+                        )
                     ):
-                        path = os.path.join(
+                        path = os.path.join(  # noqa: PTH118
                             self.base_directory, data_asset_name + extension
                         )
 
@@ -199,10 +214,14 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                     and (file_option[: -len(extension)], "file") not in valid_options
                 ):
                     valid_options.append((file_option[: -len(extension)], "file"))
-                elif os.path.isdir(os.path.join(self.base_directory, file_option)):
+                elif os.path.isdir(  # noqa: PTH112
+                    os.path.join(self.base_directory, file_option)  # noqa: PTH118
+                ):
                     # Make sure there's at least one valid file inside the subdir
                     subdir_options = self._get_valid_file_options(
-                        base_directory=os.path.join(base_directory, file_option)
+                        base_directory=os.path.join(  # noqa: PTH118
+                            base_directory, file_option
+                        )
                     )
                     if (
                         len(subdir_options) > 0
@@ -217,9 +236,11 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         )
         # If the data asset is a file, then return the path.
         # Otherwise, use files in a subdir as batches
-        if os.path.isdir(os.path.join(self.base_directory, data_asset_name)):
+        if os.path.isdir(  # noqa: PTH112
+            os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
+        ):
             subdir_options = os.listdir(
-                os.path.join(self.base_directory, data_asset_name)
+                os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
             )
             batches = []
             for file_option in subdir_options:
@@ -228,7 +249,7 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                         "."
                     ):
                         batches.append(
-                            os.path.join(
+                            os.path.join(  # noqa: PTH118
                                 self.base_directory, data_asset_name, file_option
                             )
                         )
@@ -238,8 +259,10 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             )
         else:
             for extension in self.known_extensions:
-                path = os.path.join(self.base_directory, data_asset_name + extension)
-                if os.path.isfile(path):
+                path = os.path.join(  # noqa: PTH118
+                    self.base_directory, data_asset_name + extension
+                )
+                if os.path.isfile(path):  # noqa: PTH113
                     return iter(
                         [
                             self._build_batch_kwargs_from_path(
@@ -251,11 +274,13 @@ class SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             raise BatchKwargsError(
                 "No valid files found when searching {:s} using configured known_extensions: "
                 "{:s} ".format(
-                    os.path.join(self.base_directory, data_asset_name),
+                    os.path.join(self.base_directory, data_asset_name),  # noqa: PTH118
                     ", ".join(map(str, self.known_extensions)),
                 ),
                 batch_kwargs=PathBatchKwargs(
-                    path=os.path.join(self.base_directory, data_asset_name)
+                    path=os.path.join(  # noqa: PTH118
+                        self.base_directory, data_asset_name
+                    )
                 ),
             )
 

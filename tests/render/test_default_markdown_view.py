@@ -29,8 +29,8 @@ from great_expectations.validation_operators.types.validation_operator_result im
 
 @pytest.fixture()
 def validation_operator_result():
-    fixture_filename = os.path.join(
-        os.path.dirname(__file__),
+    fixture_filename = os.path.join(  # noqa: PTH118
+        os.path.dirname(__file__),  # noqa: PTH120
         "fixtures/ValidationOperatorResult_with_multiple_validation_results.json",
     )
     with open(fixture_filename) as infile:

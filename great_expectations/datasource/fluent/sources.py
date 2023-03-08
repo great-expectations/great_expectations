@@ -10,11 +10,13 @@ from typing import (
     Generator,
     List,
     NamedTuple,
+    Sequence,
     Type,
 )
 
 from typing_extensions import Final, TypeAlias
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
@@ -148,12 +150,15 @@ class _SourceFactories:
 
         datasource_type_lookup[ds_type] = ds_type_name
         logger.debug(f"'{ds_type_name}' added to `type_lookup`")
+        factory_fn.__name__ = method_name
+        public_api(factory_fn)
+
         cls.__source_factories[method_name] = factory_fn
         return ds_type_name
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
-        asset_types: List[Type[DataAsset]] = ds_type.asset_types
+        asset_types: Sequence[Type[DataAsset]] = ds_type.asset_types
 
         if not asset_types:
             logger.warning(
@@ -209,7 +214,11 @@ class _SourceFactories:
             _add_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
                 _add_asset_factory, asset_type, exclude={"type"}
             )
+            _add_asset_factory.__name__ = add_asset_factory_method_name
             setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
+
+            # add the public api decorator
+            public_api(getattr(ds_type, add_asset_factory_method_name))
 
             def _read_asset_factory(
                 self: Datasource, asset_name: str | None = None, **kwargs
