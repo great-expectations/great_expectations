@@ -19,8 +19,12 @@ class ConfigStr(SecretStr):
         template_str: str,
     ) -> None:
         self.template_str: str = template_str
+
+        # self.config_provider - allows the config provider to manually attached to the field.
+        # negating the need to pass it to `get_config_value()`
+        # TODO: this additional feature may not be worth the complication
+        # it isn't being leveraged by our internal code outside of tests
         self.config_provider: _ConfigurationProvider | None = None
-        self._secret_value: str = ""
 
     def get_secret_value(self) -> str:
         return self.get_config_value()
