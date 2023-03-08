@@ -600,10 +600,8 @@ def _exit_with_error_if_not_run_from_correct_dir(
 ) -> None:
     """Exit if the command was not run from the correct directory."""
     if not correct_dir:
-        correct_dir = pathlib.Path(
-            os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
-        )
-    curdir = pathlib.Path(os.path.realpath(os.getcwd()))
+        correct_dir = pathlib.Path(__file__).parent
+    curdir = pathlib.Path.cwd()
     exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file."
     if correct_dir != curdir:
         raise invoke.Exit(
