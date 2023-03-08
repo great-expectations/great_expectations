@@ -5,7 +5,7 @@ import inspect
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import ClassVar, Dict, List, Optional, Type, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 import pytest
 from pydantic import DirectoryPath, validate_arguments

@@ -151,6 +151,7 @@ def test_serialization_returns_original(monkeypatch: MonkeyPatch, method: str):
 
 @pytest.mark.parametrize("method", ["yaml", "dict", "json"])
 def test_nested_serialization_returns_original(monkeypatch: MonkeyPatch, method: str):
+    # TODO: fix this
     class MyCollection(FluentBaseModel):
         my_classes: List[MyClass] = []
 
@@ -182,9 +183,9 @@ class TestSecretMasking:
 
         with pytest.raises(pydantic.ValidationError) as exc_info:
             m = MyUnionFields(
-                config_field="invalid_config",  # type: ignore[arg-type]
-                dsn_field="postgress://:invalid_config@localhost",  # type: ignore[arg-type]
-                union_field="invalid_config",  # type: ignore[arg-type]
+                config_field="invalid_config",
+                dsn_field="postgress://:invalid_config@localhost",
+                union_field="invalid_config",
             )
             print(m)
         assert "invalid_config" not in str(exc_info.value)
@@ -192,16 +193,16 @@ class TestSecretMasking:
     def test_repr(self):
         m = MyClass(
             normal_field="normal",
-            secret_field="secret",  # type: ignore[arg-type]
-            config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+            secret_field="secret",
+            config_field=r"${MY_ENV_VAR}",
         )
         assert repr(m.config_field) == r"ConfigStr('${MY_ENV_VAR}')"
 
     def test_str(self):
         m = MyClass(
             normal_field="normal",
-            secret_field="secret",  # type: ignore[arg-type]
-            config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
+            secret_field="secret",
+            config_field=r"${MY_ENV_VAR}",
         )
         assert str(m.config_field) == r"${MY_ENV_VAR}"
 
@@ -211,8 +212,8 @@ class TestSecretMasking:
         monkeypatch.setenv("MY_SECRET", "dont_serialize_me")
         m = MyClass(
             normal_field="normal",
-            secret_field="my_secret",  # type: ignore[arg-type]
-            config_field=r"${MY_SECRET}",  # type: ignore[arg-type]
+            secret_field="my_secret",
+            config_field=r"${MY_SECRET}",
         )
 
         # attach the config_provider so that config substitution is possible
