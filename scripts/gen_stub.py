@@ -19,7 +19,7 @@ def print_add_asset_method_signatures(datasource_class: Type[Datasource]):
         method_name = f"add_{asset_type_name}_asset"
         method = getattr(datasource_class, method_name)
 
-        print(f"def add_{asset_type_name}_asset(")
+        print(f"def {method_name}(")
 
         signature: Signature = method.__signature__
         for name, param in signature.parameters.items():
