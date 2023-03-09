@@ -8,7 +8,7 @@ from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
+    from great_expectations.alias_types import JSONValues, PathStr
 
 logger = logging.getLogger(__name__)
 
@@ -43,12 +43,12 @@ class PandasBatchSpec(BatchSpec, metaclass=ABCMeta):
     def reader_options(self) -> dict:
         return self.get("reader_options", {})
 
-    def to_json_dict(self) -> dict[str, dict | str]:
+    def to_json_dict(self) -> dict[str, JSONValues]:
         from great_expectations.datasource.fluent.pandas_datasource import (
             _EXCLUDE_TYPES_FROM_JSON,
         )
 
-        json_dict: dict[str, dict | str] = dict()
+        json_dict: dict[str, JSONValues] = dict()
         json_dict["reader_method"] = self.reader_method
         json_dict["reader_options"] = {
             reader_option_name: reader_option
