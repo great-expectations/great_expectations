@@ -146,7 +146,6 @@ def _print_configured_asset_sql_data_connector_message(
         data_connector_name: Name of the data connector of interest.
         data_connector_type: Type of data connector to check against.
     """
-    configured_asset_data_connector_message: str
     if _is_data_connector_of_type(datasource, data_connector_name, data_connector_type):
         configured_asset_data_connector_message = f"Need to configure a new Data Asset? See how to add a new DataAsset to your {data_connector_type.__name__} here: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource/"
 
