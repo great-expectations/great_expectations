@@ -45,7 +45,7 @@ def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`
 SPACE_CHARS = " "
 column_name = Combine(
     Suppress(Literal('col("'))
-    + Word(alphas, f"{alphanums}+_-.").setResultsName("column")
+    + Word(alphas, f"{alphanums}_-.").setResultsName("column")
     + Suppress(Literal('")'))
 )
 gt = Literal(">")
