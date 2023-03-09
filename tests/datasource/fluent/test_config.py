@@ -157,6 +157,19 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
 }
 
 
+@pytest.fixture
+def sqlite_database_path() -> pathlib.Path:
+    relative_path = pathlib.Path(
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "sqlite",
+        "yellow_tripdata.db",
+    )
+    return pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+
+
 @pytest.mark.parametrize(
     "asset_dict", [{"type": "json", "orient": "records"}, {"type": "csv", "sep": "|"}]
 )
