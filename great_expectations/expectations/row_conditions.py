@@ -43,7 +43,6 @@ def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`
 
 
 SPACE_CHARS = " "
-space = Word(SPACE_CHARS, exact=1)
 column_name = Combine(
     Suppress(Literal('col("'))
     + Word(alphas, f"{alphanums}+_-.").setResultsName("column")
@@ -67,8 +66,6 @@ condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsN
     "'"
 )
 not_null = CaselessLiteral(".notnull()").setResultsName("notnull")
-# leave_whitespace() is a method that I think will help, but the error currently still remains
-# https://pyparsing-docs.readthedocs.io/en/latest/HowToUsePyparsing.html is a helpful website
 condition = (column_name + not_null).setParseAction(_set_notnull) ^ (
     column_name + ops + (fnumber ^ condition_value)
 )
