@@ -1,11 +1,11 @@
 import re
 from glob import glob
+from pathlib import Path
 
 import pkg_resources
 from setuptools import find_packages, setup
 
 import versioneer
-from pathlib import Path
 
 
 def get_extras_require():
@@ -39,7 +39,7 @@ def get_extras_require():
     # Use Path() from pathlib so we can make this section of the code OS agnostic.
     requirements_dir = "reqs"
     glob_path = Path(f"{requirements_dir}/*.txt")
-    rx_name_part = re.compile(rf"requirements-dev-(.*).txt")
+    rx_name_part = re.compile(r"requirements-dev-(.*).txt")
 
     # Loop through each requirement file and verify they are named
     # correctly and are in the right location.
