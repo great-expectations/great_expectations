@@ -604,6 +604,7 @@ def file_dc_config_file_with_substitutions(
     return config_file
 
 
+@pytest.mark.integration
 def test_config_substitution_retains_original_value_on_save(
     monkeypatch: pytest.MonkeyPatch,
     file_dc_config_file_with_substitutions: pathlib.Path,
@@ -650,6 +651,7 @@ def test_config_substitution_retains_original_value_on_save(
     assert round_tripped == original
 
 
+@pytest.mark.integration
 def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     monkeypatch: pytest.MonkeyPatch,
     sqlite_database_path: pathlib.Path,
