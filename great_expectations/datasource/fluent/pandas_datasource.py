@@ -199,6 +199,66 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
             )
 
+    def json(
+        self,
+        *,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        by_alias: bool = False,
+        # deprecated - use exclude_unset instead
+        skip_defaults: bool | None = None,
+        # Default to True to prevent serializing long configs full of unset default values
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Callable[[Any], Any] | None = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs: Any,
+    ) -> str:
+        """
+        Generate a JSON representation of the model, `include` and `exclude` arguments
+        as per `dict()`.
+
+        `encoder` is an optional function to supply as `default` to json.dumps(), other
+        arguments as per `json.dumps()`.
+
+        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
+        default.
+
+        Excludes exclude_types if found in fields.
+        """
+        exclude_types = (sqlite3.Connection,)
+        try:
+            import sqlalchemy
+
+            exclude_types = exclude_types + (sqlalchemy.engine.Engine,)
+        except ImportError:
+            sqlalchemy = NotImported()
+
+        exclude = exclude or {}
+
+        # don't check fields that should always be set
+        check_fields: set[str] = self.__fields_set__.copy().difference(
+            _FIELDS_ALWAYS_SET
+        )
+        for field in check_fields:
+            if isinstance(getattr(self, field), exclude_types):
+                # ellipsis indicates that the entire field should be excluded
+                exclude[field] = ...
+
+        return super().json(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+            **dumps_kwargs,
+        )
+
 
 _PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_csv",
@@ -396,31 +456,25 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
 
-        Excludes sqlalchemy Engines and sqlite3 Connections found in fields.
+        Excludes exclude_types if found in asset fields.
         """
         if "assets" in self.__fields_set__:
-            exclude_types_from_json = (sqlite3.Connection,)
+            exclude = exclude or {}
+            exclude_types = (sqlite3.Connection,)
             try:
                 import sqlalchemy
 
-                exclude_types_from_json = exclude_types_from_json + (
-                    sqlalchemy.engine.Engine,
-                )
+                exclude_types = exclude_types + (sqlalchemy.engine.Engine,)
             except ImportError:
                 sqlalchemy = NotImported()
-            for asset in self.assets.values():
+            for asset_name, asset in self.assets.items():
                 # don't check fields that should always be set
                 check_fields: set[str] = asset.__fields_set__.copy().difference(
                     _FIELDS_ALWAYS_SET
                 )
                 for field in check_fields:
-                    # TODO: a more appropriate approach than what was done below (using __fields_set__) would be to
-                    #       use exclude but, the excluded set is dropped by pydantic for unknown reasons between calls
-                    #       to super().super().json() and super().dict(). This is possibly a pydantic bug.
-                    # remove any field that has a sqlalchemy Engine or sqlite3 Connection
-                    # from __fields_set__ which has the effect of excluding from pydantic serialization.
-                    if isinstance(getattr(asset, field), exclude_types_from_json):
-                        asset.__fields_set__.remove(field)
+                    if isinstance(getattr(asset, field), exclude_types):
+                        exclude["assets"] = {asset_name: {field}}
 
         return super().json(
             include=include,
