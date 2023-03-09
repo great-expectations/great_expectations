@@ -8,7 +8,6 @@ import pytest
 from pydantic import ValidationError
 
 from great_expectations.datasource.fluent import SqliteDatasource
-from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 
 
