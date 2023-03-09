@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import re
 from typing import Any, Dict, List, Optional, Union
@@ -6,6 +8,7 @@ import click
 from typing_extensions import Final
 
 from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:
@@ -16,6 +19,7 @@ except (ImportError, ModuleNotFoundError):
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.datasource import (
     BaseDatasource,
+    DataConnector,
     Datasource,
     SimpleSqlalchemyDatasource,
 )
@@ -140,11 +144,13 @@ def _is_data_connector_configured_asset_sql(
     """Determine whether a data connector is a ConfiguredAssetSqlDataConnector.
 
     Args:
-        datasource:
-        data_connector_name:
+        datasource: Datasource associated with data connector of interest.
+        data_connector_name: Name of the data connector of interest.
     """
-    # TODO: Method guts
-    return True
+    data_connector: DataConnector | None = datasource.data_connectors.get(
+        data_connector_name
+    )
+    return isinstance(data_connector, ConfiguredAssetSqlDataConnector)
 
 
 def select_data_connector_name(
