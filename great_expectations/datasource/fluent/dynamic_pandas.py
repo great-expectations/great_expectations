@@ -160,7 +160,7 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
         )
     },
     # sql
-    "con": {"con": _FieldSpec(Union[ConfigStr, str], ...)},  # type: ignore[arg-type]
+    "con": {"con": _FieldSpec(Union[ConfigStr, str, Any], ...)},  # type: ignore[arg-type]
     # misc
     "filepath_or_buffer": {"filepath_or_buffer": _FieldSpec(FilePath, ...)},
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
