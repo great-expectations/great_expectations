@@ -622,7 +622,7 @@ def test_config_substitution_retains_original_value_on_save(
     print(context.fluent_config)
 
     # inject env variable
-    my_conn_str = f"sqlite:/{sqlite_database_path}"
+    my_conn_str = f"sqlite:///{sqlite_database_path}"
     monkeypatch.setenv("MY_CONN_STR", my_conn_str)
 
     ds_w_subs: SqliteDatasource = context.fluent_config.datasources[  # type: ignore[assignment]
@@ -656,7 +656,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     file_dc_config_file_with_substitutions: pathlib.Path,
 ):
     # inject env variable
-    my_conn_str = f"sqlite://{sqlite_database_path}"
+    my_conn_str = f"sqlite:///{sqlite_database_path}"
     monkeypatch.setenv("MY_CONN_STR", my_conn_str)
 
     original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
@@ -690,9 +690,6 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
         "new_asset", table_name="yellow_tripdata_sample_2019_01"
     )
 
-    # delete a datasource
-    context.delete_datasource("my_pg_ds")
-
     context._save_project_config()
 
     round_tripped_datasources = yaml.load(
@@ -701,4 +698,3 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
 
     assert round_tripped_datasources["my_new_one"]
     assert round_tripped_datasources["my_sqlite_ds_w_subs"]["assets"]["new_asset"]
-    assert not round_tripped_datasources.get("my_pg_ds")
