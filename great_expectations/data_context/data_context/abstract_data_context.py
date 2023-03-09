@@ -2020,10 +2020,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             The requested Checkpoint.
 
         Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exist.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+
+        if not name and not id:
+            raise ValueError(f"name and id cannot both be None")
+
         del ge_cloud_id
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -2059,7 +2063,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
 
         Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exist.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)

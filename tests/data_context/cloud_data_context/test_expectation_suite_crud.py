@@ -439,7 +439,7 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 @pytest.mark.unit
 @pytest.mark.cloud
 def test_get_expectation_suite_no_identifier_raises_error(
-    empty_base_data_context_in_cloud_mode: CloudDataContext, mocked_404_response
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
