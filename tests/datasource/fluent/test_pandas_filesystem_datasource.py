@@ -195,7 +195,7 @@ class TestDynamicPandasAssets:
         assert exc_info.value.model == asset_class
 
     @pytest.mark.parametrize("asset_class", PandasFilesystemDatasource.asset_types)
-    def test_add_asset_method_signaturel(self, asset_class: Type[_FilePathDataAsset]):
+    def test_add_asset_method_signature(self, asset_class: Type[_FilePathDataAsset]):
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
