@@ -89,7 +89,7 @@ stages:
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       steps:
         - script: |
-            python scripts/public_api_report.py
+            python docs/sphinx_api_docs_source/public_api_report.py
           name: PublicAPIReport
 
   - stage: docusaurus_tests

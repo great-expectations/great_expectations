@@ -16,7 +16,7 @@ import subprocess
 from dataclasses import dataclass
 from typing import List, Set, Tuple
 
-from scripts.public_api_report import (
+from .public_api_report import (
     CodeParser,
     Definition,
     FileContents,
@@ -89,7 +89,8 @@ def parse_ruff_errors(raw_errors: List[str]) -> List[DocstringError]:
 
 
 def _repo_root() -> pathlib.Path:
-    return pathlib.Path(__file__).parent.parent
+    repo_root_path = pathlib.Path(__file__).parents[2]
+    return repo_root_path
 
 
 def _repo_relative_filepath(filepath: pathlib.Path) -> pathlib.Path:
