@@ -443,10 +443,8 @@ def test_get_expectation_suite_no_identifier_raises_error(
 ) -> None:
     context = empty_base_data_context_in_cloud_mode
 
-    suite_id = None
-
     with pytest.raises(ValueError):
-        context.get_expectation_suite(ge_cloud_id=suite_id)
+        context.get_expectation_suite()
 
 
 @pytest.mark.unit

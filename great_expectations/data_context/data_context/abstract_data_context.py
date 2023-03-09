@@ -2026,7 +2026,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
 
         if not name and not id:
-            raise ValueError(f"name and id cannot both be None")
+            raise ValueError("name and id cannot both be None")
 
         del ge_cloud_id
 
