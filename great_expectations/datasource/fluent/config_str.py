@@ -20,23 +20,7 @@ class ConfigStr(SecretStr):
     ) -> None:
         self.template_str: str = template_str
 
-        # self.config_provider - allows the config provider to manually attached to the field.
-        # negating the need to pass it to `get_config_value()`
-        # TODO: this additional feature may not be worth the complication
-        # it isn't being leveraged by our internal code outside of tests
-        self.config_provider: _ConfigurationProvider | None = None
-
-    def get_secret_value(self) -> str:
-        return self.get_config_value()
-
-    def get_config_value(
-        self, config_provider: _ConfigurationProvider | None = None
-    ) -> str:
-        config_provider = config_provider or self.config_provider
-        if not config_provider:
-            raise ValueError(
-                f"No `config_provider` present, cannot resolve '{self.template_str}'"
-            )
+    def get_config_value(self, config_provider: _ConfigurationProvider) -> str:
         return config_provider.substitute_config(self.template_str)
 
     def _display(self) -> str:

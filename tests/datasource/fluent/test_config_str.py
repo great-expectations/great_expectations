@@ -79,21 +79,6 @@ def test_config_substitution(
     assert m.config_field.get_config_value(env_config_provider) == "success"
 
 
-def test_config_substitution_alternate(
-    monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
-):
-    """TODO: maybe don't do this"""
-    monkeypatch.setenv("MY_ENV_VAR", "success")
-
-    m = MyClass(
-        normal_field="normal",
-        secret_field="secret",  # type: ignore[arg-type]
-        config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
-    )
-    m.config_field.config_provider = env_config_provider
-    assert m.config_field.get_config_value() == "success"
-
-
 def test_config_substitution_dict(
     monkeypatch: MonkeyPatch, env_config_provider: _ConfigurationProvider
 ):
