@@ -14,6 +14,7 @@ from pyparsing import (
     Regex,
     Suppress,
     Word,
+    ZeroOrMore,
     alphanums,
     alphas,
 )
@@ -42,9 +43,14 @@ def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`
     t["notnull"] = True
 
 
+SPACE_CHARS = " \t"
+DELIMITER_CHAR = "-_"
+word = Word(alphas, f"{alphanums}+_-.")
+delim = Word(DELIMITER_CHAR, exact=1)
+space = Word(SPACE_CHARS, exact=1)
 column_name = Combine(
     Suppress(Literal('col("'))
-    + Word(alphas, f"{alphanums}_.").setResultsName("column")
+    + Combine(word + ZeroOrMore(word + delim)).setResultsName("column")
     + Suppress(Literal('")'))
 )
 gt = Literal(">")
@@ -56,18 +62,19 @@ ne = Literal("!=")
 ops = (gt ^ lt ^ ge ^ le ^ eq ^ ne).setResultsName("op")
 fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
 punctuation_without_apostrophe = punctuation.replace('"', "").replace("'", "")
-condition_value_chars = alphanums + punctuation_without_apostrophe
-condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsName(
+condition_value_chars = alphanums + punctuation_without_apostrophe + SPACE_CHARS
+condition_words = Suppress('"') + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
 ) + Suppress('"') ^ Suppress("'") + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
 ) + Suppress(
     "'"
 )
+condition_value = Combine(condition_words + ZeroOrMore(word + space))
 not_null = CaselessLiteral(".notnull()").setResultsName("notnull")
 # leave_whitespace() is a method that I think will help, but the error currently still remains
 # https://pyparsing-docs.readthedocs.io/en/latest/HowToUsePyparsing.html is a helpful website
-condition = (column_name + not_null).setParseAction(_set_notnull).leave_whitespace() ^ (
+condition = (column_name + not_null).setParseAction(_set_notnull) ^ (
     column_name + ops + (fnumber ^ condition_value)
 )
 
