@@ -23,7 +23,7 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
     JSONAsset,
-    _FilePathDataAsset,  # type: ignore[attr-define] # is defined but private
+    _FilePathDataAsset,  # type: ignore[attr-defined] # is defined but private
 )
 from great_expectations.datasource.fluent.sources import _get_field_details
 
