@@ -20,7 +20,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (  # type: ignore[attr-defined] # is defined but private
     CSVAsset,
     JSONAsset,
     _FilePathDataAsset,
@@ -54,7 +54,7 @@ def pandas_filesystem_datasource() -> PandasFilesystemDatasource:
         .parent.joinpath(base_directory_rel_path)
         .resolve(strict=True)
     )
-    return PandasFilesystemDatasource(
+    return PandasFilesystemDatasource(  # type: ignore[call-arg]
         name="pandas_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
@@ -179,7 +179,7 @@ class TestDynamicPandasAssets:
 
         assert method_name in PandasFilesystemDatasource.__dict__
 
-        ds = PandasFilesystemDatasource(
+        ds = PandasFilesystemDatasource(  # type: ignore[call-arg]
             name="ds_for_testing_add_asset_methods",
             base_directory=pathlib.Path.cwd(),
         )
@@ -199,7 +199,7 @@ class TestDynamicPandasAssets:
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
-        ds = PandasFilesystemDatasource(
+        ds = PandasFilesystemDatasource(  # type: ignore[call-arg]
             name="ds_for_testing_add_asset_methods",
             base_directory=pathlib.Path.cwd(),
         )
@@ -289,7 +289,7 @@ class TestDynamicPandasAssets:
         extra_kwargs: dict,
     ):
         batch_request = (
-            empty_data_context.sources.add_pandas_filesystem(  # type: ignore[attr-defined] # .build_batch_request
+            empty_data_context.sources.add_pandas_filesystem(  # .build_batch_request
                 "my_pandas",
                 base_directory=csv_path,
             )
@@ -301,7 +301,7 @@ class TestDynamicPandasAssets:
             .build_batch_request({"year": "2018"})
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)
+            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # BatchRequest vs Optional[BatchRequestBase]
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")
@@ -324,8 +324,8 @@ def test_add_csv_asset_to_datasource(
     asset = pandas_filesystem_datasource.add_csv_asset(
         name="csv_asset",
     )
-    assert asset.name == "csv_asset"  # type: ignore[attr-defined]
-    m1 = asset.batching_regex.match("this_can_be_named_anything.csv")  # type: ignore[attr-defined]
+    assert asset.name == "csv_asset"
+    m1 = asset.batching_regex.match("this_can_be_named_anything.csv")
     assert m1 is not None
 
 
@@ -337,10 +337,10 @@ def test_add_csv_asset_with_batching_regex_to_datasource(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
     )
-    assert asset.name == "csv_asset"  # type: ignore[attr-defined]
-    assert asset.batching_regex.match("random string") is None  # type: ignore[attr-defined]
-    assert asset.batching_regex.match("yellow_tripdata_sample_11D1-22.csv") is None  # type: ignore[attr-defined]
-    m1 = asset.batching_regex.match("yellow_tripdata_sample_1111-22.csv")  # type: ignore[attr-defined]
+    assert asset.name == "csv_asset"
+    assert asset.batching_regex.match("random string") is None
+    assert asset.batching_regex.match("yellow_tripdata_sample_11D1-22.csv") is None
+    m1 = asset.batching_regex.match("yellow_tripdata_sample_1111-22.csv")
     assert m1 is not None
 
 
@@ -366,7 +366,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
     )
-    options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    options = asset.batch_request_options_template()
     assert options == {
         "path": None,
         "batch_request_param_1": None,
@@ -382,7 +382,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
-    options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    options = asset.batch_request_options_template()
     assert options == {"path": None, "year": None, "month": None}
 
 
@@ -394,7 +394,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
     )
-    options = asset.batch_request_options_template()  # type: ignore[attr-defined]
+    options = asset.batch_request_options_template()
     assert options == {"path": None, "batch_request_param_1": None, "month": None}
 
 
@@ -408,7 +408,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # year is an int which will raise an error
-        asset.build_batch_request({"year": 2018, "month": "04"})  # type: ignore[attr-defined]
+        asset.build_batch_request({"year": 2018, "month": "04"})
 
 
 @pytest.mark.unit
@@ -419,12 +419,12 @@ def test_get_batch_list_from_fully_specified_batch_request(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
-    request = asset.build_batch_request({"year": "2018", "month": "04"})  # type: ignore[attr-defined]
-    batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
+    request = asset.build_batch_request({"year": "2018", "month": "04"})
+    batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
     assert batch.batch_request.datasource_name == pandas_filesystem_datasource.name
-    assert batch.batch_request.data_asset_name == asset.name  # type: ignore[attr-defined]
+    assert batch.batch_request.data_asset_name == asset.name
 
     path = "yellow_tripdata_sample_2018-04.csv"
     assert batch.batch_request.options == {"path": path, "year": "2018", "month": "04"}
@@ -457,8 +457,8 @@ def test_get_batch_list_from_partially_specified_batch_request(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
-    request = asset.build_batch_request({"year": "2018"})  # type: ignore[attr-defined]
-    batches = asset.get_batch_list_from_batch_request(request)  # type: ignore[attr-defined]
+    request = asset.build_batch_request({"year": "2018"})
+    batches = asset.get_batch_list_from_batch_request(request)
     assert (len(batches)) == 12
     batch_filenames = [pathlib.Path(batch.metadata["path"]).stem for batch in batches]
     assert set(files_for_2018) == set(batch_filenames)
@@ -530,7 +530,7 @@ def test_pandas_sorter(
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=order_by,
     )
-    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())  # type: ignore[attr-defined]
+    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
     assert (len(batches)) == 36
 
     @dataclass(frozen=True)
@@ -584,7 +584,7 @@ def datasource_test_connection_error_messages(
     request,
 ) -> tuple[PandasFilesystemDatasource, TestConnectionError]:
     batching_regex, test_connection_error = request.param(csv_path=csv_path)
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
         batching_regex=batching_regex,
     )
