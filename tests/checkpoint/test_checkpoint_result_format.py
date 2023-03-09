@@ -12,7 +12,6 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context import EphemeralDataContext
 from great_expectations.data_context.data_context.data_context import (
     DataContext,
     FileDataContext,
