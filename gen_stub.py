@@ -19,12 +19,19 @@ def print_add_asset_method_signatures(datasource_class: Type[Datasource]):
             if param.kind == Parameter.VAR_KEYWORD:
                 print(f") -> {asset_type.__name__}\n\t...")
                 continue
-            print(f"\t{name}: {param.annotation}", end="")
+
+            annotation = param.annotation
+            if getattr(annotation, "__name__", None):
+                annotation = annotation.__name__
+            print(f"\t{name}: {annotation}", end="")
+
             if param.kind == Parameter.KEYWORD_ONLY:
                 if param.default is Parameter.empty:
                     default = "..."
                 else:
                     default = param.default
+                    if isinstance(default, str):
+                        default = f"'{default}'"
                 print(f" = {default}", end="")
             print(",")
 
