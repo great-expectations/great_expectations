@@ -843,7 +843,9 @@ class SQLDatasource(Datasource):
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 if isinstance(self.connection_string, ConfigStr):
-                    connection_string = self.connection_string.get_config_value()
+                    connection_string = self.connection_string.get_config_value(
+                        self._config_provider  # type: ignore[arg-type] # could be none
+                    )
                 else:
                     connection_string = self.connection_string
                 self._engine = sqlalchemy.create_engine(connection_string)

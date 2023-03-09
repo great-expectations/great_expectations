@@ -89,7 +89,6 @@ def test_config_substitution_dict(
         secret_field="secret",  # type: ignore[arg-type]
         config_field=r"${MY_ENV_VAR}",  # type: ignore[arg-type]
     )
-    m.config_field.config_provider = env_config_provider
 
     d = m.dict(config_provider=env_config_provider)
     assert d["config_field"] == "success"
@@ -200,9 +199,6 @@ class TestSecretMasking:
             secret_field="my_secret",  # type: ignore[arg-type]
             config_field=r"${MY_SECRET}",  # type: ignore[arg-type]
         )
-
-        # attach the config_provider so that config substitution is possible
-        m.config_field.config_provider = env_config_provider
 
         # but it should not actually be used
         for dumped_str in [str(m.dict()), m.yaml(), m.json()]:
