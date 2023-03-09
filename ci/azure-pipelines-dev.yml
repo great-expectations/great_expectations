@@ -164,7 +164,7 @@ stages:
     - job: public_api_report
       steps:
         - script: |
-            python scripts/public_api_report.py
+            python docs/sphinx_api_docs_source/public_api_report.py
           name: PublicAPIReport
 
   - stage: import_ge
