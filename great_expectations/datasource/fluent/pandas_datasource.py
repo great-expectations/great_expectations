@@ -536,7 +536,10 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_csv_asset(
-        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
+        self,
+        name: str,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
         asset = CSVAsset(
             name=name,
@@ -547,7 +550,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_csv(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -586,7 +589,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_feather_asset(
-        self, name: str, path: pydantic.FilePath, **kwargs
+        self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
     ) -> FeatherAsset:  # type: ignore[valid-type]
         asset = FeatherAsset(
             name=name,
@@ -597,7 +600,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_feather(
         self,
-        path: pydantic.FilePath,
+        path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -686,7 +689,10 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_json_asset(
-        self, name: str, path_or_buf: pydantic.Json | pydantic.FilePath, **kwargs
+        self,
+        name: str,
+        path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
         asset = JSONAsset(
             name=name,
@@ -697,7 +703,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_json(
         self,
-        path_or_buf: pydantic.Json | pydantic.FilePath,
+        path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -711,7 +717,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_orc_asset(
-        self, name: str, path: pydantic.FilePath, **kwargs
+        self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
     ) -> ORCAsset:  # type: ignore[valid-type]
         asset = ORCAsset(
             name=name,
@@ -722,7 +728,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_orc(
         self,
-        path: pydantic.FilePath,
+        path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -736,7 +742,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_parquet_asset(
-        self, name: str, path: pydantic.FilePath, **kwargs
+        self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
     ) -> ParquetAsset:  # type: ignore[valid-type]
         asset = ParquetAsset(
             name=name,
@@ -747,7 +753,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_parquet(
         self,
-        path: pydantic.FilePath,
+        path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -761,7 +767,10 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_pickle_asset(
-        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
+        self,
+        name: str,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> PickleAsset:  # type: ignore[valid-type]
         asset = PickleAsset(
             name=name,
@@ -772,7 +781,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_pickle(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -786,7 +795,10 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_sas_asset(
-        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
+        self,
+        name: str,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> SASAsset:  # type: ignore[valid-type]
         asset = SASAsset(
             name=name,
@@ -797,7 +809,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_sas(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -928,7 +940,10 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_stata_asset(
-        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
+        self,
+        name: str,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> StataAsset:  # type: ignore[valid-type]
         asset = StataAsset(
             name=name,
@@ -939,7 +954,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_stata(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -953,7 +968,10 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_table_asset(
-        self, name: str, filepath_or_buffer: pydantic.FilePath, **kwargs
+        self,
+        name: str,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        **kwargs,
     ) -> TableAsset:  # type: ignore[valid-type]
         asset = TableAsset(
             name=name,
@@ -964,7 +982,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_table(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -978,7 +996,7 @@ class PandasDatasource(_PandasDatasource):
         return self._get_validator(asset=asset)
 
     def add_xml_asset(
-        self, name: str, path_or_buffer: pydantic.FilePath, **kwargs
+        self, name: str, path_or_buffer: pydantic.FilePath | pydantic.AnyUrl, **kwargs
     ) -> XMLAsset:  # type: ignore[valid-type]
         asset = XMLAsset(
             name=name,
@@ -989,7 +1007,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_xml(
         self,
-        path_or_buffer: pydantic.FilePath,
+        path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
