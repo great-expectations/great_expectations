@@ -139,7 +139,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex

@@ -35,7 +35,7 @@ def test__get_full_file_path_pandas(fs):
         fs.add_real_file(google_cred_file)
 
     base_directory: str = "/dbfs/great_expectations"
-    base_directory_colon: str = "dbfs:/great_expectations"
+    base_directory_colon: str = "dbfs:/great_expectations"  # noqa: F841
     fs.create_dir(base_directory)
 
     create_files_in_directory(
