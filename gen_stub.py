@@ -1,30 +1,32 @@
-import inspect
-from great_expectations.datasource.fluent import PandasFilesystemDatasource
+from inspect import Parameter, Signature
+from typing import Type
 
-_DEFAULT_ARGS = """
-        self,
-        name: str,
-        batching_regex: Optional[Union[re.Pattern, str]] = ...,
-        glob_directive: str = ...,
-        order_by: Optional[SortersDefinition] = ...,
-"""
+from great_expectations.datasource.fluent import Datasource, PandasFilesystemDatasource
 
-type_lookup = PandasFilesystemDatasource._type_lookup
 
-for asset_type_name in type_lookup.type_names():
-    asset_type = type_lookup[asset_type_name]
-    method_name = f"add_{asset_type_name}_asset"
-    method = getattr(PandasFilesystemDatasource, method_name)
+def print_add_asset_method_signatures(datasource_class: Type[Datasource]):
+    type_lookup = datasource_class._type_lookup
 
-    print(f"def add_{asset_type_name}_asset(")
+    for asset_type_name in type_lookup.type_names():
+        asset_type = type_lookup[asset_type_name]
+        method_name = f"add_{asset_type_name}_asset"
+        method = getattr(PandasFilesystemDatasource, method_name)
 
-    # print(method.__signature__)
+        print(f"def add_{asset_type_name}_asset(")
 
-    # asset_sig_args = str(asset_type.__signature__).split(", ")
-    # for i, arg in enumerate(asset_sig_args[5:]):
-    #     print(f"{i}\t{arg}")
-    # print(asset_sig_args)
+        signature: Signature = method.__signature__
+        for name, param in signature.parameters.items():
+            if param.kind == Parameter.VAR_KEYWORD:
+                print(f") -> {asset_type.__name__}\n\t...")
+                continue
+            print(f"\t{name}: {param.annotation}", end="")
+            if param.kind == Parameter.KEYWORD_ONLY:
+                if param.default is Parameter.empty:
+                    default = "..."
+                else:
+                    default = param.default
+                print(f" = {default}", end="")
+            print(",")
 
-    for name, param in method.__signature__.parameters.items():
-        print(f"\t{param}", end="")
-        print(",")
+
+print_add_asset_method_signatures(PandasFilesystemDatasource)
