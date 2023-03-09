@@ -233,7 +233,7 @@ def test_pandas_happy_path_statistics_data_assistant(empty_data_context) -> None
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "..",
             "..",
@@ -380,7 +380,7 @@ def test_spark_happy_path_statistics_data_assistant(
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "..",
             "..",

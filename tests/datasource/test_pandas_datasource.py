@@ -45,7 +45,9 @@ def test_standalone_pandas_datasource(test_folder_connection_path_csv):
         "subdir_reader": {"names": [("test", "file")], "is_complete_list": True}
     }
     manual_batch_kwargs = PathBatchKwargs(
-        path=os.path.join(str(test_folder_connection_path_csv), "test.csv")
+        path=os.path.join(  # noqa: PTH118
+            str(test_folder_connection_path_csv), "test.csv"
+        )
     )
 
     generator = datasource.get_batch_kwargs_generator("subdir_reader")
@@ -95,7 +97,7 @@ def test_create_pandas_datasource(
     # We should now see updated configs
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
@@ -148,7 +150,7 @@ def test_pandas_datasource_custom_data_asset(
 
     # We should now see updated configs
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
@@ -353,14 +355,19 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
     )
 
     with open(
-        os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"), "w"
+        os.path.join(  # noqa: PTH118
+            basepath, "idonotlooklikeacsvbutiam.notrecognized"
+        ),
+        "w",
     ) as newfile:
         newfile.write("a,b\n1,2\n3,4\n")
 
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_batch(
             batch_kwargs={
-                "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized")
+                "path": os.path.join(  # noqa: PTH118
+                    basepath, "idonotlooklikeacsvbutiam.notrecognized"
+                )
             }
         )
         assert "Unable to determine reader for path" in exc.value.message
@@ -368,7 +375,7 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
     with pytest.raises(BatchKwargsError) as exc:
         datasource.get_batch(
             batch_kwargs={
-                "path": os.path.join(
+                "path": os.path.join(  # noqa: PTH118
                     basepath, "idonotlooklikeacsvbutiam.notrecognized"
                 ),
                 "reader_method": "blarg",
@@ -378,7 +385,9 @@ def test_invalid_reader_pandas_datasource(tmp_path_factory):
 
     batch = datasource.get_batch(
         batch_kwargs={
-            "path": os.path.join(basepath, "idonotlooklikeacsvbutiam.notrecognized"),
+            "path": os.path.join(  # noqa: PTH118
+                basepath, "idonotlooklikeacsvbutiam.notrecognized"
+            ),
             "reader_method": "read_csv",
             "reader_options": {"header": 0},
         }
@@ -399,7 +408,9 @@ def test_read_limit(test_folder_connection_path_csv):
 
     batch_kwargs = PathBatchKwargs(
         {
-            "path": os.path.join(str(test_folder_connection_path_csv), "test.csv"),
+            "path": os.path.join(  # noqa: PTH118
+                str(test_folder_connection_path_csv), "test.csv"
+            ),
             # "reader_options": {"sep": ",", "header": 0, "index_col": 0},
             "reader_options": {"sep": ","},
         }
@@ -430,7 +441,7 @@ def test_process_batch_parameters():
 def test_pandas_datasource_processes_dataset_options(
     test_folder_connection_path_csv, empty_data_context
 ):
-    context: DataContext = empty_data_context
+    context: DataContext = empty_data_context  # noqa: F821
     datasource = PandasDatasource(
         "PandasCSV",
         batch_kwargs_generators={

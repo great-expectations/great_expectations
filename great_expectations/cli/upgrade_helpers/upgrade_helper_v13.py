@@ -440,7 +440,7 @@ A log detailing the upgrade can be found here:
         current_time = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y%m%dT%H%M%S.%fZ"
         )
-        dest_path = os.path.join(
+        dest_path = os.path.join(  # noqa: PTH118
             self.data_context.root_directory,
             "uncommitted",
             "logs",
@@ -448,7 +448,7 @@ A log detailing the upgrade can be found here:
             f"UpgradeHelperV13_{current_time}.json",
         )
         dest_dir, dest_filename = os.path.split(dest_path)
-        os.makedirs(dest_dir, exist_ok=True)
+        os.makedirs(dest_dir, exist_ok=True)  # noqa: PTH103
 
         with open(dest_path, "w") as outfile:
             json.dump(self.upgrade_log, outfile, indent=2)

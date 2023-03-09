@@ -277,7 +277,9 @@ def test_date_time():
 
     with pytest.raises(gx_exceptions.SorterError):
         # numeric date_time_format
-        i_dont_work = DateTimeSorter(name="date", datetime_format=12345, orderby="desc")
+        i_dont_work = DateTimeSorter(  # noqa: F841
+            name="date", datetime_format=12345, orderby="desc"
+        )
 
     my_date_is_not_a_string = BatchDefinition(
         datasource_name="C",

@@ -60,7 +60,7 @@ def test_basic_instantiation(tmp_path_factory):
     )
 
     # noinspection PyUnusedLocal
-    my_data_connector = ConfiguredAssetFilesystemDataConnector(
+    my_data_connector = ConfiguredAssetFilesystemDataConnector(  # noqa: F841
         name="my_data_connector",
         datasource_name="FAKE_DATASOURCE",
         execution_engine=PandasExecutionEngine(),
