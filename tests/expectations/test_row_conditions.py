@@ -43,6 +43,13 @@ def test_condition_parser_with_space_in_condition_value():
     assert res["condition_value"] == "Two Two"
 
 
+def test_condition_parser_with_tab_in_condition_value():
+    res = _parse_great_expectations_condition('col("pk_2") == "Two  Two"')
+    assert res["column"] == "pk_2"
+    assert res["op"] == "=="
+    assert res["condition_value"] == "Two  Two"
+
+
 def test_parse_condition_to_spark(spark_session):
     res = parse_condition_to_spark('col("foo") > 5')
     # This is mostly a demonstrative test; it may be brittle. I do not know how to test
