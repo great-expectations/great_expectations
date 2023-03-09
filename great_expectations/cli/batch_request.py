@@ -100,7 +100,8 @@ def get_batch_request(
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
         _print_configured_asset_sql_data_connector_message(
-            datasource=datasource, data_connector_name=data_connector_name
+            datasource=datasource,
+            data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
         )
     else:
         raise gx_exceptions.DataContextError(
