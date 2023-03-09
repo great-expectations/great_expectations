@@ -19,6 +19,7 @@ class ConfigStr(SecretStr):
         template_str: str,
     ) -> None:
         self.template_str: str = template_str
+        self._secret_value = template_str  # for compatibility with SecretStr
 
     def get_config_value(self, config_provider: _ConfigurationProvider) -> str:
         return config_provider.substitute_config(self.template_str)
