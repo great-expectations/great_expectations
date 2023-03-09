@@ -20,10 +20,10 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.pandas_file_path_datasource import (  # type: ignore[attr-defined] # is defined but private
     CSVAsset,
     JSONAsset,
-    _FilePathDataAsset,  # type: ignore[attr-defined] # is defined but private
+    _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.sources import _get_field_details
 
