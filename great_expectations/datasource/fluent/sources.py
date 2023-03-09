@@ -262,17 +262,9 @@ class _SourceFactories:
                 "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."
             )
 
-        pandas_datasource = (
-            existing_datasource
-            or self._data_context.sources.add_pandas(
-                name=DEFAULT_PANDAS_DATASOURCE_NAME
-            )
+        return existing_datasource or self._data_context.sources.add_pandas(
+            name=DEFAULT_PANDAS_DATASOURCE_NAME
         )
-        # there is no situation in which this isn't true
-        # return type information must be missing for factory method add_pandas
-        assert isinstance(pandas_datasource, PandasDatasource)
-        pandas_datasource._data_context = self._data_context
-        return pandas_datasource
 
     @property
     def factories(self) -> List[str]:
@@ -284,6 +276,14 @@ class _SourceFactories:
 
             def wrapped(name: str, **kwargs):
                 datasource = ds_constructor(name=name, **kwargs)
+                # using try/except because hasattr will fail to find pydantic PrivateAttrs
+                try:
+                    datasource._data_context = self._data_context
+                except ValueError:
+                    logger.debug(
+                        f'Failed to attach data context to datasource "{name}" because {datasource} has no attribute "_data_context".'
+                    )
+                    pass
                 # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
                 self._data_context._attach_datasource_to_context(datasource)
                 return datasource

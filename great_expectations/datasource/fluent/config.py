@@ -74,6 +74,14 @@ class GxConfig(FluentBaseModel):
                     f"'{ds_name}' has unsupported 'type' - {type_lookup_err}"
                 ) from type_lookup_err
 
+            config["name"] = ds_name
+
+            if "assets" not in config:
+                config["assets"] = {}
+
+            for asset_name, asset_config in config["assets"].items():
+                asset_config["name"] = asset_name
+
             datasource = ds_type(**config)
 
             # the ephemeral asset should never be serialized
@@ -96,6 +104,7 @@ class GxConfig(FluentBaseModel):
 
         if v and not loaded_datasources:
             logger.info(f"Of {len(v)} entries, no 'datasources' could be loaded")
+
         return loaded_datasources
 
     @classmethod
@@ -127,4 +136,6 @@ class GxConfig(FluentBaseModel):
                         "`_allow_empty` does not prevent unrelated validation errors"
                     )
                     raise
+
+        # noinspection PyTypeChecker
         return super().parse_yaml(f)
