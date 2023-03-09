@@ -10,8 +10,11 @@ from typing import (
     AbstractSet,
     Any,
     Callable,
+    ClassVar,
     Dict,
     Mapping,
+    Set,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -39,6 +42,50 @@ yaml.default_flow_style = False
 _Self = TypeVar("_Self", bound="FluentBaseModel")
 
 
+def _exclude_name_fields_from_fluent_datasources(
+    config: Dict[str, Any]
+) -> Dict[str, Any]:
+    if "fluent_datasources" in config:
+        fluent_datasources: dict = config["fluent_datasources"]
+
+        datasource_name: str
+        datasource_config: dict
+        for datasource_name, datasource_config in fluent_datasources.items():
+            datasource_config = _exclude_fields_from_serialization(
+                source_dict=datasource_config,
+                exclusions=FluentBaseModel._EXCLUDE_FROM_DATASOURCE_SERIALIZATION,
+            )
+            if "assets" in datasource_config:
+                data_assets: dict = datasource_config["assets"]
+                data_asset_name: str
+                data_asset_config: dict
+                data_assets = {
+                    data_asset_name: _exclude_fields_from_serialization(
+                        source_dict=data_asset_config,
+                        exclusions=FluentBaseModel._EXCLUDE_FROM_DATA_ASSET_SERIALIZATION,
+                    )
+                    for data_asset_name, data_asset_config in data_assets.items()
+                }
+                datasource_config["assets"] = data_assets
+
+            fluent_datasources[datasource_name] = datasource_config
+
+    return config
+
+
+def _exclude_fields_from_serialization(
+    source_dict: Dict[str, Any], exclusions: Set[str]
+) -> Dict[str, Any]:
+    element: Tuple[str, Any]
+    # noinspection PyTypeChecker
+    return dict(
+        filter(
+            lambda element: element[0] not in exclusions,
+            source_dict.items(),
+        )
+    )
+
+
 class FluentBaseModel(pydantic.BaseModel):
     """
     Base model for most fluent datasource related pydantic models.
@@ -52,6 +99,14 @@ class FluentBaseModel(pydantic.BaseModel):
     Also prevents passing along unset kwargs to BatchSpec.
     https://docs.pydantic.dev/usage/exporting_models/
     """
+
+    _EXCLUDE_FROM_DATASOURCE_SERIALIZATION: ClassVar[Set[str]] = {
+        "name",  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+    }
+
+    _EXCLUDE_FROM_DATA_ASSET_SERIALIZATION: ClassVar[Set[str]] = {
+        "name",  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+    }
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -123,7 +178,7 @@ class FluentBaseModel(pydantic.BaseModel):
 
         # pydantic json encoder has support for many more types
         # TODO: can we dump json string directly to yaml.dump?
-        intermediate_json = self._json_dict(
+        intermediate_json_dict = self._json_dict(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -133,7 +188,10 @@ class FluentBaseModel(pydantic.BaseModel):
             encoder=encoder,
             models_as_dict=models_as_dict,
         )
-        yaml.dump(intermediate_json, stream=stream_or_path, **yaml_kwargs)
+        intermediate_json_dict = _exclude_name_fields_from_fluent_datasources(
+            config=intermediate_json_dict
+        )
+        yaml.dump(intermediate_json_dict, stream=stream_or_path, **yaml_kwargs)
 
         if isinstance(stream_or_path, pathlib.Path):
             return stream_or_path
@@ -166,7 +224,7 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
-        return super().json(
+        intermediate_json_string: str = super().json(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -177,6 +235,13 @@ class FluentBaseModel(pydantic.BaseModel):
             encoder=encoder,
             models_as_dict=models_as_dict,
             **dumps_kwargs,
+        )
+        intermediate_json_dict: dict = json.loads(intermediate_json_string)
+        intermediate_json_dict = _exclude_name_fields_from_fluent_datasources(
+            config=intermediate_json_dict
+        )
+        return super().__config__.json_dumps(
+            intermediate_json_dict, default=encoder, **dumps_kwargs
         )
 
     def _json_dict(
@@ -231,7 +296,7 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
-        return super().dict(
+        intermediate_dict = super().dict(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -240,6 +305,10 @@ class FluentBaseModel(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
+        intermediate_dict = _exclude_name_fields_from_fluent_datasources(
+            config=intermediate_dict
+        )
+        return intermediate_dict
 
     @staticmethod
     def _include_exclude_to_dict(

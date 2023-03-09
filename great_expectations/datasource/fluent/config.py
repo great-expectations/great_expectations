@@ -53,6 +53,7 @@ class GxConfig(FluentBaseModel):
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
 
+    # noinspection PyNestedDecorators
     @validator("fluent_datasources", pre=True)
     @classmethod
     def _load_datasource_subtype(cls, v: Dict[str, dict]):

@@ -133,10 +133,8 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
     "fluent_datasources": {
         DEFAULT_PANDAS_DATASOURCE_NAME: {
             "type": "pandas",
-            "name": DEFAULT_PANDAS_DATASOURCE_NAME,
             "assets": {
                 DEFAULT_PANDAS_DATA_ASSET_NAME: {
-                    "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
                     / "yellow_tripdata_sample_2018-04.csv",
@@ -144,7 +142,6 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
                     "names": ["col1", "col2"],
                 },
                 "my_csv_asset": {
-                    "name": "my_csv_asset",
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
                     / "yellow_tripdata_sample_2018-04.csv",
@@ -169,13 +166,15 @@ class TestExcludeUnsetAssetFields:
     """
 
     def test_from_datasource(self, asset_dict: dict):
+        asset_dict_config = copy.deepcopy(asset_dict)
+
         ds_mapping = {"csv": "pandas_filesystem", "json": "pandas_filesystem"}
 
-        ds_type_: str = ds_mapping[asset_dict["type"]]
+        ds_type_: str = ds_mapping[asset_dict_config["type"]]
         ds_class = _SourceFactories.type_lookup[ds_type_]
 
         # fill in required args
-        asset_dict.update(
+        asset_dict_config.update(
             {
                 "name": "my_asset",
                 "batching_regex": re.compile(
@@ -183,14 +182,14 @@ class TestExcludeUnsetAssetFields:
                 ),
             }
         )
-        asset_name = asset_dict["name"]
+        asset_name = asset_dict_config["name"]
         ds_dict = {
             "name": "my_ds",
             "base_directory": pathlib.Path(__file__),
-            "assets": {asset_name: asset_dict},
+            "assets": {asset_name: asset_dict_config},
         }
         datasource: Datasource = ds_class.parse_obj(ds_dict)
-        assert asset_dict == datasource.dict()["assets"][asset_name]
+        assert asset_dict_config == datasource.dict()["assets"][asset_name]
 
     def test_from_gx_config(self, asset_dict: dict):
         """
@@ -199,18 +198,17 @@ class TestExcludeUnsetAssetFields:
         # fill in required args
         asset_dict.update(
             {
-                "name": "my_asset",
                 "batching_regex": re.compile(
                     r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
                 ),
             }
         )
-        asset_name = asset_dict["name"]
+        asset_dict_config = copy.deepcopy(asset_dict)
+
         ds_dict = {
-            "name": "my_ds",
             "type": "pandas_filesystem",
             "base_directory": pathlib.Path(__file__),
-            "assets": {asset_name: asset_dict},
+            "assets": {"my_asset": asset_dict_config},
         }
         gx_config = GxConfig.parse_obj({"fluent_datasources": {"my_ds": ds_dict}})
 
@@ -218,7 +216,7 @@ class TestExcludeUnsetAssetFields:
         print(f"gx_config_dict\n{pf(gx_config_dict)}")
         assert (
             asset_dict
-            == gx_config_dict["fluent_datasources"]["my_ds"]["assets"][asset_name]
+            == gx_config_dict["fluent_datasources"]["my_ds"]["assets"]["my_asset"]
         )
 
 
@@ -411,6 +409,11 @@ def test_dict_config_round_trip(
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
+    assert "name" not in dumped["fluent_datasources"].keys()
+    for datasource in dumped["fluent_datasources"].values():
+        for asset in datasource["assets"].values():
+            assert "name" not in asset.keys()
+
     re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
     assert re_loaded
@@ -512,6 +515,10 @@ def test_custom_sorter_serialization(
 
 def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     # the default data asset should be dropped, but one named asset should remain
+    datasource_without_default_pandas_data_asset_config_dict = copy.deepcopy(
+        DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
+    )
+
     from_dict_default_pandas_config = GxConfig.parse_obj(
         DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
     )
@@ -525,9 +532,6 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     dumped: dict = from_dict_default_pandas_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
-    datasource_without_default_pandas_data_asset_config_dict = copy.deepcopy(
-        DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
-    )
     datasource_without_default_pandas_data_asset_config_dict["fluent_datasources"][
         DEFAULT_PANDAS_DATASOURCE_NAME
     ]["assets"].pop(DEFAULT_PANDAS_DATA_ASSET_NAME)
