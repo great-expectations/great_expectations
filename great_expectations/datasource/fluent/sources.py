@@ -288,7 +288,7 @@ class _SourceFactories:
                         f'Failed to attach data context to datasource "{name}" because {datasource} has no attribute "_data_context".'
                     )
                     pass
-                  
+
                 # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
                 self._data_context._attach_datasource_to_context(datasource)
                 return datasource
