@@ -2,7 +2,11 @@
 
 import pathlib
 
-from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+from great_expectations.datasource.fluent.interfaces import (
+    DataAsset,
+    Datasource,
+    Sorter,
+)
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDatasource,
