@@ -101,16 +101,19 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
     def base_directory(self):
         # If base directory is a relative path, interpret it as relative to the data context's
         # context root directory (parent directory of great_expectation dir)
-        if os.path.isabs(self._base_directory) or self._datasource.data_context is None:
+        if (
+            os.path.isabs(self._base_directory)  # noqa: PTH117
+            or self._datasource.data_context is None
+        ):
             return self._base_directory
         else:
-            return os.path.join(
+            return os.path.join(  # noqa: PTH118
                 self._datasource.data_context.root_directory, self._base_directory
             )
 
     def get_available_data_asset_names(self):
         known_assets = []
-        if not os.path.isdir(self.base_directory):
+        if not os.path.isdir(self.base_directory):  # noqa: PTH112
             return {"names": [(asset, "path") for asset in known_assets]}
         for data_asset_name in self.asset_globs.keys():
             batch_paths = self._get_data_asset_paths(data_asset_name=data_asset_name)
@@ -187,7 +190,9 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
             paths (list)
         """
         glob_config = self._get_data_asset_config(data_asset_name)
-        return glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
+        return glob.glob(
+            os.path.join(self.base_directory, glob_config["glob"])  # noqa: PTH118
+        )
 
     def _get_data_asset_config(self, data_asset_name):
         try:
@@ -204,7 +209,9 @@ class GlobReaderBatchKwargsGenerator(BatchKwargsGenerator):
         self, data_asset_name, reader_method=None, reader_options=None, limit=None
     ):
         glob_config = self._get_data_asset_config(data_asset_name)
-        paths = glob.glob(os.path.join(self.base_directory, glob_config["glob"]))
+        paths = glob.glob(
+            os.path.join(self.base_directory, glob_config["glob"])  # noqa: PTH118
+        )
         return self._build_batch_kwargs_path_iter(
             paths,
             glob_config,

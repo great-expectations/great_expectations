@@ -23,7 +23,7 @@ def load_data_into_postgres_database(sa):
     data_paths: List[str] = [
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "..",
                 "..",
@@ -74,7 +74,7 @@ def load_data_into_postgres_database(sa):
     data_paths: List[str] = [
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "..",
                 "..",

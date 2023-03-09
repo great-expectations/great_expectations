@@ -740,7 +740,9 @@ def test_get_batch_data_and_markers_sampling_method__md5(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     # noinspection PyUnusedLocal
-    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = (  # noqa: F841
+        test_cases_for_sql_data_connector_sqlite_execution_engine
+    )
 
     # SQlite doesn't support MD5
     # batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
