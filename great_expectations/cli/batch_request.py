@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 import click
 from typing_extensions import Final
@@ -83,12 +83,6 @@ def get_batch_request(
 
     data_asset_name: Optional[str]
 
-    configured_asset_data_connector_message: str
-    if _is_data_connector_configured_asset_sql(datasource, data_connector_name):
-        configured_asset_data_connector_message = "Need to configure a new Data Asset? See how to add a new DataAsset to your ConfiguredAssetSqlDataConnector here: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource/"
-    else:
-        configured_asset_data_connector_message = ""
-
     if isinstance(datasource, Datasource):
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
         data_asset_name = _get_data_asset_name_from_data_connector(
@@ -105,7 +99,9 @@ def get_batch_request(
             data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
-        cli_message(configured_asset_data_connector_message)
+        _print_configured_asset_sql_data_connector_message(
+            datasource=datasource, data_connector_name=data_connector_name
+        )
     else:
         raise gx_exceptions.DataContextError(
             f"Datasource '{datasource.name}' of unsupported type {type(datasource)} was encountered."
@@ -138,19 +134,41 @@ def get_batch_request(
     return batch_request
 
 
-def _is_data_connector_configured_asset_sql(
-    datasource: BaseDatasource, data_connector_name: str
+def _print_configured_asset_sql_data_connector_message(
+    datasource: BaseDatasource,
+    data_connector_name: str,
+    data_connector_type: Type = ConfiguredAssetSqlDataConnector,
+) -> None:
+    """Print a message if the data connector matches data connector type.
+
+    Args:
+        datasource: Datasource associated with data connector of interest.
+        data_connector_name: Name of the data connector of interest.
+        data_connector_type: Type of data connector to check against.
+    """
+    configured_asset_data_connector_message: str
+    if _is_data_connector_of_type(datasource, data_connector_name, data_connector_type):
+        configured_asset_data_connector_message = f"Need to configure a new Data Asset? See how to add a new DataAsset to your {data_connector_type.__name__} here: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource/"
+
+        cli_message(configured_asset_data_connector_message)
+
+
+def _is_data_connector_of_type(
+    datasource: BaseDatasource,
+    data_connector_name: str,
+    data_connector_type: Type = ConfiguredAssetSqlDataConnector,
 ) -> bool:
     """Determine whether a data connector is a ConfiguredAssetSqlDataConnector.
 
     Args:
         datasource: Datasource associated with data connector of interest.
         data_connector_name: Name of the data connector of interest.
+        data_connector_type: Type of data connector to check against.
     """
     data_connector: DataConnector | None = datasource.data_connectors.get(
         data_connector_name
     )
-    return isinstance(data_connector, ConfiguredAssetSqlDataConnector)
+    return isinstance(data_connector, data_connector_type)
 
 
 def select_data_connector_name(
