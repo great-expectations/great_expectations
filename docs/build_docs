@@ -19,17 +19,17 @@ then
   git checkout "$GX_LATEST"
   git pull
 else
-  echo -e "${ORANGE}In a pull request, using the latest commit to build API docs so changes can be viewed in the Netlify deploy preview.${NC}"
+  echo -e "${ORANGE}Building from within a pull request, using the latest commit to build API docs so changes can be viewed in the Netlify deploy preview.${NC}"
 fi
 
-echo -e "${ORANGE}Installing dev dependencies.${NC}"
+echo -e "${ORANGE}Installing Great Expectations library dev dependencies.${NC}"
 (cd ../../; pip install -c constraints-dev.txt -e ".[test]")
 
-echo -e "${ORANGE}Installing dev dependencies.${NC}"
+echo -e "${ORANGE}Installing api docs dependencies.${NC}"
 (cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
-echo -e "${ORANGE}Building sphinx API docs.${NC}"
-(cd ../sphinx_api_docs_source; invoke docs)
+echo -e "${ORANGE}Building API docs.${NC}"
+(cd ../../; invoke docs)
 
 if [ "$PULL_REQUEST" == "false" ]
 then
@@ -42,5 +42,5 @@ echo -e "${ORANGE}Copying previous versions${NC}"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 
-echo "Building docusaurus docs."
+echo -e "${ORANGE}Building docusaurus docs.${NC}"
 yarn build
