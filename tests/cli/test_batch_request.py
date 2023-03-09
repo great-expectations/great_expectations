@@ -89,11 +89,10 @@ class NotDummyDataConnector:
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    ["data_connector_type", "_is_data_connector_of_type_expected", "expected_message"],
+    ["data_connector_type", "expected_message"],
     [
         pytest.param(
             DummyDataConnector,
-            True,
             (
                 "Need to configure a new Data Asset? See how to add a new DataAsset to your "
                 "DummyDataConnector here: "
@@ -101,16 +100,53 @@ class NotDummyDataConnector:
             ),
             id="expected data connector type",
         ),
-        pytest.param(
-            NotDummyDataConnector, False, "", id="not expected data connector type"
-        ),
+        pytest.param(NotDummyDataConnector, "", id="not expected data connector type"),
     ],
 )
 def test__print_configured_asset_sql_data_connector_message_prints_message(
     data_connector_type: DummyDataConnector | NotDummyDataConnector,
-    _is_data_connector_of_type_expected: bool,
     expected_message: str,
     capsys,
+):
+
+    data_connector = DummyDataConnector()
+    data_connector_name: str = "data_connector_name"
+
+    class MockDatasource:
+        @property
+        def data_connectors(self) -> dict:
+            return {data_connector_name: data_connector}
+
+    datasource = MockDatasource()
+
+    _print_configured_asset_sql_data_connector_message(
+        datasource=datasource,  # type: ignore[arg-type]
+        data_connector_name=data_connector_name,
+        data_connector_type=data_connector_type,  # type: ignore[arg-type]
+    )
+
+    output = capsys.readouterr().out
+
+    assert output == expected_message
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["data_connector_type", "_is_data_connector_of_type_expected"],
+    [
+        pytest.param(
+            DummyDataConnector,
+            True,
+            id="expected data connector type",
+        ),
+        pytest.param(
+            NotDummyDataConnector, False, id="not expected data connector type"
+        ),
+    ],
+)
+def test__is_data_connector_of_type(
+    data_connector_type: DummyDataConnector | NotDummyDataConnector,
+    _is_data_connector_of_type_expected: bool,
 ):
 
     data_connector = DummyDataConnector()
@@ -130,13 +166,3 @@ def test__print_configured_asset_sql_data_connector_message_prints_message(
     )
 
     assert _is_data_connector_of_type_observed == _is_data_connector_of_type_expected
-
-    _print_configured_asset_sql_data_connector_message(
-        datasource=datasource,  # type: ignore[arg-type]
-        data_connector_name=data_connector_name,
-        data_connector_type=data_connector_type,  # type: ignore[arg-type]
-    )
-
-    output = capsys.readouterr().out
-
-    assert output == expected_message
