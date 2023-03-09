@@ -244,7 +244,7 @@ class FluentBaseModel(pydantic.BaseModel):
             skip_defaults=skip_defaults,
         )
         if config_provider:
-            logger.warning(
+            logger.info(
                 f"{self.__class__.__name__}.dict() - substituting config values"
             )
             subbed_config: dict = {}
