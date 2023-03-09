@@ -130,8 +130,6 @@ class RowCondition(SerializableDictDot):
 
 def _parse_great_expectations_condition(row_condition: str):
     try:
-        # this is where the error is happening
-        # breakpoint()
         return condition.parseString(row_condition)
     except ParseException:
         raise ConditionParserError(f"unable to parse condition: {row_condition}")
@@ -185,7 +183,6 @@ def generate_condition_by_operator(column, op, value):
 
 
 def parse_condition_to_sqlalchemy(row_condition: str) -> ColumnElement:
-    # does something different need to happen here?
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:

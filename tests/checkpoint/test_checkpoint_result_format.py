@@ -342,56 +342,6 @@ def _add_expectations_and_checkpoint(
 
 
 @pytest.mark.integration
-def test_sql_with_expectation_and_row_condition(
-    data_context_with_connection_to_metrics_db: FileDataContext,
-    reference_sql_checkpoint_config_for_multi_column_sum_table: dict,
-):
-    config = ExpectationConfiguration(
-        expectation_type="expect_column_values_to_not_be_null",
-        kwargs={
-            "column": "pk_1",
-            "condition_parser": "great_expectations__experimental__",
-            "mostly": 1.0,
-            "row_condition": 'col("pk_2") == "Two Two"',
-        },
-    )
-
-    dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-            "unexpected_index_column_names": ["pk_1"],
-        }
-    }
-
-    context: DataContext = _add_expectations_and_checkpoint(
-        data_context=data_context_with_connection_to_metrics_db,
-        checkpoint_config=reference_sql_checkpoint_config_for_multi_column_sum_table,
-        expectations_list=[config],
-        dict_to_update_checkpoint=dict_to_update_checkpoint,
-    )
-
-    result: CheckpointResult = context.run_checkpoint(
-        checkpoint_name="my_checkpoint",
-    )
-    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
-    # this EVR result will contain the error
-    print(evrs)
-    # index_column_names: List[str] = evrs[0]["results"][0]["result"][
-    #     "unexpected_index_column_names"
-    # ]
-    # assert index_column_names == ["pk_1"]
-    #
-    # first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
-    #     "unexpected_index_list"
-    # )
-    # assert not first_result_full_list
-    #
-    # first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
-    #     "partial_unexpected_index_list"
-    # ]
-
-
-@pytest.mark.integration
 def test_sql_result_format_in_checkpoint_pk_defined_one_expectation_complete_output(
     data_context_with_connection_to_metrics_db: FileDataContext,
     reference_sql_checkpoint_config_for_animal_names_table: dict,

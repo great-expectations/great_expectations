@@ -660,7 +660,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         ):
             condition_parser = domain_kwargs["condition_parser"]
             if condition_parser == "great_expectations__experimental__":
-                # this is where the parse_condition_to_sqlalchemy function is being called.
                 parsed_condition = parse_condition_to_sqlalchemy(
                     domain_kwargs["row_condition"]
                 )
