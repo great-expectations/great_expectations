@@ -78,10 +78,10 @@ To add a new version, follow these steps:
 2. Check out the version from the tag, e.g. `git checkout 0.15.50`
 3. Make sure dev dependencies are installed `pip install -c constraints-dev.txt -e ".[test]"`
 4. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
-5. Build API docs `cd docs/sphinx_api_docs_source; invoke docs`
-6. Run `yarn install`
-7. Run `yarn build`
-8. Create the version e.g. `yarn docusaurus docs:version 0.15.50`
+5. Build API docs `invoke docs` from the repo root.
+6. Run `yarn install` from `docs/docusaurus/`.
+7. Run `yarn build` from `docs/docusaurus/`.
+8. Create the version e.g. `yarn docusaurus docs:version 0.15.50` from `docs/docusaurus/`.
 9. Pull down the version file (see `docs/build_docs` for the file, currently https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip)
 10. Unzip and add your newly created versioned docs via the following:
 11. Copy the version you built in step 4 from inside `versioned_docs` in your repo to the `versioned_docs` from the unzipped version file.
