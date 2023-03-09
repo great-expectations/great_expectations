@@ -490,9 +490,6 @@ class PandasDatasource(_PandasDatasource):
         DataFrameAsset
     ]
 
-    # private attributes
-    _data_context = pydantic.PrivateAttr()
-
     # instance attributes
     type: Literal["pandas"] = "pandas"
     assets: Dict[str, _PandasDataAsset] = {}
