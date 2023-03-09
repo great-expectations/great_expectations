@@ -240,7 +240,7 @@ def test_construct_csv_asset_directly(
     mock_list_keys.return_value = object_keys
     asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
+        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",  # type: ignore[arg-type]
     )
     assert asset.name == "csv_asset"
     assert asset.batching_regex.match("random string") is None
@@ -420,7 +420,7 @@ def test_test_connection_failures(
     bad_regex_config: tuple[re.Pattern, str],
 ):
     regex, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
         batching_regex=regex,
     )

@@ -54,7 +54,7 @@ def pandas_filesystem_datasource() -> PandasFilesystemDatasource:
         .parent.joinpath(base_directory_rel_path)
         .resolve(strict=True)
     )
-    return PandasFilesystemDatasource(
+    return PandasFilesystemDatasource(  # type: ignore[call-arg]
         name="pandas_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
@@ -179,7 +179,7 @@ class TestDynamicPandasAssets:
 
         assert method_name in PandasFilesystemDatasource.__dict__
 
-        ds = PandasFilesystemDatasource(
+        ds = PandasFilesystemDatasource(  # type: ignore[call-arg]
             name="ds_for_testing_add_asset_methods",
             base_directory=pathlib.Path.cwd(),
         )
@@ -199,7 +199,7 @@ class TestDynamicPandasAssets:
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
-        ds = PandasFilesystemDatasource(
+        ds = PandasFilesystemDatasource(  # type: ignore[call-arg]
             name="ds_for_testing_add_asset_methods",
             base_directory=pathlib.Path.cwd(),
         )
@@ -584,7 +584,7 @@ def datasource_test_connection_error_messages(
     request,
 ) -> tuple[PandasFilesystemDatasource, TestConnectionError]:
     batching_regex, test_connection_error = request.param(csv_path=csv_path)
-    csv_asset = CSVAsset(
+    csv_asset = CSVAsset(  # type: ignore[call-arg]
         name="csv_asset",
         batching_regex=batching_regex,
     )
