@@ -1,11 +1,11 @@
 import re
-import sys
+from glob import glob
+from pathlib import Path
 
 import pkg_resources
 from setuptools import find_packages, setup
 
 import versioneer
-from pathlib import Path
 
 def get_extras_require():
     results = {}

@@ -1,7 +1,7 @@
 ---
 title: Getting started with Great Expectations
 ---
-import TechnicalTag from '/docs/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 
 Welcome to the Great Expectations getting started tutorial! This tutorial will help you set up your first local deployment of Great Expectations.  This deployment will contain a small <TechnicalTag relative="../../" tag="expectation_suite" text="Expectation Suite" /> that we will use to <TechnicalTag relative="../../" tag="validation" text="Validate" /> some sample data. We'll also introduce important concepts, with links to detailed material you can dig into later.
