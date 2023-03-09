@@ -248,13 +248,7 @@ class FluentBaseModel(pydantic.BaseModel):
             logger.info(
                 f"{self.__class__.__name__}.dict() - substituting config values"
             )
-            subbed_config: dict = {}
-            for k, v in result.items():
-                if isinstance(v, ConfigStr):
-                    v = v.get_config_value(config_provider)
-                # TODO: do this for deeply nested items too
-                subbed_config[k] = v
-            return subbed_config
+            _recursively_set_config_value(result, config_provider)
         return result
 
     @staticmethod
@@ -282,3 +276,20 @@ class FluentBaseModel(pydantic.BaseModel):
 
     def __str__(self):
         return self.yaml()
+
+
+def _recursively_set_config_value(
+    data: dict | list, config_provider: _ConfigurationProvider
+):
+    if isinstance(data, dict):
+        for k, v in data.items():
+            if isinstance(v, ConfigStr):
+                data[k] = v.get_config_value(config_provider)
+            elif isinstance(v, (dict, list)):
+                return _recursively_set_config_value(v, config_provider)
+    elif isinstance(data, list):
+        for i, v in enumerate(data):
+            if isinstance(v, ConfigStr):
+                data[i] = v.get_config_value(config_provider)
+            elif isinstance(v, (dict, list)):
+                return _recursively_set_config_value(v, config_provider)
