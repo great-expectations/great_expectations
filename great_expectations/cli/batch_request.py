@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional, Union
 import click
 from typing_extensions import Final
 
+from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:
@@ -78,6 +79,12 @@ def get_batch_request(
 
     data_asset_name: Optional[str]
 
+    configured_asset_data_connector_message: str
+    if _is_data_connector_configured_asset_sql(datasource, data_connector_name):
+        configured_asset_data_connector_message = "Need to configure a new Data Asset? See how to add a new DataAsset to your ConfiguredAssetSqlDataConnector here: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource/"
+    else:
+        configured_asset_data_connector_message = ""
+
     if isinstance(datasource, Datasource):
         msg_prompt_enter_data_asset_name: str = f'\nWhich data asset (accessible by data connector "{data_connector_name}") would you like to use?\n'
         data_asset_name = _get_data_asset_name_from_data_connector(
@@ -94,6 +101,7 @@ def get_batch_request(
             data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
+        cli_message(configured_asset_data_connector_message)
     else:
         raise gx_exceptions.DataContextError(
             f"Datasource '{datasource.name}' of unsupported type {type(datasource)} was encountered."
@@ -124,6 +132,19 @@ def get_batch_request(
     filter_properties_dict(properties=batch_request, clean_falsy=True, inplace=True)
 
     return batch_request
+
+
+def _is_data_connector_configured_asset_sql(
+    datasource: BaseDatasource, data_connector_name: str
+) -> bool:
+    """Determine whether a data connector is a ConfiguredAssetSqlDataConnector.
+
+    Args:
+        datasource:
+        data_connector_name:
+    """
+    # TODO: Method guts
+    return True
 
 
 def select_data_connector_name(
