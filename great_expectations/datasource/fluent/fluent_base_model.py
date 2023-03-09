@@ -10,6 +10,7 @@ from typing import (
     AbstractSet,
     Any,
     Callable,
+    Dict,
     Mapping,
     Type,
     TypeVar,
@@ -255,6 +256,29 @@ class FluentBaseModel(pydantic.BaseModel):
                 subbed_config[k] = v
             return subbed_config
         return result
+
+    @staticmethod
+    def _include_exclude_to_dict(
+        include_exclude: AbstractSetIntStr | MappingIntStrAny | None,
+    ) -> Dict[int | str, Any]:
+        """
+        Takes the mapping or abstract set passed to pydantic model export include or exclude and makes it a
+        mutable dictionary that can be altered for nested include/exclude operations.
+
+        See: https://docs.pydantic.dev/usage/exporting_models/#advanced-include-and-exclude
+
+        Args:
+            include_exclude: The include or exclude key passed to pydantic model export methods.
+
+        Returns: A mutable dictionary that can be used for nested include/exclude.
+        """
+        if isinstance(include_exclude, Mapping):
+            include_exclude_dict = dict(include_exclude)
+        elif isinstance(include_exclude, AbstractSet):
+            include_exclude_dict = {field: True for field in include_exclude}
+        else:
+            include_exclude_dict = {}
+        return include_exclude_dict
 
     def __str__(self):
         return self.yaml()

@@ -33,7 +33,6 @@ from IPython import get_ipython
 from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -43,6 +42,9 @@ from great_expectations.types.base import SerializableDotDict
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
+
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
 
 logger = logging.getLogger(__name__)
 
@@ -401,15 +403,12 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return data.to_json_dict()
 
     # PySpark schema serialization
-    if StructType is not None:
-        if isinstance(data, StructType):
-            return dict(data.jsonValue())
+    if StructType is not None and isinstance(data, StructType):
+        return dict(data.jsonValue())
 
-    else:
-        raise TypeError(
-            f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
-        )
-    return None
+    raise TypeError(
+        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+    )
 
 
 def ensure_json_serializable(data):  # noqa: C901 - complexity 21

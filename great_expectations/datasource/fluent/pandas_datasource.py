@@ -3,19 +3,25 @@ from __future__ import annotations
 import copy
 import dataclasses
 import logging
+import sqlite3
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
+    Any,
+    Callable,
     ClassVar,
     Dict,
     Generic,
     List,
+    Mapping,
     MutableMapping,
     Optional,
     Sequence,
     Set,
     Type,
     TypeVar,
+    Union,
 )
 
 import pandas as pd
@@ -24,7 +30,10 @@ from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
-from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
+from great_expectations.datasource.fluent.constants import (
+    _DATA_CONNECTOR_NAME,
+    _FIELDS_ALWAYS_SET,
+)
 from great_expectations.datasource.fluent.dynamic_pandas import (
     _generate_pandas_data_asset_models,
 )
@@ -39,12 +48,21 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
+from great_expectations.util import NotImported
+
+_EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
+try:
+    import sqlalchemy
+
+    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.engine.Engine]
+except ImportError:
+    sqlalchemy = NotImported("sqlalchemy not found, please install.")
 
 if TYPE_CHECKING:
     import os
-    import sqlite3
 
-    import sqlalchemy
+    MappingIntStrAny = Mapping[Union[int, str], Any]
+    AbstractSetIntStr = AbstractSet[Union[int, str]]
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequestOptions,
@@ -187,6 +205,56 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
                 f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
             )
+
+    def json(
+        self,
+        *,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        by_alias: bool = False,
+        # deprecated - use exclude_unset instead
+        skip_defaults: bool | None = None,
+        # Default to True to prevent serializing long configs full of unset default values
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Callable[[Any], Any] | None = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs: Any,
+    ) -> str:
+        """
+        Generate a JSON representation of the model, `include` and `exclude` arguments
+        as per `dict()`.
+
+        `encoder` is an optional function to supply as `default` to json.dumps(), other
+        arguments as per `json.dumps()`.
+
+        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
+        default.
+        """
+        exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(
+            include_exclude=exclude
+        )
+        # don't check fields that should always be set
+        check_fields: set[str] = self.__fields_set__.copy().difference(
+            _FIELDS_ALWAYS_SET
+        )
+        for field in check_fields:
+            if isinstance(getattr(self, field), tuple(_EXCLUDE_TYPES_FROM_JSON)):
+                exclude_fields[field] = True
+
+        return super().json(
+            include=include,
+            exclude=exclude_fields,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+            **dumps_kwargs,
+        )
 
 
 _PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
@@ -358,6 +426,60 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         )
 
     # End Abstract Methods
+
+    def json(
+        self,
+        *,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        by_alias: bool = False,
+        # deprecated - use exclude_unset instead
+        skip_defaults: bool | None = None,
+        # Default to True to prevent serializing long configs full of unset default values
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Callable[[Any], Any] | None = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs: Any,
+    ) -> str:
+        """
+        Generate a JSON representation of the model, `include` and `exclude` arguments
+        as per `dict()`.
+
+        `encoder` is an optional function to supply as `default` to json.dumps(), other
+        arguments as per `json.dumps()`.
+
+        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
+        default.
+        """
+        exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(
+            include_exclude=exclude
+        )
+        if "assets" in self.__fields_set__:
+            for asset_name, asset in self.assets.items():
+                # don't check fields that should always be set
+                check_fields: set[str] = asset.__fields_set__.copy().difference(
+                    _FIELDS_ALWAYS_SET
+                )
+                for field in check_fields:
+                    if isinstance(
+                        getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
+                    ):
+                        exclude_fields["assets"] = {asset_name: {field}}
+
+        return super().json(
+            include=include,
+            exclude=exclude_fields,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+            **dumps_kwargs,
+        )
 
 
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
