@@ -1,5 +1,5 @@
 from inspect import Parameter, Signature
-from typing import Type
+from typing import ForwardRef, Type
 
 from great_expectations.datasource.fluent import Datasource, PandasFilesystemDatasource
 
@@ -21,9 +21,15 @@ def print_add_asset_method_signatures(datasource_class: Type[Datasource]):
                 continue
 
             annotation = param.annotation
-            if getattr(annotation, "__name__", None):
+            if isinstance(annotation, ForwardRef):
+                annotation = annotation.__forward_arg__
+            elif getattr(annotation, "__name__", None):
                 annotation = annotation.__name__
-            print(f"\t{name}: {annotation}", end="")
+
+            if name in ["self"]:
+                print(f"\t{name}", end="")
+            else:
+                print(f"\t{name}: {annotation}", end="")
 
             if param.kind == Parameter.KEYWORD_ONLY:
                 if param.default is Parameter.empty:
