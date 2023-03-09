@@ -15,11 +15,11 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.pandas_datasource import (
+    _DYNAMIC_ASSET_TYPES,
     CSVAsset,
     DataFrameAsset,
     TableAsset,
     _PandasDataAsset,
-    _DYNAMIC_ASSET_TYPES,
 )
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,

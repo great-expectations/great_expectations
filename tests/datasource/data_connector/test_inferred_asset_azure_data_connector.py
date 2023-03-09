@@ -463,7 +463,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    report_object = context.test_yaml_config(
+    report_object = context.test_yaml_config(  # noqa: F841
         """
         module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetAzureDataConnector
@@ -1463,7 +1463,7 @@ azure_options:
     # Raises error due to a non-existent/unknown ExecutionEngine instance.
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        my_data_connector: InferredAssetAzureDataConnector = (
+        my_data_connector: InferredAssetAzureDataConnector = (  # noqa: F841
             instantiate_class_from_config(
                 config,
                 runtime_environment={
