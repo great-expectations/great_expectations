@@ -10,6 +10,7 @@ from typing import (
     AbstractSet,
     Any,
     Callable,
+    Dict,
     Mapping,
     Type,
     TypeVar,
@@ -239,6 +240,18 @@ class FluentBaseModel(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
+
+    @staticmethod
+    def _include_exclude_to_dict(
+        include_exclude: AbstractSetIntStr | MappingIntStrAny | None,
+    ) -> Dict[int | str, Any]:
+        if isinstance(include_exclude, Mapping):
+            include_exclude_dict = dict(include_exclude)
+        elif isinstance(include_exclude, AbstractSet):
+            include_exclude_dict = {field: ... for field in include_exclude}
+        else:
+            include_exclude_dict = {}
+        return include_exclude_dict
 
     def __str__(self):
         return self.yaml()

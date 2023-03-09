@@ -50,10 +50,16 @@ from great_expectations.datasource.fluent.sources import (
 )
 from great_expectations.util import NotImported
 
+_EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
+try:
+    import sqlalchemy
+
+    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.engine.Engine]
+except ImportError:
+    sqlalchemy = NotImported("sqlalchemy not found, please install.")
+
 if TYPE_CHECKING:
     import os
-
-    import sqlalchemy
 
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
@@ -227,28 +233,21 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
         Excludes exclude_types if found in fields.
         """
-        exclude_types = (sqlite3.Connection,)
-        try:
-            import sqlalchemy
-
-            exclude_types = exclude_types + (sqlalchemy.engine.Engine,)
-        except ImportError:
-            sqlalchemy = NotImported()
-
-        exclude = exclude or {}
-
+        exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(
+            include_exclude=exclude
+        )
         # don't check fields that should always be set
         check_fields: set[str] = self.__fields_set__.copy().difference(
             _FIELDS_ALWAYS_SET
         )
         for field in check_fields:
-            if isinstance(getattr(self, field), exclude_types):
+            if isinstance(getattr(self, field), tuple(_EXCLUDE_TYPES_FROM_JSON)):
                 # ellipsis indicates that the entire field should be excluded
-                exclude[field] = ...
+                exclude_fields[field] = ...
 
         return super().json(
             include=include,
-            exclude=exclude,
+            exclude=exclude_fields,
             by_alias=by_alias,
             skip_defaults=skip_defaults,
             exclude_unset=exclude_unset,
@@ -458,27 +457,24 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         Excludes exclude_types if found in asset fields.
         """
+        exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(
+            include_exclude=exclude
+        )
         if "assets" in self.__fields_set__:
-            exclude = exclude or {}
-            exclude_types = (sqlite3.Connection,)
-            try:
-                import sqlalchemy
-
-                exclude_types = exclude_types + (sqlalchemy.engine.Engine,)
-            except ImportError:
-                sqlalchemy = NotImported()
             for asset_name, asset in self.assets.items():
                 # don't check fields that should always be set
                 check_fields: set[str] = asset.__fields_set__.copy().difference(
                     _FIELDS_ALWAYS_SET
                 )
                 for field in check_fields:
-                    if isinstance(getattr(asset, field), exclude_types):
-                        exclude["assets"] = {asset_name: {field}}
+                    if isinstance(
+                        getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
+                    ):
+                        exclude_fields["assets"] = {asset_name: {field}}
 
         return super().json(
             include=include,
-            exclude=exclude,
+            exclude=exclude_fields,
             by_alias=by_alias,
             skip_defaults=skip_defaults,
             exclude_unset=exclude_unset,
