@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import cast
 from unittest import mock
 
@@ -77,11 +79,39 @@ def test_get_data_asset_name_from_data_connector_with_search(
     assert data_asset_name == target_file
 
 
+class DummyDataConnector:
+    pass
+
+
+class NotDummyDataConnector:
+    pass
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["data_connector_type", "_is_data_connector_of_type_expected", "expected_message"],
+    [
+        pytest.param(
+            DummyDataConnector,
+            True,
+            (
+                "Need to configure a new Data Asset? See how to add a new DataAsset to your "
+                "DummyDataConnector here: "
+                "https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource/\n"
+            ),
+            id="expected data connector type",
+        ),
+        pytest.param(
+            NotDummyDataConnector, False, "", id="not expected data connector type"
+        ),
+    ],
+)
 def test__print_configured_asset_sql_data_connector_message_prints_message(
+    data_connector_type: DummyDataConnector | NotDummyDataConnector,
+    _is_data_connector_of_type_expected: bool,
+    expected_message: str,
     capsys,
 ):
-    class DummyDataConnector:
-        pass
 
     data_connector = DummyDataConnector()
     data_connector_name: str = "data_connector_name"
@@ -93,54 +123,20 @@ def test__print_configured_asset_sql_data_connector_message_prints_message(
 
     datasource = MockDatasource()
 
-    assert _is_data_connector_of_type(
+    _is_data_connector_of_type_observed = _is_data_connector_of_type(
         datasource=datasource,  # type: ignore[arg-type]
         data_connector_name=data_connector_name,
-        data_connector_type=DummyDataConnector,
+        data_connector_type=data_connector_type,  # type: ignore[arg-type]
     )
+
+    assert _is_data_connector_of_type_observed == _is_data_connector_of_type_expected
 
     _print_configured_asset_sql_data_connector_message(
         datasource=datasource,  # type: ignore[arg-type]
         data_connector_name=data_connector_name,
-        data_connector_type=DummyDataConnector,
+        data_connector_type=data_connector_type,  # type: ignore[arg-type]
     )
 
     output = capsys.readouterr().out
 
-    assert "Need to configure a new Data Asset?" in output
-
-
-def test__print_configured_asset_sql_data_connector_message_doesnt_print_message(
-    capsys,
-):
-    class DummyDataConnector:
-        pass
-
-    data_connector = DummyDataConnector()
-    data_connector_name: str = "data_connector_name"
-
-    class MockDatasource:
-        @property
-        def data_connectors(self) -> dict:
-            return {data_connector_name: data_connector}
-
-    datasource = MockDatasource()
-
-    class Dummy:
-        pass
-
-    assert not _is_data_connector_of_type(
-        datasource=datasource,  # type: ignore[arg-type]
-        data_connector_name=data_connector_name,
-        data_connector_type=Dummy,
-    )
-
-    _print_configured_asset_sql_data_connector_message(
-        datasource=datasource,  # type: ignore[arg-type]
-        data_connector_name=data_connector_name,
-        data_connector_type=Dummy,
-    )
-
-    output = capsys.readouterr().out
-
-    assert output == ""
+    assert output == expected_message
