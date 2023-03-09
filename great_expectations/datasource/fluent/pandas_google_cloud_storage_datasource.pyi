@@ -49,6 +49,8 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 )
 
 if TYPE_CHECKING:
+    from google.cloud.storage.client import Client as GoogleCloudStorageClient
+
     from great_expectations.datasource.fluent import Sorter
     from great_expectations.datasource.fluent.dynamic_pandas import (
         CompressionOptions,
@@ -82,6 +84,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     type: Literal["pandas_gcs"]
     bucket_or_name: str
     gcs_options: Dict[str, Any]
+
+    _gcs_client: Union[GoogleCloudStorageClient, None]
+
     def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_csv_asset(
         self,

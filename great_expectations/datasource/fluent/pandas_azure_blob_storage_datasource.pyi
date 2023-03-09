@@ -81,15 +81,19 @@ class PandasAzureBlobStorageDatasourceError(PandasDatasourceError): ...
 class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     type: Literal["pandas_abs"]
     azure_options: Dict[str, Any]
+
+    _account_name: str
+    _azure_client: Any
     def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_csv_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
-        glob_directive: str = ...,
+        batching_regex: Union[re.Pattern, str],
+        container: str,
+        name_starts_with: str = "",
+        delimiter: str = "/",  # FIXME: this conflicts with the read_csv delimiter
         order_by: Optional[SortersDefinition] = ...,
         sep: typing.Union[str, None] = ...,
-        delimiter: typing.Union[str, None] = ...,
         header: Union[int, Sequence[int], None, Literal["infer"]] = "infer",
         names: Union[Sequence[Hashable], None] = ...,
         index_col: Union[IndexLabel, Literal[False], None] = ...,
@@ -142,8 +146,10 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     def add_excel_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
-        glob_directive: str = ...,
+        batching_regex: Union[re.Pattern, str],
+        container: str,
+        name_starts_with: str = "",
+        delimiter: str = "/",
         order_by: Optional[SortersDefinition] = ...,
         sheet_name: typing.Union[str, int, None] = 0,
         header: Union[int, Sequence[int], None] = 0,
@@ -217,8 +223,10 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     def add_json_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
-        glob_directive: str = ...,
+        batching_regex: Union[re.Pattern, str],
+        container: str,
+        name_starts_with: str = "",
+        delimiter: str = "/",
         order_by: Optional[SortersDefinition] = ...,
         orient: typing.Union[str, None] = ...,
         dtype: typing.Union[dict, None] = ...,
@@ -247,8 +255,10 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     def add_parquet_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
-        glob_directive: str = ...,
+        batching_regex: Union[re.Pattern, str],
+        container: str,
+        name_starts_with: str = "",
+        delimiter: str = "/",
         order_by: Optional[SortersDefinition] = ...,
         engine: str = "auto",
         columns: typing.Union[typing.List[str], None] = ...,

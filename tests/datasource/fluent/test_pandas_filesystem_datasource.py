@@ -23,7 +23,7 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
     JSONAsset,
-    _FilePathDataAsset,
+    _FilePathDataAsset,  # type: ignore[attr-define] # is defined but private
 )
 from great_expectations.datasource.fluent.sources import _get_field_details
 
@@ -301,7 +301,7 @@ class TestDynamicPandasAssets:
             .build_batch_request({"year": "2018"})
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)
+            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # BatchRequest vs Optional[BatchRequestBase]
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")
