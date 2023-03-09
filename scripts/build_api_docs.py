@@ -16,9 +16,8 @@ import pydoc
 import re
 import shutil
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Set, Tuple
 from typing import Generator as typeGenerator
-from typing import List, Set, Tuple
 
 WHITELISTED_TAG = "--Public API--"
 DOCUMENTATION_TAG = "--Documentation--"

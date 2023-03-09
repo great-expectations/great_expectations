@@ -54,7 +54,7 @@ from great_expectations.util import deep_filter_properties_iterable
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None
+    StructType = None  # type: ignore[assignment,misc]
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -1775,6 +1775,8 @@ will appear repeatedly until your configuration is updated.)
 
 class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VERSION = CURRENT_GX_CONFIG_VERSION
+    UNCOMMITTED = "uncommitted"
+
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     EXPECTATIONS_BASE_DIRECTORY = "expectations"
     DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
@@ -1783,12 +1785,19 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
     VALIDATIONS_BASE_DIRECTORY = "validations"
     DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
-        f"uncommitted/{VALIDATIONS_BASE_DIRECTORY}/"
+        f"{UNCOMMITTED}/{VALIDATIONS_BASE_DIRECTORY}/"
     )
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
     DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         "evaluation_parameters/"
     )
+    DATA_DOCS_BASE_DIRECTORY = "data_docs"
+    DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = (
+        f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
+    )
+
+    # Datasource
+    DEFAULT_DATASOURCE_STORE_NAME = "datasource_store"
 
     # Checkpoints
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
@@ -1803,7 +1812,7 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{PROFILERS_BASE_DIRECTORY}/"
 
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
-    DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
+    DEFAULT_CONFIG_VARIABLES_FILEPATH = f"{UNCOMMITTED}/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
     DEFAULT_VALIDATION_OPERATORS = {
@@ -1866,7 +1875,7 @@ class DataContextConfigDefaults(enum.Enum):
             "show_how_to_buttons": True,
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/local_site/",
+                "base_directory": f"{DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME}/local_site/",
             },
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
@@ -3133,6 +3142,7 @@ class CheckpointConfig(BaseYamlConfig):
         from great_expectations.checkpoint.util import (
             get_substituted_validation_dict,
             get_validations_with_batch_request_as_dict,
+            validate_validation_dict,
         )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
@@ -3164,7 +3174,7 @@ class CheckpointConfig(BaseYamlConfig):
         batch_request = substituted_runtime_config.get("batch_request")
         if len(validations) == 0 and not batch_request:
             raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{checkpoint.name}" must contain either a batch_request or validations.'
+                f'Checkpoint "{checkpoint.name}" configuration must contain either a batch_request or validations.'
             )
 
         if run_name is None and run_name_template is not None:
@@ -3179,6 +3189,10 @@ class CheckpointConfig(BaseYamlConfig):
             substituted_validation_dict: dict = get_substituted_validation_dict(
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
+            )
+            validate_validation_dict(
+                validation_dict=substituted_validation_dict,
+                batch_request_required=False,
             )
             validation_batch_request: BatchRequestBase = substituted_validation_dict.get(  # type: ignore[assignment]
                 "batch_request"
