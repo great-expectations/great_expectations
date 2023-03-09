@@ -124,7 +124,7 @@ class XMLAsset(_PandasDataAsset): ...
 
 class DataFrameAsset(_PandasDataAsset):
     type: Literal["dataframe"]
-    dataframe: _PandasDataFrameT
+    dataframe: _PandasDataFrameT  # type: ignore[valid-type]
 
     def _validate_dataframe(cls, dataframe: pd.DataFrame) -> pd.DataFrame: ...
     def _get_reader_method(self) -> str: ...
@@ -134,7 +134,7 @@ class DataFrameAsset(_PandasDataAsset):
 
 class _PandasDatasource(Datasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
-    assets: MutableMapping[str, _DataAssetT]
+    assets: MutableMapping[str, _DataAssetT]  # type: ignore[valid-type]
     @property
     def execution_engine_type(self) -> Type[PandasExecutionEngine]: ...
     def test_connection(self, test_assets: bool = ...) -> None: ...
