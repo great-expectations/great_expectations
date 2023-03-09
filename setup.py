@@ -1,12 +1,11 @@
 import re
-from glob import glob
+import sys
 
 import pkg_resources
 from setuptools import find_packages, setup
 
 import versioneer
 from pathlib import Path
-
 
 def get_extras_require():
     results = {}
@@ -36,24 +35,21 @@ def get_extras_require():
         "all-contrib-expectations",
     )
 
-    # Use Path() from pathlib so we can make this section of the code OS agnostic.
     requirements_dir = "reqs"
-    glob_path = Path(f"{requirements_dir}/*.txt")
     rx_name_part = re.compile(rf"requirements-dev-(.*).txt")
 
+    # Use Path() from pathlib so we can make this section of the code OS agnostic.
     # Loop through each requirement file and verify they are named
     # correctly and are in the right location.
-    for glob_file_name in glob(f"{glob_path}"):
-        path_to_file = Path(glob_file_name)
-        file_name = path_to_file.name
-        match = rx_name_part.match(file_name)
+    for path_and_file_name in Path().glob(f"{requirements_dir}/*.txt"):
+        match = rx_name_part.match(path_and_file_name.name)
         assert (
             match is not None
         ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
         key = match.group(1)
         if key in ignore_keys:
             continue
-        with open(glob_file_name) as parsed_file:
+        with open(path_and_file_name) as parsed_file:
             parsed = [str(req) for req in pkg_resources.parse_requirements(parsed_file)]
             results[key] = parsed
 
@@ -74,7 +70,6 @@ def get_extras_require():
     [all_requirements_set.update(vals) for vals in results.values()]
     results["dev"] = sorted(all_requirements_set)
     return results
-
 
 # Parse requirements.txt
 with open("requirements.txt") as f:
