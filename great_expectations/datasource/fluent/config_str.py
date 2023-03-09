@@ -14,6 +14,17 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ConfigStr(SecretStr):
+    """
+    Special type that enables great_expectation config variable substitution.
+
+    To enable config substitution for Fluent Datasources or DataAsset fields must be of
+    the `ConfigStr` type, or a union containing this type.
+
+    Note: this type is meant to used as part of pydantic model.
+    To use this outside of a model see the pydantic docs below.
+    https://docs.pydantic.dev/usage/models/#parsing-data-into-a-specified-type
+    """
+
     def __init__(
         self,
         template_str: str,
