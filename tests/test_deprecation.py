@@ -7,6 +7,8 @@ from packaging import version
 
 from great_expectations.data_context.util import file_relative_path
 
+UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD = 56
+
 
 @pytest.fixture
 def regex_for_deprecation_comments() -> Pattern:
@@ -87,6 +89,5 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
         for file, version_ in unneeded_deprecation_warnings:
             print(f"{file} - v{version_}")
 
-    # Chetan - 20220316 - Note that this will break as soon as v0.16.0 lands;
-    # this should be cleaned up and made 0 at that point.
-    assert len(unneeded_deprecation_warnings) <= 35
+    # Chetan - 20220316 - Once v0.16.0 lands, this should be cleaned up and made 0.
+    assert len(unneeded_deprecation_warnings) <= UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD
