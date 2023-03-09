@@ -396,22 +396,32 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
 
-        Excludes sqlalchemy Engines and sqlite3 Connections found in `con` field.
+        Excludes sqlalchemy Engines and sqlite3 Connections found in fields.
         """
-        self.__fields_set__.update(_FIELDS_ALWAYS_SET)
         if "assets" in self.__fields_set__:
+            exclude_types_from_json = (sqlite3.Connection,)
+            try:
+                import sqlalchemy
+
+                exclude_types_from_json = exclude_types_from_json + (
+                    sqlalchemy.engine.Engine,
+                )
+            except ImportError:
+                sqlalchemy = NotImported()
             for asset in self.assets.values():
-                if "con" in asset.__fields__:
-                    try:
-                        import sqlalchemy
-                    except ImportError:
-                        sqlalchemy = NotImported(
-                            "sqlalchemy not found, please install."
-                        )
-                    if not isinstance(sqlalchemy, NotImported) and isinstance(
-                        asset.con, (sqlalchemy.engine.Engine, sqlite3.Connection)
-                    ):
-                        asset.__fields_set__.remove("con")
+                # don't check fields that should always be set
+                check_fields: set[str] = asset.__fields_set__.copy().difference(
+                    _FIELDS_ALWAYS_SET
+                )
+                for field in check_fields:
+                    # TODO: a more appropriate approach than what was done below (using __fields_set__) would be to
+                    #       use exclude but, the excluded set is dropped by pydantic for unknown reasons between calls
+                    #       to super().super().json() and super().dict(). This is possibly a pydantic bug.
+                    # remove any field that has a sqlalchemy Engine or sqlite3 Connection
+                    # from __fields_set__ which has the effect of excluding from pydantic serialization.
+                    if isinstance(getattr(asset, field), exclude_types_from_json):
+                        asset.__fields_set__.remove(field)
+
         return super().json(
             include=include,
             exclude=exclude,
