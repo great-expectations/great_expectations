@@ -1,5 +1,6 @@
 import re
 from glob import glob
+from pathlib import Path
 
 import pkg_resources
 from setuptools import find_packages, setup
@@ -34,18 +35,26 @@ def get_extras_require():
         "tools",
         "all-contrib-expectations",
     )
+
+    # Use Path() from pathlib so we can make this section of the code OS agnostic.
     requirements_dir = "reqs"
-    rx_fname_part = re.compile(rf"{requirements_dir}/requirements-dev-(.*).txt")
-    for fname in glob(f"{requirements_dir}/*.txt"):
-        match = rx_fname_part.match(fname)
+    glob_path = Path(f"{requirements_dir}/*.txt")
+    rx_name_part = re.compile(r"requirements-dev-(.*).txt")
+
+    # Loop through each requirement file and verify they are named
+    # correctly and are in the right location.
+    for glob_file_name in glob(f"{glob_path}"):
+        path_to_file = Path(glob_file_name)
+        file_name = path_to_file.name
+        match = rx_name_part.match(file_name)
         assert (
             match is not None
         ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
         key = match.group(1)
         if key in ignore_keys:
             continue
-        with open(fname) as f:
-            parsed = [str(req) for req in pkg_resources.parse_requirements(f)]
+        with open(glob_file_name) as parsed_file:
+            parsed = [str(req) for req in pkg_resources.parse_requirements(parsed_file)]
             results[key] = parsed
 
     lite = results.pop("lite")
@@ -88,6 +97,7 @@ config = {
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
+    "package_data": {"great_expectations": ["py.typed"]},
     "name": "great_expectations",
     "long_description": long_description,
     "license": "Apache-2.0",
