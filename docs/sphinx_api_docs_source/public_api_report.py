@@ -1764,7 +1764,8 @@ class PublicAPIReport:
 
 
 def _repo_root() -> pathlib.Path:
-    return pathlib.Path(__file__).parent.parent
+    repo_root_path = pathlib.Path(__file__).parents[2]
+    return repo_root_path
 
 
 def _default_doc_example_absolute_paths() -> Set[pathlib.Path]:
