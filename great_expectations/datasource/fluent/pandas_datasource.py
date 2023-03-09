@@ -230,8 +230,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
-
-        Excludes exclude_types if found in fields.
         """
         exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(
             include_exclude=exclude
@@ -454,8 +452,6 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
-
-        Excludes exclude_types if found in asset fields.
         """
         exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(
             include_exclude=exclude
