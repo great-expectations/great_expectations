@@ -17,7 +17,7 @@ def print_add_asset_method_signatures(datasource_class: Type[Datasource]):
         signature: Signature = method.__signature__
         for name, param in signature.parameters.items():
             if param.kind == Parameter.VAR_KEYWORD:
-                print(f") -> {asset_type.__name__}\n\t...")
+                print(f") -> {asset_type.__name__}:\n\t...")
                 continue
 
             annotation = param.annotation
