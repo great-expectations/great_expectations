@@ -1,7 +1,21 @@
+from typing import cast
 from unittest import mock
+
+import pytest
 
 from great_expectations.cli.batch_request import (
     _get_data_asset_name_from_data_connector,
+    _is_data_connector_of_type,
+    get_batch_request,
+    _print_configured_asset_sql_data_connector_message,
+)
+from great_expectations.datasource import (
+    Datasource,
+    SimpleSqlalchemyDatasource,
+    BaseDatasource,
+)
+from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
+    ConfiguredAssetSqlDataConnector,
 )
 
 
@@ -61,3 +75,72 @@ def test_get_data_asset_name_from_data_connector_with_search(
         mock_datasource, "my_data_connector", "my message prompt"
     )
     assert data_asset_name == target_file
+
+
+def test__print_configured_asset_sql_data_connector_message_prints_message(
+    capsys,
+):
+    class DummyDataConnector:
+        pass
+
+    data_connector = DummyDataConnector()
+    data_connector_name: str = "data_connector_name"
+
+    class MockDatasource:
+        @property
+        def data_connectors(self) -> dict:
+            return {data_connector_name: data_connector}
+
+    datasource = MockDatasource()
+
+    assert _is_data_connector_of_type(
+        datasource=datasource,  # type: ignore[arg-type]
+        data_connector_name=data_connector_name,
+        data_connector_type=DummyDataConnector,
+    )
+
+    _print_configured_asset_sql_data_connector_message(
+        datasource=datasource,  # type: ignore[arg-type]
+        data_connector_name=data_connector_name,
+        data_connector_type=DummyDataConnector,
+    )
+
+    output = capsys.readouterr().out
+
+    assert "Need to configure a new Data Asset?" in output
+
+
+def test__print_configured_asset_sql_data_connector_message_doesnt_print_message(
+    capsys,
+):
+    class DummyDataConnector:
+        pass
+
+    data_connector = DummyDataConnector()
+    data_connector_name: str = "data_connector_name"
+
+    class MockDatasource:
+        @property
+        def data_connectors(self) -> dict:
+            return {data_connector_name: data_connector}
+
+    datasource = MockDatasource()
+
+    class Dummy:
+        pass
+
+    assert not _is_data_connector_of_type(
+        datasource=datasource,  # type: ignore[arg-type]
+        data_connector_name=data_connector_name,
+        data_connector_type=Dummy,
+    )
+
+    _print_configured_asset_sql_data_connector_message(
+        datasource=datasource,  # type: ignore[arg-type]
+        data_connector_name=data_connector_name,
+        data_connector_type=Dummy,
+    )
+
+    output = capsys.readouterr().out
+
+    assert output == ""
