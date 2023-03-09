@@ -20,18 +20,6 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
 )
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset as CSVAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    ExcelAsset as ExcelAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    JSONAsset as JSONAsset,
-)
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    ParquetAsset as ParquetAsset,
-)
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent import Sorter
@@ -41,6 +29,21 @@ if TYPE_CHECKING:
         FilePath,
         IndexLabel,
         StorageOptions,
+    )
+    from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+        CSVAsset,
+        ExcelAsset,
+        FeatherAsset,
+        HDFAsset,
+        HTMLAsset,
+        JSONAsset,
+        ORCAsset,
+        ParquetAsset,
+        PickleAsset,
+        SASAsset,
+        SPSSAsset,
+        STATAAsset,
+        XMLAsset,
     )
 
 logger: Logger
