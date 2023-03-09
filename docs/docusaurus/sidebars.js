@@ -26,7 +26,7 @@ module.exports = {
             'guides/setup/installation/hosted_environment',
             {
               type: 'category',
-              label: 'Optional dependencies for cloud storage',
+              label: 'Installation with cloud storage dependencies',
               items: [
                 {
                   type: 'doc',
@@ -44,7 +44,7 @@ module.exports = {
             },
             {
               type: 'category',
-              label: 'Optional dependencies for SQL databases',
+              label: 'Installation with SQL dependencies',
               items: [
                 {
                   type: 'doc',
@@ -163,7 +163,8 @@ module.exports = {
           type: 'category',
           label: 'SQL database Datasources',
           items: [
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas'
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark'
           ]
         },
         {
