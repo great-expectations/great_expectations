@@ -138,4 +138,4 @@ class GxConfig(FluentBaseModel):
                     raise
 
         # noinspection PyTypeChecker
-        return GxConfig, super().parse_yaml(f)
+        return super().parse_yaml(f)
