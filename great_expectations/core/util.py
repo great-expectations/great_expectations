@@ -403,7 +403,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return data.to_json_dict()
 
     # PySpark schema serialization
-    if StructType and isinstance(data, StructType):
+    if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
 
     raise TypeError(

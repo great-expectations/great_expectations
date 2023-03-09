@@ -73,7 +73,7 @@ def run_checkpoint_and_data_doc(
     }
     metadata = validator.active_batch.metadata
     if isinstance(datasource, PandasDatasource):
-        checkpoint_name = f"single_batch_checkpoint"
+        checkpoint_name = "single_batch_checkpoint"
     else:
         checkpoint_name = (
             f"batch_with_year_{metadata['year']}_month_{metadata['month']}_{suite_name}"
