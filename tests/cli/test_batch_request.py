@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import cast
 from unittest import mock
 
 import pytest
@@ -8,16 +7,7 @@ import pytest
 from great_expectations.cli.batch_request import (
     _get_data_asset_name_from_data_connector,
     _is_data_connector_of_type,
-    get_batch_request,
     _print_configured_asset_sql_data_connector_message,
-)
-from great_expectations.datasource import (
-    Datasource,
-    SimpleSqlalchemyDatasource,
-    BaseDatasource,
-)
-from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
-    ConfiguredAssetSqlDataConnector,
 )
 
 
