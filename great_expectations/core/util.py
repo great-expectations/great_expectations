@@ -33,7 +33,6 @@ from IPython import get_ipython
 from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -43,6 +42,9 @@ from great_expectations.types.base import SerializableDotDict
 # Updated from the stack overflow version below to concatenate lists
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
+
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
 
 logger = logging.getLogger(__name__)
 
@@ -285,6 +287,11 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 
+    from great_expectations.core.batch_spec import PandasBatchSpec
+
+    if isinstance(data, PandasBatchSpec):
+        return data.to_json_dict()
+
     # Handling "float(nan)" separately is required by Python-3.6 and Pandas-0.23 versions.
     if isinstance(data, float) and np.isnan(data):
         return None
@@ -423,6 +430,11 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     """
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
+        return
+
+    from great_expectations.core.batch_spec import PandasBatchSpec
+
+    if isinstance(data, PandasBatchSpec):
         return
 
     if isinstance(data, ((str,), (int,), float, bool)):
