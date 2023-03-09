@@ -286,11 +286,11 @@ def _recursively_set_config_value(
         for k, v in data.items():
             if isinstance(v, ConfigStr):
                 data[k] = v.get_config_value(config_provider)
-            elif isinstance(v, (dict, list)):
+            elif isinstance(v, (MutableMapping, MutableSequence)):
                 return _recursively_set_config_value(v, config_provider)
     elif isinstance(data, MutableSequence):
         for i, v in enumerate(data):
             if isinstance(v, ConfigStr):
                 data[i] = v.get_config_value(config_provider)
-            elif isinstance(v, (dict, list)):
+            elif isinstance(v, (MutableMapping, MutableSequence)):
                 return _recursively_set_config_value(v, config_provider)
