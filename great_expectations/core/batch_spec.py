@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, List
 
 from great_expectations.core.id_dict import BatchSpec
 from great_expectations.exceptions import InvalidBatchIdError, InvalidBatchSpecError
+from great_expectations.types.base import SerializableDotDict
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues, PathStr
@@ -34,7 +35,7 @@ class BatchMarkers(BatchSpec):
         return self.get("ge_load_time")
 
 
-class PandasBatchSpec(BatchSpec, metaclass=ABCMeta):
+class PandasBatchSpec(SerializableDotDict, BatchSpec, metaclass=ABCMeta):
     @property
     def reader_method(self) -> str:
         return self["reader_method"]

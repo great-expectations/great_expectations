@@ -287,11 +287,6 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 
-    from great_expectations.core.batch_spec import PandasBatchSpec
-
-    if isinstance(data, PandasBatchSpec):
-        return data.to_json_dict()
-
     # Handling "float(nan)" separately is required by Python-3.6 and Pandas-0.23 versions.
     if isinstance(data, float) and np.isnan(data):
         return None
@@ -411,11 +406,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
 
-    else:
-        raise TypeError(
-            f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
-        )
-    return None
+    raise TypeError(
+        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+    )
 
 
 def ensure_json_serializable(data):  # noqa: C901 - complexity 21
@@ -430,11 +423,6 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     """
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
-        return
-
-    from great_expectations.core.batch_spec import PandasBatchSpec
-
-    if isinstance(data, PandasBatchSpec):
         return
 
     if isinstance(data, ((str,), (int,), float, bool)):

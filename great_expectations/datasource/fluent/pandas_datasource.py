@@ -240,8 +240,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
         for field in check_fields:
             if isinstance(getattr(self, field), tuple(_EXCLUDE_TYPES_FROM_JSON)):
-                # ellipsis indicates that the entire field should be excluded
-                exclude_fields[field] = ...
+                exclude_fields[field] = True
 
         return super().json(
             include=include,
