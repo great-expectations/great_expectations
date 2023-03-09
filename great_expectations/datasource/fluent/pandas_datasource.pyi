@@ -133,6 +133,8 @@ class _PandasDatasource(Datasource):
         **dumps_kwargs: Any
     ) -> str: ...
 
+_DYNAMIC_ASSET_TYPES: list[Type[_PandasDataAsset]]
+
 class PandasDatasource(_PandasDatasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
     type: Literal["pandas"]
