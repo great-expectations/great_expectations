@@ -147,7 +147,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex

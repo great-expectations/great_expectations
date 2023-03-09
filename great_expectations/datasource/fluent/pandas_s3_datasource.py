@@ -122,7 +122,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             prefix: S3 object name prefix
             delimiter: S3 object name delimiter
             max_keys: S3 max_keys (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -175,7 +175,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             prefix: S3 object name prefix
             delimiter: S3 object name delimiter
             max_keys: S3 object name max_keys (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -228,7 +228,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             prefix: S3 object name prefix
             delimiter: S3 object name delimiter
             max_keys: S3 object name max_keys (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -281,7 +281,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             prefix: S3 object name prefix
             delimiter: S3 object name delimiter
             max_keys: S3 object name max_keys (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
