@@ -38,11 +38,9 @@ COMPLEX_CONFIG_DICT = {
     "fluent_datasources": {
         "my_pg_ds": {
             "connection_string": "postgresql://userName:@hostname/dbName",
-            "name": "my_pg_ds",
             "type": "postgres",
             "assets": {
                 "my_table_asset_wo_splitters": {
-                    "name": "my_table_asset_wo_splitters",
                     "table_name": "my_table",
                     "type": "table",
                 },
@@ -51,7 +49,6 @@ COMPLEX_CONFIG_DICT = {
                         "column_name": "my_column",
                         "method_name": "split_on_year_and_month",
                     },
-                    "name": "with_splitter",
                     "table_name": "another_table",
                     "type": "table",
                 },
@@ -60,13 +57,11 @@ COMPLEX_CONFIG_DICT = {
                         {"key": "year"},
                         {"key": "month", "reverse": True},
                     ],
-                    "name": "with_sorters",
                     "table_name": "yet_another_table",
                     "type": "table",
                 },
                 "with_dslish_sorters": {
                     "order_by": ["year", "-month"],
-                    "name": "with_sorters",
                     "table_name": "yet_another_table",
                     "type": "table",
                 },
@@ -74,18 +69,15 @@ COMPLEX_CONFIG_DICT = {
         },
         "my_pandas_filesystem_ds": {
             "type": "pandas_filesystem",
-            "name": "my_pandas_filesystem_ds",
             "base_directory": __file__,
             "assets": {
                 "my_csv_asset": {
-                    "name": "my_csv_asset",
                     "type": "csv",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
                 "my_json_asset": {
-                    "name": "my_json_asset",
                     "type": "json",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
                     "orient": "records",
@@ -99,7 +91,6 @@ COMPLEX_CONFIG_JSON = json.dumps(COMPLEX_CONFIG_DICT)
 SIMPLE_DS_DICT = {
     "fluent_datasources": {
         "my_ds": {
-            "name": "my_ds",
             "type": "sql",
             "connection_string": "sqlite://",
         }
@@ -109,7 +100,6 @@ SIMPLE_DS_DICT = {
 COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
     "fluent_datasources": {
         "my_ds": {
-            "name": "my_ds",
             "type": "sql",
             "connection_string": "sqlite://",
         }
