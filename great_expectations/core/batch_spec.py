@@ -43,17 +43,18 @@ class PandasBatchSpec(BatchSpec, metaclass=ABCMeta):
     def reader_options(self) -> dict:
         return self.get("reader_options", {})
 
-    def to_json_dict(self) -> dict:
+    def to_json_dict(self) -> dict[str, dict | str]:
         from great_expectations.datasource.fluent.pandas_datasource import (
             _EXCLUDE_TYPES_FROM_JSON,
         )
 
-        json_dict = dict()
+        json_dict: dict[str, dict | str] = dict()
         json_dict["reader_method"] = self.reader_method
-        json_dict["reader_options"] = {}
-        for reader_option_name, reader_option in self.reader_options.items():
-            if not isinstance(reader_option, tuple(_EXCLUDE_TYPES_FROM_JSON)):
-                json_dict["reader_options"][reader_option_name] = reader_option
+        json_dict["reader_options"] = {
+            reader_option_name: reader_option
+            for reader_option_name, reader_option in self.reader_options.items()
+            if not isinstance(reader_option, tuple(_EXCLUDE_TYPES_FROM_JSON))
+        }
         return json_dict
 
 
