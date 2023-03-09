@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from logging import Logger
 from typing import (
     AbstractSet,
     Any,
@@ -19,7 +20,6 @@ from typing import (
 import pandas as pd
 import pydantic
 import sqlalchemy
-from _typeshed import Incomplete
 from typing_extensions import Literal
 
 from great_expectations.core.batch_spec import (
@@ -69,7 +69,7 @@ from great_expectations.validator.validator import Validator as Validator
 
 MappingIntStrAny = Mapping[Union[int, str], Any]
 AbstractSetIntStr = AbstractSet[Union[int, str]]
-logger: Incomplete
+logger: Logger
 _PandasDataFrameT = TypeVar("_PandasDataFrameT")
 
 class PandasDatasourceError(Exception): ...
@@ -78,7 +78,7 @@ class _PandasDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]]
 
     class Config:
-        extra: Incomplete
+        extra: pydantic.Extra.allow
     def _get_reader_method(self) -> str: ...
     def test_connection(self) -> None: ...
     def batch_request_options_template(self) -> BatchRequestOptions: ...
@@ -129,7 +129,7 @@ class DataFrameAsset(_PandasDataAsset):
     dataframe: _PandasDataFrameT
 
     class Config:
-        extra: Incomplete
+        extra: pydantic.Extra.forbid
     def _validate_dataframe(cls, dataframe: pd.DataFrame) -> pd.DataFrame: ...
     def _get_reader_method(self) -> str: ...
     def get_batch_list_from_batch_request(
@@ -159,7 +159,6 @@ class _PandasDatasource(Datasource):
 
 class PandasDatasource(_PandasDatasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
-    _data_context: Incomplete
     type: Literal["pandas"]
     assets: Dict[str, _PandasDataAsset]
     def test_connection(self, test_assets: bool = ...) -> None: ...
