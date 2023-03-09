@@ -49,6 +49,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.validator.validator import Validator
 
+_EXCLUDE_TYPES_FROM_JSON: list[Type]
+
 MappingIntStrAny = Mapping[Union[int, str], Any]
 AbstractSetIntStr = AbstractSet[Union[int, str]]
 logger: Logger
