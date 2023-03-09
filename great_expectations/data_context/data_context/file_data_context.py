@@ -27,6 +27,7 @@ from great_expectations.datasource.fluent.config import GxConfig
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context.store.datasource_store import (
         DatasourceStore,
     )
@@ -158,7 +159,7 @@ class FileDataContext(SerializableDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def _load_fluent_config(self) -> GxConfig:
+    def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:
         logger.info(f"{type(self).__name__} loading fluent config")
         if not self.root_directory:
             logger.warning("`root_directory` not set, cannot load fluent config")
@@ -169,7 +170,7 @@ class FileDataContext(SerializableDataContext):
 
                 # attach the config_provider for each loaded datasource
                 for datasource in gx_config.datasources.values():
-                    datasource._config_provider = self.config_provider
+                    datasource._config_provider = config_provider
 
                 return gx_config
             logger.info(f"no fluent config at {path_to_fluent_yaml.absolute()}")
