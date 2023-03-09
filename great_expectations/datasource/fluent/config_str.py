@@ -39,7 +39,8 @@ class ConfigStr(SecretStr):
             return v
         raise ValueError(
             cls.__name__
-            + r" - contains no config template strings in the format '${MY_CONFIG_VAR}'"
+            + " - contains no config template strings in the format"
+            + r" '${MY_CONFIG_VAR}' or '$MY_CONFIG_VAR'"
         )
 
     @classmethod
