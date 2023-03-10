@@ -439,6 +439,13 @@ module.exports = {
       ]
     },
     { type: 'doc', id: 'changelog' },
-    { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
+    { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+    {
+      type: 'category',
+      label: 'GX Cloud',
+      items: [
+        { type: 'doc', id: 'gx_cloud/tutorials/getting_started/getting_started_with_gx_cloud', label: 'Getting Started' },
+      ]
+    },
   ]
 }
