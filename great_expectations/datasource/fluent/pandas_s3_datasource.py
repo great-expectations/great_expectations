@@ -9,6 +9,9 @@ from typing_extensions import Literal
 
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed at runtime
+)
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
@@ -55,7 +58,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
 
     # S3 specific attributes
     bucket: str
-    boto3_options: Dict[str, Any] = {}
+    boto3_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _s3_client: Union[BaseClient, None] = pydantic.PrivateAttr(default=None)
 
