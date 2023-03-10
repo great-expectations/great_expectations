@@ -395,14 +395,14 @@ def test_BasicSuiteBuilderProfiler_raises_error_on_non_existent_column_on_pandas
 def test_BasicSuiteBuilderProfiler_with_context(filesystem_csv_data_context):
     context = filesystem_csv_data_context
 
-    context.create_expectation_suite("default")
+    context.add_expectation_suite("default")
     datasource = context.datasources["rad_datasource"]
     base_dir = datasource.config["batch_kwargs_generators"]["subdir_reader"][
         "base_directory"
     ]
     batch_kwargs = {
         "datasource": "rad_datasource",
-        "path": os.path.join(base_dir, "f1.csv"),
+        "path": os.path.join(base_dir, "f1.csv"),  # noqa: PTH118
     }
     batch = context.get_batch(batch_kwargs, "default")
     expectation_suite, validation_results = BasicSuiteBuilderProfiler.profile(

@@ -55,6 +55,7 @@ from packaging import version
 from pkg_resources import Distribution
 from typing_extensions import Literal, TypeGuard
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -72,7 +73,7 @@ try:
     import importlib.metadata as importlib_metadata
 except ModuleNotFoundError:
     # Fallback for python < 3.8
-    import importlib_metadata  # type: ignore[no-redef]
+    import importlib_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -191,7 +192,7 @@ def measure_execution_time(
 
     Args:
         execution_time_holder_object_reference_name: Handle, provided in "kwargs", holds execution time property setter.
-        execution_time_property_name: Property attribute nane, provided in "kwargs", sets execution time value.
+        execution_time_property_name: Property attribute name, provided in "kwargs", sets execution time value.
         method: Name of method in "time" module (default: "process_time") to be used for recording timestamps.
         pretty_print: If True (default), prints execution time summary to standard output; if False, "silent" mode.
         include_arguments: If True (default), prints arguments of function, whose execution time is measured.
@@ -401,7 +402,7 @@ def is_library_loadable(library_name: str) -> bool:
     return module_obj is not None
 
 
-def load_class(class_name: str, module_name: str):
+def load_class(class_name: str, module_name: str) -> Any:
     if class_name is None:
         raise TypeError("class_name must not be None")
     if not isinstance(class_name, str):
@@ -419,6 +420,7 @@ def load_class(class_name: str, module_name: str):
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
+
     try:
         klass_ = getattr(module_obj, class_name)
     except AttributeError:
@@ -1092,7 +1094,7 @@ def gen_directory_tree_str(startpath):
     for root, dirs, files in tuples:
         level = root.replace(startpath, "").count(os.sep)
         indent = " " * 4 * level
-        output_str += f"{indent}{os.path.basename(root)}/\n"
+        output_str += f"{indent}{os.path.basename(root)}/\n"  # noqa: PTH119
         subindent = " " * 4 * (level + 1)
 
         files.sort()
@@ -1873,7 +1875,10 @@ def get_context(
         EphemeralDataContext,
         FileDataContext,
     )
-    from great_expectations.data_context.types.base import DataContextConfig
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
+    )
 
     # If available and applicable, convert project_config mapping into a rich config type
     if project_config:
@@ -1926,12 +1931,26 @@ def get_context(
 
     # Second, check for which type of local
     # Prioritize FileDataContext but default to EphemeralDataContext if no context_root_dir
-    if context_root_dir or not project_config:
+    if not context_root_dir:
+        try:
+            context_root_dir = FileDataContext.find_context_root_dir()
+        except gx_exceptions.ConfigNotFoundError:
+            logger.info("Could not find local context root directory")
+
+    if context_root_dir:
         return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
+
+    if not project_config:
+        project_config = DataContextConfig(
+            store_backend_defaults=InMemoryStoreBackendDefaults(
+                init_temp_docs_sites=True
+            )
+        )
+
     return EphemeralDataContext(
         project_config=project_config,
         runtime_environment=runtime_environment,
@@ -2133,3 +2152,20 @@ def numpy_quantile(
         )
 
     return quantile
+
+
+class NotImported:
+    def __init__(self, message: str):
+        self.__dict__["gx_error_message"] = message
+
+    def __getattr__(self, attr: str) -> Any:
+        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
+
+    def __setattr__(self, key: str, value: Any) -> None:
+        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
+
+    def __call__(self, *args, **kwargs) -> Any:
+        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
+
+    def __str__(self) -> str:
+        return self.__dict__["gx_error_message"]

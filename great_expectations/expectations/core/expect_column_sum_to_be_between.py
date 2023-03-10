@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     render_evaluation_parameter_string,
@@ -191,18 +192,19 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
 
     """ A Column Map Metric Decorator for the Sum"""
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        The configuration will be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
@@ -304,7 +306,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,

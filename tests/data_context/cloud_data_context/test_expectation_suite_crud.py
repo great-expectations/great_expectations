@@ -8,6 +8,9 @@ from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
+)
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
@@ -300,7 +303,7 @@ def test_create_expectation_suite_saves_suite_to_cloud(
 
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ):
+    ), pytest.deprecated_call():
         mock_list_expectation_suite_names.return_value = existing_suite_names
         suite = context.create_expectation_suite(suite_name)
 
@@ -323,7 +326,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
 
     with mock.patch(
         "great_expectations.data_context.data_context.cloud_data_context.CloudDataContext.expectations_store"
-    ):
+    ), pytest.deprecated_call():
         mock_list_expectation_suite_names.return_value = existing_suite_names
         mock_list_expectation_suites.return_value = [
             GXCloudIdentifier(
@@ -350,7 +353,7 @@ def test_create_expectation_suite_namespace_collision_raises_error(
     suite_name = "my_suite"
     existing_suite_names = [suite_name]
 
-    with pytest.raises(DataContextError) as e:
+    with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_list_expectation_suite_names.return_value = existing_suite_names
         context.create_expectation_suite(suite_name)
 
@@ -417,7 +420,7 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
             params={"name": suite_1.name},
         )
 
-    assert str(suite.ge_cloud_id) == str(suite_id)
+    assert suite.ge_cloud_id == suite_id
 
 
 @pytest.mark.unit
@@ -438,6 +441,17 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 
 @pytest.mark.unit
 @pytest.mark.cloud
+def test_get_expectation_suite_no_identifier_raises_error(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+) -> None:
+    context = empty_base_data_context_in_cloud_mode
+
+    with pytest.raises(ValueError):
+        context.get_expectation_suite()
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
 def test_save_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
@@ -452,7 +466,7 @@ def test_save_expectation_suite_saves_suite_to_cloud(
 
     with mock.patch(
         "requests.Session.post", autospec=True, side_effect=mocked_post_response
-    ):
+    ), pytest.deprecated_call():
         context.save_expectation_suite(suite)
 
     assert suite.ge_cloud_id is not None
@@ -472,7 +486,9 @@ def test_save_expectation_suite_overwrites_existing_suite(
 
     with mock.patch(
         "requests.Session.put", autospec=True, return_value=mock.Mock(status_code=405)
-    ) as mock_put, mock.patch("requests.Session.patch", autospec=True) as mock_patch:
+    ) as mock_put, mock.patch(
+        "requests.Session.patch", autospec=True
+    ) as mock_patch, pytest.deprecated_call():
         context.save_expectation_suite(suite)
 
     expected_suite_json = {
@@ -507,7 +523,7 @@ def test_save_expectation_suite_no_overwrite_namespace_collision_raises_error(
 
     existing_suite_names = [suite_name]
 
-    with pytest.raises(DataContextError) as e:
+    with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_expectations_store_has_key.return_value = False
         mock_list_expectation_suite_names.return_value = existing_suite_names
         context.save_expectation_suite(
@@ -530,7 +546,7 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     suite_id = suite_1.id
     suite = ExpectationSuite(suite_name, ge_cloud_id=suite_id)
 
-    with pytest.raises(DataContextError) as e:
+    with pytest.raises(DataContextError) as e, pytest.deprecated_call():
         mock_expectations_store_has_key.return_value = True
         context.save_expectation_suite(
             expectation_suite=suite, overwrite_existing=False
@@ -546,3 +562,48 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     assert f"expectation_suite with GX Cloud ID {suite_id} already exists" in str(
         e.value
     )
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_add_or_update_expectation_suite_adds_new_obj(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+):
+    context = empty_base_data_context_in_cloud_mode
+    mock_expectations_store_has_key.return_value = True
+
+    name = "my_suite"
+    suite = ExpectationSuite(expectation_suite_name=name)
+
+    with mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
+        return_value=False,
+    ), mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.add",
+    ) as mock_add:
+        context.add_or_update_expectation_suite(expectation_suite=suite)
+
+    mock_add.assert_called_once()
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_add_or_update_expectation_suite_updates_existing_obj(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+):
+    context = empty_base_data_context_in_cloud_mode
+    mock_expectations_store_has_key.return_value = True
+
+    name = "my_suite"
+    id = "861955f0-121e-40ea-9f4f-7b4fc78d9225"
+    suite = ExpectationSuite(expectation_suite_name=name, ge_cloud_id=id)
+
+    with mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
+        return_value=True,
+    ), mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.update",
+    ) as mock_update:
+        context.add_or_update_expectation_suite(expectation_suite=suite)
+
+    mock_update.assert_called_once()

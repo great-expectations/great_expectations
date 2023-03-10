@@ -7,9 +7,10 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -36,7 +37,9 @@ from great_expectations.render.util import (
 )
 from great_expectations.util import get_pyathena_potential_type
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
@@ -118,6 +121,12 @@ try:
 except ImportError:
     teradatasqlalchemy = None
 
+try:
+    import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
+except ImportError:
+    trino = None
+
 
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     """Expect a column to contain values of a specified data type.
@@ -196,9 +205,27 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "type_",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_of_type` it is required that:
+
+        - `_type` has been provided.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -577,6 +604,19 @@ def _get_dialect_type_module(
             and teradatatypes is not None
         ):
             return teradatatypes
+    except (TypeError, AttributeError):
+        pass
+
+    # Trino types module
+    try:
+        if (
+            isinstance(
+                execution_engine.dialect,
+                trino.sqlalchemy.dialect.TrinoDialect,
+            )
+            and trinotypes is not None
+        ):
+            return trinotypes
     except (TypeError, AttributeError):
         pass
 

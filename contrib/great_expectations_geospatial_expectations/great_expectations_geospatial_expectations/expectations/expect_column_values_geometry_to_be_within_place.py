@@ -5,12 +5,7 @@ import pandas as pd
 import pygeos as geos
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -51,7 +46,7 @@ class ColumnValuesGeometryWithinPlace(ColumnMapMetricProvider):
                 # Specify the default parameters for Nominatim and run query. User is responsible for config and query params otherwise.
                 query_params = dict(exactly_one=True, geometry="wkt")
                 location = cls.geocode(geocoder, geocoder_config, place, query_params)
-            except:
+            except Exception:
                 raise Exception(
                     "Geocoding configuration and query failed to produce a valid result."
                 )

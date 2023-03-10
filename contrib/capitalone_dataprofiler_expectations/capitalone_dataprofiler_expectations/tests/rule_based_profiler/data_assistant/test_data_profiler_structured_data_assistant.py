@@ -1,16 +1,11 @@
 import os
+import unittest
 from typing import Dict, List, Optional, cast
 from unittest import mock
 
 import pytest
 
 # noinspection PyUnresolvedReferences
-import contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics
-
-# noinspection PyUnresolvedReferences
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant import (
-    DataProfilerStructuredDataAssistant,
-)
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
     DataProfilerStructuredDataAssistantResult,
 )
@@ -28,15 +23,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 # noinspection PyUnresolvedReferences
-from tests.conftest import (
-    bobby_columnar_table_multi_batch_deterministic_data_context,
-    bobby_columnar_table_multi_batch_probabilistic_data_context,
-    no_usage_stats,
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
-)
 
-test_root_path = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+# noinspection PyUnresolvedReferences
+
+test_root_path = os.path.dirname(  # noqa: PTH120
+    os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
 
 
@@ -62,7 +54,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
         numeric_rule={
-            "profile_path": os.path.join(
+            "profile_path": os.path.join(  # noqa: PTH118
                 test_root_path,
                 "data_profiler_files",
                 "profile.pkl",
@@ -99,7 +91,7 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
         batch_request=batch_request,
         exclude_column_names=exclude_column_names,
         numeric_rule={
-            "profile_path": os.path.join(
+            "profile_path": os.path.join(  # noqa: PTH118
                 test_root_path,
                 "data_profiler_files",
                 "profile.pkl",
@@ -195,7 +187,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
     ):
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
 
-    assert num_metrics == 14
+    assert num_metrics == 28
 
 
 @pytest.mark.integration

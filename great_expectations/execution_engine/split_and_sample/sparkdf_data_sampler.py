@@ -2,7 +2,7 @@ import hashlib
 import logging
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
@@ -18,11 +18,11 @@ try:
     from pyspark.sql import DataFrame
 
 except ImportError:
-    pyspark = None
-    DataFrame = None
-    F = None
+    pyspark = None  # type: ignore[assignment]
+    DataFrame = None  # type: ignore[assignment,misc]
+    F = None  # type: ignore[assignment]
     # noinspection SpellCheckingInspection
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
 
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."

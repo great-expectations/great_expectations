@@ -22,10 +22,10 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.semantic_type_filter import (
-    SemanticTypeFilter,
+    SemanticTypeFilter,  # noqa: TCH001
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 

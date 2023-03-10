@@ -66,9 +66,7 @@ def get_pandas_runtime_validator(context, df):
         },
     )
 
-    expectation_suite = context.create_expectation_suite(
-        "my_suite", overwrite_existing=True
-    )
+    expectation_suite = context.add_expectation_suite("my_suite")
 
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite=expectation_suite
@@ -97,9 +95,7 @@ def get_spark_runtime_validator(context, df):
         },
     )
 
-    expectation_suite = context.create_expectation_suite(
-        "my_suite", overwrite_existing=True
-    )
+    expectation_suite = context.add_expectation_suite("my_suite")
 
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite=expectation_suite
@@ -881,7 +877,7 @@ def test_profiled_dataset_passes_own_validation(
     )
     suite = profiler.build_suite()
 
-    context.save_expectation_suite(suite)
+    context.add_expectation_suite(expectation_suite=suite)
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[cardinality_validator]
     )
