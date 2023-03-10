@@ -36,6 +36,7 @@ resources:
 variables:
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
+  isManual: $[eq(variables['Build.Reason'], 'Manual')]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
 
 stages:
@@ -182,7 +183,12 @@ stages:
 
     - job: test_docs_postgresql
       timeoutInMinutes: 120
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
+      condition: or(
+        eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+        eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
+        eq(variables.isMain, true), 
+        eq(variables.isManual, true)
+        )
       variables:
         python.version: '3.8'
       services:
