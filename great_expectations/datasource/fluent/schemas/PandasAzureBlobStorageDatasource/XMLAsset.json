@@ -17,6 +17,7 @@
         },
         "id": {
             "title": "Id",
+            "description": "DataAsset id",
             "type": "string",
             "format": "uuid"
         },

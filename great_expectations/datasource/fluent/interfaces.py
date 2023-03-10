@@ -153,7 +153,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
-    id: Optional[uuid.UUID] = None
+    id: Optional[uuid.UUID] = Field(default=None, description="DataAsset id")
 
     order_by: List[Sorter] = Field(default_factory=list)
 
@@ -374,7 +374,7 @@ class Datasource(
     # instance attrs
     type: str
     name: str
-    id: Optional[uuid.UUID] = None
+    id: Optional[uuid.UUID] = Field(default=None, description="Datasource id")
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs

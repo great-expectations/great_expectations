@@ -17,6 +17,7 @@
         },
         "id": {
             "title": "Id",
+            "description": "Datasource id",
             "type": "string",
             "format": "uuid"
         },
@@ -300,6 +301,7 @@
                 },
                 "id": {
                     "title": "Id",
+                    "description": "DataAsset id",
                     "type": "string",
                     "format": "uuid"
                 },
@@ -373,6 +375,7 @@
                 },
                 "id": {
                     "title": "Id",
+                    "description": "DataAsset id",
                     "type": "string",
                     "format": "uuid"
                 },
