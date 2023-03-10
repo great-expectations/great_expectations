@@ -144,7 +144,7 @@ Now that we have defined our Expectations it is time for GX to introspect our da
 result = validator.validate()
 ```
 
-#### 4.1 Review your results
+#### 4.2 Review your results
 
 Once the `validator` object finishes executing the `validate()` command, you can view the results of your Validation through the code:
 
