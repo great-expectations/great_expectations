@@ -8,92 +8,69 @@ keywords: [Great Expectations, Pandas, Filesystem]
 <!-- Import statements start here. -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
+<!-- ### 1. Import GX and instantiate a Data Context -->
+import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
+
 ## Introduction
 
-In this guide we will demonstrate how to use Pandas to connect to data stored in a filesystem.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Pandas has read methods for.  There will be instructions for connecting to different types of files in the [Additional information](#additional-information) portion of this guide.
+In this guide we will demonstrate how to use Pandas to connect to data stored in a filesystem.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Pandas has read methods for.
 
 ## Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- Access to source data stored in a filesystem
+- Access to data that can be read into a Pandas dataframe
 - A passion for data quality
 
 </Prerequisites> 
 
 ## Steps
 
-### 1. Import the Great Expectations module
+### 1. Import the Great Expectations module and instantiate a Data context
+
+<ImportGxAndInstantiateADataContext />
+
+### 2. Create a Datasource
+
+To access our in-memory data, we will create a Pandas Datasource:
 
 ```python title="Python code"
-import great_expectations as gx
+datasource = context.sources.add_pandas(name="my_pandas_datasource")
 ```
 
-### 2. Instantiate a Data Context
+### 3. Read your source data into a Pandas Dataframe
 
-```python title="Python code"
-context = gx.get_context
-```
+For this example, we will read a `.parquet` file into a Pandas Dataframe.  We will then leverage Pandas to create a set of sampled data, which we will use in the rest of this guide.
 
-### 3. Create a Datasource
-
-:::note Example Data
-
-For this example, we are using a Pandas Dataframe as our source data.
-
-The Pandas Dataframe we are using in this step's examples is defined with:
+The code to create the Pandas Dataframe we are using in this guide is defined with:
 
 ```python title="Python code"
 import Pandas as pd
 
-df = pd.DataFrame(
-  {
-    "a": [1, 2, 3],
-    "b": [4, 5, 6]
-  }
-)
-```
-
-:::
-
-```python title="Python code"
-datasource = context.datasources.pandas_default.read_dataframe(dataframe=df)
+full_dataframe = pd.read_parquet("https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2022-11.parquet")
+sampled_dataframe = full_dataframe.sample(frac=0.05)
 ```
 
 ### 4. Add a Data Asset to the Datasource
 
-```python
-csv_file_name = "taxi_data.csv"
-data_asset = datasource.add_csv_asset(asset_name="MyTaxiDataAsset", regex=csv_file_name)
+A Pandas Dataframe Data Asset can be defined with two elements:
+- `name`: The name by which the Datasource will be referenced in the future
+- `dataframe`: An in-memory Pandas Dataframe containing the data to access
+
+We will use the `sampled_dataframe` from the previous step as our `dataframe` value.  For the `name` parameter, we will define a name in advance by storing it in the Python variable `asset_name`:
+
+```python title="Python code"
+asset_name="TaxiDataframe"
 ```
 
-Your Data Asset will connect to all files that match the regex that you provide.  Each matched file will become a Batch inside your Data Asset.
+Now that we have the `name` and `dataframe` for our Data Asset, we can create the Data Asset with the code:
 
-For example:
-
-Let's say that you have a filesystem Datasource pointing to a base folder that contains the following files:
-- "taxi_data_2019.csv"
-- "taxi_data_2020.csv"
-- "taxi_data.2021.csv"
-
-If you define a Data Asset using the full file name with no regex groups, such as `"taxi_data_2019.csv"` your Data Asset will contain only one Batch, which will correspond to that file.
-
-However, if you define a partial file name with a regex group, such as `"taxi_data_{?<year>\d{{4}}}.csv"` your Data Asset will contain 3 Batches, one corresponding to each matched file.
-
-:::tip Using Pandas to connect to different file types
-
-In this example, we are connecting to a `.csv` file.  However, Great Expectations supports connecting to most types of files that Pandas has `read_*` methods for.  
-
-Because you will be using Pandas to connect to these files, the specific `read_*` methods that will be available to you will be determined by your currently installed version of Pandas.  
-
-For more information on which Pandas `read_*` methods are available to you, please reference [the official Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html) for the version of Pandas that you have installed.
-
-In the GX Python API, `read_*` methods will require the same parameters as the corresponding Pandas `read_*` method, with one caveat: In Great Expectations, you will also be required to provide a value for an `asset_name` parameter.
-
-:::
-
+```python
+data_asset = datasource.add_dataframe(name=asset_name, dataframe=sampled_dataframe)
+```
 
 ### 5. Repeat step 4 as needed to add additional files as Data Assets
+
 
 ## Next steps
 
