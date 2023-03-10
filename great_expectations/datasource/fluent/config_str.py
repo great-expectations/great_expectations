@@ -33,6 +33,10 @@ class ConfigStr(SecretStr):
         self._secret_value = template_str  # for compatibility with SecretStr
 
     def get_config_value(self, config_provider: _ConfigurationProvider) -> str:
+        """
+        Resolve the config template string to its string value according to the passed
+        _ConfigurationProvider.
+        """
         return config_provider.substitute_config(self.template_str)
 
     def _display(self) -> str:
