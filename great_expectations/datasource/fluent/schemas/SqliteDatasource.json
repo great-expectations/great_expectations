@@ -15,6 +15,11 @@
             "title": "Name",
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "type": "string",
+            "format": "uuid"
+        },
         "assets": {
             "title": "Assets",
             "default": {},
@@ -293,6 +298,11 @@
                     ],
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
@@ -360,6 +370,11 @@
                         "query"
                     ],
                     "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "type": "string",
+                    "format": "uuid"
                 },
                 "order_by": {
                     "title": "Order By",
