@@ -42,9 +42,10 @@ def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`
     t["notnull"] = True
 
 
+WHITESPACE_CHARS = " \t"
 column_name = Combine(
     Suppress(Literal('col("'))
-    + Word(alphas, f"{alphanums}_.").setResultsName("column")
+    + Word(alphas, f"{alphanums}_-.").setResultsName("column")
     + Suppress(Literal('")'))
 )
 gt = Literal(">")
@@ -56,7 +57,7 @@ ne = Literal("!=")
 ops = (gt ^ lt ^ ge ^ le ^ eq ^ ne).setResultsName("op")
 fnumber = Regex(r"[+-]?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?").setResultsName("fnumber")
 punctuation_without_apostrophe = punctuation.replace('"', "").replace("'", "")
-condition_value_chars = alphanums + punctuation_without_apostrophe
+condition_value_chars = alphanums + punctuation_without_apostrophe + WHITESPACE_CHARS
 condition_value = Suppress('"') + Word(f"{condition_value_chars}._").setResultsName(
     "condition_value"
 ) + Suppress('"') ^ Suppress("'") + Word(f"{condition_value_chars}._").setResultsName(

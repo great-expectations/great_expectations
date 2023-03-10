@@ -895,7 +895,7 @@ class StoreValidationResultAction(ValidationAction):
 
         expectation_suite_ge_cloud_id = None
         if self._using_cloud_context and expectation_suite_identifier:
-            expectation_suite_ge_cloud_id = str(expectation_suite_identifier.cloud_id)
+            expectation_suite_ge_cloud_id = expectation_suite_identifier.cloud_id
 
         return_val = self.target_store.set(
             validation_result_suite_identifier,

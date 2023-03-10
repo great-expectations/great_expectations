@@ -192,13 +192,13 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
     ),
     IntegrationTestFixture(
-        name="databricks_deployment_patterns_file_yaml_configs",
+        name="databricks_deployment_patterns_dataframe_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
-        name="databricks_deployment_patterns_file_python_configs",
+        name="databricks_deployment_patterns_dataframe_python_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         extra_backend_dependencies=BackendDependencies.SPARK,
@@ -371,6 +371,13 @@ local_tests = [
     IntegrationTestFixture(
         name="how_to_configure_result_format_parameter",
         user_flow_script="tests/integration/docusaurus/reference/core_concepts/result_format.py",
+    ),
+    # Fluent Datasources
+    IntegrationTestFixture(
+        name="how_to_connect_to_one_or_more_files_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
 ]
 

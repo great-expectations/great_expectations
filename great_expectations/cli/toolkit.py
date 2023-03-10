@@ -38,8 +38,8 @@ from great_expectations.validator.validator import Validator  # noqa: TCH001
 if TYPE_CHECKING:
     from great_expectations.core.batch import JSONValues
     from great_expectations.datasource import LegacyDatasource
-    from great_expectations.experimental.datasources.interfaces import (
-        Datasource as XDatasource,
+    from great_expectations.datasource.fluent.interfaces import (
+        Datasource as FluentDatasource,
     )
 
 
@@ -359,10 +359,10 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
 
 def select_datasource(
     context: FileDataContext, datasource_name: Optional[str] = None
-) -> Union[BaseDatasource, LegacyDatasource, XDatasource, None]:
+) -> Union[BaseDatasource, LegacyDatasource, FluentDatasource, None]:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
-    data_source: Union[BaseDatasource, LegacyDatasource, XDatasource, None] = None
+    data_source: Union[BaseDatasource, LegacyDatasource, FluentDatasource, None] = None
 
     if datasource_name is None:
         data_sources: List[BaseDatasource] = cast(
@@ -1041,7 +1041,7 @@ def add_citation_with_batch_request(
             comment="Created suite added via CLI",
             batch_request=batch_request,  # type: ignore[arg-type] # values union
         )
-        data_context.save_expectation_suite(expectation_suite=expectation_suite)
+        data_context.update_expectation_suite(expectation_suite=expectation_suite)
 
 
 def get_batch_request_from_json_file(
@@ -1113,5 +1113,8 @@ def get_batch_request_using_datasource_name(
         datasource=datasource,  # type: ignore[arg-type] # could be LegacyDatasource
         additional_batch_request_args=additional_batch_request_args,
     )
+    if "data_asset_name" not in batch_request:
+        # Some datasources don't always provide this (`RuntimeDataConnector`)
+        batch_request["data_asset_name"] = "default_data_asset_name"
 
     return batch_request

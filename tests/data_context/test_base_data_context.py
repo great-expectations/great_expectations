@@ -213,10 +213,9 @@ def prepare_validator_for_cloud_e2e() -> Callable[
         for config in configs:
             suite.add_expectation(expectation_configuration=config)
 
-        context.save_expectation_suite(
+        suite.ge_cloud_id = expectation_suite_ge_cloud_id
+        context.add_or_update_expectation_suite(
             expectation_suite=suite,
-            ge_cloud_id=expectation_suite_ge_cloud_id,
-            overwrite_existing=True,
         )
 
         assert len(suite.expectations) == 4
@@ -331,7 +330,7 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     suite_on_context = context.get_expectation_suite(
         ge_cloud_id=expectation_suite_ge_cloud_id
     )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_ge_cloud_id == suite_on_context.ge_cloud_id
 
     validator.save_expectation_suite()
     assert len(validator.expectation_suite.expectations) == 5
@@ -341,5 +340,5 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     suite_on_context = context.get_expectation_suite(
         ge_cloud_id=expectation_suite_ge_cloud_id
     )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_ge_cloud_id == suite_on_context.ge_cloud_id
     assert len(suite_on_context.expectations) == 5

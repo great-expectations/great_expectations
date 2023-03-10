@@ -102,11 +102,11 @@ class CheckpointStore(ConfigurationStore):
         if not directory_path:
             return False
 
-        checkpoints_directory_path: str = os.path.join(
+        checkpoints_directory_path: str = os.path.join(  # noqa: PTH118
             directory_path,
             DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
         )
-        return os.path.isdir(checkpoints_directory_path)
+        return os.path.isdir(checkpoints_directory_path)  # noqa: PTH112
 
     def list_checkpoints(
         self, ge_cloud_mode: bool = False
@@ -240,7 +240,7 @@ class CheckpointStore(ConfigurationStore):
         name = checkpoint.name
         id = checkpoint.ge_cloud_id
         if id:
-            return self.determine_key(ge_cloud_id=str(id))
+            return self.determine_key(ge_cloud_id=id)
         return self.determine_key(name=name)
 
     def _persist_checkpoint(
@@ -252,7 +252,7 @@ class CheckpointStore(ConfigurationStore):
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
             cloud_id = checkpoint_ref.cloud_id
-            checkpoint.config.ge_cloud_id = uuid.UUID(cloud_id)
+            checkpoint.config.ge_cloud_id = cloud_id
         return checkpoint
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:

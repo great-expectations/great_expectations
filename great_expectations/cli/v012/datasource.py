@@ -413,7 +413,7 @@ def _add_pandas_datasource(
         else:
             basenamepath = path
 
-        datasource_name = f"{os.path.basename(basenamepath)}__dir"
+        datasource_name = f"{os.path.basename(basenamepath)}__dir"  # noqa: PTH119
         if prompt_for_datasource_name:
             datasource_name = click.prompt(
                 msg_prompt_datasource_name, default=datasource_name
@@ -423,7 +423,7 @@ def _add_pandas_datasource(
             batch_kwargs_generators={
                 "subdir_reader": {
                     "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "base_directory": os.path.join("..", path),
+                    "base_directory": os.path.join("..", path),  # noqa: PTH118
                 }
             }
         )
@@ -911,7 +911,7 @@ def _add_spark_datasource(
         else:
             basenamepath = path
 
-        datasource_name = f"{os.path.basename(basenamepath)}__dir"
+        datasource_name = f"{os.path.basename(basenamepath)}__dir"  # noqa: PTH119
         if prompt_for_datasource_name:
             datasource_name = click.prompt(
                 msg_prompt_datasource_name, default=datasource_name
@@ -921,7 +921,7 @@ def _add_spark_datasource(
             batch_kwargs_generators={
                 "subdir_reader": {
                     "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "base_directory": os.path.join("..", path),
+                    "base_directory": os.path.join("..", path),  # noqa: PTH118
                 }
             }
         )
@@ -1195,7 +1195,7 @@ We could not determine the format of the file. What is it?
         )
 
         if not path.startswith("gs:") and not path.startswith("s3"):
-            path = os.path.abspath(path)
+            path = os.path.abspath(path)  # noqa: PTH100
 
         batch_kwargs = {"path": path, "datasource": datasource_name}
 
