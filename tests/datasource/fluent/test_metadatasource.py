@@ -5,7 +5,7 @@ import inspect
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import ClassVar, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union
 
 import pytest
 from pydantic import DirectoryPath, validate_arguments
@@ -23,6 +23,10 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.core.config_provider import _ConfigurationProvider
+
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +71,7 @@ class DataContext:
         self.root_directory = context_root_dir
         self._sources: _SourceFactories = _SourceFactories(self)
         self._datasources: Dict[str, Datasource] = {}
+        self.config_provider: _ConfigurationProvider | None = None
         logger.info(f"4a. Available Factories - {self._sources.factories}")
         logger.debug(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 

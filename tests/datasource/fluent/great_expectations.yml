@@ -25,3 +25,6 @@ fluent_datasources:
         order_by:
           - year
           - -month
+  my_sqlite_ds_w_subs:
+    type: sqlite
+    connection_string: "${MY_CONN_STR}"
