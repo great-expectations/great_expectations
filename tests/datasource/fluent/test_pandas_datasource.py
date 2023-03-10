@@ -46,7 +46,7 @@ pytestmark = [
 
 @pytest.fixture
 def pandas_datasource() -> PandasDatasource:
-    return PandasDatasource(
+    return PandasDatasource(  # type: ignore[call-arg] # type field not required
         name="pandas_datasource",
     )
 
@@ -160,7 +160,7 @@ class TestDynamicPandasAssets:
 
         assert method_name in PandasDatasource.__dict__
 
-        ds = PandasDatasource(
+        ds = PandasDatasource(  # type: ignore[call-arg] # type field not required
             name="ds_for_testing_add_asset_methods",
         )
         method = getattr(ds, method_name)
@@ -186,7 +186,7 @@ class TestDynamicPandasAssets:
         type_name: str = _get_field_details(asset_class, "type").default_value
         method_name: str = f"add_{type_name}_asset"
 
-        ds = PandasDatasource(
+        ds = PandasDatasource(  # type: ignore[call-arg] # type field not required
             name="ds_for_testing_add_asset_methods",
         )
         method = getattr(ds, method_name)
@@ -284,7 +284,7 @@ class TestDynamicPandasAssets:
             {"filepath_or_buffer": csv_path / "yellow_tripdata_sample_2018-04.csv"}
         )
         batch_request = (
-            empty_data_context.sources.add_pandas(  # type: ignore[attr-defined] # .build_batch_request
+            empty_data_context.sources.add_pandas(
                 "my_pandas",
             )
             .add_csv_asset(
@@ -294,7 +294,7 @@ class TestDynamicPandasAssets:
             .build_batch_request()
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)
+            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # expects BatchRequestBase
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")

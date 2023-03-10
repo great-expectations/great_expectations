@@ -32,7 +32,16 @@
         },
         "connection_string": {
             "title": "Connection String",
-            "type": "string"
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                }
+            ]
         }
     },
     "required": [

@@ -24,8 +24,19 @@
         },
         "path_or_buffer": {
             "title": "Path Or Buffer",
-            "format": "file-path",
-            "type": "string"
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
         },
         "xpath": {
             "title": "Xpath",

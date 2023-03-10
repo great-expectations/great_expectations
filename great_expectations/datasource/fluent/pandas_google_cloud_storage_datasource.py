@@ -9,6 +9,9 @@ from typing_extensions import Literal
 
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed at runtime
+)
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
@@ -59,7 +62,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
 
     # Google Cloud Storage specific attributes
     bucket_or_name: str
-    gcs_options: Dict[str, Any] = {}
+    gcs_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _gcs_client: Union[GoogleCloudStorageClient, None] = pydantic.PrivateAttr(
         default=None
@@ -75,7 +78,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                         GoogleServiceAccountCredentials, None
                     ] = None  # If configured with gcloud CLI / env vars
                     if "filename" in self.gcs_options:
-                        filename: str = self.gcs_options.pop("filename")
+                        filename: str = str(self.gcs_options.pop("filename"))
                         credentials = (
                             service_account.Credentials.from_service_account_file(
                                 filename=filename
