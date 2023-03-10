@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import copy
 import functools
 import json
 import logging
 import pathlib
 import re
+import uuid
 from pprint import pformat as pf
 from pprint import pprint as pp
 from typing import TYPE_CHECKING, Callable, List
@@ -164,6 +167,11 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
 
 
 @pytest.fixture
+def ds_dict_config() -> dict:
+    return copy.deepcopy(COMPLEX_CONFIG_DICT)
+
+
+@pytest.fixture
 def sqlite_database_path() -> pathlib.Path:
     relative_path = pathlib.Path(
         "..",
@@ -240,6 +248,48 @@ class TestExcludeUnsetAssetFields:
             asset_dict
             == gx_config_dict["fluent_datasources"]["my_ds"]["assets"]["my_asset"]
         )
+
+
+def test_id_only_serialized_if_present(ds_dict_config: dict):
+    print(f"\tInput:\n\n{pf(ds_dict_config, depth=3)}")
+    all_ids: list[str] = []
+    with_ids: dict = {}
+    no_ids: dict = {}
+
+    # remove or add ids
+    for ds_name, ds in ds_dict_config["fluent_datasources"].items():
+
+        with_ids[ds_name] = copy.deepcopy(ds)
+        no_ids[ds_name] = copy.deepcopy(ds)
+
+        ds_id = uuid.uuid4()
+        all_ids.append(str(ds_id))
+        with_ids[ds_name]["id"] = ds_id
+
+        no_ids[ds_name].pop("id", None)
+
+        for asset_name in ds["assets"].keys():
+
+            asset_id = uuid.uuid4()
+            all_ids.append(str(asset_id))
+            with_ids[ds_name]["assets"][asset_name]["id"] = asset_id
+
+            no_ids[ds_name]["assets"][asset_name].pop("id", None)
+
+    gx_config_no_ids = GxConfig.parse_obj({"fluent_datasources": no_ids})
+    gx_config_with_ids = GxConfig.parse_obj({"fluent_datasources": with_ids})
+
+    assert "id" not in str(gx_config_no_ids.dict())
+    assert "id" not in gx_config_no_ids.json()
+    assert "id" not in gx_config_no_ids.yaml()
+
+    for serialized_str in [
+        str(gx_config_with_ids.dict()),
+        gx_config_with_ids.json(),
+        gx_config_with_ids.yaml(),
+    ]:
+        for id_ in all_ids:
+            assert id_ in serialized_str
 
 
 @pytest.mark.parametrize(
