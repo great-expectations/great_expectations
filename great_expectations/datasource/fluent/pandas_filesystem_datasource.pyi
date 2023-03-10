@@ -11,9 +11,7 @@ from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector as FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    Sorter as Sorter,
-)
+from great_expectations.datasource.fluent.interfaces import Sorter as Sorter
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )

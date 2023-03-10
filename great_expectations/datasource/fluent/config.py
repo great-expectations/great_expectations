@@ -17,6 +17,7 @@ from typing import (
     Tuple,
     Type,
     Union,
+    overload,
 )
 
 from pydantic import Extra, Field, ValidationError, validator
@@ -173,6 +174,23 @@ class GxConfig(FluentBaseModel):
 
         # noinspection PyTypeChecker
         return super().parse_yaml(f)
+
+    @overload
+    def yaml(
+        self,
+        stream_or_path: Union[StringIO, None] = None,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        by_alias: bool = ...,
+        exclude_unset: bool = ...,
+        exclude_defaults: bool = ...,
+        exclude_none: bool = ...,
+        encoder: Union[Callable[[Any], Any], None] = ...,
+        models_as_dict: bool = ...,
+        **yaml_kwargs,
+    ) -> str:
+        ...
 
     def yaml(
         self,

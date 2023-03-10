@@ -23,9 +23,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector as GoogleCloudStorageDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    Sorter as Sorter,
-)
+from great_expectations.datasource.fluent.interfaces import Sorter as Sorter
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )

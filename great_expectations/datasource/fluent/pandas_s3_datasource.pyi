@@ -24,9 +24,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector as S3DataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    Sorter as Sorter,
-)
+from great_expectations.datasource.fluent.interfaces import Sorter as Sorter
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )
