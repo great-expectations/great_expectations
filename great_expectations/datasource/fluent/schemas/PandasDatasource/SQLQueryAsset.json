@@ -26,7 +26,18 @@
             "title": "Sql"
         },
         "con": {
-            "title": "Con"
+            "title": "Con",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                },
+                {}
+            ]
         },
         "index_col": {
             "title": "Index Col"

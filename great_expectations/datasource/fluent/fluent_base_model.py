@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import pathlib
+from collections.abc import MutableMapping, MutableSequence
 from io import StringIO
 from pprint import pformat as pf
 from typing import (
@@ -21,11 +22,13 @@ from typing import (
 import pydantic
 from ruamel.yaml import YAML
 
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
 
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
+    from great_expectations.core.config_provider import _ConfigurationProvider
 
 logger = logging.getLogger(__name__)
 
@@ -222,6 +225,8 @@ class FluentBaseModel(pydantic.BaseModel):
         exclude_none: bool = False,
         # deprecated - use exclude_unset instead
         skip_defaults: bool | None = None,
+        # custom
+        config_provider: _ConfigurationProvider | None = None,
     ) -> dict[str, Any]:
         """
         Generate a dictionary representation of the model, optionally specifying which
@@ -231,7 +236,7 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
-        return super().dict(
+        result = super().dict(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -240,6 +245,12 @@ class FluentBaseModel(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
+        if config_provider:
+            logger.info(
+                f"{self.__class__.__name__}.dict() - substituting config values"
+            )
+            _recursively_set_config_value(result, config_provider)
+        return result
 
     @staticmethod
     def _include_exclude_to_dict(
@@ -266,3 +277,20 @@ class FluentBaseModel(pydantic.BaseModel):
 
     def __str__(self):
         return self.yaml()
+
+
+def _recursively_set_config_value(
+    data: MutableMapping | MutableSequence, config_provider: _ConfigurationProvider
+):
+    if isinstance(data, MutableMapping):
+        for k, v in data.items():
+            if isinstance(v, ConfigStr):
+                data[k] = v.get_config_value(config_provider)
+            elif isinstance(v, (MutableMapping, MutableSequence)):
+                return _recursively_set_config_value(v, config_provider)
+    elif isinstance(data, MutableSequence):
+        for i, v in enumerate(data):
+            if isinstance(v, ConfigStr):
+                data[i] = v.get_config_value(config_provider)
+            elif isinstance(v, (MutableMapping, MutableSequence)):
+                return _recursively_set_config_value(v, config_provider)

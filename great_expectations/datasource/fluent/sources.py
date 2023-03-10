@@ -279,6 +279,10 @@ class _SourceFactories:
         def wrapped(name: str, **kwargs):
             datasource = ds_constructor(name=name, **kwargs)
             datasource._data_context = self._data_context
+
+            # config provider needed for config substitution
+            datasource._config_provider = self._data_context.config_provider
+
             # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
             self._data_context._attach_datasource_to_context(datasource)
             return datasource

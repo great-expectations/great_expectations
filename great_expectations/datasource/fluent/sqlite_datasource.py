@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Uni
 import pydantic
 from typing_extensions import Literal, Self
 
+from great_expectations.datasource.fluent.config_str import ConfigStr  # noqa: TCH001
 from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
 )
@@ -164,7 +165,7 @@ class SqliteDatasource(SQLDatasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
-    connection_string: SqliteDsn
+    connection_string: Union[ConfigStr, SqliteDsn]
 
     _TableAsset: Type[SqlTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)
     _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)

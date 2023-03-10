@@ -124,6 +124,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
                 by_alias=True,
+                config_provider=self._datasource._config_provider,
             ),
         )
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
