@@ -4,6 +4,7 @@ import dataclasses
 import functools
 import logging
 import re
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -152,6 +153,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
+    id: Optional[uuid.UUID] = None
 
     order_by: List[Sorter] = Field(default_factory=list)
 
@@ -371,6 +373,7 @@ class Datasource(
     # instance attrs
     type: str
     name: str
+    id: Optional[uuid.UUID] = None
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
