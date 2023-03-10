@@ -533,11 +533,8 @@ def test_dict_config_round_trip_no_assets_in_yaml_dump(
     dumped: str = from_simple_dict_gx_config.yaml()
     print(f"  Dumped YAML ->\n\n{dumped}\n")
 
-    re_loaded: GxConfig = GxConfig.parse_yaml(dumped)
-    pp(re_loaded)
-    assert re_loaded
-
-    assert "assets" not in re_loaded.fluent_datasources["my_ds"]
+    original: dict = yaml.load(dumped)
+    assert "assets" not in original["fluent_datasources"]["my_ds"]
 
 
 def test_dict_config_round_trip(
