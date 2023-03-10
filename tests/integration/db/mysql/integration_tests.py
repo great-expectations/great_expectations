@@ -50,6 +50,7 @@ class IntegrationTestFixture:
     other_files: Optional[Tuple[Tuple[str, str]]] = None
     util_script: Optional[str] = None
 
+
 mysql_integration_tests = [
     IntegrationTestFixture(
         name="mysql_yaml_example",
