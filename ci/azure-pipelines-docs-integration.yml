@@ -34,7 +34,6 @@ resources:
       - 8088:8080
 
 variables:
-  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
   isDevelop: $[eq(variables['Build.SourceBranch'], 'refs/heads/develop')]
   isManual: $[eq(variables['Build.Reason'], 'Manual')]
   GE_USAGE_STATISTICS_URL: "https://qa.stats.greatexpectations.io/great_expectations/v1/usage_statistics"
@@ -66,13 +65,13 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
     - job: link_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
       - bash: python scripts/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
         name: LinkChecker
 
     - job: docs_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
       - script: |
           yarn install
@@ -80,14 +79,14 @@ stages:
         name: DocsSnippetChecker
 
     - job: line_number_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
         - script: |
             python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
     - job: public_api_report
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
         - script: |
             python docs/sphinx_api_docs_source/public_api_report.py
@@ -100,7 +99,7 @@ stages:
     jobs:
     - job: test_docs_not_postgresql
       timeoutInMinutes: 120
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       variables:
         python.version: '3.8'
       services:
@@ -186,7 +185,7 @@ stages:
       condition: or(
         eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
         eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
-        eq(variables.isMain, true), 
+        eq(variables.isDevelop, true), 
         eq(variables.isManual, true)
         )
       variables:
@@ -201,61 +200,9 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage git+https://github.com/awslabs/aws-glue-libs.git "cryptography==38.0.4"
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
           displayName: 'Install dependencies'
-
-        - task: DownloadSecureFile@1
-          name: gcp_authkey
-          displayName: 'Download GCS Credentials'
-          inputs:
-            secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
-            retryCount: '2'
-
-        - script: |
-            # this is recommended by the Google documentation for CI/CD https://cloud.google.com/sdk/docs/install#other_installation_options
-            curl -sS https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-370.0.0-linux-x86_64.tar.gz > ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz && tar -xf ./google-cloud-sdk-370.0.0-linux-x86_64.tar.gz
-            ./google-cloud-sdk/install.sh --usage-reporting=False --path-update=True --quiet --install-python=False
-            # creating new named configuration
-            ./google-cloud-sdk/bin/gcloud config configurations create ge-oss-ci-cd-configurations
-            # setting account config using project and service account info
-            ./google-cloud-sdk/bin/gcloud config set account account-for-azure-tests --project=$(GE_TEST_GCP_PROJECT) --access-token-file=$(gcp_authkey.secureFilePath)
-            # Pass the configured Cloud SDK authentication to gsutil.
-            ./google-cloud-sdk/bin/gcloud config set pass_credentials_to_gsutil True
-            # Authorize access to Google Cloud with a service account
-            ./google-cloud-sdk/bin/gcloud auth activate-service-account --key-file=$(gcp_authkey.secureFilePath)
-          displayName: 'Install and setup Google Cloud SDK'
 
         - script: |
             pytest -v --docs-tests -m integration --mysql tests/integration/test_script_runner.py
           displayName: 'pytest'
-          env:
-            # snowflake credentials
-            SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
-            SNOWFLAKE_USER: $(SNOWFLAKE_USER)
-            SNOWFLAKE_PW: $(SNOWFLAKE_PW)
-            SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
-            SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
-            SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
-            SNOWFLAKE_ROLE: $(SNOWFLAKE_ROLE)
-            # redshift credentials
-            REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
-            REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
-            REDSHIFT_HOST: $(REDSHIFT_HOST)
-            REDSHIFT_PORT: $(REDSHIFT_PORT)
-            REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
-            REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
-            # AWS credentials
-            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-            ATHENA_DB_NAME: $(ATHENA_DB_NAME)
-            ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
-            ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
-            ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
-            # GCP credentials
-            GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-            GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
-            GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
-            # Azure credentials
-            AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
-            AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
