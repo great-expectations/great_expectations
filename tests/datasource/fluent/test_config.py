@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Callable, List
 import pydantic
 import pytest
 from ruamel.yaml import YAML
+from typing_extensions import Final
 
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
@@ -39,7 +40,7 @@ CSV_PATH = EXPERIMENTAL_DATASOURCE_TEST_DIR.joinpath(
 )
 
 PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
-PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
+PG_CONFIG_YAML_STR: Final[str] = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
 COMPLEX_CONFIG_DICT = {
@@ -94,9 +95,9 @@ COMPLEX_CONFIG_DICT = {
         },
     }
 }
-COMPLEX_CONFIG_JSON = json.dumps(COMPLEX_CONFIG_DICT)
+COMPLEX_CONFIG_JSON: Final[str] = json.dumps(COMPLEX_CONFIG_DICT)
 
-SIMPLE_DS_DICT = {
+SIMPLE_DS_DICT: Final[dict] = {
     "fluent_datasources": {
         "my_ds": {
             "type": "sql",
@@ -105,7 +106,7 @@ SIMPLE_DS_DICT = {
     }
 }
 
-COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
+COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT: Final[dict] = {
     "fluent_datasources": {
         "my_ds": {
             "type": "sql",
@@ -137,7 +138,7 @@ COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
     },
 }
 
-DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
+DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
     "fluent_datasources": {
         DEFAULT_PANDAS_DATASOURCE_NAME: {
             "type": "pandas",
