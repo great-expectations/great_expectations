@@ -28,7 +28,7 @@ def _models_and_schema_dirs() -> Generator[
     datasource: Type[Datasource] = Datasource
     ds_type_name: str = ""
 
-    yield Datasource, _SCHEMAS_DIR, f"datasource:{Datasource.__name__}"
+    yield Datasource, _SCHEMAS_DIR, Datasource.__name__
 
     for name, model in _iter_all_registered_types():
         if issubclass(model, Datasource):
