@@ -103,6 +103,7 @@ stages:
       variables:
         python.version: '3.8'
       services:
+        postgres: postgres
         mysql: mysql
         mssql: mssql
         trino: trino
@@ -146,7 +147,7 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --trino --aws --azure tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
@@ -181,12 +182,12 @@ stages:
             AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
     - job: test_docs_mysql
-      timeoutInMinutes: 120
+      timeoutInMinutes: 10
       condition: or(
-        eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-        eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
-        eq(variables.isDevelop, true), 
-        eq(variables.isManual, true)
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
+          eq(variables.isDevelop, true), 
+          eq(variables.isManual, true)
         )
       variables:
         python.version: '3.8'
@@ -205,4 +206,32 @@ stages:
 
         - script: |
             pytest -v --docs-tests -m integration --mysql tests/integration/test_script_runner.py
+          displayName: 'pytest'
+
+    - job: test_docs_multiple_database
+      timeoutInMinutes: 10
+      condition: or(
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
+          eq(variables.isDevelop, true),
+          eq(variables.isManual, true)
+        )
+      variables:
+        python.version: '3.8'
+      services:
+        mysql: mysql
+        postgres: postgres
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+
+        - script: |
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+          displayName: 'Install dependencies'
+
+        - script: |
+            pytest -v --docs-tests -m integration --mysql --postgresql tests/integration/test_script_runner.py
           displayName: 'pytest'

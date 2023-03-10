@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from tests.integration.backend_dependencies import BackendDependencies
 
@@ -28,6 +28,6 @@ class IntegrationTestFixture:
     data_context_dir: Optional[str] = None
     data_dir: Optional[str] = None
     # TODO: This must not be optional and be a list
-    backend_dependencies: Optional[BackendDependencies] = None
+    backend_dependencies: Optional[List[BackendDependencies]] = None
     other_files: Optional[Tuple[Tuple[str, str]]] = None
     util_script: Optional[str] = None

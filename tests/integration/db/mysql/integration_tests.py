@@ -10,7 +10,7 @@ connecting_to_your_data = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=[BackendDependencies.MYSQL],
     ),
     IntegrationTestFixture(
         name="mysql_python_example",
@@ -18,7 +18,7 @@ connecting_to_your_data = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=[BackendDependencies.MYSQL],
     ),
 ]
 
@@ -35,7 +35,7 @@ split_data = [
                 "connection_string.yml",
             ),
         ),
-        backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=[BackendDependencies.MYSQL],
     ),
     IntegrationTestFixture(
         name="split_data_on_column_value_mysql",
@@ -49,7 +49,7 @@ split_data = [
                 "connection_string.yml",
             ),
         ),
-        backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=[BackendDependencies.MYSQL],
     ),
     IntegrationTestFixture(
         name="split_data_on_divided_integer_mysql",
@@ -63,7 +63,7 @@ split_data = [
                 "connection_string.yml",
             ),
         ),
-        backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=[BackendDependencies.MYSQL],
     ),
     IntegrationTestFixture(
         name="split_data_on_mod_integer_mysql",
@@ -77,7 +77,7 @@ split_data = [
                 "connection_string.yml",
             ),
         ),
-        backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=[BackendDependencies.MYSQL],
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for MYSQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -92,7 +92,7 @@ split_data = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     backend_dependencies=BackendDependencies.MYSQL,
+    #     backend_dependencies=[BackendDependencies.MYSQL],
     # ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_mysql",
@@ -106,7 +106,7 @@ split_data = [
                 "connection_string.yml",
             ),
         ),
-        backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=[BackendDependencies.MYSQL],
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_mysql",
@@ -120,7 +120,7 @@ split_data = [
                 "connection_string.yml",
             ),
         ),
-        backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=[BackendDependencies.MYSQL],
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MYSQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -135,7 +135,7 @@ split_data = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     backend_dependencies=BackendDependencies.MYSQL,
+    #     backend_dependencies=[BackendDependencies.MYSQL],
     # ),
 ]
 
@@ -152,7 +152,7 @@ sample_data = [
                 "connection_string.yml",
             ),
         ),
-        backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=[BackendDependencies.MYSQL],
     ),
 ]
 
