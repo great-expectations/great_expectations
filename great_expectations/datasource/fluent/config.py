@@ -24,7 +24,6 @@ from pydantic import Extra, Field, ValidationError, validator
 from ruamel.yaml import YAML
 from typing_extensions import Final
 
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
     _recursively_set_config_value,
@@ -212,7 +211,6 @@ class GxConfig(FluentBaseModel):
     ) -> pathlib.Path:
         ...
 
-    @public_api
     def yaml(
         self,
         stream_or_path: Union[StringIO, pathlib.Path, None] = None,
@@ -255,7 +253,6 @@ class GxConfig(FluentBaseModel):
 
         return stream_or_path.getvalue()
 
-    @public_api
     def json(
         self,
         *,
@@ -328,7 +325,6 @@ class GxConfig(FluentBaseModel):
             )
         )
 
-    @public_api
     def dict(
         self,
         *,
