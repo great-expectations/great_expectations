@@ -1,7 +1,7 @@
-trigger:
-  branches:
-    include:
-    - pre_pr_docs-*
+# This file configures the `docs_integration` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
+#
+# The pipeline is run under the following conditions:
+#   - On any PR
 
 resources:
   containers:
@@ -181,7 +181,7 @@ stages:
             AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
             AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-    - job: test_docs_postgresql
+    - job: test_docs_mysql
       timeoutInMinutes: 120
       condition: or(
         eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
@@ -192,7 +192,7 @@ stages:
       variables:
         python.version: '3.8'
       services:
-        postgres: postgres
+        mysql: mysql
 
       steps:
         - task: UsePythonVersion@0
@@ -226,7 +226,7 @@ stages:
           displayName: 'Install and setup Google Cloud SDK'
 
         - script: |
-            pytest -v --docs-tests -m integration --postgresql tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --mysql tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
