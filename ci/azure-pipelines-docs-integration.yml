@@ -65,13 +65,13 @@ stages:
       vmImage: 'ubuntu-latest'
     jobs:
     - job: link_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
       steps:
       - bash: python scripts/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
         name: LinkChecker
 
     - job: docs_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
       steps:
       - script: |
           yarn install
@@ -79,14 +79,14 @@ stages:
         name: DocsSnippetChecker
 
     - job: line_number_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
       steps:
         - script: |
             python ci/checks/check_no_line_number_snippets.py
           name: LineNumberSnippetChecker
 
     - job: public_api_report
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
       steps:
         - script: |
             python docs/sphinx_api_docs_source/public_api_report.py
@@ -99,7 +99,7 @@ stages:
     jobs:
     - job: test_docs_not_postgresql
       timeoutInMinutes: 120
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
       variables:
         python.version: '3.8'
       services:
@@ -182,7 +182,7 @@ stages:
 
     - job: test_docs_postgresql
       timeoutInMinutes: 120
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true), eq(variables.isManual, true))
       variables:
         python.version: '3.8'
       services:
