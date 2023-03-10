@@ -297,8 +297,21 @@ class _SourceFactories:
             # attr-defined issue https://github.com/python/mypy/issues/12472
             wrapped.__signature__ = ds_constructor.__signature__  # type: ignore[attr-defined]
             return wrapped
+
         except KeyError:
             raise AttributeError(f"No factory {attr_name} in {self.factories}")
+
+        def wrapped(name: str, **kwargs):
+            datasource = ds_constructor(name=name, **kwargs)
+            datasource._data_context = self._data_context
+            # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
+            self._data_context._attach_datasource_to_context(datasource)
+            return datasource
+
+        wrapped.__doc__ = ds_constructor.__doc__
+        # attr-defined issue https://github.com/python/mypy/issues/12472
+        wrapped.__signature__ = ds_constructor.__signature__  # type: ignore[attr-defined]
+        return wrapped
 
     def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""

@@ -374,6 +374,7 @@ class Datasource(
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
+    _data_context = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
