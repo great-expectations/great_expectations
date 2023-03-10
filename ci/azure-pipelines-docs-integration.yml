@@ -97,13 +97,12 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-    - job: test_docs
+    - job: test_docs_not_postgresql
       timeoutInMinutes: 120
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       variables:
         python.version: '3.8'
       services:
-        postgres: postgres
         mysql: mysql
         mssql: mssql
         trino: trino
@@ -147,7 +146,7 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --trino --aws --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
@@ -180,3 +179,25 @@ stages:
             # Azure credentials
             AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
             AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+    - job: test_docs_postgresql
+      timeoutInMinutes: 120
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
+      variables:
+        python.version: '3.8'
+      services:
+        postgres: postgres
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+
+        - script: |
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+          displayName: 'Install dependencies'
+
+        - script: |
+            pytest -v --docs-tests -m integration --postgresql tests/integration/test_script_runner.py
+          displayName: 'pytest'
