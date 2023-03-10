@@ -66,6 +66,7 @@ class GXDependencies:
     ALL_GX_DEV_DEPENDENCIES: List[str] = sorted(
         [
             "PyMySQL",
+            "adr-tools-python",
             "azure-identity",
             "azure-keyvault-secrets",
             "azure-storage-blob",
@@ -120,6 +121,7 @@ class GXDependencies:
 
     GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING: List[str] = [
         # requirements-dev-contrib.txt:
+        "adr-tools-python",
         "black",
         "ruff",
         "invoke",
