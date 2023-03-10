@@ -75,8 +75,8 @@ class DataContext:
         self._sources: _SourceFactories = _SourceFactories(self)
         self._datasources: Dict[str, Datasource] = {}
         self.config_provider: _ConfigurationProvider | None = None
-        logger.info(f"4a. Available Factories - {self._sources.factories}")
-        logger.debug(f"4b. `type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
+        logger.info(f"Available Factories - {self._sources.factories}")
+        logger.debug(f"`type_lookup` mapping ->\n{pf(self._sources.type_lookup)}")
 
     @property
     def sources(self) -> _SourceFactories:
@@ -103,7 +103,7 @@ def get_context(
     context_root_dir: Optional[DirectoryPath] = None, **kwargs
 ) -> DataContext:
     """Experimental get_context placeholder function."""
-    logger.info(f"3. Getting context {context_root_dir or ''}")
+    logger.info(f"Getting context {context_root_dir or ''}")
     context = DataContext.get_context(context_root_dir=context_root_dir, **kwargs)
     return context
 

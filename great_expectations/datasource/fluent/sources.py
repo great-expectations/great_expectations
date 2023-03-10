@@ -214,7 +214,7 @@ class _SourceFactories:
             raise TypeRegistrationError(
                 f"'`sources.{crud_fn_name}()` already exists",
             )
-        logger.debug(f"2a. Registering data_context.source.{crud_fn_name}()")
+        logger.debug(f"Registering data_context.source.{crud_fn_name}()")
         public_api(crud_method_info)
         cls.__crud_registry[crud_fn_name] = crud_method_info
 
@@ -240,7 +240,7 @@ class _SourceFactories:
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
                 logger.debug(
-                    f"2b. Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
+                    f"Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
                 )
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
@@ -357,17 +357,9 @@ class _SourceFactories:
         def add_datasource(name: str, **kwargs) -> Datasource:
             logger.debug(f"Adding {datasource_type} with {name}")
             datasource = datasource_type(name=name, **kwargs)
+            datasource._data_context = self._data_context
             # config provider needed for config substitution
-            # datasource._config_provider = self._data_context.config_provider
-            # using try/except because hasattr will fail to find pydantic PrivateAttrs
-            # also datasource._data_context is not defined on a generic datasource
-            try:
-                datasource._data_context = self._data_context
-            except ValueError:
-                logger.debug(
-                    f'Failed to attach data context to datasource "{name}" because {datasource} has no attribute "_data_context".'
-                )
-                pass
+            datasource._config_provider = self._data_context.config_provider
             datasource.test_connection()
             self._data_context._add_fluent_datasource(datasource)
             self._data_context._save_project_config()
