@@ -19,6 +19,7 @@ import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.backend_dependencies import BackendDependencies
+from tests.integration.db.multiple_db.integration_tests import multiple_database
 from tests.integration.db.mysql.integration_tests import mysql_integration_tests
 from tests.integration.integration_test_fixture import IntegrationTestFixture
 
@@ -1550,6 +1551,7 @@ docs_test_matrix += cloud_azure_tests
 docs_test_matrix += cloud_s3_tests
 docs_test_matrix += cloud_redshift_tests
 docs_test_matrix += mysql_integration_tests
+docs_test_matrix += multiple_database
 
 pandas_integration_tests = [
     IntegrationTestFixture(
@@ -1639,17 +1641,12 @@ def pytest_parsed_arguments(request):
     return request.config.option
 
 
-# TODO: TEMPORARY _ REMOVE THIS!!!!!!
-docs_test_matrix = mysql_integration_tests
-integration_test_matrix = []
-
-
 @pytest.mark.docs
 @pytest.mark.integration
 @pytest.mark.parametrize("integration_test_fixture", docs_test_matrix, ids=idfn)
 @pytest.mark.skipif(sys.version_info < (3, 7), reason="requires Python3.7")
 def test_docs(integration_test_fixture, tmp_path, pytest_parsed_arguments):
-    # _check_for_skipped_tests(pytest_parsed_arguments, integration_test_fixture)
+    _check_for_skipped_tests(pytest_parsed_arguments, integration_test_fixture)
     _execute_integration_test(integration_test_fixture, tmp_path)
 
 

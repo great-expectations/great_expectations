@@ -27,6 +27,7 @@ class IntegrationTestFixture:
     user_flow_script: str
     data_context_dir: Optional[str] = None
     data_dir: Optional[str] = None
+    # TODO: This must not be optional and be a list
     backend_dependencies: Optional[BackendDependencies] = None
     other_files: Optional[Tuple[Tuple[str, str]]] = None
     util_script: Optional[str] = None
