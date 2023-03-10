@@ -17,6 +17,7 @@ from typing import (
     Tuple,
     Type,
     Union,
+    overload,
 )
 
 from pydantic import Extra, Field, ValidationError, validator
@@ -177,6 +178,40 @@ class GxConfig(FluentBaseModel):
         # noinspection PyTypeChecker
         return super().parse_yaml(f)
 
+    @overload
+    def yaml(
+        self,
+        stream_or_path: Union[StringIO, None] = None,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        by_alias: bool = ...,
+        exclude_unset: bool = ...,
+        exclude_defaults: bool = ...,
+        exclude_none: bool = ...,
+        encoder: Union[Callable[[Any], Any], None] = ...,
+        models_as_dict: bool = ...,
+        **yaml_kwargs,
+    ) -> str:
+        ...
+
+    @overload
+    def yaml(
+        self,
+        stream_or_path: pathlib.Path,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        by_alias: bool = ...,
+        exclude_unset: bool = ...,
+        exclude_defaults: bool = ...,
+        exclude_none: bool = ...,
+        encoder: Union[Callable[[Any], Any], None] = ...,
+        models_as_dict: bool = ...,
+        **yaml_kwargs,
+    ) -> pathlib.Path:
+        ...
+
     @public_api
     def yaml(
         self,
@@ -262,6 +297,37 @@ class GxConfig(FluentBaseModel):
             intermediate_json_dict, default=encoder, **dumps_kwargs
         )
 
+    def _json_dict(
+        self,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        by_alias: bool = False,
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Union[Callable[[Any], Any], None] = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs,
+    ) -> dict:
+        """
+        JSON compatible dictionary. All complex types removed.
+        Prefer `.dict()` or `.json()`
+        """
+        return json.loads(
+            super().json(
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_defaults=exclude_defaults,
+                exclude_none=exclude_none,
+                encoder=encoder,
+                models_as_dict=models_as_dict,
+                **dumps_kwargs,
+            )
+        )
+
     @public_api
     def dict(
         self,
@@ -304,37 +370,6 @@ class GxConfig(FluentBaseModel):
             _recursively_set_config_value(data=result, config_provider=config_provider)
 
         return result
-
-    def _json_dict(
-        self,
-        *,
-        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
-        exclude_unset: bool = True,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False,
-        encoder: Union[Callable[[Any], Any], None] = None,
-        models_as_dict: bool = True,
-        **dumps_kwargs,
-    ) -> dict:
-        """
-        JSON compatible dictionary. All complex types removed.
-        Prefer `.dict()` or `.json()`
-        """
-        return json.loads(
-            super().json(
-                include=include,
-                exclude=exclude,
-                by_alias=by_alias,
-                exclude_unset=exclude_unset,
-                exclude_defaults=exclude_defaults,
-                exclude_none=exclude_none,
-                encoder=encoder,
-                models_as_dict=models_as_dict,
-                **dumps_kwargs,
-            )
-        )
 
     def _exclude_name_fields_from_fluent_datasources(
         self, config: Dict[str, Any]
