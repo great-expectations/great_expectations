@@ -349,6 +349,7 @@ class Datasource(
     _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
         "type",
+        "id",
         "execution_engine",
         "assets",
         "base_directory",  # filesystem argument
