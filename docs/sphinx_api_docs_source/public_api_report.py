@@ -835,20 +835,18 @@ class CodeReferenceFilter:
         ),
         IncludeExcludeDefinition(
             reason="Fluent is not part of the public API",
-            filepath=pathlib.Path(
-                "great_expectations/datasources/fluent/interfaces.py"
-            ),
+            filepath=pathlib.Path("great_expectations/datasource/fluent/interfaces.py"),
         ),
         IncludeExcludeDefinition(
             reason="Fluent is not part of the public API",
             name="read_csv",
-            filepath=pathlib.Path("great_expectations/datasources/fluent/config.py"),
+            filepath=pathlib.Path("great_expectations/datasource/fluent/config.py"),
         ),
         IncludeExcludeDefinition(
             reason="Fluent-style read_csv is not referenced in the docs yet, but due to string matching it is being flagged.",
             name="read_csv",
             filepath=pathlib.Path(
-                "great_expectations/datasources/fluent/pandas_datasource.py"
+                "great_expectations/datasource/fluent/pandas_datasource.py"
             ),
         ),
         IncludeExcludeDefinition(
