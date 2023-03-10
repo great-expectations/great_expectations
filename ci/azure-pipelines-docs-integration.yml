@@ -67,7 +67,7 @@ stages:
     - job: link_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       steps:
-      - bash: python scripts/docs_link_checker.py -p docs -r docs -s docs --skip-external
+      - bash: python scripts/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
         name: LinkChecker
 
     - job: docs_snippet_checker
@@ -89,7 +89,7 @@ stages:
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isMain, true))
       steps:
         - script: |
-            python scripts/public_api_report.py
+            python docs/sphinx_api_docs_source/public_api_report.py
           name: PublicAPIReport
 
   - stage: docusaurus_tests

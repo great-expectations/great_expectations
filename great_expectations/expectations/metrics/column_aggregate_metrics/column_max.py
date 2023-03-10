@@ -1,5 +1,3 @@
-import warnings
-
 from dateutil.parser import parse
 
 from great_expectations.execution_engine import (
@@ -16,6 +14,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 
 class ColumnMax(ColumnAggregateMetricProvider):
@@ -28,14 +27,7 @@ class ColumnMax(ColumnAggregateMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
             try:
                 temp_column = column.map(parse)
@@ -51,14 +43,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
         return sa.func.max(column)
 
@@ -68,14 +53,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
             try:
                 column = apply_dateutil_parse(column=column)

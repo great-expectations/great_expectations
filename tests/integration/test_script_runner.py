@@ -373,6 +373,13 @@ local_tests = [
         name="how_to_configure_result_format_parameter",
         user_flow_script="tests/integration/docusaurus/reference/core_concepts/result_format.py",
     ),
+    # Fluent Datasources
+    IntegrationTestFixture(
+        name="how_to_connect_to_one_or_more_files_using_pandas",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
 ]
 
 dockerized_db_tests = [

@@ -207,12 +207,14 @@ class CloudDataContext(SerializableDataContext):
         cls, context_root_dir: Optional[PathStr]
     ) -> str:
         if context_root_dir is None:
-            context_root_dir = os.getcwd()
+            context_root_dir = os.getcwd()  # noqa: PTH109
             logger.info(
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )
-        return os.path.abspath(os.path.expanduser(context_root_dir))
+        return os.path.abspath(  # noqa: PTH100
+            os.path.expanduser(context_root_dir)  # noqa: PTH111
+        )
 
     @classmethod
     def retrieve_data_context_config_from_cloud(
@@ -564,6 +566,11 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             An existing ExpectationSuite
         """
+        if ge_cloud_id is None and expectation_suite_name is None:
+            raise ValueError(
+                "ge_cloud_id and expectation_suite_name cannot both be None"
+            )
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             cloud_id=ge_cloud_id,

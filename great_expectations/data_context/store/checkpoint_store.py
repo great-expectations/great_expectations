@@ -102,11 +102,11 @@ class CheckpointStore(ConfigurationStore):
         if not directory_path:
             return False
 
-        checkpoints_directory_path: str = os.path.join(
+        checkpoints_directory_path: str = os.path.join(  # noqa: PTH118
             directory_path,
             DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
         )
-        return os.path.isdir(checkpoints_directory_path)
+        return os.path.isdir(checkpoints_directory_path)  # noqa: PTH112
 
     def list_checkpoints(
         self, ge_cloud_mode: bool = False
