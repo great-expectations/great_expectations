@@ -16,15 +16,12 @@ from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import AzureUrl as AzureUrl
-from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent import Sorter, _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector as AzureBlobStorageDataConnector,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector as FilesystemDataConnector,
-)
-from great_expectations.datasource.fluent.interfaces import (
-    Sorter as Sorter,
 )
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
@@ -49,7 +46,6 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent import Sorter
     from great_expectations.datasource.fluent.dynamic_pandas import (
         CompressionOptions,
         CSVEngine,
