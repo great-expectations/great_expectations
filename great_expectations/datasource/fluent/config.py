@@ -1,7 +1,6 @@
 """POC for loading config."""
 from __future__ import annotations
 
-import json
 import logging
 import pathlib
 from io import StringIO
@@ -24,10 +23,7 @@ from pydantic import Extra, Field, ValidationError, validator
 from ruamel.yaml import YAML
 from typing_extensions import Final
 
-from great_expectations.datasource.fluent.fluent_base_model import (
-    FluentBaseModel,
-    _recursively_set_config_value,
-)
+from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.datasource.fluent.interfaces import (
     Datasource,  # noqa: TCH001
 )
@@ -36,11 +32,11 @@ from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATASOURCE_NAME,
     _SourceFactories,
 )
+from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
     from pydantic.error_wrappers import ErrorDict as PydanticErrorDict
 
-    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.datasource.fluent.fluent_base_model import (
         AbstractSetIntStr,
         MappingIntStrAny,
@@ -111,13 +107,25 @@ class GxConfig(FluentBaseModel):
                     f"'{ds_name}' has unsupported 'type' - {type_lookup_err}"
                 ) from type_lookup_err
 
-            config["name"] = ds_name
+            if "name" in config:
+                if config["name"] != ds_name:
+                    raise ValueError(
+                        f'Datasource name "{ds_name}" is different from value in its "name" entry.'
+                    )
+            else:
+                config["name"] = ds_name
 
             if "assets" not in config:
                 config["assets"] = {}
 
             for asset_name, asset_config in config["assets"].items():
-                asset_config["name"] = asset_name
+                if "name" in asset_config:
+                    if asset_config["name"] != asset_name:
+                        raise ValueError(
+                            f'DataAsset name "{asset_name}" is different from value in its "name" entry.'
+                        )
+                else:
+                    asset_config["name"] = asset_name
 
             datasource = ds_type(**config)
 
@@ -246,126 +254,15 @@ class GxConfig(FluentBaseModel):
         intermediate_json_dict = self._exclude_name_fields_from_fluent_datasources(
             config=intermediate_json_dict
         )
+        deep_filter_properties_iterable(
+            properties=intermediate_json_dict, clean_falsy=True, inplace=True
+        )
         yaml.dump(intermediate_json_dict, stream=stream_or_path, **yaml_kwargs)
 
         if isinstance(stream_or_path, pathlib.Path):
             return stream_or_path
 
         return stream_or_path.getvalue()
-
-    def json(
-        self,
-        *,
-        include: AbstractSetIntStr | MappingIntStrAny | None = None,
-        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
-        # deprecated - use exclude_unset instead
-        skip_defaults: bool | None = None,
-        # Default to True to prevent serializing long configs full of unset default values
-        exclude_unset: bool = True,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False,
-        encoder: Callable[[Any], Any] | None = None,
-        models_as_dict: bool = True,
-        **dumps_kwargs: Any,
-    ) -> str:
-        """
-        Generate a JSON representation of the model, `include` and `exclude` arguments
-        as per `dict()`.
-        `encoder` is an optional function to supply as `default` to json.dumps(), other
-        arguments as per `json.dumps()`.
-        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
-        default.
-        """
-        intermediate_json_dict = self._json_dict(
-            include=include,
-            exclude=exclude,
-            by_alias=by_alias,
-            exclude_unset=exclude_unset,
-            exclude_defaults=exclude_defaults,
-            exclude_none=exclude_none,
-            encoder=encoder,
-            models_as_dict=models_as_dict,
-        )
-        intermediate_json_dict = self._exclude_name_fields_from_fluent_datasources(
-            config=intermediate_json_dict
-        )
-        return self.__config__.json_dumps(
-            intermediate_json_dict, default=encoder, **dumps_kwargs
-        )
-
-    def _json_dict(
-        self,
-        *,
-        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        by_alias: bool = False,
-        exclude_unset: bool = True,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False,
-        encoder: Union[Callable[[Any], Any], None] = None,
-        models_as_dict: bool = True,
-        **dumps_kwargs,
-    ) -> dict:
-        """
-        JSON compatible dictionary. All complex types removed.
-        Prefer `.dict()` or `.json()`
-        """
-        return json.loads(
-            super().json(
-                include=include,
-                exclude=exclude,
-                by_alias=by_alias,
-                exclude_unset=exclude_unset,
-                exclude_defaults=exclude_defaults,
-                exclude_none=exclude_none,
-                encoder=encoder,
-                models_as_dict=models_as_dict,
-                **dumps_kwargs,
-            )
-        )
-
-    def dict(
-        self,
-        *,
-        include: AbstractSetIntStr | MappingIntStrAny | None = None,
-        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
-        # Default to True to prevent serializing long configs full of unset default values
-        exclude_unset: bool = True,
-        exclude_defaults: bool = False,
-        exclude_none: bool = False,
-        # deprecated - use exclude_unset instead
-        skip_defaults: bool | None = None,
-        # custom
-        config_provider: _ConfigurationProvider | None = None,
-    ) -> dict[str, Any]:
-        """
-        Generate a dictionary representation of the model, optionally specifying which
-        fields to include or exclude.
-        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
-        default.
-        """
-        intermediate_dict: dict = super().dict(
-            include=include,
-            exclude=exclude,
-            by_alias=by_alias,
-            exclude_unset=exclude_unset,
-            exclude_defaults=exclude_defaults,
-            exclude_none=exclude_none,
-            skip_defaults=skip_defaults,
-        )
-        result: dict = self._exclude_name_fields_from_fluent_datasources(
-            config=intermediate_dict
-        )
-
-        if config_provider:
-            logger.info(
-                f"{self.__class__.__name__}.dict() - substituting config values"
-            )
-            _recursively_set_config_value(data=result, config_provider=config_provider)
-
-        return result
 
     def _exclude_name_fields_from_fluent_datasources(
         self, config: Dict[str, Any]
