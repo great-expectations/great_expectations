@@ -97,14 +97,13 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-    - job: test_docs_not_postgresql
+    - job: test_docs_not_mysql
       timeoutInMinutes: 120
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       variables:
         python.version: '3.8'
       services:
         postgres: postgres
-        mysql: mysql
         mssql: mssql
         trino: trino
 
