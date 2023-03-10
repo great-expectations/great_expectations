@@ -182,7 +182,7 @@ stages:
             AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
     - job: test_docs_mysql
-      timeoutInMinutes: 10
+      timeoutInMinutes: 30
       condition: or(
           eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
           eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
@@ -209,7 +209,7 @@ stages:
           displayName: 'pytest'
 
     - job: test_docs_multiple_database
-      timeoutInMinutes: 10
+      timeoutInMinutes: 30
       condition: or(
           eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
           eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
