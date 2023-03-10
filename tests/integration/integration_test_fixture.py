@@ -18,7 +18,7 @@ class IntegrationTestFixture:
         user_flow_script: Required script for integration test.
         data_context_dir: Path of great_expectations/ that is used in the test.
         data_dir: Folder that contains data used in the test.
-        extra_backend_dependencies: Optional flag allows you to tie an individual test with a BackendDependency. Allows for tests to be run / disabled using cli flags (like --aws which enables AWS integration tests).
+        backend_dependencies: Optional flag allows you to tie an individual test with a BackendDependency. Allows for tests to be run / disabled using cli flags (like --aws which enables AWS integration tests).
         other_files: other files (like credential information) to copy into the test environment. These are presented as Tuple(path_to_source_file, path_to_target_file), where path_to_target_file is relative to the test_script.py file in our test environment
         util_script: Path of optional util script that is used in test script (for loading test_specific methods like load_data_into_test_database())
     """
@@ -27,6 +27,6 @@ class IntegrationTestFixture:
     user_flow_script: str
     data_context_dir: Optional[str] = None
     data_dir: Optional[str] = None
-    extra_backend_dependencies: Optional[BackendDependencies] = None
+    backend_dependencies: Optional[BackendDependencies] = None
     other_files: Optional[Tuple[Tuple[str, str]]] = None
     util_script: Optional[str] = None

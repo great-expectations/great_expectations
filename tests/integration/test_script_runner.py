@@ -40,7 +40,7 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="getting_started",
@@ -96,24 +96,24 @@ local_tests = [
     IntegrationTestFixture(
         name="in_memory_spark_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="in_memory_spark_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="filesystem_spark_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="filesystem_spark_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="how_to_choose_which_dataconnector_to_use",
@@ -139,7 +139,7 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
+        backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
         name="how_to_configure_a_runtimedataconnector",
@@ -157,25 +157,25 @@ local_tests = [
         name="databricks_deployment_patterns_dataframe_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="databricks_deployment_patterns_dataframe_python_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="databricks_deployment_patterns_file_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="databricks_deployment_patterns_file_python_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="checkpoints_and_actions_core_concepts",
@@ -240,14 +240,14 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v3_api.py",
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/",
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="migration_guide_spark_v2_api",
         user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v2_api.py",
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/",
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="expect_column_max_to_be_between_custom",
@@ -271,7 +271,7 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="cross_table_comparisons_from_query",
@@ -279,7 +279,7 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="cross_table_comparisons",
@@ -287,7 +287,7 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="cross_table_comparisons",
@@ -295,7 +295,7 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="expect_column_values_to_be_in_solfege_scale_set",
@@ -308,27 +308,27 @@ local_tests = [
     IntegrationTestFixture(
         name="expect_queried_column_value_frequency_to_meet_threshold",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="expect_queried_table_row_count_to_be",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="expect_multicolumn_values_to_be_multiples_of_three",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_multicolumn_values_to_be_multiples_of_three.py",
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="how_to_use_great_expectations_in_aws_glue",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="how_to_use_great_expectations_in_aws_emr_serverless",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py",
-        extra_backend_dependencies=BackendDependencies.SPARK,
+        backend_dependencies=BackendDependencies.SPARK,
     ),
     IntegrationTestFixture(
         name="how_to_configure_result_format_parameter",
@@ -350,7 +350,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="postgres_python_example",
@@ -358,7 +358,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="sqlite_yaml_example",
@@ -366,7 +366,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
+        backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
         name="sqlite_python_example",
@@ -374,7 +374,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
+        backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
         name="introspect_and_partition_yaml_example_gradual_sql",
@@ -382,7 +382,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
+        backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
         name="introspect_and_partition_yaml_example_complete_sql",
@@ -390,7 +390,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.SQLALCHEMY,
+        backend_dependencies=BackendDependencies.SQLALCHEMY,
     ),
     IntegrationTestFixture(
         name="split_data_on_whole_table_postgres",
@@ -404,7 +404,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_whole_table_mssql",
@@ -418,7 +418,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MSSQL,
+        backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_whole_table_mysql",
@@ -432,7 +432,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_column_value_postgres",
@@ -446,7 +446,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_column_value_mssql",
@@ -460,7 +460,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MSSQL,
+        backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_column_value_mysql",
@@ -474,7 +474,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_divided_integer_postgres",
@@ -488,7 +488,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_divided_integer_mssql",
@@ -502,7 +502,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MSSQL,
+        backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_divided_integer_mysql",
@@ -516,7 +516,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_mod_integer_postgres",
@@ -530,7 +530,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_mod_integer_mssql",
@@ -544,7 +544,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MSSQL,
+        backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_mod_integer_mysql",
@@ -558,7 +558,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for POSTGRESQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -573,7 +573,7 @@ dockerized_db_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    #     backend_dependencies=BackendDependencies.POSTGRESQL,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for MSSQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -588,7 +588,7 @@ dockerized_db_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.MSSQL,
+    #     backend_dependencies=BackendDependencies.MSSQL,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for MYSQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -603,7 +603,7 @@ dockerized_db_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.MYSQL,
+    #     backend_dependencies=BackendDependencies.MYSQL,
     # ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_postgres",
@@ -617,7 +617,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_mssql",
@@ -631,7 +631,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MSSQL,
+        backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_mysql",
@@ -645,7 +645,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_postgres",
@@ -659,7 +659,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_mssql",
@@ -673,7 +673,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MSSQL,
+        backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_mysql",
@@ -687,7 +687,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -702,7 +702,7 @@ dockerized_db_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    #     backend_dependencies=BackendDependencies.POSTGRESQL,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MSSQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -717,7 +717,7 @@ dockerized_db_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.MSSQL,
+    #     backend_dependencies=BackendDependencies.MSSQL,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MYSQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -732,7 +732,7 @@ dockerized_db_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.MYSQL,
+    #     backend_dependencies=BackendDependencies.MYSQL,
     # ),
     IntegrationTestFixture(
         name="sample_data_using_limit_postgres",
@@ -746,7 +746,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="sample_data_using_limit_mssql",
@@ -760,7 +760,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MSSQL,
+        backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="sample_data_using_limit_mysql",
@@ -774,7 +774,7 @@ dockerized_db_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="mssql_yaml_example",
@@ -782,7 +782,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.MSSQL,
+        backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="mssql_python_example",
@@ -790,7 +790,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.MSSQL,
+        backend_dependencies=BackendDependencies.MSSQL,
     ),
     IntegrationTestFixture(
         name="mysql_yaml_example",
@@ -798,7 +798,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="mysql_python_example",
@@ -806,7 +806,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="trino_yaml_example",
@@ -814,7 +814,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.TRINO,
+        backend_dependencies=BackendDependencies.TRINO,
     ),
     IntegrationTestFixture(
         name="trino_python_example",
@@ -822,7 +822,7 @@ dockerized_db_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.TRINO,
+        backend_dependencies=BackendDependencies.TRINO,
     ),
     IntegrationTestFixture(
         name="migration_guide_postgresql_v3_api",
@@ -830,7 +830,7 @@ dockerized_db_tests = [
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/",
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="migration_guide_postgresql_v2_api",
@@ -838,13 +838,13 @@ dockerized_db_tests = [
         data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/",
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
     IntegrationTestFixture(
         name="how_to_configure_credentials_postgres",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+        backend_dependencies=BackendDependencies.POSTGRESQL,
     ),
 ]
 
@@ -855,7 +855,7 @@ cloud_snowflake_tests = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+        backend_dependencies=BackendDependencies.SNOWFLAKE,
         util_script="tests/test_utils.py",
     ),
     IntegrationTestFixture(
@@ -863,7 +863,7 @@ cloud_snowflake_tests = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+        backend_dependencies=BackendDependencies.SNOWFLAKE,
         util_script="tests/test_utils.py",
     ),
     IntegrationTestFixture(
@@ -878,7 +878,7 @@ cloud_snowflake_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+        backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
     IntegrationTestFixture(
         name="split_data_on_column_value_snowflake",
@@ -892,7 +892,7 @@ cloud_snowflake_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+        backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
     IntegrationTestFixture(
         name="split_data_on_divided_integer_snowflake",
@@ -906,7 +906,7 @@ cloud_snowflake_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+        backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
     IntegrationTestFixture(
         name="split_data_on_mod_integer_snowflake",
@@ -920,7 +920,7 @@ cloud_snowflake_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+        backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for SNOWFLAKE is implemented.</Alex>
     # IntegrationTestFixture(
@@ -935,7 +935,7 @@ cloud_snowflake_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    #     backend_dependencies=BackendDependencies.SNOWFLAKE,
     # ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_snowflake",
@@ -949,7 +949,7 @@ cloud_snowflake_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+        backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -964,7 +964,7 @@ cloud_snowflake_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.POSTGRESQL,
+    #     backend_dependencies=BackendDependencies.POSTGRESQL,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>
     # IntegrationTestFixture(
@@ -979,7 +979,7 @@ cloud_snowflake_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    #     backend_dependencies=BackendDependencies.REDSHIFT,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MSSQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -994,7 +994,7 @@ cloud_snowflake_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.MSSQL,
+    #     backend_dependencies=BackendDependencies.MSSQL,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for MYSQL is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1009,7 +1009,7 @@ cloud_snowflake_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.MYSQL,
+    #     backend_dependencies=BackendDependencies.MYSQL,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for SNOWFLAKE is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1024,7 +1024,7 @@ cloud_snowflake_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    #     backend_dependencies=BackendDependencies.SNOWFLAKE,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1039,7 +1039,7 @@ cloud_snowflake_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    #     backend_dependencies=BackendDependencies.BIGQUERY,
     # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1054,7 +1054,7 @@ cloud_snowflake_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.AWS,
+    #     backend_dependencies=BackendDependencies.AWS,
     # ),
     IntegrationTestFixture(
         name="split_data_on_datetime_snowflake",
@@ -1068,7 +1068,7 @@ cloud_snowflake_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+        backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for SNOWFLAKE is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1083,7 +1083,7 @@ cloud_snowflake_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+    #     backend_dependencies=BackendDependencies.SNOWFLAKE,
     # ),
     IntegrationTestFixture(
         name="sample_data_using_limit_snowflake",
@@ -1097,7 +1097,7 @@ cloud_snowflake_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.SNOWFLAKE,
+        backend_dependencies=BackendDependencies.SNOWFLAKE,
     ),
 ]
 
@@ -1106,51 +1106,51 @@ cloud_gcp_tests = [
         name="gcp_deployment_patterns_file_gcs_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.GCS,
+        backend_dependencies=BackendDependencies.GCS,
     ),
     IntegrationTestFixture(
         name="how_to_configure_an_expectation_store_in_gcs",
         user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.GCS,
+        backend_dependencies=BackendDependencies.GCS,
     ),
     IntegrationTestFixture(
         name="how_to_host_and_share_data_docs_on_gcs",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.GCS,
+        backend_dependencies=BackendDependencies.GCS,
     ),
     IntegrationTestFixture(
         name="how_to_configure_a_validation_result_store_in_gcs",
         user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        extra_backend_dependencies=BackendDependencies.GCS,
+        backend_dependencies=BackendDependencies.GCS,
     ),
     IntegrationTestFixture(
         name="gcs_pandas_configured_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.GCS,
+        backend_dependencies=BackendDependencies.GCS,
     ),
     IntegrationTestFixture(
         name="gcs_pandas_configured_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.GCS,
+        backend_dependencies=BackendDependencies.GCS,
     ),
     IntegrationTestFixture(
         name="gcs_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.GCS,
+        backend_dependencies=BackendDependencies.GCS,
     ),
     IntegrationTestFixture(
         name="gcs_pandas_inferred_and_runtime_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.GCS,
+        backend_dependencies=BackendDependencies.GCS,
     ),
     # TODO: <Alex>ALEX -- Implement GCS Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured YAML Example is implemented.</Alex>
@@ -1158,7 +1158,7 @@ cloud_gcp_tests = [
     #     name = "gcs_spark_configured_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies= BackendDependencies.GCS,
+    #     backend_dependencies= BackendDependencies.GCS,
     # ),
     # TODO: <Alex>ALEX -- Implement GCS Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured Python Example is implemented.</Alex>
@@ -1166,20 +1166,20 @@ cloud_gcp_tests = [
     #     name = "gcs_spark_configured_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies= BackendDependencies.GCS,
+    #     backend_dependencies= BackendDependencies.GCS,
     # ),
     # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
     # IntegrationTestFixture(
     #     name = "gcs_spark_inferred_and_runtime_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies= BackendDependencies.GCS,
+    #     backend_dependencies= BackendDependencies.GCS,
     # ),
     # IntegrationTestFixture(
     #     name = "gcs_spark_inferred_and_runtime_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies= BackendDependencies.GCS,
+    #     backend_dependencies= BackendDependencies.GCS,
     # ),
 ]
 
@@ -1190,7 +1190,7 @@ cloud_bigquery_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
         name="bigquery_python_example",
@@ -1198,13 +1198,13 @@ cloud_bigquery_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
         name="gcp_deployment_patterns_file_bigquery_yaml_configs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
         name="sample_data_using_limit_bigquery",
@@ -1218,13 +1218,13 @@ cloud_bigquery_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
         name="test_runtime_parameters_bigquery",
         user_flow_script="tests/integration/db/bigquery.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
         name="split_data_on_whole_table_bigquery",
@@ -1238,7 +1238,7 @@ cloud_bigquery_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
         name="split_data_on_column_value_bigquery",
@@ -1252,7 +1252,7 @@ cloud_bigquery_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
         name="split_data_on_divided_integer_bigquery",
@@ -1266,7 +1266,7 @@ cloud_bigquery_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
         name="split_data_on_mod_integer_bigquery",
@@ -1280,7 +1280,7 @@ cloud_bigquery_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for BIGQUERY is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1295,7 +1295,7 @@ cloud_bigquery_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    #     backend_dependencies=BackendDependencies.BIGQUERY,
     # ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_bigquery",
@@ -1309,7 +1309,7 @@ cloud_bigquery_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_bigquery",
@@ -1323,7 +1323,7 @@ cloud_bigquery_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.BIGQUERY,
+        backend_dependencies=BackendDependencies.BIGQUERY,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1338,7 +1338,7 @@ cloud_bigquery_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.BIGQUERY,
+    #     backend_dependencies=BackendDependencies.BIGQUERY,
     # ),
 ]
 
@@ -1347,50 +1347,50 @@ cloud_azure_tests = [
         name="azure_pandas_configured_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.AZURE,
+        backend_dependencies=BackendDependencies.AZURE,
     ),
     IntegrationTestFixture(
         name="azure_pandas_configured_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.AZURE,
+        backend_dependencies=BackendDependencies.AZURE,
     ),
     IntegrationTestFixture(
         name="azure_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.AZURE,
+        backend_dependencies=BackendDependencies.AZURE,
     ),
     IntegrationTestFixture(
         name="azure_pandas_inferred_and_runtime_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.AZURE,
+        backend_dependencies=BackendDependencies.AZURE,
     ),
     # TODO: <Alex>ALEX -- uncomment next four (4) tests once Spark in Azure Pipelines is enabled.</Alex>
     # IntegrationTestFixture(
     #     name = "azure_spark_configured_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies = BackendDependencies.AZURE
+    #     backend_dependencies = BackendDependencies.AZURE
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_configured_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies = BackendDependencies.AZURE
+    #     backend_dependencies = BackendDependencies.AZURE
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_yaml",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies = BackendDependencies.AZURE
+    #     backend_dependencies = BackendDependencies.AZURE
     # ),
     # IntegrationTestFixture(
     #     name = "azure_spark_inferred_and_runtime_python",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies = BackendDependencies.AZURE
+    #     backend_dependencies = BackendDependencies.AZURE
     # ),
 ]
 
@@ -1399,27 +1399,27 @@ cloud_s3_tests = [
         name="s3_pandas_inferred_and_runtime_yaml",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     IntegrationTestFixture(
         name="s3_pandas_inferred_and_runtime_python",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     IntegrationTestFixture(
         name="how_to_configure_an_inferredassetdataconnector",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/dataconnector_docs",
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     IntegrationTestFixture(
         name="how_to_configure_a_configuredassetdataconnector",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/dataconnector_docs",
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     # TODO: <Alex>ALEX -- uncomment all S3 tests once S3 testing in Azure Pipelines is re-enabled and items for specific tests below are addressed.</Alex>
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
@@ -1428,7 +1428,7 @@ cloud_s3_tests = [
     #     name = "s3_pandas_configured_yaml_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies= BackendDependencies.AWS,
+    #     backend_dependencies= BackendDependencies.AWS,
     # ),
     # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once S3 Configured Python Example is implemented.</Alex>
@@ -1436,34 +1436,34 @@ cloud_s3_tests = [
     #     name = "s3_pandas_configured_python_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies= BackendDependencies.AWS,
+    #     backend_dependencies= BackendDependencies.AWS,
     # ),
     # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured YAML Example is implemented.</Alex>
     # IntegrationTestFixture(
     #     name = "s3_spark_configured_yaml_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_yaml_example.py",
-    #     extra_backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
+    #     backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
     # ),
     # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
     # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured Python Example is implemented.</Alex>
     # IntegrationTestFixture(
     #     name = "s3_spark_configured_python_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_python_example.py",
-    #     extra_backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
+    #     backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
     # ),
     # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
     # IntegrationTestFixture(
     #     name = "s3_spark_inferred_and_runtime_yaml_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
+    #     backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
     # ),
     # IntegrationTestFixture(
     #     name = "s3_spark_inferred_and_runtime_python_example",
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     extra_backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
+    #     backend_dependencies= [BackendDependencies.SPARK, BackendDependencies.AWS],
     # ),
     IntegrationTestFixture(
         name="split_data_on_whole_table_awsathena",
@@ -1477,7 +1477,7 @@ cloud_s3_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     IntegrationTestFixture(
         name="split_data_on_column_value_awsathena",
@@ -1491,7 +1491,7 @@ cloud_s3_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     IntegrationTestFixture(
         name="split_data_on_divided_integer_awsathena",
@@ -1505,7 +1505,7 @@ cloud_s3_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     IntegrationTestFixture(
         name="split_data_on_mod_integer_awsathena",
@@ -1519,7 +1519,7 @@ cloud_s3_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for AWS ATHENA is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1534,7 +1534,7 @@ cloud_s3_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.AWS,
+    #     backend_dependencies=BackendDependencies.AWS,
     # ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_awsathena",
@@ -1548,7 +1548,7 @@ cloud_s3_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_awsathena",
@@ -1562,7 +1562,7 @@ cloud_s3_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1577,7 +1577,7 @@ cloud_s3_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.AWS,
+    #     backend_dependencies=BackendDependencies.AWS,
     # ),
 ]
 
@@ -1588,7 +1588,7 @@ cloud_redshift_tests = [
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir= "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     extra_backend_dependencies= [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
+    #     backend_dependencies= [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
     #     util_script= "tests/test_utils.py",
     # ),
     # IntegrationTestFixture(
@@ -1596,7 +1596,7 @@ cloud_redshift_tests = [
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     data_dir= "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     extra_backend_dependencies= [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
+    #     backend_dependencies= [BackendDependencies.AWS, BackendDependencies.REDSHIFT],
     #     util_script= "tests/test_utils.py",
     # ),
     IntegrationTestFixture(
@@ -1611,7 +1611,7 @@ cloud_redshift_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+        backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     IntegrationTestFixture(
         name="split_data_on_column_value_redshift",
@@ -1625,7 +1625,7 @@ cloud_redshift_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+        backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     IntegrationTestFixture(
         name="split_data_on_divided_integer_redshift",
@@ -1639,7 +1639,7 @@ cloud_redshift_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+        backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     IntegrationTestFixture(
         name="split_data_on_mod_integer_redshift",
@@ -1653,7 +1653,7 @@ cloud_redshift_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+        backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for REDSHIFT is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1668,7 +1668,7 @@ cloud_redshift_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    #     backend_dependencies=BackendDependencies.REDSHIFT,
     # ),
     IntegrationTestFixture(
         name="split_data_on_multi_column_values_redshift",
@@ -1682,7 +1682,7 @@ cloud_redshift_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+        backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     IntegrationTestFixture(
         name="split_data_on_datetime_redshift",
@@ -1696,7 +1696,7 @@ cloud_redshift_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.REDSHIFT,
+        backend_dependencies=BackendDependencies.REDSHIFT,
     ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>
     # IntegrationTestFixture(
@@ -1711,7 +1711,7 @@ cloud_redshift_tests = [
     #             "connection_string.yml",
     #         ),
     #     ),
-    #     extra_backend_dependencies=BackendDependencies.REDSHIFT,
+    #     backend_dependencies=BackendDependencies.REDSHIFT,
     # ),
 ]
 
@@ -1772,14 +1772,14 @@ aws_integration_tests = [
         name="awsathena_test_yaml",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         user_flow_script="tests/integration/db/awsathena.py",
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
         util_script="tests/test_utils.py",
     ),
     IntegrationTestFixture(
         name="awsathena_test_python",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py",
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
         util_script="tests/test_utils.py",
     ),
     IntegrationTestFixture(
@@ -1794,7 +1794,7 @@ aws_integration_tests = [
                 "connection_string.yml",
             ),
         ),
-        extra_backend_dependencies=BackendDependencies.AWS,
+        backend_dependencies=BackendDependencies.AWS,
     ),
 ]
 
@@ -1936,7 +1936,7 @@ def _execute_integration_test(
 
 def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
     """Enable scripts to be skipped based on pytest invocation flags."""
-    dependencies = integration_test_fixture.extra_backend_dependencies
+    dependencies = integration_test_fixture.backend_dependencies
     if not dependencies:
         return
     elif dependencies == BackendDependencies.POSTGRESQL and (

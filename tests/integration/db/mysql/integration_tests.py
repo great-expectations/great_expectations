@@ -8,7 +8,7 @@ mysql_integration_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
     IntegrationTestFixture(
         name="mysql_python_example",
@@ -16,6 +16,6 @@ mysql_integration_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
-        extra_backend_dependencies=BackendDependencies.MYSQL,
+        backend_dependencies=BackendDependencies.MYSQL,
     ),
 ]
