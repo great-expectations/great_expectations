@@ -5,6 +5,7 @@ import pkg_resources
 from setuptools import find_packages, setup
 
 import versioneer
+from pathlib import Path
 
 
 def get_extras_require():
@@ -41,16 +42,16 @@ def get_extras_require():
     # Use Path() from pathlib so we can make this section of the code OS agnostic.
     # Loop through each requirement file and verify they are named
     # correctly and are in the right location.
-    for path_and_file_name in Path().glob(f"{requirements_dir}/*.txt"):
-        match = rx_name_part.match(path_and_file_name.name)
+    for file_path in Path().glob(f"{requirements_dir}/*.txt"):
+        match = rx_name_part.match(file_path.name)
         assert (
             match is not None
         ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
         key = match.group(1)
         if key in ignore_keys:
             continue
-        with open(path_and_file_name) as parsed_file:
-            parsed = [str(req) for req in pkg_resources.parse_requirements(parsed_file)]
+        with open(file_path) as f:
+            parsed = [str(req) for req in pkg_resources.parse_requirements(f)]
             results[key] = parsed
 
     lite = results.pop("lite")
