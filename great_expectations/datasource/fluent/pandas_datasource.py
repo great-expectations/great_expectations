@@ -456,6 +456,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
             include_exclude=exclude
         )
         if "assets" in self.__fields_set__:
+            exclude_assets = {}
             for asset_name, asset in self.assets.items():
                 # don't check fields that should always be set
                 check_fields: set[str] = asset.__fields_set__.copy().difference(
@@ -465,7 +466,9 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
                     if isinstance(
                         getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
                     ):
-                        exclude_fields["assets"] = {asset_name: {field}}
+                        exclude_assets[asset_name] = {field: True}
+            if exclude_assets:
+                exclude_fields["assets"] = exclude_assets
 
         return super().json(
             include=include,
