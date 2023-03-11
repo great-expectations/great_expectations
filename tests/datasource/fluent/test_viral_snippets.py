@@ -194,8 +194,6 @@ def test_add_and_save_fluent_datasource(
     ds = context.sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
     )
-    # BDIRKS should i remove?
-    context._save_project_config()
 
     final_yaml = config_file.read_text()
     diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())
