@@ -57,6 +57,7 @@ SELECT EXISTS (
 """
     ).fetchall()
     if table_check_results != [(True,)]:
+        # marker this will probably need to be modifiedj
         test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
 
     # Return a connection string to this newly-created db

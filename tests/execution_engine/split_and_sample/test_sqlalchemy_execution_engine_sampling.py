@@ -284,6 +284,7 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # First, make sure that degenerative case never passes.
 
     test_df_0: pd.DataFrame = test_df.iloc[:1]
+    # sqlite only
     test_df_0.to_sql("test_table_0", con=my_execution_engine.engine)
 
     p = 1.0

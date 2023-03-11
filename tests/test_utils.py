@@ -596,6 +596,7 @@ def convert_string_columns_to_datetime(
         df[column_name_to_convert] = pd.to_datetime(df[column_name_to_convert])
 
 
+# marker
 def load_data_into_test_database(
     table_name: str,
     connection_string: str,
@@ -686,7 +687,7 @@ def load_data_into_test_database(
                 print(
                     f"Adding to existing table {table_name} and adding data from {csv_paths}"
                 )
-
+            # may need to be turned into a temp table function
             all_dfs_concatenated.to_sql(
                 name=table_name,
                 con=engine,
