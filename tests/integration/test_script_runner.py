@@ -1784,11 +1784,15 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
         pytest.skip("Skipping GCS tests")
     elif BackendDependencies.AWS in dependencies and not pytest_args.aws:
         pytest.skip("Skipping AWS tests")
-    elif BackendDependencies.REDSHIFT in dependencies and pytest_args.no_sqlalchemy:
+    elif BackendDependencies.REDSHIFT in dependencies and (
+        pytest_args.no_sqlalchemy or not pytest_args.redshift
+    ):
         pytest.skip("Skipping redshift tests")
     elif BackendDependencies.SPARK in dependencies and not pytest_args.spark:
         pytest.skip("Skipping spark tests")
-    elif BackendDependencies.SNOWFLAKE in dependencies and pytest_args.no_sqlalchemy:
+    elif BackendDependencies.SNOWFLAKE in dependencies and (
+        pytest_args.no_sqlalchemy or not pytest_args.snowflake
+    ):
         pytest.skip("Skipping snowflake tests")
     elif BackendDependencies.AZURE in dependencies and not pytest_args.azure:
         pytest.skip("Skipping Azure tests")
