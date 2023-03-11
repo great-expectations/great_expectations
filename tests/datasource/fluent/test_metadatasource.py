@@ -5,12 +5,13 @@ import inspect
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Type, Union, Tuple
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
+import ruamel.yaml
 from pydantic import DirectoryPath, validate_arguments
 
-from great_expectations.data_context import FileDataContext, AbstractDataContext
+from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
@@ -24,7 +25,6 @@ from great_expectations.datasource.fluent.sources import (
     _SourceFactories,
 )
 from great_expectations.execution_engine import ExecutionEngine
-import ruamel.yaml
 from great_expectations.util import get_context as get_gx_context
 
 if TYPE_CHECKING:
