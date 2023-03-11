@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 from contextlib import contextmanager
 from typing import Any, Callable, Dict, Generator, List, Type, Union
 
@@ -12,6 +13,7 @@ from great_expectations.core.batch_spec import (
     BatchMarkers,
     SqlAlchemyDatasourceBatchSpec,
 )
+from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.execution_engine import (
@@ -132,3 +134,19 @@ def inject_engine_lookup_double(
     finally:
         for source, engine in original_engine_override.items():
             source.execution_engine_override = engine
+
+
+@pytest.fixture
+def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
+    """
+    Initialize an regular/old-style FileDataContext project config directory.
+    Removed on teardown.
+    """
+    gx_yml = tmp_path / FileDataContext.GX_DIR / FileDataContext.GX_YML
+    assert gx_yml.exists() is False
+    FileDataContext.create(tmp_path)
+    assert gx_yml.exists()
+
+    tmp_gx_dir = gx_yml.parent.absolute()
+    logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
+    return tmp_gx_dir

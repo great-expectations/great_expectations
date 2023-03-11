@@ -69,22 +69,6 @@ def fluent_only_config(fluent_config_dict: dict) -> GxConfig:
 
 
 @pytest.fixture
-def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
-    """
-    Initialize an regular/old-style FileDataContext project config directory.
-    Removed on teardown.
-    """
-    gx_yml = tmp_path / FileDataContext.GX_DIR / FileDataContext.GX_YML
-    assert gx_yml.exists() is False
-    FileDataContext.create(tmp_path)
-    assert gx_yml.exists()
-
-    tmp_gx_dir = gx_yml.parent.absolute()
-    logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
-    return tmp_gx_dir
-
-
-@pytest.fixture
 def fluent_yaml_config_file(
     file_dc_config_dir_init: pathlib.Path, fluent_only_config: GxConfig
 ) -> pathlib.Path:
@@ -210,7 +194,6 @@ def test_add_and_save_fluent_datasource(
     ds = context.sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
     )
-    context._save_project_config()
 
     final_yaml = config_file.read_text()
     diff = difflib.ndiff(initial_yaml.splitlines(), final_yaml.splitlines())
