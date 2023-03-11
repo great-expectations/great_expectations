@@ -104,6 +104,7 @@ stages:
         python.version: '3.8'
       services:
         postgres: postgres
+        mysql: mysql
         mssql: mssql
         trino: trino
 
