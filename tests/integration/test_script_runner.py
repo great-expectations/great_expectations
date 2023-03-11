@@ -223,6 +223,7 @@ local_tests = [
         name="how_to_configure_credentials",
         user_flow_script="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
     IntegrationTestFixture(
         name="migration_guide_pandas_v3_api",
@@ -257,6 +258,10 @@ local_tests = [
     IntegrationTestFixture(
         name="expect_column_values_to_equal_three",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_equal_three.py",
+        backend_dependencies=[
+            BackendDependencies.SPARK,
+            BackendDependencies.POSTGRESQL,
+        ],
     ),
     IntegrationTestFixture(
         name="expect_table_columns_to_be_unique",
@@ -265,6 +270,10 @@ local_tests = [
     IntegrationTestFixture(
         name="expect_column_pair_values_to_have_a_difference_of_three",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_pair_values_to_have_a_difference_of_three.py",
+        backend_dependencies=[
+            BackendDependencies.SPARK,
+            BackendDependencies.POSTGRESQL,
+        ],
     ),
     IntegrationTestFixture(
         name="cross_table_comparisons_from_query",
