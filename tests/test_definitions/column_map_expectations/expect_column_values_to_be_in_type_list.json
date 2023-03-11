@@ -51,7 +51,7 @@
         },
         "postgresql": {
           "x": "INTEGER",
-          "y": "DOUBLE_PRECISION",
+          "y": "DOUBLE PRECISION",
           "z": "TEXT",
           "n": "TEXT",
           "b": "BOOLEAN",

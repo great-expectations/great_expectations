@@ -75,6 +75,8 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                         skip_expectation = False
                         if isinstance(d["data"], list):
                             sqlite_db_path = generate_sqlite_db_path()
+
+                            print(f"this is the filename: {filename}")
                             for dataset in d["data"]:
                                 datasets.append(
                                     get_test_validator_with_data(
@@ -410,10 +412,11 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
 @pytest.mark.order(index=0)
 @pytest.mark.integration
 @pytest.mark.slow  # 12.68s
-def test_case_runner_v3_api(test_case):
+def test_case_runner_v3_api(test_case, backend=""):
     if test_case["skip"]:
         pytest.skip()
 
+    print(f"expectation_type: {test_case['expectation_type']}")
     # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
     # test_case["batch"]._initialize_expectations()
     if "parse_strings_as_datetimes" in test_case["test"]["in"]:
@@ -431,3 +434,9 @@ def test_case_runner_v3_api(test_case):
             test=test_case["test"],
             pk_column=test_case["pk_column"],
         )
+    # drop table here?
+    # reach into the validator to get the table name
+    # and then drop[ ]
+    # validator will have connection and we can drop it.
+
+    # TODO: see where else to_sql() is used

@@ -41,11 +41,11 @@
         },
         "postgresql": {
           "x": "INTEGER",
-          "y": "DOUBLE_PRECISION",
+          "y": "DOUBLE PRECISION",
           "z": "TEXT",
           "n": "TEXT",
           "b": "BOOLEAN",
-          "s": "DOUBLE_PRECISION",
+          "s": "DOUBLE PRECISION",
           "s1": "BIGINT"
         },
         "mysql": {

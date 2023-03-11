@@ -9,6 +9,14 @@
         "b": [true, false]
       },
       "schemas": {
+        "postgresql": {
+          "x": "DOUBLE PRECISION",
+          "y": "INTEGER",
+          "z": "INTEGER",
+          "n": "INTEGER",
+          "b": "BOOLEAN"
+        },
+
         "spark": {
           "x": "FloatType",
           "y": "IntegerType",

@@ -29,6 +29,7 @@ from typing import (
 
 import numpy as np
 import pandas as pd
+import pandas.io.sql as pandas_sql
 from dateutil.parser import parse
 
 from great_expectations.core import (
@@ -93,12 +94,13 @@ try:
     import sqlalchemy as sqlalchemy
     from sqlalchemy import create_engine
     from sqlalchemy.engine import Engine
-    from sqlalchemy.exc import SQLAlchemyError
+    from sqlalchemy.exc import DatabaseError, SQLAlchemyError
 except ImportError:
     sqlalchemy = None
     create_engine = None
     Engine = None
     SQLAlchemyError = None
+    DatabaseError = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 try:
@@ -235,7 +237,7 @@ try:
         "BIGINT": postgresqltypes.BIGINT,
         "TIMESTAMP": postgresqltypes.TIMESTAMP,
         "DATE": postgresqltypes.DATE,
-        "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
+        "DOUBLE PRECISION": postgresqltypes.DOUBLE_PRECISION,
         "BOOLEAN": postgresqltypes.BOOLEAN,
         "NUMERIC": postgresqltypes.NUMERIC,
     }
@@ -1433,7 +1435,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     debug_logger: Optional[logging.Logger] = None,
     context: Optional[AbstractDataContext] = None,
     pk_column: bool = False,
-):
+) -> Validator:
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
         _debug = lambda x: debug_logger.debug(f"(build_sa_validator_with_data) {x}")  # type: ignore[union-attr] # noqa: E731
@@ -1521,6 +1523,9 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         connection_string = None
         engine = None
 
+    # this is where we have the engines. Create Engine
+    # we should do
+
     # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
     # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
     # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
@@ -1583,15 +1588,34 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         sql_insert_method = "multi"
     else:
         sql_insert_method = None
+    # create temporary table so that we
+    # https://www.appsloveworld.com/pandas/100/12/create-a-temporary-table-in-mysql-using-pandas
+    if schemas and schemas.get(sa_engine_name):
+        # if we have defined a schema then use it
+        current_schema = schemas.get(sa_engine_name)
+        schema_from_get_schema = pandas_sql.get_schema(
+            frame=df, name=table_name, dtype=current_schema
+        )
+    else:
+        # or use the types associated with the connection
+        schema_from_get_schema = pandas_sql.get_schema(frame=df, name=table_name, con=engine)  # type: ignore
+    create_table_sql = schema_from_get_schema.strip()
+    create_tmp_table_sql = re.sub(
+        "^(CREATE TABLE)?", "CREATE TEMP TABLE", create_table_sql
+    )
+
+    with engine.connect():
+        engine.execute(create_tmp_table_sql)
 
     _debug("Calling df.to_sql")
     _start = time.time()
+    # this is where it will need to be changed
     df.to_sql(
         name=table_name,
         con=engine,
         index=False,
         dtype=sql_dtypes,
-        if_exists="replace",
+        if_exists="append",
         method=sql_insert_method,
     )
     _end = time.time()
@@ -2295,6 +2319,7 @@ def build_test_backends_list(  # noqa: C901 - 48
     return test_backends
 
 
+# is this v2 only
 def generate_expectation_tests(  # noqa: C901 - 43
     expectation_type: str,
     test_data_cases: List[ExpectationTestDataCases],
