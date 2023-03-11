@@ -1792,3 +1792,5 @@ def _check_for_skipped_tests(pytest_args, integration_test_fixture) -> None:
         pytest.skip("Skipping snowflake tests")
     elif BackendDependencies.AZURE in dependencies and not pytest_args.azure:
         pytest.skip("Skipping Azure tests")
+    elif BackendDependencies.TRINO in dependencies and not pytest_args.trino:
+        pytest.skip("Skipping Trino tests")
