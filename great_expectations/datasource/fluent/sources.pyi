@@ -64,8 +64,9 @@ class _SourceFactories:
     type_lookup: ClassVar
     def __init__(self, data_context: GXDataContext) -> None: ...
     @classmethod
-    def register_types_and_ds_factory(
-        cls, ds_type: Type[Datasource], factory_fn: SourceFactoryFn
+    def register_datasource(
+        cls,
+        ds_type: Type[Datasource],
     ) -> None: ...
     @property
     def pandas_default(self) -> PandasDatasource: ...
