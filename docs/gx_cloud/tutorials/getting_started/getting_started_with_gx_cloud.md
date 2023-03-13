@@ -1,7 +1,6 @@
 ---
 title: Getting started with Great Expectations Cloud
 tag: [tutorial, getting started, cloud, onboarding]
-slug: cloud
 description: This tutorial will help you onboard with GX Cloud and get ready to connect to your data.
 keywords: [tutorial, getting started, cloud, onboarding]
 ---
