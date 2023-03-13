@@ -148,7 +148,10 @@ module.exports = {
           items: [
             'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas',
             'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas'
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark'
           ]
         },
         {
