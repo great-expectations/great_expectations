@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import hashlib
 import logging
@@ -343,11 +345,23 @@ Bucket: {error}"""
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
             reader_fn = self._get_reader_fn(reader_method)
-            df = reader_fn(**reader_options)
+            reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
+                **reader_options
+            )
+            if isinstance(reader_fn_result, list):
+                if len(reader_fn_result) > 1:
+                    raise gx_exceptions.ExecutionEngineError(
+                        "Pandas reader method must return a single DataFrame, "
+                        f'but "{reader_method}" returned {len(reader_fn_result)} DataFrames.'
+                    )
+                else:
+                    df = reader_fn_result[0]
+            else:
+                df = reader_fn_result
 
         else:
             raise gx_exceptions.BatchSpecError(
-                f"""batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, \
+                f"""batch_spec must be of type RuntimeDataBatchSpec, PandasBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, \
 not {batch_spec.__class__.__name__}"""
             )
 

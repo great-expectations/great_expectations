@@ -1628,7 +1628,7 @@ class DataContextConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
-    xdatasources = fields.Dict(
+    fluent_datasources = fields.Dict(
         required=False,
         allow_none=True,
         load_only=True,
@@ -1665,7 +1665,7 @@ class DataContextConfigSchema(Schema):
         "concurrency",  # 0.13.33
         "progress_bars",  # 0.13.49
         "include_rendered_content",  # 0.15.19,
-        "xdatasources",
+        "fluent_datasources",
     ]
 
     # noinspection PyUnusedLocal
@@ -2375,7 +2375,7 @@ class DataContextConfig(BaseYamlConfig):
         config_version (Optional[float]): config version of this DataContext.
         datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
             DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
-        xdatasources (Optional[dict]): temporary placeholder for Experimental Datasources.
+        fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
         expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
         validations_store_name (Optional[str]): name of ValidationsStore to be used by DataContext.
         evaluation_parameter_store_name (Optional[str]): name of EvaluationParamterStore to be used by DataContext.
@@ -2415,7 +2415,7 @@ class DataContextConfig(BaseYamlConfig):
                 Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
             ]
         ] = None,
-        xdatasources: Optional[dict] = None,
+        fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
@@ -2434,9 +2434,6 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
-        if xdatasources:
-            logger.warning("`xdatasources` are an experimental feature")
-
         # Set defaults
         if config_version is None:
             config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
@@ -3136,7 +3133,7 @@ class CheckpointConfig(BaseYamlConfig):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
-        run_time = run_time or datetime.datetime.now()
+        run_time = run_time or datetime.datetime.now(tz=datetime.timezone.utc)
         runtime_configuration = runtime_configuration or {}
 
         from great_expectations.checkpoint.util import (

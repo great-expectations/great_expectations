@@ -108,7 +108,7 @@ class CustomPandasDataset(PandasDataset):
 
 
 def test_custom_class():
-    script_path = os.path.dirname(os.path.realpath(__file__))
+    script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     df = gx.read_csv(
         script_path + "/test_sets/Titanic.csv", dataset_class=CustomPandasDataset
     )
@@ -443,13 +443,13 @@ def test_stats_mixed_expectations():
 
 class TestIO(unittest.TestCase):
     def test_read_csv(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         _ = gx.read_csv(
             script_path + "/test_sets/Titanic.csv",
         )
 
     def test_read_json(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_json(
             script_path + "/test_sets/test_json_data_file.json",
         )
@@ -470,7 +470,7 @@ class TestIO(unittest.TestCase):
         reason="GX uses pandas to read excel files, which requires openpyxl",
     )
     def test_read_excel(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_excel(
             script_path + "/test_sets/Titanic_multi_sheet.xlsx", engine="openpyxl"
         )
@@ -499,7 +499,7 @@ class TestIO(unittest.TestCase):
         assert dfs_dict["Titanic_1"]["Name"][0] == "Allen, Miss Elisabeth Walton"
 
     def test_read_table(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_table(script_path + "/test_sets/Titanic.csv", sep=",")
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
@@ -518,7 +518,7 @@ class TestIO(unittest.TestCase):
             if pandas_major_version == 0 and pandas_minor_version < 25:
                 pytest.skip("Skipping because of old pandas version.")
 
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_feather(script_path + "/test_sets/Titanic.feather")
         assert df["Name"][0] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
@@ -550,13 +550,13 @@ class TestIO(unittest.TestCase):
             if pandas_major_version == 0 and pandas_minor_version < 23:
                 pytest.skip("Pandas version < 23 is no longer compatible with pyarrow")
 
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_parquet(script_path + "/test_sets/Titanic.parquet")
         assert df["Name"][1] == "Allen, Miss Elisabeth Walton"
         assert isinstance(df, PandasDataset)
 
     def test_read_pickle(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_pickle(
             script_path + "/test_sets/Titanic.pkl",
         )
@@ -564,7 +564,7 @@ class TestIO(unittest.TestCase):
         assert isinstance(df, PandasDataset)
 
     def test_read_sas(self):
-        script_path = os.path.dirname(os.path.realpath(__file__))
+        script_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
         df = gx.read_sas(
             script_path + "/test_sets/Titanic.sas7bdat",
             encoding="latin-1",

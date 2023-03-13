@@ -12,8 +12,8 @@ from great_expectations.core.metric_function_types import (
 from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,  # noqa: TCH001
 )
-from great_expectations.experimental.datasources.interfaces import (
-    Batch as XBatch,  # noqa: TCH001
+from great_expectations.datasource.fluent.interfaces import (
+    Batch as FluentBatch,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler import (
     RuleBasedProfilerResult,  # noqa: TCH001
@@ -492,7 +492,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         self._data_context = (
             self._validator.data_context if self._validator is not None else None
         )
-        self._batches: Optional[Dict[str, Union[Batch, XBatch]]] = (
+        self._batches: Optional[Dict[str, Union[Batch, FluentBatch]]] = (
             self._validator.batches if self._validator is not None else None
         )
 
@@ -562,7 +562,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         else:
             usage_statistics_handler = self._data_context._usage_statistics_handler
 
-        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
+        batches: Dict[str, Union[Batch, FluentBatch]] = self._batches or {}
 
         data_assistant_result = DataAssistantResult(
             _batch_id_to_batch_identifier_display_name_map=self._batch_id_to_batch_identifier_display_name_map(),
@@ -702,7 +702,7 @@ class DataAssistant(metaclass=MetaDataAssistant):
         """
         This method uses loaded "Batch" objects to return the mapping between unique "batch_id" and "batch_identifiers".
         """
-        batches: Dict[str, Union[Batch, XBatch]] = self._batches or {}
+        batches: Dict[str, Union[Batch, FluentBatch]] = self._batches or {}
 
         batch_id: str
         batch: Batch

@@ -88,6 +88,17 @@ def _does_validation_contain_batch_request(
     return False
 
 
+def _does_validation_contain_expectation_suite_name(
+    validations: Optional[List[dict]] = None,
+) -> bool:
+    if validations is not None:
+        for val in validations:
+            if val.get("expectation_suite_name") is not None:
+                return True
+
+    return False
+
+
 class BaseCheckpoint(ConfigPeer):
     """
     BaseCheckpoint class is initialized from CheckpointConfig typed object and contains all functionality
@@ -102,13 +113,6 @@ class BaseCheckpoint(ConfigPeer):
         checkpoint_config: CheckpointConfig,
         data_context: AbstractDataContext,
     ) -> None:
-        from great_expectations.data_context.data_context.abstract_data_context import (
-            AbstractDataContext,
-        )
-
-        if not isinstance(data_context, AbstractDataContext):
-            raise TypeError("A Checkpoint requires a valid DataContext")
-
         self._usage_statistics_handler = data_context._usage_statistics_handler
 
         self._data_context = data_context
@@ -180,20 +184,34 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
-        if validator:
-            if self._validator:
-                raise gx_exceptions.CheckpointError(
-                    f'Checkpoint "{self.name}" has already been created with a validator and overriding it through run() is not allowed.'
-                )
+        if (
+            sum(bool(x) for x in [self._validator is not None, validator is not None])
+            > 1
+        ):
+            raise gx_exceptions.CheckpointError(
+                f'Checkpoint "{self.name}" has already been created with a validator and overriding it through run() is not allowed.'
+            )
 
+        if validator:
+            self._validator = validator
+
+        if self._validator:
             if batch_request or _does_validation_contain_batch_request(
                 validations=validations
             ):
                 raise gx_exceptions.CheckpointError(
-                    f'Checkpoint "{self.name}" has already been created with a validator and overriding it by supplying batch_request and/or validations with a batch_request to run() is not allowed.'
+                    f'Checkpoint "{self.name}" has already been created with a validator and overriding it by supplying a batch_request and/or validations with a batch_request to run() is not allowed.'
                 )
 
-            self._validator = validator
+            if (
+                expectation_suite_name
+                or _does_validation_contain_expectation_suite_name(
+                    validations=validations
+                )
+            ):
+                raise gx_exceptions.CheckpointError(
+                    f'Checkpoint "{self.name}" has already been created with a validator and overriding its expectation_suite_name by supplying an expectation_suite_name and/or validations with an expectation_suite_name to run() is not allowed.'
+                )
 
         if (run_id and run_name) or (run_id and run_time):
             raise gx_exceptions.InvalidCheckpointConfigError(
@@ -204,7 +222,7 @@ class BaseCheckpoint(ConfigPeer):
         # and action_list are considered the "default" validation.
         using_default_validation = not self.validations and not validations
 
-        run_time = run_time or datetime.datetime.now()
+        run_time = run_time or datetime.datetime.now(tz=datetime.timezone.utc)
         runtime_configuration = runtime_configuration or {}
         result_format = result_format or runtime_configuration.get("result_format")
 
@@ -733,13 +751,25 @@ class Checkpoint(BaseCheckpoint):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         default_validation_id: Optional[str] = None,
     ) -> None:
-        if validator and (
-            batch_request
-            or _does_validation_contain_batch_request(validations=validations)
-        ):
-            raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{name}" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.'
-            )
+        if validator:
+            if batch_request or _does_validation_contain_batch_request(
+                validations=validations
+            ):
+                raise gx_exceptions.CheckpointError(
+                    f'Checkpoint "{name}" cannot be called with a validator and contain a batch_request and/or a batch_request in validations.'
+                )
+
+            if (
+                expectation_suite_name
+                or _does_validation_contain_expectation_suite_name(
+                    validations=validations
+                )
+            ):
+                raise gx_exceptions.CheckpointError(
+                    f'Checkpoint "{name}" cannot be called with a validator and contain an expectation_suite_name and/or an expectation_suite_name in validations.'
+                )
+
+            expectation_suite_name = validator.expectation_suite_name
 
         # Only primitive types are allowed as constructor arguments; data frames are supplied to "run()" as arguments.
         if batch_request_contains_batch_data(batch_request=batch_request):
@@ -789,6 +819,7 @@ constructor arguments.
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
@@ -830,6 +861,7 @@ constructor arguments.
             "run_name_template": run_name_template,
             "expectation_suite_name": expectation_suite_name,
             "batch_request": batch_request,
+            "validator": validator,
             "action_list": action_list,
             "evaluation_parameters": evaluation_parameters,
             "runtime_configuration": runtime_configuration,
