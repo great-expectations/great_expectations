@@ -23,7 +23,10 @@ import pydantic
 from ruamel.yaml import YAML
 
 from great_expectations.datasource.fluent.config_str import ConfigStr
-from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
+from great_expectations.datasource.fluent.constants import (
+    _ASSETS_KEY,
+    _FIELDS_ALWAYS_SET,
+)
 
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
@@ -169,6 +172,8 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+        _add_to__fields_set__if_truthy(self, _ASSETS_KEY)
+
         return super().json(
             include=include,
             exclude=exclude,
@@ -236,6 +241,8 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+        _add_to__fields_set__if_truthy(self, _ASSETS_KEY)
+
         result = super().dict(
             include=include,
             exclude=exclude,
@@ -294,3 +301,19 @@ def _recursively_set_config_value(
                 data[i] = v.get_config_value(config_provider)
             elif isinstance(v, (MutableMapping, MutableSequence)):
                 return _recursively_set_config_value(v, config_provider)
+
+
+def _add_to__fields_set__if_truthy(model: FluentBaseModel, field_name: str) -> None:
+    """
+    This method updates the special `__fields__set__` attribute if the provided field is
+    present and the value truthy.
+
+    For background `__fields_set__` is what determines whether or not a field is
+    serialized when `exclude_unset` is used with `.dict()`/`.json()`/`.yaml()`.
+
+    This is set automatically in most cases, but if a field was set with a `pre`
+    validator then this will not have been updated and so if we want it to be dumped
+    when `exclude_unset` is used we need to update `__fields_set__`.
+    """
+    if getattr(model, field_name, None):
+        model.__fields_set__.add(field_name)
