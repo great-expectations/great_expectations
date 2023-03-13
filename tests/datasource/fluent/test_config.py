@@ -497,7 +497,7 @@ def test_general_splitter_errors(
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def from_complex_dict_gx_config() -> GxConfig:
+def from_dict_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_obj(COMPLEX_CONFIG_DICT)
     assert gx_config
     return gx_config
@@ -520,16 +520,16 @@ def from_yaml_gx_config() -> GxConfig:
 
 
 def test_dict_config_round_trip(
-    inject_engine_lookup_double, from_complex_dict_gx_config: GxConfig
+    inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
-    dumped: dict = from_complex_dict_gx_config.dict()
+    dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
     re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
     assert re_loaded
 
-    assert from_complex_dict_gx_config == re_loaded
+    assert from_dict_gx_config == re_loaded
 
 
 def test_json_config_round_trip(
