@@ -97,13 +97,12 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-    - job: test_docs_not_mysql_not_postgres
+    - job: test_docs_main
       timeoutInMinutes: 120
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       variables:
         python.version: '3.8'
       services:
-        mssql: mssql
         trino: trino
 
       steps:
@@ -121,7 +120,7 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --mssql --spark --trino --aws --azure tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --trino --aws --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
@@ -150,6 +149,31 @@ stages:
             # Azure credentials
             AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
             AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+    - job: test_docs_spark
+      timeoutInMinutes: 30
+      condition: or(
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
+          eq(variables.isDevelop, true), 
+          eq(variables.isManual, true)
+        )
+      variables:
+        python.version: '3.8'
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+
+        - script: |
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+          displayName: 'Install dependencies'
+
+        - script: |
+            pytest -v --docs-tests -m integration --spark tests/integration/test_script_runner.py
+          displayName: 'pytest'
 
     - job: test_docs_mysql
       timeoutInMinutes: 30
