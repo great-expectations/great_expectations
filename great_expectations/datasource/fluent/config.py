@@ -92,40 +92,42 @@ class GxConfig(FluentBaseModel):
         logger.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
         loaded_datasources: Dict[str, Datasource] = {}
 
-        for ds_name, config in v.items():
+        for ds_key, config in v.items():
             ds_type_name: str = config.get("type", "")
             if not ds_type_name:
                 # TODO: (kilo59 122222) ideally this would be raised by `Datasource` validation
                 # https://github.com/pydantic/pydantic/issues/734
-                raise ValueError(f"'{ds_name}' is missing a 'type' entry")
+                raise ValueError(f"'{ds_key}' is missing a 'type' entry")
 
             try:
                 ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_type_name]
-                logger.debug(f"Instantiating '{ds_name}' as {ds_type}")
+                logger.debug(f"Instantiating '{ds_key}' as {ds_type}")
             except KeyError as type_lookup_err:
                 raise ValueError(
-                    f"'{ds_name}' has unsupported 'type' - {type_lookup_err}"
+                    f"'{ds_key}' has unsupported 'type' - {type_lookup_err}"
                 ) from type_lookup_err
 
             if "name" in config:
-                if config["name"] != ds_name:
+                ds_name: str = config["name"]
+                if ds_name != ds_key:
                     raise ValueError(
-                        f'Datasource name "{ds_name}" is different from value in its "name" entry.'
+                        f'Datasource key "{ds_key}" is different from name "{ds_name}" in its configuration.'
                     )
             else:
-                config["name"] = ds_name
+                config["name"] = ds_key
 
             if "assets" not in config:
                 config["assets"] = {}
 
-            for asset_name, asset_config in config["assets"].items():
+            for asset_key, asset_config in config["assets"].items():
                 if "name" in asset_config:
-                    if asset_config["name"] != asset_name:
+                    asset_name: str = asset_config["name"]
+                    if asset_name != asset_key:
                         raise ValueError(
-                            f'DataAsset name "{asset_name}" is different from value in its "name" entry.'
+                            f'DataAsset key "{asset_key}" is different from name "{asset_name}" in its configuration.'
                         )
                 else:
-                    asset_config["name"] = asset_name
+                    asset_config["name"] = asset_key
 
             datasource = ds_type(**config)
 

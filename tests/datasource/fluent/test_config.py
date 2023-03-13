@@ -331,7 +331,7 @@ def test_load_incorrect_ds_config_raises_error(
 
     assert (
         str(exc_info.value)
-        == '1 validation error for GxConfig\nfluent_datasources\n  Datasource name "my_ds" is different from value in its "name" entry. (type=value_error)'
+        == '1 validation error for GxConfig\nfluent_datasources\n  Datasource key "my_ds" is different from name "my_incorrect_ds" in its configuration. (type=value_error)'
     )
 
 
@@ -358,7 +358,7 @@ def test_load_incorrect_asset_config_raises_error(
 
     assert (
         str(exc_info.value)
-        == '1 validation error for GxConfig\nfluent_datasources\n  DataAsset name "my_csv_asset" is different from value in its "name" entry. (type=value_error)'
+        == '1 validation error for GxConfig\nfluent_datasources\n  DataAsset key "my_csv_asset" is different from name "my_incorrect_csv_asset" in its configuration. (type=value_error)'
     )
 
 
