@@ -32,10 +32,19 @@
         },
         "connection_string": {
             "title": "Connection String",
-            "minLength": 1,
-            "maxLength": 65536,
-            "format": "uri",
-            "type": "string"
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                }
+            ]
         }
     },
     "required": [

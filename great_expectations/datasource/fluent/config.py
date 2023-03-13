@@ -1,16 +1,32 @@
 """POC for loading config."""
 from __future__ import annotations
 
+import json
 import logging
 import pathlib
+from io import StringIO
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Dict, List, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    overload,
+)
 
 from pydantic import Extra, Field, ValidationError, validator
+from ruamel.yaml import YAML
 from typing_extensions import Final
 
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
+    _recursively_set_config_value,
 )
 from great_expectations.datasource.fluent.interfaces import (
     Datasource,  # noqa: TCH001
@@ -24,8 +40,20 @@ from great_expectations.datasource.fluent.sources import (
 if TYPE_CHECKING:
     from pydantic.error_wrappers import ErrorDict as PydanticErrorDict
 
+    from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.datasource.fluent.fluent_base_model import (
+        AbstractSetIntStr,
+        MappingIntStrAny,
+    )
+
 
 logger = logging.getLogger(__name__)
+
+
+yaml = YAML(typ="safe")
+# NOTE (kilo59): the following settings appear to be what we use in existing codebase
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 _FLUENT_STYLE_DESCRIPTION: Final[str] = "Fluent Datasources"
@@ -46,6 +74,14 @@ class GxConfig(FluentBaseModel):
         ..., description=_FLUENT_STYLE_DESCRIPTION
     )
 
+    _EXCLUDE_FROM_DATASOURCE_SERIALIZATION: ClassVar[Set[str]] = {
+        "name",  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+    }
+
+    _EXCLUDE_FROM_DATA_ASSET_SERIALIZATION: ClassVar[Set[str]] = {
+        "name",  # The "name" field is set in validation upon deserialization from configuration key; hence, it should not be serialized.
+    }
+
     @property
     def datasources(self) -> Dict[str, Datasource]:
         return self.fluent_datasources
@@ -53,6 +89,7 @@ class GxConfig(FluentBaseModel):
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
 
+    # noinspection PyNestedDecorators
     @validator("fluent_datasources", pre=True)
     @classmethod
     def _load_datasource_subtype(cls, v: Dict[str, dict]):
@@ -139,3 +176,236 @@ class GxConfig(FluentBaseModel):
 
         # noinspection PyTypeChecker
         return super().parse_yaml(f)
+
+    @overload
+    def yaml(
+        self,
+        stream_or_path: Union[StringIO, None] = None,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        by_alias: bool = ...,
+        exclude_unset: bool = ...,
+        exclude_defaults: bool = ...,
+        exclude_none: bool = ...,
+        encoder: Union[Callable[[Any], Any], None] = ...,
+        models_as_dict: bool = ...,
+        **yaml_kwargs,
+    ) -> str:
+        ...
+
+    @overload
+    def yaml(
+        self,
+        stream_or_path: pathlib.Path,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        by_alias: bool = ...,
+        exclude_unset: bool = ...,
+        exclude_defaults: bool = ...,
+        exclude_none: bool = ...,
+        encoder: Union[Callable[[Any], Any], None] = ...,
+        models_as_dict: bool = ...,
+        **yaml_kwargs,
+    ) -> pathlib.Path:
+        ...
+
+    def yaml(
+        self,
+        stream_or_path: Union[StringIO, pathlib.Path, None] = None,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        by_alias: bool = False,
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Union[Callable[[Any], Any], None] = None,
+        models_as_dict: bool = True,
+        **yaml_kwargs,
+    ) -> Union[str, pathlib.Path]:
+        """
+        Serialize the config object as yaml.
+        Writes to a file if a `pathlib.Path` is provided.
+        Else it writes to a stream and returns a yaml string.
+        """
+        if stream_or_path is None:
+            stream_or_path = StringIO()
+
+        intermediate_json_dict = self._json_dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+        )
+        intermediate_json_dict = self._exclude_name_fields_from_fluent_datasources(
+            config=intermediate_json_dict
+        )
+        yaml.dump(intermediate_json_dict, stream=stream_or_path, **yaml_kwargs)
+
+        if isinstance(stream_or_path, pathlib.Path):
+            return stream_or_path
+
+        return stream_or_path.getvalue()
+
+    def json(
+        self,
+        *,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        by_alias: bool = False,
+        # deprecated - use exclude_unset instead
+        skip_defaults: bool | None = None,
+        # Default to True to prevent serializing long configs full of unset default values
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Callable[[Any], Any] | None = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs: Any,
+    ) -> str:
+        """
+        Generate a JSON representation of the model, `include` and `exclude` arguments
+        as per `dict()`.
+        `encoder` is an optional function to supply as `default` to json.dumps(), other
+        arguments as per `json.dumps()`.
+        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
+        default.
+        """
+        intermediate_json_dict = self._json_dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+        )
+        intermediate_json_dict = self._exclude_name_fields_from_fluent_datasources(
+            config=intermediate_json_dict
+        )
+        return self.__config__.json_dumps(
+            intermediate_json_dict, default=encoder, **dumps_kwargs
+        )
+
+    def _json_dict(
+        self,
+        *,
+        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        by_alias: bool = False,
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Union[Callable[[Any], Any], None] = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs,
+    ) -> dict:
+        """
+        JSON compatible dictionary. All complex types removed.
+        Prefer `.dict()` or `.json()`
+        """
+        return json.loads(
+            super().json(
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_defaults=exclude_defaults,
+                exclude_none=exclude_none,
+                encoder=encoder,
+                models_as_dict=models_as_dict,
+                **dumps_kwargs,
+            )
+        )
+
+    def dict(
+        self,
+        *,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        by_alias: bool = False,
+        # Default to True to prevent serializing long configs full of unset default values
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        # deprecated - use exclude_unset instead
+        skip_defaults: bool | None = None,
+        # custom
+        config_provider: _ConfigurationProvider | None = None,
+    ) -> dict[str, Any]:
+        """
+        Generate a dictionary representation of the model, optionally specifying which
+        fields to include or exclude.
+        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
+        default.
+        """
+        intermediate_dict: dict = super().dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            skip_defaults=skip_defaults,
+        )
+        result: dict = self._exclude_name_fields_from_fluent_datasources(
+            config=intermediate_dict
+        )
+
+        if config_provider:
+            logger.info(
+                f"{self.__class__.__name__}.dict() - substituting config values"
+            )
+            _recursively_set_config_value(data=result, config_provider=config_provider)
+
+        return result
+
+    def _exclude_name_fields_from_fluent_datasources(
+        self, config: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        if "fluent_datasources" in config:
+            fluent_datasources: dict = config["fluent_datasources"]
+
+            datasource_name: str
+            datasource_config: dict
+            for datasource_name, datasource_config in fluent_datasources.items():
+                datasource_config = _exclude_fields_from_serialization(
+                    source_dict=datasource_config,
+                    exclusions=self._EXCLUDE_FROM_DATASOURCE_SERIALIZATION,
+                )
+                if "assets" in datasource_config:
+                    data_assets: dict = datasource_config["assets"]
+                    data_asset_name: str
+                    data_asset_config: dict
+                    data_assets = {
+                        data_asset_name: _exclude_fields_from_serialization(
+                            source_dict=data_asset_config,
+                            exclusions=self._EXCLUDE_FROM_DATA_ASSET_SERIALIZATION,
+                        )
+                        for data_asset_name, data_asset_config in data_assets.items()
+                    }
+                    datasource_config["assets"] = data_assets
+
+                fluent_datasources[datasource_name] = datasource_config
+
+        return config
+
+
+def _exclude_fields_from_serialization(
+    source_dict: Dict[str, Any], exclusions: Set[str]
+) -> Dict[str, Any]:
+    element: Tuple[str, Any]
+    # noinspection PyTypeChecker
+    return dict(
+        filter(
+            lambda element: element[0] not in exclusions,
+            source_dict.items(),
+        )
+    )

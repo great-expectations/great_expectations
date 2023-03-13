@@ -159,7 +159,7 @@ class PandasDatasource(_PandasDatasource):
     def add_csv_asset(
         self,
         name: str,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
@@ -215,7 +215,7 @@ class PandasDatasource(_PandasDatasource):
     def add_excel_asset(
         self,
         name: str,
-        io: str | bytes | os.PathLike,
+        io: os.PathLike | str | bytes,
         order_by: typing.List[Sorter] = ...,
         sheet_name: typing.Union[str, int, None] = 0,
         header: Union[int, Sequence[int], None] = 0,
@@ -244,7 +244,7 @@ class PandasDatasource(_PandasDatasource):
     def add_feather_asset(
         self,
         name: str,
-        path: pydantic.FilePath,
+        path: pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         columns: Union[Sequence[Hashable], None] = ...,
         use_threads: bool = ...,
@@ -287,7 +287,7 @@ class PandasDatasource(_PandasDatasource):
     def add_html_asset(
         self,
         name: str,
-        io: str | os.PathLike,
+        io: os.PathLike | str,
         order_by: typing.List[Sorter] = ...,
         match: Union[str, typing.Pattern] = ".+",
         flavor: typing.Union[str, None] = ...,
@@ -307,7 +307,7 @@ class PandasDatasource(_PandasDatasource):
     def add_json_asset(
         self,
         name: str,
-        path_or_buf: pydantic.Json | pydantic.FilePath,
+        path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         orient: typing.Union[str, None] = ...,
         dtype: typing.Union[dict, None] = ...,
@@ -328,7 +328,7 @@ class PandasDatasource(_PandasDatasource):
     def add_orc_asset(
         self,
         name: str,
-        path: pydantic.FilePath,
+        path: pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         kwargs: typing.Union[dict, None] = ...,
@@ -336,7 +336,7 @@ class PandasDatasource(_PandasDatasource):
     def add_parquet_asset(
         self,
         name: str,
-        path: pydantic.FilePath,
+        path: pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         engine: str = "auto",
         columns: typing.Union[typing.List[str], None] = ...,
@@ -347,7 +347,7 @@ class PandasDatasource(_PandasDatasource):
     def add_pickle_asset(
         self,
         name: str,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
@@ -355,7 +355,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sas_asset(
         self,
         name: str,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         format: typing.Union[str, None] = ...,
         index: Union[Hashable, None] = ...,
@@ -375,8 +375,8 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_asset(
         self,
         name: str,
-        sql: str | sqlalchemy.select | sqlalchemy.text,
-        con: str | sqlalchemy.engine.Engine | sqlite3.Connection,
+        sql: sqlalchemy.select | sqlalchemy.text | str,
+        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         order_by: typing.List[Sorter] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
         coerce_float: bool = ...,
@@ -388,8 +388,8 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_query_asset(
         self,
         name: str,
-        sql: str | sqlalchemy.select | sqlalchemy.text,
-        con: str | sqlalchemy.engine.Engine | sqlite3.Connection,
+        sql: sqlalchemy.select | sqlalchemy.text | str,
+        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         order_by: typing.List[Sorter] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
         coerce_float: bool = ...,
@@ -402,7 +402,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         table_name: str,
-        con: str | sqlalchemy.engine.Engine,
+        con: sqlalchemy.engine.Engine | str,
         order_by: typing.List[Sorter] = ...,
         schema: typing.Union[str, None] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -414,7 +414,7 @@ class PandasDatasource(_PandasDatasource):
     def add_stata_asset(
         self,
         name: str,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         convert_dates: bool = ...,
         convert_categoricals: bool = ...,
@@ -431,7 +431,7 @@ class PandasDatasource(_PandasDatasource):
     def add_table_asset(
         self,
         name: str,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
@@ -488,7 +488,7 @@ class PandasDatasource(_PandasDatasource):
     def add_xml_asset(
         self,
         name: str,
-        path_or_buffer: pydantic.FilePath,
+        path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         order_by: typing.List[Sorter] = ...,
         xpath: str = "./*",
         namespaces: typing.Union[typing.Dict[str, str], None] = ...,
@@ -511,7 +511,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_csv(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         sep: typing.Union[str, None] = ...,
@@ -567,7 +567,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_excel(
         self,
-        io: str | bytes | os.PathLike,
+        io: os.PathLike | str | bytes,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         sheet_name: typing.Union[str, int, None] = 0,
@@ -596,7 +596,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_feather(
         self,
-        path: pydantic.FilePath,
+        path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         columns: Union[Sequence[Hashable], None] = ...,
@@ -623,7 +623,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_hdf(
         self,
-        path_or_buf: str | os.PathLike | pd.HDFStore,
+        path_or_buf: pd.HDFStore | os.PathLike | str,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         key: typing.Any = ...,
@@ -639,7 +639,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_html(
         self,
-        io: str | os.PathLike,
+        io: os.PathLike | str,
         asset_name: Optional[str],
         order_by: typing.List[Sorter] = ...,
         match: Union[str, typing.Pattern] = ".+",
@@ -659,7 +659,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_json(
         self,
-        path_or_buf: pydantic.Json | pydantic.FilePath,
+        path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         orient: typing.Union[str, None] = ...,
@@ -680,7 +680,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_orc(
         self,
-        path: pydantic.FilePath,
+        path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
@@ -688,7 +688,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_parquet(
         self,
-        path: pydantic.FilePath,
+        path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         engine: str = "auto",
@@ -699,7 +699,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_pickle(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         compression: CompressionOptions = "infer",
@@ -707,7 +707,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_sas(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         format: typing.Union[str, None] = ...,
@@ -727,8 +727,8 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_sql(
         self,
-        sql: str | sqlalchemy.select | sqlalchemy.text,
-        con: str | sqlalchemy.engine.Engine | sqlite3.Connection,
+        sql: sqlalchemy.select | sqlalchemy.text | str,
+        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -740,8 +740,8 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_sql_query(
         self,
-        sql: str | sqlalchemy.select | sqlalchemy.text,
-        con: str | sqlalchemy.engine.Engine | sqlite3.Connection,
+        sql: sqlalchemy.select | sqlalchemy.text | str,
+        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -754,7 +754,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql_table(
         self,
         table_name: str,
-        con: str | sqlalchemy.engine.Engine,
+        con: sqlalchemy.engine.Engine | str,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         schema: typing.Union[str, None] = ...,
@@ -766,7 +766,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_stata(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         convert_dates: bool = ...,
@@ -783,7 +783,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_table(
         self,
-        filepath_or_buffer: pydantic.FilePath,
+        filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         sep: typing.Union[str, None] = ...,
@@ -840,7 +840,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> Validator: ...
     def read_xml(
         self,
-        path_or_buffer: pydantic.FilePath,
+        path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = ...,
         order_by: typing.List[Sorter] = ...,
         xpath: str = "./*",
