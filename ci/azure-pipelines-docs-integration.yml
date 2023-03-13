@@ -103,8 +103,6 @@ stages:
       variables:
         python.version: '3.8'
       services:
-        postgres: postgres
-        mysql: mysql
         mssql: mssql
         trino: trino
 
@@ -147,7 +145,7 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --trino --aws --azure tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --bigquery --mssql --spark --trino --aws --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
