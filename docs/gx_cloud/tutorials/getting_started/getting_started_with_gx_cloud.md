@@ -10,29 +10,30 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 Welcome to Great Expectations Cloud! This tutorial will help you onboard with GX Cloud and get ready to connect to your data.
 
+## Prerequisites
+
 <Prerequisites>
 
 This tutorial assumes you have Great Expectations OSS installed on your machine. If that's not the case please complete [Step 1: OSS Setup](/docs/tutorials/getting_started/tutorial_setup.md) first.
 
 </Prerequisites>
 
-Step 1: Login
----------------------------
+## Steps
+
+### Step 1: Login
 
 - First of all, you'll need to go to [https://app.greatexpectations.io](https://app.greatexpectations.io)
 - You should have received GX Cloud invitation email. Follow the link in the email to set the password.
 - Login into the app with your email and password.
 
 
-Step 2: Generating tokens
----------------------------
+### Step 2: Generate User Token
 
 - Go to [“Settings” > “Users”](https://app.greatexpectations.io/users) in the navigation panel. This is the screen where you can invite your mates into the app.
 - Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel. In this tutorial, we’ll create a User Token, but GX Cloud also supports Organization tokens, e.g. for use in shared execution environments. These tokens are see-once and stored as a hash in Great Expectation Cloud's backend database. Once a user copies their API key, the Cloud UI will never show the token value again. 
 
 
-Step 3: Setting tokens & <TechnicalTag tag="data_context" text="Data Context"/>
----------------------------    
+### Step 3: Set tokens & <TechnicalTag tag="data_context" text="Data Context"/>
 
 - Open Jupyter Notebook
 
@@ -56,6 +57,6 @@ import great_expectations as gx
 context = gx.get_context()
 ```
 
-Next Steps
---------------------------- 
+## Next Steps
+
 Follow in-app snippets to create a <TechnicalTag tag="datasource" text="Datasource"/>, define an <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>, configure and run a <TechnicalTag tag="checkpoint" text="Checkpoint"/> and view <TechnicalTag tag="validation_result" text="Validation Results"/>.
