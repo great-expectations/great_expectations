@@ -2794,6 +2794,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
     raise_exception: bool = True,
     debug_logger: Optional[Logger] = None,
     pk_column: bool = False,
+    temp_table_name: Optional[str] = None,
 ):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -2911,6 +2912,11 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
                 raise
             error_message = str(e)
             stack_trace = (traceback.format_exc(),)
+
+    # drop table/url
+    if isinstance(validator.execution_engine, SqlAlchemyExecutionEngine):
+        if temp_table_name and type(temp_table_name) is str:
+            validator.execution_engine.engine.execute(f"DROP TABLE {temp_table_name};")
 
     return (result, error_message, stack_trace)
 

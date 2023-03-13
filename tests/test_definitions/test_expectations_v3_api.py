@@ -17,6 +17,7 @@ from great_expectations.self_check.util import (
     candidate_test_is_on_temporary_notimplemented_list_v3_api,
     evaluate_json_test_v3_api,
     generate_sqlite_db_path,
+    generate_test_table_name,
     get_test_validator_with_data,
     mssqlDialect,
     mysqlDialect,
@@ -50,6 +51,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                 pk_column: bool = False
                 file = open(filename)
                 test_configuration = json.load(file)
+                temp_table_name: str = generate_test_table_name().lower()
 
                 for d in test_configuration["datasets"]:
                     datasets = []
@@ -76,12 +78,15 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                         if isinstance(d["data"], list):
                             sqlite_db_path = generate_sqlite_db_path()
                             for dataset in d["data"]:
+                                # to eventually drop
+                                temp_table_name = dataset.get("dataset_name")
+
                                 datasets.append(
                                     get_test_validator_with_data(
                                         c,
                                         dataset["data"],
                                         dataset.get("schemas"),
-                                        table_name=dataset.get("dataset_name"),
+                                        table_name=temp_table_name,
                                         sqlite_db_path=sqlite_db_path,
                                         context=cast(
                                             DataContext,
@@ -98,12 +103,13 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                             ]:
 
                                 pk_column: bool = True
-
+                            temp_table_name = d.get("dataset_name")
                             schemas = d["schemas"] if "schemas" in d else None
                             validator_with_data = get_test_validator_with_data(
                                 c,
                                 d["data"],
                                 schemas=schemas,
+                                table_name=temp_table_name,
                                 context=cast(
                                     DataContext, build_in_memory_runtime_context()
                                 ),
@@ -392,6 +398,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 "validator_with_data": validator_with_data,
                                 "test": test,
                                 "skip": skip_expectation or skip_test,
+                                "temp_table_name": temp_table_name,
                             }
                         )
 
@@ -423,6 +430,7 @@ def test_case_runner_v3_api(test_case):
                 expectation_type=test_case["expectation_type"],
                 test=test_case["test"],
                 pk_column=test_case["pk_column"],
+                temp_table_name=test_case["temp_table_name"],
             )
     else:
         evaluate_json_test_v3_api(
@@ -430,4 +438,5 @@ def test_case_runner_v3_api(test_case):
             expectation_type=test_case["expectation_type"],
             test=test_case["test"],
             pk_column=test_case["pk_column"],
+            temp_table_name=test_case["temp_table_name"],
         )
