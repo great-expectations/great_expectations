@@ -46,7 +46,7 @@ PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 PG_CONFIG_YAML_STR: Final[str] = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
-COMPLEX_CONFIG_DICT = {
+COMPLEX_CONFIG_DICT: Final[dict] = {
     "fluent_datasources": {
         "my_pg_ds": {
             "connection_string": "postgresql://userName:@hostname/dbName",
