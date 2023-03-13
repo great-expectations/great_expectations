@@ -35,6 +35,9 @@ from tests.integration.test_definitions.postgresql.integration_tests import (
     postgresql_integration_tests,
 )
 from tests.integration.integration_test_fixture import IntegrationTestFixture
+from tests.integration.test_definitions.redshift.integration_tests import (
+    redshift_integration_tests,
+)
 from tests.integration.test_definitions.snowflake.integration_tests import (
     snowflake_integration_tests,
 )
@@ -266,21 +269,6 @@ dockerized_db_tests = [
 
 # CLOUD
 cloud_snowflake_tests = [
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_converted_datetime_redshift",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.REDSHIFT],
-    # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_bigquery",
@@ -793,139 +781,7 @@ cloud_s3_tests = [
     # ),
 ]
 
-cloud_redshift_tests = [
-    # TODO: <Alex>ALEX: Rename test modules to include "configured" and "inferred_and_runtime" suffixes in names.</Alex>
-    # IntegrationTestFixture(
-    #     name = "azure_python_example",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/database/redshift_python_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir= "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     backend_dependencies=[ [BackendDependencies.AWS, BackendDependencies.REDSHIFT]],
-    #     util_script= "tests/test_utils.py",
-    # ),
-    # IntegrationTestFixture(
-    #     name = "azure_yaml_example",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/database/redshift_yaml_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir= "tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    #     backend_dependencies=[ [BackendDependencies.AWS, BackendDependencies.REDSHIFT]],
-    #     util_script= "tests/test_utils.py",
-    # ),
-    IntegrationTestFixture(
-        name="split_data_on_whole_table_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.REDSHIFT],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_column_value_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.REDSHIFT],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_divided_integer_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.REDSHIFT],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_mod_integer_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.REDSHIFT],
-    ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for REDSHIFT is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_hashed_column_redshift",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.REDSHIFT],
-    # ),
-    IntegrationTestFixture(
-        name="split_data_on_multi_column_values_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.REDSHIFT],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_redshift",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.REDSHIFT],
-    ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_converted_datetime_redshift",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/redshift_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.REDSHIFT],
-    # ),
-]
+cloud_redshift_tests = []
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
@@ -942,6 +798,7 @@ docs_test_matrix += postgresql_integration_tests
 docs_test_matrix += mssql_integration_tests
 docs_test_matrix += trino_integration_tests
 docs_test_matrix += snowflake_integration_tests
+docs_test_matrix += redshift_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 
