@@ -97,7 +97,7 @@ config = {
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
-    "package_data": {"great_expectations": ["py.typed"]},
+    "package_data": {"great_expectations": ["py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,
     "license": "Apache-2.0",
