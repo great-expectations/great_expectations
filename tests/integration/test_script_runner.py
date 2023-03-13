@@ -595,21 +595,6 @@ cloud_snowflake_tests = [
         ),
         backend_dependencies=[BackendDependencies.SNOWFLAKE],
     ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for POSTGRESQL is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_converted_datetime_postgres",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/postgres_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.POSTGRESQL],
-    # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for REDSHIFT is implemented.</Alex>
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_redshift",
