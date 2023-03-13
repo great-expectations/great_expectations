@@ -38,6 +38,7 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 from tests.integration.test_definitions.spark.integration_tests import (
     spark_integration_tests,
 )
+from tests.integration.test_definitions.trino.integration_tests import trino_integration_tests
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -255,22 +256,6 @@ dockerized_db_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
         util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.SQLALCHEMY],
-    ),
-    IntegrationTestFixture(
-        name="trino_yaml_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/trino_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.TRINO],
-    ),
-    IntegrationTestFixture(
-        name="trino_python_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/trino_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.TRINO],
     ),
 ]
 
@@ -1109,6 +1094,7 @@ docs_test_matrix += spark_integration_tests
 docs_test_matrix += mysql_integration_tests
 docs_test_matrix += postgresql_integration_tests
 docs_test_matrix += mssql_integration_tests
+docs_test_matrix += trino_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 
