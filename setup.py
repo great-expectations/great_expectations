@@ -36,7 +36,7 @@ def get_extras_require():
     )
 
     requirements_dir = "reqs"
-    rx_name_part = re.compile(rf"requirements-dev-(.*).txt")
+    rx_name_part = re.compile(r"requirements-dev-(.*).txt")
 
     # Use Path() from pathlib so we can make this section of the code OS agnostic.
     # Loop through each requirement file and verify they are named
