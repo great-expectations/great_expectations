@@ -497,14 +497,6 @@ def test_general_splitter_errors(
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def from_simple_dict_gx_config() -> GxConfig:
-    gx_config = GxConfig.parse_obj(SIMPLE_DS_DICT)
-    assert gx_config
-    return gx_config
-
-
-@pytest.fixture
-@functools.lru_cache(maxsize=1)
 def from_complex_dict_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_obj(COMPLEX_CONFIG_DICT)
     assert gx_config
