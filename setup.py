@@ -71,6 +71,7 @@ def get_extras_require():
     results["dev"] = sorted(all_requirements_set)
     return results
 
+
 # Parse requirements.txt
 with open("requirements.txt") as f:
     required = f.read().splitlines()
