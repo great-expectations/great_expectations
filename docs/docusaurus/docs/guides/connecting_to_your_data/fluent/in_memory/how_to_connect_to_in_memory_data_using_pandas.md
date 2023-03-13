@@ -1,7 +1,7 @@
 ---
-title: How to connect to one or more files using Pandas
+title: How to connect to in-memory data using Pandas
 tag: [how-to, connect to data]
-description: A brief how-to guide covering ...
+description: A technical guide on connecting Great Expectations to a Pandas in-memory dataframe.
 keywords: [Great Expectations, Pandas, Filesystem]
 ---
 
@@ -13,7 +13,7 @@ import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_cont
 
 ## Introduction
 
-In this guide we will demonstrate how to use Pandas to connect to data stored in a filesystem.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Pandas has read methods for.
+In this guide we will demonstrate how to connect to an in-memory Pandas dataframe.  Pandas can read many types of data into its dataframe class, but in our example we will use data originating in a `.parquet` file.
 
 ## Prerequisites
 
@@ -69,9 +69,6 @@ Now that we have the `name` and `dataframe` for our Data Asset, we can create th
 data_asset = datasource.add_dataframe(name=asset_name, dataframe=sampled_dataframe)
 ```
 
-### 5. Repeat step 4 as needed to add additional files as Data Assets
-
-
 ## Next steps
 
 Now that you have connected to your data, you may want to look into:
@@ -87,15 +84,6 @@ Now that you have connected to your data, you may want to look into:
 To see the full source code used for the examples in this guide, please reference the following scripts in our GitHub repository:
 - [script_name.py](https://path/to/the/script/on/github.com)
 -->
-
-### GX Python APIs
-
-For more information on the GX Python objects and APIs used in this guide, please reference the following pages of our public API documentation:
-
-- `get_context`
-- `add_datasource`
-- `Datasource`
-  - `add_csv_asset`
 
 ### External APIs
 
