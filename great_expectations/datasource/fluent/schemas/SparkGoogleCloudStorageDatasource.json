@@ -30,7 +30,17 @@
         "gcs_options": {
             "title": "Gcs Options",
             "default": {},
-            "type": "object"
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [

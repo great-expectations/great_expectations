@@ -1,14 +1,16 @@
 import copy
 import functools
 import json
+import logging
 import pathlib
 import re
 from pprint import pformat as pf
 from pprint import pprint as pp
-from typing import Callable, List
+from typing import TYPE_CHECKING, Callable, List
 
 import pydantic
 import pytest
+from ruamel.yaml import YAML
 
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
@@ -22,6 +24,12 @@ from great_expectations.datasource.fluent.sql_datasource import (
     SplitterYearAndMonth,
     TableAsset,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent import SqliteDatasource
+
+yaml = YAML(typ="safe")
+LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
 
@@ -133,10 +141,8 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
     "fluent_datasources": {
         DEFAULT_PANDAS_DATASOURCE_NAME: {
             "type": "pandas",
-            "name": DEFAULT_PANDAS_DATASOURCE_NAME,
             "assets": {
                 DEFAULT_PANDAS_DATA_ASSET_NAME: {
-                    "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
                     / "yellow_tripdata_sample_2018-04.csv",
@@ -144,7 +150,6 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
                     "names": ["col1", "col2"],
                 },
                 "my_csv_asset": {
-                    "name": "my_csv_asset",
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
                     / "yellow_tripdata_sample_2018-04.csv",
@@ -155,6 +160,19 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
         },
     }
 }
+
+
+@pytest.fixture
+def sqlite_database_path() -> pathlib.Path:
+    relative_path = pathlib.Path(
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "sqlite",
+        "yellow_tripdata.db",
+    )
+    return pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
 
 
 @pytest.mark.parametrize(
@@ -169,13 +187,15 @@ class TestExcludeUnsetAssetFields:
     """
 
     def test_from_datasource(self, asset_dict: dict):
+        asset_dict_config = copy.deepcopy(asset_dict)
+
         ds_mapping = {"csv": "pandas_filesystem", "json": "pandas_filesystem"}
 
-        ds_type_: str = ds_mapping[asset_dict["type"]]
+        ds_type_: str = ds_mapping[asset_dict_config["type"]]
         ds_class = _SourceFactories.type_lookup[ds_type_]
 
         # fill in required args
-        asset_dict.update(
+        asset_dict_config.update(
             {
                 "name": "my_asset",
                 "batching_regex": re.compile(
@@ -183,14 +203,14 @@ class TestExcludeUnsetAssetFields:
                 ),
             }
         )
-        asset_name = asset_dict["name"]
+        asset_name = asset_dict_config["name"]
         ds_dict = {
             "name": "my_ds",
             "base_directory": pathlib.Path(__file__),
-            "assets": {asset_name: asset_dict},
+            "assets": {asset_name: asset_dict_config},
         }
         datasource: Datasource = ds_class.parse_obj(ds_dict)
-        assert asset_dict == datasource.dict()["assets"][asset_name]
+        assert asset_dict_config == datasource.dict()["assets"][asset_name]
 
     def test_from_gx_config(self, asset_dict: dict):
         """
@@ -199,18 +219,17 @@ class TestExcludeUnsetAssetFields:
         # fill in required args
         asset_dict.update(
             {
-                "name": "my_asset",
                 "batching_regex": re.compile(
                     r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
                 ),
             }
         )
-        asset_name = asset_dict["name"]
+        asset_dict_config = copy.deepcopy(asset_dict)
+
         ds_dict = {
-            "name": "my_ds",
             "type": "pandas_filesystem",
             "base_directory": pathlib.Path(__file__),
-            "assets": {asset_name: asset_dict},
+            "assets": {"my_asset": asset_dict_config},
         }
         gx_config = GxConfig.parse_obj({"fluent_datasources": {"my_ds": ds_dict}})
 
@@ -218,7 +237,7 @@ class TestExcludeUnsetAssetFields:
         print(f"gx_config_dict\n{pf(gx_config_dict)}")
         assert (
             asset_dict
-            == gx_config_dict["fluent_datasources"]["my_ds"]["assets"][asset_name]
+            == gx_config_dict["fluent_datasources"]["my_ds"]["assets"]["my_asset"]
         )
 
 
@@ -411,6 +430,11 @@ def test_dict_config_round_trip(
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
+    assert "name" not in dumped["fluent_datasources"].keys()
+    for datasource in dumped["fluent_datasources"].values():
+        for asset in datasource["assets"].values():
+            assert "name" not in asset.keys()
+
     re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
     assert re_loaded
@@ -512,6 +536,10 @@ def test_custom_sorter_serialization(
 
 def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     # the default data asset should be dropped, but one named asset should remain
+    datasource_without_default_pandas_data_asset_config_dict = copy.deepcopy(
+        DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
+    )
+
     from_dict_default_pandas_config = GxConfig.parse_obj(
         DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
     )
@@ -525,9 +553,6 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     dumped: dict = from_dict_default_pandas_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
-    datasource_without_default_pandas_data_asset_config_dict = copy.deepcopy(
-        DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
-    )
     datasource_without_default_pandas_data_asset_config_dict["fluent_datasources"][
         DEFAULT_PANDAS_DATASOURCE_NAME
     ]["assets"].pop(DEFAULT_PANDAS_DATA_ASSET_NAME)
@@ -552,3 +577,130 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
         only_default_pandas_datasource_and_data_asset_config_dict
     )
     assert from_dict_only_default_pandas_config.fluent_datasources == {}
+
+
+@pytest.fixture
+def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
+    """
+    Initialize an regular/old-style FileDataContext project config directory.
+    Removed on teardown.
+    """
+    gx_yml = tmp_path / FileDataContext.GX_DIR / FileDataContext.GX_YML
+    assert gx_yml.exists() is False
+    FileDataContext.create(tmp_path)
+    assert gx_yml.exists()
+
+    tmp_gx_dir = gx_yml.parent.absolute()
+    LOGGER.info(f"tmp_gx_dir -> {tmp_gx_dir}")
+    return tmp_gx_dir
+
+
+@pytest.fixture
+def file_dc_config_file_with_substitutions(
+    file_dc_config_dir_init: pathlib.Path,
+) -> pathlib.Path:
+    config_file = file_dc_config_dir_init / FileDataContext.GX_YML
+    assert config_file.exists()
+    with open(config_file, mode="a") as file_append:
+        file_append.write(PG_CONFIG_YAML_STR)
+
+    print(config_file.read_text())
+    return config_file
+
+
+@pytest.mark.integration
+def test_config_substitution_retains_original_value_on_save(
+    monkeypatch: pytest.MonkeyPatch,
+    file_dc_config_file_with_substitutions: pathlib.Path,
+    sqlite_database_path: pathlib.Path,
+):
+    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
+        "fluent_datasources"
+    ]["my_sqlite_ds_w_subs"]
+
+    from great_expectations import get_context
+
+    context = get_context(
+        context_root_dir=file_dc_config_file_with_substitutions.parent
+    )
+
+    print(context.fluent_config)
+
+    # inject env variable
+    my_conn_str = f"sqlite:///{sqlite_database_path}"
+    monkeypatch.setenv("MY_CONN_STR", my_conn_str)
+
+    ds_w_subs: SqliteDatasource = context.fluent_config.datasources[  # type: ignore[assignment]
+        "my_sqlite_ds_w_subs"
+    ]
+
+    assert str(ds_w_subs.connection_string) == r"${MY_CONN_STR}"
+    assert (
+        ds_w_subs.connection_string.get_config_value(  # type: ignore[union-attr] # might not be ConfigStr
+            context.config_provider
+        )
+        == my_conn_str
+    )
+
+    context._save_project_config()
+
+    round_tripped = yaml.load(file_dc_config_file_with_substitutions.read_text())[
+        "fluent_datasources"
+    ]["my_sqlite_ds_w_subs"]
+
+    # FIXME: serialized items should not have name or assets
+    round_tripped.pop("assets")
+    round_tripped.pop("name")
+
+    assert round_tripped == original
+
+
+@pytest.mark.integration
+def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
+    monkeypatch: pytest.MonkeyPatch,
+    sqlite_database_path: pathlib.Path,
+    file_dc_config_file_with_substitutions: pathlib.Path,
+):
+    # inject env variable
+    my_conn_str = f"sqlite:///{sqlite_database_path}"
+    monkeypatch.setenv("MY_CONN_STR", my_conn_str)
+
+    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
+        "fluent_datasources"
+    ]
+    assert original.get("my_sqlite_ds_w_subs")  # will be modified
+    assert original.get("my_pg_ds")  # will be deleted
+    assert not original.get("my_sqlite")  # will be added
+
+    from great_expectations import get_context
+
+    context = get_context(
+        context_root_dir=file_dc_config_file_with_substitutions.parent
+    )
+
+    datasources = context.fluent_datasources
+
+    assert (
+        str(datasources["my_sqlite_ds_w_subs"].connection_string)  # type: ignore[attr-defined]
+        == r"${MY_CONN_STR}"
+    )
+
+    # add a new datasource
+    context.sources.add_sqlite("my_new_one", connection_string="sqlite://")
+
+    # add a new asset to an existing data
+    sqlite_ds_w_subs: SqliteDatasource = context.get_datasource(  # type: ignore[assignment]
+        "my_sqlite_ds_w_subs"
+    )
+    sqlite_ds_w_subs.add_table_asset(
+        "new_asset", table_name="yellow_tripdata_sample_2019_01"
+    )
+
+    context._save_project_config()
+
+    round_tripped_datasources = yaml.load(
+        file_dc_config_file_with_substitutions.read_text()
+    )["fluent_datasources"]
+
+    assert round_tripped_datasources["my_new_one"]
+    assert round_tripped_datasources["my_sqlite_ds_w_subs"]["assets"]["new_asset"]
