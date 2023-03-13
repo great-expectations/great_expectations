@@ -38,7 +38,9 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 from tests.integration.test_definitions.spark.integration_tests import (
     spark_integration_tests,
 )
-from tests.integration.test_definitions.trino.integration_tests import trino_integration_tests
+from tests.integration.test_definitions.trino.integration_tests import (
+    trino_integration_tests,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
