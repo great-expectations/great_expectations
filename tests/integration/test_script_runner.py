@@ -22,6 +22,9 @@ from tests.integration.backend_dependencies import BackendDependencies
 from tests.integration.test_definitions.abs.integration_tests import (
     abs_integration_tests,
 )
+from tests.integration.test_definitions.athena.integration_tests import (
+    athena_integration_tests,
+)
 from tests.integration.test_definitions.aws_glue.integration_tests import (
     aws_glue_integration_tests,
 )
@@ -47,6 +50,7 @@ from tests.integration.integration_test_fixture import IntegrationTestFixture
 from tests.integration.test_definitions.redshift.integration_tests import (
     redshift_integration_tests,
 )
+from tests.integration.test_definitions.s3.integration_tests import s3_integration_tests
 from tests.integration.test_definitions.snowflake.integration_tests import (
     snowflake_integration_tests,
 )
@@ -276,221 +280,10 @@ dockerized_db_tests = [
     ),
 ]
 
-# CLOUD
-cloud_snowflake_tests = [
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_converted_datetime_awsathena",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.AWS],
-    # ),
-]
-
-
-cloud_s3_tests = [
-    IntegrationTestFixture(
-        name="s3_pandas_inferred_and_runtime_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="s3_pandas_inferred_and_runtime_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/inferred_and_runtime_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_an_inferredassetdataconnector",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_a_configuredassetdataconnector",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/dataconnector_docs",
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    # TODO: <Alex>ALEX -- uncomment all S3 tests once S3 testing in Azure Pipelines is re-enabled and items for specific tests below are addressed.</Alex>
-    # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
-    # TODO: <Alex>ALEX -- uncomment next test once S3 Configured YAML Example is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name = "s3_pandas_configured_yaml_example",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_yaml_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[ BackendDependencies.AWS],
-    # ),
-    # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
-    # TODO: <Alex>ALEX -- uncomment next test once S3 Configured Python Example is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name = "s3_pandas_configured_python_example",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/pandas/configured_python_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[ BackendDependencies.AWS],
-    # ),
-    # TODO: <Alex>ALEX -- Implement S3 Configured YAML Example</Alex>
-    # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured YAML Example is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name = "s3_spark_configured_yaml_example",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_yaml_example.py",
-    #     backend_dependencies=[ [BackendDependencies.SPARK, BackendDependencies.AWS]],
-    # ),
-    # TODO: <Alex>ALEX -- Implement S3 Configured Python Example</Alex>
-    # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and S3 Configured Python Example is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name = "s3_spark_configured_python_example",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/configured_python_example.py",
-    #     backend_dependencies=[ [BackendDependencies.SPARK, BackendDependencies.AWS]],
-    # ),
-    # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
-    # IntegrationTestFixture(
-    #     name = "s3_spark_inferred_and_runtime_yaml_example",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[ [BackendDependencies.SPARK, BackendDependencies.AWS]],
-    # ),
-    # IntegrationTestFixture(
-    #     name = "s3_spark_inferred_and_runtime_python_example",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[ [BackendDependencies.SPARK, BackendDependencies.AWS]],
-    # ),
-    IntegrationTestFixture(
-        name="split_data_on_whole_table_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_column_value_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_divided_integer_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_mod_integer_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for AWS ATHENA is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_hashed_column_awsathena",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.AWS],
-    # ),
-    IntegrationTestFixture(
-        name="split_data_on_multi_column_values_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_converted_datetime_awsathena",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.AWS],
-    # ),
-]
-
-cloud_redshift_tests = []
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
 docs_test_matrix += dockerized_db_tests
-docs_test_matrix += cloud_snowflake_tests
-docs_test_matrix += cloud_s3_tests
-docs_test_matrix += cloud_redshift_tests
 docs_test_matrix += spark_integration_tests
 docs_test_matrix += mysql_integration_tests
 docs_test_matrix += postgresql_integration_tests
@@ -501,6 +294,8 @@ docs_test_matrix += redshift_integration_tests
 docs_test_matrix += bigquery_integration_tests
 docs_test_matrix += gcs_integration_tests
 docs_test_matrix += abs_integration_tests
+docs_test_matrix += s3_integration_tests
+docs_test_matrix += athena_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 
@@ -546,40 +341,9 @@ pandas_integration_tests = [
         user_flow_script="tests/integration/common_workflows/simple_build_data_docs.py",
     ),
 ]
-aws_integration_tests = [
-    IntegrationTestFixture(
-        name="awsathena_test_yaml",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        user_flow_script="tests/integration/db/awsathena.py",
-        backend_dependencies=[BackendDependencies.AWS],
-        util_script="tests/test_utils.py",
-    ),
-    IntegrationTestFixture(
-        name="awsathena_test_python",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py",
-        backend_dependencies=[BackendDependencies.AWS],
-        util_script="tests/test_utils.py",
-    ),
-    IntegrationTestFixture(
-        name="sample_data_using_limit_awsathena",
-        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/awsathena_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.AWS],
-    ),
-]
 
 # populate integration_test_matrix with sub-lists
 integration_test_matrix: List[IntegrationTestFixture] = []
-integration_test_matrix += aws_integration_tests
 integration_test_matrix += pandas_integration_tests
 
 
