@@ -22,6 +22,9 @@ from tests.integration.backend_dependencies import BackendDependencies
 from tests.integration.test_definitions.aws_glue.integration_tests import (
     aws_glue_integration_tests,
 )
+from tests.integration.test_definitions.bigquery.integration_tests import (
+    bigquery_integration_tests,
+)
 from tests.integration.test_definitions.mssql.integration_tests import (
     mssql_integration_tests,
 )
@@ -269,21 +272,6 @@ dockerized_db_tests = [
 
 # CLOUD
 cloud_snowflake_tests = [
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_converted_datetime_bigquery",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.BIGQUERY],
-    # ),
     # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for AWS ATHENA is implemented.</Alex>
     # IntegrationTestFixture(
     #     name="split_data_on_converted_datetime_awsathena",
@@ -380,165 +368,6 @@ cloud_gcp_tests = [
     #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py",
     #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
     #     backend_dependencies=[ BackendDependencies.GCS],
-    # ),
-]
-
-cloud_bigquery_tests = [
-    IntegrationTestFixture(
-        name="bigquery_yaml_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="bigquery_python_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="gcp_deployment_patterns_file_bigquery_yaml_configs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="sample_data_using_limit_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_sampling.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="test_runtime_parameters_bigquery",
-        user_flow_script="tests/integration/db/bigquery.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_whole_table_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_whole_table.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_column_value_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_column_value.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_divided_integer_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_divided_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_mod_integer_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_mod_integer.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_hashed_column" for BIGQUERY is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_hashed_column_bigquery",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_hashed_column.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.BIGQUERY],
-    # ),
-    IntegrationTestFixture(
-        name="split_data_on_multi_column_values_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_multi_column_values.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    IntegrationTestFixture(
-        name="split_data_on_datetime_bigquery",
-        user_flow_script="tests/integration/db/test_sql_data_split_on_datetime_and_day_part.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-        util_script="tests/test_utils.py",
-        other_files=(
-            (
-                "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-                "connection_string.yml",
-            ),
-        ),
-        backend_dependencies=[BackendDependencies.BIGQUERY],
-    ),
-    # TODO: <Alex>ALEX -- Uncomment next statement when "split_on_converted_datetime" for BIGQUERY is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name="split_data_on_converted_datetime_bigquery",
-    #     user_flow_script="tests/integration/db/test_sql_data_split_on_converted_datetime.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/",
-    #     util_script="tests/test_utils.py",
-    #     other_files=(
-    #         (
-    #             "tests/integration/fixtures/split_and_sample_data/bigquery_connection_string.yml",
-    #             "connection_string.yml",
-    #         ),
-    #     ),
-    #     backend_dependencies=[BackendDependencies.BIGQUERY],
     # ),
 ]
 
@@ -788,7 +617,6 @@ docs_test_matrix += local_tests
 docs_test_matrix += dockerized_db_tests
 docs_test_matrix += cloud_snowflake_tests
 docs_test_matrix += cloud_gcp_tests
-docs_test_matrix += cloud_bigquery_tests
 docs_test_matrix += cloud_azure_tests
 docs_test_matrix += cloud_s3_tests
 docs_test_matrix += cloud_redshift_tests
@@ -799,6 +627,7 @@ docs_test_matrix += mssql_integration_tests
 docs_test_matrix += trino_integration_tests
 docs_test_matrix += snowflake_integration_tests
 docs_test_matrix += redshift_integration_tests
+docs_test_matrix += bigquery_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 
