@@ -499,8 +499,8 @@ def test_assets_key_presence(
             ds_wo_assets = ds
         else:
             ds_with_assets = ds
-    assert ds_with_assets, "Need at least one Datasource without assets for this test"
-    assert ds_wo_assets, "Need at least one Datasource with assets for this test"
+    assert ds_with_assets, "Need at least one Datasource with assets for this test"
+    assert ds_wo_assets, "Need at least one Datasource without assets for this test"
 
     dumped_as_dict: dict = yaml.load(from_yaml_gx_config.yaml())
     print(
