@@ -505,7 +505,7 @@ def from_dict_gx_config() -> GxConfig:
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def from_complex_json_gx_config() -> GxConfig:
+def from_dict_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_raw(COMPLEX_CONFIG_JSON)
     assert gx_config
     return gx_config
@@ -533,16 +533,16 @@ def test_dict_config_round_trip(
 
 
 def test_json_config_round_trip(
-    inject_engine_lookup_double, from_complex_json_gx_config: GxConfig
+    inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
-    dumped: str = from_complex_json_gx_config.json(indent=2)
+    dumped: str = from_dict_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
     re_loaded: GxConfig = GxConfig.parse_raw(dumped)
     pp(re_loaded)
     assert re_loaded
 
-    assert from_complex_json_gx_config.dict() == re_loaded.dict()
+    assert from_dict_gx_config.dict() == re_loaded.dict()
 
 
 def test_yaml_config_round_trip(
@@ -579,11 +579,11 @@ def test_yaml_file_config_round_trip(
 
 
 def test_splitters_deserialization(
-    inject_engine_lookup_double, from_complex_json_gx_config: GxConfig
+    inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
-    table_asset: TableAsset = from_complex_json_gx_config.datasources[
-        "my_pg_ds"
-    ].assets["with_splitter"]
+    table_asset: TableAsset = from_dict_gx_config.datasources["my_pg_ds"].assets[
+        "with_splitter"
+    ]
     assert isinstance(table_asset.splitter, SplitterYearAndMonth)
     assert table_asset.splitter.method_name == "split_on_year_and_month"
 
@@ -602,9 +602,9 @@ def test_yaml_config_round_trip_ordering(
 
 @pytest.mark.xfail(reason="Custom Sorter serialization logic needs to be implemented")
 def test_custom_sorter_serialization(
-    inject_engine_lookup_double, from_complex_json_gx_config: GxConfig
+    inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
-    dumped: str = from_complex_json_gx_config.json(indent=2)
+    dumped: str = from_dict_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
     expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT["fluent_datasources"][  # type: ignore[index]
