@@ -172,7 +172,7 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
-        _update__fields_set__(self, _ASSETS_KEY)
+        _update__fields_set__on_truthyness(self, _ASSETS_KEY)
 
         return super().json(
             include=include,
@@ -241,7 +241,7 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
-        _update__fields_set__(self, _ASSETS_KEY)
+        _update__fields_set__on_truthyness(self, _ASSETS_KEY)
 
         result = super().dict(
             include=include,
@@ -303,7 +303,7 @@ def _recursively_set_config_value(
                 return _recursively_set_config_value(v, config_provider)
 
 
-def _update__fields_set__(model: FluentBaseModel, field_name: str) -> None:
+def _update__fields_set__on_truthyness(model: FluentBaseModel, field_name: str) -> None:
     """
     This method updates the special `__fields__set__` attribute if the provided field is
     present and the value truthy. Otherwise it removes the entry from `__fields_set__`.
