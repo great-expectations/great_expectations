@@ -505,9 +505,8 @@ def from_dict_gx_config() -> GxConfig:
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def from_dict_gx_config() -> GxConfig:
+def from_json_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_raw(COMPLEX_CONFIG_JSON)
-    assert gx_config
     return gx_config
 
 
@@ -515,7 +514,6 @@ def from_dict_gx_config() -> GxConfig:
 @functools.lru_cache(maxsize=1)
 def from_yaml_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
-    assert gx_config
     return gx_config
 
 
