@@ -495,10 +495,10 @@ def test_assets_key_presence(
     ds_wo_assets = None
     ds_with_assets = None
     for ds in from_yaml_gx_config.datasources.values():
-        if not ds.assets:
-            ds_wo_assets = ds
-        else:
+        if ds.assets:
             ds_with_assets = ds
+        else:
+            ds_wo_assets = ds
     assert ds_with_assets, "Need at least one Datasource with assets for this test"
     assert ds_wo_assets, "Need at least one Datasource without assets for this test"
 
