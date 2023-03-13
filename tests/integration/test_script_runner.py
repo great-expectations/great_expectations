@@ -57,6 +57,9 @@ from tests.integration.test_definitions.snowflake.integration_tests import (
 from tests.integration.test_definitions.spark.integration_tests import (
     spark_integration_tests,
 )
+from tests.integration.test_definitions.sqlite.integration_tests import (
+    sqlite_integration_tests,
+)
 from tests.integration.test_definitions.trino.integration_tests import (
     trino_integration_tests,
 )
@@ -142,14 +145,6 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/samples_2020",
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_a_sql_datasource",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.SQLALCHEMY],
     ),
     IntegrationTestFixture(
         name="how_to_configure_a_runtimedataconnector",
@@ -245,46 +240,11 @@ local_tests = [
     ),
 ]
 
-dockerized_db_tests = [
-    IntegrationTestFixture(
-        name="sqlite_yaml_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.SQLALCHEMY],
-    ),
-    IntegrationTestFixture(
-        name="sqlite_python_example",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/sqlite_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.SQLALCHEMY],
-    ),
-    IntegrationTestFixture(
-        name="introspect_and_partition_yaml_example_gradual_sql",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_gradual.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.SQLALCHEMY],
-    ),
-    IntegrationTestFixture(
-        name="introspect_and_partition_yaml_example_complete_sql",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/sqlite/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.SQLALCHEMY],
-    ),
-]
-
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
-docs_test_matrix += dockerized_db_tests
 docs_test_matrix += spark_integration_tests
+docs_test_matrix += sqlite_integration_tests
 docs_test_matrix += mysql_integration_tests
 docs_test_matrix += postgresql_integration_tests
 docs_test_matrix += mssql_integration_tests
