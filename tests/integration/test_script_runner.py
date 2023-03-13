@@ -25,6 +25,9 @@ from tests.integration.test_definitions.aws_glue.integration_tests import (
 from tests.integration.test_definitions.bigquery.integration_tests import (
     bigquery_integration_tests,
 )
+from tests.integration.test_definitions.gcs.integration_tests import (
+    gcs_integration_tests,
+)
 from tests.integration.test_definitions.mssql.integration_tests import (
     mssql_integration_tests,
 )
@@ -289,87 +292,7 @@ cloud_snowflake_tests = [
     # ),
 ]
 
-cloud_gcp_tests = [
-    IntegrationTestFixture(
-        name="gcp_deployment_patterns_file_gcs_yaml_configs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_an_expectation_store_in_gcs",
-        user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_host_and_share_data_docs_on_gcs",
-        user_flow_script="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="how_to_configure_a_validation_result_store_in_gcs",
-        user_flow_script="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="gcs_pandas_configured_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="gcs_pandas_configured_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/configured_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="gcs_pandas_inferred_and_runtime_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    IntegrationTestFixture(
-        name="gcs_pandas_inferred_and_runtime_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/pandas/inferred_and_runtime_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.GCS],
-    ),
-    # TODO: <Alex>ALEX -- Implement GCS Configured YAML Example</Alex>
-    # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured YAML Example is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name = "gcs_spark_configured_yaml",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_yaml_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[ BackendDependencies.GCS],
-    # ),
-    # TODO: <Alex>ALEX -- Implement GCS Configured Python Example</Alex>
-    # TODO: <Alex>ALEX -- uncomment next test once Spark in Azure Pipelines is enabled and GCS Configured Python Example is implemented.</Alex>
-    # IntegrationTestFixture(
-    #     name = "gcs_spark_configured_python",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/configured_python_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[ BackendDependencies.GCS],
-    # ),
-    # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
-    # IntegrationTestFixture(
-    #     name = "gcs_spark_inferred_and_runtime_yaml",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_yaml_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[ BackendDependencies.GCS],
-    # ),
-    # IntegrationTestFixture(
-    #     name = "gcs_spark_inferred_and_runtime_python",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/gcs/spark/inferred_and_runtime_python_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies=[ BackendDependencies.GCS],
-    # ),
-]
+cloud_gcp_tests = []
 
 cloud_azure_tests = [
     IntegrationTestFixture(
@@ -628,6 +551,7 @@ docs_test_matrix += trino_integration_tests
 docs_test_matrix += snowflake_integration_tests
 docs_test_matrix += redshift_integration_tests
 docs_test_matrix += bigquery_integration_tests
+docs_test_matrix += gcs_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 
