@@ -102,8 +102,6 @@ stages:
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       variables:
         python.version: '3.8'
-      services:
-        trino: trino
 
       steps:
         - task: UsePythonVersion@0
@@ -120,16 +118,9 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --trino --aws --azure tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --aws --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
-            # redshift credentials
-            REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
-            REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
-            REDSHIFT_HOST: $(REDSHIFT_HOST)
-            REDSHIFT_PORT: $(REDSHIFT_PORT)
-            REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
-            REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
             # AWS credentials
             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
             AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
@@ -322,6 +313,56 @@ stages:
             SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
             SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
             SNOWFLAKE_ROLE: $(SNOWFLAKE_ROLE)
+
+    - job: test_docs_redshift
+      timeoutInMinutes: 30
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      variables:
+        python.version: '3.8'
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+
+        - script: |
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+          displayName: 'Install dependencies'
+
+        - script: |
+            pytest -v --docs-tests -m integration --redshift tests/integration/test_script_runner.py
+          displayName: 'pytest'
+          env:
+            # redshift credentials
+            REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
+            REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
+            REDSHIFT_HOST: $(REDSHIFT_HOST)
+            REDSHIFT_PORT: $(REDSHIFT_PORT)
+            REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
+            REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
+
+    - job: test_docs_trino
+      timeoutInMinutes: 30
+      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
+      variables:
+        python.version: '3.8'
+      services:
+        trino: trino
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+
+        - script: |
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+          displayName: 'Install dependencies'
+
+        - script: |
+            pytest -v --docs-tests -m integration --trino tests/integration/test_script_runner.py
+          displayName: 'pytest'
 
     - job: test_docs_multiple_database
       timeoutInMinutes: 30
