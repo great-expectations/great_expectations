@@ -5,7 +5,6 @@ import pkg_resources
 from setuptools import find_packages, setup
 
 import versioneer
-from pathlib import Path
 
 
 def get_extras_require():
