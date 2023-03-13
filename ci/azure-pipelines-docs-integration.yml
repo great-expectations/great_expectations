@@ -97,7 +97,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-    - job: test_docs_not_mysql
+    - job: test_docs_not_mysql_not_postgres
       timeoutInMinutes: 120
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       variables:
@@ -147,7 +147,7 @@ stages:
           displayName: 'Create MSSQL database test_ci'
 
         - script: |
-            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --postgresql --trino --aws --azure tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration --mysql --bigquery --mssql --spark --trino --aws --azure tests/integration/test_script_runner.py
           displayName: 'pytest'
           env:
             # snowflake credentials
@@ -206,6 +206,33 @@ stages:
 
         - script: |
             pytest -v --docs-tests -m integration --mysql tests/integration/test_script_runner.py
+          displayName: 'pytest'
+
+    - job: test_docs_postgresql
+      timeoutInMinutes: 30
+      condition: or(
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
+          eq(variables.isDevelop, true), 
+          eq(variables.isManual, true)
+        )
+      variables:
+        python.version: '3.8'
+      services:
+        postgres: postgres
+
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '$(python.version)'
+          displayName: 'Use Python $(python.version)'
+
+        - script: |
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+          displayName: 'Install dependencies'
+
+        - script: |
+            pytest -v --docs-tests -m integration --postgresql tests/integration/test_script_runner.py
           displayName: 'pytest'
 
     - job: test_docs_multiple_database
