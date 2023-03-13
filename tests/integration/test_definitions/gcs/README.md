@@ -2,4 +2,4 @@
 
 GCS = Google Cloud Storage
 
-GCS is a blob store similar to s3.
+GCS is a blob store similar to AWS S3 and Microsoft ABS.

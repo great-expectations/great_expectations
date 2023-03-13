@@ -19,6 +19,9 @@ import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.backend_dependencies import BackendDependencies
+from tests.integration.test_definitions.abs.integration_tests import (
+    abs_integration_tests,
+)
 from tests.integration.test_definitions.aws_glue.integration_tests import (
     aws_glue_integration_tests,
 )
@@ -292,59 +295,6 @@ cloud_snowflake_tests = [
     # ),
 ]
 
-cloud_gcp_tests = []
-
-cloud_azure_tests = [
-    IntegrationTestFixture(
-        name="azure_pandas_configured_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.AZURE],
-    ),
-    IntegrationTestFixture(
-        name="azure_pandas_configured_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/configured_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.AZURE],
-    ),
-    IntegrationTestFixture(
-        name="azure_pandas_inferred_and_runtime_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_yaml_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.AZURE],
-    ),
-    IntegrationTestFixture(
-        name="azure_pandas_inferred_and_runtime_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/pandas/inferred_and_runtime_python_example.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[BackendDependencies.AZURE],
-    ),
-    # TODO: <Alex>ALEX -- uncomment next four (4) tests once Spark in Azure Pipelines is enabled.</Alex>
-    # IntegrationTestFixture(
-    #     name = "azure_spark_configured_yaml",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_yaml_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies = BackendDependencies.AZURE
-    # ),
-    # IntegrationTestFixture(
-    #     name = "azure_spark_configured_python",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/configured_python_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies = BackendDependencies.AZURE
-    # ),
-    # IntegrationTestFixture(
-    #     name = "azure_spark_inferred_and_runtime_yaml",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_yaml_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies = BackendDependencies.AZURE
-    # ),
-    # IntegrationTestFixture(
-    #     name = "azure_spark_inferred_and_runtime_python",
-    #     user_flow_script= "tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py",
-    #     data_context_dir= "tests/integration/fixtures/no_datasources/great_expectations",
-    #     backend_dependencies = BackendDependencies.AZURE
-    # ),
-]
 
 cloud_s3_tests = [
     IntegrationTestFixture(
@@ -539,8 +489,6 @@ cloud_redshift_tests = []
 docs_test_matrix += local_tests
 docs_test_matrix += dockerized_db_tests
 docs_test_matrix += cloud_snowflake_tests
-docs_test_matrix += cloud_gcp_tests
-docs_test_matrix += cloud_azure_tests
 docs_test_matrix += cloud_s3_tests
 docs_test_matrix += cloud_redshift_tests
 docs_test_matrix += spark_integration_tests
@@ -552,6 +500,7 @@ docs_test_matrix += snowflake_integration_tests
 docs_test_matrix += redshift_integration_tests
 docs_test_matrix += bigquery_integration_tests
 docs_test_matrix += gcs_integration_tests
+docs_test_matrix += abs_integration_tests
 docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 
