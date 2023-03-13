@@ -47,9 +47,11 @@ COMPLEX_CONFIG_DICT = {
     "fluent_datasources": {
         "my_pg_ds": {
             "connection_string": "postgresql://userName:@hostname/dbName",
+            "name": "my_pg_ds",
             "type": "postgres",
             "assets": {
                 "my_table_asset_wo_splitters": {
+                    "name": "my_table_asset_wo_splitters",
                     "table_name": "my_table",
                     "type": "table",
                 },
@@ -59,6 +61,7 @@ COMPLEX_CONFIG_DICT = {
                         "method_name": "split_on_year_and_month",
                     },
                     "table_name": "another_table",
+                    "name": "with_splitter",
                     "type": "table",
                 },
                 "with_sorters": {
@@ -67,27 +70,32 @@ COMPLEX_CONFIG_DICT = {
                         {"key": "month", "reverse": True},
                     ],
                     "table_name": "yet_another_table",
+                    "name": "with_sorters",
                     "type": "table",
                 },
                 "with_dslish_sorters": {
                     "order_by": ["year", "-month"],
                     "table_name": "yet_another_table",
+                    "name": "with_dslish_sorters",
                     "type": "table",
                 },
             },
         },
         "my_pandas_filesystem_ds": {
             "type": "pandas_filesystem",
+            "name": "my_pandas_filesystem_ds",
             "base_directory": __file__,
             "assets": {
                 "my_csv_asset": {
                     "type": "csv",
+                    "name": "my_csv_asset",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
                 "my_json_asset": {
                     "type": "json",
+                    "name": "my_json_asset",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
                     "orient": "records",
                 },
@@ -101,7 +109,35 @@ SIMPLE_DS_DICT = {
     "fluent_datasources": {
         "my_ds": {
             "type": "sql",
+            "name": "my_ds",
             "connection_string": "sqlite://",
+        }
+    }
+}
+
+SIMPLE_DS_DICT_WITH_DS_NAME_ERROR = {
+    "fluent_datasources": {
+        "my_ds": {
+            "type": "sql",
+            "name": "my_incorrect_ds",
+            "connection_string": "sqlite://",
+        }
+    }
+}
+
+SIMPLE_DS_DICT_WITH_ASSET_NAME_ERROR = {
+    "fluent_datasources": {
+        "my_ds": {
+            "type": "sql",
+            "name": "my_ds",
+            "connection_string": "sqlite://",
+            "assets": {
+                "my_csv_asset": {
+                    "type": "csv",
+                    "name": "my_incorrect_csv_asset",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                },
+            },
         }
     }
 }
@@ -110,6 +146,7 @@ COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
     "fluent_datasources": {
         "my_ds": {
             "type": "sql",
+            "name": "my_ds",
             "connection_string": "sqlite://",
         }
     },
@@ -142,8 +179,10 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
     "fluent_datasources": {
         DEFAULT_PANDAS_DATASOURCE_NAME: {
             "type": "pandas",
+            "name": DEFAULT_PANDAS_DATASOURCE_NAME,
             "assets": {
                 DEFAULT_PANDAS_DATA_ASSET_NAME: {
+                    "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
                     / "yellow_tripdata_sample_2018-04.csv",
@@ -151,6 +190,7 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
                     "names": ["col1", "col2"],
                 },
                 "my_csv_asset": {
+                    "name": "my_csv_asset",
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
                     / "yellow_tripdata_sample_2018-04.csv",
@@ -220,6 +260,7 @@ class TestExcludeUnsetAssetFields:
         # fill in required args
         asset_dict.update(
             {
+                "name": "my_asset",
                 "batching_regex": re.compile(
                     r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
                 ),
@@ -266,6 +307,60 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
     assert loaded.datasources
     for datasource in loaded.datasources.values():
         assert isinstance(datasource, Datasource)
+
+
+@pytest.mark.parametrize(
+    ["load_method", "input_"],
+    [
+        p(
+            GxConfig.parse_obj,
+            SIMPLE_DS_DICT_WITH_DS_NAME_ERROR,
+            id="simple pg config dict with ds name error",
+        ),
+        p(
+            GxConfig.parse_raw,
+            json.dumps(SIMPLE_DS_DICT_WITH_DS_NAME_ERROR),
+            id="simple pg json with ds name error",
+        ),
+    ],
+)
+def test_load_incorrect_ds_config_raises_error(
+    inject_engine_lookup_double, load_method: Callable, input_
+):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        _ = load_method(input_)
+
+    assert (
+        str(exc_info.value)
+        == '1 validation error for GxConfig\nfluent_datasources\n  Datasource key "my_ds" is different from name "my_incorrect_ds" in its configuration. (type=value_error)'
+    )
+
+
+@pytest.mark.parametrize(
+    ["load_method", "input_"],
+    [
+        p(
+            GxConfig.parse_obj,
+            SIMPLE_DS_DICT_WITH_ASSET_NAME_ERROR,
+            id="simple pg config dict with asset name error",
+        ),
+        p(
+            GxConfig.parse_raw,
+            json.dumps(SIMPLE_DS_DICT_WITH_ASSET_NAME_ERROR),
+            id="simple pg json with asset name error",
+        ),
+    ],
+)
+def test_load_incorrect_asset_config_raises_error(
+    inject_engine_lookup_double, load_method: Callable, input_
+):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        _ = load_method(input_)
+
+    assert (
+        str(exc_info.value)
+        == '1 validation error for GxConfig\nfluent_datasources\n  DataAsset key "my_csv_asset" is different from name "my_incorrect_csv_asset" in its configuration. (type=value_error)'
+    )
 
 
 @pytest.mark.unit
@@ -413,7 +508,6 @@ def from_dict_gx_config() -> GxConfig:
 @functools.lru_cache(maxsize=1)
 def from_json_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_raw(COMPLEX_CONFIG_JSON)
-    assert gx_config
     return gx_config
 
 
@@ -421,7 +515,6 @@ def from_json_gx_config() -> GxConfig:
 @functools.lru_cache(maxsize=1)
 def from_yaml_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
-    assert gx_config
     return gx_config
 
 
@@ -430,11 +523,6 @@ def test_dict_config_round_trip(
 ):
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
-
-    assert "name" not in dumped["fluent_datasources"].keys()
-    for datasource in dumped["fluent_datasources"].values():
-        for asset in datasource["assets"].values():
-            assert "name" not in asset.keys()
 
     re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
