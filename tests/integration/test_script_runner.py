@@ -19,9 +19,9 @@ import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.backend_dependencies import BackendDependencies
-from tests.integration.db.multiple_db.integration_tests import multiple_backend
-from tests.integration.db.mysql.integration_tests import mysql_integration_tests
-from tests.integration.db.postgresql.integration_tests import (
+from tests.integration.test_definitions.multiple_db.integration_tests import multiple_backend
+from tests.integration.test_definitions.mysql.integration_tests import mysql_integration_tests
+from tests.integration.test_definitions.postgresql.integration_tests import (
     postgresql_integration_tests,
 )
 from tests.integration.integration_test_fixture import IntegrationTestFixture
