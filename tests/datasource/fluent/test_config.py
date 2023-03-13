@@ -671,8 +671,7 @@ def test_config_substitution_retains_original_value_on_save(
         "fluent_datasources"
     ]["my_sqlite_ds_w_subs"]
 
-    # FIXME: serialized items should not have name or assets
-    round_tripped.pop("assets")
+    # FIXME: serialized items should not have name
     round_tripped.pop("name")
 
     assert round_tripped == original
