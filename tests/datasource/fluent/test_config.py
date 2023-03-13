@@ -20,6 +20,7 @@ from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATASOURCE_NAME,
     _SourceFactories,
 )
+from great_expectations.datasource.fluent.constants import _ASSETS_KEY
 from great_expectations.datasource.fluent.sql_datasource import (
     SplitterYearAndMonth,
     TableAsset,
@@ -486,6 +487,28 @@ def test_yaml_file_config_round_trip(
     assert re_loaded
 
     assert from_yaml_gx_config == re_loaded
+
+
+def test_assets_key_presence(
+    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
+):
+    ds_wo_assets = None
+    ds_with_assets = None
+    for ds in from_yaml_gx_config.datasources.values():
+        if not ds.assets:
+            ds_wo_assets = ds
+        else:
+            ds_with_assets = ds
+    assert ds_with_assets, "Need at least one Datasource without assets for this test"
+    assert ds_wo_assets, "Need at least one Datasource with assets for this test"
+
+    dumped_as_dict: dict = yaml.load(from_yaml_gx_config.yaml())
+    print(
+        f"  dict from dumped yaml ->\n\n{pf(dumped_as_dict['fluent_datasources'], depth=2)}"
+    )
+
+    assert _ASSETS_KEY in dumped_as_dict["fluent_datasources"][ds_with_assets.name]
+    assert _ASSETS_KEY not in dumped_as_dict["fluent_datasources"][ds_with_assets.name]
 
 
 def test_splitters_deserialization(
