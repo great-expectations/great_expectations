@@ -19,6 +19,9 @@ import pytest
 from assets.scripts.build_gallery import execute_shell_command
 from great_expectations.data_context.util import file_relative_path
 from tests.integration.backend_dependencies import BackendDependencies
+from tests.integration.test_definitions.aws_glue.integration_tests import (
+    aws_glue_integration_tests,
+)
 from tests.integration.test_definitions.multiple_backend.integration_tests import (
     multiple_backend,
 )
@@ -29,6 +32,9 @@ from tests.integration.test_definitions.postgresql.integration_tests import (
     postgresql_integration_tests,
 )
 from tests.integration.integration_test_fixture import IntegrationTestFixture
+from tests.integration.test_definitions.spark.integration_tests import (
+    spark_integration_tests,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -42,13 +48,6 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    ),
-    IntegrationTestFixture(
-        name="how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
         name="getting_started",
@@ -102,28 +101,6 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
     ),
     IntegrationTestFixture(
-        name="in_memory_spark_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_yaml_example.py",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="in_memory_spark_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/in_memory/spark_python_example.py",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="filesystem_spark_yaml",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_yaml_example.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="filesystem_spark_python",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/filesystem/spark_python_example.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
         name="how_to_choose_which_dataconnector_to_use",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/how_to_choose_which_dataconnector_to_use.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -160,30 +137,6 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
-    ),
-    IntegrationTestFixture(
-        name="databricks_deployment_patterns_dataframe_yaml_configs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="databricks_deployment_patterns_dataframe_python_configs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="databricks_deployment_patterns_file_yaml_configs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="databricks_deployment_patterns_file_python_configs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
         name="checkpoints_and_actions_core_concepts",
@@ -239,20 +192,6 @@ local_tests = [
         data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
     ),
     IntegrationTestFixture(
-        name="migration_guide_spark_v3_api",
-        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v3_api.py",
-        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v3/great_expectations/",
-        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="migration_guide_spark_v2_api",
-        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_spark_v2_api.py",
-        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/",
-        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
         name="expect_column_max_to_be_between_custom",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py",
     ),
@@ -267,26 +206,6 @@ local_tests = [
     IntegrationTestFixture(
         name="expect_column_values_to_only_contain_vowels",
         user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py",
-    ),
-    IntegrationTestFixture(
-        name="expect_queried_column_value_frequency_to_meet_threshold",
-        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="expect_queried_table_row_count_to_be",
-        user_flow_script="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="how_to_use_great_expectations_in_aws_glue",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
-    IntegrationTestFixture(
-        name="how_to_use_great_expectations_in_aws_emr_serverless",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py",
-        backend_dependencies=[BackendDependencies.SPARK],
     ),
     IntegrationTestFixture(
         name="how_to_configure_result_format_parameter",
@@ -1342,8 +1261,10 @@ docs_test_matrix += cloud_bigquery_tests
 docs_test_matrix += cloud_azure_tests
 docs_test_matrix += cloud_s3_tests
 docs_test_matrix += cloud_redshift_tests
+docs_test_matrix += spark_integration_tests
 docs_test_matrix += mysql_integration_tests
 docs_test_matrix += postgresql_integration_tests
+docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 
 pandas_integration_tests = [
