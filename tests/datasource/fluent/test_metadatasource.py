@@ -409,7 +409,6 @@ def context_with_fluent_datasource(
         config_file_path,
         {
             DEFAULT_CRUD_DATASOURCE_NAME: {
-                "assets": {},
                 "base_directory": str(data_dir),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,
@@ -439,7 +438,6 @@ def test_update_datasource(context_with_fluent_datasource):
         config_file_path,
         {
             DEFAULT_CRUD_DATASOURCE_NAME: {
-                "assets": {},
                 "base_directory": str(data_dir_2),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,
@@ -463,14 +461,12 @@ def test_add_or_update_datasource_using_add(context_with_fluent_datasource):
         config_file_path,
         {
             DEFAULT_CRUD_DATASOURCE_NAME: {
-                "assets": {},
                 "base_directory": str(data_dir),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,
                 "type": "pandas_filesystem",
             },
             f"{DEFAULT_CRUD_DATASOURCE_NAME}_2": {
-                "assets": {},
                 "base_directory": str(data_dir_2),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
@@ -494,7 +490,6 @@ def test_add_or_update_datasource_using_update(context_with_fluent_datasource):
         config_file_path,
         {
             DEFAULT_CRUD_DATASOURCE_NAME: {
-                "assets": {},
                 "base_directory": str(data_dir_2),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,
