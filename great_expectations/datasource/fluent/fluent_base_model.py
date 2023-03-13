@@ -314,6 +314,9 @@ def _update__fields_set__(model: FluentBaseModel, field_name: str) -> None:
     This is set automatically in most cases, but if a field was set with a `pre`
     validator then this will not have been updated and so if we want it to be dumped
     when `exclude_unset` is used we need to update `__fields_set__`.
+
+    https://docs.pydantic.dev/usage/validators/#pre-and-per-item-validators
+    https://docs.pydantic.dev/usage/exporting_models/#modeldict
     """
     if getattr(model, field_name, None):
         model.__fields_set__.add(field_name)
