@@ -32,7 +32,6 @@ from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATASOURCE_NAME,
     _SourceFactories,
 )
-from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
     from pydantic.error_wrappers import ErrorDict as PydanticErrorDict
@@ -255,9 +254,6 @@ class GxConfig(FluentBaseModel):
         )
         intermediate_json_dict = self._exclude_name_fields_from_fluent_datasources(
             config=intermediate_json_dict
-        )
-        deep_filter_properties_iterable(
-            properties=intermediate_json_dict, clean_falsy=True, inplace=True
         )
         yaml.dump(intermediate_json_dict, stream=stream_or_path, **yaml_kwargs)
 

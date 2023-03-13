@@ -527,16 +527,6 @@ def from_yaml_gx_config() -> GxConfig:
     return gx_config
 
 
-def test_dict_config_round_trip_no_assets_in_yaml_dump(
-    inject_engine_lookup_double, from_simple_dict_gx_config: GxConfig
-):
-    dumped: str = from_simple_dict_gx_config.yaml()
-    print(f"  Dumped YAML ->\n\n{dumped}\n")
-
-    original: dict = yaml.load(dumped)
-    assert "assets" not in original["fluent_datasources"]["my_ds"]
-
-
 def test_dict_config_round_trip(
     inject_engine_lookup_double, from_complex_dict_gx_config: GxConfig
 ):
