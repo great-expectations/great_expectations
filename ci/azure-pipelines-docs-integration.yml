@@ -97,7 +97,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
-    - job: test_docs_main
+    - job: test_docs_non_backend_specific
       timeoutInMinutes: 30
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       variables:
@@ -110,24 +110,12 @@ stages:
           displayName: 'Use Python $(python.version)'
 
         - script: |
-            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git "cryptography==38.0.4"
+            pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -v --docs-tests -m integration --aws --azure tests/integration/test_script_runner.py
+            pytest -v --docs-tests -m integration tests/integration/test_script_runner.py
           displayName: 'pytest'
-          env:
-            # AWS credentials
-            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-            ATHENA_DB_NAME: $(ATHENA_DB_NAME)
-            ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
-            ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
-            ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
-            # Azure credentials
-            AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
-            AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
     - job: test_docs_spark
       timeoutInMinutes: 30
