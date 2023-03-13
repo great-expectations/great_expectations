@@ -701,7 +701,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _attach_datasource_to_context(self, datasource: FluentDatasource):
+    def _add_fluent_datasource(self, datasource: FluentDatasource) -> None:
         # We currently don't allow one to overwrite a datasource with this internal method
         if datasource.name in self.datasources:
             raise gx_exceptions.DataContextError(
@@ -709,6 +709,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "name already exists in the data context."
             )
         self.datasources[datasource.name] = datasource
+
+    def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
+        self.datasources[datasource.name] = datasource
+
+    def _delete_fluent_datasource(self, datasource_name: str) -> None:
+        self.datasources.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -5446,7 +5452,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
             logger.info(f"Loaded '{ds_name}' from fluent config")
-            self._attach_datasource_to_context(datasource)
+            self._add_fluent_datasource(datasource)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
