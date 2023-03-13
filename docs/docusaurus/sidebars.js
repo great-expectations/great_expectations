@@ -156,10 +156,10 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'SQL database Datasources',
+          label: 'SQL databases',
           items: [
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark'
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table',
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query'
           ]
         },
         {
