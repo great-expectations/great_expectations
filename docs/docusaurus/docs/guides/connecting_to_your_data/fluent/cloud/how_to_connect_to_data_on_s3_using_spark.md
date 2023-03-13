@@ -1,8 +1,8 @@
 ---
-title: How to connect to data on S3 using Pandas
+title: How to connect to data on S3 using Spark
 tag: [how-to, connect to data]
-description: A technical guide demonstrating how to connect Great Expectations to dat stored on a Amazon Web Services S3 bucket using Pandas.
-keywords: [Great Expectations, Amazon Web Services, AWS S3, Pandas]
+description: A technical guide demonstrating how to connect Great Expectations to dat stored on a Amazon Web Services S3 bucket using Spark.
+keywords: [Great Expectations, Amazon Web Services, AWS S3, Spark]
 ---
 
 <!-- Import statements start here. -->
@@ -19,7 +19,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 ## Introduction
 
-In this guide we will demonstrate how to use Pandas to connect to data stored on AWS S3.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Pandas has read methods for.
+In this guide we will demonstrate how to use Spark to connect to data stored on AWS S3.  In our examples, we will specifically be connecting to `.csv` files.
 
 ## Prerequisites
 
@@ -61,7 +61,7 @@ The parameter `boto3_options` will allow you to pass such things as:
 Once we have those three elements, we can define our Datasource like so:
 
 ```python title="Python code"
-datasource = context.sources.add_pandas_s3(
+datasource = context.sources.add_spark_s3(
     name=datasource_name, bucket=bucket_name, boto3_options=boto3_options
 )
 ```
@@ -72,7 +72,11 @@ datasource = context.sources.add_pandas_s3(
 batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 prefix = "data/taxi_yellow_tripdata_samples/"
 data_asset = datasource.add_csv_asset(
-    name="MyTaxiDataAsset", batching_regex=batching_regex, prefix=prefix
+    name="MyTaxiDataAsset",
+    batching_regex=batching_regex,
+    header=True,
+    infer_schema=True,
+    prefix=prefix,
 )
 ```
 
@@ -96,7 +100,7 @@ To see the full source code used for the examples in this guide, please referenc
  For more information on the GX Python objects and APIs used in this guide, please reference the following pages of our public API documentation:
  
  - `get_context(...)`
- - `DataContext.datasources.add_pandas_s3(...)`
+ - `DataContext.datasources.add_spark_s3(...)`
  - `Datasource.add_csv_asset(...)` -->
 
 ### Related reading
