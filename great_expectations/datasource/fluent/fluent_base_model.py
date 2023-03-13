@@ -172,7 +172,7 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
-        _add_to__fields_set__if_truthy(self, _ASSETS_KEY)
+        _update__fields_set__(self, _ASSETS_KEY)
 
         return super().json(
             include=include,
@@ -241,7 +241,7 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
-        _add_to__fields_set__if_truthy(self, _ASSETS_KEY)
+        _update__fields_set__(self, _ASSETS_KEY)
 
         result = super().dict(
             include=include,
@@ -303,10 +303,10 @@ def _recursively_set_config_value(
                 return _recursively_set_config_value(v, config_provider)
 
 
-def _add_to__fields_set__if_truthy(model: FluentBaseModel, field_name: str) -> None:
+def _update__fields_set__(model: FluentBaseModel, field_name: str) -> None:
     """
     This method updates the special `__fields__set__` attribute if the provided field is
-    present and the value truthy.
+    present and the value truthy. Otherwise it removes the entry from `__fields_set__`.
 
     For background `__fields_set__` is what determines whether or not a field is
     serialized when `exclude_unset` is used with `.dict()`/`.json()`/`.yaml()`.
@@ -317,3 +317,9 @@ def _add_to__fields_set__if_truthy(model: FluentBaseModel, field_name: str) -> N
     """
     if getattr(model, field_name, None):
         model.__fields_set__.add(field_name)
+        logger.debug(f"{model.__class__.__name__}.__fields_set__ {field_name} added")
+    else:
+        model.__fields_set__.discard(field_name)
+        logger.debug(
+            f"{model.__class__.__name__}.__fields_set__ {field_name} discarded"
+        )

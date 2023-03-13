@@ -14,13 +14,13 @@ from ruamel.yaml import YAML
 
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
+from great_expectations.datasource.fluent.constants import _ASSETS_KEY
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
     _SourceFactories,
 )
-from great_expectations.datasource.fluent.constants import _ASSETS_KEY
 from great_expectations.datasource.fluent.sql_datasource import (
     SplitterYearAndMonth,
     TableAsset,
@@ -508,7 +508,7 @@ def test_assets_key_presence(
     )
 
     assert _ASSETS_KEY in dumped_as_dict["fluent_datasources"][ds_with_assets.name]
-    assert _ASSETS_KEY not in dumped_as_dict["fluent_datasources"][ds_with_assets.name]
+    assert _ASSETS_KEY not in dumped_as_dict["fluent_datasources"][ds_wo_assets.name]
 
 
 def test_splitters_deserialization(
