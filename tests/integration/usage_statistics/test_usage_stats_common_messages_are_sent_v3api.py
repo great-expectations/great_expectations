@@ -4,9 +4,9 @@ from typing import List
 
 import pandas as pd
 import pytest
-from ruamel import yaml
 
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import DataContextConfig
 from great_expectations.util import get_context
 from tests.core.usage_statistics.util import (
@@ -16,6 +16,8 @@ from tests.core.usage_statistics.util import (
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
+
+yaml: YAMLHandler = YAMLHandler()
 
 USAGE_STATISTICS_URL = USAGE_STATISTICS_QA_URL
 DATA_CONTEXT_ID = "00000000-0000-0000-0000-000000000001"
