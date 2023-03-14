@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 from enum import Enum
 from typing import (
@@ -425,7 +426,7 @@ class _SourceFactories:
             self._data_context._delete_fluent_datasource(datasource_name=name)
 
         delete_datasource.__doc__ = doc_string
-        # TODO: update signature
+        delete_datasource.__signature__ = inspect.signature(delete_datasource)
         return delete_datasource
 
     def __getattr__(self, attr_name: str):
