@@ -11,6 +11,9 @@
     "schemas": {
       "mssql": {
         "ts": "DATETIME"
+      },
+      "snowflake": {
+        "ts": "TIMESTAMP_NTZ"
       }
     },
     "tests": [

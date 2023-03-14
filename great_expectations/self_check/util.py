@@ -1575,7 +1575,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                         value=[min_value_dbms, max_value_dbms],
                         inplace=True,
                     )
-            elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
+            elif type_ in ["DATETIME", "TIMESTAMP", "DATE", "TIMESTAMP_NTZ"]:
                 df[col] = pd.to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
@@ -1591,14 +1591,21 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     else:
         sql_insert_method = None
 
+    _debug("generating temp table")
+    _start = time.time()
     generate_temp_table_for_validator(
         dialect=sa_engine_name,
         df=df,
         engine=engine,
         temp_table_name=table_name,
         schemas=schemas,
+        sql_dtypes=sql_dtypes,
+        sql_insert_method=sql_insert_method,
     )
-
+    _end = time.time()
+    _debug(
+        f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
+    )
     _debug("Calling df.to_sql")
     _start = time.time()
     # this is where it will need to be changed
@@ -3411,6 +3418,8 @@ def generate_temp_table_for_validator(
     df: pd.DataFrame,
     engine,
     temp_table_name: str,
+    sql_insert_method,
+    sql_dtypes,
     temp_table_schema_name: str | None = None,
     schemas: dict | None = None,
 ):
@@ -3479,6 +3488,14 @@ def generate_temp_table_for_validator(
     else:
         stmt = "CREATE TEMPORARY TABLE "
 
+    # if dialect == GXSqlDialect.SNOWFLAKE:
+    #     # these are the two types of this
+    #     # if df.get("ts") and df["ts"][0] =="1977-01-01T12:00:01":
+    #     #     with engine.connect():
+    #     #         engine.execute("ALTER SESSION SET TIMESTAMP_INPUT_FORMAT = 'YYYY-MM-DDThh:mi:ss';")
+    #     if "ts_mon" in df:
+    #         df = df.drop(columns=['ts_mon'])
+
     if schemas and schemas.get(dialect):
         # if we have defined a schema then use it
         current_schema = schemas.get(dialect)
@@ -3488,10 +3505,24 @@ def generate_temp_table_for_validator(
     else:
         # or use the types associated with the connection
         schema_from_get_schema = pandas_sql.get_schema(frame=df, name=temp_table_name, con=engine)  # type: ignore
+
+    # https://docs.snowflake.com/en/user-guide/date-time-examples
+    # https://docs.snowflake.com/en/sql-reference/data-types-datetime0
+
     create_table_sql = schema_from_get_schema.strip()
     create_tmp_table_sql = re.sub("^(CREATE TABLE )?", stmt, create_table_sql)
     if dialect == GXSqlDialect.BIGQUERY:
         create_tmp_table_sql = re.sub('"', "`", create_tmp_table_sql)
         create_tmp_table_sql += " OPTIONS(expiration_timestamp=TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR))"
+
     with engine.connect():
         engine.execute(create_tmp_table_sql)
+
+    df.to_sql(
+        name=temp_table_name,
+        con=engine,
+        index=False,
+        dtype=sql_dtypes,
+        if_exists="append",
+        method=sql_insert_method,
+    )
