@@ -398,7 +398,7 @@ try:
         "DOUBLE": snowflaketypes.DOUBLE,
         "FIXED": snowflaketypes.FIXED,
         "NUMBER": snowflaketypes.NUMBER,
-        "INTEGER": snowflaketypes.NUMBER,
+        "INTEGER": snowflaketypes.NUMBER,  # sqlalchemy will not always infer the correct snowflake-specific NUMBER type
         "OBJECT": snowflaketypes.OBJECT,
         "STRING": snowflaketypes.STRING,
         "TEXT": snowflaketypes.TEXT,
@@ -1524,9 +1524,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     else:
         connection_string = None
         engine = None
-
-    # this is where we have the engines. Create Engine
-    # we should do
 
     # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
     # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
@@ -3447,14 +3444,6 @@ def generate_temp_table_for_validator(
         # BigQuery Table is created using with an expiration of 24 hours using Google's Data Definition Language
         # https://stackoverflow.com/questions/20673986/how-to-create-temporary-table-in-google-bigquery
         stmt = "CREATE OR REPLACE TABLE "
-    elif dialect == GXSqlDialect.DREMIO:
-        stmt = "CREATE OR REPLACE VDS "
-    elif dialect == GXSqlDialect.SNOWFLAKE:
-        stmt = "CREATE OR REPLACE TEMPORARY TABLE "
-    elif dialect == GXSqlDialect.MYSQL:
-        stmt = "CREATE TEMPORARY TABLE "
-    elif dialect == GXSqlDialect.HIVE:
-        stmt = "CREATE TEMPORARY TABLE "
     elif dialect == GXSqlDialect.MSSQL:
         # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
         # Split is case sensitive so detect case.
@@ -3462,8 +3451,8 @@ def generate_temp_table_for_validator(
         # changing column names), so this is not an option!
         # noinspection PyUnresolvedReferences
         stmt = "CREATE TABLE #"
-        # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
-        # Similar message may be needed in the future for Trino backend.
+    elif dialect == GXSqlDialect.DREMIO:
+        stmt = "CREATE OR REPLACE VDS "
     elif dialect == GXSqlDialect.TRINO:
         logger.warning(
             f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
@@ -3483,46 +3472,32 @@ def generate_temp_table_for_validator(
     # Please note that Teradata is currently experimental (as of 0.13.43)
     elif dialect == GXSqlDialect.TERADATASQL:
         stmt = "CREATE VOLATILE TABLE "
-    elif dialect == GXSqlDialect.VERTICA:
+    elif dialect in [
+        GXSqlDialect.SNOWFLAKE,
+        GXSqlDialect.MYSQL,
+        GXSqlDialect.HIVE,
+        GXSqlDialect.VERTICA,
+    ]:
         stmt = "CREATE TEMPORARY TABLE "
     else:
         stmt = "CREATE TEMPORARY TABLE "
 
-    # if dialect == GXSqlDialect.SNOWFLAKE:
-    #     # these are the two types of this
-    #     # if df.get("ts") and df["ts"][0] =="1977-01-01T12:00:01":
-    #     #     with engine.connect():
-    #     #         engine.execute("ALTER SESSION SET TIMESTAMP_INPUT_FORMAT = 'YYYY-MM-DDThh:mi:ss';")
-    #     if "ts_mon" in df:
-    #         df = df.drop(columns=['ts_mon'])
-
+    # use schema that was defined in test, or infer from connection
     if schemas and schemas.get(dialect):
-        # if we have defined a schema then use it
         current_schema = schemas.get(dialect)
         schema_from_get_schema = pandas_sql.get_schema(
             frame=df, name=temp_table_name, dtype=current_schema
         )
     else:
-        # or use the types associated with the connection
         schema_from_get_schema = pandas_sql.get_schema(frame=df, name=temp_table_name, con=engine)  # type: ignore
-
-    # https://docs.snowflake.com/en/user-guide/date-time-examples
-    # https://docs.snowflake.com/en/sql-reference/data-types-datetime0
 
     create_table_sql = schema_from_get_schema.strip()
     create_tmp_table_sql = re.sub("^(CREATE TABLE )?", stmt, create_table_sql)
+
+    # add expiration for BIGQUERY
     if dialect == GXSqlDialect.BIGQUERY:
         create_tmp_table_sql = re.sub('"', "`", create_tmp_table_sql)
         create_tmp_table_sql += " OPTIONS(expiration_timestamp=TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR))"
 
     with engine.connect():
         engine.execute(create_tmp_table_sql)
-
-    df.to_sql(
-        name=temp_table_name,
-        con=engine,
-        index=False,
-        dtype=sql_dtypes,
-        if_exists="append",
-        method=sql_insert_method,
-    )
