@@ -87,7 +87,7 @@ datasource = context.sources.add_sql(name="my_datasource", connection_string=sql
 
 ### 4. Add a table to the Datasource as a Data Asset
 
-We will indicate a table to connect to by defining a Data Asset.  This is as simple as providing the `add_table_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
+To indicate the query that provides the data to connect to we will define a Data Asset.  This done by providing the `add_table_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
 
 ```python title="Python code"
 table_asset = datasource.add_query_asset(name="my_asset", query="SELECT * from yellow_tripdata_sample")
