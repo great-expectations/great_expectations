@@ -374,6 +374,9 @@ filterwarnings = [
     # Example Actual Warning: sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     # Found so far in test_cli_datasource_list
     'ignore: Deprecated API features detected!:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
+    # sqlalchemy.exc.RemovedIn20Warning: The Row.keys() method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. Use the namedtuple standard accessor Row._fields, or for full mapping behavior use  row._mapping.keys()  (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The Row.keys\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:sqlalchemy.exc.RemovedIn20Warning'
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
