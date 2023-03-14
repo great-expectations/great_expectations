@@ -108,6 +108,7 @@
         "x": "NUMBER",
         "y": "STRING",
         "z": "NUMBER",
+        "ts": "TIMESTAMP",
         "alpha": "STRING",
         "numeric": "NUMBER"
       },
