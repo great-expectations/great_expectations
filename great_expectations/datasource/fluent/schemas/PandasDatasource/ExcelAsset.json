@@ -23,7 +23,20 @@
             }
         },
         "io": {
-            "title": "Io"
+            "title": "Io",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
         },
         "sheet_name": {
             "title": "Sheet Name",

@@ -30,7 +30,17 @@
         "boto3_options": {
             "title": "Boto3 Options",
             "default": {},
-            "type": "object"
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [

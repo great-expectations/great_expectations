@@ -95,7 +95,7 @@ except ImportError:
     )
 
 if TYPE_CHECKING:
-    from pyspark.sql import DataFrame  # noqa: TCH004 # try imported above
+    from pyspark.sql import DataFrame
 
 
 # noinspection SpellCheckingInspection

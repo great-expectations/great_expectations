@@ -566,6 +566,11 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             An existing ExpectationSuite
         """
+        if ge_cloud_id is None and expectation_suite_name is None:
+            raise ValueError(
+                "ge_cloud_id and expectation_suite_name cannot both be None"
+            )
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             cloud_id=ge_cloud_id,

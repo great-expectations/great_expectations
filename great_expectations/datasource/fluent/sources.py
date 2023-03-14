@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import inspect
 import logging
+from enum import Enum
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -64,6 +66,13 @@ def _get_field_details(
     )
 
 
+class CrudMethodType(str, Enum):
+    ADD = "ADD"
+    DELETE = "DELETE"
+    UPDATE = "UPDATE"
+    ADD_OR_UPDATE = "ADD_OR_UPDATE"
+
+
 class _SourceFactories:
     """
     Contains a collection of datasource factory methods in the format `.add_<TYPE_NAME>()`
@@ -74,7 +83,7 @@ class _SourceFactories:
 
     # TODO (kilo59): split DataAsset & Datasource lookups
     type_lookup: ClassVar = TypeLookup()
-    __source_factories: ClassVar[Dict[str, SourceFactoryFn]] = {}
+    __crud_registry: ClassVar[Dict[str, SourceFactoryFn]] = {}
 
     _data_context: GXDataContext
 
@@ -82,14 +91,11 @@ class _SourceFactories:
         self._data_context = data_context
 
     @classmethod
-    def register_types_and_ds_factory(
-        cls,
-        ds_type: Type[Datasource],
-        factory_fn: SourceFactoryFn,
-    ) -> None:
+    def register_datasource(cls, ds_type: Type[Datasource]) -> None:
         """
-        Add/Register a datasource factory function and all related `Datasource`,
-        `DataAsset` and `ExecutionEngine` types.
+        Add/Register a datasource. This registers all the crud datasource methods:
+        add_<datasource>, delete_<datasource>, update_<datasource>, add_or_update_<datasource>
+        and all related `Datasource`, `DataAsset` and `ExecutionEngine` types.
 
         Creates mapping table between the `DataSource`/`DataAsset` classes and their
         declared `type` string.
@@ -118,18 +124,16 @@ class _SourceFactories:
 
             cls._register_assets(ds_type, asset_type_lookup=asset_type_lookup)
 
-            cls._register_datasource_and_factory_method(
+            cls._register_datasource(
                 ds_type,
-                factory_fn=factory_fn,
                 ds_type_name=ds_type_name,
                 datasource_type_lookup=ds_type_lookup,
             )
 
     @classmethod
-    def _register_datasource_and_factory_method(
+    def _register_datasource(
         cls,
         ds_type: Type[Datasource],
-        factory_fn: SourceFactoryFn,
         ds_type_name: str,
         datasource_type_lookup: TypeLookup,
     ) -> str:
@@ -137,24 +141,83 @@ class _SourceFactories:
         Register the `Datasource` class and add a factory method for the class on `sources`.
         The method name is pulled from the `Datasource.type` attribute.
         """
-        method_name = f"add_{ds_type_name}"
-        logger.debug(
-            f"2a. Registering {ds_type.__name__} as {ds_type_name} with {method_name}() factory"
-        )
-
-        pre_existing = cls.__source_factories.get(method_name)
-        if pre_existing:
+        if ds_type in datasource_type_lookup:
             raise TypeRegistrationError(
-                f"'{ds_type_name}' - `sources.{method_name}()` factory already exists",
+                f"'{ds_type_name}' is already a registered typed and there can only be 1 type "
+                "for a given name."
             )
-
         datasource_type_lookup[ds_type] = ds_type_name
         logger.debug(f"'{ds_type_name}' added to `type_lookup`")
-        factory_fn.__name__ = method_name
-        public_api(factory_fn)
 
-        cls.__source_factories[method_name] = factory_fn
+        cls._register_add_datasource(ds_type, ds_type_name)
+        cls._register_update_datasource(ds_type, ds_type_name)
+        cls._register_add_or_update_datasource(ds_type, ds_type_name)
+        cls._register_delete_datasource(ds_type, ds_type_name)
+
         return ds_type_name
+
+    @classmethod
+    def _register_add_datasource(cls, ds_type: Type[Datasource], ds_type_name: str):
+        method_name = f"add_{ds_type_name}"
+
+        def crud_method_info() -> tuple[CrudMethodType, Type[Datasource]]:
+            return CrudMethodType.ADD, ds_type
+
+        cls._register_crud_method(method_name, cls.__doc__, crud_method_info)
+
+    @classmethod
+    def _register_update_datasource(cls, ds_type: Type[Datasource], ds_type_name: str):
+        method_name = f"update_{ds_type_name}"
+
+        def crud_method_info() -> tuple[CrudMethodType, Type[Datasource]]:
+            return CrudMethodType.UPDATE, ds_type
+
+        cls._register_crud_method(
+            method_name, f"Updates a {ds_type_name} data source.", crud_method_info
+        )
+
+    @classmethod
+    def _register_add_or_update_datasource(
+        cls, ds_type: Type[Datasource], ds_type_name: str
+    ):
+        method_name = f"add_or_update_{ds_type_name}"
+
+        def crud_method_info() -> tuple[CrudMethodType, Type[Datasource], str]:
+            return CrudMethodType.ADD_OR_UPDATE, ds_type
+
+        cls._register_crud_method(
+            method_name,
+            f"Adds or updates a {ds_type_name} data source.",
+            crud_method_info,
+        )
+
+    @classmethod
+    def _register_delete_datasource(cls, ds_type: Type[Datasource], ds_type_name: str):
+        method_name = f"delete_{ds_type_name}"
+
+        def crud_method_info() -> tuple[CrudMethodType, Type[Datasource], str]:
+            return CrudMethodType.DELETE, ds_type
+
+        cls._register_crud_method(
+            method_name, f"Deletes a {ds_type_name} data source.", crud_method_info
+        )
+
+    @classmethod
+    def _register_crud_method(
+        cls, crud_fn_name: str, crud_fn_doc: str, crud_method_info: SourceFactoryFn
+    ):
+        # We set the name and doc and the crud_method_info because that will be used as a proxy
+        # for the real crud method so we can call public_api to generate docs for these dynamically
+        # generated methods.
+        crud_method_info.__name__ = crud_fn_name
+        crud_method_info.__doc__ = crud_fn_doc
+        if crud_fn_name in cls.__crud_registry:
+            raise TypeRegistrationError(
+                f"'`sources.{crud_fn_name}()` already exists",
+            )
+        logger.debug(f"Registering data_context.source.{crud_fn_name}()")
+        public_api(crud_method_info)
+        cls.__crud_registry[crud_fn_name] = crud_method_info
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
@@ -178,7 +241,7 @@ class _SourceFactories:
                         f"{t.__name__} `type` field must be assigned and cannot be `None`"
                     )
                 logger.debug(
-                    f"2b. Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
+                    f"Registering `{ds_type.__name__}` `DataAsset` `{t.__name__}` as '{asset_type_name}'"
                 )
                 asset_type_lookup[t] = asset_type_name
             except (AttributeError, KeyError, TypeError) as bad_field_exc:
@@ -268,32 +331,132 @@ class _SourceFactories:
 
     @property
     def factories(self) -> List[str]:
-        return list(self.__source_factories.keys())
+        return list(self.__crud_registry.keys())
+
+    def _validate_datasource_type(
+        self, name: str, datasource_type: Type[Datasource], raise_if_none: bool = True
+    ) -> None:
+        try:
+            old_datasource = self._data_context.get_datasource(name)
+        except ValueError as e:
+            if raise_if_none:
+                raise ValueError(
+                    f"There is no datasource {name} in the data context."
+                ) from e
+            old_datasource = None
+        if old_datasource and not isinstance(old_datasource, datasource_type):
+            raise ValueError(
+                f"Trying to update datasource {name} but it is not the correct type. "
+                f"Expected {datasource_type} but got {type(old_datasource)}"
+            )
+
+    def create_add_crud_method(
+        self,
+        datasource_type: Type[Datasource],
+        doc_string: str = "",
+    ) -> SourceFactoryFn:
+        def add_datasource(name: str, **kwargs) -> Datasource:
+            logger.debug(f"Adding {datasource_type} with {name}")
+            datasource = datasource_type(name=name, **kwargs)
+            datasource._data_context = self._data_context
+            # config provider needed for config substitution
+            datasource._config_provider = self._data_context.config_provider
+            datasource.test_connection()
+            self._data_context._add_fluent_datasource(datasource)
+            self._data_context._save_project_config()
+            return datasource
+
+        add_datasource.__doc__ = doc_string
+        add_datasource.__signature__ = _merge_signatures(
+            add_datasource,
+            datasource_type,
+            exclude={"type", "assets"},
+            return_type=datasource_type,
+        )
+        return add_datasource
+
+    def create_update_crud_method(
+        self,
+        datasource_type: Type[Datasource],
+        doc_string: str = "",
+    ) -> SourceFactoryFn:
+        def update_datasource(name: str, **kwargs) -> Datasource:
+            logger.debug(f"Updating {datasource_type} with {name}")
+            self._validate_datasource_type(name, datasource_type)
+            self._data_context._delete_fluent_datasource(datasource_name=name)
+            return self.create_add_crud_method(datasource_type)(name=name, **kwargs)
+
+        update_datasource.__doc__ = doc_string
+        update_datasource.__signature__ = _merge_signatures(
+            update_datasource,
+            datasource_type,
+            exclude={"type", "assets"},
+            return_type=datasource_type,
+        )
+        return update_datasource
+
+    def create_add_or_update_crud_method(
+        self,
+        datasource_type: Type[Datasource],
+        doc_string: str = "",
+    ) -> SourceFactoryFn:
+        def add_or_update_datasource(name: str, **kwargs) -> Datasource:
+            logger.debug(f"Adding or updating {datasource_type} with {name}")
+            self._validate_datasource_type(name, datasource_type, raise_if_none=False)
+            self._data_context._delete_fluent_datasource(datasource_name=name)
+            return self.create_add_crud_method(datasource_type)(name=name, **kwargs)
+
+        add_or_update_datasource.__doc__ = doc_string
+        add_or_update_datasource.__signature__ = _merge_signatures(
+            add_or_update_datasource,
+            datasource_type,
+            exclude={"type", "assets"},
+            return_type=datasource_type,
+        )
+        return add_or_update_datasource
+
+    def create_delete_crud_method(
+        self,
+        datasource_type: Type[Datasource],
+        doc_string: str = "",
+    ) -> Callable[[str], None]:
+        def delete_datasource(name: str) -> None:
+            logger.debug(f"Delete {datasource_type} with {name}")
+            self._validate_datasource_type(name, datasource_type)
+            self._data_context._delete_fluent_datasource(datasource_name=name)
+
+        delete_datasource.__doc__ = doc_string
+        delete_datasource.__signature__ = inspect.signature(delete_datasource)
+        return delete_datasource
 
     def __getattr__(self, attr_name: str):
         try:
-            ds_constructor = self.__source_factories[attr_name]
-
-            def wrapped(name: str, **kwargs):
-                datasource = ds_constructor(name=name, **kwargs)
-                # using try/except because hasattr will fail to find pydantic PrivateAttrs
-                try:
-                    datasource._data_context = self._data_context
-                except ValueError:
-                    logger.debug(
-                        f'Failed to attach data context to datasource "{name}" because {datasource} has no attribute "_data_context".'
-                    )
-                    pass
-                # TODO (bdirks): _attach_datasource_to_context to the AbstractDataContext class
-                self._data_context._attach_datasource_to_context(datasource)
-                return datasource
-
-            wrapped.__doc__ = ds_constructor.__doc__
-            # attr-defined issue https://github.com/python/mypy/issues/12472
-            wrapped.__signature__ = ds_constructor.__signature__  # type: ignore[attr-defined]
-            return wrapped
-        except KeyError:
-            raise AttributeError(f"No factory {attr_name} in {self.factories}")
+            crud_method_info = self.__crud_registry[attr_name]
+            crud_method_type, datasource_type = crud_method_info()
+            if crud_method_type == CrudMethodType.ADD:
+                return self.create_add_crud_method(
+                    datasource_type, crud_method_info.__doc__
+                )
+            elif crud_method_type == CrudMethodType.UPDATE:
+                return self.create_update_crud_method(
+                    datasource_type, crud_method_info.__doc__
+                )
+            elif crud_method_type == CrudMethodType.ADD_OR_UPDATE:
+                return self.create_add_or_update_crud_method(
+                    datasource_type, crud_method_info.__doc__
+                )
+            elif crud_method_type == CrudMethodType.DELETE:
+                return self.create_delete_crud_method(
+                    datasource_type, crud_method_info.__doc__
+                )
+            else:
+                raise TypeRegistrationError(
+                    f"Unknown crud method registered for {attr_name} with type {crud_method_type}"
+                )
+        except KeyError as e:
+            raise AttributeError(
+                f"No crud method '{attr_name}' in {self.factories}"
+            ) from e
 
     def __dir__(self) -> List[str]:
         """Preserves autocompletion for dynamic attributes."""

@@ -441,6 +441,17 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 
 @pytest.mark.unit
 @pytest.mark.cloud
+def test_get_expectation_suite_no_identifier_raises_error(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+) -> None:
+    context = empty_base_data_context_in_cloud_mode
+
+    with pytest.raises(ValueError):
+        context.get_expectation_suite()
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
 def test_save_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],

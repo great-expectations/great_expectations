@@ -27,7 +27,18 @@
             "type": "string"
         },
         "con": {
-            "title": "Con"
+            "title": "Con",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                },
+                {}
+            ]
         },
         "schema": {
             "title": "Schema",

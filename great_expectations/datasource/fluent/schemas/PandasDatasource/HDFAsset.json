@@ -23,7 +23,20 @@
             }
         },
         "path_or_buf": {
-            "title": "Path Or Buf"
+            "title": "Path Or Buf",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
         },
         "key": {
             "title": "Key"

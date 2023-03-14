@@ -29,7 +29,6 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
-from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -46,6 +45,7 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -373,8 +373,10 @@ class Datasource(
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
+    _data_context = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
+    _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -409,7 +411,7 @@ class Datasource(
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
-            exclude=self._EXCLUDED_EXEC_ENG_ARGS
+            exclude=self._EXCLUDED_EXEC_ENG_ARGS, config_provider=self._config_provider
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
@@ -459,10 +461,6 @@ class Datasource(
         asset.test_connection()
 
         self.assets[asset.name] = asset
-
-        # pydantic needs to know that an asset has been set so that it doesn't get excluded
-        # when dumping to dict, json, yaml etc.
-        self.__fields_set__.update(_FIELDS_ALWAYS_SET)
 
         return asset
 

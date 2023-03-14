@@ -8,7 +8,6 @@ import pytest
 from pydantic import ValidationError
 
 from great_expectations.datasource.fluent import SqliteDatasource
-from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 
 
@@ -59,12 +58,16 @@ def test_connection_string_that_does_not_start_with_sqlite():
             name=name,
             connection_string=connection_string,
         )
-    assert str(e.value) == (
-        "1 validation error for SqliteDatasource\n"
-        "connection_string\n"
-        "  URL scheme not permitted (type=value_error.url.scheme; "
-        f"allowed_schemes={SqliteDsn.allowed_schemes})"
-    )
+    # the first error is due to missing a config template string
+    assert e.value.errors()[1]["msg"] == "URL scheme not permitted"
+    assert e.value.errors()[1].get("ctx") == {
+        "allowed_schemes": {
+            "sqlite",
+            "sqlite+aiosqlite",
+            "sqlite+pysqlcipher",
+            "sqlite+pysqlite",
+        }
+    }
 
 
 @pytest.mark.unit

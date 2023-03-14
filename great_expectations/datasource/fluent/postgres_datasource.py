@@ -1,6 +1,9 @@
+from typing import Union
+
 from pydantic import PostgresDsn
 from typing_extensions import Literal
 
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.sql_datasource import SQLDatasource
 
 
@@ -16,4 +19,4 @@ class PostgresDatasource(SQLDatasource):
     """
 
     type: Literal["postgres"] = "postgres"  # type: ignore[assignment]
-    connection_string: PostgresDsn
+    connection_string: Union[ConfigStr, PostgresDsn]

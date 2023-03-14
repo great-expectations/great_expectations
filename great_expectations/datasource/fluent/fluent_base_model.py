@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import pathlib
+from collections.abc import MutableMapping, MutableSequence
 from io import StringIO
 from pprint import pformat as pf
 from typing import (
@@ -21,11 +22,16 @@ from typing import (
 import pydantic
 from ruamel.yaml import YAML
 
-from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
+from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.constants import (
+    _ASSETS_KEY,
+    _FIELDS_ALWAYS_SET,
+)
 
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
     AbstractSetIntStr = AbstractSet[Union[int, str]]
+    from great_expectations.core.config_provider import _ConfigurationProvider
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +172,8 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
+        _update__fields_set__on_truthyness(self, _ASSETS_KEY)
+
         return super().json(
             include=include,
             exclude=exclude,
@@ -222,6 +230,8 @@ class FluentBaseModel(pydantic.BaseModel):
         exclude_none: bool = False,
         # deprecated - use exclude_unset instead
         skip_defaults: bool | None = None,
+        # custom
+        config_provider: _ConfigurationProvider | None = None,
     ) -> dict[str, Any]:
         """
         Generate a dictionary representation of the model, optionally specifying which
@@ -231,7 +241,9 @@ class FluentBaseModel(pydantic.BaseModel):
         default.
         """
         self.__fields_set__.update(_FIELDS_ALWAYS_SET)
-        return super().dict(
+        _update__fields_set__on_truthyness(self, _ASSETS_KEY)
+
+        result = super().dict(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -240,6 +252,12 @@ class FluentBaseModel(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
+        if config_provider:
+            logger.info(
+                f"{self.__class__.__name__}.dict() - substituting config values"
+            )
+            _recursively_set_config_value(result, config_provider)
+        return result
 
     @staticmethod
     def _include_exclude_to_dict(
@@ -266,3 +284,45 @@ class FluentBaseModel(pydantic.BaseModel):
 
     def __str__(self):
         return self.yaml()
+
+
+def _recursively_set_config_value(
+    data: MutableMapping | MutableSequence, config_provider: _ConfigurationProvider
+):
+    if isinstance(data, MutableMapping):
+        for k, v in data.items():
+            if isinstance(v, ConfigStr):
+                data[k] = v.get_config_value(config_provider)
+            elif isinstance(v, (MutableMapping, MutableSequence)):
+                return _recursively_set_config_value(v, config_provider)
+    elif isinstance(data, MutableSequence):
+        for i, v in enumerate(data):
+            if isinstance(v, ConfigStr):
+                data[i] = v.get_config_value(config_provider)
+            elif isinstance(v, (MutableMapping, MutableSequence)):
+                return _recursively_set_config_value(v, config_provider)
+
+
+def _update__fields_set__on_truthyness(model: FluentBaseModel, field_name: str) -> None:
+    """
+    This method updates the special `__fields__set__` attribute if the provided field is
+    present and the value truthy. Otherwise it removes the entry from `__fields_set__`.
+
+    For background `__fields_set__` is what determines whether or not a field is
+    serialized when `exclude_unset` is used with `.dict()`/`.json()`/`.yaml()`.
+
+    This is set automatically in most cases, but if a field was set with a `pre`
+    validator then this will not have been updated and so if we want it to be dumped
+    when `exclude_unset` is used we need to update `__fields_set__`.
+
+    https://docs.pydantic.dev/usage/validators/#pre-and-per-item-validators
+    https://docs.pydantic.dev/usage/exporting_models/#modeldict
+    """
+    if getattr(model, field_name, None):
+        model.__fields_set__.add(field_name)
+        logger.debug(f"{model.__class__.__name__}.__fields_set__ {field_name} added")
+    else:
+        model.__fields_set__.discard(field_name)
+        logger.debug(
+            f"{model.__class__.__name__}.__fields_set__ {field_name} discarded"
+        )

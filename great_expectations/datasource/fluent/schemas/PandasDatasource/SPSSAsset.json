@@ -26,12 +26,16 @@
             "title": "Path",
             "anyOf": [
                 {
-                    "type": "string"
+                    "type": "string",
+                    "format": "file-path"
                 },
                 {
                     "type": "string",
-                    "format": "path"
-                }
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
             ]
         },
         "usecols": {
