@@ -5,18 +5,13 @@ description: This tutorial will help you onboard with GX Cloud and get ready to 
 keywords: [tutorial, getting started, cloud, onboarding]
 ---
 
-import Prerequisites from '/docs/guides/connecting_to_your_data/components/prerequisites.jsx'
-import TechnicalTag from '@site/docs/term_tags/\_tag.mdx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 Welcome to Great Expectations Cloud! This tutorial will help you onboard with GX Cloud and get ready to connect to your data.
 
-## Prerequisites
-
-<Prerequisites>
-
+:::note Prerequisites
 - This tutorial assumes you have Great Expectations OSS installed on your machine. If that's not the case please complete [Step 1: OSS Setup](/docs/tutorials/getting_started/tutorial_setup.md) first.
-
-</Prerequisites>
+:::
 
 ## Steps
 
@@ -35,10 +30,11 @@ Welcome to Great Expectations Cloud! This tutorial will help you onboard with GX
 
 - Open Jupyter Notebook
 
-:::tip Any Python Interpreter or script file will work for the remaining steps in the guide, we recommend using a Jupyter Notebook, since they are included in the OSS GX installation and give the best experience of both composing a script file and running code in a live interpreter.
+:::tip 
+Any Python Interpreter or script file will work for the remaining steps in the guide, we recommend using a Jupyter Notebook, since they are included in the OSS GX installation and give the best experience of both composing a script file and running code in a live interpreter.
 :::
 
-- Set environment variables in the notebook (alternatively, add these as <TechnicalTag tag="data_context" text="Data Context"/> [config variables](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials))
+- Set environment variables in the notebook (alternatively, add these as [Data Context config variables](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials))
 
 ```console
 import os
