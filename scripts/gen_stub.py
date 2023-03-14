@@ -7,7 +7,9 @@ from great_expectations.datasource.fluent import Datasource, PandasFilesystemDat
 # ontop.
 
 
-def print_add_asset_method_signatures(datasource_class: Type[Datasource]):
+def print_add_asset_method_signatures(
+    datasource_class: Type[Datasource], default_override: str = "..."
+):
     """
     Prints out all of the asset methods for a given datasource in a format that be used
     for defining methods in stub files.
@@ -39,7 +41,9 @@ def print_add_asset_method_signatures(datasource_class: Type[Datasource]):
                 print(f"\t{name}: {annotation}", end="")
 
             if param.kind == Parameter.KEYWORD_ONLY:
-                if param.default is Parameter.empty:
+                if default_override:
+                    default = default_override
+                elif param.default is Parameter.empty:
                     default = "..."
                 else:
                     default = param.default
