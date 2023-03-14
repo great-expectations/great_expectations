@@ -325,7 +325,7 @@ filterwarnings = [
     # pymysql
     # Actual warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
     # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
-    'ignore: Truncated incorrect DOUBLE value:pymysql.err.Warning',
+    'ignore: Truncated incorrect DOUBLE value:Warning',
     # urllib3
     "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
     # ruamel
