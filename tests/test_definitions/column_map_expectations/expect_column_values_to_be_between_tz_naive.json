@@ -97,11 +97,19 @@
       },
       "trino": {
         "x": "INTEGER",
-        "y": "INTEGER",
+        "y": "VARCHAR",
         "z": "INTEGER",
         "ts": "TIMESTAMP",
         "alpha": "VARCHAR",
         "numeric": "INTEGER"
+      },
+      "snowflake": {
+        "x": "NUMBER",
+        "y": "VARCHAR",
+        "z": "NUMBER",
+        "ts": "TIMESTAMP",
+        "alpha": "VARCHAR",
+        "numeric": "NUMBER"
       }
     },
     "tests": [
