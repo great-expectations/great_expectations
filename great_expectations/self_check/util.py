@@ -3491,6 +3491,6 @@ def generate_temp_table_for_validator(
     create_tmp_table_sql = re.sub("^(CREATE TABLE )?", stmt, create_table_sql)
 
     if dialect == GXSqlDialect.BIGQUERY:
-        create_tmp_table_sql += "OPTIONS(expiration_timestamp=TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR))"
+        create_tmp_table_sql += " OPTIONS(expiration_timestamp=TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL 24 HOUR))"
     with engine.connect():
         engine.execute(create_tmp_table_sql)
