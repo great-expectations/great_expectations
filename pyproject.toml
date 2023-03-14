@@ -297,11 +297,21 @@ filterwarnings = [
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Expectation-level will not be persisted:UserWarning",
 
+    # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
+    # Ignores in this section are for items in Great Expectations that are deprecated but not yet removed. Once the
+    # relevant code is removed, the warning ignore should also be removed.
+    # By ignoring these warnings, we will be able to turn on "warnings are errors" in our pipelines.
+    'ignore: The parameter "save_changes" is deprecated as of v0.15.32; moving forward, changes made to Datasources will always be persisted by Store implementations. As support will be removed in v0.18, please omit the argument moving forward.:DeprecationWarning',
+    # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
+
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
     # urllib3
     "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
+    # ruamel
+    'ignore:\nsafe_load will be removed:PendingDeprecationWarning',
+    'ignore:\nload will be removed:PendingDeprecationWarning',
     # SQLAlchemy
     # SQLAlchemy warnings. These warnings should be addressed.
     'ignore: Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated; please call .subquery\(\) on any Core select or ORM Query object in order to produce a subquery object.:sqlalchemy.exc.SADeprecationWarning',
@@ -312,6 +322,8 @@ filterwarnings = [
     'ignore: The current statement is being autocommitted using implicit autocommit, which will be removed in SQLAlchemy 2.0. Use the .begin\(\) method of Engine or Connection in order to use an explicit transaction for DML and DDL statements.:sqlalchemy.exc.RemovedIn20Warning',
     'ignore: The "whens" argument to case\(\), when referring to a sequence of items, is now passed as a series of positional elements, rather than as a list.:sqlalchemy.exc.RemovedIn20Warning',
     'ignore: The Engine.execute\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. All statement execution in SQLAlchemy 2.0 is performed by the Connection.execute\(\) method of Connection, or in the ORM by the Session.execute\(\) method of Session.:sqlalchemy.exc.RemovedIn20Warning',
+    # Error with link to docs: sqlalchemy.exc.RemovedIn20Warning: The Connection.connect() method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The Connection.connect\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:sqlalchemy.exc.RemovedIn20Warning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
