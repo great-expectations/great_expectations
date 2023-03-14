@@ -127,10 +127,10 @@
         },
         "snowflake": {
           "x": "NUMBER",
-          "y": "VARCHAR",
+          "y": "STRING",
           "z": "NUMBER",
           "ts": "TIMESTAMP",
-          "alpha": "VARCHAR",
+          "alpha": "STRING",
           "numeric": "NUMBER"
         }
       },
