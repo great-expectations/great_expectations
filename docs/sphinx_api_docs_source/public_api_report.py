@@ -834,14 +834,20 @@ class CodeReferenceFilter:
             ),
         ),
         IncludeExcludeDefinition(
-            reason="Experimental is not part of the public API",
-            filepath=pathlib.Path(
-                "great_expectations/experimental/datasources/interfaces.py"
-            ),
+            reason="Fluent is not part of the public API",
+            filepath=pathlib.Path("great_expectations/datasource/fluent/interfaces.py"),
         ),
         IncludeExcludeDefinition(
-            reason="Experimental is not part of the public API",
-            filepath=pathlib.Path("great_expectations/experimental/context.py"),
+            reason="Fluent is not part of the public API",
+            name="read_csv",
+            filepath=pathlib.Path("great_expectations/datasource/fluent/config.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="Fluent-style read_csv is not referenced in the docs yet, but due to string matching it is being flagged.",
+            name="read_csv",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/fluent/pandas_datasource.py"
+            ),
         ),
         IncludeExcludeDefinition(
             reason="Marshmallow dump methods are not part of the public API",
@@ -1471,13 +1477,6 @@ class CodeReferenceFilter:
             name="get_available_data_asset_names",
             filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
         ),
-        IncludeExcludeDefinition(
-            reason="Fluent-style read_csv is not referenced in the docs yet, but due to string matching it is being flagged.",
-            name="read_csv",
-            filepath=pathlib.Path(
-                "great_expectations/experimental/datasources/pandas_datasource.py"
-            ),
-        ),
     ]
 
     def __init__(
@@ -1844,7 +1843,7 @@ def main():
     # any methods or classes you are adding to documentation with the @public_api
     # decorator and any relevant "new" or "deprecated" public api decorators.
     # If the actual is lower than the threshold, please reduce the threshold.
-    PUBLIC_API_MISSING_THRESHOLD = 101  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
+    PUBLIC_API_MISSING_THRESHOLD = 98  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
     if len(printable_definitions) != PUBLIC_API_MISSING_THRESHOLD:
         error_msg_prefix = f"There are {len(printable_definitions)} items missing from the public API, we currently allow {PUBLIC_API_MISSING_THRESHOLD}."
         if len(printable_definitions) > PUBLIC_API_MISSING_THRESHOLD:
