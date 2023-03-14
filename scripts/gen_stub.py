@@ -22,7 +22,6 @@ class _Callable(Protocol):
 
 def _print_method(
     method: _Callable,
-    cls: Type,
     method_name: str | None = None,
     default_override: str = "...",
     return_type_override: str = "",
@@ -86,7 +85,6 @@ def print_add_asset_method_signatures(
 
         _print_method(
             method,
-            asset_type,
             method_name=method_name,
             default_override=default_override,
             return_type_override=asset_type.__name__,
@@ -110,14 +108,12 @@ def print_datasource_crud_signatures(
     datasource_type_lookup = source_factories.type_lookup
 
     for datasource_name in datasource_type_lookup.type_names():
-        datasource_type = datasource_type_lookup[datasource_name]
 
         for method_name_tmplt in method_name_templates:
             method_name = method_name_tmplt.format(datasource_name)
 
             _print_method(
                 getattr(source_factories, method_name),
-                datasource_type,
                 method_name=method_name,
                 default_override=default_override,
             )
@@ -127,4 +123,6 @@ if __name__ == "__main__":
     # replace the provided dataclass as needed
     print_add_asset_method_signatures(PandasFilesystemDatasource)
 
-    print_datasource_crud_signatures(source_factories=_SourceFactories("dummy_context"))
+    print_datasource_crud_signatures(
+        source_factories=_SourceFactories("dummy_context"),  # type: ignore[arg-type]
+    )
