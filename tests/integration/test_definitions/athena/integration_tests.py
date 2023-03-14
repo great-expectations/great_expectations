@@ -8,14 +8,14 @@ connecting_to_your_data = [
         name="awsathena_test_yaml",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         user_flow_script="tests/integration/db/awsathena.py",
-        backend_dependencies=[BackendDependencies.AWS],
+        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
         util_script="tests/test_utils.py",
     ),
     IntegrationTestFixture(
         name="awsathena_test_python",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/database/athena_python_example.py",
-        backend_dependencies=[BackendDependencies.AWS],
+        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
         util_script="tests/test_utils.py",
     ),
 ]
@@ -150,7 +150,7 @@ sample_data = [
                 "connection_string.yml",
             ),
         ),
-        backend_dependencies=[BackendDependencies.AWS],
+        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.ATHENA],
     ),
 ]
 
