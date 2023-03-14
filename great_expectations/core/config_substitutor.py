@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import base64
 import json
 import logging
 import re
 from collections import OrderedDict
 from functools import lru_cache
+from types import ModuleType
 from typing import Any, Dict, Optional
 
 from typing_extensions import Final
@@ -28,7 +31,7 @@ except ImportError:
 try:
     from google.cloud import secretmanager
 except ImportError:
-    secretmanager = None
+    secretmanager: ModuleType | None = None  # type: ignore[no-redef]
 
 logger = logging.getLogger(__name__)
 
