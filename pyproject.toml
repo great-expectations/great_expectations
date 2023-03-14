@@ -302,11 +302,30 @@ filterwarnings = [
     # relevant code is removed, the warning ignore should also be removed.
     # By ignoring these warnings, we will be able to turn on "warnings are errors" in our pipelines.
     'ignore: The parameter "save_changes" is deprecated as of v0.15.32; moving forward, changes made to Datasources will always be persisted by Store implementations. As support will be removed in v0.18, please omit the argument moving forward.:DeprecationWarning',
+    # Actual warning: great_expectations.exceptions.exceptions.MetricResolutionError: The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, please see: https://greatexpectations.io/blog/why-we-dont-do-transformations-for-expectations-and-when-we-do
+    'ignore: The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in v0.16.:great_expectations.exceptions.exceptions.MetricResolutionError',
+    # Actual warning: UserWarning: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.
+    'ignore: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
+    # Actual warning: UserWarning: Your query appears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.
+    'ignore: Your query appears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
+    # Actual warning: DeprecationWarning: save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_expectation_suite or add_or_update_expectation_suite instead.
+    # Found in test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint
+    'ignore: save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_expectation_suite or add_or_update_expectation_suite instead.:DeprecationWarning',
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+    # python
+    # Actual warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
+    'ignore: iteritems is deprecated and will be removed in a future version. Use .items instead.:FutureWarning',
+    # Actual warning: RuntimeWarning: divide by zero encountered in divide
+    # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
+    'ignore: divide by zero encountered in divide:RuntimeWarning',
+    # pymysql
+    # Actual warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
+    # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
+    'ignore: Truncated incorrect DOUBLE value:pymysql.err.Warning',
     # urllib3
     "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
     # ruamel
@@ -324,6 +343,10 @@ filterwarnings = [
     # `JUPYTER_PLATFORM_DIRS=1` and then run `jupyter --paths`.
     # The use of platformdirs will be the default in `jupyter_core` v6
     'ignore: Jupyter is migrating its paths to use standard platformdirs:DeprecationWarning',
+    # pytest
+    # Example Actual Error:
+    # pytest.PytestCollectionWarning: cannot collect test class 'TestConnectionError' because it has a __init__ constructor (from: tests/datasource/fluent/test_pandas_azure_blob_storage_datasource.py)
+    "ignore: cannot collect test class 'TestConnectionError' because it has a __init__ constructor:pytest.PytestCollectionWarning",
     # SQLAlchemy
     # SQLAlchemy warnings. These warnings should be addressed.
     'ignore: Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated; please call .subquery\(\) on any Core select or ORM Query object in order to produce a subquery object.:sqlalchemy.exc.SADeprecationWarning',
@@ -335,7 +358,12 @@ filterwarnings = [
     'ignore: The "whens" argument to case\(\), when referring to a sequence of items, is now passed as a series of positional elements, rather than as a list.:sqlalchemy.exc.RemovedIn20Warning',
     'ignore: The Engine.execute\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. All statement execution in SQLAlchemy 2.0 is performed by the Connection.execute\(\) method of Connection, or in the ORM by the Session.execute\(\) method of Session.:sqlalchemy.exc.RemovedIn20Warning',
     # Error with link to docs: sqlalchemy.exc.RemovedIn20Warning: The Connection.connect() method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    # Found so far in pytest tests/test_ge_utils.py, which is a v2 API reference. We won't fix this since the v2 API
+    # code will be deleted soon.
     'ignore: The Connection.connect\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    # Found so far in test_cli_datasource_list
+    'ignore: Deprecated API features detected!:sqlalchemy.exc.RemovedIn20Warning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
