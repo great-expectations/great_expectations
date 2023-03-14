@@ -157,7 +157,7 @@ def test_common_usage_stats_are_sent_no_mocking(
     expected_events.append("data_context.test_yaml_config")
 
     # Note: add_checkpoint is not instrumented as of 20211215
-    context.add_checkpoint(**yaml.safe_load(checkpoint_yaml))
+    context.add_checkpoint(**yaml.load(checkpoint_yaml))
 
     context.run_checkpoint(
         checkpoint_name="my_checkpoint",
