@@ -31,8 +31,8 @@ def _print_method(
 
     signature: Signature = method.__signature__
     for name, param in signature.parameters.items():
+        # ignore kwargs
         if param.kind == Parameter.VAR_KEYWORD:
-            print(f") -> {cls.__name__}:\n\t...")
             continue
 
         annotation = param.annotation
@@ -57,6 +57,7 @@ def _print_method(
                     default = f"'{default}'"
             print(f" = {default}", end="")
         print(",")
+    print(f") -> {cls.__name__}:\n\t...")
 
 
 def print_add_asset_method_signatures(
@@ -84,6 +85,7 @@ def print_add_asset_method_signatures(
 
 
 def print_datasource_crud_signatures(
+    source_factories: _SourceFactories,
     method_name_templates: tuple[str, ...] = (
         "add_{0}",
         "update_{0}",
@@ -91,31 +93,27 @@ def print_datasource_crud_signatures(
     default_override: str = "...",
 ):
     """
-    Prints out all of the asset methods for a given datasource in a format that be used
+    Prints out all of the CRUD methods for a given datasource in a format that be used
     for defining methods in stub files.
     """
-    datasource_type_lookup = _SourceFactories.type_lookup
+    datasource_type_lookup = source_factories.type_lookup
 
     for datasource_name in datasource_type_lookup.type_names():
         datasource_type = datasource_type_lookup[datasource_name]
 
         for method_name_tmplt in method_name_templates:
             method_name = method_name_tmplt.format(datasource_name)
-            method = getattr(_SourceFactories, method_name, None)
 
-            if method:
-                _print_method(
-                    method,
-                    datasource_type,
-                    method_name=method_name,
-                    default_override=default_override,
-                )
-            else:
-                print(f"Missing {method_name}")
+            _print_method(
+                getattr(source_factories, method_name),
+                datasource_type,
+                method_name=method_name,
+                default_override=default_override,
+            )
 
 
 if __name__ == "__main__":
     # replace the provided dataclass as needed
     print_add_asset_method_signatures(PandasFilesystemDatasource)
 
-    print_datasource_crud_signatures()
+    print_datasource_crud_signatures(source_factories=_SourceFactories("dummy_context"))
