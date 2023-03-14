@@ -312,6 +312,18 @@ filterwarnings = [
     # ruamel
     'ignore:\nsafe_load will be removed:PendingDeprecationWarning',
     'ignore:\nload will be removed:PendingDeprecationWarning',
+    # pyarrow
+    # Actual error:
+    # UserWarning: You have an incompatible version of 'pyarrow' installed (11.0.0), please install a version that adheres to: 'pyarrow<10.1.0,>=10.0.1; extra == "pandas"'
+    "ignore: You have an incompatible version of 'pyarrow' installed:UserWarning",
+    # jupyter
+    # Actual error:
+    # DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
+    # given by the platformdirs library.  To remove this warning and
+    # see the appropriate new directories, set the environment variable
+    # `JUPYTER_PLATFORM_DIRS=1` and then run `jupyter --paths`.
+    # The use of platformdirs will be the default in `jupyter_core` v6
+    'ignore: Jupyter is migrating its paths to use standard platformdirs:DeprecationWarning',
     # SQLAlchemy
     # SQLAlchemy warnings. These warnings should be addressed.
     'ignore: Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated; please call .subquery\(\) on any Core select or ORM Query object in order to produce a subquery object.:sqlalchemy.exc.SADeprecationWarning',
