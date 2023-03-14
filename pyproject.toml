@@ -326,6 +326,10 @@ filterwarnings = [
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide
     # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
     'ignore: divide by zero encountered in divide:RuntimeWarning',
+    # pandas
+    # Example Actual Warning: FutureWarning: The behavior of `series[i:j]` with an integer-dtype index is deprecated. In a future version, this will be treated as *label-based* indexing, consistent with e.g. `series[i]` lookups. To retain the old behavior, use `series.iloc[i:j]`. To get the future behavior, use `series.loc[i:j]`.
+    # Found when running pytest tests/test_definitions/test_expectations_v3_api.py
+    'ignore: The behavior of `series:FutureWarning',
     # pymysql
     # Example Actual Warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
     # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
