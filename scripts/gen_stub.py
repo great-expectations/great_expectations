@@ -31,13 +31,6 @@ def _print_method(
         print(f"def {method_name}(")
 
     signature: Signature = method.__signature__
-    if return_type_override:
-        return_type = return_type_override
-    else:
-        return_type = getattr(
-            signature.return_annotation, "__name__", signature.return_annotation
-        )
-
     for name, param in signature.parameters.items():
         # ignore kwargs
         if param.kind == Parameter.VAR_KEYWORD:
@@ -65,6 +58,13 @@ def _print_method(
                     default = f"'{default}'"
             print(f" = {default}", end="")
         print(",")
+
+    if return_type_override:
+        return_type = return_type_override
+    else:
+        return_type = getattr(
+            signature.return_annotation, "__name__", signature.return_annotation
+        )
     print(f") -> {return_type}:\n\t...")
 
 
