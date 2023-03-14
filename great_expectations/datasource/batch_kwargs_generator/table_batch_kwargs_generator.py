@@ -1,5 +1,4 @@
 import logging
-import warnings
 from string import Template
 
 from marshmallow import Schema, ValidationError, fields, post_load
@@ -283,20 +282,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             )
         )
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(
-        self, generator_asset=None, data_asset_name=None
-    ) -> None:
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
+    def get_available_partition_ids(self, data_asset_name=None) -> None:
         raise BatchKwargsError(
             "TableBatchKwargsGenerator cannot identify partitions, however any existing table may"
             "already be referenced by accessing a data_asset with the name of the "
