@@ -279,7 +279,7 @@ convention = "google"
 [tool.pytest.ini_options]
 filterwarnings = [
     # Turn all warnings not explicitly filtered below into errors
-#    "error",
+    "error",
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
     "ignore:Setting result format to COMPLETE for a SqlAlchemyDataset:UserWarning",
@@ -297,12 +297,22 @@ filterwarnings = [
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Expectation-level will not be persisted:UserWarning",
 
-    # These warnings should be addressed but are ignored here to allow new warnings to become errors:
+    # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
+    # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
+    # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+    # urllib3
     "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
+    # SQLAlchemy
+    # SQLAlchemy warnings. These warnings should be addressed.
+    'ignore: Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated; please call .subquery\(\) on any Core select or ORM Query object in order to produce a subquery object.:sqlalchemy.exc.SADeprecationWarning',
     # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
-#    'ignore:RemovedIn20Warning: The legacy calling style of select() is deprecated and will be removed in SQLAlchemy 2.0.:sqlalchemy.exc.RemovedIn20Warning',
-    'ignore:The legacy calling style of select() is deprecated and will be removed in SQLAlchemy 2.0.:DeprecationWarning',
-#    'ignore:sqlalchemy.exc.RemovedIn20Warning',
+    # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
+    'ignore: The legacy calling style of select\(\) is deprecated and will be removed in SQLAlchemy 2.0.  Please use the new calling style described at select\(\).:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore: Passing a string to Connection.execute\(\) is deprecated and will be removed in version 2.0.  Use the text\(\) construct, or the Connection.exec_driver_sql\(\) method to invoke a driver-level SQL string.:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore: The current statement is being autocommitted using implicit autocommit, which will be removed in SQLAlchemy 2.0. Use the .begin\(\) method of Engine or Connection in order to use an explicit transaction for DML and DDL statements.:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore: The "whens" argument to case\(\), when referring to a sequence of items, is now passed as a series of positional elements, rather than as a list.:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore: The Engine.execute\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. All statement execution in SQLAlchemy 2.0 is performed by the Connection.execute\(\) method of Connection, or in the ORM by the Session.execute\(\) method of Session.:sqlalchemy.exc.RemovedIn20Warning',
+    # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
 markers = [
