@@ -278,6 +278,8 @@ convention = "google"
 
 [tool.pytest.ini_options]
 filterwarnings = [
+    # Turn all warnings not explicitly filtered below into errors
+#    "error",
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
     "ignore:Setting result format to COMPLETE for a SqlAlchemyDataset:UserWarning",
@@ -294,6 +296,13 @@ filterwarnings = [
     # This warning is for configuring the result_format parameter at the Expectation-level, which will not be persisted,
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Expectation-level will not be persisted:UserWarning",
+
+    # These warnings should be addressed but are ignored here to allow new warnings to become errors:
+    "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
+    # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
+#    'ignore:RemovedIn20Warning: The legacy calling style of select() is deprecated and will be removed in SQLAlchemy 2.0.:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore:The legacy calling style of select() is deprecated and will be removed in SQLAlchemy 2.0.:DeprecationWarning',
+#    'ignore:sqlalchemy.exc.RemovedIn20Warning',
 ]
 junit_family="xunit2"
 markers = [
