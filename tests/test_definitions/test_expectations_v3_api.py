@@ -41,10 +41,11 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
     for expectation_category in expectation_dirs:
-
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
+        # test_configuration_files = ["/Users/work/Development/great_expectations/tests/test_definitions/column_map_expectations/expect_column_values_to_be_in_set.json"]
+        # backends = ["postgresql"]
         for c in backends:
             for filename in test_configuration_files:
                 pk_column: bool = False

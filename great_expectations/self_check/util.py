@@ -61,6 +61,7 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (
     LockingConnectionCheck,
@@ -1588,24 +1589,14 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         sql_insert_method = "multi"
     else:
         sql_insert_method = None
-    # create temporary table so that we
-    # https://www.appsloveworld.com/pandas/100/12/create-a-temporary-table-in-mysql-using-pandas
-    if schemas and schemas.get(sa_engine_name):
-        # if we have defined a schema then use it
-        current_schema = schemas.get(sa_engine_name)
-        schema_from_get_schema = pandas_sql.get_schema(
-            frame=df, name=table_name, dtype=current_schema
-        )
-    else:
-        # or use the types associated with the connection
-        schema_from_get_schema = pandas_sql.get_schema(frame=df, name=table_name, con=engine)  # type: ignore
-    create_table_sql = schema_from_get_schema.strip()
-    create_tmp_table_sql = re.sub(
-        "^(CREATE TABLE)?", "CREATE TEMP TABLE", create_table_sql
-    )
 
-    with engine.connect():
-        engine.execute(create_tmp_table_sql)
+    generate_temp_table_for_validator(
+        dialect=sa_engine_name,
+        df=df,
+        engine=engine,
+        temp_table_name=table_name,
+        schemas=schemas,
+    )
 
     _debug("Calling df.to_sql")
     _start = time.time()
@@ -3412,3 +3403,113 @@ def generate_sqlite_db_path():
         )
     )
     return abspath
+
+
+def generate_temp_table_for_validator(
+    dialect: str,
+    df: pd.DataFrame,
+    engine,
+    temp_table_name: str,
+    temp_table_schema_name: str | None = None,
+    schemas: dict | None = None,
+):
+    """creates temporary table before creating a Validator for Expectations V3 tests.
+
+    Args:
+        sa_engine_name (str): sa_engine_name is the backend that the Validator is being created for.
+        df (pd.DataFrame): DataFrame that is being added to Validator.
+        engine (_type_): _descrip
+        table_name (str): name of table to create. Can either be described in test, or randomly generated.
+        schemas (dict | None): Optional schemas that are defined as part of the JSON tests for Expectations.
+    """
+    # create temporary table so that we
+    # https://www.appsloveworld.com/pandas/100/12/create-a-temporary-table-in-mysql-using-pandas
+
+    # dialects that support temp schemas
+    if temp_table_schema_name is not None and dialect in [
+        GXSqlDialect.BIGQUERY,
+        GXSqlDialect.SNOWFLAKE,
+        GXSqlDialect.VERTICA,
+    ]:
+        temp_table_name = f"{temp_table_schema_name}.{temp_table_name}"
+
+    if dialect == GXSqlDialect.BIGQUERY:
+        # BigQuery Table is created using with an expiration of 24 hours using Google's Data Definition Language
+        # https://stackoverflow.com/questions/20673986/how-to-create-temporary-table-in-google-bigquery
+        # stmt = f"""CREATE OR REPLACE TABLE `{temp_table_name}`
+        #         OPTIONS(
+        #             expiration_timestamp=TIMESTAMP_ADD(
+        #             CURRENT_TIMESTAMP(), INTERVAL 24 HOUR)
+        #         )"""
+        stmt = "CREATE TEMP TABLE"
+    elif dialect == GXSqlDialect.DREMIO:
+        stmt = "CREATE OR REPLACE VDS"
+    elif dialect == GXSqlDialect.SNOWFLAKE:
+        stmt = "CREATE OR REPLACE TEMPORARY TABLE"
+    elif dialect == GXSqlDialect.MYSQL:
+        stmt = "CREATE TEMPORARY TABLE "
+    elif dialect == GXSqlDialect.HIVE:
+        stmt = "CREATE TEMPORARY TABLE "
+    # elif dialect == GXSqlDialect.MSSQL:
+    #         # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
+    #         # Split is case sensitive so detect case.
+    #         # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
+    #         # changing column names), so this is not an option!
+    #         # noinspection PyUnresolvedReferences
+    #         if isinstance(query, sa.dialects.mssql.base.MSSQLCompiler):
+    #             query = query.string  # extracting string from MSSQLCompiler object
+
+    #         if "from" in query:
+    #             strsep = "from"
+    #         else:
+    #             strsep = "FROM"
+    #         querymod = query.split(strsep, maxsplit=1)
+    #         stmt = f"{querymod[0]}into {{temp_table_name}} from{querymod[1]}".format(
+    #             temp_table_name=temp_table_name
+    #         )
+    #         # we dont actually create a temp table here
+    #     # TODO: <WILL> logger.warning is emitted in situations where a permanent TABLE is created in _create_temporary_table()
+    #     # Similar message may be needed in the future for Trino backend.
+    #     elif dialect == GXSqlDialect.TRINO:
+    #         logger.warning(
+    #             f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+    #         )
+    #         stmt = f"CREATE TABLE {temp_table_name} AS {query}"
+    #     elif dialect == GXSqlDialect.AWSATHENA:
+    #         logger.warning(
+    #             f"GX has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
+    #         )
+    #         stmt = f"CREATE TABLE {temp_table_name} AS {query}"
+    #     elif dialect == GXSqlDialect.ORACLE:
+    #         # oracle 18c introduced PRIVATE temp tables which are transient objects
+    #         stmt_1 = "CREATE PRIVATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE DEFINITION AS {query}".format(
+    #             temp_table_name=temp_table_name, query=query
+    #         )
+    #         # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
+    #         # this means an empty table will persist after the db session
+    #         stmt_2 = "CREATE GLOBAL TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}".format(
+    #             temp_table_name=temp_table_name, query=query
+    #         )
+    #     # Please note that Teradata is currently experimental (as of 0.13.43)
+    #     elif dialect == GXSqlDialect.TERADATASQL:
+    #         stmt = 'CREATE VOLATILE TABLE "{temp_table_name}" AS ({query}) WITH DATA NO PRIMARY INDEX ON COMMIT PRESERVE ROWS'.format(
+    #             temp_table_name=temp_table_name, query=query
+    #         )
+    #     elif dialect == GXSqlDialect.VERTICA:
+    #         stmt = f"CREATE TEMPORARY TABLE {temp_table_name} ON COMMIT PRESERVE ROWS AS {query}"
+    else:
+        stmt = "CREATE TEMPORARY TABLE"
+
+    if schemas and schemas.get(dialect):
+        # if we have defined a schema then use it
+        current_schema = schemas.get(dialect)
+        schema_from_get_schema = pandas_sql.get_schema(
+            frame=df, name=temp_table_name, dtype=current_schema
+        )
+    else:
+        # or use the types associated with the connection
+        schema_from_get_schema = pandas_sql.get_schema(frame=df, name=temp_table_name, con=engine)  # type: ignore
+    create_table_sql = schema_from_get_schema.strip()
+    create_tmp_table_sql = re.sub("^(CREATE TABLE)?", stmt, create_table_sql)
+    with engine.connect():
+        engine.execute(create_tmp_table_sql)
