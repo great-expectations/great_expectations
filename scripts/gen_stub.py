@@ -8,7 +8,9 @@ from great_expectations.datasource.fluent import Datasource, PandasFilesystemDat
 
 
 def print_add_asset_method_signatures(
-    datasource_class: Type[Datasource], default_override: str = "..."
+    datasource_class: Type[Datasource],
+    method_name_template_str: str = "add_{0}_asset",
+    default_override: str = "...",
 ):
     """
     Prints out all of the asset methods for a given datasource in a format that be used
@@ -18,7 +20,7 @@ def print_add_asset_method_signatures(
 
     for asset_type_name in type_lookup.type_names():
         asset_type = type_lookup[asset_type_name]
-        method_name = f"add_{asset_type_name}_asset"
+        method_name = method_name_template_str.format(asset_type_name)
         method = getattr(datasource_class, method_name)
 
         print(f"def {method_name}(")
