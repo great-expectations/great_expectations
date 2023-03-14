@@ -90,4 +90,7 @@ def test_deprecation_warnings_have_been_removed_after_two_minor_versions(
             print(f"{file} - v{version_}")
 
     # Chetan - 20220316 - Once v0.16.0 lands, this should be cleaned up and made 0.
-    assert len(unneeded_deprecation_warnings) <= UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD
+    if len(unneeded_deprecation_warnings) != UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD:
+        raise ValueError(
+            f"Found {len(unneeded_deprecation_warnings)} but threshold is {UNNEEDED_DEPRECATION_WARNINGS_THRESHOLD}; please adjust accordingly"
+        )
