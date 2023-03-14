@@ -37,7 +37,7 @@
       "snowflake": {
         "w": "NUMBER",
         "x": "NUMBER",
-        "y": "VARCHAR",
+        "y": "STRING",
         "z": "NUMBER",
         "a": "NUMBER",
         "b": "NUMBER"

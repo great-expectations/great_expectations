@@ -106,9 +106,9 @@
       },
       "snowflake": {
         "x": "NUMBER",
-        "y": "VARCHAR",
+        "y": "STRING",
         "z": "NUMBER",
-        "alpha": "VARCHAR",
+        "alpha": "STRING",
         "numeric": "NUMBER"
       },
       "trino": {
