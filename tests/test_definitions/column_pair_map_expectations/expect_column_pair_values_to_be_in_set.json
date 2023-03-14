@@ -33,6 +33,14 @@
         "z": "INTEGER",
         "a": "INTEGER",
         "b": "INTEGER"
+      },
+      "snowflake": {
+        "w": "NUMBER",
+        "x": "NUMBER",
+        "y": "VARCHAR",
+        "z": "NUMBER",
+        "a": "NUMBER",
+        "b": "NUMBER"
       }
     },
     "tests" : [{
