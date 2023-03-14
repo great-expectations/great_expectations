@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from inspect import Parameter, Signature
-from typing import Callable, ForwardRef, Type
+from typing import TYPE_CHECKING, Callable, ForwardRef, Type
 
 from typing_extensions import Protocol
 
 from great_expectations.datasource.fluent import Datasource, PandasFilesystemDatasource
+from great_expectations.datasource.fluent.sources import _SourceFactories
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
 # TODO: make this script run the initial mypy stubgen and then layer the dynamic methods
 # ontop.
@@ -64,7 +68,7 @@ def print_add_asset_method_signatures(
     Prints out all of the asset methods for a given datasource in a format that be used
     for defining methods in stub files.
     """
-    type_lookup = datasource_class._type_lookup
+    type_lookup: TypeLookup = datasource_class._type_lookup
 
     for asset_type_name in type_lookup.type_names():
         asset_type = type_lookup[asset_type_name]
@@ -79,6 +83,39 @@ def print_add_asset_method_signatures(
         )
 
 
+def print_datasource_crud_signatures(
+    method_name_templates: tuple[str, ...] = (
+        "add_{0}",
+        "update_{0}",
+    ),
+    default_override: str = "...",
+):
+    """
+    Prints out all of the asset methods for a given datasource in a format that be used
+    for defining methods in stub files.
+    """
+    datasource_type_lookup = _SourceFactories.type_lookup
+
+    for datasource_name in datasource_type_lookup.type_names():
+        datasource_type = datasource_type_lookup[datasource_name]
+
+        for method_name_tmplt in method_name_templates:
+            method_name = method_name_tmplt.format(datasource_name)
+            method = getattr(_SourceFactories, method_name, None)
+
+            if method:
+                _print_method(
+                    method,
+                    datasource_type,
+                    method_name=method_name,
+                    default_override=default_override,
+                )
+            else:
+                print(f"Missing {method_name}")
+
+
 if __name__ == "__main__":
     # replace the provided dataclass as needed
     print_add_asset_method_signatures(PandasFilesystemDatasource)
+
+    print_datasource_crud_signatures()
