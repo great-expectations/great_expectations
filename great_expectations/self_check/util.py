@@ -398,6 +398,7 @@ try:
         "DOUBLE": snowflaketypes.DOUBLE,
         "FIXED": snowflaketypes.FIXED,
         "NUMBER": snowflaketypes.NUMBER,
+        "INTEGER": snowflaketypes.NUMBER,
         "OBJECT": snowflaketypes.OBJECT,
         "STRING": snowflaketypes.STRING,
         "TEXT": snowflaketypes.TEXT,
