@@ -1,5 +1,4 @@
 import logging
-import warnings
 from typing import Dict, Set
 
 from great_expectations.core.id_dict import BatchKwargs
@@ -233,14 +232,6 @@ class BatchKwargsGenerator:
             kwargs.get("name") and data_asset_name
         ):
             raise ValueError("Please provide either name or data_asset_name.")
-        if kwargs.get("name"):
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
 
         """The key workhorse. Docs forthcoming."""
         if data_asset_name is not None:
