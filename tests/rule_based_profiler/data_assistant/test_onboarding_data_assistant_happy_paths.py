@@ -420,7 +420,7 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
         df["test_bool"] = df.apply(
             lambda row: True if row["test_bool"] == "t" else False, axis=1
         )
-        # will need to be modified.
+        # not a temp-table but it's postgresql only
         df.to_sql(
             name=table_name,
             con=postgresql_engine,

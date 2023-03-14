@@ -158,7 +158,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
         table_name = "test_data_" + "".join(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
-    # is this only postgres
+    # not a temp-table but only postgres
     df.to_sql(
         name=table_name,
         con=engine,

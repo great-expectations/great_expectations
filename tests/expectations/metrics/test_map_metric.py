@@ -66,7 +66,7 @@ def sqlite_table_for_unexpected_rows_with_index(
             # use try-except block to ensure we don't keep modifying the database
             # adapted from https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_sql.html
             try:
-                # sqlite only
+                # not a temp-table but sqlite only
                 df.to_sql(
                     name="animal_names",
                     con=sqlite_engine,

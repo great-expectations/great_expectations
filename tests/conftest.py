@@ -2338,7 +2338,6 @@ def test_db_connection_string(tmp_path_factory, test_backends):
         basepath = str(tmp_path_factory.mktemp("db_context"))
         path = os.path.join(basepath, "test.db")  # noqa: PTH118
         engine = sa.create_engine("sqlite:///" + str(path))
-        # this is ok because it is sqlite
         df1.to_sql(name="table_1", con=engine, index=True)
         df2.to_sql(name="table_2", con=engine, index=True, schema="main")
 

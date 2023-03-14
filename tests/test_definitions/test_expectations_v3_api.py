@@ -44,8 +44,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        # test_configuration_files = ["/Users/work/Development/great_expectations/tests/test_definitions/column_map_expectations/expect_column_values_to_be_in_set.json"]
-        # backends = ["postgresql"]
         for c in backends:
             for filename in test_configuration_files:
                 pk_column: bool = False
@@ -413,11 +411,10 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
 @pytest.mark.order(index=0)
 @pytest.mark.integration
 @pytest.mark.slow  # 12.68s
-def test_case_runner_v3_api(test_case, backend=""):
+def test_case_runner_v3_api(test_case):
     if test_case["skip"]:
         pytest.skip()
 
-    print(f"expectation_type: {test_case['expectation_type']}")
     # Note: this should never be done in practice, but we are wiping expectations to reuse batches during testing.
     # test_case["batch"]._initialize_expectations()
     if "parse_strings_as_datetimes" in test_case["test"]["in"]:
@@ -435,9 +432,3 @@ def test_case_runner_v3_api(test_case, backend=""):
             test=test_case["test"],
             pk_column=test_case["pk_column"],
         )
-    # drop table here?
-    # reach into the validator to get the table name
-    # and then drop[ ]
-    # validator will have connection and we can drop it.
-
-    # TODO: see where else to_sql() is used

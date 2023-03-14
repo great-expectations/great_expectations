@@ -324,4 +324,3 @@ def test_case_runner_v2_api(test_case):
     evaluate_json_test_v2_api(
         test_case["dataset"], test_case["expectation_type"], test_case["test"]
     )
-    #

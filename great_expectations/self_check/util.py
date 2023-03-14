@@ -1605,7 +1605,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     )
     _debug("Calling df.to_sql")
     _start = time.time()
-    # this is where it will need to be changed
     df.to_sql(
         name=table_name,
         con=engine,
@@ -2315,7 +2314,6 @@ def build_test_backends_list(  # noqa: C901 - 48
     return test_backends
 
 
-# is this v2 only
 def generate_expectation_tests(  # noqa: C901 - 43
     expectation_type: str,
     test_data_cases: List[ExpectationTestDataCases],
@@ -3209,7 +3207,7 @@ def check_json_test_result(  # noqa: C901 - 52
 
 
 def generate_test_table_name(
-    default_table_name_prefix: str = "will_test_data_",
+    default_table_name_prefix: str = "test_data_",
 ) -> str:
     table_name: str = default_table_name_prefix + "".join(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
@@ -3445,11 +3443,7 @@ def generate_temp_table_for_validator(
         # https://stackoverflow.com/questions/20673986/how-to-create-temporary-table-in-google-bigquery
         stmt = "CREATE OR REPLACE TABLE "
     elif dialect == GXSqlDialect.MSSQL:
-        # Insert "into #{temp_table_name}" in the custom sql query right before the "from" clause
-        # Split is case sensitive so detect case.
-        # Note: transforming query to uppercase/lowercase has unintended consequences (i.e.,
-        # changing column names), so this is not an option!
-        # noinspection PyUnresolvedReferences
+        # TODO: ensure that MSSQL works
         stmt = "CREATE TABLE #"
     elif dialect == GXSqlDialect.DREMIO:
         stmt = "CREATE OR REPLACE VDS "
@@ -3464,11 +3458,11 @@ def generate_temp_table_for_validator(
         )
         stmt = "CREATE TABLE"
     elif dialect == GXSqlDialect.ORACLE:
+        # TODO: ensure oracle works
         # oracle 18c introduced PRIVATE temp tables which are transient objects
         stmt = "CREATE PRIVATE TEMPORARY TABLE"
         # prior to oracle 18c only GLOBAL temp tables existed and only the data is transient
         # this means an empty table will persist after the db session
-        # TODO figure this part out later
     # Please note that Teradata is currently experimental (as of 0.13.43)
     elif dialect == GXSqlDialect.TERADATASQL:
         stmt = "CREATE VOLATILE TABLE "

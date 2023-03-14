@@ -687,7 +687,7 @@ def load_data_into_test_database(
                 print(
                     f"Adding to existing table {table_name} and adding data from {csv_paths}"
                 )
-            # may need to be turned into a temp table function
+            # TODO: convert into temp_table function
             all_dfs_concatenated.to_sql(
                 name=table_name,
                 con=engine,
@@ -728,6 +728,7 @@ def load_data_into_test_bigquery_database_with_bigquery_client(
         raise ValueError(
             "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
         )
+    # will need to turn ino
     client: bigquery.Client = bigquery.Client(project=gcp_project)
     job: bigquery.LoadJob = client.load_table_from_dataframe(
         dataframe, table_id
