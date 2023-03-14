@@ -213,19 +213,19 @@ class _SourceFactories:
         self,
         name: str,
         *,
-        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn] = ...,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
     ) -> PostgresDatasource: ...
     def update_postgres(
         self,
         name: str,
         *,
-        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn] = ...,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
     ) -> PostgresDatasource: ...
     def add_or_update_postgres(
         self,
         name: str,
         *,
-        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn] = ...,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
     ) -> PostgresDatasource: ...
     def delete_postgres(
         self,
@@ -332,19 +332,19 @@ class _SourceFactories:
         self,
         name: str,
         *,
-        connection_string: Union[ConfigStr, SqliteDsn] = ...,
+        connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
     ) -> SqliteDatasource: ...
     def update_sqlite(
         self,
         name: str,
         *,
-        connection_string: Union[ConfigStr, SqliteDsn] = ...,
+        connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
     ) -> SqliteDatasource: ...
     def add_or_update_sqlite(
         self,
         name: str,
         *,
-        connection_string: Union[ConfigStr, SqliteDsn] = ...,
+        connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
     ) -> SqliteDatasource: ...
     def delete_sqlite(
         self,
