@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import logging
 from enum import Enum
 from typing import (
@@ -386,7 +387,12 @@ class _SourceFactories:
             return self.create_add_crud_method(datasource_type)(name=name, **kwargs)
 
         update_datasource.__doc__ = doc_string
-        # TODO: update signature
+        update_datasource.__signature__ = _merge_signatures(
+            update_datasource,
+            datasource_type,
+            exclude={"type", "assets"},
+            return_type=datasource_type,
+        )
         return update_datasource
 
     def create_add_or_update_crud_method(
@@ -401,7 +407,12 @@ class _SourceFactories:
             return self.create_add_crud_method(datasource_type)(name=name, **kwargs)
 
         add_or_update_datasource.__doc__ = doc_string
-        # TODO: update signature
+        add_or_update_datasource.__signature__ = _merge_signatures(
+            add_or_update_datasource,
+            datasource_type,
+            exclude={"type", "assets"},
+            return_type=datasource_type,
+        )
         return add_or_update_datasource
 
     def create_delete_crud_method(
@@ -415,7 +426,7 @@ class _SourceFactories:
             self._data_context._delete_fluent_datasource(datasource_name=name)
 
         delete_datasource.__doc__ = doc_string
-        # TODO: update signature
+        delete_datasource.__signature__ = inspect.signature(delete_datasource)
         return delete_datasource
 
     def __getattr__(self, attr_name: str):
