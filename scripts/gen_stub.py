@@ -89,6 +89,7 @@ def print_datasource_crud_signatures(
     method_name_templates: tuple[str, ...] = (
         "add_{0}",
         "update_{0}",
+        "add_or_update_{0}",
     ),
     default_override: str = "...",
 ):

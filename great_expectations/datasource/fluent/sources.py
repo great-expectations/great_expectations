@@ -406,7 +406,12 @@ class _SourceFactories:
             return self.create_add_crud_method(datasource_type)(name=name, **kwargs)
 
         add_or_update_datasource.__doc__ = doc_string
-        # TODO: update signature
+        add_or_update_datasource.__signature__ = _merge_signatures(
+            add_or_update_datasource,
+            datasource_type,
+            exclude={"type", "assets"},
+            return_type=datasource_type,
+        )
         return add_or_update_datasource
 
     def create_delete_crud_method(
