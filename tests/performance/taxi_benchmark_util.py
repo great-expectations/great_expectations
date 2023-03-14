@@ -358,7 +358,7 @@ def _add_checkpoint(
 
 
 def _add_expectation_configuration(context: AbstractDataContext, suite_name: str):
-    suite = context.add_expectation_suite(expectation_suite_name=suite_name)
+    suite = context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
     suite.add_expectation(
         expectation_configuration=ExpectationConfiguration(
             expectation_type="expect_table_columns_to_match_set",
@@ -432,4 +432,4 @@ def _add_expectation_configuration(context: AbstractDataContext, suite_name: str
 
     # Save the expectation suite or else it doesn't show up in the data docs.
     suite.expectation_suite_name = suite_name
-    context.add_expectation_suite(expectation_suite=suite)
+    context.add_or_update_expectation_suite(expectation_suite=suite)

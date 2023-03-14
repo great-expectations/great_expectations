@@ -3204,7 +3204,7 @@ def check_json_test_result(  # noqa: C901 - 52
 
 
 def generate_test_table_name(
-    default_table_name_prefix: str = "test_data_",
+    default_table_name_prefix: str = "will_test_data_",
 ) -> str:
     table_name: str = default_table_name_prefix + "".join(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]

@@ -104,7 +104,7 @@ stages:
               mkdir -p junit
               pytest -v $(test_script) \
                 $(extra_args) \
-                --bigquery \
+                --snowflake \
                 --junitxml=junit/test-results.xml \
                 --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
                 --ignore=tests/cli --ignore=tests/integration/usage_statistics
@@ -113,3 +113,11 @@ stages:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
               GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+              # snowflake credentials
+              SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
+              SNOWFLAKE_USER: $(SNOWFLAKE_USER)
+              SNOWFLAKE_PW: $(SNOWFLAKE_PW)
+              SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
+              SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
+              SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+              SNOWFLAKE_ROLE: $(SNOWFLAKE_ROLE)
