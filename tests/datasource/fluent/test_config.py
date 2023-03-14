@@ -14,6 +14,7 @@ from ruamel.yaml import YAML
 
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
+from great_expectations.datasource.fluent.constants import _ASSETS_KEY
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
@@ -576,6 +577,28 @@ def test_yaml_file_config_round_trip(
     assert from_yaml_gx_config == re_loaded
 
 
+def test_assets_key_presence(
+    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
+):
+    ds_wo_assets = None
+    ds_with_assets = None
+    for ds in from_yaml_gx_config.datasources.values():
+        if ds.assets:
+            ds_with_assets = ds
+        else:
+            ds_wo_assets = ds
+    assert ds_with_assets, "Need at least one Datasource with assets for this test"
+    assert ds_wo_assets, "Need at least one Datasource without assets for this test"
+
+    dumped_as_dict: dict = yaml.load(from_yaml_gx_config.yaml())
+    print(
+        f"  dict from dumped yaml ->\n\n{pf(dumped_as_dict['fluent_datasources'], depth=2)}"
+    )
+
+    assert _ASSETS_KEY in dumped_as_dict["fluent_datasources"][ds_with_assets.name]
+    assert _ASSETS_KEY not in dumped_as_dict["fluent_datasources"][ds_wo_assets.name]
+
+
 def test_splitters_deserialization(
     inject_engine_lookup_double, from_json_gx_config: GxConfig
 ):
@@ -736,8 +759,7 @@ def test_config_substitution_retains_original_value_on_save(
         "fluent_datasources"
     ]["my_sqlite_ds_w_subs"]
 
-    # FIXME: serialized items should not have name or assets
-    round_tripped.pop("assets")
+    # FIXME: serialized items should not have name
     round_tripped.pop("name")
 
     assert round_tripped == original
