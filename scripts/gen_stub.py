@@ -25,11 +25,19 @@ def _print_method(
     cls: Type,
     method_name: str | None = None,
     default_override: str = "...",
+    return_type_override: str = "",
 ):
     if method_name:
         print(f"def {method_name}(")
 
     signature: Signature = method.__signature__
+    if return_type_override:
+        return_type = return_type_override
+    else:
+        return_type = getattr(
+            signature.return_annotation, "__name__", signature.return_annotation
+        )
+
     for name, param in signature.parameters.items():
         # ignore kwargs
         if param.kind == Parameter.VAR_KEYWORD:
@@ -57,7 +65,7 @@ def _print_method(
                     default = f"'{default}'"
             print(f" = {default}", end="")
         print(",")
-    print(f") -> {cls.__name__}:\n\t...")
+    print(f") -> {return_type}:\n\t...")
 
 
 def print_add_asset_method_signatures(
@@ -81,6 +89,7 @@ def print_add_asset_method_signatures(
             asset_type,
             method_name=method_name,
             default_override=default_override,
+            return_type_override=asset_type.__name__,
         )
 
 
@@ -90,6 +99,7 @@ def print_datasource_crud_signatures(
         "add_{0}",
         "update_{0}",
         "add_or_update_{0}",
+        "delete_{0}",
     ),
     default_override: str = "...",
 ):
