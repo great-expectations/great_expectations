@@ -129,7 +129,7 @@
           "x": "NUMBER",
           "y": "STRING",
           "z": "NUMBER",
-          "ts": "TIMESTAMP",
+          "ts": "TIMESTAMP_NTZ",
           "alpha": "STRING",
           "numeric": "NUMBER"
         }
@@ -155,9 +155,52 @@
           "title": "basic_negative_now_test_pandas_spark_select_sql",
           "include_in_gallery": true,
           "exact_match_out": false,
-          "only_for": ["pandas", "spark", "postgresql", "mysql", "mssql"],
+          "only_for": [
+            "pandas",
+            "spark",
+            "postgresql",
+            "mysql",
+            "mssql"
+          ],
           "out": {
-            "unexpected_index_list": [{"ts": "1970-01-01T12:00:01", "pk_index": 0}, {"ts": "1999-12-31T12:00:01", "pk_index": 1}, {"ts": "2000-01-01T12:00:01", "pk_index": 2}, {"ts": "2000-02-01T12:00:01", "pk_index": 3}, {"ts": "2000-03-01T12:00:01", "pk_index": 4}, {"ts": "2000-04-01T12:00:01", "pk_index": 5}, {"ts": "2000-05-01T12:00:01", "pk_index": 6}, {"ts": "2000-06-01T12:00:01", "pk_index": 7}, {"ts": "2001-01-01T12:00:01", "pk_index": 9}],
+            "unexpected_index_list": [
+              {
+                "ts": "1970-01-01T12:00:01",
+                "pk_index": 0
+              },
+              {
+                "ts": "1999-12-31T12:00:01",
+                "pk_index": 1
+              },
+              {
+                "ts": "2000-01-01T12:00:01",
+                "pk_index": 2
+              },
+              {
+                "ts": "2000-02-01T12:00:01",
+                "pk_index": 3
+              },
+              {
+                "ts": "2000-03-01T12:00:01",
+                "pk_index": 4
+              },
+              {
+                "ts": "2000-04-01T12:00:01",
+                "pk_index": 5
+              },
+              {
+                "ts": "2000-05-01T12:00:01",
+                "pk_index": 6
+              },
+              {
+                "ts": "2000-06-01T12:00:01",
+                "pk_index": 7
+              },
+              {
+                "ts": "2001-01-01T12:00:01",
+                "pk_index": 9
+              }
+            ],
             "success": false
           },
           "in": {
@@ -180,7 +223,44 @@
             "bigquery"
           ],
           "out": {
-            "unexpected_index_list": [{"pk_index": 0, "ts": "1970-01-01 12:00:01"}, {"pk_index": 1, "ts": "1999-12-31 12:00:01"}, {"pk_index": 2, "ts": "2000-01-01 12:00:01"}, {"pk_index": 3, "ts": "2000-02-01 12:00:01"}, {"pk_index": 4, "ts": "2000-03-01 12:00:01"}, {"pk_index": 5, "ts": "2000-04-01 12:00:01"}, {"pk_index": 6, "ts": "2000-05-01 12:00:01"}, {"pk_index": 7, "ts": "2000-06-01 12:00:01"}, {"pk_index": 9, "ts": "2001-01-01 12:00:01"}],
+            "unexpected_index_list": [
+              {
+                "pk_index": 0,
+                "ts": "1970-01-01 12:00:01"
+              },
+              {
+                "pk_index": 1,
+                "ts": "1999-12-31 12:00:01"
+              },
+              {
+                "pk_index": 2,
+                "ts": "2000-01-01 12:00:01"
+              },
+              {
+                "pk_index": 3,
+                "ts": "2000-02-01 12:00:01"
+              },
+              {
+                "pk_index": 4,
+                "ts": "2000-03-01 12:00:01"
+              },
+              {
+                "pk_index": 5,
+                "ts": "2000-04-01 12:00:01"
+              },
+              {
+                "pk_index": 6,
+                "ts": "2000-05-01 12:00:01"
+              },
+              {
+                "pk_index": 7,
+                "ts": "2000-06-01 12:00:01"
+              },
+              {
+                "pk_index": 9,
+                "ts": "2001-01-01 12:00:01"
+              }
+            ],
             "success": false
           },
           "in": {
@@ -208,9 +288,52 @@
         {
           "title": "basic_negative_now_timedelta_test_pandas_spark_select_sql",
           "exact_match_out": false,
-          "only_for": ["pandas", "spark","postgresql", "mssql", "mysql"],
+          "only_for": [
+            "pandas",
+            "spark",
+            "postgresql",
+            "mssql",
+            "mysql"
+          ],
           "out": {
-            "unexpected_index_list": [{"ts": "1970-01-01T12:00:01", "pk_index": 0}, {"ts": "1999-12-31T12:00:01", "pk_index": 1}, {"ts": "2000-01-01T12:00:01", "pk_index": 2}, {"ts": "2000-02-01T12:00:01", "pk_index": 3}, {"ts": "2000-03-01T12:00:01", "pk_index": 4}, {"ts": "2000-04-01T12:00:01", "pk_index": 5}, {"ts": "2000-05-01T12:00:01", "pk_index": 6}, {"ts": "2000-06-01T12:00:01", "pk_index": 7}, {"ts": "2001-01-01T12:00:01", "pk_index": 9}],
+            "unexpected_index_list": [
+              {
+                "ts": "1970-01-01T12:00:01",
+                "pk_index": 0
+              },
+              {
+                "ts": "1999-12-31T12:00:01",
+                "pk_index": 1
+              },
+              {
+                "ts": "2000-01-01T12:00:01",
+                "pk_index": 2
+              },
+              {
+                "ts": "2000-02-01T12:00:01",
+                "pk_index": 3
+              },
+              {
+                "ts": "2000-03-01T12:00:01",
+                "pk_index": 4
+              },
+              {
+                "ts": "2000-04-01T12:00:01",
+                "pk_index": 5
+              },
+              {
+                "ts": "2000-05-01T12:00:01",
+                "pk_index": 6
+              },
+              {
+                "ts": "2000-06-01T12:00:01",
+                "pk_index": 7
+              },
+              {
+                "ts": "2001-01-01T12:00:01",
+                "pk_index": 9
+              }
+            ],
             "success": false
           },
           "in": {
@@ -232,7 +355,44 @@
             "bigquery"
           ],
           "out": {
-            "unexpected_index_list": [{"pk_index": 0, "ts": "1970-01-01 12:00:01"}, {"pk_index": 1, "ts": "1999-12-31 12:00:01"}, {"pk_index": 2, "ts": "2000-01-01 12:00:01"}, {"pk_index": 3, "ts": "2000-02-01 12:00:01"}, {"pk_index": 4, "ts": "2000-03-01 12:00:01"}, {"pk_index": 5, "ts": "2000-04-01 12:00:01"}, {"pk_index": 6, "ts": "2000-05-01 12:00:01"}, {"pk_index": 7, "ts": "2000-06-01 12:00:01"}, {"pk_index": 9, "ts": "2001-01-01 12:00:01"}],
+            "unexpected_index_list": [
+              {
+                "pk_index": 0,
+                "ts": "1970-01-01 12:00:01"
+              },
+              {
+                "pk_index": 1,
+                "ts": "1999-12-31 12:00:01"
+              },
+              {
+                "pk_index": 2,
+                "ts": "2000-01-01 12:00:01"
+              },
+              {
+                "pk_index": 3,
+                "ts": "2000-02-01 12:00:01"
+              },
+              {
+                "pk_index": 4,
+                "ts": "2000-03-01 12:00:01"
+              },
+              {
+                "pk_index": 5,
+                "ts": "2000-04-01 12:00:01"
+              },
+              {
+                "pk_index": 6,
+                "ts": "2000-05-01 12:00:01"
+              },
+              {
+                "pk_index": 7,
+                "ts": "2000-06-01 12:00:01"
+              },
+              {
+                "pk_index": 9,
+                "ts": "2001-01-01 12:00:01"
+              }
+            ],
             "success": false
           },
           "in": {
@@ -261,10 +421,53 @@
         {
           "title": "basic_negative_datetime_test_pandas_spark_select_sql",
           "exact_match_out": false,
-          "only_for": ["pandas", "spark", "postgresql", "mssql", "mysql"],
+          "only_for": [
+            "pandas",
+            "spark",
+            "postgresql",
+            "mssql",
+            "mysql"
+          ],
           "out": {
             "success": false,
-            "unexpected_index_list": [{"ts": "1970-01-01T12:00:01", "pk_index": 0}, {"ts": "1999-12-31T12:00:01", "pk_index": 1}, {"ts": "2000-01-01T12:00:01", "pk_index": 2}, {"ts": "2000-02-01T12:00:01", "pk_index": 3}, {"ts": "2000-03-01T12:00:01", "pk_index": 4}, {"ts": "2000-04-01T12:00:01", "pk_index": 5}, {"ts": "2000-05-01T12:00:01", "pk_index": 6}, {"ts": "2000-06-01T12:00:01", "pk_index": 7}, {"ts": "2001-01-01T12:00:01", "pk_index": 9}]
+            "unexpected_index_list": [
+              {
+                "ts": "1970-01-01T12:00:01",
+                "pk_index": 0
+              },
+              {
+                "ts": "1999-12-31T12:00:01",
+                "pk_index": 1
+              },
+              {
+                "ts": "2000-01-01T12:00:01",
+                "pk_index": 2
+              },
+              {
+                "ts": "2000-02-01T12:00:01",
+                "pk_index": 3
+              },
+              {
+                "ts": "2000-03-01T12:00:01",
+                "pk_index": 4
+              },
+              {
+                "ts": "2000-04-01T12:00:01",
+                "pk_index": 5
+              },
+              {
+                "ts": "2000-05-01T12:00:01",
+                "pk_index": 6
+              },
+              {
+                "ts": "2000-06-01T12:00:01",
+                "pk_index": 7
+              },
+              {
+                "ts": "2001-01-01T12:00:01",
+                "pk_index": 9
+              }
+            ]
           },
           "in": {
             "column": "ts",
@@ -272,7 +475,8 @@
               "$PARAMETER": "datetime(1969, 1, 1)"
             }
           }
-        }, {
+        },
+        {
           "title": "basic_negative_datetime_test_other_sql",
           "exact_match_out": false,
           "suppress_test_for": [
@@ -285,7 +489,44 @@
           ],
           "out": {
             "success": false,
-            "unexpected_index_list": [{"pk_index": 0, "ts": "1970-01-01 12:00:01"}, {"pk_index": 1, "ts": "1999-12-31 12:00:01"}, {"pk_index": 2, "ts": "2000-01-01 12:00:01"}, {"pk_index": 3, "ts": "2000-02-01 12:00:01"}, {"pk_index": 4, "ts": "2000-03-01 12:00:01"}, {"pk_index": 5, "ts": "2000-04-01 12:00:01"}, {"pk_index": 6, "ts": "2000-05-01 12:00:01"}, {"pk_index": 7, "ts": "2000-06-01 12:00:01"}, {"pk_index": 9, "ts": "2001-01-01 12:00:01"}]
+            "unexpected_index_list": [
+              {
+                "pk_index": 0,
+                "ts": "1970-01-01 12:00:01"
+              },
+              {
+                "pk_index": 1,
+                "ts": "1999-12-31 12:00:01"
+              },
+              {
+                "pk_index": 2,
+                "ts": "2000-01-01 12:00:01"
+              },
+              {
+                "pk_index": 3,
+                "ts": "2000-02-01 12:00:01"
+              },
+              {
+                "pk_index": 4,
+                "ts": "2000-03-01 12:00:01"
+              },
+              {
+                "pk_index": 5,
+                "ts": "2000-04-01 12:00:01"
+              },
+              {
+                "pk_index": 6,
+                "ts": "2000-05-01 12:00:01"
+              },
+              {
+                "pk_index": 7,
+                "ts": "2000-06-01 12:00:01"
+              },
+              {
+                "pk_index": 9,
+                "ts": "2001-01-01 12:00:01"
+              }
+            ]
           },
           "in": {
             "column": "ts",
