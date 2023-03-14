@@ -315,6 +315,12 @@ filterwarnings = [
     # Example Actual Warning: (found in test_expect_queried_column_value_frequency_to_meet_threshold_override_query_sqlite)
     # UserWarning: `row_condition` is an experimental feature. Combining this functionality with QueryExpectations may result in unexpected behavior.
     'ignore: `row_condition` is an experimental feature. Combining this functionality with QueryExpectations may result in unexpected behavior.:UserWarning',
+    # Example Actual Warning: (found in test_render_types_module_deprecation_warning)
+    # DeprecationWarning: Importing the class CollapseContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18. Please import class CollapseContent from great_expectations.render.
+    'ignore: Importing the class CollapseContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18.:DeprecationWarning',
+    # Example Actual Warning: (found in test_notebook_execution_rule_based_profiler_with_pandas_backend)
+    # DeprecationWarning: save_profiler is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_profiler or add_or_update_profiler instead.
+    'ignore: save_profiler is deprecated as of v0.15.48 and will be removed in v0.18.:DeprecationWarning',
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
@@ -323,9 +329,9 @@ filterwarnings = [
     # python
     # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
     'ignore: iteritems is deprecated and will be removed in a future version. Use .items instead.:FutureWarning',
-    # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide
-    # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
-    'ignore: divide by zero encountered in divide:RuntimeWarning',
+    # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
+    # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than, test_case_runner_v2_api
+    'ignore: divide by zero encountered:RuntimeWarning',
     # pandas
     # Example Actual Warning: FutureWarning: The behavior of `series[i:j]` with an integer-dtype index is deprecated. In a future version, this will be treated as *label-based* indexing, consistent with e.g. `series[i]` lookups. To retain the old behavior, use `series.iloc[i:j]`. To get the future behavior, use `series.loc[i:j]`.
     # Found when running pytest tests/test_definitions/test_expectations_v3_api.py
@@ -339,6 +345,8 @@ filterwarnings = [
     # ruamel
     'ignore:\nsafe_load will be removed:PendingDeprecationWarning',
     'ignore:\nload will be removed:PendingDeprecationWarning',
+    # Warning found in tests/integration/profiling/rule_based_profiler/test_profiler_basic_workflows.py, among other places.
+    'ignore:\ndump will be removed:PendingDeprecationWarning',
     # pyarrow
     # Example Actual Warning:
     # UserWarning: You have an incompatible version of 'pyarrow' installed (11.0.0), please install a version that adheres to: 'pyarrow<10.1.0,>=10.0.1; extra == "pandas"'
@@ -358,12 +366,20 @@ filterwarnings = [
     # Example Actual Warning:
     # pytest.PytestUnraisableExceptionWarning: Exception ignored in: <socket.socket fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6>
     "ignore: Exception ignored in:pytest.PytestUnraisableExceptionWarning",
+
     # SQLAlchemy
     # SQLAlchemy warnings. These warnings should be addressed.
     'ignore: Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated; please call .subquery\(\) on any Core select or ORM Query object in order to produce a subquery object.:sqlalchemy.exc.SADeprecationWarning',
     # Example Actual Warning: (from test_table_column_reflection_fallback)
     # sqlalchemy.exc.SADeprecationWarning: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.
     'ignore: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.:sqlalchemy.exc.SADeprecationWarning',
+    # Example Actual Warning: (from mssql tests, tests/test_definitions/test_expectations_v2_api.py)
+    # sqlalchemy.exc.SAWarning: SELECT statement has a cartesian product between FROM element(s) "UnexpectedCountSubquery" and FROM element "ElementAndNullCountsSubquery".  Apply join condition(s) between each element to resolve.
+    'ignore: SELECT statement has a cartesian product between FROM element\(s\):sqlalchemy.exc.SAWarning',
+    # Example Actual Warning: (from trino tests, test_table_column_reflection_fallback)
+    # sqlalchemy.exc.SADeprecationWarning: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.
+    'ignore: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.:sqlalchemy.exc.SADeprecationWarning',
+
     # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
     # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
     'ignore: The legacy calling style of select\(\) is deprecated and will be removed in SQLAlchemy 2.0.  Please use the new calling style described at select\(\).:sqlalchemy.exc.RemovedIn20Warning',
