@@ -734,6 +734,16 @@ class DBFSPath:
     """
 
     @staticmethod
+    def convert_to_file_semantics_version(path: str) -> str:
+        if re.search(r"^dbfs:", path):
+            return path.replace("dbfs:", "/dbfs", 1)
+
+        if re.search("^/dbfs", path):
+            return path
+
+        raise ValueError("Path should start with either /dbfs or dbfs:")
+
+    @staticmethod
     def convert_to_protocol_version(path: str) -> str:
         if re.search(r"^\/dbfs", path):
             candidate = path.replace("/dbfs", "dbfs:", 1)
@@ -748,16 +758,6 @@ class DBFSPath:
                 # Must add trailing slash
                 return "dbfs:/"
 
-            return path
-
-        raise ValueError("Path should start with either /dbfs or dbfs:")
-
-    @staticmethod
-    def convert_to_file_semantics_version(path: str) -> str:
-        if re.search(r"^dbfs:", path):
-            return path.replace("dbfs:", "/dbfs", 1)
-
-        if re.search("^/dbfs", path):
             return path
 
         raise ValueError("Path should start with either /dbfs or dbfs:")
