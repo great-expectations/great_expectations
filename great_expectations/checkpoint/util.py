@@ -518,7 +518,7 @@ def send_sns_notification(
     sns = session.client("sns")
     try:
         response = sns.publish(**message_dict)
-    except sns.exceptions.InvalidParameterException as err:
+    except sns.exceptions.InvalidParameterException:
         logger.error(f"Received invalid for message: {validation_results}")
     else:
         return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"
