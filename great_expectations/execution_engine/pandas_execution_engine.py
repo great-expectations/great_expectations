@@ -69,7 +69,7 @@ try:
 except ImportError:
     storage = None
     service_account = None
-    GoogleAPIError = None
+    GoogleAPIError = None  # type: ignore[assignment,misc] # assigning None to a type
     DefaultCredentialsError = None
     logger.debug(
         "Unable to load GCS connection object; install optional google dependency for support"
