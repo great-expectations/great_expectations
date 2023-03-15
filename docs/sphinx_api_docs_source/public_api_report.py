@@ -262,7 +262,7 @@ class CodeParser:
     @staticmethod
     def get_all_dynamic_class_method_and_function_definitions() -> Set[Definition]:
         _DYNAMIC_DOCS_DEFINITIONS_PATH = pathlib.Path(
-            ".", "dynamic_docs_callables.pickle"
+            ".", "dynamic_docs_definitions.pickle"
         )
         dynamic_callables: list[Callable] = []
         with open(_DYNAMIC_DOCS_DEFINITIONS_PATH, "rb") as f:

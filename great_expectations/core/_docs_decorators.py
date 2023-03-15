@@ -17,7 +17,7 @@ WHITELISTED_TAG = "--Public API--"
 _FuncT = TypeVar("_FuncT", bound=Callable[..., Any])
 
 _DYNAMIC_DOCS_DEFINITIONS_PATH = pathlib.Path(
-    ".", ".", ".", "docs", "sphinx_api_docs_source", "dynamic_docs_callables.pickle"
+    ".", ".", ".", "docs", "sphinx_api_docs_source", "dynamic_docs_definitions.pickle"
 )
 
 
