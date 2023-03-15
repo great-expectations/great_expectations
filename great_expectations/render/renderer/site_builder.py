@@ -425,7 +425,7 @@ class DefaultSiteSectionBuilder:
         for resource_key in source_store_keys:
             # if no resource_identifiers are passed, the section
             # builder will build
-            # a page for every keys in its source store.
+            # a page for every key in its source store.
             # if the caller did pass resource_identifiers, the section builder
             # will build pages only for the specified resources
             if resource_identifiers and resource_key not in resource_identifiers:
