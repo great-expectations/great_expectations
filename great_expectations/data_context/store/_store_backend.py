@@ -166,7 +166,8 @@ class StoreBackend(metaclass=ABCMeta):
         self._validate_key(key)
         return self._has_key(key)
 
-    def _url_path_escape_special_characters(self, path: str) -> str:
+    @staticmethod
+    def _url_path_escape_special_characters(path: str) -> str:
         # will replace special characters with %xx escape
         # this is meant to be used only on the path section of a URL
         # https://docs.python.org/3/library/urllib.parse.html#url-quoting
