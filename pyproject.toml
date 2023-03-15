@@ -321,6 +321,12 @@ filterwarnings = [
     # Example Actual Warning: (found in test_notebook_execution_rule_based_profiler_with_pandas_backend)
     # DeprecationWarning: save_profiler is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_profiler or add_or_update_profiler instead.
     'ignore: save_profiler is deprecated as of v0.15.48 and will be removed in v0.18.:DeprecationWarning',
+    # Example Actual Warning: (found in test_render_types_module_deprecation_warning)
+    # DeprecationWarning: Importing the class RenderedContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18. Please import class RenderedContent from great_expectations.render.
+    'ignore: Importing the class RenderedContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18.:DeprecationWarning',
+    # Example Actual Warning: (found in test_golden_path_sql_datasource_configuration)
+    # DeprecationWarning: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use get_batch_list instead.
+    'ignore: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16.:DeprecationWarning',
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
@@ -336,10 +342,24 @@ filterwarnings = [
     # Example Actual Warning: FutureWarning: The behavior of `series[i:j]` with an integer-dtype index is deprecated. In a future version, this will be treated as *label-based* indexing, consistent with e.g. `series[i]` lookups. To retain the old behavior, use `series.iloc[i:j]`. To get the future behavior, use `series.loc[i:j]`.
     # Found when running pytest tests/test_definitions/test_expectations_v3_api.py
     'ignore: The behavior of `series:FutureWarning',
+    # Example Actual Warning: UserWarning: Unknown extension is not supported and will be removed
+    # Found when running TestIO.test_read_excel
+    'ignore: Unknown extension is not supported and will be removed:UserWarning',
+    # Example Actual Warning: DeprecationWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+    # Found when running test_value_counts_metric_spark
+    "ignore: The default dtype for empty Series will be 'object' instead of 'float64' in a future version.:DeprecationWarning",
+    # numpy
+    # Example Actual Warning: RuntimeWarning: Mean of empty slice.
+    # Found when running test_case_runner_v3_api[spark/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
+    'ignore: Mean of empty slice.:RuntimeWarning',
+    # spark
+    # Example Actual Warning: FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
+    # Found when running test_case_runner_v2_api[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:basic_positive_test_without_nulls]
+    'ignore: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate\(\) instead.:FutureWarning',
     # pymysql
     # Example Actual Warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
     # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
-    'ignore: Truncated incorrect DOUBLE value:Warning',
+    'ignore: \(1292, "Truncated incorrect DOUBLE value:Warning',
     # urllib3
     "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
     # ruamel
@@ -347,6 +367,8 @@ filterwarnings = [
     'ignore:\nload will be removed:PendingDeprecationWarning',
     # Warning found in tests/integration/profiling/rule_based_profiler/test_profiler_basic_workflows.py, among other places.
     'ignore:\ndump will be removed:PendingDeprecationWarning',
+    # Warning found in tests/integration/profiling/rule_based_profiler/test_profiler_basic_workflows.py
+    'ignore:\ndump_all will be removed:PendingDeprecationWarning',
     # pyarrow
     # Example Actual Warning:
     # UserWarning: You have an incompatible version of 'pyarrow' installed (11.0.0), please install a version that adheres to: 'pyarrow<10.1.0,>=10.0.1; extra == "pandas"'
