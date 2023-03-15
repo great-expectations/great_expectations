@@ -12,7 +12,6 @@ import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
 <!-- ## Prerequisites -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import DetailsList from '/docs/components/_details_list.jsx'
 
 <!-- ### Import GX and instantiate a Data Context -->
 import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
@@ -32,7 +31,7 @@ In this guide we will demonstrate the ways in which Batches can be organized in 
 <Prerequisites>
 
 - A working installation of Great Expectations
-- A Datasource that connects to a container with source data files
+- A Datasource that connects to a location with source data files
 - A passion for data quality
 
 </Prerequisites>

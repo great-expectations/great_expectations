@@ -1,4 +1,3 @@
-Now that you have connected to your data, you may want to look into:
 - [How to configure a non-SQL Data Asset to include multiple files as Batches](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_include_multiple_files_in_a_non_sql_data_asset.md)
 - [How to configure a non-SQL Data Asset to return a sampling of its full data](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_configure_a_non_sql_data_asset_to_return_sample_data.md)
 - [How to request a Batch of data from a Data Asset in a Datasource](docs/guides/connecting_to_your_data/fluent/data_assets/how_to_include_multiple_files_in_a_non_sql_data_asset.md)

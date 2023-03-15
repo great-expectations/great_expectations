@@ -205,8 +205,7 @@ module.exports = {
               value: '<h4>General SQL Datasources</h4>',
               defaultStyle: true
             },
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table',
-            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query',
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data',
             {
               type: 'html',
               value: '<h4>Specific SQL dialects</h4>',
@@ -220,8 +219,26 @@ module.exports = {
           type: 'category',
           label: 'Working with Data Assets',
           items: [
+            {
+              type: 'html',
+              value: '<h4>All Data Assets</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset',
+            {
+              type: 'html',
+              value: '<h4>Filesystem Data Assets</h4>',
+              defaultStyle: true
+            },
             'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset',
-            'guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset'
+            {
+              type: 'html',
+              value: '<h4>SQL Data Assets</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table',
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query',
+            'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset'
           ]
         },
         {
