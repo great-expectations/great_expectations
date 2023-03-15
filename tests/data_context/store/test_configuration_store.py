@@ -347,7 +347,7 @@ def test_determine_key_raises_error_with_conflicting_args(
     with pytest.raises(AssertionError) as e:
         ConfigurationStore(store_name="test")._determine_key(name=name, id=id)
 
-    assert "Must provide either name or ge_cloud_id" in str(e.value)
+    assert "Must provide either name or id" in str(e.value)
 
 
 @pytest.mark.unit
