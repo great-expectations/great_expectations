@@ -136,7 +136,6 @@ stages:
               pip freeze > pip-freeze.txt
               mkdir -p junit
               pytest -v tests/test_definitions/test_expectations_v3_api.py \
-                $(extra_args) \
                 --snowflake \
                 --junitxml=junit/test-results.xml \
                 --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
