@@ -32,7 +32,7 @@
         "ts": "TimestampType"
       },
       "snowflake": {
-        "ts": "TIMESTAMP_NTZ"
+        "ts": "TIMESTAMP_TZ"
       }
     },
     "tests": [

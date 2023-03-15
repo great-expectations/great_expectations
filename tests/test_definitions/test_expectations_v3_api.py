@@ -21,6 +21,7 @@ from great_expectations.self_check.util import (
     mssqlDialect,
     mysqlDialect,
     postgresqlDialect,
+    snowflakeDialect,
     sqliteDialect,
     trinoDialect,
 )
@@ -41,7 +42,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
     for expectation_category in expectation_dirs:
-
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
@@ -151,6 +151,15 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     and isinstance(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
                                         mysqlDialect,
+                                    )
+                                ):
+                                    generate_test = True
+                                elif (
+                                    "snowflake" in only_for
+                                    and snowflakeDialect is not None
+                                    and isinstance(
+                                        validator_with_data.active_batch_data.sql_engine_dialect,
+                                        snowflakeDialect.SnowflakeDialect,
                                     )
                                 ):
                                     generate_test = True
@@ -299,6 +308,19 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     and isinstance(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
                                         mssqlDialect,
+                                    )
+                                )
+                                or (
+                                    "snowflake" in suppress_test_for
+                                    and snowflakeDialect.SnowflakeDialect is not None
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.active_batch_data,
+                                        SqlAlchemyBatchData,
+                                    )
+                                    and isinstance(
+                                        validator_with_data.active_batch_data.sql_engine_dialect,
+                                        snowflakeDialect.SnowflakeDialect,
                                     )
                                 )
                                 or (
