@@ -59,7 +59,7 @@ import pathlib
 import re
 import sys
 from dataclasses import dataclass
-from typing import Callable, ClassVar, List, Optional, Set, Union, cast
+from typing import List, Optional, Set, Union, cast
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -489,8 +489,6 @@ def _get_import_names(code: str) -> List[str]:
 class PublicAPIChecker:
     """Check if functions, methods and classes are marked part of the PublicAPI."""
 
-    dynamic_definitions: ClassVar[set[Definition]] = set()
-
     def __init__(
         self,
         code_parser: CodeParser,
@@ -507,7 +505,16 @@ class PublicAPIChecker:
             if self.is_definition_marked_public_api(definition):
                 static_definitions.add(definition)
 
-        return static_definitions | self.dynamic_definitions
+        from great_expectations.core._docs_decorators import _DYNAMIC_DEFINITIONS
+
+        dynamic_definitions: set[Definition] = {
+            Definition(
+                name=name, filepath=pathlib.Path(), ast_definition=ast_definition
+            )
+            for name, ast_definition in _DYNAMIC_DEFINITIONS.items()
+        }
+
+        return static_definitions | dynamic_definitions
 
     def get_module_level_function_public_api_definitions(self) -> Set[Definition]:
         """Get module level function definitions that are marked with the public api decorator."""

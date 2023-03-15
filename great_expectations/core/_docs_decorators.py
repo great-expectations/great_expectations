@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import pathlib
+import ast
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
-
-from docs.sphinx_api_docs_source.public_api_report import Definition, PublicAPIChecker
 
 try:
     import docstring_parser
@@ -16,6 +14,10 @@ except ImportError:
 WHITELISTED_TAG = "--Public API--"
 
 _FuncT = TypeVar("_FuncT", bound=Callable[..., Any])
+
+_DYNAMIC_DEFINITIONS: dict[
+    str, ast.FunctionDef | ast.ClassDef | ast.AsyncFunctionDef
+] = {}
 
 
 def public_api(func: _FuncT, is_dynamic: bool = False) -> _FuncT:
@@ -35,9 +37,7 @@ def public_api(func: _FuncT, is_dynamic: bool = False) -> _FuncT:
     func.__doc__ = WHITELISTED_TAG + existing_docstring
 
     if is_dynamic:
-        PublicAPIChecker.dynamic_definitions.add(
-            Definition(name=func.__name__, filepath=pathlib.Path(), ast_definition=func)
-        )
+        _DYNAMIC_DEFINITIONS[func.__name__] = func
 
     return func
 
