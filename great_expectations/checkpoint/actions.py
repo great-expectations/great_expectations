@@ -294,10 +294,10 @@ class SlackNotificationAction(ValidationAction):
         ]
         if (
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
-            and validation_result_suite_identifier.cloud_id
+            and validation_result_suite_identifier.id
         ):
             cloud_base_url: Final[str] = CLOUD_APP_DEFAULT_BASE_URL
-            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.cloud_id}"
+            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.id}"
             validation_result_urls.append(validation_result_url)
 
         if (
@@ -891,11 +891,11 @@ class StoreValidationResultAction(ValidationAction):
 
         checkpoint_ge_cloud_id = None
         if self._using_cloud_context and checkpoint_identifier:
-            checkpoint_ge_cloud_id = checkpoint_identifier.cloud_id
+            checkpoint_ge_cloud_id = checkpoint_identifier.id
 
         expectation_suite_ge_cloud_id = None
         if self._using_cloud_context and expectation_suite_identifier:
-            expectation_suite_ge_cloud_id = expectation_suite_identifier.cloud_id
+            expectation_suite_ge_cloud_id = expectation_suite_identifier.id
 
         return_val = self.target_store.set(
             validation_result_suite_identifier,
@@ -905,8 +905,8 @@ class StoreValidationResultAction(ValidationAction):
         )
         if self._using_cloud_context:
             return_val: GXCloudResourceRef
-            new_ge_cloud_id = return_val.cloud_id
-            validation_result_suite_identifier.cloud_id = new_ge_cloud_id
+            new_ge_cloud_id = return_val.id
+            validation_result_suite_identifier.id = new_ge_cloud_id
 
 
 @public_api
