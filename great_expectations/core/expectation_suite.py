@@ -738,7 +738,9 @@ class ExpectationSuite(SerializableDictDot):
 
         # noqa: DAR402
         """
-        self._validate_expectation_configuration(expectation_configuration)
+        self._validate_expectation_configuration_before_adding(
+            expectation_configuration
+        )
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
             send_usage_event=send_usage_event,
@@ -746,11 +748,11 @@ class ExpectationSuite(SerializableDictDot):
             overwrite_existing=overwrite_existing,
         )
 
-    def _validate_expectation_configuration(
+    def _validate_expectation_configuration_before_adding(
         self, expectation_configuration: ExpectationConfiguration
     ):
-        class_ = get_expectation_impl(expectation_configuration.expectation_type)
         try:
+            class_ = get_expectation_impl(expectation_configuration.expectation_type)
             expectation = class_()
             expectation.validate_configuration(expectation_configuration)
         except (
