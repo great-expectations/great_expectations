@@ -33,7 +33,6 @@ from IPython import get_ipython
 from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -44,14 +43,17 @@ from great_expectations.types.base import SerializableDotDict
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
 
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
+
 logger = logging.getLogger(__name__)
 
 try:
     import pyspark
     from pyspark.sql import SparkSession  # noqa: F401
 except ImportError:
-    pyspark = None
-    SparkSession = None
+    pyspark = None  # type: ignore[assignment]
+    SparkSession = None  # type: ignore[assignment,misc]
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -59,7 +61,7 @@ except ImportError:
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None
+    StructType = None  # type: ignore[assignment,misc]
 
 
 try:
@@ -101,8 +103,8 @@ SCHEMAS = {
 
 if TYPE_CHECKING:
     import numpy.typing as npt
+    from pyspark.sql import SparkSession
     from ruamel.yaml.comments import CommentedMap
-
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
@@ -401,15 +403,12 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return data.to_json_dict()
 
     # PySpark schema serialization
-    if StructType is not None:
-        if isinstance(data, StructType):
-            return dict(data.jsonValue())
+    if StructType is not None and isinstance(data, StructType):
+        return dict(data.jsonValue())
 
-    else:
-        raise TypeError(
-            f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
-        )
-    return None
+    raise TypeError(
+        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+    )
 
 
 def ensure_json_serializable(data):  # noqa: C901 - complexity 21
@@ -832,7 +831,7 @@ def get_or_create_spark_application(
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
-) -> SparkSession:
+) -> SparkSession | None:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.

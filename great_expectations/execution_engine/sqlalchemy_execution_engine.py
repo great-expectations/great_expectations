@@ -44,6 +44,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
+from great_expectations.optional_imports import sqlalchemy_version_check
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
@@ -89,6 +90,8 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+
+    sqlalchemy_version_check(sa.__version__)
 
     make_url = import_make_url()
 except ImportError:
@@ -210,7 +213,7 @@ except ImportError:
     trinotypes = None
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa  # noqa: TCH004
+    import sqlalchemy as sa
     from sqlalchemy.engine import Engine as SaEngine
 
 

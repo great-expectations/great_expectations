@@ -6,6 +6,7 @@ import logging
 import warnings
 from functools import reduce
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -79,19 +80,22 @@ try:
     from pyspark.sql import DataFrame, Row, SparkSession
     from pyspark.sql.readwriter import DataFrameReader
 except ImportError:
-    pyspark = None
-    SparkContext = None
-    SparkSession = None
-    Row = None
-    DataFrame = None
-    DataFrameReader = None
-    F = None
+    pyspark = None  # type: ignore[assignment]
+    SparkContext = None  # type: ignore[assignment,misc]
+    SparkSession = None  # type: ignore[assignment,misc]
+    Row = None  # type: ignore[assignment,misc]
+    DataFrame = None  # type: ignore[assignment,misc]
+    DataFrameReader = None  # type: ignore[assignment,misc]
+    F = None  # type: ignore[assignment]
     # noinspection SpellCheckingInspection
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
 
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
+
+if TYPE_CHECKING:
+    from pyspark.sql import DataFrame
 
 
 # noinspection SpellCheckingInspection
@@ -255,7 +259,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
-    def load_batch_data(
+    def load_batch_data(  # type: ignore[override]
         self, batch_id: str, batch_data: Union[SparkDFBatchData, DataFrame]
     ) -> None:
         if isinstance(batch_data, DataFrame):

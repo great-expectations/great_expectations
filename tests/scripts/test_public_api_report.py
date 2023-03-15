@@ -3,8 +3,7 @@ import pathlib
 from typing import List, Union
 
 import pytest
-
-from scripts.public_api_report import (
+from docs.sphinx_api_docs_source.public_api_report import (
     CodeParser,
     CodeReferenceFilter,
     Definition,
@@ -15,6 +14,7 @@ from scripts.public_api_report import (
     PublicAPIReport,
     _get_import_names,
     get_shortest_dotted_path,
+    parse_docs_contents_for_class_names,
 )
 
 
@@ -51,6 +51,20 @@ example_public_api_module_level_function()
 epub = ExamplePublicAPIClass()
 
 assert d
+
+some_yaml_contents = \"\"\"
+name: {datasource_name}
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+\"\"\"
+
 """
 
 
@@ -120,6 +134,33 @@ class ExamplePublicAPIClass:
 
 
 @pytest.fixture
+def sample_markdown_doc_with_yaml() -> str:
+    return """# Title
+
+Content.
+
+More content.
+
+Some yaml:
+
+yaml_contents = \"\"\"
+name: {datasource_name}
+class_name: Datasource
+execution_engine:
+  class_name: SqlAlchemyExecutionEngine
+  credentials:
+    host: {host}
+    port: '{port}'
+    username: {username}
+    password: {password}
+    database: {database}
+\"\"\"
+
+End of content.
+"""
+
+
+@pytest.fixture
 def repo_root() -> pathlib.Path:
     return pathlib.Path("/some/absolute/path/repo_root/")
 
@@ -171,12 +212,30 @@ def sample_with_definitions_file_contents(
 
 
 @pytest.fixture
+def sample_markdown_doc_with_yaml_file_contents(
+    sample_markdown_doc_with_yaml: str,
+) -> FileContents:
+    return FileContents(
+        filepath=pathlib.Path("some/random/filepath/markdown.md"),
+        contents=sample_markdown_doc_with_yaml,
+    )
+
+
+@pytest.fixture
 def docs_example_parser(
     sample_docs_example_file_contents: FileContents,
 ) -> DocsExampleParser:
     docs_example_parser = DocsExampleParser(
         file_contents={sample_docs_example_file_contents}
     )
+    return docs_example_parser
+
+
+@pytest.fixture
+def empty_docs_example_parser(
+    sample_docs_example_file_contents: FileContents,
+) -> DocsExampleParser:
+    docs_example_parser = DocsExampleParser(file_contents=set())
     return docs_example_parser
 
 
@@ -202,6 +261,8 @@ class TestDocExampleParser:
             "example_public_classmethod",
             "example_public_staticmethod",
             "example_staticmethod",
+            "Datasource",
+            "SqlAlchemyExecutionEngine",
         }
 
 
@@ -268,6 +329,14 @@ class TestCodeParser:
                 "great_expectations/sample_with_definitions_python_file_string.py"
             )
         }
+
+
+def test_parse_docs_contents_for_class_names(
+    sample_markdown_doc_with_yaml_file_contents: FileContents,
+):
+    assert parse_docs_contents_for_class_names(
+        file_contents={sample_markdown_doc_with_yaml_file_contents}
+    ) == {"Datasource", "SqlAlchemyExecutionEngine"}
 
 
 def test_get_shortest_dotted_path(monkeypatch):
@@ -549,6 +618,22 @@ def code_reference_filter_with_exclude_by_file(
 
 
 @pytest.fixture
+def code_reference_filter_with_references_from_docs_content(
+    repo_root: pathlib.Path,
+    empty_docs_example_parser: DocsExampleParser,
+    code_parser: CodeParser,
+    public_api_checker: PublicAPIChecker,
+) -> CodeReferenceFilter:
+    return CodeReferenceFilter(
+        repo_root=repo_root,
+        docs_example_parser=empty_docs_example_parser,
+        code_parser=code_parser,
+        public_api_checker=public_api_checker,
+        references_from_docs_content={"ExampleClass", "ExamplePublicAPIClass"},
+    )
+
+
+@pytest.fixture
 def code_reference_filter_with_exclude_by_file_and_name(
     repo_root: pathlib.Path,
     docs_example_parser: DocsExampleParser,
@@ -719,6 +804,22 @@ class TestCodeReferenceFilter:
             "example_module_level_function",
             "example_staticmethod",
         }
+        assert {d.filepath for d in observed} == {
+            pathlib.Path(
+                "great_expectations/sample_with_definitions_python_file_string.py"
+            )
+        }
+
+    @pytest.mark.integration
+    def test_filter_definitions_with_references_from_docs_content(
+        self,
+        code_reference_filter_with_references_from_docs_content: CodeReferenceFilter,
+    ):
+        observed = (
+            code_reference_filter_with_references_from_docs_content.filter_definitions()
+        )
+        assert len(observed) == 1
+        assert {d.name for d in observed} == {"ExampleClass"}
         assert {d.filepath for d in observed} == {
             pathlib.Path(
                 "great_expectations/sample_with_definitions_python_file_string.py"

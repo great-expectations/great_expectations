@@ -18,11 +18,11 @@ try:
     from pyspark.sql import DataFrame
 
 except ImportError:
-    pyspark = None
-    DataFrame = None
-    F = None
+    pyspark = None  # type: ignore[assignment]
+    DataFrame = None  # type: ignore[assignment,misc]
+    F = None  # type: ignore[assignment]
     # noinspection SpellCheckingInspection
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
 
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."

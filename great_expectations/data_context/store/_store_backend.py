@@ -99,10 +99,10 @@ class StoreBackend(metaclass=ABCMeta):
                     value=f"{self.STORE_BACKEND_ID_PREFIX}{store_id}\n",
                 )
                 return store_id
-        except Exception:
+        except Exception as e:
             if not suppress_warning:
                 logger.warning(
-                    f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}"
+                    f"Invalid store configuration: Please check the configuration of your {self.__class__.__name__} named {self.store_name}. Exception was: \n {e}"
                 )
             return self.STORE_BACKEND_INVALID_CONFIGURATION_ID
 

@@ -57,6 +57,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 
@@ -206,12 +207,14 @@ class CloudDataContext(SerializableDataContext):
         cls, context_root_dir: Optional[PathStr]
     ) -> str:
         if context_root_dir is None:
-            context_root_dir = os.getcwd()
+            context_root_dir = os.getcwd()  # noqa: PTH109
             logger.info(
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )
-        return os.path.abspath(os.path.expanduser(context_root_dir))
+        return os.path.abspath(  # noqa: PTH100
+            os.path.expanduser(context_root_dir)  # noqa: PTH111
+        )
 
     @classmethod
     def retrieve_data_context_config_from_cloud(
@@ -367,7 +370,7 @@ class CloudDataContext(SerializableDataContext):
             conf_file_option=conf_file_option,
         )
 
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
@@ -375,8 +378,9 @@ class CloudDataContext(SerializableDataContext):
             GXCloudStoreBackend,
         )
 
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
+        # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
+        store_name = DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME.value
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
@@ -391,7 +395,7 @@ class CloudDataContext(SerializableDataContext):
             runtime_environment=runtime_environment,
             serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
-        self._datasource_store = datasource_store
+        return datasource_store
 
     def list_expectation_suite_names(self) -> List[str]:
         """
@@ -562,6 +566,11 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             An existing ExpectationSuite
         """
+        if ge_cloud_id is None and expectation_suite_name is None:
+            raise ValueError(
+                "ge_cloud_id and expectation_suite_name cannot both be None"
+            )
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             cloud_id=ge_cloud_id,
@@ -632,16 +641,6 @@ class CloudDataContext(SerializableDataContext):
                 f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True."
             )
-
-    @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        return self._context_root_directory
 
     def add_checkpoint(
         self,

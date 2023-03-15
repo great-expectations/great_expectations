@@ -2,7 +2,7 @@
 title: 'Tutorial, Step 3: Create Expectations'
 ---
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
-import TechnicalTag from '/docs/term_tags/_tag.mdx';
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 

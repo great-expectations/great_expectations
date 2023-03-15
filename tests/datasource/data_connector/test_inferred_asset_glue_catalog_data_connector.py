@@ -96,7 +96,7 @@ def test_instantiation_from_a_config(
             - db_test.tb_titanic_without_partitions
         glue_introspection_directives:
             database_name: db_test
-        """,
+        """,  # noqa: F541
         runtime_environment={
             "execution_engine": "execution_engine",
         },
