@@ -3483,7 +3483,9 @@ def generate_temp_table_for_validator(
             frame=df, name=temp_table_name, dtype=current_schema
         )
     else:
-        schema_from_get_schema = pandas_sql.get_schema(frame=df, name=temp_table_name, con=engine)  # type: ignore
+        schema_from_get_schema = pandas_sql.get_schema(
+            frame=df, name=temp_table_name, con=engine
+        )
 
     create_table_sql = schema_from_get_schema.strip()
     create_tmp_table_sql = re.sub("^(CREATE TABLE )?", stmt, create_table_sql)
