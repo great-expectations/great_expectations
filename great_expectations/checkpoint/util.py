@@ -498,7 +498,7 @@ def send_sns_notification(
     :param sns_subject: : The SNS Message Subject - defaults to expectation_suite_identifier.expectation_suite_name
     :param validation_results:  The results of the validation ran
     :param kwargs:  Keyword arguments to pass to the boto3 Session
-    :return:  Message ID that was published
+    :return:  Message ID that was published or error message
 
     """
     if not boto3:
@@ -519,6 +519,8 @@ def send_sns_notification(
     try:
         response = sns.publish(**message_dict)
     except sns.exceptions.InvalidParameterException:
-        logger.error(f"Received invalid for message: {validation_results}")
+        error_msg = f"Received invalid for message: {validation_results}"
+        logger.error(error_msg)
+        return error_msg
     else:
         return f"Successfully posted results to {response['MessageId']} with Subject {sns_subject}"
