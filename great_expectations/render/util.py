@@ -5,7 +5,6 @@ import copy
 import decimal
 import locale
 import re
-import warnings
 from typing import Any, List, Optional, Sequence, Tuple, Union
 
 import pandas as pd
@@ -110,20 +109,6 @@ def resource_key_passes_run_name_filter(resource_key, run_name_filter):
         regex = run_name_filter.get("matches_regex")
         regex_match = re.search(regex, run_name)
         return False if regex_match is None else True
-    elif run_name_filter.get("eq"):
-        # deprecated-v0.11.9
-        warnings.warn(
-            "The 'eq' key will is deprecated as of v0.11.9 and will be removed in v0.16. Please use the renamed 'equals' key.",
-            DeprecationWarning,
-        )
-        return run_name_filter.get("eq") == run_name
-    elif run_name_filter.get("ne"):
-        # deprecated-v0.11.9
-        warnings.warn(
-            "The 'ne' key will is deprecated as of v0.11.9 and will be removed in v0.16. Please use the renamed 'not_equals' key.",
-            DeprecationWarning,
-        )
-        return run_name_filter.get("ne") != run_name
 
 
 @public_api
