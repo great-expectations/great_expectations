@@ -22,8 +22,8 @@ from typing import (
 from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
 
 import great_expectations as gx
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
     new_argument,
@@ -46,12 +46,6 @@ from great_expectations.core.util import (
     parse_string_to_datetime,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.exceptions import (
-    ClassInstantiationError,
-    DataContextError,
-    GreatExpectationsTypeError,
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
@@ -61,6 +55,7 @@ from great_expectations.types import SerializableDictDot
 from great_expectations.util import deep_filter_properties_iterable
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.inline_renderer import InlineRendererConfig
@@ -164,7 +159,7 @@ class ExpectationSuite(SerializableDictDot):
         elif isinstance(citation_date, datetime.datetime):
             citation_date_obj = citation_date
         else:
-            raise GreatExpectationsTypeError(
+            raise gx_exceptions.GreatExpectationsTypeError(
                 f"citation_date should be of type - {' '.join(str(t) for t in _citation_date_types)}"
             )
 
@@ -451,7 +446,7 @@ class ExpectationSuite(SerializableDictDot):
         if expectation_configuration and not isinstance(
             expectation_configuration, ExpectationConfiguration
         ):
-            raise InvalidExpectationConfigurationError(
+            raise gx_exceptions.InvalidExpectationConfigurationError(
                 "Ensure that expectation configuration is valid."
             )
 
@@ -654,7 +649,7 @@ class ExpectationSuite(SerializableDictDot):
                 if send_usage_event:
                     self.send_usage_event(success=False)
 
-                raise DataContextError(
+                raise gx_exceptions.DataContextError(
                     "A matching ExpectationConfiguration already exists. If you would like to overwrite this "
                     "ExpectationConfiguration, set overwrite_existing=True"
                 )
@@ -758,8 +753,11 @@ class ExpectationSuite(SerializableDictDot):
         try:
             expectation = class_()
             expectation.validate_configuration(expectation_configuration)
-        except InvalidExpectationConfigurationError as e:
-            raise InvalidExpectationConfigurationError(
+        except (
+            gx_exceptions.ExpectationNotFoundError,
+            gx_exceptions.InvalidExpectationConfigurationError,
+        ) as e:
+            raise gx_exceptions.InvalidExpectationConfigurationError(
                 f"Could not add expectation; provided configuration is not valid: {e.message}"
             ) from e
 
@@ -1051,7 +1049,7 @@ class ExpectationSuite(SerializableDictDot):
                 config_defaults={"module_name": module_name},
             )
             if not inline_renderer:
-                raise ClassInstantiationError(
+                raise gx_exceptions.ClassInstantiationError(
                     module_name=module_name,
                     package_name=None,
                     class_name=inline_renderer_config["class_name"],
