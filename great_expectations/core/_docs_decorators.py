@@ -3,7 +3,7 @@ from __future__ import annotations
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
-from ...docs import _DYNAMIC_DEFINITIONS
+from great_expectations import _DYNAMIC_DEFINITIONS
 
 try:
     import docstring_parser
