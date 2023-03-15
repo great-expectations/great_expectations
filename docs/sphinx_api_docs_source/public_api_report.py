@@ -15,7 +15,7 @@ DocsExampleParser.get_names_from_usage_in_docs_examples()
     not filtered to be only GX related, we filter in step 6.
 3. Scan all code examples for class names used in yaml strings.
 
-CodeParser.get_all_class_method_and_function_definitions()
+CodeParser.get_all_static_class_method_and_function_definitions()
 
 4. AST walk through full GX codebase to find all classes and method names from
     their definitions, and capture the definition file location.
@@ -258,19 +258,32 @@ class CodeParser:
         """
         self.file_contents = file_contents
 
-    def get_all_class_method_and_function_names(
+    @staticmethod
+    def get_all_dynamic_class_method_and_function_definitions() -> set[Definition]:
+        from great_expectations.core._docs_decorators import _DYNAMIC_DEFINITIONS
+
+        return {
+            Definition(
+                name=name, filepath=pathlib.Path(), ast_definition=ast_definition
+            )
+            for name, ast_definition in _DYNAMIC_DEFINITIONS.items()
+        }
+
+    def get_all_static_class_method_and_function_names(
         self,
     ) -> Set[str]:
         """Get string names of all classes, methods and functions in all FileContents."""
         all_usages = set()
         for file_contents in self.file_contents:
-            usages = self._get_all_class_method_and_function_names_from_file_contents(
-                file_contents=file_contents
+            usages = (
+                self._get_all_static_class_method_and_function_names_from_file_contents(
+                    file_contents=file_contents
+                )
             )
             all_usages |= usages
         return all_usages
 
-    def _get_all_class_method_and_function_names_from_file_contents(
+    def _get_all_static_class_method_and_function_names_from_file_contents(
         self, file_contents: FileContents
     ) -> Set[str]:
         """Get string names of all classes, methods and functions in a single FileContents."""
@@ -282,7 +295,7 @@ class CodeParser:
 
         return {definition.name for definition in definitions}
 
-    def get_all_class_method_and_function_definitions(
+    def get_all_static_class_method_and_function_definitions(
         self,
     ) -> Set[Definition]:
         """Get Definition objects for all class, method and function definitions."""
@@ -495,28 +508,21 @@ class PublicAPIChecker:
     ) -> None:
         self.code_parser = code_parser
 
-    @property
-    def dynamic_definitions(self) -> set[Definition]:
-        from great_expectations.core._docs_decorators import _DYNAMIC_DEFINITIONS
-
-        return {
-            Definition(
-                name=name, filepath=pathlib.Path(), ast_definition=ast_definition
-            )
-            for name, ast_definition in _DYNAMIC_DEFINITIONS.items()
-        }
-
-    def get_all_public_api_definitions(self) -> set[Definition]:
+    def get_all_public_api_definitions(self) -> Set[Definition]:
         """Get definitions that are marked with the public api decorator."""
-        static_definitions: set[Definition] = set()
+        static_definitions: Set[Definition] = set()
 
         for (
             definition
-        ) in self.code_parser.get_all_class_method_and_function_definitions():
+        ) in self.code_parser.get_all_static_class_method_and_function_definitions():
             if self.is_definition_marked_public_api(definition):
                 static_definitions.add(definition)
 
-        return static_definitions | self.dynamic_definitions
+        dynamic_definitions: Set[
+            Definition
+        ] = self.code_parser.get_all_dynamic_class_method_and_function_definitions()
+
+        return static_definitions | dynamic_definitions
 
     def get_module_level_function_public_api_definitions(self) -> Set[Definition]:
         """Get module level function definitions that are marked with the public api decorator."""
@@ -1578,7 +1584,9 @@ class CodeReferenceFilter:
         doc_example_usages: Set[
             str
         ] = self.docs_example_parser.get_names_from_usage_in_docs_examples()
-        gx_code_definitions = self.code_parser.get_all_class_method_and_function_names()
+        gx_code_definitions = (
+            self.code_parser.get_all_static_class_method_and_function_names()
+        )
 
         doc_example_usages_of_gx_code = doc_example_usages.intersection(
             gx_code_definitions
@@ -1598,7 +1606,7 @@ class CodeReferenceFilter:
             Set of Definition objects with filepath locations.
         """
         gx_code_definitions = (
-            self.code_parser.get_all_class_method_and_function_definitions()
+            self.code_parser.get_all_static_class_method_and_function_definitions()
         )
         gx_code_definitions_appearing_in_docs_examples = {
             d for d in gx_code_definitions if d.name in gx_usages_in_docs_examples
@@ -1617,7 +1625,7 @@ class CodeReferenceFilter:
         """
         included_definitions: List[Definition] = []
         all_gx_code_definitions = (
-            self.code_parser.get_all_class_method_and_function_definitions()
+            self.code_parser.get_all_static_class_method_and_function_definitions()
         )
         for definition in definitions:
             definition_filepath = self._repo_relative_filepath(
