@@ -52,6 +52,7 @@ from great_expectations.exceptions import (
     GreatExpectationsTypeError,
     InvalidExpectationConfigurationError,
 )
+from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     RenderedAtomicContent,
@@ -742,12 +743,25 @@ class ExpectationSuite(SerializableDictDot):
 
         # noqa: DAR402
         """
+        self._validate_expectation_configuration(expectation_configuration)
         return self._add_expectation(
             expectation_configuration=expectation_configuration,
             send_usage_event=send_usage_event,
             match_type=match_type,
             overwrite_existing=overwrite_existing,
         )
+
+    def _validate_expectation_configuration(
+        self, expectation_configuration: ExpectationConfiguration
+    ):
+        class_ = get_expectation_impl(expectation_configuration.expectation_type)
+        try:
+            expectation = class_()
+            expectation.validate_configuration(expectation_configuration)
+        except InvalidExpectationConfigurationError as e:
+            raise InvalidExpectationConfigurationError(
+                f"Could not add expectation; provided configuration is not valid: {e.message}"
+            ) from e
 
     @public_api
     def show_expectations_by_domain_type(self) -> None:
