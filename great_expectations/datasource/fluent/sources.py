@@ -138,8 +138,7 @@ class _SourceFactories:
         datasource_type_lookup: TypeLookup,
     ) -> str:
         """
-        Register the `Datasource` class and add a factory method for the class on `sources`.
-        The method name is pulled from the `Datasource.type` attribute.
+        Register the `Datasource` class. The method name is pulled from the `Datasource.type` attribute.
         """
         if ds_type in datasource_type_lookup:
             raise TypeRegistrationError(
@@ -216,7 +215,7 @@ class _SourceFactories:
                 f"'`sources.{crud_fn_name}()` already exists",
             )
         logger.debug(f"Registering data_context.source.{crud_fn_name}()")
-        public_api(crud_method_info)
+        public_api(crud_method_info, is_dynamic=True)
         cls.__crud_registry[crud_fn_name] = crud_method_info
 
     @classmethod
@@ -281,7 +280,7 @@ class _SourceFactories:
             setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
 
             # add the public api decorator
-            public_api(getattr(ds_type, add_asset_factory_method_name))
+            public_api(getattr(ds_type, add_asset_factory_method_name), is_dynamic=True)
 
             def _read_asset_factory(
                 self: Datasource, asset_name: str | None = None, **kwargs
@@ -322,7 +321,7 @@ class _SourceFactories:
         ):
             raise DefaultPandasDatasourceError(
                 f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
-                "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."
+                "Please rename this datasource if you wish to use the pandas_default `PandasDatasource`."
             )
 
         return existing_datasource or self._data_context.sources.add_pandas(
