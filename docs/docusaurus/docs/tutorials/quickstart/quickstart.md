@@ -5,6 +5,10 @@ tag: [tutorial, getting started]
 # Quickstart with Great Expectations
 
 import Prerequisites from '/docs/components/_prerequisites.jsx'
+import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
+import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/_setup_and_install_for_filesystem_data.md'
+import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
+import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
 
 ## Introduction
 
@@ -37,17 +41,27 @@ import great_expectations as gx
 context = gx.get_context()
 
 # Connect to data
-datasource = context.datasources.add_pandas_filesystem(base_folder="https://raw.githubusercontent.com/great_expectations/")
-csv_asset = datasource.add_csv_asset(name="MyTaxiData", regex="taxi_data.csv")
-batch_request_from_csv = csv_asset.build_batch_request()
+validator = context.datasources.pandas_default.read_csv(
+    filepath_or_buffer="https://raw.githubusercontent.com/great_expectations/taxi_data.csv"
+)
 
 # Create Expectations
-validator = context.get_validator(batch_request=batch_request_from_csv)
 validator.expect_column_values_to_not_be_null("pickup_datetime")
 
 # Validate data
-result = validator.validate()
-result.view()
+checkpoint = SimpleCheckpoint( 
+    name=f"{csv_asset.name}_{expectation_suite_name}",
+    context=context,
+    validator=validator,
+)
+checkpoint_result = checkpoint.run()
+
+# View results
+validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
+context.open_data_docs(resource_identifier=validation_result_identifier)
+
+# Save the Data Context for future use
+context.convert_to_file_context()
 ```
 
 That's not a lot of code, is it?  In the following steps we'll break down exactly what is happening here so that you can follow along and perform a Validation yourself.
@@ -89,40 +103,21 @@ The Data Context will provide you with access to a variety of utility and conven
 
 ### 2. Connect to data
 
-For the purpose of this guide, we will connect to `.csv` data stored in our GitHub repo.  First, we will define a Datasource that uses our GitHub repo as it's `base_folder`:
+For the purpose of this guide, we will connect to `.csv` data stored in our GitHub repo:
 
 ```python title="Python code"
-datasource = context.datasources.add_pandas_filesystem(base_folder="https://raw.githubusercontent.com/great_expectations/")
+validator = context.datasources.pandas_default.read_csv(
+    filepath_or_buffer="https://raw.githubusercontent.com/great_expectations/taxi_data.csv"
+)
 ```
 
-Next, we will specify the file that we want to connect to by creating a Data Asset in our Datasource:
-
-```python title="Python code"
-csv_asset = datasource.add_csv_asset(name="MyTaxiData", regex="taxi_data.csv")
-```
-
-Finally, we will tell Great Expectations to request the data that our `csv_asset` is connected to:
-
-```python title="Python code"
-batch_request_from_csv = csv_asset.build_batch_request()
-```
-
+The above code uses our Data Context's default Datasource for Pandas to access the `.csv` data in the file at the provided `path`.
 
 ### 3. Create Expectations
 
-#### 3.1 Get a Validator object for our data
+When we read our `.csv` data, we got a Validator instance back.  A Validator is a robust object capable of storing Expectations about the data it is associated with, as well as performing introspections on that data.  
 
-We will use a Validator to create Expectations about a provided set of data, and to validate the data against those Expectations.  The data that we will use in this example is the data that we requested from the `taxe_data.csv` file in our `batch_request`, previously.
-
-We define our Validator with the code:
-
-```python title="Python code"
-validator = context.get_validator(batch_request=batch_request_from_csv)
-```
-
-#### 3.2 Define an Expectation
-
-At this point, we will describe our Expectations for the data in question.  In this example, we will define a single Expectation based on our domain knowledge (that is: based on what we know _should_ be true about our data, without looking at the actual state of the data).
+In this guide, we will define a single Expectation based on our domain knowledge (that is: based on what we know _should_ be true about our data, without looking at the actual state of the data).
 
 The code we will use for this is:
 
@@ -132,59 +127,62 @@ validator.expect_column_values_to_not_be_null("pickup_datetime")
 
 With the Expectation defined above, we are stating that we _expect_ the column `pickup_datetime` to always be populated.  That is: none of the column's values should be null.
 
-In the future, you may define numerous Expectations by using the `validator.expect_*` syntax.  When you Validate data with the `validator` object, all of you Expectations will be run against the `validator`'s associated Datasource.
+In the future, you may define numerous Expectations about a Validator's associated data by calling multiple methods that follow the `validator.expect_*` syntax.
+
 
 ### 4. Validate data
 
 #### 4.1 Execute your defined Expectations
 
-Now that we have defined our Expectations it is time for GX to introspect our data and see if it corresponds to them.  (We call this process Validation.)  The code to run this process is:
+Now that we have defined our Expectations it is time for GX to introspect our data and see if it corresponds to what we told GX to expect.  To do this, we define a Checkpoint (which will allow us to repeat the Validation in the future).
 
 ```python title="Python code"
-result = validator.validate()
+checkpoint = SimpleCheckpoint( 
+    name="my_quickstart_checkpoint",
+    context=context,
+    validator=validator,
+)
+```
+Once we have created the Checkpoint, we will run it and get back the results from our Validation.
+
+```python title="Python code"
+checkpoint_result = checkpoint.run()
 ```
 
 #### 4.2 Review your results
 
-Once the `validator` object finishes executing the `validate()` command, you can view the results of your Validation through the code:
+Great Expectations provides a friendly, human-readable way to view the results of Validations: Data Docs.  Our Checkpoint will have automatically compiled new Data Docs to include the results of the Validation we ran, so we can view them immediately:
 
 ```python title="Python code"
-result.view()
+validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
+context.open_data_docs(resource_identifier=validation_result_identifier)
 ```
+
+#### 4.3 Save the Data Context for future use
+Because we did not previously initialize a Filesystem Data Context or specify a path at which to create one, the Data Context we recieved from `gx.get_context()` was a temporary, in-memory Ephemeral Data Context.  To save this Data Context for future use, we will convert it to a Filesystem Data Context:
+
+```python title="Python code"
+context = context.convert_to_file_context()
+```
+
+You can provide the path to a specific folder when you convert your Ephemeral Data Context to a Filesystem Data Context.  If you do, your Filesystem Data Context will be initialized at that location.  If you do not, your new Filesystem Data Context will be initialized in the folder that your script is executed in.
 
 ## Next Steps 
 
-Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases.
+Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases! To help with this we have prepared some more detailed installation and setting up guides tailored to specific environments and resources.
 
-To help with this we have prepared some more detailed installation and setting up guides tailored to specific environments and resources.  For more details on installation and setup of GX, please see:
-- [How to install Great Expectations locally](/docs/guides/setup/installation/local.md)
-- [How to install Great Expectations in a hosted environment](/docs/guides/setup/installation/hosted_environment.md)
-- How to install and set up GX for use with data in a local filesystem
-- How to install and set up GX for use with data in a SQL database
-- How to install and set up GX for use with Amazon S3
-- How to install and set up GX for use with Google Cloud Services
-- How to install and set up GX for use with an EMR Spark cluster
-- How to install and set up GX for use with Databricks
-- How to install and set up GX for use with Airflow
+For more details on installing GX for use with local filesystems, please see:
 
-If you wish to continue working with the GX installation used in this Quickstart guide, you will likely want to configure your Data Context to persist through future Python sessions.  For more details on how to do this, please see:
-- How to create a Filesystem Data Context from an Ephemeral Data Context
-- How to initialize a Filesystem Data Context from the CLI
-- How to initialize or instantiate a specific Filesystem Data Context with `get_context(...)`
+<SetupAndInstallForFilesystemData />
 
-## Additional information
+For guides on installing GX for use with cloud storage systems, please reference:
 
-### Code examples
+<SetupAndInstallForCloudData />
 
-To see the full source code used for the examples in this guide, please reference the following script in our GitHub repository:
-- [quickstart.py](https://path/to/the/script/on/github.com)
+For information on installing GX for use with SQL databases, see:
 
-### Python APIs
+<SetupAndInstallForSqlData />
 
-For more information on the GX Python objects and APIs used in this guide, please reference the following pages of our public API documentation:
+And for instructions on installing GX for use with hosted data systems, read:
 
-- [get_context()](https://docs.greatexpectations.io/docs/reference/api/util.py/#great_expectations.util.get_context)
-
-- Validator
-  - [.validate()](https://docs.greatexpectations.io/docs/reference/api/validator/validator/Validator_class#great_expectations.validator.validator.Validator.validate)
-  - [.expect_column_values_to_not_be_null()](https://greatexpectations.io/expectations/expect_column_values_to_not_be_null)
+<SetupAndInstallForHostedData />

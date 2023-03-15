@@ -6,7 +6,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Step 1: Setup',
+      label: 'Setting up a GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview' },
       items: [
         {
@@ -152,7 +152,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Step 2: Connect to data',
+      label: 'Connecting to data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview' },
       items: [
         {
@@ -164,6 +164,7 @@ module.exports = {
               value: '<h4>Local Filesystems</h4>',
               defaultStyle: true
             },
+            'guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas',
             'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas',
             'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark',
             {
@@ -304,7 +305,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Step 3: Create Expectations',
+      label: 'Creating Expectations',
       link: { type: 'doc', id: 'guides/expectations/create_expectations_overview' },
       items: [
         {
@@ -370,7 +371,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Step 4: Validate data',
+      label: 'Validating data',
       link: { type: 'doc', id: 'guides/validation/validate_data_overview' },
       items: [
         {
