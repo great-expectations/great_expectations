@@ -10,6 +10,7 @@ import DatabaseCredentials from '../components/adding_database_credentials.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import SqlAlchemy2 from '/docs/components/warnings/_sql_alchemy2.md'
 
 This guide will help you connect to data in a MySQL database.
 This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
@@ -29,6 +30,8 @@ This will allow you to <TechnicalTag tag="validation" text="Validate" /> and exp
 ### 2. Install required dependencies
 
 First, install the necessary dependencies for Great Expectations to connect to your MySQL database by running the following in your terminal:
+
+<SqlAlchemy2 />
 
 ```console
 pip install sqlalchemy
