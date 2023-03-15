@@ -427,8 +427,9 @@ class DataAsset:
     def discard_failing_expectations(self) -> None:
         res = self.validate(only_return_failures=True).results
         if any(res):
+            suite = self._expectation_suite
             for item in res:
-                self.remove_expectation(
+                suite.remove_expectation(
                     expectation_configuration=item.expectation_config,
                     match_type="runtime",
                 )
