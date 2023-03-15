@@ -187,10 +187,7 @@ class BatchKwargsGenerator:
         """
         raise NotImplementedError
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(
-        self, generator_asset=None, data_asset_name=None
-    ) -> None:
+    def get_available_partition_ids(self, data_asset_name=None) -> None:
         """
         Applies the current _partitioner to the batches available on data_asset_name and returns a list of valid
         partition_id strings that can be used to identify batches of data.
