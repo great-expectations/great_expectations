@@ -10,10 +10,10 @@ except ImportError:
 
 WHITELISTED_TAG = "--Public API--"
 
-F = TypeVar("F", bound=Callable[..., Any])
+_FuncT = TypeVar("_FuncT", bound=Callable[..., Any])
 
 
-def public_api(func: F) -> F:
+def public_api(func: _FuncT) -> _FuncT:
     """Add the public API tag for processing by the auto documentation generator.
 
     Used as a decorator:
@@ -57,7 +57,7 @@ def deprecated_method_or_class(
 
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 
-    def wrapper(func: F) -> F:
+    def wrapper(func: _FuncT) -> _FuncT:
         """Wrapper method that accepts func, so we can modify the docstring."""
         return _add_text_to_function_docstring_after_summary(
             func=func,
@@ -92,7 +92,7 @@ def new_method_or_class(
 
     text = f".. versionadded:: {version}" "\n" f"    {message}"
 
-    def wrapper(func: F) -> F:
+    def wrapper(func: _FuncT) -> _FuncT:
         """Wrapper method that accepts func, so we can modify the docstring."""
         return _add_text_to_function_docstring_after_summary(
             func=func,
@@ -131,7 +131,7 @@ def deprecated_argument(
 
     text = f".. deprecated:: {version}" "\n" f"    {message}"
 
-    def wrapper(func: F) -> F:
+    def wrapper(func: _FuncT) -> _FuncT:
         """Wrapper method that accepts func, so we can modify the docstring."""
         if not docstring_parser:
             return func
@@ -174,7 +174,7 @@ def new_argument(
 
     text = f".. versionadded:: {version}" "\n" f"    {message}"
 
-    def wrapper(func: F) -> F:
+    def wrapper(func: _FuncT) -> _FuncT:
         """Wrapper method that accepts func, so we can modify the docstring."""
         if not docstring_parser:
             return func
@@ -188,7 +188,7 @@ def new_argument(
     return wrapper
 
 
-def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
+def _add_text_to_function_docstring_after_summary(func: _FuncT, text: str) -> _FuncT:
     """Insert text into docstring, e.g. rst directive.
 
     Args:
@@ -227,10 +227,10 @@ def _add_text_to_function_docstring_after_summary(func: F, text: str) -> F:
 
 
 def _add_text_below_function_docstring_argument(
-    func: F,
+    func: _FuncT,
     argument_name: str,
     text: str,
-) -> F:
+) -> _FuncT:
     """Add text below specified docstring argument.
 
     Args:
