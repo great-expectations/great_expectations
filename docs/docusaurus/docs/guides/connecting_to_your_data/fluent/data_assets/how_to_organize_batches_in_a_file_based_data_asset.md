@@ -71,11 +71,11 @@ Please reference the appropriate one of these guides:
 
 #### Azure Blob Storage
 - [How to connect to data in Azure Blob Storage using Pandas](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas.md)
-- [How to connect to data in Azure Blob Storage using Spark]((/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark.md))
+- [How to connect to data in Azure Blob Storage using Spark](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark.md)
 
 #### Amazon Web Services S3
 - [How to connect to data on Amazon Web Services S3 using Pandas](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas.md)
-- [How to connect to data on Amazon Web Services S3 using Spark]((/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark.md))
+- [How to connect to data on Amazon Web Services S3 using Spark](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark.md)
 
 </details>
 

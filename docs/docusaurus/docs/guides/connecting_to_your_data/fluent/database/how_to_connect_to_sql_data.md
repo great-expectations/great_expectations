@@ -48,7 +48,7 @@ Here are some examples of connection strings for various SQL dialects.  GX also 
 - [MySQL](/docs/guides/connecting_to_your_data/database/mysql.md): `mysql+pymysql://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
 - PostgreSQL: `postgresql+psycopg2://<USERNAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>`
   - [Connecting to PostgreSQL data](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data.md)
-  - [Defining advanced PostgreSQL Datasource configurations with the block-config method]((/docs/guides/connecting_to_your_data/database/postgres.md))
+  - [Defining advanced PostgreSQL Datasource configurations with the block-config method](/docs/guides/connecting_to_your_data/database/postgres.md)
 - [Redshift](/docs/guides/connecting_to_your_data/database/redshift.md): `postgresql+psycopg2://<USER_NAME>:<PASSWORD>@<HOST>:<PORT>/<DATABASE>?sslmode=<SSLMODE>`
 - [Snowflake](/docs/guides/connecting_to_your_data/database/snowflake.md): `snowflake://<USER_NAME>:<PASSWORD>@<ACCOUNT_NAME>/<DATABASE_NAME>/<SCHEMA_NAME>?warehouse=<WAREHOUSE_NAME>&role=<ROLE_NAME>&application=great_expectations_oss`
 - SQLite: `sqlite:///<PATH_TO_DB_FILE>`

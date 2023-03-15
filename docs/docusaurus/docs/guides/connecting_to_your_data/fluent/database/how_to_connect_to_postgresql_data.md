@@ -18,7 +18,7 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_postgresql_databases.md)
+- [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_postgresql.md)
 - Source data stored in a PostgreSQL database
 - A passion for data quality
 
