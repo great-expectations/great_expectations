@@ -213,7 +213,7 @@ except ImportError:
     trinotypes = None
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa  # noqa: TCH004
+    import sqlalchemy as sa
     from sqlalchemy.engine import Engine as SaEngine
 
 
