@@ -124,6 +124,14 @@
           "ts": "DATETIME2",
           "alpha": "VARCHAR",
           "numeric": "INTEGER"
+        },
+        "snowflake": {
+          "x": "NUMBER",
+          "y": "STRING",
+          "z": "NUMBER",
+          "ts": "TIMESTAMP_NTZ",
+          "alpha": "STRING",
+          "numeric": "NUMBER"
         }
       },
       "tests": [

@@ -1568,7 +1568,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                         value=[min_value_dbms, max_value_dbms],
                         inplace=True,
                     )
-            elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
+            elif type_ in ["DATETIME", "TIMESTAMP", "DATE", "TIMESTAMP_NTZ"]:
                 df[col] = pd.to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
