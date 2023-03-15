@@ -8,7 +8,7 @@
     "regexp": "^\\[(FEATURE|BUGFIX|DOCS|MAINTENANCE|CONTRIB)\\]"
   },
   "MESSAGES": {
-    "success": "PR is labelled properly!",
+    "success": "PR is labeled properly!",
     "failure": "PR requires an updated label: [BREAKING] | [FEATURE] | [BUGFIX] | [DOCS] | [MAINTENANCE] | [CONTRIB]",
     "notice": ""
   }
