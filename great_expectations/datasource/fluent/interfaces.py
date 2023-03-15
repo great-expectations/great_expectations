@@ -173,6 +173,23 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One needs to implement "test_connection" on a DataAsset subclass."""
         )
 
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        """The potential keys for BatchRequestOptions.
+
+        Example:
+        ```python
+        >>> print(data_asset.batch_request_options)
+        ("day", "month", "year", "path")
+        >>> options = {"year": "2023"}
+        >>> batch_request = data_asset.build_batch_request(options=options)
+        ```
+
+        Returns:
+            A tuple of keys that can be used in a BatchRequestOptions dictionary.
+        """
+        raise NotImplementedError
+
     # Abstract Methods
     def batch_request_options_template(
         self,
