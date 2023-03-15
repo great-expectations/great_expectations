@@ -1573,7 +1573,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                 "DATETIME",
                 "TIMESTAMP",
                 "DATE",
-                "TIMESTAMP_NTZ",
+                "TIMESTAMP_NTZ",  # the following 3 types are snowflake-specific
                 "TIMESTAMP_LTZ",
                 "TIMESTAMP_TZ",
             ]:
