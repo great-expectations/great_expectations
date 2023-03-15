@@ -138,7 +138,7 @@ class MicrosoftTeamsRenderer(Renderer):
                     {
                         "type": "TextBlock",
                         "spacing": "none",
-                        "text": run_time.strftime("%b %d %Y %H:%M:%S"),
+                        "text": run_time.strftime("%b %d %Y %H:%M:%S%z"),
                         "isSubtle": "true",
                         "wrap": "true",
                     }

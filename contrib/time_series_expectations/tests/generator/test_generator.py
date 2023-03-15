@@ -84,3 +84,9 @@ def test__generate_hourly_time_series_df():
 
     df = generator.generate_df(hourly_seasonality_params=[(1.0, 0.0)])
     assert df.shape == (90 * 24, 2)
+
+    # Test ability to generate data that's NOT in 24 hour increments
+    df = generator.generate_df(
+        size=25,
+    )
+    assert df.shape == (25, 2)

@@ -16,8 +16,9 @@ from great_expectations.types import DictDot, SerializableDictDot, safe_deep_cop
 from great_expectations.util import deep_filter_properties_iterable, load_class
 
 if TYPE_CHECKING:
-    from great_expectations.experimental.datasources.interfaces import (
-        BatchRequest as XBatchRequest,
+    from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
     )
     from great_expectations.validator.metrics_calculator import MetricsCalculator
 
@@ -44,10 +45,17 @@ except ImportError:
     )
 
 
-def _get_x_batch_request_class() -> Type[XBatchRequest]:
+def _get_fluent_batch_request_class() -> Type[FluentBatchRequest]:
     """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.experimental.datasources.interfaces"
+    module_name = "great_expectations.datasource.fluent.interfaces"
     class_name = "BatchRequest"
+    return load_class(class_name=class_name, module_name=module_name)
+
+
+def _get_fluent_batch_class() -> Type[FluentBatch]:
+    """Using this function helps work around circular import dependncies."""
+    module_name = "great_expectations.datasource.fluent.interfaces"
+    class_name = "Batch"
     return load_class(class_name=class_name, module_name=module_name)
 
 
@@ -879,7 +887,7 @@ def materialize_batch_request(
 
     batch_request_class: type
     if "options" in effective_batch_request:
-        batch_request_class = _get_x_batch_request_class()
+        batch_request_class = _get_fluent_batch_request_class()
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request
     ):
@@ -910,7 +918,7 @@ def batch_request_contains_runtime_parameters(
 
 
 def get_batch_request_as_dict(
-    batch_request: Optional[Union[BatchRequestBase, XBatchRequest, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, FluentBatchRequest, dict]] = None
 ) -> Optional[dict]:
     if batch_request is None:
         return None
@@ -918,7 +926,7 @@ def get_batch_request_as_dict(
     if isinstance(batch_request, (BatchRequest, RuntimeBatchRequest)):
         batch_request = batch_request.to_dict()
 
-    if isinstance(batch_request, _get_x_batch_request_class()):
+    if isinstance(batch_request, _get_fluent_batch_request_class()):
         batch_request = dataclasses.asdict(batch_request)
 
     return batch_request
@@ -985,11 +993,11 @@ def get_batch_request_from_acceptable_arguments(  # noqa: C901 - complexity 21
     if batch_request:
         if not isinstance(
             batch_request,
-            (BatchRequest, RuntimeBatchRequest, _get_x_batch_request_class()),
+            (BatchRequest, RuntimeBatchRequest, _get_fluent_batch_request_class()),
         ):
             raise TypeError(
                 "batch_request must be a BatchRequest, RuntimeBatchRequest, or a "
-                f"experimental.datasources.interfaces.BatchRequest object, not {type(batch_request)}"
+                f"fluent BatchRequest object, not {type(batch_request)}"
             )
 
         datasource_name = batch_request.datasource_name

@@ -446,9 +446,9 @@ try:
         "JSON": athenatypes.String,
     }
 except ImportError:
-    pyathena = None
+    pyathena = None  # type: ignore[assignment]
     athenatypes = None
-    athenaDialect = None
+    athenaDialect = None  # type: ignore[assignment,misc]
     ATHENA_TYPES = {}
 
 # # Others from great_expectations/dataset/sqlalchemy_dataset.py
@@ -3376,8 +3376,8 @@ def generate_sqlite_db_path():
         str: An absolute path to the ephemeral db within the created temporary directory.
     """
     tmp_dir = str(tempfile.mkdtemp())
-    abspath = os.path.abspath(
-        os.path.join(
+    abspath = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             tmp_dir,
             "sqlite_db"
             + "".join(

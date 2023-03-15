@@ -49,14 +49,16 @@ def yellow_trip_pandas_data_context(
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "integration",
                 "fixtures",
@@ -65,12 +67,12 @@ def yellow_trip_pandas_data_context(
                 "great_expectations.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
@@ -78,7 +80,7 @@ def yellow_trip_pandas_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-01.csv"
             )
         ),
@@ -86,7 +88,7 @@ def yellow_trip_pandas_data_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
@@ -94,7 +96,7 @@ def yellow_trip_pandas_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-02.csv"
             )
         ),
@@ -102,7 +104,7 @@ def yellow_trip_pandas_data_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "test_sets",
                 "taxi_yellow_tripdata_samples",
@@ -110,7 +112,7 @@ def yellow_trip_pandas_data_context(
             ),
         ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "yellow_tripdata_sample_2019-03.csv"
             )
         ),

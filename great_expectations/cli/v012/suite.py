@@ -461,7 +461,7 @@ def _suite_scaffold(suite: str, directory: str, jupyter: bool) -> None:
 
     if suite_name in context.list_expectation_suite_names():
         toolkit.tell_user_suite_exists(suite_name)
-        if os.path.isfile(notebook_path):
+        if os.path.isfile(notebook_path):  # noqa: PTH113
             cli_message(
                 f"  - If you wish to adjust your scaffolding, you can open this notebook with jupyter: `{notebook_path}` <red>(Please note that if you run that notebook, you will overwrite your existing suite.)</red>"
             )
@@ -551,8 +551,8 @@ def suite_list(directory):
 
 
 def _get_notebook_path(context, notebook_name):
-    return os.path.abspath(
-        os.path.join(
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )
