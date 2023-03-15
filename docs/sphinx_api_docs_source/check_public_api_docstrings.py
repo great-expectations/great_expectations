@@ -16,8 +16,6 @@ import subprocess
 from dataclasses import dataclass
 from typing import List, Set, Tuple
 
-from great_expectations.core._docs_decorators import _DYNAMICALLY_DEFINED
-
 from .public_api_report import (
     CodeParser,
     Definition,
@@ -156,6 +154,8 @@ def get_public_api_definitions() -> Set[Definition]:
     code_parser = CodeParser(file_contents=code_file_contents)
 
     public_api_checker = PublicAPIChecker(code_parser=code_parser)
+
+    from great_expectations.core._docs_decorators import _DYNAMICALLY_DEFINED
 
     dynamic_definitions = set(_DYNAMICALLY_DEFINED.values())
 
