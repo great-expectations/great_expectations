@@ -418,9 +418,7 @@ def test_delete_checkpoint_with_cloud_id(
     store.delete_checkpoint(id="abc123")
 
     mock_backend.remove_key.assert_called_once_with(
-        GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.CHECKPOINT, cloud_id="abc123"
-        )
+        GXCloudIdentifier(resource_type=GXCloudRESTResource.CHECKPOINT, id="abc123")
     )
 
 

@@ -1404,7 +1404,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.cloud_id
+            ge_cloud_id = response.id
 
         # If an id is present, we want to prioritize that as our key for object retrieval
         if ge_cloud_id:
