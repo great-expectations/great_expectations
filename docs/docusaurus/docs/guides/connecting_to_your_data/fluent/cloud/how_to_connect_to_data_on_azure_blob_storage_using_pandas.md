@@ -61,7 +61,6 @@ In the above example, the value for `account_url` will be substituted for the co
 
 ### 3. Add ABS data to the Datasource as a Data Asset
 
-
 <AbsFluentAddDataAssetConfigKeys />
 
 Once these values have been defined, we will define our Data Asset with the code:

@@ -1,5 +1,5 @@
 ---
-title: How to connect to PostgreSQL data
+title: How to connect to a PostgreSQL database
 tag: [how-to, connect to data]
 description: A technical guide demonstrating how to connect Great Expectations to data in a PostgreSQL database.
 keywords: [Great Expectations, Postgres, PostgreSQL, SQL]
@@ -111,11 +111,19 @@ If you wish to connect to additional tables or queries in the same PostgreSQL Da
 
 ## Next steps
 
-Now that you have a SQL Datasource, you may be interested in:
-- How to configure a SQL Data Asset to split its data into multiple Batches
-- How to configure a SQL Data Asset to provide a sampling of its full data
-- How to request a Batch of data from a Datasource
-- How to create Expectations while interactively evaluating a set of data
-- How to use a Data Assistant to evaluate data
+Now that you have connected to a PostgreSQL database and created a Data Asset, you may want to look into:
+
+### Configuring SQL Data Assets further
+- [How to organize Batches in a SQL based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
+
+### Requesting Data from a Data Asset
+- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+
+### Using Data Assets to create Expectations
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
+
+
+
 
 

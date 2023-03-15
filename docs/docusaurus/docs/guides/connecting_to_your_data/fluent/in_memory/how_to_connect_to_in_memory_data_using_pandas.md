@@ -11,6 +11,9 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 <!-- ### 1. Import GX and instantiate a Data Context -->
 import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
 
+<!-- ## Next steps -->
+import AfterCreateInMemoryDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_in_memory_data_asset.md'
+
 ## Introduction
 
 In this guide we will demonstrate how to connect to an in-memory Pandas dataframe.  Pandas can read many types of data into its dataframe class, but in our example we will use data originating in a `.parquet` file.
@@ -65,16 +68,15 @@ asset_name="TaxiDataframe"
 
 Now that we have the `name` and `dataframe` for our Data Asset, we can create the Data Asset with the code:
 
-```python
+```python title="Python code"
 data_asset = datasource.add_dataframe(name=asset_name, dataframe=sampled_dataframe)
 ```
 
 ## Next steps
 
 Now that you have connected to your data, you may want to look into:
-- How to request a Batch of data from a Datasource
-- How to create Expectations while interactively evaluating a set of data
-- How to use a Data Assistant to evaluate data
+
+<AfterCreateInMemoryDataAsset />
 
 ## Additional information
 

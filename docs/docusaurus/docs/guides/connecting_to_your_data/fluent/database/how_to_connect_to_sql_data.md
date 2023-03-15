@@ -1,5 +1,5 @@
 ---
-title: How to connect to SQL data
+title: How to connect to a SQL database
 tag: [how-to, connect to data]
 description: A technical guide demonstrating how to connect Great Expectations to a SQL database.
 keywords: [Great Expectations, SQL]
@@ -88,5 +88,7 @@ datasource = context.sources.add_sql(name="my_datasource", connection_string=sql
 ```
 
 ## Next steps
+
+Now that you have connected to a SQL database, next you will want to:
 
 <AfterCreateSqlDatasource />
