@@ -139,32 +139,6 @@ def test_resource_key_passes_run_name_filter():
         )
         is False
     )
-    with pytest.warns(DeprecationWarning):
-        assert (
-            resource_key_passes_run_name_filter(
-                resource_key, run_name_filter={"eq": "profiling"}
-            )
-            is False
-        )
-        assert (
-            resource_key_passes_run_name_filter(
-                resource_key, run_name_filter={"eq": "foofooprofilingfoo"}
-            )
-            is True
-        )
-    with pytest.warns(DeprecationWarning):
-        assert (
-            resource_key_passes_run_name_filter(
-                resource_key, run_name_filter={"ne": "profiling"}
-            )
-            is True
-        )
-        assert (
-            resource_key_passes_run_name_filter(
-                resource_key, run_name_filter={"ne": "foofooprofilingfoo"}
-            )
-            is False
-        )
 
 
 def run_notebook(

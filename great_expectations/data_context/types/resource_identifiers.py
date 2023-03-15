@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 import logging
-import warnings
 from typing import TYPE_CHECKING, Optional, Union
 
-from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load
 
 import great_expectations.exceptions as gx_exceptions
@@ -114,20 +112,7 @@ class ValidationResultIdentifier(DataContextKey):
         """
         super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
-        if isinstance(run_id, str):
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional).",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                run_time = None
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif run_id is None:
             run_id = RunIdentifier()
@@ -252,20 +237,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
                 expectation_suite_name=expectation_suite_identifier
             )
 
-        if isinstance(run_id, str):
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional).",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                run_time = None
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif run_id is None:
             run_id = RunIdentifier()
