@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any, Optional
+from typing import Any, ClassVar, Optional
 
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import TypedDict
+from typing_extensions import NotRequired, TypedDict
 
 from great_expectations.checkpoint.util import (
     does_batch_request_in_validations_contain_batch_data,
@@ -26,10 +26,10 @@ logger = logging.getLogger(__name__)
 
 class ActionDetails(TypedDict):
     class_name: str
-    site_names: NotRequired[List[str]]
+    site_names: NotRequired[list[str]]
     slack_webhook: NotRequired[Any]
     notify_on: NotRequired[Any]
-    notify_with: NotRequired[Union[List[str], str, None]]
+    notify_with: NotRequired[list[str] | str | None]
     renderer: NotRequired[dict]
 
 
@@ -215,7 +215,7 @@ class SimpleCheckpointConfigurator:
         are intentionally hiding this from users of SimpleCheckpoint by having a
         default of "all" that sets the configuration appropriately.
         """
-        _notify_with: str | list[str] | None= self.notify_with
+        _notify_with: str | list[str] | None = self.notify_with
         if self.notify_with == "all":
             _notify_with = None
         action_list.append(
