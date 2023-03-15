@@ -17,3 +17,5 @@ jobs:
       run: |
         echo {{ github.event.pull_request.title }} | grep -E "^\\[(FEATURE|BUGFIX|DOCS|MAINTENANCE|CONTRIB)\\]"
         exit $?
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
