@@ -3,7 +3,7 @@ from __future__ import annotations
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
-from typing_extensions import Final
+from docs.sphinx_api_docs_source.public_api_report import PublicAPIChecker
 
 try:
     import docstring_parser
@@ -15,9 +15,6 @@ except ImportError:
 WHITELISTED_TAG = "--Public API--"
 
 _FuncT = TypeVar("_FuncT", bound=Callable[..., Any])
-
-# get_public_api_definitions() also checks this global
-_DYNAMICALLY_DEFINED: Final[dict[str, Callable]] = {}
 
 
 def public_api(func: _FuncT, is_dynamic: bool = False) -> _FuncT:
@@ -39,7 +36,7 @@ def public_api(func: _FuncT, is_dynamic: bool = False) -> _FuncT:
     if is_dynamic:
         # what other details do we need?
         # module path, class etc.
-        _DYNAMICALLY_DEFINED[func.__name__] = func
+        PublicAPIChecker.dynamically_defined[func.__name__] = func
 
     return func
 
