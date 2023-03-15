@@ -1,5 +1,4 @@
-# Validate that PR titles are prefixed with one of our accepted labels (see pr-title-checker-config.json for more details)
-# Docs: https://github.com/marketplace/actions/pr-title-checker
+# Validate that PR titles are prefixed with one of our accepted labels
 name: "PR Title Checker"
 on:
   pull_request_target:
@@ -14,8 +13,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: thehanimo/pr-title-checker@v1.3.7
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          pass_on_octokit_error: false
-          configuration_path: "../.github/pr-title-checker-config.json"
+    - name : Check PR title validity
+      run: |
+        echo {{ github.event.pull_request.title }} | grep -E "^\\[(FEATURE|BUGFIX|DOCS|MAINTENANCE|CONTRIB)\\]"
+        exit $?
