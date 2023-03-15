@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import Callable, Optional, cast
+from typing import Callable, Optional
 
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -90,21 +90,18 @@ class DBFSDataConnector(FilesystemDataConnector):
         Returns:
             Instantiated "DBFSDataConnector" object
         """
-        return cast(
-            DBFSDataConnector,
-            FilesystemDataConnector.build_data_connector(
-                datasource_name=datasource_name,
-                data_asset_name=data_asset_name,
-                batching_regex=batching_regex,
-                base_directory=base_directory,
-                glob_directive=glob_directive,
-                data_context_root_directory=data_context_root_directory,
-                # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # sorters=sorters,
-                # TODO: <Alex>ALEX</Alex>
-                file_path_template_map_fn=file_path_template_map_fn,
-            ),
+        return DBFSDataConnector(
+            datasource_name=datasource_name,
+            data_asset_name=data_asset_name,
+            batching_regex=batching_regex,
+            base_directory=base_directory,
+            glob_directive=glob_directive,
+            data_context_root_directory=data_context_root_directory,
+            # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # sorters=sorters,
+            # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn=file_path_template_map_fn,
         )
 
     # Interface Method
