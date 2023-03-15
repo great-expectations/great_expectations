@@ -3451,7 +3451,7 @@ def generate_temp_table_for_validator(
         logger.warning(
             f"GX has created permanent view {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
         )
-        stmt = "CREATE TABLE"
+        stmt = "CREATE TABLE "
     elif dialect == GXSqlDialect.AWSATHENA:
         logger.warning(
             f"GX has created permanent TABLE {temp_table_name} as part of processing SqlAlchemyBatchData, which usually creates a TEMP TABLE."
@@ -3489,6 +3489,9 @@ def generate_temp_table_for_validator(
 
     create_table_sql = schema_from_get_schema.strip()
     create_tmp_table_sql = re.sub("^(CREATE TABLE )?", stmt, create_table_sql)
+
+    if dialect in [GXSqlDialect.MYSQL, GXSqlDialect.MSSQL]:
+        create_tmp_table_sql = re.sub('"', "", create_tmp_table_sql)
 
     # add expiration for BIGQUERY
     if dialect == GXSqlDialect.BIGQUERY:
