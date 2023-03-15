@@ -1249,7 +1249,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
             ) from e
 
         if isinstance(response, GXCloudResourceRef):
-            new_profiler.ge_cloud_id = response.cloud_id
+            new_profiler.ge_cloud_id = response.id
 
         return new_profiler
 
@@ -1399,9 +1399,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         assert bool(name) ^ bool(id), "Must provide either name or id (but not both)"
 
         if id:
-            return GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, cloud_id=id
-            )
+            return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER, id=id)
         return ConfigurationIdentifier(
             configuration_key=name,
         )

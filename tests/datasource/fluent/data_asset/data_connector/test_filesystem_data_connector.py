@@ -576,6 +576,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         base_directory=pathlib.Path(base_directory),
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
+
     unsorted_batch_definition_list: List[
         BatchDefinition
     ] = my_data_connector.get_batch_definition_list(
