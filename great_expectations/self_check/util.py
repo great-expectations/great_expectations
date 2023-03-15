@@ -238,7 +238,7 @@ try:
         "BIGINT": postgresqltypes.BIGINT,
         "TIMESTAMP": postgresqltypes.TIMESTAMP,
         "DATE": postgresqltypes.DATE,
-        "DOUBLE PRECISION": postgresqltypes.DOUBLE_PRECISION,
+        "DOUBLE_PRECISION": postgresqltypes.DOUBLE_PRECISION,
         "BOOLEAN": postgresqltypes.BOOLEAN,
         "NUMERIC": postgresqltypes.NUMERIC,
     }
@@ -3431,6 +3431,9 @@ def generate_temp_table_for_validator(
     # https://www.appsloveworld.com/pandas/100/12/create-a-temporary-table-in-mysql-using-pandas
 
     # dialects that support temp schemas
+
+    if dialect in [GXSqlDialect.MYSQL, GXSqlDialect.POSTGRESQL, GXSqlDialect.MSSQL]:
+        return
     if temp_table_schema_name is not None and dialect in [
         GXSqlDialect.BIGQUERY,
         GXSqlDialect.SNOWFLAKE,
@@ -3468,11 +3471,12 @@ def generate_temp_table_for_validator(
         stmt = "CREATE VOLATILE TABLE "
     elif dialect in [
         GXSqlDialect.SNOWFLAKE,
-        GXSqlDialect.MYSQL,
+        # GXSqlDialect.MYSQL,
         GXSqlDialect.HIVE,
         GXSqlDialect.VERTICA,
     ]:
         stmt = "CREATE TEMPORARY TABLE "
+
     else:
         stmt = "CREATE TEMPORARY TABLE "
 
@@ -3490,8 +3494,9 @@ def generate_temp_table_for_validator(
     create_table_sql = schema_from_get_schema.strip()
     create_tmp_table_sql = re.sub("^(CREATE TABLE )?", stmt, create_table_sql)
 
-    if dialect in [GXSqlDialect.MYSQL, GXSqlDialect.MSSQL]:
-        create_tmp_table_sql = re.sub('"', "", create_tmp_table_sql)
+    # if dialect in [GXSqlDialect.MYSQL, GXSqlDialect.MSSQL]:
+    #     create_tmp_table_sql = re.sub(f'"{temp_table_name}"', f'{temp_table_name}', create_tmp_table_sql)
+    #     create_tmp_table_sql = re.sub('\"', '', create_tmp_table_sql)
 
     # add expiration for BIGQUERY
     if dialect == GXSqlDialect.BIGQUERY:

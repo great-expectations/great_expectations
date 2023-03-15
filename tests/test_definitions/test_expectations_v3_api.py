@@ -75,7 +75,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                         if isinstance(d["data"], list):
                             sqlite_db_path = generate_sqlite_db_path()
 
-                            print(f"this is the filename: {filename}")
                             for dataset in d["data"]:
                                 datasets.append(
                                     get_test_validator_with_data(

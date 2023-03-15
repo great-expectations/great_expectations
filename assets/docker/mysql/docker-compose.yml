@@ -11,6 +11,8 @@ services:
       - dbnet
     ports:
       - "3306:3306"
+    cap_add:
+      - SYS_NICE  # CAP_SYS_NICE (https://stackoverflow.com/questions/55559386/how-to-fix-mbind-operation-not-permitted-in-mysql-error-log/55706057#55706057)
 
 networks:
   dbnet:
