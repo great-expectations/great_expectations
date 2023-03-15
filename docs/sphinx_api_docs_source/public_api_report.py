@@ -505,7 +505,11 @@ class PublicAPIChecker:
             if self.is_definition_marked_public_api(definition):
                 definitions.append(definition)
 
-        return set(definitions)
+        from great_expectations.core._docs_decorators import _DYNAMICALLY_DEFINED
+
+        dynamic_definitions = _DYNAMICALLY_DEFINED.values()
+
+        return set(definitions) | set(dynamic_definitions)
 
     def get_module_level_function_public_api_definitions(self) -> Set[Definition]:
         """Get module level function definitions that are marked with the public api decorator."""

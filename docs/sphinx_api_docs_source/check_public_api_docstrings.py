@@ -155,11 +155,7 @@ def get_public_api_definitions() -> Set[Definition]:
 
     public_api_checker = PublicAPIChecker(code_parser=code_parser)
 
-    from great_expectations.core._docs_decorators import _DYNAMICALLY_DEFINED
-
-    dynamic_definitions = set(_DYNAMICALLY_DEFINED.values())
-
-    return public_api_checker.get_all_public_api_definitions() | dynamic_definitions
+    return public_api_checker.get_all_public_api_definitions()
 
 
 def get_public_api_module_level_function_definitions() -> Set[Definition]:
