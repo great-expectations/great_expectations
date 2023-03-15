@@ -3904,17 +3904,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             BatchKwargs
 
         """
-        if kwargs.get("name"):
-            if data_asset_name:
-                raise ValueError(
-                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
-                )
-            # deprecated-v0.11.2
-            warnings.warn(
-                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
