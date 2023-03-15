@@ -41,6 +41,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
+
     for expectation_category in expectation_dirs:
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"

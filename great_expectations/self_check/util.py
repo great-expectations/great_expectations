@@ -3035,14 +3035,11 @@ def check_json_test_result(  # noqa: C901 - 52
                                 rtol=test["tolerance"],
                             )
                     else:
-                        try:
-                            assert np.allclose(
-                                result["result"]["observed_value"],
-                                value,
-                                rtol=test["tolerance"],
-                            )
-                        except AssertionError:
-                            breakpoint()
+                        assert np.allclose(
+                            result["result"]["observed_value"],
+                            value,
+                            rtol=test["tolerance"],
+                        )
                 else:
                     if isinstance(value, dict) and "values" in value:
                         try:
