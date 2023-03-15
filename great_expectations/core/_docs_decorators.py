@@ -3,6 +3,8 @@ from __future__ import annotations
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
+from ...docs import _DYNAMIC_DEFINITIONS
+
 try:
     import docstring_parser
     from docstring_parser import DocstringStyle
@@ -13,8 +15,6 @@ except ImportError:
 WHITELISTED_TAG = "--Public API--"
 
 _FuncT = TypeVar("_FuncT", bound=Callable[..., Any])
-
-_DYNAMIC_DEFINITIONS: dict[str, _FuncT] = {}
 
 
 def public_api(func: _FuncT, is_dynamic: bool = False) -> _FuncT:

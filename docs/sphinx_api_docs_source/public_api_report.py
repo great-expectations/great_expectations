@@ -260,7 +260,7 @@ class CodeParser:
 
     @staticmethod
     def get_all_dynamic_class_method_and_function_definitions() -> set[Definition]:
-        from great_expectations.core._docs_decorators import _DYNAMIC_DEFINITIONS
+        from .. import _DYNAMIC_DEFINITIONS
 
         return {
             Definition(
