@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import ast
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
@@ -15,9 +14,7 @@ WHITELISTED_TAG = "--Public API--"
 
 _FuncT = TypeVar("_FuncT", bound=Callable[..., Any])
 
-_DYNAMIC_DEFINITIONS: dict[
-    str, ast.FunctionDef | ast.ClassDef | ast.AsyncFunctionDef
-] = {}
+_DYNAMIC_DEFINITIONS: dict[str, _FuncT] = {}
 
 
 def public_api(func: _FuncT, is_dynamic: bool = False) -> _FuncT:

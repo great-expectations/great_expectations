@@ -495,7 +495,18 @@ class PublicAPIChecker:
     ) -> None:
         self.code_parser = code_parser
 
-    def get_all_public_api_definitions(self) -> Set[Definition]:
+    @property
+    def dynamic_definitions(self) -> set[Definition]:
+        from great_expectations.core._docs_decorators import _DYNAMIC_DEFINITIONS
+
+        return {
+            Definition(
+                name=name, filepath=pathlib.Path(), ast_definition=ast_definition
+            )
+            for name, ast_definition in _DYNAMIC_DEFINITIONS.items()
+        }
+
+    def get_all_public_api_definitions(self) -> set[Definition]:
         """Get definitions that are marked with the public api decorator."""
         static_definitions: set[Definition] = set()
 
@@ -505,16 +516,7 @@ class PublicAPIChecker:
             if self.is_definition_marked_public_api(definition):
                 static_definitions.add(definition)
 
-        from great_expectations.core._docs_decorators import _DYNAMIC_DEFINITIONS
-
-        dynamic_definitions: set[Definition] = {
-            Definition(
-                name=name, filepath=pathlib.Path(), ast_definition=ast_definition
-            )
-            for name, ast_definition in _DYNAMIC_DEFINITIONS.items()
-        }
-
-        return static_definitions | dynamic_definitions
+        return static_definitions | self.dynamic_definitions
 
     def get_module_level_function_public_api_definitions(self) -> Set[Definition]:
         """Get module level function definitions that are marked with the public api decorator."""
