@@ -270,6 +270,7 @@ stages:
 
       # Runs pytest with Spark and Postgres enabled
       - job: comprehensive
+        timeoutInMinutes: 90
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
           # This matrix is intended to split up our sizeable test suite into two distinct components.
