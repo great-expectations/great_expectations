@@ -1,7 +1,13 @@
+from __future__ import annotations
+
+from typing import Any, Callable
+
 # Set up version information immediately
 from ._version import get_versions  # isort:skip
 
 __version__ = get_versions()["version"]  # isort:skip
+
+_DYNAMIC_DEFINITIONS: dict[str, Callable[..., Any]] = {}
 
 from great_expectations.data_context.migrator.cloud_migrator import CloudMigrator
 

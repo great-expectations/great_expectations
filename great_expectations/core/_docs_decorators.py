@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import pathlib
-import pickle
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
+
+from great_expectations import _DYNAMIC_DEFINITIONS
 
 try:
     import docstring_parser
@@ -15,10 +15,6 @@ except ImportError:
 WHITELISTED_TAG = "--Public API--"
 
 _FuncT = TypeVar("_FuncT", bound=Callable[..., Any])
-
-_DYNAMIC_DOCS_DEFINITIONS_PATH = pathlib.Path(
-    ".", ".", ".", "docs", "sphinx_api_docs_source", "dynamic_docs_definitions.pickle"
-)
 
 
 def public_api(func: _FuncT, is_dynamic: bool = False) -> _FuncT:
@@ -38,8 +34,7 @@ def public_api(func: _FuncT, is_dynamic: bool = False) -> _FuncT:
     func.__doc__ = WHITELISTED_TAG + existing_docstring
 
     if is_dynamic:
-        with open(_DYNAMIC_DOCS_DEFINITIONS_PATH, "a+") as f:
-            pickle.dump(func, f)
+        _DYNAMIC_DEFINITIONS[func.__name__] = func
 
     return func
 

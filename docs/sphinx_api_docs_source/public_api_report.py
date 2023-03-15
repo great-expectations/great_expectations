@@ -56,11 +56,10 @@ import glob
 import logging
 import operator
 import pathlib
-import pickle
 import re
 import sys
 from dataclasses import dataclass
-from typing import Callable, List, Optional, Set, Union, cast
+from typing import List, Optional, Set, Union, cast
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -260,27 +259,15 @@ class CodeParser:
         self.file_contents = file_contents
 
     @staticmethod
-    def get_all_dynamic_class_method_and_function_definitions() -> Set[Definition]:
-        _DYNAMIC_DOCS_DEFINITIONS_PATH = pathlib.Path(
-            ".", "dynamic_docs_definitions.pickle"
-        )
-        dynamic_callables: list[Callable] = []
-        with open(_DYNAMIC_DOCS_DEFINITIONS_PATH, "rb") as f:
-            try:
-                while True:
-                    dynamic_callables.append(pickle.load(f))
-            except EOFError:
-                pass
-        dynamic_definitions: Set[Definition] = set()
-        for dynamic_callable in dynamic_callables:
-            dynamic_definitions.add(
-                Definition(
-                    name=dynamic_callable.__name__,
-                    filepath=pathlib.Path(),
-                    ast_definition=callable,
-                )
+    def get_all_dynamic_class_method_and_function_definitions() -> set[Definition]:
+        from great_expectations import _DYNAMIC_DEFINITIONS
+
+        return {
+            Definition(
+                name=name, filepath=pathlib.Path(), ast_definition=ast_definition
             )
-        return dynamic_definitions
+            for name, ast_definition in _DYNAMIC_DEFINITIONS.items()
+        }
 
     def get_all_static_class_method_and_function_names(
         self,
