@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import pathlib
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
-from docs.sphinx_api_docs_source.public_api_report import PublicAPIChecker
+from docs.sphinx_api_docs_source.public_api_report import Definition, PublicAPIChecker
 
 try:
     import docstring_parser
@@ -34,9 +35,9 @@ def public_api(func: _FuncT, is_dynamic: bool = False) -> _FuncT:
     func.__doc__ = WHITELISTED_TAG + existing_docstring
 
     if is_dynamic:
-        # what other details do we need?
-        # module path, class etc.
-        PublicAPIChecker.dynamically_defined[func.__name__] = func
+        PublicAPIChecker.dynamic_definitions.add(
+            Definition(name=func.__name__, filepath=pathlib.Path(), ast_definition=func)
+        )
 
     return func
 

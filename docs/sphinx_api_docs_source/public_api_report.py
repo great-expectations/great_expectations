@@ -489,7 +489,7 @@ def _get_import_names(code: str) -> List[str]:
 class PublicAPIChecker:
     """Check if functions, methods and classes are marked part of the PublicAPI."""
 
-    dynamically_defined: ClassVar[dict[str, Callable]] = {}
+    dynamic_definitions: ClassVar[set[Definition]] = set()
 
     def __init__(
         self,
@@ -499,17 +499,15 @@ class PublicAPIChecker:
 
     def get_all_public_api_definitions(self) -> Set[Definition]:
         """Get definitions that are marked with the public api decorator."""
-        definitions: List[Definition] = []
+        static_definitions: set[Definition] = set()
 
         for (
             definition
         ) in self.code_parser.get_all_class_method_and_function_definitions():
             if self.is_definition_marked_public_api(definition):
-                definitions.append(definition)
+                static_definitions.add(definition)
 
-        dynamic_definitions = self.dynamically_defined.values()
-
-        return set(definitions) | set(dynamic_definitions)
+        return static_definitions | self.dynamic_definitions
 
     def get_module_level_function_public_api_definitions(self) -> Set[Definition]:
         """Get module level function definitions that are marked with the public api decorator."""
