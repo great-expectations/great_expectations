@@ -326,13 +326,13 @@ def test_determine_key_constructs_key(
     name: Optional[str], ge_cloud_id: Optional[str], expected_key: DataContextKey
 ) -> None:
     actual_key = ConfigurationStore(store_name="test").determine_key(
-        name=name, ge_cloud_id=ge_cloud_id
+        name=name, id=ge_cloud_id
     )
     assert actual_key == expected_key
 
 
 @pytest.mark.parametrize(
-    "name,ge_cloud_id",
+    "name,id",
     [
         pytest.param("my_name", "abc123", id="too many args"),
         pytest.param(
@@ -344,12 +344,10 @@ def test_determine_key_constructs_key(
 )
 @pytest.mark.unit
 def test_determine_key_raises_error_with_conflicting_args(
-    name: Optional[str], ge_cloud_id: Optional[str]
+    name: Optional[str], id: Optional[str]
 ) -> None:
     with pytest.raises(AssertionError) as e:
-        ConfigurationStore(store_name="test").determine_key(
-            name=name, ge_cloud_id=ge_cloud_id
-        )
+        ConfigurationStore(store_name="test").determine_key(name=name, id=id)
 
     assert "Must provide either name or ge_cloud_id" in str(e.value)
 

@@ -151,17 +151,15 @@ class ConfigurationStore(Store):
         raise NotImplementedError
 
     def determine_key(
-        self, name: Optional[str] = None, ge_cloud_id: Optional[str] = None
+        self, name: Optional[str] = None, id: Optional[str] = None
     ) -> Union[GXCloudIdentifier, ConfigurationIdentifier]:
-        assert bool(name) ^ bool(
-            ge_cloud_id
-        ), "Must provide either name or ge_cloud_id."
+        assert bool(name) ^ bool(id), "Must provide either name or id."
 
         key: Union[GXCloudIdentifier, ConfigurationIdentifier]
-        if ge_cloud_id or self.ge_cloud_mode:
+        if id or self.cloud_mode:
             key = GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.CHECKPOINT,
-                cloud_id=ge_cloud_id,
+                cloud_id=id,
                 resource_name=name,
             )
         else:
