@@ -170,13 +170,14 @@ def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="test"
     )
-    with pytest.deprecated_call():  # "name being deprecated as a batch_parameter. Please use data_asset_name instead.
-        batch = data_context_parameterized_expectation_suite.get_batch(
-            expectation_suite_name="test",
-            batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
-                datasource=name, batch_kwargs_generator="subdir_reader", name="test"
-            ),
-        )
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        expectation_suite_name="test",
+        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
+            datasource=name,
+            batch_kwargs_generator="subdir_reader",
+            data_asset_name="test",
+        ),
+    )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
     assert res.success is True
