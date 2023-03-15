@@ -11,41 +11,49 @@ module.exports = {
       items: [
         {
           type: 'category',
-          label: 'Installation',
+          label: 'Installation and dependencies',
           items: [
+            {
+              type: 'html',
+              value: '<h4>For use with local filesystems</h4>',
+              defaultStyle: true
+            },
             'guides/setup/installation/local',
+            {
+              type: 'html',
+              value: '<h4>For use in hosted environments</h4>',
+              defaultStyle: true
+            },
             'guides/setup/installation/hosted_environment',
             {
-              type: 'category',
-              label: 'Installation with cloud storage dependencies',
-              items: [
-                {
-                  type: 'doc',
-                  id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3'
-                },
-                {
-                  type: 'doc',
-                  id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs'
-                },
-                {
-                  type: 'doc',
-                  id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs'
-                }
-              ]
+              type: 'html',
+              value: '<h4>For use with cloud storage</h4>',
+              defaultStyle: true
             },
             {
-              type: 'category',
-              label: 'Installation with SQL dependencies',
-              items: [
-                {
-                  type: 'doc',
-                  id: 'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases'
-                },
-                {
-                  type: 'doc',
-                  id: 'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_postgresql'
-                }
-              ]
+              type: 'doc',
+              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3'
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs'
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs'
+            },
+            {
+              type: 'html',
+              value: '<h4>For use with SQL Databases</h4>',
+              defaultStyle: true
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases'
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_postgresql'
             }
           ]
         },
@@ -54,24 +62,44 @@ module.exports = {
           label: 'Data Contexts',
           items: [
             {
-              type: 'doc',
-              id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
-              label: 'How to initialize a Filesystem Data Context in Python'
+              type: 'html',
+              value: '<h4>Quickstart Data Context</h4>',
+              defaultStyle: true
             },
-            'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
             {
               type: 'doc',
               id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context',
               label: 'How to quickly instantiate a Data Context'
             },
             {
+              type: 'html',
+              value: '<h4>Filesystem Data Contexts</h4>',
+              defaultStyle: true
+            },
+            'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
+            {
+              type: 'doc',
+              id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
+              label: 'How to initialize a Filesystem Data Context in Python'
+            },
+            {
               type: 'doc',
               id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context',
               label: 'How to instantiate a specific Filesystem Data Context'
             },
+            {
+              type: 'html',
+              value: '<h4>In-memory Data Contexts</h4>',
+              defaultStyle: true
+            },
+            'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file',
+            {
+              type: 'html',
+              value: '<h4>Data Context Configuration</h4>',
+              defaultStyle: true
+            },
             'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
-            'guides/setup/configuring_data_contexts/how_to_configure_credentials',
-            'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'
+            'guides/setup/configuring_data_contexts/how_to_configure_credentials'
           ]
         },
         {
@@ -131,8 +159,34 @@ module.exports = {
           type: 'category',
           label: 'Filesystem Datasources',
           items: [
+            {
+              type: 'html',
+              value: '<h4>Local Filesystems</h4>',
+              defaultStyle: true
+            },
             'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas',
-            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark'
+            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark',
+            {
+              type: 'html',
+              value: '<h4>Google Cloud Server</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark',
+            {
+              type: 'html',
+              value: '<h4>Azure Blob Storage</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark',
+            {
+              type: 'html',
+              value: '<h4>Amazon Web Services S3</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark'
           ]
         },
         {
@@ -144,32 +198,30 @@ module.exports = {
         },
         {
           type: 'category',
-          label: 'Cloud Datasources',
+          label: 'SQL Datasources',
           items: [
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas',
-            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'SQL databases',
-          items: [
+            {
+              type: 'html',
+              value: '<h4>General SQL Datasources</h4>',
+              defaultStyle: true
+            },
             'guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table',
             'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query',
+            {
+              type: 'html',
+              value: '<h4>Specific SQL dialects</h4>',
+              defaultStyle: true
+            },
             'guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data',
             'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data'
           ]
         },
         {
           type: 'category',
-          label: 'Requesting data from a Datasource',
+          label: 'Working with Data Assets',
           items: [
-            'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource',
-            'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe'
+            'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset',
+            'guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset'
           ]
         },
         {
@@ -218,6 +270,14 @@ module.exports = {
                 'guides/connecting_to_your_data/database/snowflake',
                 'guides/connecting_to_your_data/database/sqlite',
                 'guides/connecting_to_your_data/database/trino'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Block-configuration compatible Batch Requests',
+              items: [
+                'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource',
+                'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe'
               ]
             }
           ]
