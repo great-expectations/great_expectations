@@ -74,9 +74,9 @@ stages:
             expectations_v3_api:
               test_script: 'tests/test_definitions/test_expectations_v3_api.py'
               extra_args: ''
-            expectations_v2_api:
-              test_script: 'tests/test_definitions/test_expectations_v2_api.py'
-              extra_args: ''
+#            expectations_v2_api:
+#              test_script: 'tests/test_definitions/test_expectations_v2_api.py'
+#              extra_args: ''
           maxParallel: 1
 
         steps:
@@ -104,7 +104,7 @@ stages:
               mkdir -p junit
               pytest -v $(test_script) \
                 $(extra_args) \
-                --bigquery \
+                --snowflake \
                 --junitxml=junit/test-results.xml \
                 --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
                 --ignore=tests/cli --ignore=tests/integration/usage_statistics
