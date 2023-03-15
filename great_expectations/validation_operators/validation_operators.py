@@ -366,7 +366,7 @@ class ActionListValidationOperator(ValidationOperator):
                 if self._using_cloud_context:
                     expectation_suite_identifier = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-                        cloud_id=batch._expectation_suite.ge_cloud_id,
+                        id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.VALIDATION_RESULT
@@ -384,7 +384,7 @@ class ActionListValidationOperator(ValidationOperator):
                 validation_result = async_batch_validation_result.result()
                 validation_result.meta["validation_id"] = validation_id
                 validation_result.meta["checkpoint_id"] = (
-                    checkpoint_identifier.cloud_id if checkpoint_identifier else None
+                    checkpoint_identifier.id if checkpoint_identifier else None
                 )
 
                 batch_actions_results = self._run_actions(
