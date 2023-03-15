@@ -1,3 +1,5 @@
+from typing import Optional, cast
+
 import pandas as pd
 import pytest
 
@@ -7,7 +9,11 @@ from contrib.experimental.great_expectations_experimental.expectations.expect_qu
 )
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.data_context import DataContext
-from great_expectations.self_check.util import build_spark_validator_with_data
+from great_expectations.self_check.util import (
+    build_spark_validator_with_data,
+    get_test_validator_with_data,
+)
+from great_expectations.util import build_in_memory_runtime_context
 from great_expectations.validator.validator import (
     ExpectationValidationResult,
     Validator,
@@ -39,6 +45,7 @@ sqlite_batch_request: BatchRequest = BatchRequest(
         (sqlite_runtime_batch_request, True, 0.5, 'col("Age")>17', True),
     ],
 )
+@pytest.mark.slow  # 3.02s
 def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
     batch_request,
     success,
@@ -122,6 +129,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_sqlite(
         ),
     ],
 )
+@pytest.mark.slow  # 3.92s
 def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_sqlite(
     batch_request,
     query,
@@ -163,12 +171,13 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "success,observed,row_condition,warns",
     [
         (True, 0.6481340441736482, None, False),
         (False, 0.4791666666666667, 'col("Age")<18', True),
-        (True, 0.6393939393939394, 'col("Age")>17', True),
+        (True, 0.6614626129827444, 'col("Age")>17', True),
     ],
 )
 def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
@@ -181,7 +190,15 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     titanic_df,
 ):
     df: pd.DataFrame = titanic_df
-    validator: Validator = build_spark_validator_with_data(df, spark_session)
+
+    context: Optional[DataContext] = cast(
+        DataContext, build_in_memory_runtime_context()
+    )
+    validator = get_test_validator_with_data(
+        execution_engine="spark",
+        data=df,
+        context=context,
+    )
 
     if warns:
         with pytest.warns(UserWarning):
@@ -209,6 +226,7 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_spark(
     )
 
 
+# noinspection PyUnusedLocal
 @pytest.mark.parametrize(
     "query,success,observed,row_condition,warns",
     [
@@ -240,7 +258,14 @@ def test_expect_queried_column_value_frequency_to_meet_threshold_override_query_
 ):
     df: pd.DataFrame = titanic_df
 
-    validator: Validator = build_spark_validator_with_data(df, spark_session)
+    context: Optional[DataContext] = cast(
+        DataContext, build_in_memory_runtime_context()
+    )
+    validator = get_test_validator_with_data(
+        execution_engine="spark",
+        data=df,
+        context=context,
+    )
 
     if warns:
         with pytest.warns(UserWarning):

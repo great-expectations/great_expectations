@@ -7,7 +7,7 @@ import pandas as pd
 import pandas.api.types as ptypes
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import (
@@ -110,7 +110,7 @@ def test_get_batch_with_split_on_year(
     num_values_in_df,
     simple_multi_year_pandas_df: pd.DataFrame,
 ):
-    engine: PandasExecutionEngine = PandasExecutionEngine()
+    engine = PandasExecutionEngine()
 
     split_df: pd.DataFrame = engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -144,7 +144,7 @@ def test_get_batch_with_split_on_date_parts_day(
     num_values_in_df,
     simple_multi_year_pandas_df: pd.DataFrame,
 ):
-    engine: PandasExecutionEngine = PandasExecutionEngine()
+    engine = PandasExecutionEngine()
 
     split_df: pd.DataFrame = engine.get_batch_data(
         RuntimeDataBatchSpec(
@@ -348,7 +348,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "group_names": ["index"],
         },
     )
-    batch_def: BatchDefinition = BatchDefinition(
+    batch_def = BatchDefinition(
         datasource_name="FAKE_DATASOURCE_NAME",
         data_connector_name="my_data_connector",
         data_asset_name="alpha",
@@ -374,7 +374,7 @@ def test_get_batch_with_split_on_whole_table_s3_with_configured_asset_s3_data_co
             "splitter_method": "_split_on_whole_table",
         },
     )
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         execution_engine.get_batch_data(
             batch_spec=my_data_connector.build_batch_spec(
                 batch_definition=batch_def_no_key
@@ -494,7 +494,7 @@ def test_get_batch_with_split_on_multi_column_values(test_df):
 
 
 def test_get_batch_with_split_on_hashed_column(test_df):
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
         split_df = PandasExecutionEngine().get_batch_data(
             RuntimeDataBatchSpec(

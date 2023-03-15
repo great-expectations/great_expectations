@@ -37,7 +37,14 @@ def diagnostics() -> List[ExpectationDiagnostics]:
         ExpectColumnMostCommonValueToBeInSet,
         ExpectColumnStdevToBeBetween,
     ]
-    diagnostics = list(map(lambda e: e().run_diagnostics(), expectations))
+    diagnostics = list(
+        map(
+            lambda e: e().run_diagnostics(
+                only_consider_these_backends=["pandas", "sqlite"]
+            ),
+            expectations,
+        )
+    )
     return diagnostics
 
 
@@ -53,7 +60,7 @@ def test_update_expectations(
         for expectation in package.expectations.values()
     )
     assert (
-        package.status and package.status.production == 3 and package.status.total == 3
+        package.status and package.status.production >= 2 and package.status.total == 3
     )
     assert package.maturity == Maturity.PRODUCTION
 

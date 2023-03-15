@@ -15,7 +15,7 @@ BASE_API_URL = "https://api.github.com/users/"
 
 # This class defines a Metric to support your Expectation.
 # For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidGithubUser(ColumnMapMetricProvider):
+class ColumnValuesToBeValidGithubUsername(ColumnMapMetricProvider):
 
     # This is the id string that will be used to reference your metric.
     condition_metric_name = "column_values.valid_github_username"
@@ -50,15 +50,15 @@ class ColumnValuesToBeValidGithubUser(ColumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesToBeValidGithubUser(ColumnMapExpectation):
-    """This Expectation validates data as conforming to be valid github users."""
+class ExpectColumnValuesToBeValidGithubUsername(ColumnMapExpectation):
+    """Expect column values to be valid github users."""
 
     # These examples will be shown in the public gallery.
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
             "data": {
-                "valid_users": ["github", "git"],
+                "valid_users": ["github", "git", "great-expectations"],
                 "invalid_users": [
                     "RANDOM_123",
                     "memememememe",
@@ -95,7 +95,7 @@ class ExpectColumnValuesToBeValidGithubUser(ColumnMapExpectation):
     default_kwarg_values = {}
 
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
         Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
@@ -108,8 +108,7 @@ class ExpectColumnValuesToBeValidGithubUser(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        if configuration is None:
-            configuration = self.configuration
+        configuration = configuration or self.configuration
 
         # # Check other things in configuration.kwargs and raise Exceptions if needed
         # try:
@@ -133,4 +132,4 @@ class ExpectColumnValuesToBeValidGithubUser(ColumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnValuesToBeValidGithubUser().print_diagnostic_checklist()
+    ExpectColumnValuesToBeValidGithubUsername().print_diagnostic_checklist()

@@ -1,5 +1,5 @@
 import re
-from glob import glob
+from pathlib import Path
 
 import pkg_resources
 from setuptools import find_packages, setup
@@ -26,22 +26,39 @@ def get_extras_require():
         "snowflake",
         "teradata",
         "trino",
+        "vertica",
     )
-    ignore_keys = ("sqlalchemy", "test", "test-pipeline")
-    rx_fname_part = re.compile(r"requirements-dev-(.*).txt")
-    for fname in sorted(glob("requirements-dev-*.txt")):
-        key = rx_fname_part.match(fname).group(1)
+    ignore_keys = (
+        "sqlalchemy",
+        "test",
+        "tools",
+        "all-contrib-expectations",
+    )
+
+    requirements_dir = "reqs"
+    rx_name_part = re.compile(r"requirements-dev-(.*).txt")
+
+    # Use Path() from pathlib so we can make this section of the code OS agnostic.
+    # Loop through each requirement file and verify they are named
+    # correctly and are in the right location.
+    for file_path in Path().glob(f"{requirements_dir}/*.txt"):
+        match = rx_name_part.match(file_path.name)
+        assert (
+            match is not None
+        ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
+        key = match.group(1)
         if key in ignore_keys:
             continue
-        with open(fname) as f:
+        with open(file_path) as f:
             parsed = [str(req) for req in pkg_resources.parse_requirements(f)]
             results[key] = parsed
 
     lite = results.pop("lite")
     contrib = results.pop("contrib")
+    docs_test = results.pop("api-docs-test")
     results["boto"] = [req for req in lite if req.startswith("boto")]
     results["sqlalchemy"] = [req for req in lite if req.startswith("sqlalchemy")]
-    results["test"] = lite + contrib
+    results["test"] = lite + contrib + docs_test
 
     for new_key, existing_key in extra_key_mapping.items():
         results[new_key] = results[existing_key]
@@ -49,6 +66,9 @@ def get_extras_require():
         results[key] += results["sqlalchemy"]
 
     results.pop("boto")
+    all_requirements_set = set()
+    [all_requirements_set.update(vals) for vals in results.values()]
+    results["dev"] = sorted(all_requirements_set)
     return results
 
 
@@ -67,10 +87,13 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": get_extras_require(),
-    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
+    "packages": find_packages(
+        exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
+    ),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
+    "package_data": {"great_expectations": ["py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,
     "license": "Apache-2.0",
@@ -89,6 +112,7 @@ config = {
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 }
 

@@ -2,9 +2,9 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 
-context = ge.get_context()
+context = gx.get_context()
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
@@ -87,9 +87,10 @@ assert actual_checkpoint_yaml == yaml.safe_load(expected_checkpoint_yaml)
 # override for integration tests
 updated_configuration = actual_checkpoint_yaml
 updated_configuration["batches"][0]["batch_kwargs"]["path"] = "./data/Titanic.csv"
+updated_configuration["name"] = "test_updated_v2_checkpoint"
 
 # run checkpoint
 context.add_checkpoint(**updated_configuration)
-results = context.run_checkpoint(checkpoint_name="test_v2_checkpoint")
+results = context.run_checkpoint(checkpoint_name="test_updated_v2_checkpoint")
 
 assert results["success"] is True

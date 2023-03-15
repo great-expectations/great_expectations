@@ -20,18 +20,18 @@ class ColumnValuesJsonParseable(ColumnMapMetricProvider):
             try:
                 json.loads(val)
                 return True
-            except:
+            except Exception:
                 return False
 
         return column.map(is_json)
 
     @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, json_schema, **kwargs):
+    def _spark(cls, column, **kwargs):
         def is_json(val):
             try:
                 json.loads(val)
                 return True
-            except:
+            except Exception:
                 return False
 
         is_json_udf = F.udf(is_json, sparktypes.BooleanType())

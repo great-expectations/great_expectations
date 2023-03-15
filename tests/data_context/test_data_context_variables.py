@@ -7,6 +7,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -26,13 +27,17 @@ from great_expectations.data_context.types.base import (
     AnonymizedUsageStatisticsConfig,
     ConcurrencyConfig,
     DataContextConfig,
-    GeCloudConfig,
+    GXCloudConfig,
+    IncludeRenderedContentConfig,
     NotebookConfig,
     NotebookTemplateConfig,
     ProgressBarsConfig,
 )
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
+)
+from tests.integration.usage_statistics.test_integration_usage_statistics import (
+    USAGE_STATISTICS_QA_URL,
 )
 
 yaml = YAMLHandler()
@@ -66,11 +71,16 @@ def data_context_config_dict() -> dict:
         "anonymous_usage_statistics": AnonymizedUsageStatisticsConfig(
             enabled=True,
             data_context_id="6a52bdfa-e182-455b-a825-e69f076e67d6",
-            usage_statistics_url="https://app.greatexpectations.io/",
+            usage_statistics_url=USAGE_STATISTICS_QA_URL,
         ),
         "notebooks": None,
         "concurrency": None,
         "progress_bars": None,
+        "include_rendered_content": {
+            "expectation_suite": False,
+            "expectation_validation_result": False,
+            "globally": False,
+        },
     }
     return config
 
@@ -81,19 +91,32 @@ def data_context_config(data_context_config_dict: dict) -> DataContextConfig:
     return config
 
 
+class StubConfigurationProvider(_ConfigurationProvider):
+    def __init__(self, config_values=None) -> None:
+        self._config_values = config_values or {}
+        super().__init__()
+
+    def get_values(self):
+        return self._config_values
+
+
 @pytest.fixture
 def ephemeral_data_context_variables(
     data_context_config: DataContextConfig,
 ) -> EphemeralDataContextVariables:
-    return EphemeralDataContextVariables(config=data_context_config)
+    return EphemeralDataContextVariables(
+        config=data_context_config, config_provider=StubConfigurationProvider()
+    )
 
 
 @pytest.fixture
 def file_data_context_variables(
-    data_context_config: DataContextConfig, empty_data_context: DataContext
+    data_context_config: DataContextConfig, empty_data_context: FileDataContext
 ) -> FileDataContextVariables:
     return FileDataContextVariables(
-        data_context=empty_data_context, config=data_context_config
+        data_context=empty_data_context,
+        config=data_context_config,
+        config_provider=StubConfigurationProvider(),
     )
 
 
@@ -109,6 +132,7 @@ def cloud_data_context_variables(
         ge_cloud_organization_id=ge_cloud_organization_id,
         ge_cloud_access_token=ge_cloud_access_token,
         config=data_context_config,
+        config_provider=StubConfigurationProvider(),
     )
 
 
@@ -120,7 +144,7 @@ def file_data_context(
     project_path.mkdir()
     context_root_dir = project_path / "great_expectations"
     context = FileDataContext(
-        project_config=data_context_config, context_root_dir=str(context_root_dir)
+        project_config=data_context_config, context_root_dir=context_root_dir
     )
     return context
 
@@ -129,7 +153,7 @@ def file_data_context(
 def cloud_data_context(
     tmp_path: pathlib.Path,
     data_context_config: DataContextConfig,
-    ge_cloud_config_e2e: GeCloudConfig,
+    ge_cloud_config_e2e: GXCloudConfig,
 ) -> CloudDataContext:
     project_path = tmp_path / "cloud_data_context"
     project_path.mkdir()
@@ -137,8 +161,10 @@ def cloud_data_context(
 
     cloud_data_context = CloudDataContext(
         project_config=data_context_config,
-        ge_cloud_config=ge_cloud_config_e2e,
-        context_root_dir=str(context_root_dir),
+        cloud_base_url=ge_cloud_config_e2e.base_url,
+        cloud_access_token=ge_cloud_config_e2e.access_token,
+        cloud_organization_id=ge_cloud_config_e2e.organization_id,
+        context_root_dir=context_root_dir,
     )
     return cloud_data_context
 
@@ -200,6 +226,15 @@ def progress_bars() -> ProgressBarsConfig:
     )
 
 
+@pytest.fixture
+def include_rendered_content() -> IncludeRenderedContentConfig:
+    return IncludeRenderedContentConfig(
+        globally=False,
+        expectation_validation_result=False,
+        expectation_suite=False,
+    )
+
+
 @pytest.mark.parametrize(
     "target_attr",
     [
@@ -256,8 +291,13 @@ def progress_bars() -> ProgressBarsConfig:
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars getter",
         ),
+        pytest.param(
+            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
+            id="include_rendered_content getter",
+        ),
     ],
 )
+@pytest.mark.slow  # 1.20s
 def test_data_context_variables_get(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
@@ -291,12 +331,12 @@ def test_data_context_variables_get_with_substitutions(
         DataContextVariableSchema.CONFIG_VERSION
     ] = f"${env_var_name}"
     config: DataContextConfig = DataContextConfig(**data_context_config_dict)
-    substitutions: dict = {
+    config_values: dict = {
         env_var_name: value_associated_with_env_var,
     }
-
     variables: DataContextVariables = EphemeralDataContextVariables(
-        config=config, substitutions=substitutions
+        config=config,
+        config_provider=StubConfigurationProvider(config_values=config_values),
     )
     assert variables.config_version == value_associated_with_env_var
 
@@ -370,8 +410,14 @@ def test_data_context_variables_get_with_substitutions(
             DataContextVariableSchema.PROGRESS_BARS,
             id="progress_bars setter",
         ),
+        pytest.param(
+            include_rendered_content,
+            DataContextVariableSchema.INCLUDE_RENDERED_CONTENT,
+            id="include_rendered_content setter",
+        ),
     ],
 )
+@pytest.mark.slow  # 1.20s
 def test_data_context_variables_set(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
@@ -400,7 +446,7 @@ def test_data_context_variables_save_config(
     ephemeral_data_context_variables: EphemeralDataContextVariables,
     file_data_context_variables: FileDataContextVariables,
     cloud_data_context_variables: CloudDataContextVariables,
-    # The below GE Cloud variables were used to instantiate the above CloudDataContextVariables
+    # The below GX Cloud variables were used to instantiate the above CloudDataContextVariables
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
     ge_cloud_access_token: str,
@@ -419,7 +465,7 @@ def test_data_context_variables_save_config(
 
     # FileDataContextVariables
     with mock.patch(
-        "great_expectations.data_context.DataContext._save_project_config",
+        "great_expectations.data_context.store.InlineStoreBackend._save_changes",
         autospec=True,
     ) as mock_save:
         file_data_context_variables.save_config()
@@ -427,7 +473,7 @@ def test_data_context_variables_save_config(
         assert mock_save.call_count == 1
 
     # CloudDataContextVariables
-    with mock.patch("requests.put", autospec=True) as mock_put:
+    with mock.patch("requests.Session.put", autospec=True) as mock_put:
         type(mock_put.return_value).status_code = mock.PropertyMock(return_value=200)
 
         cloud_data_context_variables.save_config()
@@ -440,11 +486,13 @@ def test_data_context_variables_save_config(
             "notebooks",
             "plugins_directory",
             "stores",
+            "include_rendered_content",
         ):
             expected_config_dict[attr] = data_context_config_dict[attr]
 
         assert mock_put.call_count == 1
         mock_put.assert_called_with(
+            mock.ANY,  # requests.Session object
             f"{ge_cloud_base_url}/organizations/{ge_cloud_organization_id}/data-context-variables",
             json={
                 "data": {
@@ -455,10 +503,6 @@ def test_data_context_variables_save_config(
                     },
                 }
             },
-            headers={
-                "Content-Type": "application/vnd.api+json",
-                "Authorization": f"Bearer {ge_cloud_access_token}",
-            },
         )
 
 
@@ -468,10 +512,9 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 ) -> None:
     config = data_context_config
 
-    substitutions_key = "my_sensitive_information"
-    substitutions = {substitutions_key: "*****"}
     variables = EphemeralDataContextVariables(
-        config=data_context_config, substitutions=substitutions
+        config=data_context_config,
+        config_provider=StubConfigurationProvider(),
     )
 
     variables_str = str(variables)
@@ -479,15 +522,14 @@ def test_data_context_variables_repr_and_str_only_reveal_config(
 
     assert variables_str == str(config)
     assert variables_repr == repr(config)
-    assert (
-        substitutions_key not in variables_str
-        and substitutions_key not in variables_repr
-    )
 
 
 @pytest.mark.integration
 def test_file_data_context_variables_e2e(
-    monkeypatch, file_data_context: FileDataContext, progress_bars: ProgressBarsConfig
+    monkeypatch,
+    file_data_context: FileDataContext,
+    progress_bars: ProgressBarsConfig,
+    include_rendered_content: IncludeRenderedContentConfig,
 ) -> None:
     """
     What does this test do and why?
@@ -500,10 +542,16 @@ def test_file_data_context_variables_e2e(
     It is also important to note that in the case of $VARS syntax, we NEVER want to persist the underlying
     value in order to preserve sensitive information.
     """
-    # Prepare updated progress bars to set and serialize to disk
+    # Prepare updated progress_bars to set and serialize to disk
     updated_progress_bars: ProgressBarsConfig = copy.deepcopy(progress_bars)
     updated_progress_bars.globally = False
     updated_progress_bars.profilers = True
+
+    # Prepare updated include_rendered_content to set and serialize to disk
+    updated_include_rendered_content: IncludeRenderedContentConfig = copy.deepcopy(
+        include_rendered_content
+    )
+    updated_include_rendered_content.expectation_validation_result = True
 
     # Prepare updated plugins directory to set and serialize to disk (ensuring we hide the true value behind $VARS syntax)
     env_var_name: str = "MY_PLUGINS_DIRECTORY"
@@ -512,12 +560,15 @@ def test_file_data_context_variables_e2e(
 
     # Set attributes defined above
     file_data_context.variables.progress_bars = updated_progress_bars
+    file_data_context.variables.include_rendered_content = (
+        updated_include_rendered_content
+    )
     file_data_context.variables.plugins_directory = f"${env_var_name}"
     file_data_context.variables.save_config()
 
     # Review great_expectations.yml where values were written and confirm changes
     config_filepath = pathlib.Path(file_data_context.root_directory).joinpath(
-        file_data_context.GE_YML
+        file_data_context.GX_YML
     )
 
     with open(config_filepath) as f:
@@ -526,12 +577,16 @@ def test_file_data_context_variables_e2e(
 
     assert config_saved_to_disk.progress_bars == updated_progress_bars.to_dict()
     assert (
+        config_saved_to_disk.include_rendered_content.to_dict()
+        == updated_include_rendered_content.to_dict()
+    )
+    assert (
         file_data_context.variables.plugins_directory == value_associated_with_env_var
     )
     assert config_saved_to_disk.plugins_directory == f"${env_var_name}"
 
 
-@pytest.mark.integration
+@pytest.mark.e2e
 @pytest.mark.cloud
 def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     cloud_data_context: CloudDataContext,
@@ -549,9 +604,15 @@ def test_cloud_data_context_variables_successfully_hits_cloud_endpoint(
     assert success is True
 
 
-@pytest.mark.integration
+@pytest.mark.e2e
 @pytest.mark.cloud
-@mock.patch("great_expectations.data_context.DataContext._save_project_config")
+@mock.patch(
+    "great_expectations.data_context.data_context.serializable_data_context.SerializableDataContext._save_project_config"
+)
+@pytest.mark.xfail(
+    strict=False,
+    reason="GX Cloud E2E tests are failing due to env vars not being consistently recognized by Docker; x-failing for purposes of 0.15.22 release",
+)
 def test_cloud_enabled_data_context_variables_e2e(
     mock_save_project_config: mock.MagicMock, data_docs_sites: dict, monkeypatch
 ) -> None:
@@ -576,7 +637,7 @@ def test_cloud_enabled_data_context_variables_e2e(
     new_site_name = f"docs_site_{''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))}"
     updated_data_docs_sites[new_site_name] = {}
 
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     assert context.variables.plugins_directory != updated_plugins_dir
     assert context.variables.data_docs_sites != updated_data_docs_sites
@@ -589,7 +650,7 @@ def test_cloud_enabled_data_context_variables_e2e(
 
     context.variables.save_config()
 
-    context = DataContext(ge_cloud_mode=True)
+    context = DataContext(cloud_mode=True)
 
     assert context.variables.plugins_directory == updated_plugins_dir
     assert context.variables.data_docs_sites == updated_data_docs_sites

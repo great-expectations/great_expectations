@@ -1,18 +1,14 @@
 import logging
-import warnings
 from string import Template
+
+from marshmallow import Schema, ValidationError, fields, post_load
 
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
 from great_expectations.datasource.types import SqlAlchemyDatasourceTableBatchKwargs
 from great_expectations.exceptions import BatchKwargsError, GreatExpectationsError
-from great_expectations.marshmallow__shade import (
-    Schema,
-    ValidationError,
-    fields,
-    post_load,
-)
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +91,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         except ValidationError as err:
             raise GreatExpectationsError(
                 f"Unable to load asset configuration in TableBatchKwargsGenerator '{name}': "
-                "validation error: {str(err)}."
+                f"validation error: {str(err)}."
             )
 
         if datasource is not None:
@@ -109,7 +105,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 )
                 self.inspector = None
 
-    def _get_iterator(
+    def _get_iterator(  # noqa: C901 - 19
         self,
         data_asset_name,
         query_parameters=None,
@@ -153,7 +149,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             split_data_asset_name = data_asset_name.split(".")
             if len(split_data_asset_name) == 2:
                 schema_name = split_data_asset_name[0]
-                if self.engine.dialect.name.lower() == "bigquery":
+                if self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
                     table_name = data_asset_name
                 else:
                     table_name = split_data_asset_name[1]
@@ -163,14 +159,14 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
 
             elif (
                 len(split_data_asset_name) == 3
-                and self.engine.dialect.name.lower() == "bigquery"
+                and self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY
             ):
-                project_id = split_data_asset_name[0]
+                project_id = split_data_asset_name[0]  # noqa: F841
                 schema_name = split_data_asset_name[1]
                 table_name = data_asset_name
             else:
                 shape = "[SCHEMA.]TABLE"
-                if self.engine.dialect.name.lower() == "bigquery":
+                if self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
                     shape = f"[PROJECT_ID.]{shape}"
 
                 raise ValueError(
@@ -229,7 +225,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                 if schema_name in known_information_schemas:
                     continue
 
-                if self.engine.dialect.name.lower() == "bigquery":
+                if self.engine.dialect.name.lower() == GXSqlDialect.BIGQUERY:
                     tables.extend(
                         [
                             (table_name, "table")
@@ -241,7 +237,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
                     )
                 else:
                     # set default_schema_name
-                    if self.engine.dialect.name.lower() == "sqlite":
+                    if self.engine.dialect.name.lower() == GXSqlDialect.SQLITE:
                         # Workaround for compatibility with sqlalchemy < 1.4.0 and is described in issue #2641
                         default_schema_name = None
                     else:
@@ -286,20 +282,7 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
             )
         )
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(
-        self, generator_asset=None, data_asset_name=None
-    ) -> None:
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
+    def get_available_partition_ids(self, data_asset_name=None) -> None:
         raise BatchKwargsError(
             "TableBatchKwargsGenerator cannot identify partitions, however any existing table may"
             "already be referenced by accessing a data_asset with the name of the "

@@ -1,13 +1,11 @@
 from typing import Any, Dict
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import (
@@ -26,10 +24,10 @@ class TableRowCount(TableMetricProvider):
     def _pandas(
         cls,
         execution_engine: "PandasExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         df, _, _ = execution_engine.get_compute_domain(
             domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
@@ -44,10 +42,10 @@ class TableRowCount(TableMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         return sa.func.count(), metric_domain_kwargs, {}
 
@@ -59,9 +57,9 @@ class TableRowCount(TableMetricProvider):
     def _spark(
         cls,
         execution_engine: "SqlAlchemyExecutionEngine",
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         return F.count(F.lit(1)), metric_domain_kwargs, {}

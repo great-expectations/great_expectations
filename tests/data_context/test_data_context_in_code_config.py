@@ -4,9 +4,9 @@ import boto3
 import pyparsing as pp
 from moto import mock_s3
 
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.store import StoreBackend, TupleS3StoreBackend
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.util import get_context
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -221,13 +221,13 @@ def test_DataContext_construct_data_context_id_uses_id_of_currently_configured_e
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
     )
-    in_code_data_context = BaseDataContext(
+    in_code_data_context = get_context(
         project_config=in_code_data_context_project_config
     )
-    bucket_contents_after_instantiating_BaseDataContext = list_s3_bucket_contents(
+    bucket_contents_after_instantiating_get_context = list_s3_bucket_contents(
         bucket=bucket, prefix=data_context_prefix
     )
-    assert bucket_contents_after_instantiating_BaseDataContext == {
+    assert bucket_contents_after_instantiating_get_context == {
         f"{expectations_store_prefix}/{store_backend_id_filename}",
         f"{validations_store_prefix}/{store_backend_id_filename}",
     }
@@ -288,7 +288,7 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_DataContextConf
     in_code_data_context_project_config.anonymous_usage_statistics.data_context_id = (
         manually_created_uuid
     )
-    in_code_data_context = BaseDataContext(
+    in_code_data_context = get_context(
         project_config=in_code_data_context_project_config
     )
 
@@ -336,7 +336,7 @@ def test_DataContext_construct_data_context_id_uses_id_stored_in_env_var_GE_DATA
         validations_store_prefix=validations_store_prefix,
         data_docs_store_prefix=data_docs_store_prefix,
     )
-    in_code_data_context = BaseDataContext(
+    in_code_data_context = get_context(
         project_config=in_code_data_context_project_config
     )
 
@@ -416,7 +416,7 @@ def test_suppress_store_backend_id_is_true_for_inactive_stores():
         data_docs_store_prefix=data_docs_store_prefix,
         stores=stores,
     )
-    in_code_data_context = BaseDataContext(
+    in_code_data_context = get_context(
         project_config=in_code_data_context_project_config
     )
 
@@ -510,16 +510,16 @@ def test_inaccessible_active_bucket_warning_messages(caplog):
         data_docs_store_prefix=data_docs_store_prefix,
         stores=stores,
     )
-    _ = BaseDataContext(project_config=in_code_data_context_project_config)
+    _ = get_context(project_config=in_code_data_context_project_config)
     assert (
         caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store"
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store. Exception was: \n Unable to set object in s3."
         )
         == 1
     )
     assert (
         caplog.messages.count(
-            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store"
+            "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named validations_S3_store. Exception was: \n Unable to set object in s3."
         )
         == 1
     )
@@ -592,7 +592,7 @@ def test_inaccessible_inactive_bucket_no_warning_messages(caplog):
         data_docs_store_prefix=data_docs_store_prefix,
         stores=stores,
     )
-    _ = BaseDataContext(project_config=in_code_data_context_project_config)
+    _ = get_context(project_config=in_code_data_context_project_config)
     assert (
         caplog.messages.count(
             "Invalid store configuration: Please check the configuration of your TupleS3StoreBackend named expectations_S3_store"

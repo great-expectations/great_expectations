@@ -1,0 +1,50 @@
+import TipMoreInfoOnRegex from '../components/_tip_more_info_on_regex.mdx'
+
+Configuring a `ConfiguredAssetFilesystemDataConnector` so that its Data Assets are capable of returning more than one Batch is just a matter of defining an appropriate regular expression.  For this kind of configuration, the regular expression you define should include at least one group that contains regular expression special characters capable of matching more than one value.
+
+For this example, lets assume we have the following files in our `data` directory:
+- `yellow_tripdata_sample_2020-01.csv`
+- `yellow_tripdata_sample_2020-02.csv`
+- `yellow_tripdata_sample_2020-03.csv`
+
+In this case, we want to define a Data Asset that contains all of our data for the year 2020.
+
+First, you need to add an empty dictionary entry into the `assets` dictionary.  Since the key you associate with this entry will be treated as the Data Asset's name, go ahead and name it `yellow_trip_data_2020`.
+
+At this point, your entry in the `assets dictionary will look like:
+
+```python name="empty data asset for configured, multi batch datasource"
+```
+
+Next, you will need to define the `pattern` value and `group_names` value for this Data Asset.
+
+Since you want this Data Asset to all of the 2020 files, the value for `pattern` needs to be a regular expression that is capable of matching all of the files.  To do this, we will need to use regular expression special characters that are capable of matching one more than one value.
+
+Looking back at the files in our `data` directory, you can see that each file differs from the others only in the digits indicating the month of the file.  Therefore, the regular expression we create will separate those specific characters into a group, and will define the content of that group using special characters capable of matching on any values, like so:
+
+```python name="pattern for asset in configured, multi-batch datasource"
+```
+
+To correspond to the single group that was defined in your `pattern`, you will define a single entry in the list for the `group_names` key.  Since the `assets` dictionary key is used for this Data Asset's name, you can give this group a name relevant to what it is matching on:
+
+```python name="group_names for asset in configured, multi-batch datasource"
+```
+
+Since the group in the above regular expression will match on any characters, this regex will successfully match on each of the file names in our `data` directory, and will associate each file with the identifier `month` that corresponds to the file's grouped characters:
+- `yellow_tripdata_sample_2020_01.csv` will be Batch identified by a `month` value of `01`
+- `yellow_tripdata_sample_2020_02.csv` will be Batch identified by a `month` value of `02`
+- `yellow_tripdata_sample_2020_03.csv` will be Batch identified by a `month` value of `03`
+
+Put entirely together, your `assets` entry will look like:
+
+```python name="multi batch data asset for configured pandas datasource"
+```
+
+Looking back at our sample files, this entry will result in the `ConfiguredAssetFilesystemDataConnector` providing one Data Asset, which can be accessed by the name `yellow_tripdata_2020`.  In future workflows you will be able to refer to this Data Asset and by providing that name, and refer to a specific Batch in this Data Asset by providing your Batch Request with a `batch_identifier` entry using the key `month` and the value corresponding to the month portion of the filename of the file that corresponds to the Batch in question.
+
+<TipMoreInfoOnRegex />
+
+With all of these values put together into a single dictionary, your Data Connector configuration will look like this:
+
+```python name="data connector for configured, multi-batch, Pandas datasource"
+```

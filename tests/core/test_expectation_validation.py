@@ -12,6 +12,7 @@ def test_df():
     return pd.DataFrame({"col_1": [1, 2], "col_2": ["one", "two"]})
 
 
+@pytest.mark.unit
 def test_expectation_suite_extract_false_no_results(test_df):
     test_ds = PandasDataset(data=test_df)
 
@@ -26,6 +27,7 @@ def test_expectation_suite_extract_false_no_results(test_df):
     assert failed_results.statistics["evaluated_expectations"] == 0
 
 
+@pytest.mark.unit
 def test_expectation_suite_extract_false_many_results(test_df):
     test_ds = PandasDataset(data=test_df)
 

@@ -6,13 +6,13 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import click
 
 from great_expectations import DataContext
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 
 # noinspection PyPep8Naming
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
-from great_expectations.core import ExpectationSuite
+from great_expectations.core import ExpectationSuite  # noqa: TCH001
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
@@ -22,7 +22,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
+from great_expectations.render.renderer.notebook_renderer import (
+    BaseNotebookRenderer,  # noqa: TCH001
+)
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -35,7 +37,7 @@ try:
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
-    SQLAlchemyError = ge_exceptions.ProfilerError
+    SQLAlchemyError = gx_exceptions.ProfilerError
 
 
 MESSAGE_USER_CONFIGURABLE_PROFILER: str = "Since you did not supply a profiler name, defaulting to the UserConfigurableProfiler"
@@ -311,8 +313,8 @@ def _suite_new_workflow(
             assume_yes=False,
         )
     except (
-        ge_exceptions.DataContextError,
-        ge_exceptions.ProfilerError,
+        gx_exceptions.DataContextError,
+        gx_exceptions.ProfilerError,
         ValueError,
         OSError,
         SQLAlchemyError,
@@ -447,9 +449,9 @@ def _suite_new_mode_from_prompt(
     suite_create_method: str = click.prompt(
         """
 How would you like to create your Expectation Suite?
-    1. Manually, without interacting with a sample batch of data (default)
-    2. Interactively, with a sample batch of data
-    3. Automatically, using a profiler
+    1. Manually, without interacting with a sample Batch of data (default)
+    2. Interactively, with a sample Batch of data
+    3. Automatically, using a Data Assistant
 """,
         type=click.Choice(["1", "2", "3"]),
         show_choices=False,
@@ -702,7 +704,7 @@ How would you like to edit your Expectation Suite?
     return interactive_mode
 
 
-def _suite_edit_workflow(
+def _suite_edit_workflow(  # noqa: C901 - 19
     context: DataContext,
     expectation_suite_name: str,
     profile: bool,
@@ -835,8 +837,8 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
             toolkit.launch_jupyter_notebook(notebook_path=notebook_path)
 
     except (
-        ge_exceptions.DataContextError,
-        ge_exceptions.ProfilerError,
+        gx_exceptions.DataContextError,
+        gx_exceptions.ProfilerError,
         ValueError,
         OSError,
         SQLAlchemyError,
@@ -976,8 +978,8 @@ def suite_list(ctx: click.Context) -> None:
 
 
 def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
-    return os.path.abspath(
-        os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
+            context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )

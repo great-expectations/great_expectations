@@ -1,4 +1,8 @@
-from .column_distinct_values import ColumnDistinctValues, ColumnDistinctValuesCount
+from .column_distinct_values import (
+    ColumnDistinctValues,
+    ColumnDistinctValuesCount,
+    ColumnDistinctValuesCountUnderThreshold,
+)
 from .column_histogram import ColumnHistogram
 from .column_max import ColumnMax
 from .column_mean import ColumnMean

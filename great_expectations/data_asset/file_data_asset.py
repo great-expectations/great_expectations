@@ -101,7 +101,9 @@ class MetaFileDataAsset(DataAsset):
                     nonnull_lines = list(
                         compress(lines, np.invert(boolean_mapped_null_lines))
                     )
-                    nonnull_count = int((boolean_mapped_null_lines == False).sum())
+                    nonnull_count = int(
+                        (boolean_mapped_null_lines == False).sum()  # noqa: E712
+                    )
                     boolean_mapped_success_lines = np.array(
                         func(self, _lines=nonnull_lines, *args, **kwargs)
                     )
@@ -552,9 +554,9 @@ class FileDataAsset(MetaFileDataAsset):
         :ref:`include_config`, :ref:`catch_exceptions`, and :ref:`meta`.
         """
 
-        if filepath is not None and os.path.isfile(filepath):
+        if filepath is not None and os.path.isfile(filepath):  # noqa: PTH113
             success = True
-        elif self._path is not None and os.path.isfile(self._path):
+        elif self._path is not None and os.path.isfile(self._path):  # noqa: PTH113
             success = True
         else:
             success = False
@@ -700,6 +702,6 @@ class FileDataAsset(MetaFileDataAsset):
                 success = False
             except jsonschema.SchemaError:
                 raise
-            except:
+            except BaseException:
                 raise
         return {"success": success}

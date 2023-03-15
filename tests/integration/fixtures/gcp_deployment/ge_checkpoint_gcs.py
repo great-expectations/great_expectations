@@ -1,3 +1,4 @@
+# <snippet name="tests/integration/fixtures/gcp_deployment/ge_checkpoint_gcs.py full">
 from datetime import timedelta
 
 import airflow
@@ -11,9 +12,9 @@ default_args = {
 }
 
 dag = DAG(
-    "GE_checkpoint_run",
+    "GX_checkpoint_run",
     default_args=default_args,
-    description="running GE checkpoint",
+    description="running GX checkpoint",
     schedule_interval=None,
     dagrun_timeout=timedelta(minutes=5),
 )
@@ -26,3 +27,4 @@ t1 = BashOperator(
     depends_on_past=False,
     priority_weight=2**31 - 1,
 )
+# </snippet>

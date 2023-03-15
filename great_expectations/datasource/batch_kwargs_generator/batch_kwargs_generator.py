@@ -1,5 +1,5 @@
 import logging
-import warnings
+from typing import Dict, Set
 
 from great_expectations.core.id_dict import BatchKwargs
 
@@ -24,7 +24,7 @@ class BatchKwargsGenerator:
         A Batch is the primary unit of validation in the Great Expectations DataContext.
         Batches include metadata that identifies how they were constructed--the same “batch_kwargs”
         assembled by the batch kwargs generator, While not every datasource will enable re-fetching a
-        specific batch of data, GE can store snapshots of batches or store metadata from an
+        specific batch of data, GX can store snapshots of batches or store metadata from an
         external data version control system.
 
         Example Generator Configurations follow::
@@ -162,12 +162,12 @@ class BatchKwargsGenerator:
     """
 
     _batch_kwargs_type = BatchKwargs
-    recognized_batch_parameters = set()
+    recognized_batch_parameters: Set = set()
 
     def __init__(self, name, datasource) -> None:
         self._name = name
         self._generator_config = {"class_name": self.__class__.__name__}
-        self._data_asset_iterators = {}
+        self._data_asset_iterators: Dict = {}
         if datasource is None:
             raise ValueError("datasource must be provided for a BatchKwargsGenerator")
         self._datasource = datasource
@@ -176,7 +176,7 @@ class BatchKwargsGenerator:
     def name(self):
         return self._name
 
-    def _get_iterator(self, data_asset_name, **kwargs) -> None:
+    def _get_iterator(self, data_asset_name, **kwargs):
         raise NotImplementedError
 
     def get_available_data_asset_names(self) -> None:
@@ -187,10 +187,7 @@ class BatchKwargsGenerator:
         """
         raise NotImplementedError
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(
-        self, generator_asset=None, data_asset_name=None
-    ) -> None:
+    def get_available_partition_ids(self, data_asset_name=None) -> None:
         """
         Applies the current _partitioner to the batches available on data_asset_name and returns a list of valid
         partition_id strings that can be used to identify batches of data.
@@ -206,41 +203,13 @@ class BatchKwargsGenerator:
     def get_config(self):
         return self._generator_config
 
-    # TODO: deprecate generator_asset argument
-    def reset_iterator(
-        self, generator_asset=None, data_asset_name=None, **kwargs
-    ) -> None:
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
-
+    def reset_iterator(self, data_asset_name=None, **kwargs) -> None:
         self._data_asset_iterators[data_asset_name] = (
             self._get_iterator(data_asset_name=data_asset_name, **kwargs),
             kwargs,
         )
 
-    # TODO: deprecate generator_asset argument
-    def get_iterator(self, generator_asset=None, data_asset_name=None, **kwargs):
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
-
+    def get_iterator(self, data_asset_name=None, **kwargs):
         if data_asset_name in self._data_asset_iterators:
             data_asset_iterator, passed_kwargs = self._data_asset_iterators[
                 data_asset_name
@@ -260,14 +229,6 @@ class BatchKwargsGenerator:
             kwargs.get("name") and data_asset_name
         ):
             raise ValueError("Please provide either name or data_asset_name.")
-        if kwargs.get("name"):
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
 
         """The key workhorse. Docs forthcoming."""
         if data_asset_name is not None:
@@ -296,20 +257,7 @@ class BatchKwargsGenerator:
     def _build_batch_kwargs(self, batch_parameters) -> None:
         raise NotImplementedError
 
-    # TODO: deprecate generator_asset argument
-    def yield_batch_kwargs(self, data_asset_name=None, generator_asset=None, **kwargs):
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
-
+    def yield_batch_kwargs(self, data_asset_name=None, **kwargs):
         if data_asset_name not in self._data_asset_iterators:
             self.reset_iterator(data_asset_name=data_asset_name, **kwargs)
         data_asset_iterator, passed_kwargs = self._data_asset_iterators[data_asset_name]

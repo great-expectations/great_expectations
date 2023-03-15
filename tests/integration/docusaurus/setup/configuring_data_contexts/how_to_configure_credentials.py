@@ -2,9 +2,22 @@ import os
 
 from ruamel import yaml
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.datasource.new_datasource import Datasource
 
+"""
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml">
+my_postgres_db_yaml_creds:
+  drivername: postgresql
+  host: localhost
+  port: 5432
+  username: postgres
+  password: ${MY_DB_PW}
+  database: postgres
+# </snippet>
+"""
+
+# Override without snippet tag
 config_variables_yaml = """
 my_postgres_db_yaml_creds:
   drivername: postgresql
@@ -15,6 +28,19 @@ my_postgres_db_yaml_creds:
   database: postgres
 """
 
+"""
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars">
+export POSTGRES_DRIVERNAME=postgresql
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5432
+export POSTGRES_USERNAME=postgres
+export POSTGRES_PW=
+export POSTGRES_DB=postgres
+export MY_DB_PW=password
+# </snippet>
+"""
+
+# Override without snippet tag
 export_env_vars = """
 export POSTGRES_DRIVERNAME=postgresql
 export POSTGRES_HOST=localhost
@@ -26,10 +52,13 @@ export MY_DB_PW=password
 """
 
 config_variables_file_path = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_file_path">
 config_variables_file_path: uncommitted/config_variables.yml
+# </snippet>
 """
 
 datasources_yaml = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py datasources_yaml">
 datasources:
   my_postgres_db:
     class_name: Datasource
@@ -57,6 +86,7 @@ datasources:
     data_connectors:
       default_inferred_data_connector_name:
         class_name: InferredAssetSqlDataConnector
+# </snippet>
 """
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -70,9 +100,9 @@ try:
             os.environ[key] = value
 
     # get context and set config variables in config_variables.yml
-    context = ge.get_context()
+    context = gx.get_context()
     context_config_variables_relative_file_path = os.path.join(
-        context.GE_UNCOMMITTED_DIR, "config_variables.yml"
+        context.GX_UNCOMMITTED_DIR, "config_variables.yml"
     )
     assert (
         yaml.safe_load(config_variables_file_path)["config_variables_file_path"]

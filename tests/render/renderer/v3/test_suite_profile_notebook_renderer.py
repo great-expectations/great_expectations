@@ -2,9 +2,8 @@ import os
 from typing import Any, List, Set
 from unittest import mock
 
+import pytest
 from ruamel.yaml import YAML
-
-from great_expectations import DataContext
 
 # noinspection PyProtectedMember
 from great_expectations.cli.suite import _suite_edit_workflow
@@ -23,6 +22,7 @@ from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import (
     ruleBasedProfilerConfigSchema,
 )
+from great_expectations.util import get_context
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 from tests.render.test_util import find_code_in_notebook, run_notebook
 
@@ -35,7 +35,7 @@ SNIPPETS_USER_CONFIGURABLE_PROFILER: List[str] = [
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
@@ -70,62 +70,24 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.exceptions import DataContextError""",
     # Batch request
-    """batch_request = {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1912",
-    }
+    """
+batch_request = {
+    "datasource_name": "my_datasource",
+    "data_connector_name": "my_basic_data_connector",
+    "data_asset_name": "Titanic_1912",
+}
 """,
     # OnboardingDataAssistant instantiation/usage
     """\
 result = context.assistants.onboarding.run(
     batch_request=batch_request,
-    # include_column_names=include_column_names,
     exclude_column_names=exclude_column_names,
-    # include_column_name_suffixes=include_column_name_suffixes,
-    # exclude_column_name_suffixes=exclude_column_name_suffixes,
-    # semantic_type_filter_module_name=semantic_type_filter_module_name,
-    # semantic_type_filter_class_name=semantic_type_filter_class_name,
-    # include_semantic_types=include_semantic_types,
-    # exclude_semantic_types=exclude_semantic_types,
-    # allowed_semantic_types_passthrough=allowed_semantic_types_passthrough,
-    # cardinality_limit_mode="few",  # case-insensitive (see documentation for other options)
-    # max_unique_values=max_unique_values,
-    # max_proportion_unique=max_proportion_unique,
-    # column_value_uniqueness_rule={
-    #     "success_ratio": 0.8,
-    # },
-    # column_value_nullity_rule={
-    # },
-    # column_value_nonnullity_rule={
-    # },
-    # numeric_columns_rule={
-    #     "round_decimals": 12,
-    #     "false_positive_rate": 0.1,
-    #     "random_seed": 43792,
-    # },
-    # datetime_columns_rule={
-    #     "truncate_values": {
-    #         "lower_bound": 0,
-    #         "upper_bound": 4481049600,  # Friday, January 1, 2112 0:00:00
-    #     },
-    #     "round_decimals": 0,
-    # },
-    # text_columns_rule={
-    #     "strict_min": True,
-    #     "strict_max": True,
-    #     "success_ratio": 0.8,
-    # },
-    # categorical_columns_rule={
-    #     "false_positive_rate": 0.1,
-    #     "round_decimals": 4,
-    # },
 )
 validator.expectation_suite = result.get_expectation_suite(
     expectation_suite_name=expectation_suite_name
@@ -138,7 +100,7 @@ import datetime
 
 import pandas as pd
 
-import great_expectations as ge
+import great_expectations as gx
 import great_expectations.jupyter_ux
 from great_expectations.core.batch import BatchRequest
 from great_expectations.checkpoint import SimpleCheckpoint
@@ -211,7 +173,6 @@ EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT: List[
                 "profiler_details": {
                     "metric_configuration": {
                         "domain_kwargs": {},
-                        "metric_dependencies": None,
                         "metric_name": "table.row_count",
                         "metric_value_kwargs": None,
                     },
@@ -241,7 +202,7 @@ EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT: List[
 ]
 
 
-@mock.patch("great_expectations.data_context.DataContext")
+@mock.patch("great_expectations.data_context.FileDataContext")
 def test_suite_notebook_renderer_render_onboarding_data_assistant_configuration(
     mock_data_context: mock.MagicMock,
 ):
@@ -257,7 +218,7 @@ def test_suite_notebook_renderer_render_onboarding_data_assistant_configuration(
     )
     notebook = renderer.render()
 
-    snippets = SNIPPETS_USER_CONFIGURABLE_PROFILER
+    snippets = SNIPPETS_ONBOARDING_DATA_ASSISTANT
 
     for snippet in snippets:
         assert find_code_in_notebook(
@@ -265,6 +226,7 @@ def test_suite_notebook_renderer_render_onboarding_data_assistant_configuration(
         ), f"Could not find snippet in Notebook: {snippet}"
 
 
+@pytest.mark.slow  # 9.23s
 def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -281,12 +243,12 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")  # noqa: PTH118
     expectation_suite_name: str = "warning"
 
-    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -395,8 +357,10 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         suppress_usage_message=True,
         assume_yes=True,
     )
-    edit_notebook_path: str = os.path.join(uncommitted_dir, "edit_warning.ipynb")
-    assert os.path.isfile(edit_notebook_path)
+    edit_notebook_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "edit_warning.ipynb"
+    )
+    assert os.path.isfile(edit_notebook_path)  # noqa: PTH113
 
     run_notebook(
         notebook_path=edit_notebook_path,
@@ -406,7 +370,7 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
     )
 
     # Assertions about output
-    context = DataContext(context_root_dir=root_dir)
+    context = get_context(context_root_dir=root_dir)
     obs_validation_result: ExpectationSuiteValidationResult = (
         context.get_validation_result(expectation_suite_name="warning")
     )
@@ -417,10 +381,9 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         "success_percent": 100.0,
     }
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
     expected_expectation_configurations: List[
         ExpectationConfiguration
-    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_USER_CONFIGURABLE_PROFILER
+    ] = EXPECTED_EXPECTATION_CONFIGURATIONS_ONBOARDING_DATA_ASSISTANT
 
     suite: ExpectationSuite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
@@ -448,14 +411,13 @@ def test_notebook_execution_onboarding_data_assistant_pandas_backend(
         expectations_from_suite,
     ) = get_set_of_columns_and_expectations_from_suite(suite=suite)
 
-    # TODO: <Alex>Update when RBP replaces UCP permanently.</Alex>
-    expected_expectations: Set[str] = EXPECTED_EXPECTATIONS_USER_CONFIGURABLE_PROFILER
+    expected_expectations: Set[str] = EXPECTED_EXPECTATIONS_ONBOARDING_DATA_ASSISTANT
 
     assert columns_with_expectations == set()
     assert expectations_from_suite == expected_expectations
 
 
-@mock.patch("great_expectations.data_context.DataContext")
+@mock.patch("great_expectations.data_context.FileDataContext")
 def test_suite_notebook_renderer_render_rule_based_profiler_configuration(
     mock_data_context: mock.MagicMock,
 ):
@@ -479,6 +441,7 @@ def test_suite_notebook_renderer_render_rule_based_profiler_configuration(
         ), f"Could not find snippet in Notebook: {snippet}"
 
 
+@pytest.mark.slow  # 15.16s
 def test_notebook_execution_rule_based_profiler_with_pandas_backend(
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
     bobby_columnar_table_multi_batch,
@@ -496,12 +459,12 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
     - create a new context from disk
     - verify that a validation has been run with our expectation suite
     """
-    context: DataContext = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     root_dir: str = context.root_directory
-    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")
+    uncommitted_dir: str = os.path.join(root_dir, "uncommitted")  # noqa: PTH118
     expectation_suite_name: str = "warning"
 
-    context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
@@ -613,11 +576,10 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
         data_context=context,
     )
 
-    profiler_name: str = "bobby_user_workflow"
+    profiler_name = profiler.name
 
     context.save_profiler(
         profiler=profiler,
-        name=profiler_name,
     )
 
     # Create notebook
@@ -637,8 +599,10 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
         suppress_usage_message=True,
         assume_yes=True,
     )
-    edit_notebook_path: str = os.path.join(uncommitted_dir, "edit_warning.ipynb")
-    assert os.path.isfile(edit_notebook_path)
+    edit_notebook_path: str = os.path.join(  # noqa: PTH118
+        uncommitted_dir, "edit_warning.ipynb"
+    )
+    assert os.path.isfile(edit_notebook_path)  # noqa: PTH113
 
     run_notebook(
         notebook_path=edit_notebook_path,
@@ -648,7 +612,7 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
     )
 
     # Assertions about output
-    context = DataContext(context_root_dir=root_dir)
+    context = get_context(context_root_dir=root_dir)
     obs_validation_result: ExpectationSuiteValidationResult = (
         context.get_validation_result(expectation_suite_name="warning")
     )
@@ -666,7 +630,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {},
-                            "metric_dependencies": None,
                             "metric_name": "table.row_count",
                             "metric_value_kwargs": None,
                         },
@@ -683,7 +646,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Unnamed: 0"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -705,7 +667,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Unnamed: 0"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -727,7 +688,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Age"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -749,7 +709,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Age"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -771,7 +730,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Survived"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -793,7 +751,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "Survived"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },
@@ -815,7 +772,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "SexCode"},
-                            "metric_dependencies": None,
                             "metric_name": "column.min",
                             "metric_value_kwargs": None,
                         },
@@ -837,7 +793,6 @@ def test_notebook_execution_rule_based_profiler_with_pandas_backend(
                     "profiler_details": {
                         "metric_configuration": {
                             "domain_kwargs": {"column": "SexCode"},
-                            "metric_dependencies": None,
                             "metric_name": "column.max",
                             "metric_value_kwargs": None,
                         },

@@ -1,7 +1,7 @@
 import logging
 import os
-import warnings
 from pathlib import Path
+from typing import Dict, Iterable
 from urllib.parse import urlparse, urlunparse
 
 try:
@@ -21,6 +21,8 @@ KNOWN_EXTENSIONS = [
     ".csv",
     ".tsv",
     ".parquet",
+    ".pqt",
+    ".parq",
     ".xls",
     ".xlsx",
     ".json",
@@ -45,7 +47,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
     by this generator.
     """
 
-    _default_reader_options = {}
+    _default_reader_options: Dict = {}
     recognized_batch_parameters = {"data_asset_name", "partition_id"}
 
     def __init__(
@@ -105,34 +107,27 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         known_assets = self._get_valid_file_options(base_directory=self.base_directory)
         return {"names": known_assets, "is_complete_list": True}
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(self, generator_asset=None, data_asset_name=None):
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
-
-        # If the generator asset names a single known *file*, return ONLY that
+    def get_available_partition_ids(self, data_asset_name=None):
+        # If the asset names a single known *file*, return ONLY that
         for extension in self.known_extensions:
             if self.fs.isfile(
-                os.path.join(self.base_directory, data_asset_name + extension)
+                os.path.join(  # noqa: PTH118
+                    self.base_directory, data_asset_name + extension
+                )
             ):
                 return [data_asset_name]
-        if self.fs.isfile(os.path.join(self.base_directory, data_asset_name)):
+        if self.fs.isfile(
+            os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
+        ):
             return [data_asset_name]
 
         # Otherwise, subdir files are partition ids
         return [
             path
             for (path, type) in self._get_valid_file_options(
-                base_directory=os.path.join(self.base_directory, data_asset_name)
+                base_directory=os.path.join(  # noqa: PTH118
+                    self.base_directory, data_asset_name
+                )
             )
         ]
 
@@ -160,11 +155,11 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             path = None
             for extension in self.known_extensions:
                 if self.fs.isfile(
-                    os.path.join(
+                    os.path.join(  # noqa: PTH118
                         self.base_directory, data_asset_name, partition_id + extension
                     )
                 ):
-                    path = os.path.join(
+                    path = os.path.join(  # noqa: PTH118
                         self.base_directory, data_asset_name, partition_id + extension
                     )
 
@@ -174,14 +169,20 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                 )
                 # Fall through to this case in the event that there is not a subdir available, or if partition_id was
                 # not provided
-                if self.fs.isfile(os.path.join(self.base_directory, data_asset_name)):
-                    path = os.path.join(self.base_directory, data_asset_name)
+                if self.fs.isfile(
+                    os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
+                ):
+                    path = os.path.join(  # noqa: PTH118
+                        self.base_directory, data_asset_name
+                    )
 
                 for extension in self.known_extensions:
                     if self.fs.isfile(
-                        os.path.join(self.base_directory, data_asset_name + extension)
+                        os.path.join(  # noqa: PTH118
+                            self.base_directory, data_asset_name + extension
+                        )
                     ):
-                        path = os.path.join(
+                        path = os.path.join(  # noqa: PTH118
                             self.base_directory, data_asset_name + extension
                         )
 
@@ -214,10 +215,14 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                     and (file_option[: -len(extension)], "file") not in valid_options
                 ):
                     valid_options.append((file_option[: -len(extension)], "file"))
-                elif self.fs.isdir(os.path.join(self.base_directory, file_option)):
+                elif self.fs.isdir(
+                    os.path.join(self.base_directory, file_option)  # noqa: PTH118
+                ):
                     # Make sure there's at least one valid file inside the subdir
                     subdir_options = self._get_valid_file_options(
-                        base_directory=os.path.join(base_directory, file_option)
+                        base_directory=os.path.join(  # noqa: PTH118
+                            base_directory, file_option
+                        )
                     )
                     if (
                         len(subdir_options) > 0
@@ -232,9 +237,11 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
         )
         # If the data asset is a file, then return the path.
         # Otherwise, use files in a subdir as batches
-        if self.fs.isdir(os.path.join(self.base_directory, data_asset_name)):
+        if self.fs.isdir(
+            os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
+        ):
             subdir_options = os.listdir(
-                os.path.join(self.base_directory, data_asset_name)
+                os.path.join(self.base_directory, data_asset_name)  # noqa: PTH118
             )
             batches = []
             for file_option in subdir_options:
@@ -243,7 +250,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
                         "."
                     ):
                         batches.append(
-                            os.path.join(
+                            os.path.join(  # noqa: PTH118
                                 self.base_directory, data_asset_name, file_option
                             )
                         )
@@ -253,7 +260,9 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             )
         else:
             for extension in self.known_extensions:
-                path = os.path.join(self.base_directory, data_asset_name + extension)
+                path = os.path.join(  # noqa: PTH118
+                    self.base_directory, data_asset_name + extension
+                )
                 path = self._window_to_s3_path(path)
                 if self.fs.isfile(path):
                     return iter(
@@ -267,17 +276,19 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
             raise BatchKwargsError(
                 "No valid files found when searching {:s} using configured known_extensions: "
                 "{:s} ".format(
-                    os.path.join(self.base_directory, data_asset_name),
+                    os.path.join(self.base_directory, data_asset_name),  # noqa: PTH118
                     ", ".join(map(str, self.known_extensions)),
                 ),
                 batch_kwargs=PathBatchKwargs(
-                    path=os.path.join(self.base_directory, data_asset_name)
+                    path=os.path.join(  # noqa: PTH118
+                        self.base_directory, data_asset_name
+                    )
                 ),
             )
 
     def _build_batch_kwargs_path_iter(
         self, path_list, reader_options=None, limit=None
-    ) -> None:
+    ) -> Iterable[S3BatchKwargs]:
         for path in path_list:
             yield self._build_batch_kwargs_from_path(
                 path, reader_options=reader_options, limit=limit
@@ -285,7 +296,7 @@ class S3SubdirReaderBatchKwargsGenerator(BatchKwargsGenerator):
 
     def _build_batch_kwargs_from_path(
         self, path, reader_method=None, reader_options=None, limit=None
-    ):
+    ) -> S3BatchKwargs:
         batch_kwargs = self._datasource.process_batch_parameters(
             reader_method=reader_method or self.reader_method,
             reader_options=reader_options or self.reader_options,

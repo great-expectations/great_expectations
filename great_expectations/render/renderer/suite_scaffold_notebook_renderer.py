@@ -1,16 +1,24 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import nbformat
 
-from great_expectations import DataContext
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite  # noqa: TCH001
 from great_expectations.dataset import Dataset
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
 
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 class SuiteScaffoldNotebookRenderer(SuiteEditNotebookRenderer):
     def __init__(
-        self, context: DataContext, suite: ExpectationSuite, batch_kwargs
+        self, context: AbstractDataContext, suite: ExpectationSuite, batch_kwargs
     ) -> None:
         super().__init__(context=context)
         self.suite = suite
@@ -32,17 +40,17 @@ We'd love it if you'd **reach out to us on** the [**Great Expectations Slack Cha
             self.batch_kwargs = {}
         self.add_code_cell(
             f"""\
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations.checkpoint import LegacyCheckpoint
 from great_expectations.profile.user_configurable_profiler import UserConfigurableProfiler
 from great_expectations.data_context.types.resource_identifiers import ValidationResultIdentifier
 
-context = ge.data_context.DataContext()
+context = gx.get_context()
 
 expectation_suite_name = "{self.suite_name}"
 
 # Wipe the suite clean to prevent unwanted expectations in the batch
-suite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
+suite = context.add_or_update_expectation_suite(expectation_suite_name)
 
 batch_kwargs = {self.batch_kwargs}
 batch = context.get_batch(batch_kwargs, suite)
@@ -71,7 +79,7 @@ Let's save the scaffolded expectation suite as a JSON file in the
             "action_list_operator"
         ):
             code_cell = """\
-context.save_expectation_suite(suite, expectation_suite_name)
+context.update_expectation_suite(expectation_suite=suite)
 
 results = LegacyCheckpoint(
     name="_temp_checkpoint",
@@ -89,7 +97,7 @@ context.build_data_docs()
 context.open_data_docs(validation_result_identifier)"""
         else:
             code_cell = """\
-context.save_expectation_suite(suite, expectation_suite_name)
+context.update_expectation_suite(expectation_suite=suite)
 
 results = LegacyCheckpoint(
     name="_temp_checkpoint",

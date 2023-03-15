@@ -4,8 +4,10 @@ from typing import List
 
 import click
 
-from great_expectations import DataContext
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+from great_expectations import DataContext  # noqa: TCH001
+from great_expectations.checkpoint.types.checkpoint_result import (
+    CheckpointResult,  # noqa: TCH001
+)
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -163,9 +165,9 @@ def _verify_checkpoint_does_not_exist(
 
 
 def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
-    return os.path.abspath(
-        os.path.join(
-            context.root_directory, context.GE_EDIT_NOTEBOOK_DIR, notebook_name
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
+            context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )
 
@@ -325,11 +327,11 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
     )
 
     script_name: str = f"run_{checkpoint}.py"
-    script_path: str = os.path.join(
-        context.root_directory, context.GE_UNCOMMITTED_DIR, script_name
+    script_path: str = os.path.join(  # noqa: PTH118
+        context.root_directory, context.GX_UNCOMMITTED_DIR, script_name
     )
 
-    if os.path.isfile(script_path):
+    if os.path.isfile(script_path):  # noqa: PTH113
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
             usage_event=usage_event_end,
@@ -357,7 +359,9 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
 def _write_checkpoint_script_to_disk(
     context_directory: str, checkpoint_name: str, script_path: str
 ) -> None:
-    script_full_path: str = os.path.abspath(os.path.join(script_path))
+    script_full_path: str = os.path.abspath(  # noqa: PTH100
+        os.path.join(script_path)  # noqa: PTH118
+    )
     template: str = _load_script_template().format(checkpoint_name, context_directory)
     linted_code: str = lint_code(code=template)
     with open(script_full_path, "w") as f:

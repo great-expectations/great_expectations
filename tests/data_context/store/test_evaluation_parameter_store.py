@@ -11,7 +11,6 @@ from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
-from great_expectations.core.metric import ValidationMetricIdentifier
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.store import (
@@ -19,6 +18,9 @@ from great_expectations.data_context.store import (
     TupleAzureBlobStoreBackend,
     TupleGCSStoreBackend,
     TupleS3StoreBackend,
+)
+from great_expectations.data_context.types.resource_identifiers import (
+    ValidationMetricIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from tests.core.usage_statistics.util import (
@@ -89,6 +91,7 @@ def in_memory_param_store(request, test_backends):
     )
 
 
+@pytest.mark.integration
 def test_evaluation_parameter_store_methods(
     data_context_parameterized_expectation_suite: DataContext,
 ):
@@ -176,6 +179,7 @@ def test_evaluation_parameter_store_methods(
     }
 
 
+@pytest.mark.integration
 def test_database_evaluation_parameter_store_basics(param_store):
     run_id = RunIdentifier(
         run_name=datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -196,6 +200,7 @@ def test_database_evaluation_parameter_store_basics(param_store):
     assert value == metric_value
 
 
+@pytest.mark.integration
 def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_store):
     """
     What does this test and why?
@@ -209,6 +214,7 @@ def test_database_evaluation_parameter_store_store_backend_id(in_memory_param_st
 
 
 @freeze_time("09/26/2019 13:42:41")
+@pytest.mark.integration
 def test_database_evaluation_parameter_store_get_bind_params(param_store):
     # Bind params must be expressed as a string-keyed dictionary.
     # Verify that the param_store supports that
@@ -261,13 +267,14 @@ def test_database_evaluation_parameter_store_get_bind_params(param_store):
     }
 
 
-@pytest.mark.cloud
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleS3StoreBackend.list_keys"
 )
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
 )
+@pytest.mark.cloud
+@pytest.mark.integration
 def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
     mock_parent_list_keys,
     mock_s3_list_keys,
@@ -299,6 +306,7 @@ def test_evaluation_parameter_store_calls_proper_cloud_tuple_store_methods(
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
 )
+@pytest.mark.integration
 def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
     mock_parent_list_keys,
     mock_azure_list_keys,
@@ -332,6 +340,7 @@ def test_evaluation_parameter_store_calls_proper_azure_tuple_store_methods(
 @mock.patch(
     "great_expectations.data_context.store.tuple_store_backend.TupleStoreBackend.list_keys"
 )
+@pytest.mark.integration
 def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
     mock_parent_list_keys,
     mock_gcs_list_keys,
@@ -360,6 +369,7 @@ def test_evaluation_parameter_store_calls_proper_gcs_tuple_store_methods(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.integration
 def test_instantiation_with_test_yaml_config(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):

@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 class BaseAnonymizer(ABC):
 
     # Any class that starts with this __module__ is considered a "core" object
-    CORE_GE_OBJECT_MODULE_PREFIX = "great_expectations"
+    CORE_GX_OBJECT_MODULE_PREFIX = "great_expectations"
 
-    CORE_GE_EXPECTATION_TYPES = aggregate_all_core_expectation_types()
+    CORE_GX_EXPECTATION_TYPES = aggregate_all_core_expectation_types()
 
     def __init__(self, salt: Optional[str] = None) -> None:
         if salt is not None and not isinstance(salt, str):
@@ -44,9 +44,9 @@ class BaseAnonymizer(ABC):
         object_class: Optional[type] = None,
         object_config: Optional[dict] = None,
     ) -> Optional[str]:
-        """Check if the parent class is a subclass of any core GE class.
+        """Check if the parent class is a subclass of any core GX class.
 
-        These anonymizers define and provide an optional list of core GE classes_to_check.
+        These anonymizers define and provide an optional list of core GX classes_to_check.
         If not provided, the object's inheritance hierarchy is traversed.
 
         Args:
@@ -170,7 +170,7 @@ class BaseAnonymizer(ABC):
             else:
 
                 # Chetan - 20220311 - If we can't identify the class in question, we iterate through the parents.
-                # While GE rarely utilizes multiple inheritance when defining core objects (as of v0.14.10),
+                # While GX rarely utilizes multiple inheritance when defining core objects (as of v0.14.10),
                 # it is important to recognize that this is possibility.
                 #
                 # In the presence of multiple valid parents, we generate a comma-delimited list.
@@ -211,4 +211,4 @@ class BaseAnonymizer(ABC):
 
     @staticmethod
     def _is_core_great_expectations_class(class_name: str) -> bool:
-        return class_name.startswith(BaseAnonymizer.CORE_GE_OBJECT_MODULE_PREFIX)
+        return class_name.startswith(BaseAnonymizer.CORE_GX_OBJECT_MODULE_PREFIX)

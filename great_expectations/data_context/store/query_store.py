@@ -1,19 +1,26 @@
 import logging
 from string import Template
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
+from great_expectations.optional_imports import is_version_greater_or_equal
 from great_expectations.util import filter_properties_dict
 
 try:
     import sqlalchemy
     from sqlalchemy import create_engine
     from sqlalchemy.engine.url import URL
+
+    if is_version_greater_or_equal(sqlalchemy.__version__, "1.4.0"):
+        url_create_fn = URL.create
+    else:
+        url_create_fn = URL
 except ImportError:
     sqlalchemy = None
     create_engine = None
     URL = None
+    url_create_fn = None
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +30,7 @@ class SqlAlchemyQueryStore(Store):
     """SqlAlchemyQueryStore stores queries by name, and makes it possible to retrieve the resulting value by query
     name."""
 
-    _key_class = StringKey
+    _key_class = StringKey  # type: ignore[assignment] # StringKey is a DataContextKey??
 
     def __init__(
         self,
@@ -34,7 +41,7 @@ class SqlAlchemyQueryStore(Store):
         store_name=None,
     ) -> None:
         if not sqlalchemy:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "sqlalchemy module not found, but is required for "
                 "SqlAlchemyQueryStore"
             )
@@ -60,7 +67,7 @@ class SqlAlchemyQueryStore(Store):
                     self._store_backend.set(tuple([k]), v)
 
             except (AssertionError, KeyError) as e:
-                raise ge_exceptions.InvalidConfigError(str(e))
+                raise gx_exceptions.InvalidConfigError(str(e))
 
         if "engine" in credentials:
             self.engine = credentials["engine"]
@@ -70,7 +77,7 @@ class SqlAlchemyQueryStore(Store):
             self.engine = create_engine(credentials["connection_string"])
         else:
             drivername = credentials.pop("drivername")
-            options = URL(drivername, **credentials)
+            options = url_create_fn(drivername, **credentials)
             self.engine = create_engine(options)
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter

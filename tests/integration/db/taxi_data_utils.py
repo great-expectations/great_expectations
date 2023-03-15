@@ -3,7 +3,7 @@ from typing import Any, List
 import pandas as pd
 import sqlalchemy as sa
 
-import great_expectations as ge
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition, BatchRequest
@@ -112,7 +112,7 @@ def _execute_taxi_splitting_test_cases(
 
         # 1. Setup
 
-        context: DataContext = ge.get_context()
+        context: DataContext = gx.get_context()
 
         datasource_name: str = "test_datasource"
         data_connector_name: str = "test_data_connector"

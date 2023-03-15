@@ -1,6 +1,6 @@
 from typing import Any, Dict, Optional
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -16,7 +16,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 try:
     import pyspark.sql.types as sparktypes
 except ImportError:
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
 
 
 class TableColumns(TableMetricProvider):
@@ -26,10 +26,10 @@ class TableColumns(TableMetricProvider):
     def _pandas(
         cls,
         execution_engine: PandasExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
@@ -38,10 +38,10 @@ class TableColumns(TableMetricProvider):
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
@@ -50,10 +50,10 @@ class TableColumns(TableMetricProvider):
     def _spark(
         cls,
         execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: Dict,
-        metric_value_kwargs: Dict,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
         metrics: Dict[str, Any],
-        runtime_configuration: Dict,
+        runtime_configuration: dict,
     ):
         column_metadata = metrics["table.column_types"]
         return [col["name"] for col in column_metadata]
@@ -81,6 +81,5 @@ class TableColumns(TableMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         return dependencies

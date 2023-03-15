@@ -13,6 +13,7 @@ config_version: 2.0
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
+# <snippet name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml datasources">
 datasources:
   my_datasource:
     class_name: SparkDFDatasource
@@ -24,13 +25,14 @@ datasources:
       subdir_reader:
         class_name: SubdirReaderBatchKwargsGenerator
         base_directory: ../../../
+# </snippet>
 
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes
 # such as staging vs prod.
 #
-# When GE encounters substitution syntax (like `my_key: ${my_value}` or
+# When GX encounters substitution syntax (like `my_key: ${my_value}` or
 # `my_key: $my_value`) in the great_expectations.yml file, it will attempt
 # to replace the value of `my_key` with the value from an environment
 # variable `my_value` or a corresponding key read from this config file,
@@ -54,6 +56,7 @@ plugins_directory: plugins/
 # one or more expectation suites and subsequent actions. The example below
 # stores validations and send a slack notification. To read more about
 # customizing and extending these, read: https://docs.greatexpectations.io/en/latest/reference/core_concepts/validation_operators_and_actions.html
+# <snippet name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/spark/v2/great_expectations/great_expectations.yml validation_operators">
 validation_operators:
   action_list_operator:
     class_name: ActionListValidationOperator
@@ -67,6 +70,7 @@ validation_operators:
       - name: update_data_docs
         action:
           class_name: UpdateDataDocsAction
+# </snippet>
 
 stores:
 # Stores are configurable places to store things like Expectations, Validations

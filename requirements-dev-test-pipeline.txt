@@ -1,2 +1,0 @@
-pytest-azurepipelines
-pytest-random-order

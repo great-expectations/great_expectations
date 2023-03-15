@@ -1,22 +1,40 @@
-import logging
-from typing import Dict, Iterable, List, Optional, Set, Union
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+import logging
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
+    NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricComputationResult,  # noqa: TCH001
+    MetricValues,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
-    AttributedResolvedMetrics,
-    Domain,
-    MetricComputationResult,
-    MetricValues,
     ParameterContainer,
 )
 from great_expectations.types.attributes import Attributes
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +118,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Configure this SimpleDateFormatStringParameterBuilder
@@ -115,7 +133,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
             ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
             These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
@@ -160,7 +178,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -177,6 +195,10 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_name="column_values.nonnull.count",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=self.metric_value_kwargs,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -184,7 +206,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # This should never happen.
         if len(metric_computation_result.attributed_resolved_metrics) != 1:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f'Result of metric computations for {self.__class__.__name__} must be a list with exactly 1 element of type "AttributedResolvedMetrics" ({metric_computation_result.attributed_resolved_metrics} found).'
             )
 
@@ -199,7 +221,7 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
         metric_values = attributed_resolved_metrics.conditioned_metric_values
 
         if metric_values is None:
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"Result of metric computations for {self.__class__.__name__} is empty."
             )
 
@@ -241,9 +263,13 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
         metric_computation_result = self.get_metrics(
-            metric_name="column_values.match_strftime_format.unexpected_count",
+            metric_name=f"column_values.match_strftime_format.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_strftime_metric_value_kwargs_list,
+            limit=None,
+            enforce_numeric_metric=False,
+            replace_nan_with_zero=False,
+            runtime_configuration=runtime_configuration,
             domain=domain,
             variables=variables,
             parameters=parameters,
@@ -258,9 +284,9 @@ class SimpleDateFormatStringParameterBuilder(ParameterBuilder):
             metric_values = attributed_resolved_metrics.conditioned_metric_values[:, 0]
 
             match_strftime_unexpected_count: int = sum(metric_values)
-            success_ratio: float = (
-                nonnull_count - match_strftime_unexpected_count
-            ) / nonnull_count
+            success_ratio: float = (nonnull_count - match_strftime_unexpected_count) / (
+                nonnull_count + NP_EPSILON
+            )
             format_string_success_ratios[
                 attributed_resolved_metrics.metric_attributes["strftime_format"]
             ] = success_ratio

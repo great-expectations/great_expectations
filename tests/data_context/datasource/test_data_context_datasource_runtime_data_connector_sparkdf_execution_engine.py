@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 import great_expectations
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.id_dict import BatchSpec
@@ -149,7 +149,7 @@ def test_batch_data_get_batch_ambiguous_parameter_sparkdf_engine(
     test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     # raised by get_batch_list()
-    with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
         batch_list: List[Batch] = context.get_batch_list(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -293,7 +293,7 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine(
     context: DataContext = data_context_with_datasource_spark_engine
     test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
     my_validator = context.get_validator(
         batch_request=RuntimeBatchRequest(
@@ -320,9 +320,9 @@ def test_batch_data_get_validator_ambiguous_parameter_sparkdf_engine(
     context: DataContext = data_context_with_datasource_spark_engine
     test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
-    with pytest.raises(ge_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
         batch_list: List[Batch] = context.get_validator(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -341,7 +341,7 @@ def test_get_validator_wrong_type_sparkdf_engine(
     context: DataContext = data_context_with_datasource_spark_engine
     test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     # data_connector_name should be a dict not an int
@@ -366,7 +366,7 @@ def test_batch_data_get_validator_failed_specification_no_batch_identifier_spark
     context: DataContext = data_context_with_datasource_spark_engine
     test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     # batch_identifiers should not be None
@@ -401,7 +401,7 @@ def test_batch_data_get_validator_failed_specification_incorrect_batch_spec_pass
     context: DataContext = data_context_with_datasource_spark_engine
     test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # incorrect batch_spec_passthrough, which should be a dict
@@ -424,7 +424,7 @@ def test_batch_data_get_validator_failed_specification_no_runtime_parameters_spa
     context: DataContext = data_context_with_datasource_spark_engine
     test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     with pytest.raises(TypeError):
         # runtime_parameters should not be None
         batch: list = context.get_validator(
@@ -455,7 +455,7 @@ def test_batch_data_get_validator_wrong_runtime_parameters_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
         great_expectations.exceptions.exceptions.InvalidBatchRequestError
@@ -479,7 +479,7 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine_named_
     context: "DataContext" = data_context_with_datasource_spark_engine
     test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
     my_validator = context.get_validator(
         batch_request=RuntimeBatchRequest(
@@ -542,7 +542,7 @@ def test_file_path_get_batch_spark_directory_fail_no_reader_method(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[Batch] = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -560,7 +560,7 @@ def test_file_path_get_batch_spark_directory_fail_wrong_reader_method(
     data_context_with_datasource_spark_engine, taxi_test_file_directory, spark_session
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[Batch] = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -649,7 +649,7 @@ def test_file_path_get_batch_successful_specification_spark_directory_batch_spec
 
     This tests the same behavior as the previous test, test_get_batch_successful_specification_spark_directory, but the
     batch_spec_passthrough is in the Datasource configuration, found in the data_context_with_datasource_spark_engine_batch_spec_passthrough
-    fixture. This is why the `batch_spec_passthrough` parameters are commented out, but GE is still able to read in the 3 CSV files
+    fixture. This is why the `batch_spec_passthrough` parameters are commented out, but GX is still able to read in the 3 CSV files
     as a single SparkDF with 30,000 lines.
 
     """
@@ -717,7 +717,7 @@ def test_file_path_get_batch_spark_fail_wrong_file_path(
     context: DataContext = data_context_with_datasource_spark_engine
 
     # raised by get_batch_data_and_markers() in SparkDFExecutionEngine.
-    with pytest.raises(ge_exceptions.ExecutionEngineError):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         batch_list: List[Batch] = context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -796,7 +796,7 @@ def test_file_path_get_validator_successful_specification_sparkdf_engine_named_a
 ):
     context: DataContext = data_context_with_datasource_spark_engine
     batch_identifiers: Dict[str, int] = {"day": 1, "month": 12}
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     # Successful specification using a RuntimeBatchRequest
     my_validator = context.get_validator(
         batch_request=RuntimeBatchRequest(

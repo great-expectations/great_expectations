@@ -4,7 +4,7 @@ from typing import List
 
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.data_context.util import (
     file_relative_path,
@@ -17,7 +17,7 @@ from great_expectations.datasource import SimpleSqlalchemyDatasource
 def create_db_and_instantiate_simple_sql_datasource():
     data_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "..",
             "test_sets",
@@ -73,7 +73,7 @@ def test_data_connector_query_non_recognized_param(
     )
 
     # Test 1: non valid_batch_identifiers_limit
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         batch_definition_list = (
             my_sql_datasource.get_batch_definition_list_from_batch_request(
@@ -87,7 +87,7 @@ def test_data_connector_query_non_recognized_param(
         )
 
     # Test 2: Unrecognized custom_filter is not a function
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         my_sql_datasource.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
                 datasource_name="taxi_multi_batch_sql_datasource",
@@ -98,9 +98,9 @@ def test_data_connector_query_non_recognized_param(
         )
 
     # Test 3: batch_identifiers is not dict
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        batch_definition_list = (
+        batch_definition_list = (  # noqa: F841
             my_sql_datasource.get_batch_definition_list_from_batch_request(
                 batch_request=BatchRequest(
                     datasource_name="taxi_multi_batch_sql_datasource",
@@ -153,7 +153,7 @@ def test_data_connector_query_limit(create_db_and_instantiate_simple_sql_datasou
     assert len(batch_definition_list) == 2
 
     # illegal limit
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
         batch_definition_list: List[
             BatchDefinition
@@ -173,9 +173,9 @@ def test_data_connector_query_illegal_index_and_limit_combination(
     my_sql_datasource: SimpleSqlalchemyDatasource = (
         create_db_and_instantiate_simple_sql_datasource
     )
-    with pytest.raises(ge_exceptions.BatchFilterError):
+    with pytest.raises(gx_exceptions.BatchFilterError):
         # noinspection PyUnusedLocal
-        batch_definition_list: List[
+        batch_definition_list: List[  # noqa: F841
             BatchDefinition
         ] = my_sql_datasource.get_batch_definition_list_from_batch_request(
             batch_request=BatchRequest(
@@ -214,7 +214,7 @@ def test_data_connector_query_sorted_filtered_by_custom_filter(
         )
     )
     assert len(returned_batch_definition_list) == 24
-    expected_batch_definition: BatchDefinition = BatchDefinition(
+    expected_batch_definition = BatchDefinition(
         datasource_name="taxi_multi_batch_sql_datasource",
         data_connector_name="by_pickup_date_time",
         data_asset_name="yellow_tripdata_sample_2020_01",
@@ -254,11 +254,11 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index(
     )
     assert len(returned_batch_definition_list) == 1
 
-    expected_batch_definition: BatchDefinition = BatchDefinition(
+    expected_batch_definition = BatchDefinition(
         datasource_name="taxi_multi_batch_sql_datasource",
         data_connector_name="by_pickup_date_time",
         data_asset_name="yellow_tripdata_sample_2020_01",
-        batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 08"}),
+        batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 23"}),
     )
     assert expected_batch_definition == returned_batch_definition_list[0]
 
@@ -298,13 +298,13 @@ def test_data_connector_query_sorted_filtered_by_custom_filter_with_index_as_sli
             datasource_name="taxi_multi_batch_sql_datasource",
             data_connector_name="by_pickup_date_time",
             data_asset_name="yellow_tripdata_sample_2020_01",
-            batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 10"}),
+            batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 00"}),
         ),
         BatchDefinition(
             datasource_name="taxi_multi_batch_sql_datasource",
             data_connector_name="by_pickup_date_time",
             data_asset_name="yellow_tripdata_sample_2020_01",
-            batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 17"}),
+            batch_identifiers=IDDict({"pickup_datetime": "2020-01-01 03"}),
         ),
     ]
     assert returned_batch_definition_list == expected

@@ -1,40 +1,84 @@
+from __future__ import annotations
+
 import copy
+import datetime
 import itertools
-import warnings
+import logging
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Union,
+)
 
 import numpy as np
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
+    BootstrapNumericRangeEstimator,
+)
+from great_expectations.rule_based_profiler.estimators.exact_numeric_range_estimator import (
+    ExactNumericRangeEstimator,
+)
+from great_expectations.rule_based_profiler.estimators.kde_numeric_range_estimator import (
+    KdeNumericRangeEstimator,
+)
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_result import (
+    NUM_HISTOGRAM_BINS,
+    NumericRangeEstimationResult,
+)
+from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
+    NumericRangeEstimator,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_estimator import (
+    QuantilesNumericRangeEstimator,
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     build_numeric_range_estimation_result,
-    compute_bootstrap_quantiles_point_estimate,
-    compute_kde_quantiles_point_estimate,
-    compute_quantiles,
+    datetime_semantic_domain_type,
     get_parameter_value_and_validate_return_type,
     integer_semantic_domain_type,
+)
+from great_expectations.rule_based_profiler.metric_computation_result import (
+    MetricValues,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY,
     FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY,
     RAW_PARAMETER_KEY,
-    Domain,
-    MetricValues,
-    NumericRangeEstimationResult,
     ParameterContainer,
     ParameterNode,
 )
-from great_expectations.rule_based_profiler.types.numeric_range_estimation_result import (
-    NUM_HISTOGRAM_BINS,
-)
 from great_expectations.types.attributes import Attributes
-from great_expectations.util import is_numeric
+from great_expectations.util import (
+    convert_ndarray_decimal_to_float_dtype,
+    does_ndarray_contain_decimal_dtype,
+    is_ndarray_datetime_dtype,
+    is_numeric,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 MAX_DECIMALS: int = 9
 
@@ -48,41 +92,35 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     On the other hand, it is specific in the sense that the parameter names will always have the semantics of numeric
     ranges, which will incorporate the requirements, imposed by the configured false_positive_rate tolerances.
 
-    The implementation supports two methods of estimating parameter values from data:
-    * bootstrapped (default) -- a statistical technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)")
-    * one-shot -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
-      and the standard error using the queried batches as the single sample of the distribution (fast, but inaccurate).
+    The implementation supports four methods of estimating parameter values from data:
+    * quantiles -- assumes that metric values, computed on batch data, are normally distributed and computes the mean
+      and the standard error using the queried batches as the single sample of the distribution.
+    * exact -- uses the minimum and maximum observations for range boundaries.
+    * bootstrap -- a statistical resampling technique (see "https://en.wikipedia.org/wiki/Bootstrapping_(statistics)").
+    * kde -- a statistical technique that fits a gaussian to the distribution and resamples from it.
     """
 
     RECOGNIZED_SAMPLING_METHOD_NAMES: set = {
         "bootstrap",
         "exact",
         "kde",
-        "oneshot",
+        "quantiles",
     }
-
-    RECOGNIZED_N_RESAMPLES_SAMPLING_METHOD_NAMES: set = {
-        "bootstrap",
-        "kde",
-    }
-
-    DEFAULT_BOOTSTRAP_NUM_RESAMPLES: int = 9999
-    DEFAULT_KDE_NUM_RESAMPLES: int = 9999
-
-    DEFAULT_KDE_BW_METHOD: Union[str, float, Callable] = "scott"
 
     RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS: set = {
         "lower_bound",
         "upper_bound",
     }
 
-    RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
-        "auto",
-        "nearest",
-        "linear",
+    METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING: set = {
+        "column.unique_proportion",
     }
 
-    DEFAULT_BOOTSTRAP_QUANTILE_BIAS_STD_ERROR_RATIO_THRESHOLD: float = 2.5e-1
+    exclude_field_names: ClassVar[
+        Set[str]
+    ] = MetricMultiBatchParameterBuilder.exclude_field_names | {
+        "single_batch_mode",
+    }
 
     def __init__(
         self,
@@ -99,6 +137,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         n_resamples: Optional[Union[str, int]] = None,
         random_seed: Optional[Union[str, int]] = None,
         quantile_statistic_interpolation_method: str = "auto",
+        quantile_bias_correction: Union[str, bool] = False,
         quantile_bias_std_error_ratio_threshold: Optional[Union[str, float]] = None,
         bw_method: Optional[Union[str, float, Callable]] = None,
         include_estimator_samples_histogram_in_details: Union[str, bool] = False,
@@ -109,7 +148,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
         evaluation_parameter_builder_configs: Optional[
             List[ParameterBuilderConfig]
         ] = None,
-        data_context: Optional["BaseDataContext"] = None,  # noqa: F821
+        data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
@@ -126,15 +165,18 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             reduce_scalar_metric: if True (default), then reduces computation of 1-dimensional metric to scalar value.
             false_positive_rate: user-configured fraction between 0 and 1 expressing desired false positive rate for
                 identifying unexpected values as judged by the upper- and lower- quantiles of the observed metric data.
-            estimator: choice of the estimation algorithm: "oneshot" (one observation), "bootstrap" (default), "exact"
+            estimator: choice of the estimation algorithm: "quantiles", "bootstrap", "exact"
                 (deterministic, incorporating entire observed value range), or "kde" (kernel density estimation).
             n_resamples: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 9999 is used (default in
                 "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html").
             random_seed: Applicable only for the "bootstrap" and "kde" sampling methods -- if omitted (default), then
                 uses "np.random.choice"; otherwise, utilizes "np.random.Generator(np.random.PCG64(random_seed))".
-            quantile_statistic_interpolation_method: Applicable only for the "bootstrap" sampling method --
-                supplies value of (interpolation) "method" to "np.quantile()" statistic, used for confidence intervals.
+            quantile_statistic_interpolation_method: Supplies value of (interpolation) "method" to "np.quantile()"
+                statistic, used for confidence intervals.
+            quantile_bias_correction: Applicable only for the "bootstrap" sampling method -- if omitted (default), then
+                False is used (bias correction is disabled) and quantile_bias_std_error_ratio_threshold will have no
+                effect.
             quantile_bias_std_error_ratio_threshold: Applicable only for the "bootstrap" sampling method -- if omitted
                 (default), then 0.25 is used (as minimum ratio of bias to standard error for applying bias correction).
             bw_method: Applicable only for the "kde" sampling method -- if omitted (default), then "scott" is used.
@@ -150,13 +192,14 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             evaluation_parameter_builder_configs: ParameterBuilder configurations, executing and making whose respective
                 ParameterBuilder objects' outputs available (as fully-qualified parameter names) is pre-requisite.
                 These "ParameterBuilder" configurations help build parameters needed for this "ParameterBuilder".
-            data_context: BaseDataContext associated with this ParameterBuilder
+            data_context: AbstractDataContext associated with this ParameterBuilder
         """
         super().__init__(
             name=name,
             metric_name=metric_name,
             metric_domain_kwargs=metric_domain_kwargs,
             metric_value_kwargs=metric_value_kwargs,
+            single_batch_mode=False,
             enforce_numeric_metric=enforce_numeric_metric,
             replace_nan_with_zero=replace_nan_with_zero,
             reduce_scalar_metric=reduce_scalar_metric,
@@ -183,6 +226,8 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
             quantile_statistic_interpolation_method
         )
 
+        self._quantile_bias_correction = quantile_bias_correction
+
         self._quantile_bias_std_error_ratio_threshold = (
             quantile_bias_std_error_ratio_threshold
         )
@@ -207,7 +252,7 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
                     not truncate_values_keys
                     <= NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS
                 ):
-                    raise ge_exceptions.ProfilerExecutionError(
+                    raise gx_exceptions.ProfilerExecutionError(
                         message=f"""Unrecognized truncate_values key(s) in {self.__class__.__name__}:
 "{str(truncate_values_keys - NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_TRUNCATE_DISTRIBUTION_KEYS)}" \
 detected.
@@ -241,7 +286,11 @@ detected.
         return self._quantile_statistic_interpolation_method
 
     @property
-    def quantile_bias_std_error_ratio_threshold(self) -> str:
+    def quantile_bias_correction(self) -> Union[str, bool]:
+        return self._quantile_bias_correction
+
+    @property
+    def quantile_bias_std_error_ratio_threshold(self) -> Optional[Union[str, float]]:
         return self._quantile_bias_std_error_ratio_threshold
 
     @property
@@ -267,7 +316,7 @@ detected.
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -276,7 +325,7 @@ detected.
             Attributes object, containing computed parameter values and parameter computation details metadata.
 
          The algorithm operates according to the following steps:
-         1. Obtain batch IDs of interest using BaseDataContext and BatchRequest (unless passed explicitly as argument).
+         1. Obtain batch IDs of interest using AbstractDataContext and BatchRequest (unless passed explicitly as argument).
          2. Set up metric_domain_kwargs and metric_value_kwargs (using configuration and/or variables and parameters).
          3. Instantiate the Validator object corresponding to BatchRequest (with a temporary expectation_suite_name) in
             order to have access to all Batch objects, on each of which the specified metric_name will be computed.
@@ -288,33 +337,6 @@ detected.
          9. Return [low, high] for the desired metric as estimated by the specified sampling method.
         10. Set up the arguments and call build_parameter_container() to store the parameter as part of "rule state".
         """
-        # Obtain false_positive_rate from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        false_positive_rate: np.float64 = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.false_positive_rate,
-            expected_return_type=(float, np.float64),
-            variables=variables,
-            parameters=parameters,
-        )
-
-        if not (0.0 <= false_positive_rate <= 1.0):
-            raise ge_exceptions.ProfilerExecutionError(
-                f"""false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1],
-but {false_positive_rate} was provided."""
-            )
-        elif false_positive_rate <= NP_EPSILON:
-            warnings.warn(
-                f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 0.
-A false_positive_rate of {NP_EPSILON} has been selected instead."""
-            )
-            false_positive_rate = np.float64(NP_EPSILON)
-        elif false_positive_rate >= (1.0 - NP_EPSILON):
-            warnings.warn(
-                f"""You have chosen a false_positive_rate of {false_positive_rate}, which is too close to 1.
-A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
-            )
-            false_positive_rate = np.float64(1.0 - NP_EPSILON)
-
         parameter_reference: str
         if self.metric_multi_batch_parameter_builder_name:
             # Obtain metric_multi_batch_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
@@ -337,7 +359,7 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
                 variables=variables,
                 parameters=parameters,
                 parameter_computation_impl=super()._build_parameters,
-                recompute_existing_parameter_values=recompute_existing_parameter_values,
+                runtime_configuration=runtime_configuration,
             )
             parameter_reference = self.raw_fully_qualified_parameter_name
 
@@ -353,48 +375,12 @@ A false_positive_rate of {1.0-NP_EPSILON} has been selected instead."""
             FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY
         ]
 
-        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        estimator: str = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=self.estimator,
-            expected_return_type=str,
-            variables=variables,
-            parameters=parameters,
-        )
-        if (
-            estimator
-            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
-        ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
-{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
-"""
-            )
-
         round_decimals: int
-
-        # Obtain quantile_statistic_interpolation_method directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        quantile_statistic_interpolation_method: str = (
-            get_parameter_value_and_validate_return_type(
-                domain=domain,
-                parameter_reference=self.quantile_statistic_interpolation_method,
-                expected_return_type=str,
-                variables=variables,
-                parameters=parameters,
-            )
-        )
         if (
-            quantile_statistic_interpolation_method
-            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS
+            self.metric_name
+            not in NumericMetricRangeMultiBatchParameterBuilder.METRIC_NAMES_EXEMPT_FROM_VALUE_ROUNDING
+            and integer_semantic_domain_type(domain=domain)
         ):
-            raise ge_exceptions.ProfilerExecutionError(
-                message=f"""The directive "quantile_statistic_interpolation_method" for {self.__class__.__name__} can \
-be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS} \
-("{quantile_statistic_interpolation_method}" was detected).
-"""
-            )
-
-        if integer_semantic_domain_type(domain=domain):
             round_decimals = 0
         else:
             round_decimals = self._get_round_decimals_using_heuristics(
@@ -404,52 +390,22 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 parameters=parameters,
             )
 
-        if quantile_statistic_interpolation_method == "auto":
-            if round_decimals == 0:
-                quantile_statistic_interpolation_method = "nearest"
-            else:
-                quantile_statistic_interpolation_method = "linear"
-
-        estimator_func: Callable
-        estimator_kwargs: dict
-        if estimator == "exact":
-            estimator_func = self._get_exact_estimate
-            estimator_kwargs = {}
-        elif estimator == "bootstrap":
-            estimator_func = self._get_bootstrap_estimate
-            estimator_kwargs = {
-                "false_positive_rate": false_positive_rate,
-                "n_resamples": self.n_resamples,
-                "random_seed": self.random_seed,
-                "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
-                "quantile_bias_std_error_ratio_threshold": self.quantile_bias_std_error_ratio_threshold,
-            }
-        elif estimator == "kde":
-            estimator_func = self._get_kde_estimate
-            estimator_kwargs = {
-                "false_positive_rate": false_positive_rate,
-                "n_resamples": self.n_resamples,
-                "random_seed": self.random_seed,
-                "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
-                "bw_method": self.bw_method,
-            }
-        else:
-            # Apply "oneshot" estimator (should be used for testing purposes only).
-            estimator_func = self._get_oneshot_estimate
-            estimator_kwargs = {
-                "false_positive_rate": false_positive_rate,
-                "quantile_statistic_interpolation_method": quantile_statistic_interpolation_method,
-            }
-
-        numeric_range_estimation_result: NumericRangeEstimationResult = (
-            self._estimate_metric_value_range(
-                metric_values=metric_values,
-                estimator_func=estimator_func,
+        numeric_range_estimator: NumericRangeEstimator = (
+            self._build_numeric_range_estimator(
                 round_decimals=round_decimals,
                 domain=domain,
                 variables=variables,
                 parameters=parameters,
-                **estimator_kwargs,
+            )
+        )
+        numeric_range_estimation_result: NumericRangeEstimationResult = (
+            self._estimate_metric_value_range(
+                metric_values=metric_values,
+                numeric_range_estimator=numeric_range_estimator,
+                round_decimals=round_decimals,
+                domain=domain,
+                variables=variables,
+                parameters=parameters,
             )
         )
 
@@ -481,18 +437,105 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             }
         )
 
+    def _build_numeric_range_estimator(
+        self,
+        round_decimals: int,
+        domain: Domain,
+        variables: Optional[ParameterContainer] = None,
+        parameters: Optional[Dict[str, ParameterContainer]] = None,
+    ) -> NumericRangeEstimator:
+        """
+        Determines "estimator" name and returns appropriate configured "NumericRangeEstimator" subclass instance.
+        """
+        # Obtain estimator directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        estimator: str = get_parameter_value_and_validate_return_type(
+            domain=domain,
+            parameter_reference=self.estimator,
+            expected_return_type=str,
+            variables=variables,
+            parameters=parameters,
+        )
+        if (
+            estimator
+            not in NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES
+        ):
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f"""The directive "estimator" for {self.__class__.__name__} can be only one of
+{NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_SAMPLING_METHOD_NAMES} ("{estimator}" was detected).
+"""
+            )
+
+        if estimator == "exact":
+            return ExactNumericRangeEstimator()
+
+        if estimator == "quantiles":
+            return QuantilesNumericRangeEstimator(
+                configuration=Attributes(
+                    {
+                        "false_positive_rate": self.false_positive_rate,
+                        "round_decimals": round_decimals,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                    }
+                )
+            )
+
+        # Since complex numerical calculations do not support DateTime/TimeStamp data types, use "quantiles" estimator.
+        if datetime_semantic_domain_type(domain=domain):
+            logger.info(
+                f'Estimator "{estimator}" does not support DateTime/TimeStamp data types (downgrading to "quantiles").'
+            )
+            return QuantilesNumericRangeEstimator(
+                configuration=Attributes(
+                    {
+                        "false_positive_rate": self.false_positive_rate,
+                        "round_decimals": round_decimals,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                    }
+                )
+            )
+
+        if estimator == "bootstrap":
+            return BootstrapNumericRangeEstimator(
+                configuration=Attributes(
+                    {
+                        "false_positive_rate": self.false_positive_rate,
+                        "round_decimals": round_decimals,
+                        "n_resamples": self.n_resamples,
+                        "random_seed": self.random_seed,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                        "quantile_bias_correction": self.quantile_bias_correction,
+                        "quantile_bias_std_error_ratio_threshold": self.quantile_bias_std_error_ratio_threshold,
+                    }
+                )
+            )
+
+        if estimator == "kde":
+            return KdeNumericRangeEstimator(
+                configuration=Attributes(
+                    {
+                        "false_positive_rate": self.false_positive_rate,
+                        "round_decimals": round_decimals,
+                        "n_resamples": self.n_resamples,
+                        "random_seed": self.random_seed,
+                        "quantile_statistic_interpolation_method": self.quantile_statistic_interpolation_method,
+                        "bw_method": self.bw_method,
+                    }
+                )
+            )
+
+        return ExactNumericRangeEstimator()
+
     def _estimate_metric_value_range(
         self,
         metric_values: np.ndarray,
-        estimator_func: Callable,
+        numeric_range_estimator: NumericRangeEstimator,
         round_decimals: int,
         domain: Optional[Domain] = None,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        **kwargs,
     ) -> NumericRangeEstimationResult:
         """
-        This method accepts an estimator Callable and data samples in the format "N x R^m", where "N" (most significant
+        This method accepts "NumericRangeEstimator" and data samples in format "N x R^m", where "N" (most significant
         dimension) is the number of measurements (e.g., one per Batch of data), while "R^m" is the multi-dimensional
         metric, whose values are being estimated.  Thus, for each element in the "R^m" hypercube, an "N"-dimensional
         vector of sample measurements is constructed and given to the estimator to apply its specific algorithm for
@@ -532,25 +575,53 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
         # Initialize value range estimate for multi-dimensional metric to all trivial values (to be updated in situ).
         # Since range includes min and max values, value range estimate contains 2-element least-significant dimension.
         metric_value_range_shape: tuple = metric_value_shape + (2,)
-        metric_value_range: np.ndarray = np.zeros(shape=metric_value_range_shape)
         # Initialize observed_values for multi-dimensional metric to all trivial values (to be updated in situ).
         # Return values of "numpy.histogram()", histogram and bin edges, are packaged in least-significant dimensions.
         estimation_histogram_shape: tuple = metric_value_shape + (
             2,
             NUM_HISTOGRAM_BINS + 1,
         )
-        estimation_histogram: np.ndarray = np.empty(shape=estimation_histogram_shape)
 
+        datetime_detected: bool = datetime_semantic_domain_type(
+            domain=domain
+        ) or self._is_metric_values_ndarray_datetime_dtype(
+            metric_values=metric_values,
+            metric_value_vector_indices=metric_value_vector_indices,
+        )
+
+        metric_value_range: np.ndarray
+        estimation_histogram: np.ndarray
+        if datetime_detected:
+            metric_value_range = np.full(
+                shape=metric_value_range_shape, fill_value=datetime.datetime.min
+            )
+            estimation_histogram = np.full(
+                shape=estimation_histogram_shape, fill_value=datetime.datetime.min
+            )
+        else:
+            if self._is_metric_values_ndarray_decimal_dtype(
+                metric_values=metric_values,
+                metric_value_vector_indices=metric_value_vector_indices,
+            ):
+                metric_values = convert_ndarray_decimal_to_float_dtype(
+                    data=metric_values
+                )
+
+            metric_value_range = np.zeros(shape=metric_value_range_shape)
+            estimation_histogram = np.empty(shape=estimation_histogram_shape)
+
+        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         metric_value_vector: np.ndarray
         metric_value_range_min_idx: tuple
         metric_value_range_max_idx: tuple
         metric_value_estimation_histogram_idx: tuple
         numeric_range_estimation_result: NumericRangeEstimationResult
-        # Traverse indices of sample vectors corresponding to every element of multi-dimensional metric.
         for metric_value_idx in metric_value_vector_indices:
             # Obtain "N"-element-long vector of samples for each element of multi-dimensional metric.
             metric_value_vector = metric_values[metric_value_idx]
-            if np.all(np.isclose(metric_value_vector, metric_value_vector[0])):
+            if not datetime_detected and np.all(
+                np.isclose(metric_value_vector, metric_value_vector[0])
+            ):
                 # Computation is unnecessary if distribution is degenerate.
                 numeric_range_estimation_result = build_numeric_range_estimation_result(
                     metric_values=metric_value_vector,
@@ -559,21 +630,22 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 )
             else:
                 # Compute low and high estimates for vector of samples for given element of multi-dimensional metric.
-                numeric_range_estimation_result = estimator_func(
-                    metric_values=metric_value_vector,
-                    domain=domain,
-                    variables=variables,
-                    parameters=parameters,
-                    **kwargs,
+                numeric_range_estimation_result = (
+                    numeric_range_estimator.get_numeric_range_estimate(
+                        metric_values=metric_value_vector,
+                        domain=domain,
+                        variables=variables,
+                        parameters=parameters,
+                    )
                 )
 
             min_value = numeric_range_estimation_result.value_range[0]
             if lower_bound is not None:
-                min_value = max(cast(float, min_value), lower_bound)
+                min_value = max(np.float64(min_value), np.float64(lower_bound))
 
             max_value = numeric_range_estimation_result.value_range[1]
             if upper_bound is not None:
-                max_value = min(cast(float, max_value), upper_bound)
+                max_value = min(np.float64(max_value), np.float64(upper_bound))
 
             # Obtain index of metric element (by discarding "N"-element samples dimension).
             metric_value_idx = metric_value_idx[1:]
@@ -590,12 +662,24 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             metric_value_estimation_histogram_idx = metric_value_idx
 
             # Store computed min and max value estimates into allocated range estimate for multi-dimensional metric.
-            metric_value_range[metric_value_range_min_idx] = round(
-                cast(float, min_value), round_decimals
-            )
-            metric_value_range[metric_value_range_max_idx] = round(
-                cast(float, max_value), round_decimals
-            )
+            if datetime_detected:
+                metric_value_range[metric_value_range_min_idx] = min_value
+                metric_value_range[metric_value_range_max_idx] = max_value
+            else:
+                if round_decimals is None:
+                    metric_value_range[metric_value_range_min_idx] = np.float64(
+                        min_value
+                    )
+                    metric_value_range[metric_value_range_max_idx] = np.float64(
+                        max_value
+                    )
+                else:
+                    metric_value_range[metric_value_range_min_idx] = round(
+                        np.float64(min_value), round_decimals
+                    )
+                    metric_value_range[metric_value_range_max_idx] = round(
+                        np.float64(max_value), round_decimals
+                    )
 
             # Store computed estimation_histogram into allocated range estimate for multi-dimensional metric.
             estimation_histogram[
@@ -614,6 +698,36 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             estimation_histogram=estimation_histogram,
             value_range=metric_value_range,
         )
+
+    @staticmethod
+    def _is_metric_values_ndarray_datetime_dtype(
+        metric_values: np.ndarray,
+        metric_value_vector_indices: List[tuple],
+    ) -> bool:
+        metric_value_vector: np.ndarray
+        for metric_value_idx in metric_value_vector_indices:
+            metric_value_vector = metric_values[metric_value_idx]
+            if not is_ndarray_datetime_dtype(
+                data=metric_value_vector,
+                parse_strings_as_datetimes=True,
+                fuzzy=False,
+            ):
+                return False
+
+        return True
+
+    @staticmethod
+    def _is_metric_values_ndarray_decimal_dtype(
+        metric_values: np.ndarray,
+        metric_value_vector_indices: List[tuple],
+    ) -> bool:
+        metric_value_vector: np.ndarray
+        for metric_value_idx in metric_value_vector_indices:
+            metric_value_vector = metric_values[metric_value_idx]
+            if not does_ndarray_contain_decimal_dtype(data=metric_value_vector):
+                return False
+
+        return True
 
     def _get_truncate_values_using_heuristics(
         self,
@@ -640,11 +754,12 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
                 (
                     distribution_boundary is None
                     or is_numeric(value=distribution_boundary)
+                    or isinstance(distribution_boundary, datetime.datetime)
                 )
                 for distribution_boundary in truncate_values.values()
             ]
         ):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "truncate_values" for {self.__class__.__name__} must specify the
 [lower_bound, upper_bound] closed interval, where either boundary is a numeric value (or None).
 """
@@ -653,11 +768,12 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
         lower_bound: Optional[Number] = truncate_values.get("lower_bound")
         upper_bound: Optional[Number] = truncate_values.get("upper_bound")
 
-        if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
-            lower_bound = 0.0
+        if metric_values.shape == 1 and np.issubdtype(metric_values.dtype, np.number):
+            if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
+                lower_bound = 0.0
 
-        if upper_bound is None and np.all(np.less(metric_values, (-NP_EPSILON))):
-            upper_bound = 0.0
+            if upper_bound is None and np.all(np.less(metric_values, (-NP_EPSILON))):
+                upper_bound = 0.0
 
         return {
             "lower_bound": lower_bound,
@@ -679,169 +795,17 @@ be only one of {NumericMetricRangeMultiBatchParameterBuilder.RECOGNIZED_QUANTILE
             variables=variables,
             parameters=parameters,
         )
-        if round_decimals is None:
-            round_decimals = MAX_DECIMALS
-        else:
-            if not isinstance(round_decimals, int) or (round_decimals < 0):
-                raise ge_exceptions.ProfilerExecutionError(
-                    message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
+        if not (
+            round_decimals is None
+            or (isinstance(round_decimals, int) and (round_decimals >= 0))
+        ):
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f"""The directive "round_decimals" for {self.__class__.__name__} can be 0 or a
 positive integer, or must be omitted (or set to None).
 """
-                )
+            )
 
         if np.issubdtype(metric_values.dtype, np.integer):
             round_decimals = 0
 
         return round_decimals
-
-    @staticmethod
-    def _get_bootstrap_estimate(
-        metric_values: np.ndarray,
-        domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        **kwargs,
-    ) -> NumericRangeEstimationResult:
-        false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
-
-        # Obtain n_resamples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        n_resamples: Optional[int] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=kwargs.get("n_resamples"),
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        if n_resamples is None:
-            n_resamples = (
-                NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_BOOTSTRAP_NUM_RESAMPLES
-            )
-
-        # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=kwargs.get("random_seed"),
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        quantile_statistic_interpolation_method: str = kwargs.get(
-            "quantile_statistic_interpolation_method"
-        )
-
-        # Obtain quantile_bias_std_error_ratio_threshold override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        quantile_bias_std_error_ratio_threshold: Optional[
-            float
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=kwargs.get("quantile_bias_std_error_ratio_threshold"),
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        if quantile_bias_std_error_ratio_threshold is None:
-            quantile_bias_std_error_ratio_threshold = (
-                NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_BOOTSTRAP_QUANTILE_BIAS_STD_ERROR_RATIO_THRESHOLD
-            )
-
-        return compute_bootstrap_quantiles_point_estimate(
-            metric_values=metric_values,
-            false_positive_rate=false_positive_rate,
-            n_resamples=n_resamples,
-            random_seed=random_seed,
-            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-            quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
-        )
-
-    @staticmethod
-    def _get_kde_estimate(
-        metric_values: np.ndarray,
-        domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        **kwargs,
-    ) -> NumericRangeEstimationResult:
-        false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
-
-        # Obtain n_resamples override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        n_resamples: Optional[int] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=kwargs.get("n_resamples"),
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        if n_resamples is None:
-            n_resamples = (
-                NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_KDE_NUM_RESAMPLES
-            )
-
-        # Obtain random_seed override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        random_seed: Optional[int] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=kwargs.get("random_seed"),
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        quantile_statistic_interpolation_method: str = kwargs.get(
-            "quantile_statistic_interpolation_method"
-        )
-
-        # Obtain bw_method override from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        bw_method: Optional[
-            Union[str, float, Callable]
-        ] = get_parameter_value_and_validate_return_type(
-            domain=domain,
-            parameter_reference=kwargs.get("bw_method"),
-            expected_return_type=None,
-            variables=variables,
-            parameters=parameters,
-        )
-
-        if bw_method is None:
-            bw_method = (
-                NumericMetricRangeMultiBatchParameterBuilder.DEFAULT_KDE_BW_METHOD
-            )
-
-        return compute_kde_quantiles_point_estimate(
-            metric_values=metric_values,
-            false_positive_rate=false_positive_rate,
-            n_resamples=n_resamples,
-            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-            bw_method=bw_method,
-            random_seed=random_seed,
-        )
-
-    @staticmethod
-    def _get_oneshot_estimate(
-        metric_values: np.ndarray,
-        **kwargs,
-    ) -> NumericRangeEstimationResult:
-        false_positive_rate: np.float64 = kwargs.get("false_positive_rate", 5.0e-2)
-        quantile_statistic_interpolation_method: str = kwargs.get(
-            "quantile_statistic_interpolation_method"
-        )
-
-        return compute_quantiles(
-            metric_values=metric_values,
-            false_positive_rate=false_positive_rate,
-            quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
-        )
-
-    # noinspection PyUnusedLocal
-    @staticmethod
-    def _get_exact_estimate(
-        metric_values: np.ndarray,
-        **kwargs,
-    ) -> NumericRangeEstimationResult:
-        return build_numeric_range_estimation_result(
-            metric_values=metric_values,
-            min_value=np.amin(a=metric_values),
-            max_value=np.amax(a=metric_values),
-        )

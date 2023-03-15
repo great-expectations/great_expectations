@@ -5,7 +5,8 @@ import numpy as np
 import pytest
 import scipy.stats as stats
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import DataContext
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
@@ -14,15 +15,15 @@ from great_expectations.rule_based_profiler.parameter_builder import (
     NumericMetricRangeMultiBatchParameterBuilder,
     ParameterBuilder,
 )
-from great_expectations.rule_based_profiler.types import (
+from great_expectations.rule_based_profiler.parameter_container import (
     DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-    Domain,
     ParameterContainer,
     ParameterNode,
     get_parameter_value_by_fully_qualified_parameter_name,
 )
 
 
+@pytest.mark.integration
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -55,12 +56,12 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.TABLE,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -71,6 +72,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -79,14 +81,13 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -107,7 +108,7 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([7510, 8806])
 
@@ -149,7 +150,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
-def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
+@pytest.mark.integration
+@pytest.mark.slow  # 1.10s
+def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
@@ -173,7 +176,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             metric_multi_batch_parameter_builder_name=None,
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            estimator="oneshot",
+            estimator="quantiles",
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=1,
@@ -184,13 +187,13 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -201,6 +204,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -208,14 +212,13 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {"column": "fare_amount"},
                 "metric_name": "column.min",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -236,7 +239,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -276,7 +279,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
             metric_multi_batch_parameter_builder_name=None,
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            estimator="oneshot",
+            estimator="quantiles",
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=5.0e-2,
             round_decimals=1,
@@ -289,8 +292,10 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         domain=domain,
         variables=variables,
         parameters=parameters,
-        recompute_existing_parameter_values=True,
         batch_request=batch_request,
+        runtime_configuration={
+            "recompute_existing_parameter_values": True,
+        },
     )
 
     parameter_node: ParameterNode = (
@@ -308,7 +313,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -346,6 +351,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
+@pytest.mark.integration
 def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -381,13 +387,13 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -398,6 +404,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -405,14 +412,13 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {"column": "fare_amount"},
                 "metric_name": "column.min",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -433,7 +439,7 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -467,7 +473,8 @@ def test_exact_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
-def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
+@pytest.mark.integration
+def test_quantiles_numeric_metric_range_multi_batch_parameter_builder_with_evaluation_dependency_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
     data_context: DataContext = (
@@ -484,7 +491,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
 
     fully_qualified_parameter_name_for_value: str = "$parameter.column_min_range"
 
-    my_column_min_metric_multi_batch_parameter_builder_config: ParameterBuilderConfig = ParameterBuilderConfig(
+    my_column_min_metric_multi_batch_parameter_builder_config = ParameterBuilderConfig(
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_column_min",
@@ -506,7 +513,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
             metric_multi_batch_parameter_builder_name="my_column_min",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            estimator="oneshot",
+            estimator="quantiles",
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=1.0e-2,
             round_decimals=1,
@@ -517,13 +524,13 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -534,6 +541,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -541,14 +549,13 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
     )
     assert len(parameter_nodes) == 1
 
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {"column": "fare_amount"},
                 "metric_name": "column.min",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -569,7 +576,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_01_lower: float = actual_values_01[0]
     actual_value_01_upper: float = actual_values_01[1]
@@ -609,7 +616,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
             metric_multi_batch_parameter_builder_name="my_column_min",
             metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
             metric_value_kwargs=None,
-            estimator="oneshot",
+            estimator="quantiles",
             include_estimator_samples_histogram_in_details=True,
             false_positive_rate=5.0e-2,
             round_decimals=1,
@@ -622,8 +629,10 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
         domain=domain,
         variables=variables,
         parameters=parameters,
-        recompute_existing_parameter_values=True,
         batch_request=batch_request,
+        runtime_configuration={
+            "recompute_existing_parameter_values": True,
+        },
     )
 
     parameter_node: ParameterNode = (
@@ -641,7 +650,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     actual_value_05_lower: float = actual_values_05[0]
     actual_value_05_upper: float = actual_values_05[1]
@@ -679,6 +688,7 @@ def test_oneshot_numeric_metric_range_multi_batch_parameter_builder_with_evaluat
     assert p_value > 9.5e-1
 
 
+@pytest.mark.integration
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_one(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -710,11 +720,11 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.TABLE,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -722,8 +732,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     error_message: str = re.escape(
-        f"""You have chosen a false_positive_rate of 1.0, which is too close to 1.
-A false_positive_rate of {1 - NP_EPSILON} has been selected instead."""
+        f"""You have chosen a false_positive_rate of 1.0, which is too close to 1.  A false_positive_rate of \
+{1 - NP_EPSILON} has been selected instead.
+"""
     )
 
     with pytest.warns(UserWarning, match=error_message):
@@ -732,9 +743,11 @@ A false_positive_rate of {1 - NP_EPSILON} has been selected instead."""
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
 
+@pytest.mark.integration
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_negative(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -766,11 +779,11 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.TABLE,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -778,19 +791,23 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     error_message: str = re.escape(
-        """false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1],
-but -0.05 was provided."""
+        """false_positive_rate must be a positive decimal number between 0 and 1 inclusive [0, 1], but -0.05 was \
+provided.
+"""
     )
 
-    with pytest.raises(ge_exceptions.ProfilerExecutionError, match=error_message):
+    with pytest.raises(gx_exceptions.ProfilerExecutionError, match=error_message):
         numeric_metric_range_parameter_builder.build_parameters(
             domain=domain,
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 2.51s
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_zero(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -822,11 +839,11 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.TABLE,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -834,8 +851,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     warning_message: str = re.escape(
-        f"""You have chosen a false_positive_rate of 0.0, which is too close to 0.
-A false_positive_rate of {NP_EPSILON} has been selected instead."""
+        f"""You have chosen a false_positive_rate of 0.0, which is too close to 0.  A false_positive_rate of \
+{NP_EPSILON} has been selected instead.
+"""
     )
 
     with pytest.warns(UserWarning, match=warning_message):
@@ -844,9 +862,11 @@ A false_positive_rate of {NP_EPSILON} has been selected instead."""
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
 
+@pytest.mark.integration
 def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_false_positive_rate_very_small(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -885,11 +905,11 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.TABLE,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -897,8 +917,9 @@ def test_bootstrap_numeric_metric_range_multi_batch_parameter_builder_bobby_fals
     assert parameter_container.parameter_nodes is None
 
     warning_message: str = re.escape(
-        f"""You have chosen a false_positive_rate of {smaller_than_np_epsilon_false_positive_rate}, which is too close to 0.
-A false_positive_rate of {NP_EPSILON} has been selected instead."""
+        f"""You have chosen a false_positive_rate of {smaller_than_np_epsilon_false_positive_rate}, which is too close \
+to 0.  A false_positive_rate of {NP_EPSILON} has been selected instead.
+"""
     )
 
     with pytest.warns(UserWarning, match=warning_message):
@@ -907,9 +928,11 @@ A false_positive_rate of {NP_EPSILON} has been selected instead."""
             variables=variables,
             parameters=parameters,
             batch_request=batch_request,
+            runtime_configuration=None,
         )
 
 
+@pytest.mark.integration
 def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -942,12 +965,12 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         rule_name="my_rule",
         domain_type=MetricDomainTypes.TABLE,
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
-    parameters: Dict[str, ParameterContainer] = {
+    parameter_container = ParameterContainer(parameter_nodes=None)
+    parameters: Dict[str, ParameterContainer | None] = {
         domain.id: parameter_container,
     }
 
@@ -958,6 +981,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -966,14 +990,13 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert len(parameter_nodes) == 1
 
     fully_qualified_parameter_name_for_value: str = "$parameter.row_count_range"
-    expected_value_dict: Dict[str, Optional[str]] = {
+    expected_parameter_node_as_dict: dict = {
         "value": None,
         "details": {
             "metric_configuration": {
                 "domain_kwargs": {},
                 "metric_name": "table.row_count",
                 "metric_value_kwargs": None,
-                "metric_dependencies": None,
             },
             "num_batches": 3,
         },
@@ -994,7 +1017,7 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
         "estimation_histogram"
     )
 
-    assert parameter_node == expected_value_dict
+    assert parameter_node == expected_parameter_node_as_dict
 
     expected_value: np.ndarray = np.asarray([6180, 10277])
 
@@ -1036,6 +1059,8 @@ def test_kde_numeric_metric_range_multi_batch_parameter_builder_bobby(
     assert p_value > 9.5e-1
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.12s
 def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstrap_marginal_info_at_boundary(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -1073,12 +1098,12 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -1090,6 +1115,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -1124,7 +1150,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -1136,6 +1162,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -1158,6 +1185,8 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_vs_bootstr
     assert kde_value[1] > bootstrap_value[1]
 
 
+@pytest.mark.integration
+@pytest.mark.slow  # 1.12s
 def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
     bobby_columnar_table_multi_batch_deterministic_data_context,
 ):
@@ -1195,12 +1224,12 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
 
     variables: Optional[ParameterContainer] = None
 
-    domain: Domain = Domain(
+    domain = Domain(
         domain_type=MetricDomainTypes.COLUMN,
         domain_kwargs=metric_domain_kwargs,
         rule_name="my_rule",
     )
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -1212,6 +1241,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (
@@ -1247,7 +1277,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         )
     )
 
-    parameter_container: ParameterContainer = ParameterContainer(parameter_nodes=None)
+    parameter_container = ParameterContainer(parameter_nodes=None)
     parameters: Dict[str, ParameterContainer] = {
         domain.id: parameter_container,
     }
@@ -1259,6 +1289,7 @@ def test_numeric_metric_range_multi_batch_parameter_builder_bobby_kde_bw_method(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_nodes: Optional[Dict[str, ParameterNode]] = (

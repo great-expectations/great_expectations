@@ -6,11 +6,7 @@ import traceback
 import tzlocal
 from dateutil.parser import parse
 
-from great_expectations.render.renderer.call_to_action_renderer import (
-    CallToActionRenderer,
-)
-from great_expectations.render.renderer.renderer import Renderer
-from great_expectations.render.types import (
+from great_expectations.render import (
     RenderedBootstrapTableContent,
     RenderedDocumentContent,
     RenderedHeaderContent,
@@ -18,6 +14,10 @@ from great_expectations.render.types import (
     RenderedStringTemplateContent,
     RenderedTabsContent,
 )
+from great_expectations.render.renderer.call_to_action_renderer import (
+    CallToActionRenderer,
+)
+from great_expectations.render.renderer.renderer import Renderer
 
 logger = logging.getLogger(__name__)
 

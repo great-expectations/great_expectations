@@ -51,3 +51,6 @@ from .expect_profile_numeric_columns_percent_diff_less_than_or_equal_to_threshol
 from .expect_profile_numeric_columns_percent_diff_less_than_threshold import (
     ExpectProfileNumericColumnsPercentDiffLessThanThreshold,
 )
+from .profile_numeric_columns_diff_expectation import (
+    ProfileNumericColumnsDiffExpectation,
+)

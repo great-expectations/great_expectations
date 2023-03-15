@@ -1,6 +1,7 @@
 import os
 from unittest import mock
 
+import pytest
 from ruamel.yaml import YAML
 
 from great_expectations import DataContext
@@ -116,10 +117,12 @@ def test_batches_are_accessible(
             )
         )
         assert metric_max == (total_batches + 1) - batch_num
-        metric_value_set = validator.get_metric(
-            MetricConfiguration(
-                "column.distinct_values",
-                metric_domain_kwargs={"column": "string_cardinality_3"},
+        metric_value_set = set(
+            validator.get_metric(
+                MetricConfiguration(
+                    "column.distinct_values",
+                    metric_domain_kwargs={"column": "string_cardinality_3"},
+                )
             )
         )
         assert metric_value_set == {"category0", "category1", "category2"}
@@ -128,6 +131,7 @@ def test_batches_are_accessible(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 2.04s
 def test_profile_includes_citations(
     mock_emit,
     alice_columnar_table_single_batch_context,
@@ -171,15 +175,13 @@ def test_profile_includes_citations(
 
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert (
-        actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.RULE_BASED_PROFILER_RUN.value
-    )
+    assert actual_events[-1][0][0]["event"] == UsageStatsEvents.RULE_BASED_PROFILER_RUN
 
 
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@pytest.mark.slow  # 2.16s
 def test_profile_get_expectation_suite(
     mock_emit,
     alice_columnar_table_single_batch_context,
@@ -227,5 +229,5 @@ def test_profile_get_expectation_suite(
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert (
         actual_events[-1][0][0]["event"]
-        == UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE.value
+        == UsageStatsEvents.RULE_BASED_PROFILER_RESULT_GET_EXPECTATION_SUITE
     )
