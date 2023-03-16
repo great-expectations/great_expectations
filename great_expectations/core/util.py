@@ -100,10 +100,10 @@ SCHEMAS = {
         "PositiveInfinity": 1.79e308,
     },
 }
-from pyspark.sql import SparkSession
 
 if TYPE_CHECKING:
     import numpy.typing as npt
+    from pyspark.sql import SparkSession  # noqa: TCH004
     from ruamel.yaml.comments import CommentedMap
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}

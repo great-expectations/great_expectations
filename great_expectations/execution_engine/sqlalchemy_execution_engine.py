@@ -101,7 +101,6 @@ try:
     from sqlalchemy.engine import Dialect, Row
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql import text as sa_text
     from sqlalchemy.sql.elements import (
         BooleanClauseList,
         Label,
@@ -664,7 +663,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     domain_kwargs["row_condition"]
                 )
                 selectable = (
-                    sa.select([sa_text("*")])
+                    sa.select([sa.text("*")])
                     .select_from(selectable)
                     .where(parsed_condition)
                 )
@@ -685,7 +684,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
 
             selectable = (
-                sa.select([sa_text("*")])
+                sa.select([sa.text("*")])
                 .select_from(selectable)
                 .where(parse_condition_to_sqlalchemy(filter_condition.condition))
             )
@@ -720,7 +719,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "both_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa_text("*")])
+                    sa.select([sa.text("*")])
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -733,7 +732,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             elif ignore_row_if == "either_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa_text("*")])
+                    sa.select([sa.text("*")])
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -767,7 +766,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa_text("*")])
+                    sa.select([sa.text("*")])
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -782,7 +781,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             elif ignore_row_if == "any_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa_text("*")])
+                    sa.select([sa.text("*")])
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -1187,7 +1186,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         else:
             if self.dialect_name == GXSqlDialect.SQLITE:
-                split_clause = sa_text("1 = 1")
+                split_clause = sa.text("1 = 1")
             else:
                 split_clause = sa.true()
 
@@ -1233,7 +1232,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             if not isinstance(query, str):
                 raise ValueError(f"SQL query should be a str but got {query}")
             # Query is a valid SELECT query that begins with r"\w+select\w"
-            selectable = sa.select(sa_text(query.lstrip()[6:].lstrip())).subquery()
+            selectable = sa.select(sa.text(query.lstrip()[6:].lstrip())).subquery()
 
         return selectable
 
