@@ -1230,7 +1230,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             f"from (SELECT {column} from {self._table})"
         )
         try:
-            quantiles_results = self.engine.execute(sa.text(quantiles_query)).fetchone()[0]
+            quantiles_results = self.engine.execute(
+                sa.text(quantiles_query)
+            ).fetchone()[0]
             quantiles_results_list = ast.literal_eval(quantiles_results)
             return quantiles_results_list
 
@@ -1245,7 +1247,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             f"from (SELECT {column} from {self._table})"
         )
         try:
-            quantiles_results = self.engine.execute(sa.text(quantiles_query)).fetchone()[0]
+            quantiles_results = self.engine.execute(
+                sa.text(quantiles_query)
+            ).fetchone()[0]
             return quantiles_results
 
         except ProgrammingError as pe:

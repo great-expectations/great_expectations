@@ -151,27 +151,31 @@ def validate_uuid4(uuid_string: str) -> bool:
 
 
 def get_sqlite_temp_table_names(engine):
-    result = engine.execute(sa.text(
-        """
+    result = engine.execute(
+        sa.text(
+            """
 SELECT
     name
 FROM
     sqlite_temp_master
 """
-    ))
+        )
+    )
     rows = result.fetchall()
     return {row[0] for row in rows}
 
 
 def get_sqlite_table_names(engine):
-    result = engine.execute(sa.text(
-        """
+    result = engine.execute(
+        sa.text(
+            """
 SELECT
     name
 FROM
     sqlite_master
 """
-    ))
+        )
+    )
     rows = result.fetchall()
     return {row[0] for row in rows}
 

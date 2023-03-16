@@ -32,6 +32,7 @@ except ImportError:
     sa = None
 
 try:
+    import sqlalchemy as sa
     import sqlalchemy.sql.functions.concat as concat
     from sqlalchemy.engine import LegacyRow
     from sqlalchemy.sql import Selectable
@@ -45,7 +46,6 @@ except ImportError:
     concat = None
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.expression import Cast, ColumnOperators
 
