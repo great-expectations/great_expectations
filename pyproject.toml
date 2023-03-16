@@ -338,6 +338,15 @@ filterwarnings = [
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
     # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than, test_case_runner_v2_api
     'ignore: divide by zero encountered:RuntimeWarning',
+    # Example Actual Warning: Found running tests/test_definitions/test_expectations_v3_api.py
+    # DeprecationWarning: NotImplemented should not be used in a boolean context
+    'ignore: NotImplemented should not be used in a boolean context:DeprecationWarning',
+
+    # six
+    # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
+    # ImportWarning: _SixMetaPathImporter.exec_module() not found; falling back to load_module()
+    'ignore: _SixMetaPathImporter.exec_module\(\) not found:ImportWarning',
+
     # pandas
     # Example Actual Warning: FutureWarning: The behavior of `series[i:j]` with an integer-dtype index is deprecated. In a future version, this will be treated as *label-based* indexing, consistent with e.g. `series[i]` lookups. To retain the old behavior, use `series.iloc[i:j]`. To get the future behavior, use `series.loc[i:j]`.
     # Found when running pytest tests/test_definitions/test_expectations_v3_api.py
