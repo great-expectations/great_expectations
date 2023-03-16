@@ -28,7 +28,10 @@ logger = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def spark_dbfs_datasource(fs) -> SparkDBFSDatasource:
+def spark_dbfs_datasource(fs, test_backends) -> SparkDBFSDatasource:
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     # Copy boto modules into fake filesystem (see https://github.com/spulec/moto/issues/1682#issuecomment-645016188)
     for module in [boto3, botocore]:
         module_dir = pathlib.Path(module.__file__).parent
