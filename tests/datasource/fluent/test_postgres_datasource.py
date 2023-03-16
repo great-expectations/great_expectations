@@ -93,7 +93,7 @@ def assert_table_asset(
     name: str,
     table_name: str,
     source: PostgresDatasource,
-    batch_request_options: BatchRequestOptions,
+    batch_request_options: tuple[str, ...],
 ):
     assert asset.name == name
     assert asset.table_name == table_name
@@ -136,7 +136,7 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_options={"year": None, "month": None},
+            batch_request_options=("year", "month"),
         )
         assert_batch_request(
             batch_request=asset.build_batch_request({"year": 2021, "month": 10}),
@@ -163,7 +163,7 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_options={},
+            batch_request_options=tuple(),
         )
         assert_batch_request(
             batch_request=asset.build_batch_request(),
