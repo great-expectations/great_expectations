@@ -52,6 +52,14 @@
         "a" : "INTEGER",
         "b" : "INTEGER",
         "ts": "TIMESTAMP"
+      },
+      "snowflake": {
+        "w" : "NUMBER",
+        "x" : "NUMBER",
+        "y" : "NUMBER",
+        "a" : "NUMBER",
+        "b" : "NUMBER",
+        "ts": "TIMESTAMP_NTZ"
       }
     },
     "tests" : [{
