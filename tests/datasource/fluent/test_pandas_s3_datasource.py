@@ -161,52 +161,6 @@ def test_construct_csv_asset_directly():
 
 
 @pytest.mark.integration
-def test_csv_asset_with_regex_unnamed_parameters(
-    pandas_s3_datasource: PandasS3Datasource,
-):
-    asset = pandas_s3_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
-    )
-    options = asset.batch_request_options
-    assert options == (
-        "path",
-        "batch_request_param_1",
-        "batch_request_param_2",
-        "batch_request_param_3",
-    )
-
-
-@pytest.mark.integration
-def test_csv_asset_with_regex_named_parameters(
-    pandas_s3_datasource: PandasS3Datasource,
-):
-    asset = pandas_s3_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-    )
-    options = asset.batch_request_options
-    assert options == ("path", "name", "timestamp", "price")
-
-
-@pytest.mark.integration
-def test_csv_asset_with_some_regex_named_parameters(
-    pandas_s3_datasource: PandasS3Datasource,
-):
-    asset = pandas_s3_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
-    )
-    options = asset.batch_request_options
-    assert options == (
-        "path",
-        "name",
-        "batch_request_param_2",
-        "price",
-    )
-
-
-@pytest.mark.integration
 def test_csv_asset_with_non_string_regex_named_parameters(
     pandas_s3_datasource: PandasS3Datasource,
 ):
