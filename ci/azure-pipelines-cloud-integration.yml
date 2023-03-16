@@ -133,6 +133,7 @@ stages:
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
               pip install chardet==3.0.4
+              pip install grpcio-status
             displayName: 'Install dependencies'
 
           - script: |
