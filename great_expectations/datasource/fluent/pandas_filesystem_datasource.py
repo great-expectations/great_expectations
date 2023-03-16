@@ -72,6 +72,9 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             order_by: sorting directive via either list[Sorter] or "+/-  key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
+        # TODO: this needs to work for dynamic methods
+        # TODO: example my making these validator methods on `DataAsset`
+        # or always doing this in the dynamic `add_asset` methods
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
         )
