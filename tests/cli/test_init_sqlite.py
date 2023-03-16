@@ -32,7 +32,7 @@ def titanic_sqlite_db_file(sa, tmp_path_factory):
     shutil.copy(fixture_db_path, db_path)
 
     engine = sa.create_engine(f"sqlite:///{db_path}", pool_recycle=3600)
-    assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+    assert engine.execute(sa.text(f"select count(*) from titanic")).fetchall()[0] == (1313,)
     return db_path
 
 

@@ -418,7 +418,6 @@ filterwarnings = [
     # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
     # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
     'ignore: The legacy calling style of select\(\) is deprecated and will be removed in SQLAlchemy 2.0.  Please use the new calling style described at select\(\).:sqlalchemy.exc.RemovedIn20Warning',
-    'ignore: Passing a string to Connection.execute\(\) is deprecated and will be removed in version 2.0.  Use the text\(\) construct, or the Connection.exec_driver_sql\(\) method to invoke a driver-level SQL string.:sqlalchemy.exc.RemovedIn20Warning',
     'ignore: The current statement is being autocommitted using implicit autocommit, which will be removed in SQLAlchemy 2.0. Use the .begin\(\) method of Engine or Connection in order to use an explicit transaction for DML and DDL statements.:sqlalchemy.exc.RemovedIn20Warning',
     'ignore: The "whens" argument to case\(\), when referring to a sequence of items, is now passed as a series of positional elements, rather than as a list.:sqlalchemy.exc.RemovedIn20Warning',
     'ignore: The Engine.execute\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. All statement execution in SQLAlchemy 2.0 is performed by the Connection.execute\(\) method of Connection, or in the ORM by the Session.execute\(\) method of Session.:sqlalchemy.exc.RemovedIn20Warning',

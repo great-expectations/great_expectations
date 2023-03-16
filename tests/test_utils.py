@@ -151,27 +151,27 @@ def validate_uuid4(uuid_string: str) -> bool:
 
 
 def get_sqlite_temp_table_names(engine):
-    result = engine.execute(
+    result = engine.execute(sa.text(
         """
 SELECT
     name
 FROM
     sqlite_temp_master
 """
-    )
+    ))
     rows = result.fetchall()
     return {row[0] for row in rows}
 
 
 def get_sqlite_table_names(engine):
-    result = engine.execute(
+    result = engine.execute(sa.text(
         """
 SELECT
     name
 FROM
     sqlite_master
 """
-    )
+    ))
     rows = result.fetchall()
     return {row[0] for row in rows}
 
@@ -680,7 +680,7 @@ def load_data_into_test_database(
             connection = engine.connect()
             if drop_existing_table:
                 print(f"Dropping table {table_name}")
-                connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+                connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
                 print(f"Creating table {table_name} and adding data from {csv_paths}")
             else:
                 print(
@@ -810,7 +810,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
     connection = execution_engine.engine.connect()
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))

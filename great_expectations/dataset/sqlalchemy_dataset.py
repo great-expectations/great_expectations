@@ -1116,7 +1116,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             or self.sql_engine_dialect.name.lower() == GXSqlDialect.TRINO
         ):
             element_values = self.engine.execute(
-                f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
+                sa.text(f"SELECT approx_percentile({column},  0.5) FROM {self._table}")
             )
             return convert_to_json_serializable(element_values.fetchone()[0])
         else:
@@ -1230,7 +1230,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             f"from (SELECT {column} from {self._table})"
         )
         try:
-            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            quantiles_results = self.engine.execute(sa.text(quantiles_query)).fetchone()[0]
             quantiles_results_list = ast.literal_eval(quantiles_results)
             return quantiles_results_list
 
@@ -1245,7 +1245,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             f"from (SELECT {column} from {self._table})"
         )
         try:
-            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            quantiles_results = self.engine.execute(sa.text(quantiles_query)).fetchone()[0]
             return quantiles_results
 
         except ProgrammingError as pe:
