@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import logging
-import pathlib
 import os
+import pathlib
 import re
-from typing import TYPE_CHECKING, List, cast
+from typing import cast
 
-import pandas as pd
 import boto3
 import botocore
 import pytest
@@ -26,7 +25,6 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
 from tests.test_utils import create_files_in_directory
-
 
 logger = logging.getLogger(__file__)
 
