@@ -506,13 +506,12 @@ class SqlAlchemyDataSplitter(DataSplitter):
         concat_date_parts: Cast | ColumnOperators
         if len(date_parts) == 1:
             # MSSql does not accept single item concatenation
-            concat_clause = [
-                sa.func.distinct(
-                    sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
-                        date_parts[0].value
-                    )
-                ).label("concat_distinct_values")
-            ]
+            concat_clause = sa.func.distinct(
+                sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
+                    date_parts[0].value
+                )
+            ).label("concat_distinct_values")
+
         else:
             """
             # NOTE: <Alex>6/29/2022</Alex>
@@ -533,9 +532,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
                         )
                     )
 
-                concat_clause = [
-                    sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
-                ]
+                concat_clause = sa.func.distinct(concat_date_parts).label(
+                    "concat_distinct_values"
+                )
             else:
                 concat_date_parts = sa.func.concat(
                     "",
@@ -554,9 +553,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
                         ),
                     )
 
-                concat_clause = [
-                    sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
-                ]
+                concat_clause = sa.func.distinct(concat_date_parts).label(
+                    "concat_distinct_values"
+                )
 
         split_query: Selectable = sa.select(
             concat_clause,
