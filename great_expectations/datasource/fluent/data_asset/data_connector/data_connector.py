@@ -185,8 +185,8 @@ class DataConnector(ABC):
             return False
 
         if batch_request.options:
-            for key in batch_request.options.keys():
-                if not (
+            for key, value in batch_request.options.items():
+                if value is not None and not (
                     (key in batch_definition.batch_identifiers)
                     and (
                         batch_definition.batch_identifiers[key]

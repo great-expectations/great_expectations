@@ -384,17 +384,6 @@ class LegacyDatasource:
     def build_batch_kwargs(
         self, batch_kwargs_generator, data_asset_name=None, partition_id=None, **kwargs
     ):
-        if kwargs.get("name"):
-            if data_asset_name:
-                raise ValueError(
-                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
-                )
-            # deprecated-v0.11.2
-            warnings.warn(
-                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
         generator_obj = self.get_batch_kwargs_generator(batch_kwargs_generator)
         if partition_id is not None:
             kwargs["partition_id"] = partition_id

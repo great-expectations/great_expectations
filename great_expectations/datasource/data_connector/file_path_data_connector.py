@@ -81,14 +81,14 @@ class DataConnectorStorageDataReferenceResolver:
         ),
         (
             "DBFS",
-            "SparkDFExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
+            "PandasExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
             **template_arguments
         ),
         (
             "DBFS",
-            "PandasExecutionEngine",
-        ): lambda template_arguments: DBFSPath.convert_to_file_semantics_version(
+            "SparkDFExecutionEngine",
+        ): lambda template_arguments: DBFSPath.convert_to_protocol_version(
             **template_arguments
         ),
     }

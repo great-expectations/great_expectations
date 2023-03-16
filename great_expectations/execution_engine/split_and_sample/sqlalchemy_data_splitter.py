@@ -45,7 +45,7 @@ except ImportError:
     concat = None
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa  # noqa: TCH004
+    import sqlalchemy as sa
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.expression import Cast, ColumnOperators
 

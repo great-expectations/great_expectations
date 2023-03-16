@@ -6,8 +6,9 @@ from typing_extensions import Final
 # methods are called. Otherwise it could be excluded.
 # https://docs.pydantic.dev/usage/exporting_models/#modeldict
 _FIELDS_ALWAYS_SET: Final[set[str]] = {
-    "assets",
     "type",
 }
+
+_ASSETS_KEY: Final[str] = "assets"
 
 _DATA_CONNECTOR_NAME: Final[str] = "fluent"

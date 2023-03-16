@@ -497,6 +497,9 @@ def test_render_string_template():
     assert res == expected
 
 
+@pytest.mark.filterwarnings(
+    ""
+)  # Make sure warnings are emitted during this tests even if ignored in pytest ini
 def test_render_types_module_deprecation_warning():
     with warnings.catch_warnings(record=True) as w:
         CollapseContent(collapse=True)
