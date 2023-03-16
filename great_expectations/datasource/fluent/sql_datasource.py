@@ -401,7 +401,7 @@ class _SQLAsset(DataAsset):
         Example:
         ```python
         >>> print(data_asset.batch_request_options)
-        ("day", "month", "year", "path")
+        ("day", "month", "year")
         >>> options = {"year": "2023"}
         >>> batch_request = data_asset.build_batch_request(options=options)
         ```
