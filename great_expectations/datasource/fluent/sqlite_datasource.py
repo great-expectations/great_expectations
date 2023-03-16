@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Uni
 import pydantic
 from typing_extensions import Literal, Self
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr  # noqa: TCH001
 from great_expectations.datasource.fluent.sql_datasource import (
     QueryAsset as SqlQueryAsset,
@@ -147,6 +148,7 @@ class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
     splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
+@public_api
 class SqliteDatasource(SQLDatasource):
     """Adds a sqlite datasource to the data context.
 
@@ -170,6 +172,7 @@ class SqliteDatasource(SQLDatasource):
     _TableAsset: Type[SqlTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)
     _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
 
+    @public_api
     def add_table_asset(
         self,
         name: str,
@@ -182,6 +185,7 @@ class SqliteDatasource(SQLDatasource):
             super().add_table_asset(name, table_name, schema_name, order_by),
         )
 
+    @public_api
     def add_query_asset(
         self,
         name: str,
