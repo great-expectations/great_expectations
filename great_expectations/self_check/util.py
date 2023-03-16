@@ -378,6 +378,7 @@ except (ImportError, KeyError):
 
 try:
     import snowflake.sqlalchemy.custom_types as snowflaketypes
+    import snowflake.sqlalchemy.snowdialect
     import snowflake.sqlalchemy.snowdialect as snowflakeDialect
 
     # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.
