@@ -21,7 +21,7 @@ from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset,
+    ParquetAsset,
 )
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 
@@ -62,23 +62,23 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
+    # TODO: remove this before merge. Using for reference
     @public_api
-    def add_csv_asset(
+    def add_parquet_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[re.Pattern, str]] = None,
+        batching_regex: Optional[Union[str, re.Pattern]] = None,
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
-    ) -> CSVAsset:  # type: ignore[valid-type]
-        """Adds a CSV DataAsst to the present "PandasFilesystemDatasource" object.
-
+    ) -> ParquetAsset:  # type: ignore[valid-type]
+        """Adds a Parquet DataAsst to the present "PandasFilesystemDatasource" object.
         Args:
-            name: The name of the CSV asset
-            batching_regex: regex pattern that matches CSV filenames that is used to label the batches
+            name: The name of the Parquet asset
+            batching_regex: regex pattern that matches Parquet filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "+/-  key" syntax: +/- (a/de)scending; + default
-            kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
+            kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
         # TODO: this needs to work for dynamic methods
         # TODO: example my making these validator methods on `DataAsset`
@@ -87,12 +87,14 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             batching_regex=batching_regex
         )
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-        asset = CSVAsset(
+
+        asset = ParquetAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             order_by=order_by_sorters,
             **kwargs,
         )
+
         asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
@@ -143,4 +145,4 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
 
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
-    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
+    add_parquet_asset.__signature__ = _merge_signatures(add_parquet_asset, ParquetAsset, exclude={"type"})  # type: ignore[attr-defined]
