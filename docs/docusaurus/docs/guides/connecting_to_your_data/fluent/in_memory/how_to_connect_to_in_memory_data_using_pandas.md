@@ -1,7 +1,7 @@
 ---
 title: How to connect to in-memory data using Pandas
 tag: [how-to, connect to data]
-description: A technical guide on connecting Great Expectations to a Pandas in-memory dataframe.
+description: A technical guide on connecting Great Expectations to a Pandas in-memory DataFrame.
 keywords: [Great Expectations, Pandas, Filesystem]
 ---
 
@@ -16,13 +16,13 @@ import AfterCreateInMemoryDataAsset from '/docs/components/connect_to_data/next_
 
 ## Introduction
 
-In this guide we will demonstrate how to connect to an in-memory Pandas dataframe.  Pandas can read many types of data into its dataframe class, but in our example we will use data originating in a `.parquet` file.
+In this guide we will demonstrate how to connect to an in-memory Pandas DataFrame.  Pandas can read many types of data into its DataFrame class, but in our example we will use data originating in a parquet file.
 
 ## Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- Access to data that can be read into a Pandas dataframe
+- Access to data that can be read into a Pandas DataFrame
 - A passion for data quality
 
 </Prerequisites> 
@@ -41,11 +41,11 @@ To access our in-memory data, we will create a Pandas Datasource:
 datasource = context.sources.add_pandas(name="my_pandas_datasource")
 ```
 
-### 3. Read your source data into a Pandas Dataframe
+### 3. Read your source data into a Pandas DataFrame
 
-For this example, we will read a `.parquet` file into a Pandas Dataframe.  We will then leverage Pandas to create a set of sampled data, which we will use in the rest of this guide.
+For this example, we will read a parquet file into a Pandas DataFrame.  We will then leverage Pandas to create a set of sampled data, which we will use in the rest of this guide.
 
-The code to create the Pandas Dataframe we are using in this guide is defined with:
+The code to create the Pandas DataFrame we are using in this guide is defined with:
 
 ```python title="Python code"
 import Pandas as pd
@@ -56,20 +56,20 @@ sampled_dataframe = full_dataframe.sample(frac=0.05)
 
 ### 4. Add a Data Asset to the Datasource
 
-A Pandas Dataframe Data Asset can be defined with two elements:
+A Pandas DataFrame Data Asset can be defined with two elements:
 - `name`: The name by which the Datasource will be referenced in the future
-- `dataframe`: An in-memory Pandas Dataframe containing the data to access
+- `dataframe`: An in-memory Pandas DataFrame containing the data to access
 
-We will use the `sampled_dataframe` from the previous step as our `dataframe` value.  For the `name` parameter, we will define a name in advance by storing it in the Python variable `asset_name`:
+We will use the `sampled_dataframe` from the previous step as our `dataframe` value.  For the `name` parameter, we will define a name in advance by storing it in a Python variable:
 
 ```python title="Python code"
-asset_name="TaxiDataframe"
+name="TaxiDataFrame"
 ```
 
 Now that we have the `name` and `dataframe` for our Data Asset, we can create the Data Asset with the code:
 
 ```python title="Python code"
-data_asset = datasource.add_dataframe(name=asset_name, dataframe=sampled_dataframe)
+data_asset = datasource.add_dataframe(name=name, dataframe=sampled_dataframe)
 ```
 
 ## Next steps
