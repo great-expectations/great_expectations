@@ -413,7 +413,8 @@ class TupleFilesystemStoreBackend(TupleStoreBackend):
 
     def get_url_for_key(self, key, protocol=None):
         path = self._convert_key_to_filepath(key)
-        full_path = os.path.join(self.full_base_directory, path)  # noqa: PTH118
+        escaped_path = self._url_path_escape_special_characters(path=path)
+        full_path = os.path.join(self.full_base_directory, escaped_path)  # noqa: PTH118
 
         if protocol is None:
             protocol = "file:"
