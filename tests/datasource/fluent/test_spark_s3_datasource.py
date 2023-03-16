@@ -154,7 +154,7 @@ def test_construct_csv_asset_directly():
 
 
 @pytest.mark.integration
-def test_csv_asset_with_regex_unnamed_parameters(
+def test_csv_asset_with_batching_regex_unnamed_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
     asset = spark_s3_datasource.add_csv_asset(
@@ -173,7 +173,9 @@ def test_csv_asset_with_regex_unnamed_parameters(
 
 
 @pytest.mark.integration
-def test_csv_asset_with_regex_named_parameters(spark_s3_datasource: SparkS3Datasource):
+def test_csv_asset_with_batching_regex_named_parameters(
+    spark_s3_datasource: SparkS3Datasource,
+):
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
@@ -185,7 +187,7 @@ def test_csv_asset_with_regex_named_parameters(spark_s3_datasource: SparkS3Datas
 
 
 @pytest.mark.integration
-def test_csv_asset_with_some_regex_named_parameters(
+def test_csv_asset_with_some_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
     asset = spark_s3_datasource.add_csv_asset(
@@ -204,7 +206,7 @@ def test_csv_asset_with_some_regex_named_parameters(
 
 
 @pytest.mark.integration
-def test_csv_asset_with_non_string_regex_named_parameters(
+def test_csv_asset_with_non_string_batching_regex_named_parameters(
     spark_s3_datasource: SparkS3Datasource,
 ):
     asset = spark_s3_datasource.add_csv_asset(

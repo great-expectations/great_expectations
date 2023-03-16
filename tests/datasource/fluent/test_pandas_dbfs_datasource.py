@@ -10,7 +10,6 @@ import boto3
 import botocore
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -144,67 +143,6 @@ def test_construct_csv_asset_directly():
     assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
     m1 = asset.batching_regex.match("alex_20200819_1300.csv")
     assert m1 is not None
-
-
-@pytest.mark.integration
-def test_csv_asset_with_regex_unnamed_parameters(
-    pandas_dbfs_datasource: PandasDBFSDatasource,
-):
-    asset = pandas_dbfs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
-    )
-    options = asset.batch_request_options_template()
-    assert options == {
-        "path": None,
-        "batch_request_param_1": None,
-        "batch_request_param_2": None,
-        "batch_request_param_3": None,
-    }
-
-
-@pytest.mark.integration
-def test_csv_asset_with_regex_named_parameters(
-    pandas_dbfs_datasource: PandasDBFSDatasource,
-):
-    asset = pandas_dbfs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-    )
-    options = asset.batch_request_options_template()
-    assert options == {"path": None, "name": None, "timestamp": None, "price": None}
-
-
-@pytest.mark.integration
-def test_csv_asset_with_some_regex_named_parameters(
-    pandas_dbfs_datasource: PandasDBFSDatasource,
-):
-    asset = pandas_dbfs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
-    )
-    options = asset.batch_request_options_template()
-    assert options == {
-        "path": None,
-        "name": None,
-        "batch_request_param_2": None,
-        "price": None,
-    }
-
-
-@pytest.mark.integration
-def test_csv_asset_with_non_string_regex_named_parameters(
-    pandas_dbfs_datasource: PandasDBFSDatasource,
-):
-    asset = pandas_dbfs_datasource.add_csv_asset(
-        name="csv_asset",
-        batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
-    )
-    with pytest.raises(ge_exceptions.InvalidBatchRequestError):
-        # price is an int which will raise an error
-        asset.build_batch_request(
-            {"name": "alex", "timestamp": "1234567890", "price": 1300}
-        )
 
 
 @pytest.mark.integration

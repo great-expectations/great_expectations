@@ -257,7 +257,7 @@ def test_construct_csv_asset_directly(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_regex_unnamed_parameters(
+def test_csv_asset_with_batching_regex_unnamed_parameters(
     mock_gcs_client,
     mock_list_keys,
     object_keys: List[str],
@@ -285,7 +285,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_regex_named_parameters(
+def test_csv_asset_with_batching_regex_named_parameters(
     mock_gcs_client,
     mock_list_keys,
     object_keys: List[str],
@@ -308,7 +308,7 @@ def test_csv_asset_with_regex_named_parameters(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_some_regex_named_parameters(
+def test_csv_asset_with_some_batching_regex_named_parameters(
     mock_gcs_client,
     mock_list_keys,
     object_keys: List[str],
@@ -336,7 +336,7 @@ def test_csv_asset_with_some_regex_named_parameters(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_non_string_regex_named_parameters(
+def test_csv_asset_with_non_string_batching_regex_named_parameters(
     mock_gcs_client,
     mock_list_keys,
     object_keys: List[str],
