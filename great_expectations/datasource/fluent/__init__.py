@@ -17,6 +17,9 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
 )
+from great_expectations.datasource.fluent.pandas_dbfs_datasource import (
+    PandasDBFSDatasource,
+)
 from great_expectations.datasource.fluent.pandas_s3_datasource import (
     PandasS3Datasource,
 )
