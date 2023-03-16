@@ -122,9 +122,7 @@ class _FilePathDataAsset(DataAsset):
         Returns:
             A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
-        options: set[str] = {FILE_PATH_BATCH_SPEC_KEY}
-        options.update(set(self._all_group_names))
-        return tuple(options)
+        return tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
 
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None

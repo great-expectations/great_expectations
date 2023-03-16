@@ -107,6 +107,10 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
     def test_connection(self) -> None:
         ...
 
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        return tuple()
+
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
