@@ -43,38 +43,12 @@ import AfterCreateValidator from '/docs/components/connect_to_data/next_steps/_a
 Great Expectations supports reading the data in individual files directly into a Validator using Pandas.  To do this, we will run the code:
 
 ```python title="Python code"
-validator = context.datasources.pandas_default.read_csv(
-    filepath_or_buffer="https://raw.githubusercontent.com/great_expectations/taxi_data.csv"
+validator = context.sources.pandas_default.read_csv(
+    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 ```
 
 <InfoUsingPandasToConnectToDifferentFileTypes this_example_file_extension="'.csv'"/>
-
-### 3. Add a Data Asset to the Datasource
-
-A Data Asset requires two pieces of information to be defined:
-- `name`: The name by which you will reference the Data Asset (for when you have defined multiple Data Assets in the same Datasource)
-- `batching_regex`: A regular expression that matches the files to be included in the Data Asset
-
-<TipFilesystemDataAssetWhatIfBatchingRegexMatchesMultipleFiles />
-
-For this example, we will define these two values in advance by storing them in the Python variables `asset_name` and (since we are connecting to NYC taxi data in this example) `taxi_batching_regex`:
-
-```python title="Python code"
-asset_name = "MyTaxiDataAsset"
-taxi_batching_regex = "yellow_tripdata_sample_2023_01\.csv"
-```
-
-Once we have determined those two values, we will pass them in as parameters when we create our Data Asset:
-
-```python title="Python code"
-data_asset = datasource.add_csv_asset(
-    name=asset_name, batching_regex=taxi_batching_regex
-)
-```
-
-<TipUsingPandasToConnectToDifferentFileTypes this_example_file_extension=".csv" />
-
 
 ## Next steps
 
