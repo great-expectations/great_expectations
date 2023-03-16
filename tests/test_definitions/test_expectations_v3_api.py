@@ -47,18 +47,12 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
-    expectation_dirs = ["column_map_expectations"]
-    backends = ["postgresql"]
-    # tables list
     tables_to_drop: List[str] = list()
     for backend in backends:
         for expectation_category in expectation_dirs:
             test_configuration_files = glob.glob(
                 dir_path + "/" + expectation_category + "/*.json"
             )
-            test_configuration_files = [
-                "/Users/work/Development/great_expectations/tests/test_definitions/column_map_expectations/expect_column_values_to_be_in_set.json"
-            ]
             for filename in test_configuration_files:
                 pk_column: bool = False
                 file = open(filename)
@@ -483,10 +477,10 @@ def test_case_runner_v3_api(test_case):
             test=test_case["test"],
             pk_column=test_case["pk_column"],
         )
-    # return (test_case["validator_with_data"], test_case["tables_to_drop"])
 
 
 def test_drop_tables(test_case):
+    """Helper method to remove the temporary tables"""
     validator = test_case["validator_with_data"]
     tables_to_drop = test_case["tables_to_drop"]
     if isinstance(validator.execution_engine, SqlAlchemyExecutionEngine):
