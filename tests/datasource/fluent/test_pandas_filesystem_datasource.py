@@ -439,8 +439,8 @@ def test_get_batch_list_from_fully_specified_batch_request(
     [
         ("2018", "04", "yellow_tripdata_sample_2018-04.csv", 1),
         ("2018", None, None, 12),
-        ("2018", "04", None, 1),
         (None, "04", None, 3),
+        (None, "03", "yellow_tripdata_sample_2018-04.csv", 0),
     ],
 )
 def test_get_batch_list_batch_count(

@@ -180,10 +180,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
         Example:
         ```python
-        >>> print(data_asset.batch_request_options)
-        ("day", "month", "year", "path")
+        >>> print(asset.batch_request_options)
+        ("day", "month", "year")
         >>> options = {"year": "2023"}
-        >>> batch_request = data_asset.build_batch_request(options=options)
+        >>> batch_request = asset.build_batch_request(options=options)
         ```
 
         Returns:
