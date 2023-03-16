@@ -116,6 +116,31 @@ class _SourceFactories:
         self,
         name: str,
     ) -> None: ...
+    def add_pandas_dbfs(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasFilesystemDatasource: ...
+    def update_pandas_dbfs(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasFilesystemDatasource: ...
+    def add_or_update_pandas_dbfs(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasFilesystemDatasource: ...
+    def delete_pandas_dbfs(
+        self,
+        name: str,
+    ) -> None: ...
     def add_pandas_s3(
         self,
         name: str,
