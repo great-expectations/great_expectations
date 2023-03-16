@@ -1636,3 +1636,13 @@ def test_InMemoryStoreBackend_add_or_update(previous_key_exists: bool):
 
     store_backend.add_or_update(key=key, value=value)
     assert store_backend.get(key) == value
+
+
+@pytest.mark.unit
+def test_store_backend_path_special_character_escape():
+    path = "/validations/default/pandas_data_asset/20230315T205136.109084Z/default_pandas_datasource-#ephemeral_pandas_asset.html"
+    escaped_path = StoreBackend._url_path_escape_special_characters(path=path)
+    assert (
+        escaped_path
+        == "/validations/default/pandas_data_asset/20230315T205136.109084Z/default_pandas_datasource-%23ephemeral_pandas_asset.html"
+    )

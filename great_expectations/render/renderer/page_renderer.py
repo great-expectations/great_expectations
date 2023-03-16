@@ -101,7 +101,7 @@ class ValidationResultsPageRenderer(Renderer):
         )
 
         # Add datasource key to batch_kwargs if missing
-        if "datasource" not in batch_kwargs and "datasource" not in batch_kwargs:
+        if "datasource" not in batch_kwargs:
             # Check if expectation_suite_name follows datasource.batch_kwargs_generator.data_asset_name.suite_name pattern
             if len(expectation_suite_name.split(".")) == 4:
                 batch_kwargs["datasource"] = expectation_suite_name.split(".")[0]

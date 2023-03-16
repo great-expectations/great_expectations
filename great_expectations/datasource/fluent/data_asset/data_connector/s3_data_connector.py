@@ -38,8 +38,8 @@ class S3DataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
-        file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
         # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Format function mapping path to fully-qualified resource on S3
     """
 
     def __init__(
@@ -107,8 +107,8 @@ class S3DataConnector(FilePathDataConnector):
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters: optional list of sorters for sorting data_references
-            file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
             # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn: Format function mapping path to fully-qualified resource on S3
 
         Returns:
             Instantiated "S3DataConnector" object
