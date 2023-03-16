@@ -153,12 +153,12 @@ def test_get_batch_list_from_fully_specified_batch_request(
     batch = batches[0]
     assert batch.batch_request.datasource_name == spark_dbfs_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
+    assert batch.batch_request.options == (
+        "name",
+        "timestamp",
+        "price",
+        "path",
+    )
     assert batch.metadata == {
         "path": "alex_20200819_1300.csv",
         "name": "alex",
