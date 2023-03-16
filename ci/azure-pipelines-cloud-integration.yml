@@ -133,13 +133,7 @@ stages:
             displayName: 'Install dependencies'
 
           - script: |
-              pip freeze > pip-freeze.txt
-              mkdir -p junit
-              pytest -v tests/test_definitions/test_expectations_v3_api.py \
-                --snowflake \
-                --junitxml=junit/test-results.xml \
-                --napoleon-docstrings --cov=. --cov-report=xml --cov-report=html \
-                --ignore=tests/cli --ignore=tests/integration/usage_statistics
+              pytest -v --snowflake tests/test_definitions/test_expectations_v3_api.py
             displayName: 'pytest'
             env:
               SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
