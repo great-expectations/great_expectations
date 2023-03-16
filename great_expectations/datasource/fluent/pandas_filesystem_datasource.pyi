@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 logger: Logger
 
 class PandasFilesystemDatasource(_PandasFilePathDatasource):
-    type: Literal["pandas_filesystem"]
+    type: Literal["filesystem"]
     base_directory: pathlib.Path
     data_context_root_directory: Optional[pathlib.Path]
     def test_connection(self, test_assets: bool = ...) -> None: ...

@@ -1,4 +1,3 @@
-import pathlib
 import re
 import typing
 from logging import Logger
@@ -45,10 +44,6 @@ if TYPE_CHECKING:
 logger: Logger
 
 class PandasDBFSDatasource(PandasFilesystemDatasource):
-    type: Literal["pandas_dbfs"]
-    base_directory: pathlib.Path
-    data_context_root_directory: Optional[pathlib.Path]
-    def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_csv_asset(
         self,
         name: str,

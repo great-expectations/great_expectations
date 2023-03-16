@@ -34,7 +34,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
     """Pandas based Datasource for DataBricks File System (DBFS) based data assets."""
 
     # instance attributes
-    type: Literal["pandas_dbfs"] = "pandas_dbfs"
+    type: Literal["filesystem"] = "pandas_dbfs"
 
     @public_api
     def add_csv_asset(

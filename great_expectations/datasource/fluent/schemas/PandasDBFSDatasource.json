@@ -1,11 +1,11 @@
 {
-    "title": "PandasFilesystemDatasource",
-    "description": "--Public API--Pandas based Datasource for filesystem based data assets.",
+    "title": "PandasDBFSDatasource",
+    "description": "--Public API--Pandas based Datasource for DataBricks File System (DBFS) based data assets.",
     "type": "object",
     "properties": {
         "type": {
             "title": "Type",
-            "default": "pandas_filesystem",
+            "default": "pandas_dbfs",
             "enum": [
                 "filesystem"
             ],
