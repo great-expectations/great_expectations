@@ -303,7 +303,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         container="my_container",
     )
-    options = asset.batch_request_options_template()
+    options = asset.batch_request_options
     assert options == {
         "path": None,
         "batch_request_param_1": None,
@@ -333,7 +333,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         container="my_container",
     )
-    options = asset.batch_request_options_template()
+    options = asset.batch_request_options
     assert options == {"path": None, "name": None, "timestamp": None, "price": None}
 
 
@@ -358,7 +358,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
         container="my_container",
     )
-    options = asset.batch_request_options_template()
+    options = asset.batch_request_options
     assert options == {
         "path": None,
         "name": None,
