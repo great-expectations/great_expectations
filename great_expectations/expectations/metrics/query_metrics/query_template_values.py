@@ -72,7 +72,9 @@ class QueryTemplateValues(QueryMetricProvider):
 
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         try:
-            result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
+            result: List[sqlalchemy_engine_Row] = engine.execute(
+                sa.text(query)
+            ).fetchall()
         except Exception as e:
             if hasattr(e, "_query_id"):
                 # query_id removed because it duplicates the validation_results
