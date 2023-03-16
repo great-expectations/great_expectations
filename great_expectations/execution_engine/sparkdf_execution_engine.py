@@ -92,9 +92,6 @@ except ImportError:
         "Unable to load pyspark; install optional spark dependency for support."
     )
 
-from pyspark.sql import DataFrame
-
-
 # noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):
     assert len(column.columns) == 1, "Expected DataFrame with 1 column"
