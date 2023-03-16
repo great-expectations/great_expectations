@@ -4,6 +4,7 @@ import pathlib
 
 import pytest
 
+from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import (
     PandasFilesystemDatasource,
@@ -359,3 +360,30 @@ def test_splitter(
     )
     assert len(specified_batches) == specified_batch_cnt
     assert specified_batches[-1].metadata == last_specified_batch_metadata
+
+
+def test_checkpoint_run(empty_data_context):
+    context = empty_data_context
+    path = pathlib.Path(
+        __file__,
+        "..",
+        "..",
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+        "yellow_tripdata_sample_2019-02.csv",
+    ).resolve(strict=True)
+    csv_asset = context.sources.pandas_default.add_csv_asset("my_csv_asset", path)
+    batch_request = csv_asset.build_batch_request()
+    expectation_suite_name = "my_expectation_suite"
+    context.add_expectation_suite(expectation_suite_name)
+    checkpoint = SimpleCheckpoint(
+        "my_checkpoint",
+        data_context=context,
+        expectation_suite_name=expectation_suite_name,
+        batch_request=batch_request,
+    )
+    result = checkpoint.run()
+    assert result["success"]
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
