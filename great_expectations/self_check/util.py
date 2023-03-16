@@ -92,6 +92,7 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sqlalchemy
     from sqlalchemy import create_engine
+    from sqlalchemy import text as sa_text
     from sqlalchemy.engine import Engine
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
@@ -99,6 +100,7 @@ except ImportError:
     create_engine = None
     Engine = None
     SQLAlchemyError = None
+    sa_text = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 try:
@@ -2803,7 +2805,6 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
     raise_exception: bool = True,
     debug_logger: Optional[Logger] = None,
     pk_column: bool = False,
-    temp_table_name: Optional[str] = None,
 ):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -2923,9 +2924,12 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
             stack_trace = (traceback.format_exc(),)
 
     # drop table/url
-    if isinstance(validator.execution_engine, SqlAlchemyExecutionEngine):
-        if temp_table_name and type(temp_table_name) is str:
-            validator.execution_engine.engine.execute(f"DROP TABLE {temp_table_name};")
+    # if isinstance(validator.execution_engine, SqlAlchemyExecutionEngine):
+    #     try:
+    #         for temp_table in temp_tables_to_drop:
+    #             validator.execution_engine.engine.execute(sa_text(f"DROP TABLE IF EXISTS {temp_table};"))
+    #     except Exception as e:
+    #         raise
 
     return (result, error_message, stack_trace)
 
@@ -3203,7 +3207,7 @@ def check_json_test_result(  # noqa: C901 - 52
 
 
 def generate_test_table_name(
-    default_table_name_prefix: str = "test_data_",
+    default_table_name_prefix: str = "v3_api_expectation_test_data_",
 ) -> str:
     table_name: str = default_table_name_prefix + "".join(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]

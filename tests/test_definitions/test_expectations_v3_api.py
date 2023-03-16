@@ -1,7 +1,7 @@
 import glob
 import json
 import os
-from typing import cast
+from typing import List, cast
 
 import pandas as pd
 import pytest
@@ -11,6 +11,9 @@ from great_expectations.execution_engine.pandas_batch_data import PandasBatchDat
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
+)
+from great_expectations.execution_engine.sqlalchemy_execution_engine import (
+    SqlAlchemyExecutionEngine,
 )
 from great_expectations.self_check.util import (
     BigQueryDialect,
@@ -29,6 +32,8 @@ from great_expectations.self_check.util import (
 from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
 
+from sqlalchemy import text as sa_text
+
 
 def pytest_generate_tests(metafunc):  # noqa C901 - 35
     # Load all the JSON files in the directory
@@ -42,49 +47,57 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
-
-    for expectation_category in expectation_dirs:
-        test_configuration_files = glob.glob(
-            dir_path + "/" + expectation_category + "/*.json"
-        )
-        for c in backends:
+    expectation_dirs = ["column_map_expectations"]
+    backends = ["postgresql"]
+    # tables list
+    tables_to_drop: List[str] = list()
+    for backend in backends:
+        for expectation_category in expectation_dirs:
+            test_configuration_files = glob.glob(
+                dir_path + "/" + expectation_category + "/*.json"
+            )
+            test_configuration_files = [
+                "/Users/work/Development/great_expectations/tests/test_definitions/column_map_expectations/expect_column_values_to_be_in_set.json"
+            ]
             for filename in test_configuration_files:
                 pk_column: bool = False
                 file = open(filename)
                 test_configuration = json.load(file)
-                temp_table_name: str = generate_test_table_name().lower()
 
-                for d in test_configuration["datasets"]:
+                for configured_dataset in test_configuration["datasets"]:
                     datasets = []
                     # optional only_for and suppress_test flag at the datasets-level that can prevent data being
                     # added to incompatible backends. Currently only used by expect_column_values_to_be_unique
-                    only_for = d.get("only_for")
+                    only_for = configured_dataset.get("only_for")
                     if only_for and not isinstance(only_for, list):
                         # coerce into list if passed in as string
                         only_for = [only_for]
-                    suppress_test_for = d.get("suppress_test_for")
+                    suppress_test_for = configured_dataset.get("suppress_test_for")
                     if suppress_test_for and not isinstance(suppress_test_for, list):
                         # coerce into list if passed in as string
                         suppress_test_for = [suppress_test_for]
                     if candidate_test_is_on_temporary_notimplemented_list_v3_api(
-                        c, test_configuration["expectation_type"]
+                        backend, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
-                    elif suppress_test_for and c in suppress_test_for:
+                    elif suppress_test_for and backend in suppress_test_for:
                         continue
-                    elif only_for and c not in only_for:
+                    elif only_for and backend not in only_for:
                         continue
                     else:
                         skip_expectation = False
-                        if isinstance(d["data"], list):
+                        if isinstance(configured_dataset["data"], list):
                             sqlite_db_path = generate_sqlite_db_path()
-                            for dataset in d["data"]:
+                            for dataset in configured_dataset["data"]:
                                 # to eventually drop
-                                temp_table_name = dataset.get("dataset_name")
+                                temp_table_name = dataset.get(
+                                    "dataset_name", generate_test_table_name().lower()
+                                )
+                                tables_to_drop.append(temp_table_name)
 
                                 datasets.append(
                                     get_test_validator_with_data(
-                                        c,
+                                        backend,
                                         dataset["data"],
                                         dataset.get("schemas"),
                                         table_name=temp_table_name,
@@ -104,11 +117,20 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                             ]:
 
                                 pk_column: bool = True
-                            temp_table_name = d.get("dataset_name")
-                            schemas = d["schemas"] if "schemas" in d else None
+
+                            temp_table_name = configured_dataset.get(
+                                "dataset_name", generate_test_table_name().lower()
+                            )
+                            tables_to_drop.append(temp_table_name)
+
+                            schemas = (
+                                configured_dataset["schemas"]
+                                if "schemas" in configured_dataset
+                                else None
+                            )
                             validator_with_data = get_test_validator_with_data(
-                                c,
-                                d["data"],
+                                backend,
+                                configured_dataset["data"],
                                 schemas=schemas,
                                 table_name=temp_table_name,
                                 context=cast(
@@ -117,7 +139,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 pk_column=pk_column,
                             )
 
-                    for test in d["tests"]:
+                    for test in configured_dataset["tests"]:
                         generate_test = True
                         skip_test = False
                         only_for = test.get("only_for")
@@ -421,12 +443,12 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 "validator_with_data": validator_with_data,
                                 "test": test,
                                 "skip": skip_expectation or skip_test,
-                                "temp_table_name": temp_table_name,
+                                "tables_to_drop": tables_to_drop,
                             }
                         )
 
                         ids.append(
-                            c
+                            backend
                             + "/"
                             + expectation_category
                             + "/"
@@ -453,7 +475,6 @@ def test_case_runner_v3_api(test_case):
                 expectation_type=test_case["expectation_type"],
                 test=test_case["test"],
                 pk_column=test_case["pk_column"],
-                temp_table_name=test_case["temp_table_name"],
             )
     else:
         evaluate_json_test_v3_api(
@@ -461,5 +482,18 @@ def test_case_runner_v3_api(test_case):
             expectation_type=test_case["expectation_type"],
             test=test_case["test"],
             pk_column=test_case["pk_column"],
-            temp_table_name=test_case["temp_table_name"],
         )
+    # return (test_case["validator_with_data"], test_case["tables_to_drop"])
+
+
+def test_drop_tables(test_case):
+    validator = test_case["validator_with_data"]
+    tables_to_drop = test_case["tables_to_drop"]
+    if isinstance(validator.execution_engine, SqlAlchemyExecutionEngine):
+        try:
+            for temp_table in tables_to_drop:
+                validator.execution_engine.engine.execute(
+                    sa_text(f"DROP TABLE IF EXISTS {temp_table};")
+                )
+        except Exception as e:
+            raise
