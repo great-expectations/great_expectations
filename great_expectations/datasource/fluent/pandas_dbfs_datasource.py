@@ -45,7 +45,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
-        """Adds a CSV DataAsst to the present "PandasFilesystemDatasource" object.
+        """Adds a CSV DataAsst to the present "PandasDBFSDatasource" object.
 
         Args:
             name: The name of the CSV asset
@@ -92,7 +92,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
-        """Adds an Excel DataAsst to the present "PandasFilesystemDatasource" object.
+        """Adds an Excel DataAsst to the present "PandasDBFSDatasource" object.
 
         Args:
             name: The name of the Excel asset
@@ -141,7 +141,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
-        """Adds a JSON DataAsst to the present "PandasFilesystemDatasource" object.
+        """Adds a JSON DataAsst to the present "PandasDBFSDatasource" object.
 
         Args:
             name: The name of the JSON asset
@@ -190,7 +190,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
-        """Adds a Parquet DataAsst to the present "PandasFilesystemDatasource" object.
+        """Adds a Parquet DataAsst to the present "PandasDBFSDatasource" object.
 
         Args:
             name: The name of the Parquet asset
