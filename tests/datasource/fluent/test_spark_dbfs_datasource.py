@@ -181,7 +181,7 @@ def test_test_connection_failures(
     bad_regex_config: tuple[re.Pattern, str],
 ):
     regex, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(  # type: ignore[call-arg]
+    csv_asset = CSVAsset(
         name="csv_asset",
         batching_regex=regex,
     )
