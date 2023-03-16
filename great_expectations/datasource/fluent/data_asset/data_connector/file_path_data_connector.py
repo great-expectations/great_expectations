@@ -146,7 +146,11 @@ class FilePathDataConnector(DataConnector):
 
         if batch_request.options is not None:
             data_connector_query_dict = {
-                "batch_filter_parameters": batch_request.options.copy()
+                "batch_filter_parameters": {
+                    key: value
+                    for key, value in batch_request.options.items()
+                    if value is not None
+                }
             }
             # TODO: <Alex>ALEX-SUPPORT_LIMIT_BATCH_QUERY_OPTION_DIRECTIVE_LATER</Alex>
             # TODO: <Alex>ALEX</Alex>
