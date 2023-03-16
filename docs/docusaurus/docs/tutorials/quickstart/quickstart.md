@@ -41,17 +41,18 @@ import great_expectations as gx
 context = gx.get_context()
 
 # Connect to data
-validator = context.datasources.pandas_default.read_csv(
-    filepath_or_buffer="https://raw.githubusercontent.com/great_expectations/taxi_data.csv"
+validator = context.sources.pandas_default.read_csv(
+    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 
 # Create Expectations
 validator.expect_column_values_to_not_be_null("pickup_datetime")
+validator.expect_column_values_to_be_between("passenger_count", auto=True)
 
 # Validate data
-checkpoint = SimpleCheckpoint( 
-    name=f"{csv_asset.name}_{expectation_suite_name}",
-    context=context,
+checkpoint = gx.checkpoint.SimpleCheckpoint( 
+    name="my_quickstart_checkpoint",
+    data_context=context,
     validator=validator,
 )
 checkpoint_result = checkpoint.run()
@@ -59,12 +60,9 @@ checkpoint_result = checkpoint.run()
 # View results
 validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
 context.open_data_docs(resource_identifier=validation_result_identifier)
-
-# Save the Data Context for future use
-context.convert_to_file_context()
 ```
 
-That's not a lot of code, is it?  In the following steps we'll break down exactly what is happening here so that you can follow along and perform a Validation yourself.
+In the following steps we'll break down exactly what is happening here so that you can follow along and perform a Validation yourself.
 
 
 ## Steps
@@ -106,8 +104,8 @@ The Data Context will provide you with access to a variety of utility and conven
 For the purpose of this guide, we will connect to `.csv` data stored in our GitHub repo:
 
 ```python title="Python code"
-validator = context.datasources.pandas_default.read_csv(
-    filepath_or_buffer="https://raw.githubusercontent.com/great_expectations/taxi_data.csv"
+validator = context.sources.pandas_default.read_csv(
+    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 ```
 
@@ -117,12 +115,13 @@ The above code uses our Data Context's default Datasource for Pandas to access t
 
 When we read our `.csv` data, we got a Validator instance back.  A Validator is a robust object capable of storing Expectations about the data it is associated with, as well as performing introspections on that data.  
 
-In this guide, we will define a single Expectation based on our domain knowledge (that is: based on what we know _should_ be true about our data, without looking at the actual state of the data).
+In this guide, we will define two Expectations, one based on our domain knowledge (knowing that the `pickup_datetime` should not be null), and one by using GX to detect the range of values in the `passenger_count` column (using `auto=True`).
 
 The code we will use for this is:
 
 ```python title="Python code"
 validator.expect_column_values_to_not_be_null("pickup_datetime")
+validator.expect_column_values_to_be_between("passenger_count", auto=True)
 ```
 
 With the Expectation defined above, we are stating that we _expect_ the column `pickup_datetime` to always be populated.  That is: none of the column's values should be null.
@@ -137,9 +136,9 @@ In the future, you may define numerous Expectations about a Validator's associat
 Now that we have defined our Expectations it is time for GX to introspect our data and see if it corresponds to what we told GX to expect.  To do this, we define a Checkpoint (which will allow us to repeat the Validation in the future).
 
 ```python title="Python code"
-checkpoint = SimpleCheckpoint( 
+checkpoint = gx.checkpoint.SimpleCheckpoint( 
     name="my_quickstart_checkpoint",
-    context=context,
+    data_context=context,
     validator=validator,
 )
 ```
@@ -157,15 +156,6 @@ Great Expectations provides a friendly, human-readable way to view the results o
 validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
 context.open_data_docs(resource_identifier=validation_result_identifier)
 ```
-
-#### 4.3 Save the Data Context for future use
-Because we did not previously initialize a Filesystem Data Context or specify a path at which to create one, the Data Context we recieved from `gx.get_context()` was a temporary, in-memory Ephemeral Data Context.  To save this Data Context for future use, we will convert it to a Filesystem Data Context:
-
-```python title="Python code"
-context = context.convert_to_file_context()
-```
-
-You can provide the path to a specific folder when you convert your Ephemeral Data Context to a Filesystem Data Context.  If you do, your Filesystem Data Context will be initialized at that location.  If you do not, your new Filesystem Data Context will be initialized in the folder that your script is executed in.
 
 ## Next Steps 
 
