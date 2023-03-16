@@ -44,6 +44,8 @@ if TYPE_CHECKING:
 logger: Logger
 
 class PandasDBFSDatasource(PandasFilesystemDatasource):
+    type: Literal["pandas_dbfs"]  # type: ignore[assignment]
+
     def add_csv_asset(
         self,
         name: str,

@@ -7,7 +7,7 @@
             "title": "Type",
             "default": "pandas_filesystem",
             "enum": [
-                "filesystem"
+                "pandas_filesystem"
             ],
             "type": "string"
         },

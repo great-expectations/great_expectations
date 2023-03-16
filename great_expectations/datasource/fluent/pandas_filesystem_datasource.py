@@ -33,7 +33,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     """Pandas based Datasource for filesystem based data assets."""
 
     # instance attributes
-    type: Literal["filesystem"] = "pandas_filesystem"
+    type: Literal["pandas_filesystem"] = "pandas_filesystem"
 
     # Filesystem specific attributes
     base_directory: pathlib.Path
