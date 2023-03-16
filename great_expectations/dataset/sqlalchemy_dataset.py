@@ -472,34 +472,34 @@ class MetaSqlAlchemyDataset(Dataset):
                 raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
 
             count_value_query = sa.select(
-                    sa.func.sum(
-                        sa.case(
-                            [
-                                (
-                                    sa.or_(
-                                        sa.column(column_A) != (None),
-                                        sa.column(column_A) == (None),
-                                    ),
-                                    1,
-                                )
-                            ],
-                            else_=0,
-                        )
-                    ).label("column_A_count"),
-                    sa.func.sum(
-                        sa.case(
-                            [
-                                (
-                                    sa.or_(
-                                        sa.column(column_B) != (None),
-                                        sa.column(column_B) == (None),
-                                    ),
-                                    1,
-                                )
-                            ],
-                            else_=0,
-                        )
-                    ).label("column_B_count"),
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.or_(
+                                    sa.column(column_A) != (None),
+                                    sa.column(column_A) == (None),
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label("column_A_count"),
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.or_(
+                                    sa.column(column_B) != (None),
+                                    sa.column(column_B) == (None),
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label("column_B_count"),
             ).select_from(self._table)
             count_value_query_results = dict(
                 self.engine.execute(count_value_query).fetchone()
@@ -682,24 +682,24 @@ class MetaSqlAlchemyDataset(Dataset):
         ignore_values_condition: BinaryExpression,
     ) -> Select:
         return sa.select(
-                sa.func.count().label("element_count"),
-                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
-                    "null_count"
-                ),
-                sa.func.sum(
-                    sa.case(
-                        [
-                            (
-                                sa.and_(
-                                    sa.not_(expected_condition),
-                                    sa.not_(ignore_values_condition),
-                                ),
-                                1,
-                            )
-                        ],
-                        else_=0,
-                    )
-                ).label("unexpected_count"),
+            sa.func.count().label("element_count"),
+            sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                "null_count"
+            ),
+            sa.func.sum(
+                sa.case(
+                    [
+                        (
+                            sa.and_(
+                                sa.not_(expected_condition),
+                                sa.not_(ignore_values_condition),
+                            ),
+                            1,
+                        )
+                    ],
+                    else_=0,
+                )
+            ).label("unexpected_count"),
         ).select_from(self._table)
 
 
@@ -1049,8 +1049,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         query = (
             sa.select(
-                    sa.column(column).label("value"),
-                    sa.func.count(sa.column(column)).label("count"),
+                sa.column(column).label("value"),
+                sa.func.count(sa.column(column)).label("count"),
             )
             .where(sa.column(column) != None)
             .group_by(sa.column(column))
@@ -1252,11 +1252,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
         percent_rank_query: CTE = (
             sa.select(
-                    sa.column(column),
-                    sa.cast(
-                        sa.func.percent_rank().over(order_by=sa.column(column).asc()),
-                        sa.dialects.mysql.DECIMAL(18, 15),
-                    ).label("p"),
+                sa.column(column),
+                sa.cast(
+                    sa.func.percent_rank().over(order_by=sa.column(column).asc()),
+                    sa.dialects.mysql.DECIMAL(18, 15),
+                ).label("p"),
             )
             .order_by(sa.column("p").asc())
             .select_from(self._table)
