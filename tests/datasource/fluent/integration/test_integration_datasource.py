@@ -362,6 +362,7 @@ def test_splitter(
     assert specified_batches[-1].metadata == last_specified_batch_metadata
 
 
+@pytest.mark.integration
 def test_checkpoint_run(empty_data_context):
     context = empty_data_context
     path = pathlib.Path(
