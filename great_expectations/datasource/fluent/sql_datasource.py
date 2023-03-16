@@ -394,19 +394,25 @@ class _SQLAsset(DataAsset):
     splitter: Optional[Splitter] = None
     name: str
 
-    def batch_request_options_template(
-        self,
-    ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for build_batch_request.
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        """The potential keys for BatchRequestOptions.
+
+        Example:
+        ```python
+        >>> print(data_asset.batch_request_options)
+        ("day", "month", "year", "path")
+        >>> options = {"year": "2023"}
+        >>> batch_request = data_asset.build_batch_request(options=options)
+        ```
 
         Returns:
-            A BatchRequestOptions dictionary with the correct shape that build_batch_request
-            will understand. All the option values are defaulted to None.
+            A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
-        template: BatchRequestOptions = {}
-        if not self.splitter:
-            return template
-        return {p: None for p in self.splitter.param_names}
+        options = tuple()
+        if self.splitter:
+            options = tuple(self.splitter.param_names)
+        return options
 
     def _add_splitter(self: Self, splitter: Splitter) -> Self:
         self.splitter = splitter
@@ -631,15 +637,15 @@ class _SQLAsset(DataAsset):
 
         Args:
             options: A dict that can be used to limit the number of batches returned from the asset.
-                The dict structure depends on the asset type. A template of the dict can be obtained by
-                calling batch_request_options_template.
+                The dict structure depends on the asset type. The available keys for dict can be obtained by
+                calling batch_request_options.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
         if options is not None and not self._valid_batch_request_options(options):
-            allowed_keys = set(self.batch_request_options_template().keys())
+            allowed_keys = set(self.batch_request_options)
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -663,10 +669,11 @@ class _SQLAsset(DataAsset):
             and batch_request.data_asset_name == self.name
             and self._valid_batch_request_options(batch_request.options)
         ):
+            options = {option: None for option in self.batch_request_options}
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
-                options=self.batch_request_options_template(),
+                options=options,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"

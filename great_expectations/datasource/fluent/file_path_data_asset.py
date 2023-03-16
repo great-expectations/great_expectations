@@ -105,12 +105,26 @@ class _FilePathDataAsset(DataAsset):
     ) -> re.Pattern:
         return Datasource.parse_batching_regex_string(batching_regex=batching_regex)
 
-    def batch_request_options_template(
+    @property
+    def batch_request_options(
         self,
-    ) -> BatchRequestOptions:
+    ) -> tuple[str, ...]:
+        """The potential keys for BatchRequestOptions.
+
+        Example:
+        ```python
+        >>> print(data_asset.batch_request_options)
+        ("day", "month", "year", "path")
+        >>> options = {"year": "2023"}
+        >>> batch_request = data_asset.build_batch_request(options=options)
+        ```
+
+        Returns:
+            A tuple of keys that can be used in a BatchRequestOptions dictionary.
+        """
         options: set[str] = {FILE_PATH_BATCH_SPEC_KEY}
         options.update(set(self._all_group_names))
-        return {option: None for option in options}
+        return tuple(options)
 
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -127,7 +141,7 @@ class _FilePathDataAsset(DataAsset):
                     )
 
         if options is not None and not self._valid_batch_request_options(options):
-            allowed_keys = set(self.batch_request_options_template().keys())
+            allowed_keys = set(self.batch_request_options)
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -152,10 +166,11 @@ class _FilePathDataAsset(DataAsset):
             and batch_request.data_asset_name == self.name
             and self._valid_batch_request_options(batch_request.options)
         ):
+            options = {option: None for option in self.batch_request_options}
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
-                options=self.batch_request_options_template(),
+                options=options,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"

@@ -268,13 +268,13 @@ def test_csv_asset_with_regex_unnamed_parameters(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()
-    assert options == {
-        "path": None,
-        "batch_request_param_1": None,
-        "batch_request_param_2": None,
-        "batch_request_param_3": None,
-    }
+    options = asset.batch_request_options
+    assert options == (
+        "path",
+        "batch_request_param_1",
+        "batch_request_param_2",
+        "batch_request_param_3",
+    )
 
 
 @pytest.mark.integration
@@ -296,8 +296,13 @@ def test_csv_asset_with_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()
-    assert options == {"path": None, "name": None, "timestamp": None, "price": None}
+    options = asset.batch_request_options
+    assert options == (
+        "path",
+        "name",
+        "timestamp",
+        "price",
+    )
 
 
 @pytest.mark.integration
@@ -319,13 +324,13 @@ def test_csv_asset_with_some_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()
-    assert options == {
-        "path": None,
-        "name": None,
-        "batch_request_param_2": None,
-        "price": None,
-    }
+    options = asset.batch_request_options
+    assert options == (
+        "path",
+        "name",
+        "batch_request_param_2",
+        "price",
+    )
 
 
 @pytest.mark.integration
