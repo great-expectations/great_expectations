@@ -41,7 +41,7 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
-        """Adds a CSV DataAsst to the present "SparkDBFSDatasource" object.
+        """Adds a CSV DataAsset to the present "SparkDBFSDatasource" object.
 
         Args:
             name: The name of the CSV asset
