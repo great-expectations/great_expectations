@@ -202,12 +202,12 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         infer_schema=True,
     )
     options = asset.batch_request_options
-    assert options == {
+    assert options == (
         "name",
         "batch_request_param_2",
         "price",
         "path",
-    }
+    )
 
 
 @pytest.mark.integration
