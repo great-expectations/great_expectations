@@ -516,12 +516,12 @@ class CloudDataContext(SerializableDataContext):
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=cloud_id,
+            id=cloud_id,
         )
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.cloud_id
+            expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
 
@@ -545,7 +545,7 @@ class CloudDataContext(SerializableDataContext):
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=id,
+            id=id,
         )
 
         return self.expectations_store.remove_key(key)
@@ -573,7 +573,7 @@ class CloudDataContext(SerializableDataContext):
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=ge_cloud_id,
+            id=ge_cloud_id,
             resource_name=expectation_suite_name,
         )
 
@@ -603,7 +603,7 @@ class CloudDataContext(SerializableDataContext):
         id = expectation_suite.ge_cloud_id
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=id,
+            id=id,
             resource_name=expectation_suite.expectation_suite_name,
         )
 
@@ -621,12 +621,12 @@ class CloudDataContext(SerializableDataContext):
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.cloud_id
+            expectation_suite.ge_cloud_id = response.id
 
     def _validate_suite_unique_constaints_before_save(
         self, key: GXCloudIdentifier
     ) -> None:
-        ge_cloud_id = key.cloud_id
+        ge_cloud_id = key.id
         if ge_cloud_id:
             if self.expectations_store.has_key(key):  # noqa: W601
                 raise gx_exceptions.DataContextError(
@@ -762,9 +762,7 @@ class CloudDataContext(SerializableDataContext):
         The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
         instead of the usual `ConfigurationIdentifier` for `Store` interaction.
         """
-        return GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.PROFILER, cloud_id=id
-        )
+        return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER, id=id)
 
     @classmethod
     def _load_cloud_backed_project_config(
@@ -790,7 +788,7 @@ class CloudDataContext(SerializableDataContext):
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             resource_name=expectation_suite.expectation_suite_name,
-            cloud_id=cloud_id,
+            id=cloud_id,
         )
 
         persistence_fn: Callable
@@ -801,6 +799,6 @@ class CloudDataContext(SerializableDataContext):
 
         response = persistence_fn(key=key, value=expectation_suite, **kwargs)
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.cloud_id
+            expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
