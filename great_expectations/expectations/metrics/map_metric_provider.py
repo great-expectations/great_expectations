@@ -2104,7 +2104,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         else_=sa.sql.expression.cast(0, sa.Numeric),
     ).label("condition")
 
-    count_selectable: Select = sa.select([count_case_statement])
+    count_selectable: Select = sa.select(count_case_statement)
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         count_selectable = count_selectable.select_from(selectable)
@@ -2127,7 +2127,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 temp_table_obj.create(execution_engine.engine, checkfirst=True)
 
                 inner_case_query: Insert = temp_table_obj.insert().from_select(
-                    [count_case_statement],
+                    count_case_statement,
                     count_selectable,
                 )
                 execution_engine.engine.execute(inner_case_query)
@@ -2137,9 +2137,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         count_selectable = get_sqlalchemy_selectable(count_selectable)
         unexpected_count_query: Select = (
             sa.select(
-                [
-                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
-                ]
+                sa.func.sum(sa.column("condition")).label("unexpected_count"),
             )
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
@@ -2147,11 +2145,9 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
         unexpected_count: Union[float, int] = execution_engine.engine.execute(
             sa.select(
-                [
-                    unexpected_count_query.c[
-                        f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-                    ],
-                ]
+                unexpected_count_query.c[
+                    f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                ],
             )
         ).scalar()
         # Unexpected count can be None if the table is empty, in which case the count
@@ -2203,7 +2199,7 @@ def _sqlalchemy_column_map_condition_values(
         batch_columns_list=metrics["table.columns"],
     )
 
-    query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
+    query = sa.select(sa.column(column_name).label("unexpected_values")).where(
         unexpected_condition
     )
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
@@ -2265,10 +2261,8 @@ def _sqlalchemy_column_pair_map_condition_values(
     )
 
     query = sa.select(
-        [
-            sa.column(column_A_name).label("unexpected_values_A"),
-            sa.column(column_B_name).label("unexpected_values_B"),
-        ]
+        sa.column(column_A_name).label("unexpected_values_A"),
+        sa.column(column_B_name).label("unexpected_values_B"),
     ).where(boolean_mapped_unexpected_values)
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
@@ -2313,7 +2307,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     )
 
     return execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(selectable)
+        sa.select(sa.func.count()).select_from(selectable)
     ).scalar()
 
 
@@ -2353,7 +2347,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     )
 
     column_selector = [sa.column(column_name) for column_name in column_list]
-    query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
+    query = sa.select(*column_selector).where(boolean_mapped_unexpected_values)
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         query = query.select_from(selectable)
@@ -2397,7 +2391,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
     selectable = get_sqlalchemy_selectable(selectable)
 
     return execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(selectable)
+        sa.select(sa.func.count()).select_from(selectable)
     ).scalar()
 
 
@@ -2437,7 +2431,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     column: sa.Column = sa.column(column_name)
 
     query = (
-        sa.select([column, sa.func.count(column)])
+        sa.select(column, sa.func.count(column))
         .where(unexpected_condition)
         .group_by(column)
     )
@@ -2471,7 +2465,7 @@ def _sqlalchemy_map_condition_rows(
 
     table_columns = metrics.get("table.columns")
     column_selector = [sa.column(column_name) for column_name in table_columns]
-    query = sa.select(column_selector).where(unexpected_condition)
+    query = sa.select(*column_selector).where(unexpected_condition)
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         query = query.select_from(selectable)
@@ -2555,7 +2549,7 @@ def _sqlalchemy_map_condition_query(
         column_selector.append(sa.column(column_name))
 
     unexpected_condition_query_with_selected_columns: sa.select = sa.select(
-        column_selector
+        *column_selector
     ).where(unexpected_condition)
     source_table_and_schema: sa.Table = get_sqlalchemy_source_table_and_schema(
         execution_engine
@@ -2643,7 +2637,7 @@ def _sqlalchemy_map_condition_index(
         execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
     )
     unexpected_condition_query_with_selected_columns: sa.select = sa.select(
-        column_selector
+        *column_selector
     ).where(unexpected_condition)
 
     if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
