@@ -25,6 +25,7 @@ stages:
           - bash: python -m pip install --upgrade pip==20.2.4
             displayName: 'Update pip'
 
+          # includes explicit install of chardet, which was causing errors in pipeline
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
               pip install chardet==3.0.4
@@ -89,6 +90,7 @@ stages:
           - bash: python -m pip install --upgrade pip==20.2.4
             displayName: 'Update pip'
 
+          # includes explicit install of chardet, which was causing errors in pipeline
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
               pip install chardet==3.0.4
@@ -130,6 +132,7 @@ stages:
           - bash: python -m pip install --upgrade pip==20.2.4
             displayName: 'Update pip'
 
+          # includes explicit install of grpcio-status and chardet, which was causing errors in pipeline
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
               pip install chardet==3.0.4
