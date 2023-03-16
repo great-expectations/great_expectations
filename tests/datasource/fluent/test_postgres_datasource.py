@@ -231,7 +231,7 @@ def test_construct_table_asset_directly_with_splitter(create_source):
             "my_asset",
             "my_table",
             source,
-            {"year": None, "month": None},
+            ("year", "month"),
         )
         batch_request_options = {"year": 2022, "month": 10}
         assert_batch_request(
