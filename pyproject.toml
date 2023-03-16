@@ -424,7 +424,7 @@ filterwarnings = [
     'ignore: The Row.keys\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:sqlalchemy.exc.RemovedIn20Warning',
     # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
     # sqlalchemy.exc.RemovedIn20Warning: Using non-integer/slice indices on Row is deprecated and will be removed in version 2.0; please use row._mapping[<key>], or the mappings() accessor on the Result object. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: Using non-integer/slice indices on Row is deprecated and will be removed in version 2.0:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore: Using non-integer\/slice indices on Row is deprecated and will be removed in version 2.0:sqlalchemy.exc.RemovedIn20Warning',
     # Example Actual Warning: Found by running pytest tests/rule_based_profiler/data_assistant/test_volume_data_assistant.py
     # FutureWarning: In a future version, object-dtype columns with all-bool values will not be included in reductions with bool_only=True. Explicitly cast to bool dtype instead.
     'ignore: In a future version, object-dtype columns with all-bool values will not be included in reductions with bool_only=True. Explicitly cast to bool dtype instead.:FutureWarning',
@@ -433,7 +433,7 @@ filterwarnings = [
     'ignore: _SixMetaPathImporter.find_spec\(\) not found; falling back to find_module\(\):ImportWarning',
     # Example Actual Warning: Found by running pytest tests/datasource/fluent/integration/test_integration_datasource.py (with SA-backed fluent datasources).
     # SADeprecationWarning: The Engine.run_callable() method is deprecated and will be removed in a future release.  Use the Engine.begin() context manager instead. (deprecated since: 1.4)
-    'ignore: The Engine.run_callable\(\) method is deprecated and will be removed in a future release.  Use the Engine.begin\(\) context manager instead. \(deprecated since: 1.4\):sqlalchemy.exc.SADeprecationWarning',
+    'ignore: The Engine.run_callable\(\) method is deprecated and will be removed in a future release.  Use the Engine.begin\(\) context manager instead. \(deprecated since\: 1.4\):sqlalchemy.exc.SADeprecationWarning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
