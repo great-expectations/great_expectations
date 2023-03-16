@@ -304,12 +304,12 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         container="my_container",
     )
     options = asset.batch_request_options
-    assert options == {
-        "path": None,
-        "batch_request_param_1": None,
-        "batch_request_param_2": None,
-        "batch_request_param_3": None,
-    }
+    assert options == (
+        "batch_request_param_1",
+        "batch_request_param_2",
+        "batch_request_param_3",
+        "path",
+    )
 
 
 @pytest.mark.integration
@@ -334,7 +334,12 @@ def test_csv_asset_with_batching_regex_named_parameters(
         container="my_container",
     )
     options = asset.batch_request_options
-    assert options == {"path": None, "name": None, "timestamp": None, "price": None}
+    assert options == (
+        "name",
+        "timestamp",
+        "price",
+        "path",
+    )
 
 
 @pytest.mark.integration
@@ -359,12 +364,12 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         container="my_container",
     )
     options = asset.batch_request_options
-    assert options == {
-        "path": None,
-        "name": None,
-        "batch_request_param_2": None,
-        "price": None,
-    }
+    assert options == (
+        "name",
+        "batch_request_param_2",
+        "price",
+        "path",
+    )
 
 
 @pytest.mark.integration
