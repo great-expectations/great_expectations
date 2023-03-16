@@ -772,14 +772,12 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """Convert the values in the named column to the given date_format, and split on that"""
         if self._dialect == "sqlite":
             return sa.select(
-                [
-                    sa.func.distinct(
-                        sa.func.strftime(
-                            date_format_string,
-                            sa.column(column_name),
-                        )
+                sa.func.distinct(
+                    sa.func.strftime(
+                        date_format_string,
+                        sa.column(column_name),
                     )
-                ]
+                )
             ).select_from(selectable)
 
         raise NotImplementedError(
@@ -907,13 +905,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """Note: this method is experimental. It does not work with all SQL dialects."""
         if self._dialect == GXSqlDialect.SQLITE:
             return sa.select(
-                [
-                    sa.func.distinct(
-                        sa.func.md5(
-                            sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits
-                        )
+                sa.func.distinct(
+                    sa.func.md5(
+                        sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits
                     )
-                ]
+                )
             ).select_from(selectable)
 
         raise NotImplementedError(
