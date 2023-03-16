@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         PandasAzureBlobStorageDatasource,
         PandasDatasource,
+        PandasDBFSDatasource,
         PandasFilesystemDatasource,
         PandasGoogleCloudStorageDatasource,
         PandasS3Datasource,
@@ -122,21 +123,21 @@ class _SourceFactories:
         *,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
-    ) -> PandasFilesystemDatasource: ...
+    ) -> PandasDBFSDatasource: ...
     def update_pandas_dbfs(
         self,
         name: str,
         *,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
-    ) -> PandasFilesystemDatasource: ...
+    ) -> PandasDBFSDatasource: ...
     def add_or_update_pandas_dbfs(
         self,
         name: str,
         *,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
-    ) -> PandasFilesystemDatasource: ...
+    ) -> PandasDBFSDatasource: ...
     def delete_pandas_dbfs(
         self,
         name: str,
