@@ -1,21 +1,16 @@
 from __future__ import annotations
 
 import logging
-import pathlib
 import re
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.core.util import DBFSPath
+from great_expectations.datasource.fluent import PandasFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
-    FilesystemDataConnector,
-)
-from great_expectations.datasource.fluent.interfaces import (
-    Sorter,
-    SortersDefinition,
-    TestConnectionError,
+    DBFSDataConnector,
 )
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
@@ -25,37 +20,21 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 )
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import (
+        Sorter,
+        SortersDefinition,
+    )
+
 logger = logging.getLogger(__name__)
 
 
 @public_api
-class PandasFilesystemDatasource(_PandasFilePathDatasource):
-    """Pandas based Datasource for filesystem based data assets."""
+class PandasDBFSDatasource(PandasFilesystemDatasource):
+    """Pandas based Datasource for DataBricks File System (DBFS) based data assets."""
 
     # instance attributes
-    type: Literal["pandas_filesystem"] = "pandas_filesystem"
-
-    # Filesystem specific attributes
-    base_directory: pathlib.Path
-    data_context_root_directory: Optional[pathlib.Path] = None
-
-    def test_connection(self, test_assets: bool = True) -> None:
-        """Test the connection for the PandasFilesystemDatasource.
-
-        Args:
-            test_assets: If assets have been passed to the PandasFilesystemDatasource, whether to test them as well.
-
-        Raises:
-            TestConnectionError: If the connection test fails.
-        """
-        if not self.base_directory.exists():
-            raise TestConnectionError(
-                f"Path: {self.base_directory.resolve()} does not exist."
-            )
-
-        if self.assets and test_assets:
-            for asset in self.assets.values():
-                asset.test_connection()
+    type: Literal["pandas_dbfs"] = "pandas_dbfs"
 
     @public_api
     def add_csv_asset(
@@ -85,16 +64,17 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             order_by=order_by_sorters,
             **kwargs,
         )
-        asset._data_connector = FilesystemDataConnector.build_data_connector(
+        asset._data_connector = DBFSDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
+            file_path_template_map_fn=DBFSPath.convert_to_file_semantics_version,
         )
         asset._test_connection_error_message = (
-            FilesystemDataConnector.build_test_connection_error_message(
+            DBFSDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
                 glob_directive=glob_directive,
@@ -133,16 +113,17 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        asset._data_connector = FilesystemDataConnector.build_data_connector(
+        asset._data_connector = DBFSDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
+            file_path_template_map_fn=DBFSPath.convert_to_file_semantics_version,
         )
         asset._test_connection_error_message = (
-            FilesystemDataConnector.build_test_connection_error_message(
+            DBFSDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
                 glob_directive=glob_directive,
@@ -181,16 +162,17 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        asset._data_connector = FilesystemDataConnector.build_data_connector(
+        asset._data_connector = DBFSDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
+            file_path_template_map_fn=DBFSPath.convert_to_file_semantics_version,
         )
         asset._test_connection_error_message = (
-            FilesystemDataConnector.build_test_connection_error_message(
+            DBFSDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
                 glob_directive=glob_directive,
@@ -229,16 +211,17 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             **kwargs,
         )
 
-        asset._data_connector = FilesystemDataConnector.build_data_connector(
+        asset._data_connector = DBFSDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             batching_regex=batching_regex_pattern,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
+            file_path_template_map_fn=DBFSPath.convert_to_file_semantics_version,
         )
         asset._test_connection_error_message = (
-            FilesystemDataConnector.build_test_connection_error_message(
+            DBFSDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
                 batching_regex=batching_regex_pattern,
                 glob_directive=glob_directive,
