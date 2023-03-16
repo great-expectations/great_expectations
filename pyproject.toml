@@ -348,6 +348,9 @@ filterwarnings = [
     # Example Actual Warning: DeprecationWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
     # Found when running test_value_counts_metric_spark
     "ignore: The default dtype for empty Series will be 'object' instead of 'float64' in a future version.:DeprecationWarning",
+    # Example Actual Warning: Found by running pytest tests/rule_based_profiler/data_assistant/test_volume_data_assistant.py
+    # FutureWarning: In a future version, object-dtype columns with all-bool values will not be included in reductions with bool_only=True. Explicitly cast to bool dtype instead.
+    'ignore: In a future version, object-dtype columns with all-bool values will not be included:FutureWarning',
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
     # Found when running test_case_runner_v3_api[spark/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
@@ -365,6 +368,10 @@ filterwarnings = [
     'ignore: \(1292, "Truncated incorrect DOUBLE value:Warning',
     # urllib3
     "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
+    # boto
+    # Example Actual Warning: Found when importing botocore when collecting tests with 3.10.
+    # ImportWarning: _SixMetaPathImporter.find_spec() not found; falling back to find_module()
+    'ignore: _SixMetaPathImporter.find_spec\(\) not found; falling back to find_module\(\):ImportWarning',
     # ruamel
     'ignore:\nsafe_load will be removed:PendingDeprecationWarning',
     'ignore:\nload will be removed:PendingDeprecationWarning',
@@ -404,6 +411,9 @@ filterwarnings = [
     # Example Actual Warning: (from trino tests, test_table_column_reflection_fallback)
     # sqlalchemy.exc.SADeprecationWarning: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.
     'ignore: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.:sqlalchemy.exc.SADeprecationWarning',
+    # Example Actual Warning: Found by running pytest tests/datasource/fluent/integration/test_integration_datasource.py (with SA-backed fluent datasources).
+    # sqlalchemy.exc.SADeprecationWarning: The Engine.run_callable() method is deprecated and will be removed in a future release.  Use the Engine.begin() context manager instead. (deprecated since: 1.4)
+    'ignore: The Engine.run_callable\(\) method is deprecated and will be removed in a future release:sqlalchemy.exc.SADeprecationWarning',
 
     # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
     # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
@@ -423,7 +433,7 @@ filterwarnings = [
     'ignore: The Row.keys\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:sqlalchemy.exc.RemovedIn20Warning',
     # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
     # sqlalchemy.exc.RemovedIn20Warning: Using non-integer/slice indices on Row is deprecated and will be removed in version 2.0; please use row._mapping[<key>], or the mappings() accessor on the Result object. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: Using non-integer/slice indices on Row is deprecated and will be removed in version 2.0:sqlalchemy.exc.RemovedIn20Warning'
+    'ignore: Using non-integer\/slice indices on Row is deprecated and will be removed in version 2.0:sqlalchemy.exc.RemovedIn20Warning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
