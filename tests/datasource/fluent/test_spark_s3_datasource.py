@@ -163,7 +163,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options_template()
+    options = asset.batch_request_options_template
     assert options == {
         "path": None,
         "batch_request_param_1": None,
@@ -182,7 +182,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options_template()
+    options = asset.batch_request_options_template
     assert options == {"path": None, "name": None, "timestamp": None, "price": None}
 
 
@@ -196,7 +196,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         header=True,
         infer_schema=True,
     )
-    options = asset.batch_request_options_template()
+    options = asset.batch_request_options_template
     assert options == {
         "path": None,
         "name": None,
