@@ -332,6 +332,7 @@ filterwarnings = [
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+
     # python
     # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
     'ignore: iteritems is deprecated and will be removed in a future version. Use .items instead.:FutureWarning',
@@ -346,6 +347,11 @@ filterwarnings = [
     # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
     # ImportWarning: _SixMetaPathImporter.exec_module() not found; falling back to load_module()
     'ignore: _SixMetaPathImporter.exec_module\(\) not found:ImportWarning',
+
+    # distutils
+    # Example Actual Warning: Found in tests/datasource/test_batch_generators.py, test spark python 3.10
+    # DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    'ignore: distutils Version classes are deprecated. Use packaging.version instead.:DeprecationWarning',
 
     # pandas
     # Example Actual Warning: FutureWarning: The behavior of `series[i:j]` with an integer-dtype index is deprecated. In a future version, this will be treated as *label-based* indexing, consistent with e.g. `series[i]` lookups. To retain the old behavior, use `series.iloc[i:j]`. To get the future behavior, use `series.loc[i:j]`.
