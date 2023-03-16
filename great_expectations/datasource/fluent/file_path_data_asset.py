@@ -131,6 +131,7 @@ class _FilePathDataAsset(DataAsset):
             for option, value in options.items():
                 if (
                     option in self._all_group_name_to_group_index_mapping
+                    and value
                     and not isinstance(value, str)
                 ):
                     raise gx_exceptions.InvalidBatchRequestError(

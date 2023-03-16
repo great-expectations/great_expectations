@@ -6,7 +6,7 @@ import pathlib
 import re
 from dataclasses import dataclass
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any, Optional, Type
 
 import pydantic
 import pytest
@@ -431,6 +431,32 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert batch.metadata == {"path": path, "year": "2018", "month": "04"}
 
     assert batch.id == "pandas_filesystem_datasource-csv_asset-year_2018-month_04"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "year,month,path,batch_count",
+    [
+        ("2018", "04", "yellow_tripdata_sample_2018-04.csv", 1),
+        ("2018", None, None, 12),
+        ("2018", "04", None, 1),
+        (None, "04", None, 3),
+    ],
+)
+def test_get_batch_list_batch_count(
+    year: Optional[str],
+    month: Optional[str],
+    path: Optional[str],
+    batch_count: int,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+):
+    asset = pandas_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+    )
+    request = asset.build_batch_request({"year": year, "month": month, "path": path})
+    batches = asset.get_batch_list_from_batch_request(request)
+    assert len(batches) == batch_count
 
 
 @pytest.mark.unit
