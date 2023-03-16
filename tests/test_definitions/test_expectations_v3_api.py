@@ -313,7 +313,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 )
                                 or (
                                     "snowflake" in suppress_test_for
-                                    and snowflakeDialect.SnowflakeDialect is not None
+                                    and snowflakeDialect is not None
                                     and validator_with_data
                                     and isinstance(
                                         validator_with_data.active_batch_data,
