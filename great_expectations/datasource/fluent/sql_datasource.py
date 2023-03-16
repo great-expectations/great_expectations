@@ -409,7 +409,7 @@ class _SQLAsset(DataAsset):
         Returns:
             A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
-        options = tuple()
+        options: tuple[str, ...] = tuple()
         if self.splitter:
             options = tuple(self.splitter.param_names)
         return options
