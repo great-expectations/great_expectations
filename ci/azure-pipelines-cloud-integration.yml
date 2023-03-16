@@ -27,6 +27,7 @@ stages:
 
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
+              pip install chardet==3.0.4
             displayName: 'Install dependencies'
 
           - task: DownloadSecureFile@1
@@ -90,6 +91,7 @@ stages:
 
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
+              pip install chardet==3.0.4
             displayName: 'Install dependencies'
 
           - task: DownloadSecureFile@1
@@ -130,6 +132,7 @@ stages:
 
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+              pip install chardet==3.0.4
             displayName: 'Install dependencies'
 
           - script: |
