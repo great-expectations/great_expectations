@@ -29,7 +29,7 @@ In this guide we will demonstrate how to connect to an in-memory Pandas DataFram
 
 ## Steps
 
-### 1. Import the Great Expectations module and instantiate a Data context
+### 1. Import the Great Expectations module and instantiate a Data Context
 
 <ImportGxAndInstantiateADataContext />
 
