@@ -343,6 +343,11 @@ filterwarnings = [
     # DeprecationWarning: NotImplemented should not be used in a boolean context
     'ignore: NotImplemented should not be used in a boolean context:DeprecationWarning',
 
+    # python 3.10
+    # Example Actual Warning: Found in tests/datasource/fluent/data_asset/data_connector/test_s3_data_connector.py
+    # DeprecationWarning: ssl.PROTOCOL_TLS is deprecated
+    'ignore: ssl.PROTOCOL_TLS is deprecated:DeprecationWarning',
+
     # six
     # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
     # ImportWarning: _SixMetaPathImporter.exec_module() not found; falling back to load_module()
@@ -429,6 +434,9 @@ filterwarnings = [
     # Example Actual Warning: Found by running pytest tests/datasource/fluent/integration/test_integration_datasource.py (with SA-backed fluent datasources).
     # sqlalchemy.exc.SADeprecationWarning: The Engine.run_callable() method is deprecated and will be removed in a future release.  Use the Engine.begin() context manager instead. (deprecated since: 1.4)
     'ignore: The Engine.run_callable\(\) method is deprecated and will be removed in a future release:sqlalchemy.exc.SADeprecationWarning',
+    # Example Actual Warning: (tests/datasource/fluent/integration/conftest.py)
+    # sqlalchemy.exc.SADeprecationWarning: Table.tometadata() is renamed to Table.to_metadata() (deprecated since: 1.4)
+    'ignore: Table.tometadata\(\) is renamed to Table.to_metadata\(\):sqlalchemy.exc.SADeprecationWarning',
 
     # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
     # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
