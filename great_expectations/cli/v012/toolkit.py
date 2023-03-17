@@ -2,7 +2,6 @@ import datetime
 import os
 import subprocess
 import sys
-import warnings
 from typing import Optional, Union
 
 import click
@@ -65,7 +64,6 @@ def create_expectation_suite(
     context,
     datasource_name=None,
     batch_kwargs_generator_name=None,
-    generator_asset=None,
     batch_kwargs=None,
     expectation_suite_name=None,
     additional_batch_kwargs=None,
@@ -83,14 +81,6 @@ def create_expectation_suite(
     require a serious revisiting.
     :return: a tuple: (success, suite name, profiling_results)
     """
-    if generator_asset:
-        # deprecated-v0.13.12
-        warnings.warn(
-            "The 'generator_asset' argument is deprecated as of v0.13.12 and will be removed in v0.16. Please use 'data_asset_name' instead.",
-            DeprecationWarning,
-        )
-        data_asset_name = generator_asset
-
     if show_intro_message and not empty_suite:
         cli_message(
             "\n<cyan>========== Create sample Expectations ==========</cyan>\n\n"

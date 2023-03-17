@@ -30,6 +30,9 @@
       },
       "spark": {
         "ts": "TimestampType"
+      },
+      "snowflake": {
+        "ts": "TIMESTAMP_TZ"
       }
     },
     "tests": [

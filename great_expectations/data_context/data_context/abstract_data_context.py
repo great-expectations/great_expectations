@@ -29,7 +29,6 @@ from typing import (
     overload,
 )
 
-from dateutil.parser import parse
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Literal
@@ -1405,7 +1404,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.cloud_id
+            ge_cloud_id = response.id
 
         # If an id is present, we want to prioritize that as our key for object retrieval
         if ge_cloud_id:
@@ -3630,21 +3629,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif not isinstance(run_id, RunIdentifier):
             run_name = run_name or "profiling"
@@ -3904,17 +3889,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             BatchKwargs
 
         """
-        if kwargs.get("name"):
-            if data_asset_name:
-                raise ValueError(
-                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
-                )
-            # deprecated-v0.11.2
-            warnings.warn(
-                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
