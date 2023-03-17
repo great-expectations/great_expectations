@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import ClassVar, Optional, TypeVar, Union
+from typing import ClassVar, Optional, Type, TypeVar, Union
 
 from typing_extensions import Literal
 
@@ -35,7 +35,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     """Pandas based Datasource for filesystem based data assets."""
 
     # class attributes
-    _data_connector: ClassVar = FilesystemDataConnector
+    _data_connector: ClassVar[Type] = FilesystemDataConnector
 
     # instance attributes
     type: Literal["pandas_filesystem"] = "pandas_filesystem"
