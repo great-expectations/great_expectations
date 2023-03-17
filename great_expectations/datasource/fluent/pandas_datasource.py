@@ -19,6 +19,7 @@ from typing import (
     Optional,
     Sequence,
     Set,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -332,6 +333,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
     dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
+    batch_metadata_keys: Optional[Tuple[str]]
     batch_metadata: Optional[BatchMetadata]
 
     class Config:
@@ -515,12 +517,12 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         dataframe: pd.DataFrame,
-        batch_metadata: Optional[BatchMetadata] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = None,
     ) -> DataFrameAsset:
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
-            batch_metadata=batch_metadata,
+            batch_metadata_keys=tuple(batch_metadata_keys),
         )
         return self.add_asset(asset=asset)
 
@@ -535,19 +537,19 @@ class PandasDatasource(_PandasDatasource):
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=asset_name,
             dataframe=dataframe,
-            batch_metadata=batch_metadata,
+            batch_metadata_keys=batch_metadata.keys(),
         )
         return self._get_validator(asset=asset)
 
     def add_clipboard_asset(
         self,
         name: str,
-        batch_metadata: Optional[BatchMetadata] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = None,
         **kwargs,
     ) -> ClipboardAsset:  # type: ignore[valid-type]
         asset = ClipboardAsset(
             name=name,
-            batch_metadata=batch_metadata,
+            batch_metadata_keys=batch_metadata_keys,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -562,7 +564,7 @@ class PandasDatasource(_PandasDatasource):
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         asset: ClipboardAsset = self.add_clipboard_asset(
             name=asset_name,
-            batch_metadata=batch_metadata,
+            batch_metadata_keys=batch_metadata.keys(),
             **kwargs,
         )  # type: ignore[valid-type]
         return self._get_validator(asset=asset)
@@ -571,13 +573,13 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata: Optional[BatchMetadata] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
         asset = CSVAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
-            batch_metadata=batch_metadata,
+            batch_metadata_keys=batch_metadata_keys,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -594,7 +596,7 @@ class PandasDatasource(_PandasDatasource):
         asset: CSVAsset = self.add_csv_asset(  # type: ignore[valid-type]
             name=asset_name,
             filepath_or_buffer=filepath_or_buffer,
-            batch_metadata=batch_metadata,
+            batch_metadata_keys=batch_metadata.keys(),
             **kwargs,
         )
         return self._get_validator(asset=asset)
