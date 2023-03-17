@@ -371,6 +371,10 @@ filterwarnings = [
     # Example Actual Warning: Found by running pytest tests/rule_based_profiler/data_assistant/test_volume_data_assistant.py
     # FutureWarning: In a future version, object-dtype columns with all-bool values will not be included in reductions with bool_only=True. Explicitly cast to bool dtype instead.
     'ignore: In a future version, object-dtype columns with all-bool values will not be included:FutureWarning',
+    # Example Actual Warning: Found by running tests/expectations/metrics/test_core.py::test_value_counts_metric_spark
+    # FutureWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+    'ignore: The default dtype for empty Series will be:FutureWarning',
+
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
     # Found when running test_case_runner_v3_api[spark/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
