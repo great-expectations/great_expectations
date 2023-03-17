@@ -15,7 +15,6 @@ except ImportError:
     sa = None
 
 try:
-    import sqlalchemy as sa
     from sqlalchemy.engine import Dialect
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
@@ -24,11 +23,9 @@ except ImportError:
     BinaryExpression = None
     BooleanClauseList = None
     Dialect = None
-    sa = None
 
 
 if TYPE_CHECKING:
-
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 
