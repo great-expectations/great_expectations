@@ -27,14 +27,20 @@ class QueryTemplateValues(QueryMetricProvider):
         "query",
     )
 
+    @classmethod
+    def get_query(cls, query, template_dict, selectable):
+        template_dict_reformatted = dict((k, v.format(active_batch=selectable)) for k, v in template_dict.items())
+        query_reformatted = query.format(**template_dict_reformatted, active_batch=selectable)
+        return query_reformatted
+
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
-        cls,
-        execution_engine: SqlAlchemyExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
-        runtime_configuration: dict,
+            cls,
+            execution_engine: SqlAlchemyExecutionEngine,
+            metric_domain_kwargs: dict,
+            metric_value_kwargs: dict,
+            metrics: Dict[str, Any],
+            runtime_configuration: dict,
     ) -> List[dict]:
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
@@ -49,26 +55,28 @@ class QueryTemplateValues(QueryMetricProvider):
             raise TypeError("Query must be supplied as a string")
 
         template_dict = metric_value_kwargs.get("template_dict")
+
         if not isinstance(template_dict, dict):
             raise TypeError("template_dict supplied by the expectation must be a dict")
 
         if isinstance(selectable, sa.Table):
-            query = query.format(**template_dict, active_batch=selectable)
+            query = cls.get_query(query, template_dict, selectable)
+
         elif isinstance(
-            selectable, get_sqlalchemy_subquery_type()
+                selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active batch as a Subquery; sectioning
             # the active batch off w/ parentheses ensures flow of operations doesn't break
-            query = query.format(**template_dict, active_batch=f"({selectable})")
+            query = cls.get_query(query, template_dict, f"({selectable})")
+
         elif isinstance(
-            selectable, sa.sql.Select
+                selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation &
             # aliasing when formatting the parameterized query
-            query = query.format(
-                **template_dict,
-                active_batch=f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
-            )
+            query = cls.get_query(query, template_dict,
+                                  f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect')
+
         else:
-            query = query.format(**template_dict, active_batch=f"({selectable})")
+            query = cls.get_query(query, template_dict, f"({selectable})")
 
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
@@ -77,12 +85,12 @@ class QueryTemplateValues(QueryMetricProvider):
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
-        cls,
-        execution_engine: SparkDFExecutionEngine,
-        metric_domain_kwargs: dict,
-        metric_value_kwargs: dict,
-        metrics: Dict[str, Any],
-        runtime_configuration: dict,
+            cls,
+            execution_engine: SparkDFExecutionEngine,
+            metric_domain_kwargs: dict,
+            metric_value_kwargs: dict,
+            metrics: Dict[str, Any],
+            runtime_configuration: dict,
     ) -> List[dict]:
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
