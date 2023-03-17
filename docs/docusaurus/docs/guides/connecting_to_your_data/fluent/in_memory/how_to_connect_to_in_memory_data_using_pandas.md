@@ -48,7 +48,7 @@ For this example, we will read a parquet file into a Pandas DataFrame.  We will 
 The code to create the Pandas DataFrame we are using in this guide is defined with:
 
 ```python title="Python code"
-import Pandas as pd
+import pandas as pd
 
 full_dataframe = pd.read_parquet("https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2022-11.parquet")
 sampled_dataframe = full_dataframe.sample(frac=0.05)
@@ -58,12 +58,12 @@ sampled_dataframe = full_dataframe.sample(frac=0.05)
 
 A Pandas DataFrame Data Asset can be defined with two elements:
 - `name`: The name by which the Datasource will be referenced in the future
-- `dataframe`: An in-memory Pandas DataFrame containing the data to access
+- `dataframe`: A Pandas DataFrame containing the data
 
 We will use the `sampled_dataframe` from the previous step as our `dataframe` value.  For the `name` parameter, we will define a name in advance by storing it in a Python variable:
 
 ```python title="Python code"
-name="TaxiDataFrame"
+name = "taxi_dataframe"
 ```
 
 Now that we have the `name` and `dataframe` for our Data Asset, we can create the Data Asset with the code:
@@ -89,7 +89,7 @@ To see the full source code used for the examples in this guide, please referenc
 
 ### External APIs
 
-For more information on Pandas `read_*` methods, please reference [the official Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html).
+For more information on Pandas read methods, please reference [the official Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html).
 
 <!-- TODO: Enable this and update links after the conceptual guides are revised
 ### Related reading
