@@ -234,28 +234,29 @@ class GXDependencies:
 
     def get_required_dependency_names(self) -> List[str]:
         """Sorted list of required GX dependencies"""
-        return self.GX_REQUIRED_DEPENDENCIES
+        return [name.lower() for name in self.GX_REQUIRED_DEPENDENCIES]
 
     def get_dev_dependency_names(self) -> Set[str]:
         """Set of dev GX dependencies"""
-        return self.GX_DEV_DEPENDENCIES
+        return {name.lower() for name in self.GX_DEV_DEPENDENCIES}
 
     def get_required_dependency_names_from_requirements_file(self) -> List[str]:
-        """Get unique names of required dependencies.
+        """Get unique names of required dependencies. Lowercase names.
 
         Returns:
             List of string names of required dependencies.
         """
         return sorted(
-            set(
-                self._get_dependency_names_from_requirements_file(
+            {
+                name.lower()
+                for name in self._get_dependency_names_from_requirements_file(
                     self._requirements_paths[self.PRIMARY_REQUIREMENTS_FILE]
                 )
-            )
+            }
         )
 
     def get_dev_dependency_names_from_requirements_file(self) -> List[str]:
-        """Get unique names of dependencies from all dev requirements files.
+        """Get unique lowercase names of dependencies from all dev requirements files.
         Returns:
             List of string names of dev dependencies.
         """
@@ -272,7 +273,7 @@ class GXDependencies:
                 dev_dependency_path.absolute()
             )
             dev_dependency_names.update(dependency_names)
-        return sorted(dev_dependency_names)
+        return sorted(name.lower() for name in dev_dependency_names)
 
     def _get_dependency_names_from_requirements_file(
         self, filepath: pathlib.Path
