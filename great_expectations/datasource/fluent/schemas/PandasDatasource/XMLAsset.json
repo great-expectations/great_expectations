@@ -22,6 +22,10 @@
                 "$ref": "#/definitions/Sorter"
             }
         },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
+        },
         "path_or_buffer": {
             "title": "Path Or Buffer",
             "anyOf": [
