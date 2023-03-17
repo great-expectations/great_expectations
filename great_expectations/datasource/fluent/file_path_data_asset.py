@@ -14,7 +14,6 @@ from typing import (
     Optional,
     Pattern,
     Set,
-    Union,
 )
 
 import pydantic
@@ -31,7 +30,6 @@ from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
-    Datasource,
     TestConnectionError,
 )
 
@@ -48,6 +46,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+MATCH_ALL_REGEX: re.Pattern = re.compile(".*")
+
 
 class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
@@ -59,7 +59,7 @@ class _FilePathDataAsset(DataAsset):
     }
 
     # General file-path DataAsset pertaining attributes.
-    batching_regex: Pattern
+    batching_regex: Pattern = MATCH_ALL_REGEX
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -98,12 +98,6 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
-
-    @pydantic.validator("batching_regex", pre=True)
-    def _parse_batching_regex_string(
-        cls, batching_regex: Optional[Union[re.Pattern, str]] = None
-    ) -> re.Pattern:
-        return Datasource.parse_batching_regex_string(batching_regex=batching_regex)
 
     @property
     def batch_request_options(
