@@ -72,6 +72,12 @@ data_asset = datasource.add_csv_asset(
 )
 ```
 
+:::info Optional parameters: `header` and `infer_schema`
+
+In the above example there are two parameters that are optional, depending on the structure of your file.  If the file does not have a header line, the `header` parameter can be left out: it will default to `false`.  Likewise, if you do not want GX to infer the schema of your file, you can leave off the `infer_schema` parameter; it will also default to `false`.
+
+:::
+
 <BatchingRegexExplaination storage_location_type="GCS bucket" />
 
 ## Next steps
