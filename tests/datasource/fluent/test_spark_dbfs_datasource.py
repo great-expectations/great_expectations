@@ -4,11 +4,13 @@ import logging
 import os
 import pathlib
 import re
-from typing import cast
+from typing import Optional, cast
 
 import boto3
 import botocore
 import pytest
+
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import SparkDBFSDatasource
@@ -28,7 +30,9 @@ logger = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def spark_dbfs_datasource(fs, test_backends) -> SparkDBFSDatasource:
+def spark_dbfs_datasource(
+    fs: Optional[FakeFilesystem], test_backends
+) -> SparkDBFSDatasource:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 

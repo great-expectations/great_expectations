@@ -1,11 +1,13 @@
 import os
 import pathlib
 import re
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, Optional
 
 import boto3
 import botocore
 import pytest
+
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -21,7 +23,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.integration
 @pytest.mark.slow  # 1.05s
-def test__get_full_file_path_pandas(fs):
+def test__get_full_file_path_pandas(fs: Optional[FakeFilesystem]):
     """
     What does this test and why?
     File paths in DBFS need to use the `dbfs:/` protocol base instead of `/dbfs/` when

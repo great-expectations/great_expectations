@@ -4,11 +4,13 @@ import logging
 import os
 import pathlib
 import re
-from typing import cast
+from typing import cast, Optional
 
 import boto3
 import botocore
 import pytest
+
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import PandasDBFSDatasource
@@ -37,7 +39,7 @@ pytestmark = [
 
 
 @pytest.fixture
-def pandas_dbfs_datasource(fs) -> PandasDBFSDatasource:
+def pandas_dbfs_datasource(fs: Optional[FakeFilesystem]) -> PandasDBFSDatasource:
     # Copy boto modules into fake filesystem (see https://github.com/spulec/moto/issues/1682#issuecomment-645016188)
     for module in [boto3, botocore]:
         module_dir = pathlib.Path(module.__file__).parent
