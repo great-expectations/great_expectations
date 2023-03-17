@@ -41,6 +41,21 @@
                     {}
                 ]
             }
+        },
+        "prefix": {
+            "title": "Prefix",
+            "default": "",
+            "type": "string"
+        },
+        "delimiter": {
+            "title": "Delimiter",
+            "default": "/",
+            "type": "string"
+        },
+        "max_keys": {
+            "title": "Max Keys",
+            "default": 1000,
+            "type": "integer"
         }
     },
     "required": [
