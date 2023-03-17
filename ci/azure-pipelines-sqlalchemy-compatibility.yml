@@ -137,6 +137,7 @@ stages:
 
     jobs:
       - job: sqlalchemy_compatibility_postgres
+        timeoutInMinutes: 90
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
           # This matrix is intended to run against the latest patch versions of
