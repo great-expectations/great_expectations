@@ -1041,17 +1041,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 to TextualSelect using sa.columns() before it can be converted to type Subquery
                 """
                 if TextClause and isinstance(selectable, TextClause):
-                    sa_query_object = sa.select(query["select"]).select_from(
+                    sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.columns().subquery()
                     )
                 elif (Select and isinstance(selectable, Select)) or (
                     TextualSelect and isinstance(selectable, TextualSelect)
                 ):
-                    sa_query_object = sa.select(query["select"]).select_from(
+                    sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.subquery()
                     )
                 else:
-                    sa_query_object = sa.select(query["select"]).select_from(selectable)
+                    sa_query_object = sa.select(*query["select"]).select_from(
+                        selectable
+                    )
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
                 res = self.engine.execute(sa_query_object).fetchall()
