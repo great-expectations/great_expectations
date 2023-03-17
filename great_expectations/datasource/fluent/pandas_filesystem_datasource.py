@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import ClassVar, Optional, Type, TypeVar
+from typing import Optional, TypeVar
 
 from typing_extensions import Literal
 
