@@ -76,25 +76,6 @@ def csv_asset(spark_dbfs_datasource: SparkDBFSDatasource) -> _FilePathDataAsset:
     return asset
 
 
-# TODO: <Alex>ALEX</Alex>
-def bad_batching_regex_config(
-    csv_path: pathlib.Path,
-) -> tuple[re.Pattern, TestConnectionError]:
-    batching_regex = re.compile(
-        r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-    )
-    test_connection_error = TestConnectionError(
-        "No file at base_directory path "
-        f'"{csv_path.resolve()}" matched regular expressions pattern '
-        f'"{batching_regex.pattern}" and/or glob_directive "**/*" for '
-        'DataAsset "csv_asset".'
-    )
-    return batching_regex, test_connection_error
-
-
-# TODO: <Alex>ALEX</Alex>
-
-
 @pytest.fixture
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     regex = re.compile(
