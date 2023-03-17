@@ -150,7 +150,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(self.batch_metadata)
+        batch_metadata = copy.deepcopy(self.batch_metadata) or {}
         batch_metadata.update(copy.deepcopy(batch_request.options))
 
         # Some pydantic annotations are postponed due to circular imports.
@@ -375,7 +375,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(self.batch_metadata)
+        batch_metadata = copy.deepcopy(self.batch_metadata) or {}
         batch_metadata.update(copy.deepcopy(batch_request.options))
 
         # Some pydantic annotations are postponed due to circular imports.
