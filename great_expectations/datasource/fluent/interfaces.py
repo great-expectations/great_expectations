@@ -74,6 +74,9 @@ class TestConnectionError(Exception):
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
+BatchMetadata: TypeAlias = Dict[str, Any]
+
+
 @dataclasses.dataclass(frozen=True)
 class BatchRequest:
     datasource_name: str

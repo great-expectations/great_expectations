@@ -39,6 +39,7 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
+    BatchMetadata,
     BatchRequest,
     DataAsset,
     Datasource,
@@ -82,6 +83,8 @@ class PandasDatasourceError(Exception):
 
 
 class _PandasDataAsset(DataAsset):
+    batch_metadata: Optional[BatchMetadata]
+
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "name",
         "order_by",
@@ -146,7 +149,8 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(batch_request.options)
+        batch_metadata = copy.deepcopy(self.batch_metadata)
+        batch_metadata.update(copy.deepcopy(batch_request.options))
 
         # Some pydantic annotations are postponed due to circular imports.
         # Batch.update_forward_refs() will set the annotations before we
@@ -327,6 +331,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
     dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
+    batch_metadata: Optional[BatchMetadata]
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -369,7 +374,8 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(batch_request.options)
+        batch_metadata = copy.deepcopy(self.batch_metadata)
+        batch_metadata.update(copy.deepcopy(batch_request.options))
 
         # Some pydantic annotations are postponed due to circular imports.
         # Batch.update_forward_refs() will set the annotations before we
