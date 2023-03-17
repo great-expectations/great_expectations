@@ -1,7 +1,7 @@
 ---
-title: How to connect to a SQL query
+title: How to connect to SQL data using a query
 tag: [how-to, connect to data]
-description: A technical guide demonstrating how to connect Great Expectations to a SQL query.
+description: A technical guide demonstrating how to connect Great Expectations to the data returned by a SQL query.
 keywords: [Great Expectations, SQL]
 ---
 
@@ -15,7 +15,7 @@ import ConnectingToSqlDatasourcesBlockConfig from '/docs/components/connect_to_d
 
 ## Introduction
 
-In this guide we will demonstrate how to connect Great Expectations to a query in a generic SQL database.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, please see [SQLAlchemy's official documentation on dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
+In this guide we will demonstrate how to connect Great Expectations to the data returned by a query in a generic SQL database.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, please see [SQLAlchemy's official documentation on dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 If you would like to connect to the contents of a SQL table instead of the results of a SQL query, please see [our guide on how to connect to a SQL table](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table.md), instead.
 
@@ -78,12 +78,12 @@ context = gx.get_context()
 
 ### 2. Retrieve a SQL Datasource
 
-For this guide, we will use a previously defined Datasource named `"MyDatasource"`.  For purposes of our demonstration, this Datasource is a SQL Datasource connecting to a PostgreSQL database.
+For this guide, we will use a previously defined Datasource named `"my_datasource"`.  For purposes of our demonstration, this Datasource was configured to connect to a SQL database.
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
 ```python title="Python code"
-my_datasource = context.get_datasource("MyDatasource")
+datasource = context.get_datasource("my_datasource")
 ```
 
 ### 3. Add a query to the Datasource as a Data Asset
@@ -91,7 +91,7 @@ my_datasource = context.get_datasource("MyDatasource")
 To indicate the query that provides the data to connect to we will define a Data Asset.  This is done by providing the `add_query_asset(...)` method a `name` by which we will reference the Data Asset in the future and a `query` which will provide the data we wish the Data Asset to connect to.
 
 ```python title="Python code"
-table_asset = datasource.add_query_asset(name="my_asset", query="SELECT * from yellow_tripdata_sample")
+table_asset = datasource.add_query_asset(name="my_asset", query="SELECT passenger_count, total_amount FROM yellow_tripdata")
 ```
 
 ### 4. (Optional) Repeat step 3 as needed to add additional queries
