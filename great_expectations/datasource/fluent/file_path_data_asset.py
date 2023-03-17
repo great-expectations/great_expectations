@@ -46,8 +46,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-MATCH_ALL_REGEX: re.Pattern = re.compile(".*")
-
 
 class _FilePathDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
@@ -59,7 +57,7 @@ class _FilePathDataAsset(DataAsset):
     }
 
     # General file-path DataAsset pertaining attributes.
-    batching_regex: Pattern = MATCH_ALL_REGEX
+    batching_regex: Pattern
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
