@@ -114,7 +114,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 To use AWS Secrets Manager, you may need to install the ``great_expectations`` package with its ``aws_secrets`` extra requirement:
 
 ```bash
-pip install great_expectations[aws_secrets]
+pip install 'great_expectations[aws_secrets]'
 ```
 
 In order to substitute your value by a secret in AWS Secrets Manager, you need to provide an arn of the secret like this one:
@@ -194,7 +194,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 To use GCP Secret Manager, you may need to install the ``great_expectations`` package with its ``gcp`` extra requirement:
 
 ```bash
-pip install great_expectations[gcp]
+pip install 'great_expectations[gcp]'
 ```
 
 In order to substitute your value by a secret in GCP Secret Manager, you need to provide a name of the secret like this one:
@@ -269,7 +269,7 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 To use Azure Key Vault, you may need to install the ``great_expectations`` package with its ``azure_secrets`` extra requirement:
 
 ```bash
-pip install great_expectations[azure_secrets]
+pip install 'great_expectations[azure_secrets]'
 ```
 
 In order to substitute your value by a secret in Azure Key Vault, you need to provide a name of the secret like this one:

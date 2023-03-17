@@ -60,15 +60,23 @@ This guide will walk you through best practices for creating your GX Python envi
 
 :::caution Additional dependencies for some SQL dialects
 
-The above pip instruction will install GX with basic SQL support through SQLAlchemy.  However, certain SQL dialects require additional dependencies.  Depending on the SQL database type you will be working with, you may wish to use one of the following installation commands, instead:
+The above pip instruction will install GX with basic SQL support through SqlAlchemy.  However, certain SQL dialects require additional dependencies.  Depending on the SQL database type you will be working with, you may wish to use one of the following installation commands, instead:
 
-- AWS Athena: `pip install great_expectations[athena]`
-- BigQuery: `pip install great_expectations[bigquery]`
-- MSSQL: `pip install great_expectations[mssql]`
-- PostgreSQL: `pip install great_expectations[postgresql]`
-- Redshift: `pip install great_expectations[redshift]`
-- Snowflake: `pip install great_expectations[snowflake]`
-- Trino: `pip install great_expectations[trino]`
+- AWS Athena: `pip install 'great_expectations[athena]'`
+- BigQuery: `pip install 'great_expectations[bigquery]'`
+- MSSQL: `pip install 'great_expectations[mssql]'`
+- PostgreSQL: `pip install 'great_expectations[postgresql]'`
+- Redshift: `pip install 'great_expectations[redshift]'`
+- Snowflake: `pip install 'great_expectations[snowflake]'`
+- Trino: `pip install 'great_expectations[trino]'`
+
+:::
+
+:::caution SqlAlchemy version
+
+Great Expectations does not currently support SqlAlchemy 2.0.
+
+If you install SqlAlchemy independently of the above pip commands, be certain to install the most recent SqlAlchemy version prior to 2.0.
 
 :::
 
