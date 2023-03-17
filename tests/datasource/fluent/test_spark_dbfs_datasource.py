@@ -125,9 +125,6 @@ def test_construct_csv_asset_directly():
 
 
 @pytest.mark.integration
-@pytest.mark.xfail(
-    reason="Accessing objects on pyfakefs.fake_filesystem.FakeFilesystem using Spark is not working (this test is conducted using Jupyter notebook manually)."
-)
 def test_get_batch_list_from_fully_specified_batch_request(
     spark_dbfs_datasource: SparkDBFSDatasource,
 ):
@@ -185,7 +182,7 @@ def test_test_connection_failures(
         base_directory=spark_dbfs_datasource.base_directory,
         data_context_root_directory=spark_dbfs_datasource.data_context_root_directory,
         glob_directive="*.csv",
-        file_path_template_map_fn=DBFSPath.convert_to_file_semantics_version,
+        file_path_template_map_fn=DBFSPath.convert_to_protocol_version,
     )
     csv_asset._test_connection_error_message = test_connection_error_message
 
