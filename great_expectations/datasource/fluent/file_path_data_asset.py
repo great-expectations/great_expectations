@@ -83,8 +83,13 @@ class _FilePathDataAsset(DataAsset):
 
         extra = pydantic.Extra.allow
 
-    def __init__(self, **data):
-        super().__init__(**data)
+    def __init__(
+        self,
+        batching_regex=".*",  # TODO: do this by declaring a default on the `batching_regex` field
+        # however this will cause a ton of schema changes
+        **data,
+    ):
+        super().__init__(batching_regex=batching_regex, **data)
 
         self._regex_parser = RegExParser(
             regex_pattern=self.batching_regex,
