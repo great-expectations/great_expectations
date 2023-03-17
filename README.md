@@ -12,7 +12,7 @@
 
 
 
-<img align="right" src="./static/img/gx-mark-160.png">
+<img align="right" src="./docs/docusaurus/static/img/gx-mark-160.png">
 
 Great Expectations
 ================================================================================
