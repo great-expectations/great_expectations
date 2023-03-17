@@ -828,6 +828,10 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
+    connect_args: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
+        default={},
+        description="Optional dictionary of `connect_args` will be passed to the SQLAlchemy Engine",
+    )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
     assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
