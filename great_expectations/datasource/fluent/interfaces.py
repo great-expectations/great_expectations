@@ -348,8 +348,6 @@ class Datasource(
 
     # class attrs
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
-    # The Datasource DataConnector will be used when adding assets if it exists
-    _data_connector: ClassVar[Optional[Type[DataConnector]]] = None
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
     _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",

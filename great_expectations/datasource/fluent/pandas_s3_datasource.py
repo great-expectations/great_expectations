@@ -46,8 +46,6 @@ _DataAssetT = TypeVar("_DataAssetT", bound=_FilePathDataAsset)
 
 
 class PandasS3Datasource(_PandasFilePathDatasource):
-    _data_connector: ClassVar[Type[S3DataConnector]] = S3DataConnector
-
     # instance attributes
     type: Literal["pandas_s3"] = "pandas_s3"
 

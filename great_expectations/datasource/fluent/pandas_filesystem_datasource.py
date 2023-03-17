@@ -27,9 +27,6 @@ _DataAssetT = TypeVar("_DataAssetT", bound=_FilePathDataAsset)
 class PandasFilesystemDatasource(_PandasFilePathDatasource):
     """Pandas based Datasource for filesystem based data assets."""
 
-    # class attributes
-    _data_connector: ClassVar[Type] = FilesystemDataConnector
-
     # instance attributes
     type: Literal["pandas_filesystem"] = "pandas_filesystem"
 
