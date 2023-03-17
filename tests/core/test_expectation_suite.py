@@ -1053,7 +1053,7 @@ def test_add_expectation_fails_validation(empty_suite_with_meta: ExpectationSuit
         kwargs=kwargs,
     )
 
-    with pytest.raises(gx_exceptions.ExpectationNotFoundError) as e:
+    with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
         suite.add_expectation(expectation_configuration)
 
     assert f"{expectation_type} not found" in str(e)
