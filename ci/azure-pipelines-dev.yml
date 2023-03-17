@@ -239,6 +239,7 @@ stages:
             displayName: 'Unit Tests'
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
 
           - script: |
               # Run pytest
@@ -257,6 +258,7 @@ stages:
             displayName: 'pytest'
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -272,6 +274,7 @@ stages:
 
       # Runs pytest with Spark and Postgres enabled
       - job: comprehensive
+        timeoutInMinutes: 90
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
           # This matrix is intended to split up our sizeable test suite into two distinct components.
@@ -318,6 +321,7 @@ stages:
             displayName: 'pytest'
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
 
           - task: PublishTestResults@2
             condition: succeededOrFailed()
@@ -418,6 +422,7 @@ stages:
             displayName: 'pytest'
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
 
       - job: mssql
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
@@ -457,6 +462,7 @@ stages:
             displayName: 'pytest'
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
 
       - job: trino
         condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
@@ -502,6 +508,7 @@ stages:
             displayName: 'pytest'
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
 
   - stage: cli_integration
     dependsOn: [scope_check, lint, import_ge, custom_checks]
@@ -538,6 +545,7 @@ stages:
             displayName: 'pytest'
             env:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
 
   - stage: airflow_provider
     dependsOn: [scope_check, lint, import_ge, custom_checks]

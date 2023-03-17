@@ -278,6 +278,8 @@ convention = "google"
 
 [tool.pytest.ini_options]
 filterwarnings = [
+    # Turn all warnings not explicitly filtered below into errors
+    "error",
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
     "ignore:Setting result format to COMPLETE for a SqlAlchemyDataset:UserWarning",
@@ -294,6 +296,188 @@ filterwarnings = [
     # This warning is for configuring the result_format parameter at the Expectation-level, which will not be persisted,
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Expectation-level will not be persisted:UserWarning",
+
+    # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
+    # Ignores in this section are for items in Great Expectations that are deprecated but not yet removed. Once the
+    # relevant code is removed, the warning ignore should also be removed.
+    # By ignoring these warnings, we will be able to turn on "warnings are errors" in our pipelines.
+    'ignore: The parameter "save_changes" is deprecated as of v0.15.32; moving forward, changes made to Datasources will always be persisted by Store implementations. As support will be removed in v0.18, please omit the argument moving forward.:DeprecationWarning',
+    # Example Actual Warning: great_expectations.exceptions.exceptions.MetricResolutionError: The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, please see: https://greatexpectations.io/blog/why-we-dont-do-transformations-for-expectations-and-when-we-do
+    # Example warning location: test_column_partition_metric_pd
+    'ignore: The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in v0.16.:DeprecationWarning',
+    # Example Actual Warning: UserWarning: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.
+    'ignore: Your query appears to have hard-coded references to your data. By not parameterizing your query with `{active_batch}`, {col}, etc., you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
+    # Example Actual Warning: UserWarning: Your query appears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.
+    'ignore: Your query appears to not be parameterized for a data asset. By not parameterizing your query with `{active_batch}`, you may not be validating against your intended data asset, or the expectation may fail.:UserWarning',
+    # Example Actual Warning: DeprecationWarning: save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_expectation_suite or add_or_update_expectation_suite instead.
+    # Found in test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint
+    'ignore: save_expectation_suite is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_expectation_suite or add_or_update_expectation_suite instead.:DeprecationWarning',
+    # Example Actual Warning: (found in test_expect_queried_column_value_frequency_to_meet_threshold_override_query_sqlite)
+    # UserWarning: `row_condition` is an experimental feature. Combining this functionality with QueryExpectations may result in unexpected behavior.
+    'ignore: `row_condition` is an experimental feature. Combining this functionality with QueryExpectations may result in unexpected behavior.:UserWarning',
+    # Example Actual Warning: (found in test_render_types_module_deprecation_warning)
+    # DeprecationWarning: Importing the class CollapseContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18. Please import class CollapseContent from great_expectations.render.
+    'ignore: Importing the class CollapseContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18.:DeprecationWarning',
+    # Example Actual Warning: (found in test_notebook_execution_rule_based_profiler_with_pandas_backend)
+    # DeprecationWarning: save_profiler is deprecated as of v0.15.48 and will be removed in v0.18. Please use update_profiler or add_or_update_profiler instead.
+    'ignore: save_profiler is deprecated as of v0.15.48 and will be removed in v0.18.:DeprecationWarning',
+    # Example Actual Warning: (found in test_render_types_module_deprecation_warning)
+    # DeprecationWarning: Importing the class RenderedContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18. Please import class RenderedContent from great_expectations.render.
+    'ignore: Importing the class RenderedContent from great_expectations.render.types is deprecated as of v0.15.32 in v0.18.:DeprecationWarning',
+    # Example Actual Warning: (found in test_golden_path_sql_datasource_configuration)
+    # DeprecationWarning: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use get_batch_list instead.
+    'ignore: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16.:DeprecationWarning',
+    # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
+
+    # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
+    # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
+    # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+
+    # python
+    # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
+    'ignore: iteritems is deprecated and will be removed in a future version. Use .items instead.:FutureWarning',
+    # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
+    # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than, test_case_runner_v2_api
+    'ignore: divide by zero encountered:RuntimeWarning',
+    # Example Actual Warning: Found running tests/test_definitions/test_expectations_v3_api.py
+    # DeprecationWarning: NotImplemented should not be used in a boolean context
+    'ignore: NotImplemented should not be used in a boolean context:DeprecationWarning',
+
+    # python 3.10
+    # Example Actual Warning: Found in tests/datasource/fluent/data_asset/data_connector/test_s3_data_connector.py
+    # DeprecationWarning: ssl.PROTOCOL_TLS is deprecated
+    'ignore: ssl.PROTOCOL_TLS is deprecated:DeprecationWarning',
+
+    # six
+    # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
+    # ImportWarning: _SixMetaPathImporter.exec_module() not found; falling back to load_module()
+    'ignore: _SixMetaPathImporter.exec_module\(\) not found:ImportWarning',
+
+    # distutils
+    # Example Actual Warning: Found in tests/datasource/test_batch_generators.py, test spark python 3.10
+    # DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    'ignore: distutils Version classes are deprecated. Use packaging.version instead.:DeprecationWarning',
+
+    # pandas
+    # Example Actual Warning: FutureWarning: The behavior of `series[i:j]` with an integer-dtype index is deprecated. In a future version, this will be treated as *label-based* indexing, consistent with e.g. `series[i]` lookups. To retain the old behavior, use `series.iloc[i:j]`. To get the future behavior, use `series.loc[i:j]`.
+    # Found when running pytest tests/test_definitions/test_expectations_v3_api.py
+    'ignore: The behavior of `series:FutureWarning',
+    # Example Actual Warning: UserWarning: Unknown extension is not supported and will be removed
+    # Found when running TestIO.test_read_excel
+    'ignore: Unknown extension is not supported and will be removed:UserWarning',
+    # Example Actual Warning: DeprecationWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+    # Found when running test_value_counts_metric_spark
+    "ignore: The default dtype for empty Series will be 'object' instead of 'float64' in a future version.:DeprecationWarning",
+    # Example Actual Warning: Found by running pytest tests/rule_based_profiler/data_assistant/test_volume_data_assistant.py
+    # FutureWarning: In a future version, object-dtype columns with all-bool values will not be included in reductions with bool_only=True. Explicitly cast to bool dtype instead.
+    'ignore: In a future version, object-dtype columns with all-bool values will not be included:FutureWarning',
+    # Example Actual Warning: Found by running tests/expectations/metrics/test_core.py::test_value_counts_metric_spark
+    # FutureWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+    'ignore: The default dtype for empty Series will be:FutureWarning',
+
+    # numpy
+    # Example Actual Warning: RuntimeWarning: Mean of empty slice.
+    # Found when running test_case_runner_v3_api[spark/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
+    'ignore: Mean of empty slice.:RuntimeWarning',
+    # Example Actual Warning: RuntimeWarning: invalid value encountered in double_scalars
+    # Found when running test_case_runner_v3_api[spark/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
+    'ignore: invalid value encountered:RuntimeWarning',
+    # spark
+    # Example Actual Warning: FutureWarning: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate() instead.
+    # Found when running test_case_runner_v2_api[SparkDFDataset/column_pair_map_expectations/expect_column_pair_values_to_be_in_set:basic_positive_test_without_nulls]
+    'ignore: Deprecated in 3.0.0. Use SparkSession.builder.getOrCreate\(\) instead.:FutureWarning',
+    # pymysql
+    # Example Actual Warning: pymysql.err.Warning: (1292, "Truncated incorrect DOUBLE value: 'cat'")
+    # Found in tests/test_definitions/test_expectations_v2_api.py, if not found in v3 api remove this ignore directive with the v2 api code.
+    'ignore: \(1292, "Truncated incorrect DOUBLE value:Warning',
+    # urllib3
+    "ignore:'urllib3.contrib.pyopenssl' module is deprecated and will be removed in a future release of urllib3 2.x.:DeprecationWarning",
+    # boto
+    # Example Actual Warning: Found when importing botocore when collecting tests with 3.10.
+    # ImportWarning: _SixMetaPathImporter.find_spec() not found; falling back to find_module()
+    'ignore: _SixMetaPathImporter.find_spec\(\) not found; falling back to find_module\(\):ImportWarning',
+    # ruamel
+    'ignore:\nsafe_load will be removed:PendingDeprecationWarning',
+    'ignore:\nload will be removed:PendingDeprecationWarning',
+    # Warning found in tests/integration/profiling/rule_based_profiler/test_profiler_basic_workflows.py, among other places.
+    'ignore:\ndump will be removed:PendingDeprecationWarning',
+    # Warning found in tests/integration/profiling/rule_based_profiler/test_profiler_basic_workflows.py
+    'ignore:\ndump_all will be removed:PendingDeprecationWarning',
+    # pyarrow
+    # Example Actual Warning:
+    # UserWarning: You have an incompatible version of 'pyarrow' installed (11.0.0), please install a version that adheres to: 'pyarrow<10.1.0,>=10.0.1; extra == "pandas"'
+    "ignore: You have an incompatible version of 'pyarrow' installed:UserWarning",
+    # jupyter
+    # Example Actual Warning:
+    # DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs
+    # given by the platformdirs library.  To remove this warning and
+    # see the appropriate new directories, set the environment variable
+    # `JUPYTER_PLATFORM_DIRS=1` and then run `jupyter --paths`.
+    # The use of platformdirs will be the default in `jupyter_core` v6
+    'ignore: Jupyter is migrating its paths to use standard platformdirs:DeprecationWarning',
+    # pytest
+    # Example Actual Warning:
+    # pytest.PytestCollectionWarning: cannot collect test class 'TestConnectionError' because it has a __init__ constructor (from: tests/datasource/fluent/test_pandas_azure_blob_storage_datasource.py)
+    "ignore: cannot collect test class 'TestConnectionError' because it has a __init__ constructor:pytest.PytestCollectionWarning",
+    # Example Actual Warning:
+    # pytest.PytestUnraisableExceptionWarning: Exception ignored in: <socket.socket fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=6>
+    "ignore: Exception ignored in:pytest.PytestUnraisableExceptionWarning",
+
+    # SQLAlchemy
+    # SQLAlchemy warnings. These warnings should be addressed.
+    'ignore: Implicit coercion of SELECT and textual SELECT constructs into FROM clauses is deprecated; please call .subquery\(\) on any Core select or ORM Query object in order to produce a subquery object.:sqlalchemy.exc.SADeprecationWarning',
+    # Example Actual Warning: (from test_table_column_reflection_fallback)
+    # sqlalchemy.exc.SADeprecationWarning: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.
+    'ignore: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.:sqlalchemy.exc.SADeprecationWarning',
+    # Example Actual Warning: (from mssql tests, tests/test_definitions/test_expectations_v2_api.py)
+    # sqlalchemy.exc.SAWarning: SELECT statement has a cartesian product between FROM element(s) "UnexpectedCountSubquery" and FROM element "ElementAndNullCountsSubquery".  Apply join condition(s) between each element to resolve.
+    'ignore: SELECT statement has a cartesian product between FROM element\(s\):sqlalchemy.exc.SAWarning',
+    # Example Actual Warning: (from trino tests, test_table_column_reflection_fallback)
+    # sqlalchemy.exc.SADeprecationWarning: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.  Please execute the underlying select() statement directly.
+    'ignore: Executing a subquery object is deprecated and will raise ObjectNotExecutableError in an upcoming release.:sqlalchemy.exc.SADeprecationWarning',
+    # Example Actual Warning: Found by running pytest tests/datasource/fluent/integration/test_integration_datasource.py (with SA-backed fluent datasources).
+    # sqlalchemy.exc.SADeprecationWarning: The Engine.run_callable() method is deprecated and will be removed in a future release.  Use the Engine.begin() context manager instead. (deprecated since: 1.4)
+    'ignore: The Engine.run_callable\(\) method is deprecated and will be removed in a future release:sqlalchemy.exc.SADeprecationWarning',
+    # Example Actual Warning: (tests/datasource/fluent/integration/conftest.py)
+    # sqlalchemy.exc.SADeprecationWarning: Table.tometadata() is renamed to Table.to_metadata() (deprecated since: 1.4)
+    'ignore: Table.tometadata\(\) is renamed to Table.to_metadata\(\):sqlalchemy.exc.SADeprecationWarning',
+
+    # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
+    # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
+    'ignore: The legacy calling style of select\(\) is deprecated and will be removed in SQLAlchemy 2.0.  Please use the new calling style described at select\(\).:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore: Passing a string to Connection.execute\(\) is deprecated and will be removed in version 2.0.  Use the text\(\) construct, or the Connection.exec_driver_sql\(\) method to invoke a driver-level SQL string.:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore: The current statement is being autocommitted using implicit autocommit, which will be removed in SQLAlchemy 2.0. Use the .begin\(\) method of Engine or Connection in order to use an explicit transaction for DML and DDL statements.:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore: The "whens" argument to case\(\), when referring to a sequence of items, is now passed as a series of positional elements, rather than as a list.:sqlalchemy.exc.RemovedIn20Warning',
+    'ignore: The Engine.execute\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. All statement execution in SQLAlchemy 2.0 is performed by the Connection.execute\(\) method of Connection, or in the ORM by the Session.execute\(\) method of Session.:sqlalchemy.exc.RemovedIn20Warning',
+    # Error with link to docs: sqlalchemy.exc.RemovedIn20Warning: The Connection.connect() method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    # Found so far in pytest tests/test_ge_utils.py, which is a v2 API reference. We won't fix this since the v2 API
+    # code will be deleted soon.
+    'ignore: The Connection.connect\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    # Found so far in test_cli_datasource_list
+    'ignore: Deprecated API features detected!:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
+    # sqlalchemy.exc.RemovedIn20Warning: The Row.keys() method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. Use the namedtuple standard accessor Row._fields, or for full mapping behavior use  row._mapping.keys()  (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The Row.keys\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
+    # sqlalchemy.exc.RemovedIn20Warning: Using non-integer/slice indices on Row is deprecated and will be removed in version 2.0; please use row._mapping[<key>], or the mappings() accessor on the Result object. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: Using non-integer\/slice indices on Row is deprecated and will be removed in version 2.0:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found by running setup of test_validate_dataset[sqlite]
+    # sqlalchemy.exc.RemovedIn20Warning: The MetaData.bind argument is deprecated and will be removed in SQLAlchemy 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The MetaData.bind argument is deprecated and will be removed in SQLAlchemy 2.0.:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found in setup of test_database_evaluation_parameter_store_basics[param_store0-test_backends0]
+    # sqlalchemy.exc.RemovedIn20Warning: The autoload parameter is deprecated and will be removed in version 2.0.  Please use the autoload_with parameter, passing an engine or connection. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The autoload parameter is deprecated and will be removed in version 2.0.:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found in test_sample_using_limit_builds_correct_query_where_clause_none[test_backends0-hive]
+    # sqlalchemy.exc.RemovedIn20Warning: The `database` package is deprecated and will be removed in v2.0 of sqlalchemy. Use the `dialects` package instead. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The `database` package is deprecated and will be removed in v2.0 of sqlalchemy. Use the `dialects` package instead.:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found in mysql test_table_column_reflection_fallback[test_backends0]
+    # sqlalchemy.exc.RemovedIn20Warning: The .close() method on a so-called 'branched' connection is deprecated as of 1.4, as are 'branched' connections overall, and will be removed in a future release.  If this is a default-handling function, don't close the connection. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The .close\(\) method on a so-called:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found in setup of test_validate_dataset[sqlite]
+    # sqlalchemy.exc.RemovedIn20Warning: The ``bind`` argument for schema methods that invoke SQL against an engine or connection will be required in SQLAlchemy 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The ``bind`` argument for schema methods that invoke SQL against an engine or connection will be required in SQLAlchemy 2.0.:sqlalchemy.exc.RemovedIn20Warning',
+    # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
 markers = [

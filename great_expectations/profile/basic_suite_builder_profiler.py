@@ -101,7 +101,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             column_cache_entry["type"] = column_type
             # remove the expectation
             # Does this change with different config format?
-            dataset.remove_expectation(
+            suite = dataset._expectation_suite
+            suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_values_to_be_in_type_list",
                     kwargs={"column": column_name},
@@ -122,13 +123,14 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             column_cardinality = cls._get_column_cardinality(dataset, column_name)
             column_cache_entry["cardinality"] = column_cardinality
             # remove the expectations
-            dataset.remove_expectation(
+            suite = dataset._expectation_suite
+            suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_unique_value_count_to_be_between",
                     kwargs={"column": column_name},
                 )
             )
-            dataset.remove_expectation(
+            suite.remove_expectation(
                 ExpectationConfiguration(
                     expectation_type="expect_column_proportion_of_unique_values_to_be_between",
                     kwargs={"column": column_name},
@@ -478,7 +480,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             ).result["observed_value"]
 
             if min_value is not None:
-                dataset.remove_expectation(
+                suite = dataset._expectation_suite
+                suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_min_to_be_between",
                         kwargs={"column": column},
@@ -506,7 +509,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 column, min_value=None, max_value=None, result_format="SUMMARY"
             ).result["observed_value"]
             if max_value is not None:
-                dataset.remove_expectation(
+                suite = dataset._expectation_suite
+                suite.remove_expectation(
                     ExpectationConfiguration(
                         expectation_type="expect_column_max_to_be_between",
                         kwargs={"column": column},
@@ -673,7 +677,8 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
             ).expectations:
                 if expectation.expectation_type not in included_expectations:
                     try:
-                        dataset.remove_expectation(
+                        suite = dataset._expectation_suite
+                        suite.remove_expectation(
                             ExpectationConfiguration(
                                 expectation_type=expectation.expectation_type,
                                 kwargs=expectation.kwargs,

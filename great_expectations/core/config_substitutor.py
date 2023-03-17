@@ -28,7 +28,7 @@ except ImportError:
 try:
     from google.cloud import secretmanager
 except ImportError:
-    secretmanager = None
+    secretmanager = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 

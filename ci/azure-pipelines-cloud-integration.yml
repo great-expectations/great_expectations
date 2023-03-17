@@ -25,8 +25,10 @@ stages:
           - bash: python -m pip install --upgrade pip==20.2.4
             displayName: 'Update pip'
 
+          # includes explicit install of chardet, which was causing errors in pipeline
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
+              pip install chardet==3.0.4
             displayName: 'Install dependencies'
 
           - task: DownloadSecureFile@1
@@ -88,8 +90,10 @@ stages:
           - bash: python -m pip install --upgrade pip==20.2.4
             displayName: 'Update pip'
 
+          # includes explicit install of chardet, which was causing errors in pipeline
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines google-cloud-bigquery-storage
+              pip install chardet==3.0.4
             displayName: 'Install dependencies'
 
           - task: DownloadSecureFile@1
@@ -113,7 +117,32 @@ stages:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
               GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
-              # snowflake credentials
+
+      - job: snowflake_expectations_test
+        timeoutInMinutes: 45 # snowflake tests will run in about 30 min
+        variables:
+          python.version: '3.8'
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip==20.2.4
+            displayName: 'Update pip'
+
+          # includes explicit install of grpcio-status and chardet, which was causing errors in pipeline
+          - script: |
+              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+              pip install chardet==3.0.4
+              pip install grpcio-status
+            displayName: 'Install dependencies'
+
+          - script: |
+              pytest -v --snowflake tests/test_definitions/test_expectations_v3_api.py
+            displayName: 'pytest'
+            env:
               SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
               SNOWFLAKE_USER: $(SNOWFLAKE_USER)
               SNOWFLAKE_PW: $(SNOWFLAKE_PW)
