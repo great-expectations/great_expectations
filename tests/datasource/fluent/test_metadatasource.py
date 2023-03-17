@@ -389,6 +389,7 @@ def assert_fluent_datasource_content(
     config_file_path: str, fluent_datasource_config: dict
 ):
     config = ruamel.yaml.safe_load(config_file_path.read_text())
+    breakpoint()
     assert "fluent_datasources" in config
     assert config["fluent_datasources"] == fluent_datasource_config
 
@@ -425,6 +426,32 @@ def test_add_datasource(context_with_fluent_datasource):
 
 
 @pytest.mark.unit
+def test_add_datasource_with_datasource_object(context_with_fluent_datasource):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    new_datasource = copy.deepcopy(context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME))
+    new_datasource.name = "new_datasource"
+    context.sources.add_pandas_filesystem(datasource=new_datasource)
+    assert len(context.datasources) == 2
+    assert_fluent_datasource_content(
+        config_file_path,
+        {
+            "new_datasource": {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "name": "new_datasource",
+                "type": "pandas_filesystem",
+            },
+            "pandas_datasource": {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "name": "pandas_datasource",
+                "type": "pandas_filesystem",
+            },
+        },
+    )
+
+
+@pytest.mark.unit
 def test_update_datasource(context_with_fluent_datasource):
     context, config_file_path, data_dir = context_with_fluent_datasource
     data_dir_2 = data_dir.parent / "data2"
@@ -442,6 +469,48 @@ def test_update_datasource(context_with_fluent_datasource):
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,
                 "type": "pandas_filesystem",
+            }
+        },
+    )
+
+
+@pytest.mark.unit
+def test_update_datasource_with_datasource_object(context_with_fluent_datasource):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    datasource = context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME)
+    assert_fluent_datasource_content(
+        config_file_path,
+        {
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir_2),
+                "data_context_root_directory": str(config_file_path.parent),
+                "name": DEFAULT_CRUD_DATASOURCE_NAME,
+                "type": "pandas_filesystem",
+            }
+        },
+    )
+
+    # Add an asset and update datasource
+    (data_dir / "1.csv").touch()
+    datasource.add_csv_asset(name="csv_asset", batching_regex=r"(?P<file_name>.*).csv")
+
+    context.sources.update_pandas_filesystem(datasource=datasource)
+    assert_fluent_datasource_content(
+        config_file_path,
+        {
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "name": DEFAULT_CRUD_DATASOURCE_NAME,
+                "type": "pandas_filesystem",
+                "assets": {
+                    "csv_asset": {
+                        "batching_regex": "(?P<file_name>.*).csv",
+                        "name": "csv_asset",
+                        "order_by": [],
+                        "type": "csv",
+                    }
+                },
             }
         },
     )

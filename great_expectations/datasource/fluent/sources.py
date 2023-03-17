@@ -12,6 +12,7 @@ from typing import (
     Generator,
     List,
     NamedTuple,
+    Optional,
     Sequence,
     Type,
 )
@@ -333,31 +334,52 @@ class _SourceFactories:
     def factories(self) -> List[str]:
         return list(self.__crud_registry.keys())
 
-    def _validate_datasource_type(
+    def _validate_current_datasource_type(
         self, name: str, datasource_type: Type[Datasource], raise_if_none: bool = True
     ) -> None:
         try:
-            old_datasource = self._data_context.get_datasource(name)
+            current_datasource = self._data_context.get_datasource(name)
         except ValueError as e:
             if raise_if_none:
                 raise ValueError(
                     f"There is no datasource {name} in the data context."
                 ) from e
-            old_datasource = None
-        if old_datasource and not isinstance(old_datasource, datasource_type):
+            current_datasource = None
+        if current_datasource and not isinstance(current_datasource, datasource_type):
             raise ValueError(
                 f"Trying to update datasource {name} but it is not the correct type. "
-                f"Expected {datasource_type} but got {type(old_datasource)}"
+                f"Expected {datasource_type} but got {type(current_datasource)}"
             )
+
+    @staticmethod
+    def _datasource_passed_in(
+        datasource_type, name: Optional[str], **kwargs
+    ) -> Optional[Datasource]:
+        if name is None:
+            if not ("datasource" in kwargs and len(kwargs) == 1):
+                raise ValueError()
+            datasource = kwargs["datasource"]
+            if not isinstance(datasource, datasource_type):
+                raise ValueError(
+                    f"Trying to modify datasource {name} but it is not the correct type. "
+                    f"Expected {datasource_type} but got {type(datasource)}"
+                )
+            return datasource
+        else:
+            if "datasource" in kwargs:
+                raise ValueError()
+            return None
 
     def create_add_crud_method(
         self,
         datasource_type: Type[Datasource],
         doc_string: str = "",
     ) -> SourceFactoryFn:
-        def add_datasource(name: str, **kwargs) -> Datasource:
-            logger.debug(f"Adding {datasource_type} with {name}")
-            datasource = datasource_type(name=name, **kwargs)
+        def add_datasource(name: Optional[str] = None, **kwargs) -> Datasource:
+            datasource = self._datasource_passed_in(
+                datasource_type, name, **kwargs
+            ) or datasource_type(name=name, **kwargs)
+            logger.debug(f"Adding {datasource_type} with {datasource.name}")
             datasource._data_context = self._data_context
             # config provider needed for config substitution
             datasource._config_provider = self._data_context.config_provider
@@ -380,10 +402,19 @@ class _SourceFactories:
         datasource_type: Type[Datasource],
         doc_string: str = "",
     ) -> SourceFactoryFn:
-        def update_datasource(name: str, **kwargs) -> Datasource:
-            logger.debug(f"Updating {datasource_type} with {name}")
-            self._validate_datasource_type(name, datasource_type)
-            self._data_context._delete_fluent_datasource(datasource_name=name)
+        def update_datasource(name: Optional[str] = None, **kwargs) -> Datasource:
+            new_datasource: Optional[Datasource] = self._datasource_passed_in(
+                datasource_type, name, **kwargs
+            )
+            # if datasource is None that means name is defined.
+            datasource_name = new_datasource.name if new_datasource else name
+            self._validate_current_datasource_type(datasource_name, datasource_type)
+            logger.debug(f"Updating {datasource_type} with {datasource_name}")
+            self._data_context._delete_fluent_datasource(
+                datasource_name=datasource_name
+            )
+            # Now that the input is validated and the old datasource is deleted we pass the
+            # original arguments to the add method (ie name and not datasource_name).
             return self.create_add_crud_method(datasource_type)(name=name, **kwargs)
 
         update_datasource.__doc__ = doc_string
@@ -401,9 +432,20 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def add_or_update_datasource(name: str, **kwargs) -> Datasource:
-            logger.debug(f"Adding or updating {datasource_type} with {name}")
-            self._validate_datasource_type(name, datasource_type, raise_if_none=False)
-            self._data_context._delete_fluent_datasource(datasource_name=name)
+            new_datasource: Optional[Datasource] = self._datasource_passed_in(
+                datasource_type, name, **kwargs
+            )
+            # if datasource is None that means name is defined.
+            datasource_name = new_datasource.name if new_datasource else name
+            logger.debug(f"Adding or updating {datasource_type} with {datasource_name}")
+            self._validate_current_datasource_type(
+                name, datasource_type, raise_if_none=False
+            )
+            self._data_context._delete_fluent_datasource(
+                datasource_name=datasource_name
+            )
+            # Now that the input is validated and the old datasource is deleted we pass the
+            # original arguments to the add method (ie name and not datasource_name).
             return self.create_add_crud_method(datasource_type)(name=name, **kwargs)
 
         add_or_update_datasource.__doc__ = doc_string
@@ -422,7 +464,7 @@ class _SourceFactories:
     ) -> Callable[[str], None]:
         def delete_datasource(name: str) -> None:
             logger.debug(f"Delete {datasource_type} with {name}")
-            self._validate_datasource_type(name, datasource_type)
+            self._validate_current_datasource_type(name, datasource_type)
             self._data_context._delete_fluent_datasource(datasource_name=name)
 
         delete_datasource.__doc__ = doc_string
