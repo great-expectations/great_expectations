@@ -1,13 +1,13 @@
 # Validate that PR titles are prefixed with one of our accepted labels
 name: "PR Title Checker"
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - edited
+      - reopened
       - synchronize
-      - labeled
-      - unlabeled
+      - auto_merge_enabled
 
 jobs:
   check:
