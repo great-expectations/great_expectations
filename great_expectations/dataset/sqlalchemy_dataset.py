@@ -1736,11 +1736,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if engine_dialect == GXSqlDialect.ORACLE:
             try:
-                self.engine.execute(stmt_1)
+                self.engine.execute(sa.text(stmt_1))
             except DatabaseError:
-                self.engine.execute(stmt_2)
+                self.engine.execute(sa.text(stmt_2))
         else:
-            self.engine.execute(stmt)
+            self.engine.execute(sa.text(stmt))
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
