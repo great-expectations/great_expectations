@@ -24,7 +24,6 @@
         },
         "batching_regex": {
             "title": "Batching Regex",
-            "default": ".*",
             "type": "string",
             "format": "regex"
         },
@@ -100,7 +99,8 @@
         }
     },
     "required": [
-        "name"
+        "name",
+        "batching_regex"
     ],
     "additionalProperties": false,
     "definitions": {
