@@ -15,8 +15,7 @@ jobs:
     steps:
     - name : Check PR title validity
       run: |
-        echo {{ github.event.pull_request.title }}
-        echo {{ github.event.pull_request.title }} | grep -E "^\[(FEATURE|BUGFIX|DOCS|MAINTENANCE|CONTRIB)\]"
+        echo ${{ github.event.pull_request.title }} | grep -E "^\\[(FEATURE|BUGFIX|DOCS|MAINTENANCE|CONTRIB)\\]"
         exit $?
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
