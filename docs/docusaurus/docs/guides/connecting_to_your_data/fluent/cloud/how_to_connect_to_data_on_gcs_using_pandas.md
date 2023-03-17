@@ -45,7 +45,7 @@ We can define a GCS datasource by providing three pieces of information:
 - `gcs_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
 ```python title="Python code"
-datasource_name = "MyGcsDatasource"
+datasource_name = "my_gcs_datasource"
 bucket_name = "test_docs_data"
 gcs_options = {}
 ```
@@ -54,7 +54,7 @@ Once we have those three elements, we can define our Datasource like so:
 
 ```python title="Python code"
 datasource = context.sources.add_pandas_gcs(
-    name=dataspirce_name, bucket_or_name=bucket_name, gcs_options=gcs_options
+    name=datasource_name, bucket_or_name=bucket_name, gcs_options=gcs_options
 )
 ```
 
