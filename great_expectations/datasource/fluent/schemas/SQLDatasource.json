@@ -42,6 +42,22 @@
                     "type": "string"
                 }
             ]
+        },
+        "connect_args": {
+            "title": "Connect Args",
+            "description": "Optional dictionary of `connect_args` will be passed to the SQLAlchemy Engine",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [
