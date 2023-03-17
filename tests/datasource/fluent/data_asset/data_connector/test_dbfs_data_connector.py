@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, cast
 import boto3
 import botocore
 import pytest
-from pyfakefs.fake_filesystem import FakeFilesystem
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -15,6 +14,8 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
+    from pyfakefs.fake_filesystem import FakeFilesystem
+
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )

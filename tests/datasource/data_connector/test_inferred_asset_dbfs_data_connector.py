@@ -1,11 +1,10 @@
 import os
 import pathlib
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import boto3
 import botocore
 import pytest
-from pyfakefs.fake_filesystem import FakeFilesystem
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec
@@ -13,6 +12,9 @@ from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.data_connector import InferredAssetDBFSDataConnector
 from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
+
+if TYPE_CHECKING:
+    from pyfakefs.fake_filesystem import FakeFilesystem
 
 
 @pytest.mark.integration

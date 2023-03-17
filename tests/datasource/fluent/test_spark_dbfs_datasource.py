@@ -4,12 +4,11 @@ import logging
 import os
 import pathlib
 import re
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import boto3
 import botocore
 import pytest
-from pyfakefs.fake_filesystem import FakeFilesystem
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent import SparkDBFSDatasource
@@ -24,6 +23,10 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
 )
 from tests.test_utils import create_files_in_directory
+
+if TYPE_CHECKING:
+    from pyfakefs.fake_filesystem import FakeFilesystem
+
 
 logger = logging.getLogger(__file__)
 
