@@ -3,7 +3,6 @@ from __future__ import annotations
 import dataclasses
 import functools
 import logging
-import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -499,21 +498,6 @@ class Datasource(
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
-
-    @staticmethod
-    def parse_batching_regex_string(
-        batching_regex: Optional[Union[re.Pattern, str]] = None
-    ) -> re.Pattern:
-        pattern: re.Pattern
-        if not batching_regex:
-            pattern = re.compile(".*")
-        elif isinstance(batching_regex, str):
-            pattern = re.compile(batching_regex)
-        elif isinstance(batching_regex, re.Pattern):
-            pattern = batching_regex
-        else:
-            raise ValueError('"batching_regex" must be either re.Pattern, str, or None')
-        return pattern
 
     # Abstract Methods
     @property
