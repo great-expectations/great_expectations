@@ -4,7 +4,6 @@ import datetime
 import hashlib
 import logging
 import pickle
-import warnings
 from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
@@ -583,19 +582,9 @@ not {batch_spec.__class__.__name__}"""
                     subset=[column_A_name, column_B_name],
                 )
             else:
-                if ignore_row_if not in ["neither", "never"]:
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
-
-                if ignore_row_if == "never":
-                    # deprecated-v0.13.29
-                    warnings.warn(
-                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  \
-Please use "neither" instead.
-""",
-                        DeprecationWarning,
                     )
 
             return data

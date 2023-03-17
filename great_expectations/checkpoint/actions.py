@@ -7,13 +7,11 @@ from __future__ import annotations
 
 import json
 import logging
-import warnings
 from typing import TYPE_CHECKING, Dict, List, Union
 
 import requests
 from typing_extensions import Final
 
-from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
 from great_expectations.data_context.types.refs import (
     GXCloudResourceRef,  # noqa: TCH001
@@ -294,10 +292,10 @@ class SlackNotificationAction(ValidationAction):
         ]
         if (
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
-            and validation_result_suite_identifier.cloud_id
+            and validation_result_suite_identifier.id
         ):
             cloud_base_url: Final[str] = CLOUD_APP_DEFAULT_BASE_URL
-            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.cloud_id}"
+            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.id}"
             validation_result_urls.append(validation_result_url)
 
         if (
@@ -891,11 +889,11 @@ class StoreValidationResultAction(ValidationAction):
 
         checkpoint_ge_cloud_id = None
         if self._using_cloud_context and checkpoint_identifier:
-            checkpoint_ge_cloud_id = checkpoint_identifier.cloud_id
+            checkpoint_ge_cloud_id = checkpoint_identifier.id
 
         expectation_suite_ge_cloud_id = None
         if self._using_cloud_context and expectation_suite_identifier:
-            expectation_suite_ge_cloud_id = expectation_suite_identifier.cloud_id
+            expectation_suite_ge_cloud_id = expectation_suite_identifier.id
 
         return_val = self.target_store.set(
             validation_result_suite_identifier,
@@ -905,8 +903,8 @@ class StoreValidationResultAction(ValidationAction):
         )
         if self._using_cloud_context:
             return_val: GXCloudResourceRef
-            new_ge_cloud_id = return_val.cloud_id
-            validation_result_suite_identifier.cloud_id = new_ge_cloud_id
+            new_ge_cloud_id = return_val.id
+            validation_result_suite_identifier.id = new_ge_cloud_id
 
 
 @public_api
@@ -1064,11 +1062,6 @@ class StoreMetricsAction(ValidationAction):
 
 
 @public_api
-@deprecated_argument(
-    argument_name="target_site_names",
-    version="0.10.10",
-    message="target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
-)
 class UpdateDataDocsAction(ValidationAction):
     """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
@@ -1094,32 +1087,18 @@ class UpdateDataDocsAction(ValidationAction):
     Args:
         data_context: Data Context that is used by the Action.
         site_names: Optional. A list of the names of sites to update.
-        target_site_names: Optional. Deprecated. A list of the names of sites to update.
     """
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         site_names: Optional[Union[List[str], str]] = None,
-        target_site_names: Optional[Union[List[str], str]] = None,
     ) -> None:
         """
         :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
         """
         super().__init__(data_context)
-        if target_site_names:
-            # deprecated-v0.10.10
-            warnings.warn(
-                "target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
-                DeprecationWarning,
-            )
-            if site_names:
-                raise DataContextError(
-                    "Invalid configuration: legacy key target_site_names and site_names key are "
-                    "both present in UpdateDataDocsAction configuration"
-                )
-            site_names = target_site_names
         self._site_names = site_names
 
     def _run(
