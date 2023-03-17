@@ -279,7 +279,7 @@ convention = "google"
 [tool.pytest.ini_options]
 filterwarnings = [
     # Turn all warnings not explicitly filtered below into errors
-    # "error", # temporarily disabling for purposes of v0.16.1
+    "error",
     # This warning is common during testing where we intentionally use a COMPLETE format even in cases that would
     # be potentially overly resource intensive in standard operation
     "ignore:Setting result format to COMPLETE for a SqlAlchemyDataset:UserWarning",
@@ -332,12 +332,32 @@ filterwarnings = [
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+
     # python
     # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
     'ignore: iteritems is deprecated and will be removed in a future version. Use .items instead.:FutureWarning',
     # Example Actual Warning: RuntimeWarning: divide by zero encountered in divide, RuntimeWarning: divide by zero encountered in true_divide
     # Found in test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than, test_case_runner_v2_api
     'ignore: divide by zero encountered:RuntimeWarning',
+    # Example Actual Warning: Found running tests/test_definitions/test_expectations_v3_api.py
+    # DeprecationWarning: NotImplemented should not be used in a boolean context
+    'ignore: NotImplemented should not be used in a boolean context:DeprecationWarning',
+
+    # python 3.10
+    # Example Actual Warning: Found in tests/datasource/fluent/data_asset/data_connector/test_s3_data_connector.py
+    # DeprecationWarning: ssl.PROTOCOL_TLS is deprecated
+    'ignore: ssl.PROTOCOL_TLS is deprecated:DeprecationWarning',
+
+    # six
+    # Example Actual Warning: Found in ImportError while loading conftest '/great_expectations/tests/conftest.py'.
+    # ImportWarning: _SixMetaPathImporter.exec_module() not found; falling back to load_module()
+    'ignore: _SixMetaPathImporter.exec_module\(\) not found:ImportWarning',
+
+    # distutils
+    # Example Actual Warning: Found in tests/datasource/test_batch_generators.py, test spark python 3.10
+    # DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+    'ignore: distutils Version classes are deprecated. Use packaging.version instead.:DeprecationWarning',
+
     # pandas
     # Example Actual Warning: FutureWarning: The behavior of `series[i:j]` with an integer-dtype index is deprecated. In a future version, this will be treated as *label-based* indexing, consistent with e.g. `series[i]` lookups. To retain the old behavior, use `series.iloc[i:j]`. To get the future behavior, use `series.loc[i:j]`.
     # Found when running pytest tests/test_definitions/test_expectations_v3_api.py
@@ -351,6 +371,10 @@ filterwarnings = [
     # Example Actual Warning: Found by running pytest tests/rule_based_profiler/data_assistant/test_volume_data_assistant.py
     # FutureWarning: In a future version, object-dtype columns with all-bool values will not be included in reductions with bool_only=True. Explicitly cast to bool dtype instead.
     'ignore: In a future version, object-dtype columns with all-bool values will not be included:FutureWarning',
+    # Example Actual Warning: Found by running tests/expectations/metrics/test_core.py::test_value_counts_metric_spark
+    # FutureWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+    'ignore: The default dtype for empty Series will be:FutureWarning',
+
     # numpy
     # Example Actual Warning: RuntimeWarning: Mean of empty slice.
     # Found when running test_case_runner_v3_api[spark/column_aggregate_expectations/expect_column_median_to_be_between:test_empty_column_should_be_false_no_observed_value_with_which_to_compare]
@@ -414,6 +438,9 @@ filterwarnings = [
     # Example Actual Warning: Found by running pytest tests/datasource/fluent/integration/test_integration_datasource.py (with SA-backed fluent datasources).
     # sqlalchemy.exc.SADeprecationWarning: The Engine.run_callable() method is deprecated and will be removed in a future release.  Use the Engine.begin() context manager instead. (deprecated since: 1.4)
     'ignore: The Engine.run_callable\(\) method is deprecated and will be removed in a future release:sqlalchemy.exc.SADeprecationWarning',
+    # Example Actual Warning: (tests/datasource/fluent/integration/conftest.py)
+    # sqlalchemy.exc.SADeprecationWarning: Table.tometadata() is renamed to Table.to_metadata() (deprecated since: 1.4)
+    'ignore: Table.tometadata\(\) is renamed to Table.to_metadata\(\):sqlalchemy.exc.SADeprecationWarning',
 
     # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
     # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
@@ -435,6 +462,21 @@ filterwarnings = [
     # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
     # sqlalchemy.exc.RemovedIn20Warning: Using non-integer/slice indices on Row is deprecated and will be removed in version 2.0; please use row._mapping[<key>], or the mappings() accessor on the Result object. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     'ignore: Using non-integer\/slice indices on Row is deprecated and will be removed in version 2.0:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found by running setup of test_validate_dataset[sqlite]
+    # sqlalchemy.exc.RemovedIn20Warning: The MetaData.bind argument is deprecated and will be removed in SQLAlchemy 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The MetaData.bind argument is deprecated and will be removed in SQLAlchemy 2.0.:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found in setup of test_database_evaluation_parameter_store_basics[param_store0-test_backends0]
+    # sqlalchemy.exc.RemovedIn20Warning: The autoload parameter is deprecated and will be removed in version 2.0.  Please use the autoload_with parameter, passing an engine or connection. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The autoload parameter is deprecated and will be removed in version 2.0.:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found in test_sample_using_limit_builds_correct_query_where_clause_none[test_backends0-hive]
+    # sqlalchemy.exc.RemovedIn20Warning: The `database` package is deprecated and will be removed in v2.0 of sqlalchemy. Use the `dialects` package instead. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The `database` package is deprecated and will be removed in v2.0 of sqlalchemy. Use the `dialects` package instead.:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found in mysql test_table_column_reflection_fallback[test_backends0]
+    # sqlalchemy.exc.RemovedIn20Warning: The .close() method on a so-called 'branched' connection is deprecated as of 1.4, as are 'branched' connections overall, and will be removed in a future release.  If this is a default-handling function, don't close the connection. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The .close\(\) method on a so-called:sqlalchemy.exc.RemovedIn20Warning',
+    # Example Actual Warning: Found in setup of test_validate_dataset[sqlite]
+    # sqlalchemy.exc.RemovedIn20Warning: The ``bind`` argument for schema methods that invoke SQL against an engine or connection will be required in SQLAlchemy 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    'ignore: The ``bind`` argument for schema methods that invoke SQL against an engine or connection will be required in SQLAlchemy 2.0.:sqlalchemy.exc.RemovedIn20Warning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"

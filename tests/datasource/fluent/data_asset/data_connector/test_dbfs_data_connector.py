@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import pathlib
 import re
@@ -6,7 +8,6 @@ from typing import TYPE_CHECKING, cast
 import boto3
 import botocore
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations.core.util import DBFSPath
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -15,17 +16,16 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
+    from pyfakefs.fake_filesystem import FakeFilesystem
+
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
 
 
-yaml = YAML()
-
-
 @pytest.mark.integration
 @pytest.mark.slow  # 1.05s
-def test__get_full_file_path_pandas(fs):
+def test__get_full_file_path_pandas(fs: FakeFilesystem):
     """
     What does this test and why?
     File paths in DBFS need to use the `dbfs:/` protocol base instead of `/dbfs/` when
