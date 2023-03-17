@@ -32,7 +32,7 @@ _DataAssetT = TypeVar("_DataAssetT", bound=_FilePathDataAsset)
 
 @public_api
 class PandasFilesystemDatasource(_PandasFilePathDatasource):
-    """Pandas based Datasource for local filesystem based data assets."""
+    """Pandas based Datasource for filesystem based data assets."""
 
     # class attributes
     _data_connector: ClassVar = FilesystemDataConnector
