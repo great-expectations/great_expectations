@@ -257,7 +257,7 @@ def test_construct_csv_asset_directly(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_regex_unnamed_parameters(
+def test_csv_asset_with_batching_regex_unnamed_parameters(
     mock_gcs_client,
     mock_list_keys,
     object_keys: List[str],
@@ -268,13 +268,13 @@ def test_csv_asset_with_regex_unnamed_parameters(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()
-    assert options == {
-        "path": None,
-        "batch_request_param_1": None,
-        "batch_request_param_2": None,
-        "batch_request_param_3": None,
-    }
+    options = asset.batch_request_options
+    assert options == (
+        "batch_request_param_1",
+        "batch_request_param_2",
+        "batch_request_param_3",
+        "path",
+    )
 
 
 @pytest.mark.integration
@@ -285,7 +285,7 @@ def test_csv_asset_with_regex_unnamed_parameters(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_regex_named_parameters(
+def test_csv_asset_with_batching_regex_named_parameters(
     mock_gcs_client,
     mock_list_keys,
     object_keys: List[str],
@@ -296,8 +296,13 @@ def test_csv_asset_with_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()
-    assert options == {"path": None, "name": None, "timestamp": None, "price": None}
+    options = asset.batch_request_options
+    assert options == (
+        "name",
+        "timestamp",
+        "price",
+        "path",
+    )
 
 
 @pytest.mark.integration
@@ -308,7 +313,7 @@ def test_csv_asset_with_regex_named_parameters(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_some_regex_named_parameters(
+def test_csv_asset_with_some_batching_regex_named_parameters(
     mock_gcs_client,
     mock_list_keys,
     object_keys: List[str],
@@ -319,13 +324,13 @@ def test_csv_asset_with_some_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
     )
-    options = asset.batch_request_options_template()
-    assert options == {
-        "path": None,
-        "name": None,
-        "batch_request_param_2": None,
-        "price": None,
-    }
+    options = asset.batch_request_options
+    assert options == (
+        "name",
+        "batch_request_param_2",
+        "price",
+        "path",
+    )
 
 
 @pytest.mark.integration
@@ -336,7 +341,7 @@ def test_csv_asset_with_some_regex_named_parameters(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
 )
 @mock.patch("google.cloud.storage.Client")
-def test_csv_asset_with_non_string_regex_named_parameters(
+def test_csv_asset_with_non_string_batching_regex_named_parameters(
     mock_gcs_client,
     mock_list_keys,
     object_keys: List[str],
