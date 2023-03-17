@@ -389,7 +389,6 @@ def assert_fluent_datasource_content(
     config_file_path: str, fluent_datasource_config: dict
 ):
     config = ruamel.yaml.safe_load(config_file_path.read_text())
-    breakpoint()
     assert "fluent_datasources" in config
     assert config["fluent_datasources"] == fluent_datasource_config
 
@@ -482,7 +481,7 @@ def test_update_datasource_with_datasource_object(context_with_fluent_datasource
         config_file_path,
         {
             DEFAULT_CRUD_DATASOURCE_NAME: {
-                "base_directory": str(data_dir_2),
+                "base_directory": str(data_dir),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,
                 "type": "pandas_filesystem",
