@@ -5,9 +5,8 @@ from typing import List, Optional
 import boto3
 import botocore
 import pytest
-from ruamel.yaml import YAML
-
 from pyfakefs.fake_filesystem import FakeFilesystem
+from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec

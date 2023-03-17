@@ -1,12 +1,11 @@
 import os
 import pathlib
 import re
-from typing import TYPE_CHECKING, cast, Optional
+from typing import TYPE_CHECKING, Optional, cast
 
 import boto3
 import botocore
 import pytest
-
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from great_expectations.core.util import DBFSPath

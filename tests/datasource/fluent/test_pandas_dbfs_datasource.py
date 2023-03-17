@@ -4,12 +4,11 @@ import logging
 import os
 import pathlib
 import re
-from typing import cast, Optional
+from typing import Optional, cast
 
 import boto3
 import botocore
 import pytest
-
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from great_expectations.core.util import DBFSPath

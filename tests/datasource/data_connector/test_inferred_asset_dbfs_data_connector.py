@@ -5,7 +5,6 @@ from typing import List, Optional
 import boto3
 import botocore
 import pytest
-
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
