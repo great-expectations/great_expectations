@@ -29,18 +29,22 @@ class QueryTemplateValues(QueryMetricProvider):
 
     @classmethod
     def get_query(cls, query, template_dict, selectable):
-        template_dict_reformatted = dict((k, v.format(active_batch=selectable)) for k, v in template_dict.items())
-        query_reformatted = query.format(**template_dict_reformatted, active_batch=selectable)
+        template_dict_reformatted = dict(
+            (k, v.format(active_batch=selectable)) for k, v in template_dict.items()
+        )
+        query_reformatted = query.format(
+            **template_dict_reformatted, active_batch=selectable
+        )
         return query_reformatted
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
-            cls,
-            execution_engine: SqlAlchemyExecutionEngine,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            metrics: Dict[str, Any],
-            runtime_configuration: dict,
+        cls,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: dict,
     ) -> List[dict]:
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
@@ -63,17 +67,20 @@ class QueryTemplateValues(QueryMetricProvider):
             query = cls.get_query(query, template_dict, selectable)
 
         elif isinstance(
-                selectable, get_sqlalchemy_subquery_type()
+            selectable, get_sqlalchemy_subquery_type()
         ):  # Specifying a runtime query in a RuntimeBatchRequest returns the active batch as a Subquery; sectioning
             # the active batch off w/ parentheses ensures flow of operations doesn't break
             query = cls.get_query(query, template_dict, f"({selectable})")
 
         elif isinstance(
-                selectable, sa.sql.Select
+            selectable, sa.sql.Select
         ):  # Specifying a row_condition returns the active batch as a Select object, requiring compilation &
             # aliasing when formatting the parameterized query
-            query = cls.get_query(query, template_dict,
-                                  f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect')
+            query = cls.get_query(
+                query,
+                template_dict,
+                f'({selectable.compile(compile_kwargs={"literal_binds": True})}) AS subselect',
+            )
 
         else:
             query = cls.get_query(query, template_dict, f"({selectable})")
@@ -85,12 +92,12 @@ class QueryTemplateValues(QueryMetricProvider):
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
-            cls,
-            execution_engine: SparkDFExecutionEngine,
-            metric_domain_kwargs: dict,
-            metric_value_kwargs: dict,
-            metrics: Dict[str, Any],
-            runtime_configuration: dict,
+        cls,
+        execution_engine: SparkDFExecutionEngine,
+        metric_domain_kwargs: dict,
+        metric_value_kwargs: dict,
+        metrics: Dict[str, Any],
+        runtime_configuration: dict,
     ) -> List[dict]:
         query = metric_value_kwargs.get("query") or cls.default_kwarg_values.get(
             "query"
