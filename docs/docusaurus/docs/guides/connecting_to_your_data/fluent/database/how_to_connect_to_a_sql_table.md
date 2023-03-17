@@ -78,12 +78,12 @@ If you are using a Datasource that was created with the advanced block-config me
 
 ### 2. Retrieve a SQL Datasource
 
-For this guide, we will use a previously defined Datasource named `"MyDatasource"`.  For purposes of our demonstration, this Datasource is a SQL Datasource connecting to a PostgreSQL database.
+For this guide, we will use a previously defined Datasource named `"my_datasource"` which connects to a SQL database.
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
 ```python title="Python code"
-my_datasource = context.get_datasource("MyDatasource")
+datasource = context.get_datasource("my_datasource")
 ```
 
 ### 3. Add a table to the Datasource as a Data Asset
