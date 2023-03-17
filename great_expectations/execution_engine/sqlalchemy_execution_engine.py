@@ -664,7 +664,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     domain_kwargs["row_condition"]
                 )
                 selectable = (
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(selectable)
                     .where(parsed_condition)
                 )
@@ -685,7 +685,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
 
             selectable = (
-                sa.select([sa.text("*")])
+                sa.select(sa.text("*"))
                 .select_from(selectable)
                 .where(parse_condition_to_sqlalchemy(filter_condition.condition))
             )
@@ -720,7 +720,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "both_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -733,7 +733,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             elif ignore_row_if == "either_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -767,7 +767,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -782,7 +782,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             elif ignore_row_if == "any_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
