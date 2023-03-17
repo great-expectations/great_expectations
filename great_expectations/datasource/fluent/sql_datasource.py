@@ -20,7 +20,9 @@ from typing_extensions import Literal, Protocol, Self
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed for pydantic
+)
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
@@ -853,13 +855,14 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.engine.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                if isinstance(self.connection_string, ConfigStr):
-                    connection_string = self.connection_string.get_config_value(
-                        self._config_provider  # type: ignore[arg-type] # could be none
-                    )
-                else:
-                    connection_string = self.connection_string
-                self._engine = sqlalchemy.create_engine(connection_string)
+                engine_kwargs = self.dict(
+                    exclude=self._EXCLUDED_EXEC_ENG_ARGS,
+                    config_provider=self._config_provider,
+                )
+                connection_string = engine_kwargs.pop("connection_string")
+                self._engine = sqlalchemy.create_engine(
+                    connection_string, **engine_kwargs
+                )
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
