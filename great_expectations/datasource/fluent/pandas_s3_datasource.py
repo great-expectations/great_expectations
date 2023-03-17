@@ -104,7 +104,6 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     def add_asset(
         self,
         asset: _DataAssetT,
-        # TODO: these extra methods should exist at the Datasource level
     ) -> _DataAssetT:
         asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
