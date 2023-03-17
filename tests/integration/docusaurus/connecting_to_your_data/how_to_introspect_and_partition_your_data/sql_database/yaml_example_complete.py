@@ -122,7 +122,7 @@ batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 batch_data = batch_list[0].data
 num_rows = batch_data.execution_engine.engine.execute(
-    sa.select([sa.func.count()]).select_from(batch_data.selectable)
+    sa.select(sa.func.count()).select_from(batch_data.selectable)
 ).one()[0]
 assert num_rows == 10000
 
