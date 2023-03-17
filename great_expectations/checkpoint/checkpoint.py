@@ -327,9 +327,9 @@ class BaseCheckpoint(ConfigPeer):
         # Generate a URL to the validation result details page in GX Cloud
         validation_result_url: str | None = None
         for key in checkpoint_run_results:
-            if isinstance(key, GXCloudIdentifier) and key.cloud_id:
+            if isinstance(key, GXCloudIdentifier) and key.id:
                 validation_result_url = (
-                    f"{CLOUD_APP_DEFAULT_BASE_URL}?validationResultId={key.cloud_id}"
+                    f"{CLOUD_APP_DEFAULT_BASE_URL}?validationResultId={key.id}"
                 )
                 break
 
@@ -495,7 +495,7 @@ class BaseCheckpoint(ConfigPeer):
             if self._using_cloud_context:
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
-                    cloud_id=self.ge_cloud_id,
+                    id=self.ge_cloud_id,
                 )
 
             operator_run_kwargs = {}

@@ -93,12 +93,12 @@ def assert_table_asset(
     name: str,
     table_name: str,
     source: PostgresDatasource,
-    batch_request_template: BatchRequestOptions,
+    batch_request_options: tuple[str, ...],
 ):
     assert asset.name == name
     assert asset.table_name == table_name
     assert asset.datasource == source
-    assert asset.batch_request_options_template() == batch_request_template
+    assert asset.batch_request_options == batch_request_options
 
 
 def assert_batch_request(
@@ -136,7 +136,7 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_template={"year": None, "month": None},
+            batch_request_options=("year", "month"),
         )
         assert_batch_request(
             batch_request=asset.build_batch_request({"year": 2021, "month": 10}),
@@ -163,7 +163,7 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_template={},
+            batch_request_options=tuple(),
         )
         assert_batch_request(
             batch_request=asset.build_batch_request(),
@@ -231,7 +231,7 @@ def test_construct_table_asset_directly_with_splitter(create_source):
             "my_asset",
             "my_table",
             source,
-            {"year": None, "month": None},
+            ("year", "month"),
         )
         batch_request_options = {"year": 2022, "month": 10}
         assert_batch_request(
@@ -329,8 +329,9 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
+        assert asset.batch_request_options == ("year", "month")
         batch_request_with_none = asset.build_batch_request(
-            asset.batch_request_options_template()
+            {"year": None, "month": None}
         )
         assert batch_request_with_none.options == {"year": None, "month": None}
         batches = source.get_batch_list_from_batch_request(batch_request_with_none)

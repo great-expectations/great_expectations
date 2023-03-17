@@ -89,7 +89,7 @@ class DatasourceStore(Store):
         datasource_config_dict: dict = response_json["data"]["attributes"][
             "datasource_config"
         ]
-        datasource_config_dict["ge_cloud_id"] = datasource_ge_cloud_id
+        datasource_config_dict["id"] = datasource_ge_cloud_id
 
         return datasource_config_dict
 
@@ -158,7 +158,7 @@ class DatasourceStore(Store):
             key=key, value=config
         )
         if ref and isinstance(ref, GXCloudResourceRef):
-            key.cloud_id = ref.cloud_id  # type: ignore[attr-defined]
+            key.id = ref.id  # type: ignore[attr-defined]
 
         return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]
         if not return_value.name and isinstance(key, DataContextVariableKey):

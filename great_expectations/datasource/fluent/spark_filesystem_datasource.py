@@ -61,7 +61,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = False,
         order_by: Optional[SortersDefinition] = None,
     ) -> CSVAsset:
-        """Adds a CSV DataAsst to the present "SparkFilesystemDatasource" object.
+        """Adds a CSV DataAsset to the present "SparkFilesystemDatasource" object.
 
         Args:
             name: The name of the CSV asset

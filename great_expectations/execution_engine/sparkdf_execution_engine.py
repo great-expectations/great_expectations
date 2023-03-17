@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
-import warnings
 from functools import reduce
 from typing import (
     TYPE_CHECKING,
@@ -577,19 +576,9 @@ illegal.  Please check your config."""
                 )
                 data = data.filter(~ignore_condition)
             else:
-                if ignore_row_if not in ["neither", "never"]:
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
-
-                if ignore_row_if == "never":
-                    # deprecated-v0.13.29
-                    warnings.warn(
-                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use \
-"neither" moving forward.
-""",
-                        DeprecationWarning,
                     )
 
             return data

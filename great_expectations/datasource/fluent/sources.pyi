@@ -27,11 +27,13 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import (
         PandasAzureBlobStorageDatasource,
         PandasDatasource,
+        PandasDBFSDatasource,
         PandasFilesystemDatasource,
         PandasGoogleCloudStorageDatasource,
         PandasS3Datasource,
         PostgresDatasource,
         SparkAzureBlobStorageDatasource,
+        SparkDBFSDatasource,
         SparkFilesystemDatasource,
         SparkGoogleCloudStorageDatasource,
         SparkS3Datasource,
@@ -113,6 +115,31 @@ class _SourceFactories:
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> PandasFilesystemDatasource: ...
     def delete_pandas_filesystem(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_pandas_dbfs(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasDBFSDatasource: ...
+    def update_pandas_dbfs(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasDBFSDatasource: ...
+    def add_or_update_pandas_dbfs(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasDBFSDatasource: ...
+    def delete_pandas_dbfs(
         self,
         name: str,
     ) -> None: ...
@@ -253,6 +280,31 @@ class _SourceFactories:
         data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
     def delete_spark_filesystem(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_spark_dbfs(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> SparkDBFSDatasource: ...
+    def update_spark_dbfs(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> SparkDBFSDatasource: ...
+    def add_or_update_spark_dbfs(
+        self,
+        name: str,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> SparkDBFSDatasource: ...
+    def delete_spark_dbfs(
         self,
         name: str,
     ) -> None: ...

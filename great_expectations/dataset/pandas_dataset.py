@@ -1,7 +1,6 @@
 import inspect
 import json
 import logging
-import warnings
 from datetime import datetime
 from functools import wraps
 from operator import ge, gt, le, lt
@@ -1822,36 +1821,6 @@ Notes:
             results.append((a, b) in value_pairs_set)
 
         return pd.Series(results, temp_df.index)
-
-    def expect_multicolumn_values_to_be_unique(
-        self,
-        column_list,
-        mostly=None,
-        ignore_row_if="all_values_are_missing",
-        result_format=None,
-        include_config=True,
-        catch_exceptions=None,
-        meta=None,
-    ):
-        deprecation_warning = (
-            "expect_multicolumn_values_to_be_unique is deprecated as of v0.13.4 and will be removed in v0.16. "
-            "Please use expect_select_column_values_to_be_unique_within_record instead."
-        )
-        # deprecated-v0.13.4
-        warnings.warn(
-            deprecation_warning,
-            DeprecationWarning,
-        )
-
-        return self.expect_select_column_values_to_be_unique_within_record(
-            column_list=column_list,
-            mostly=mostly,
-            ignore_row_if=ignore_row_if,
-            result_format=result_format,
-            include_config=include_config,
-            catch_exceptions=catch_exceptions,
-            meta=meta,
-        )
 
     @DocInherit
     @MetaPandasDataset.multicolumn_map_expectation

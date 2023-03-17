@@ -220,7 +220,8 @@
             "mysql",
             "mssql",
             "postgresql",
-            "bigquery"
+            "bigquery",
+            "snowflake"
           ],
           "out": {
             "unexpected_index_list": [
@@ -352,7 +353,8 @@
             "postgresql",
             "mssql",
             "mysql",
-            "bigquery"
+            "bigquery",
+            "snowflake"
           ],
           "out": {
             "unexpected_index_list": [
@@ -485,7 +487,8 @@
             "postgresql",
             "mssql",
             "mysql",
-            "bigquery"
+            "bigquery",
+            "snowflake"
           ],
           "out": {
             "success": false,
