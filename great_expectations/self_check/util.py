@@ -1260,6 +1260,7 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             return None
 
         if table_name is None:
+            raise Exception("we shouldn't be here")
             table_name = generate_test_table_name().lower()
 
         return build_sa_validator_with_data(
@@ -1585,6 +1586,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                 df[col] = df[col].apply(str)
 
     if table_name is None:
+        raise Exception("we shouldn't be here either")
         table_name = generate_test_table_name()
 
     if sa_engine_name in [

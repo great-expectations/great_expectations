@@ -47,16 +47,22 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
-    tables_to_drop: List[str] = list()
+    expectation_dirs = ["column_map_expectations"]
+    backends = ["postgresql"]
+    # tables list
     for backend in backends:
         for expectation_category in expectation_dirs:
             test_configuration_files = glob.glob(
                 dir_path + "/" + expectation_category + "/*.json"
             )
+            test_configuration_files = [
+                "/Users/work/Development/great_expectations/tests/test_definitions/column_map_expectations/expect_column_values_to_be_in_set.json"
+            ]
             for filename in test_configuration_files:
                 pk_column: bool = False
                 file = open(filename)
                 test_configuration = json.load(file)
+                tables_to_drop: List[str] = list()
 
                 for configured_dataset in test_configuration["datasets"]:
                     datasets = []
@@ -88,7 +94,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     "dataset_name", generate_test_table_name().lower()
                                 )
                                 tables_to_drop.append(temp_table_name)
-
+                                print(f"creating table: {temp_table_name}")
                                 datasets.append(
                                     get_test_validator_with_data(
                                         backend,
@@ -116,6 +122,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 "dataset_name", generate_test_table_name().lower()
                             )
                             tables_to_drop.append(temp_table_name)
+                            print(f"creating table: {temp_table_name}")
 
                             schemas = (
                                 configured_dataset["schemas"]
@@ -481,11 +488,15 @@ def test_case_runner_v3_api(test_case):
 
 def test_drop_tables(test_case):
     """Helper method to remove the temporary tables"""
+    if test_case["skip"]:
+        pytest.skip()
+
     validator = test_case["validator_with_data"]
     tables_to_drop = test_case["tables_to_drop"]
     if isinstance(validator.execution_engine, SqlAlchemyExecutionEngine):
         try:
             for temp_table in tables_to_drop:
+                print(f"dropping table: {temp_table}")
                 validator.execution_engine.engine.execute(
                     sa_text(f"DROP TABLE IF EXISTS {temp_table};")
                 )
