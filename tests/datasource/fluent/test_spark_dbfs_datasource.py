@@ -4,7 +4,7 @@ import logging
 import os
 import pathlib
 import re
-from typing import Optional, cast
+from typing import cast
 
 import boto3
 import botocore
@@ -29,9 +29,7 @@ logger = logging.getLogger(__file__)
 
 
 @pytest.fixture
-def spark_dbfs_datasource(
-    fs: Optional[FakeFilesystem], test_backends
-) -> SparkDBFSDatasource:
+def spark_dbfs_datasource(fs: FakeFilesystem, test_backends) -> SparkDBFSDatasource:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 

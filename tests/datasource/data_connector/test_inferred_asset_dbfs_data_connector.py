@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import List, Optional
+from typing import List
 
 import boto3
 import botocore
@@ -16,7 +16,7 @@ from tests.test_utils import create_files_in_directory
 
 
 @pytest.mark.integration
-def test__get_full_file_path_pandas(fs: Optional[FakeFilesystem]):
+def test__get_full_file_path_pandas(fs: FakeFilesystem):
     """
     What does this test and why?
     File paths in DBFS need to use the `dbfs:/` protocol base instead of `/dbfs/` when

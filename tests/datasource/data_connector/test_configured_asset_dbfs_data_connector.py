@@ -1,6 +1,6 @@
 import os
 import pathlib
-from typing import List, Optional
+from typing import List
 
 import boto3
 import botocore
@@ -23,7 +23,7 @@ yaml = YAML()
 
 @pytest.mark.integration
 @pytest.mark.slow  # 1.05s
-def test__get_full_file_path_for_asset_pandas(fs: Optional[FakeFilesystem]):
+def test__get_full_file_path_for_asset_pandas(fs: FakeFilesystem):
     """
     What does this test and why?
     File paths in DBFS need to use the `dbfs:/` protocol base instead of `/dbfs/` when
