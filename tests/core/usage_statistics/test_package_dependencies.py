@@ -60,7 +60,7 @@ def test_required_dependency_names_match_requirements_file():
     """
     ge_dependencies = GXDependencies()
     assert (
-        ge_dependencies.get_required_dependency_names()
+        sorted(ge_dependencies.get_required_dependency_names())
         == ge_dependencies.get_required_dependency_names_from_requirements_file()
     )
 
@@ -74,4 +74,7 @@ def test_dev_dependency_names_match_requirements_file():
     ge_dependencies = GXDependencies()
     assert ge_dependencies.get_dev_dependency_names() == set(
         ge_dependencies.get_dev_dependency_names_from_requirements_file()
-    ) - set(GXDependencies.GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING)
+    ) - {
+        name.lower()
+        for name in GXDependencies.GX_DEV_DEPENDENCIES_EXCLUDED_FROM_TRACKING
+    }
