@@ -388,3 +388,33 @@ def test_checkpoint_run(empty_data_context):
     result = checkpoint.run()
     assert result["success"]
     assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+
+
+@pytest.mark.integration
+def test_checkpoint_run_with_nonstring_path_option(empty_data_context):
+    context = empty_data_context
+    path = pathlib.Path(
+        __file__,
+        "..",
+        "..",
+        "..",
+        "..",
+        "test_sets",
+        "taxi_yellow_tripdata_samples",
+    ).resolve(strict=True)
+    datasource = context.sources.add_pandas_filesystem(name="name", base_directory=path)
+    data_asset = datasource.add_csv_asset(name="csv_asset")
+    batch_request = data_asset.build_batch_request(
+        {"path": pathlib.Path("yellow_tripdata_sample_2019-02.csv")}
+    )
+    expectation_suite_name = "my_expectation_suite"
+    context.add_expectation_suite(expectation_suite_name)
+    checkpoint = SimpleCheckpoint(
+        "my_checkpoint",
+        data_context=context,
+        expectation_suite_name=expectation_suite_name,
+        batch_request=batch_request,
+    )
+    result = checkpoint.run()
+    assert result["success"]
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
