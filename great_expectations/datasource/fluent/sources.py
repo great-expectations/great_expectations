@@ -461,8 +461,8 @@ class _SourceFactories:
             datasource_name = (
                 new_datasource.name if new_datasource else first or kwargs["name"]
             )
-            self._validate_current_datasource_type(datasource_name, datasource_type)
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
+            self._validate_current_datasource_type(datasource_name, datasource_type)
             self._data_context._delete_fluent_datasource(
                 datasource_name=datasource_name
             )
