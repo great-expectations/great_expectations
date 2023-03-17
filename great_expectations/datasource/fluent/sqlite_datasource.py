@@ -185,6 +185,8 @@ class SqliteDatasource(SQLDatasource):
             super().add_table_asset(name, table_name, schema_name, order_by),
         )
 
+    add_table_asset.__doc__ = SQLDatasource.add_table_asset.__doc__
+
     @public_api
     def add_query_asset(
         self,
@@ -193,6 +195,8 @@ class SqliteDatasource(SQLDatasource):
         order_by: Optional[SortersDefinition] = None,
     ) -> SqliteQueryAsset:
         return cast(SqliteQueryAsset, super().add_query_asset(name, query, order_by))
+
+    add_query_asset.__doc__ = SQLDatasource.add_query_asset.__doc__
 
 
 # Removed automatically added add_*_asset methods we don't want.
