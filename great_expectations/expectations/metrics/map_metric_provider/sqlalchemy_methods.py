@@ -19,11 +19,11 @@ from great_expectations.core.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+    from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
-from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.metrics.import_manager import quoted_name, sa
 from great_expectations.expectations.metrics.util import (
     Insert,
