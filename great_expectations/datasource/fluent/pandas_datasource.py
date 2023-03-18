@@ -84,6 +84,7 @@ class PandasDatasourceError(Exception):
 
 
 class _PandasDataAsset(DataAsset):
+    batch_metadata_keys: Optional[Tuple[str, ...]]
     batch_metadata: Optional[BatchMetadata]
 
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
@@ -333,8 +334,8 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
     dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
-    batch_metadata_keys: Optional[Tuple[str]]
-    batch_metadata: Optional[BatchMetadata] = pydantic.Field(None, exclude=True)
+    batch_metadata_keys: Optional[Tuple[str, ...]]
+    batch_metadata: Optional[BatchMetadata]
 
     class Config:
         extra = pydantic.Extra.forbid
