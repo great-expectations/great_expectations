@@ -104,6 +104,12 @@ class _PandasDataAsset(DataAsset):
 
         extra = pydantic.Extra.allow
 
+    @pydantic.root_validator
+    def _validate_batch_metadata_and_batch_metadata_keys(cls, values: dict):
+        if values["batch_metadata"] and not values["batch_metadata_keys"]:
+            values["batch_metadata_keys"] = tuple(values["batch_metadata"].keys())
+        return values
+
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for Pandas DataAsset extensions as temporary \
