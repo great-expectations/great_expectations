@@ -447,6 +447,21 @@ class _PandasDatasource(Datasource, Generic[_PandasDataAssetT]):
 
     # End Abstract Methods
 
+    def get_asset(
+        self, asset_name: str, batch_metadata: Optional[BatchMetadata]
+    ) -> _PandasDataAssetT:
+        """Returns the DataAsset referred to by name"""
+        # This default implementation will be used if protocol is inherited
+        try:
+            asset = self.assets[asset_name]
+            if batch_metadata:
+                asset.batch_metadata = batch_metadata
+            return asset
+        except KeyError as exc:
+            raise LookupError(
+                f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
+            ) from exc
+
     def json(
         self,
         *,
