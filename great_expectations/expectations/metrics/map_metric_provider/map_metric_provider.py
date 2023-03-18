@@ -76,6 +76,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 logger = logging.getLogger(__name__)
 
+
 @public_api
 class MapMetricProvider(MetricProvider):
     """The base class for defining metrics that are evaluated for every row. An example of a map metric is

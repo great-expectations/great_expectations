@@ -19,6 +19,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 logger = logging.getLogger(__name__)
 
+
 @public_api
 class ColumnPairMapMetricProvider(MapMetricProvider):
     """Defines metrics that are evaluated for every row for a column pair. All column pair metrics require domain

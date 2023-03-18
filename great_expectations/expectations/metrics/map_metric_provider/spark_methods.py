@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 def _spark_map_condition_unexpected_count_aggregate_fn(
     cls,
     execution_engine: SparkDFExecutionEngine,

@@ -26,6 +26,7 @@ from great_expectations.expectations.metrics.util import (
 
 logger = logging.getLogger(__name__)
 
+
 def _pandas_map_condition_unexpected_count(
     cls,
     execution_engine: PandasExecutionEngine,

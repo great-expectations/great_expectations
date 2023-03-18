@@ -15,6 +15,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 
 logger = logging.getLogger(__name__)
 
+
 @public_api
 class ColumnMapMetricProvider(MapMetricProvider):
     """Defines metrics that are evaluated for every row for a single column. An example of a column map

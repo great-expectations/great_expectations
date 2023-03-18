@@ -33,6 +33,7 @@ from great_expectations.expectations.metrics.util import (
 
 logger = logging.getLogger(__name__)
 
+
 def multicolumn_condition_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
     partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,

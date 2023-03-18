@@ -42,6 +42,7 @@ from great_expectations.util import (
 
 logger = logging.getLogger(__name__)
 
+
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     cls,
     execution_engine: SqlAlchemyExecutionEngine,

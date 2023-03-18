@@ -33,6 +33,7 @@ from great_expectations.expectations.metrics.util import (
 
 logger = logging.getLogger(__name__)
 
+
 @public_api
 def column_pair_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
