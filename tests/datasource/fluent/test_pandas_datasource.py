@@ -492,8 +492,8 @@ def test_batch_metadata(empty_data_context: AbstractDataContext):
     dataframe_asset = pandas_datasource.add_dataframe_asset(
         name="dataframe_1",
         dataframe=df,
-        batch_metadata_keys=[
+        batch_metadata_keys=(
             "pipeline_filename",
             "pipeline_step",
-        ],
+        ),
     )
