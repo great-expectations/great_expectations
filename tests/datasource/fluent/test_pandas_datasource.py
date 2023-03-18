@@ -523,7 +523,7 @@ def test_dynamic_pandas_batch_metadata(
         filepath_or_buffer=valid_file_path,
         batch_metadata_keys=batch_metadata_keys,
     )
-    assert csv_asset is None
+    assert not csv_asset
 
     csv_asset = pandas_datasource.get_asset(asset_name=name)
     assert csv_asset
