@@ -23,8 +23,8 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
-from great_expectations.expectations.metrics.import_manager import quoted_name, sa
 from great_expectations.expectations.metrics import MetaMetricProvider
+from great_expectations.expectations.metrics.import_manager import quoted_name, sa
 from great_expectations.expectations.metrics.util import (
     Insert,
     Label,
