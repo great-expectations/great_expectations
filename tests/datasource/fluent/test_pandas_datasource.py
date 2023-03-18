@@ -521,6 +521,7 @@ def test_dynamic_pandas_batch_metadata(
         batch_metadata_keys=batch_metadata_keys,
     )
     assert not csv_asset
+    assert csv_asset_name_1 in pandas_datasource.assets
 
     csv_asset = pandas_datasource.get_asset(
         asset_name=csv_asset_name_1,
