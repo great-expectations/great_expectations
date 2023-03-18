@@ -88,6 +88,7 @@ class _PandasDataAsset(DataAsset):
     batch_metadata: Optional[BatchMetadata]
 
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "batch_metadata_keys",
         "batch_metadata",
         "name",
         "order_by",
