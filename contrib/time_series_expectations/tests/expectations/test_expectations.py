@@ -4,14 +4,13 @@ from time_series_expectations.expectations.expect_batch_row_count_to_match_proph
 from time_series_expectations.expectations.expect_column_max_to_match_prophet_date_model import (
     ExpectColumnMaxToMatchProphetDateModel,
 )
-from time_series_expectations.expectations.expect_column_pair_values_to_match_prophet_date_model import (
-    ExpectColumnPairValuesToMatchProphetDateModel,
-)
 
 
 def test_ExpectColumnPairValuesToMatchProphetDateModel():
+    from time_series_expectations.expectations.expect_column_pair_values_to_match_prophet_date_model import (
+        ExpectColumnPairValuesToMatchProphetDateModel,
+    )
     ExpectColumnPairValuesToMatchProphetDateModel().run_diagnostics()
-
     assert False
 
 

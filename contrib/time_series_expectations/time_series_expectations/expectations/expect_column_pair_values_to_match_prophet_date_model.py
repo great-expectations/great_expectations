@@ -1,11 +1,14 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import pandas as pd
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
+    SqlAlchemyExecutionEngine,
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnPairMapExpectation
@@ -14,6 +17,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
 )
+from great_expectations.expectations.metrics.metric_provider import metric_value
 from time_series_expectations.expectations.prophet_model_deserializer import (
     ProphetModelDeserializer,
 )
@@ -42,6 +46,75 @@ class ColumnPairValuesMatchProphetModel(ColumnPairMapMetricProvider):
     #     print(column_A)
     #     print(type(column_A))
     #     raise NotImplementedError
+
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
+    # def _sqlalchemy(
+    #     cls,
+    #     execution_engine: SqlAlchemyExecutionEngine,
+    #     metric_domain_kwargs: dict,
+    #     metric_value_kwargs: dict,
+    #     metrics: Dict[str, Any],
+    #     runtime_configuration: dict,
+    # ) -> pd.DataFrame:
+
+    #     print("*"*80)
+    #     print(metric_value_kwargs)
+    #     print(metrics)
+
+    #     selectable, _, _ = execution_engine.get_compute_domain(
+    #         metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
+    #     )
+    #     # table_name = getattr(selectable, "name", None)
+    #     # n_rows: int = (
+    #     #     metric_value_kwargs.get("n_rows")
+    #     #     if metric_value_kwargs.get("n_rows") is not None
+    #     #     else cls.default_kwarg_values["n_rows"]
+    #     # )
+    #     # df_chunk_iterator: Iterator[pd.DataFrame]
+
+    #     df = pd.read_sql_table(
+    #         table_name=getattr(selectable, "name", None),
+    #         schema=getattr(selectable, "schema", None),
+    #         con=execution_engine.engine,
+    #     )
+
+    #     print(df)
+
+    #     assert False
+    #     return df
+    #     # return metrics[
+    #     #     f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    #     # ]
+
+
+    # Here's a different pattern, from the ColumnValuesNullCount MetricProvider    
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
+    # def _sqlalchemy(*, metrics, **kwargs):
+    #     return metrics[
+    #         f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    #     ]
+
+    @column_pair_condition_partial(
+        engine=SqlAlchemyExecutionEngine,
+        partial_fn_type=MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
+        # other_engine=PandasExecutionEngine,
+    )
+    def _sqlalchemy(cls, column_A, column_B, model_json, _dialect, **kwargs):
+        df = pd.read_sql_table(
+            # table_name=getattr(selectable, "name", None),
+            table_name=kwargs["_table"].name,
+            # schema=getattr(selectable, "schema", None),
+            schema=kwargs["_table"].schema,
+            # con=execution_engine.engine,
+            con=kwargs["_sqlalchemy_engine"],
+        )
+
+        model = ProphetModelDeserializer().get_model(model_json)
+        forecast = model.predict(pd.DataFrame({"ds": df[column_A.name]}))
+        in_bounds = (forecast.yhat_lower < df[column_B.name]) & (df[column_B.name] < forecast.yhat_upper)
+
+        print(in_bounds)
+        return in_bounds
 
     @column_pair_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column_A, column_B, model_json, **kwargs):
@@ -183,14 +256,14 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
                     "backend": "pandas",
                     "dialects": None,
                 },
-                # {
-                #     "backend": "sqlalchemy",
-                #     "dialects": ["sqlite", "postgresql"],
-                # },
                 {
-                    "backend": "spark",
-                    "dialects": None,
+                    "backend": "sqlalchemy",
+                    "dialects": ["sqlite"],#, "postgresql"],
                 },
+                # {
+                #     "backend": "spark",
+                #     "dialects": None,
+                # },
             ],
         }
     ]

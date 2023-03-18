@@ -60,6 +60,7 @@ from great_expectations.expectations.metrics.util import (
 from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
+    _registered_metrics,
 )
 from great_expectations.util import (
     generate_temporary_table_name,
@@ -389,12 +390,14 @@ def column_condition_partial(  # noqa: C901 - 23
             partial_fn_type = MetricPartialFunctionTypes.MAP_CONDITION_FN
 
         partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        print(partial_fn_type)
         if partial_fn_type not in [
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+            MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
         ]:
             raise ValueError(
-                f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN.value}" and \
+                f"""XXXXX SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN.value}" and \
 "{MetricPartialFunctionTypes.WINDOW_CONDITION_FN.value}" for "column_condition_partial" "partial_fn_type" property."""
             )
 
@@ -458,6 +461,11 @@ def column_condition_partial(  # noqa: C901 - 23
                     )
                 else:
                     unexpected_condition = sa.not_(expected_condition)
+
+                print("MMM"*30)
+                print(partial_fn_type)
+                print(unexpected_condition)
+
                 return (
                     unexpected_condition,
                     compute_domain_kwargs,
@@ -873,9 +881,10 @@ def column_pair_condition_partial(  # noqa: C901 - 16
         if partial_fn_type not in [
             MetricPartialFunctionTypes.MAP_CONDITION_FN,
             MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
+            MetricPartialFunctionTypes.MAP_CONDITION_SERIES,
         ]:
             raise ValueError(
-                f"""SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN.value}" and \
+                f"""YYYY SqlAlchemyExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_CONDITION_FN.value}" and \
 "{MetricPartialFunctionTypes.WINDOW_CONDITION_FN.value}" for "column_pair_condition_partial" "partial_fn_type" property.
 """
             )
@@ -933,7 +942,16 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                     _metrics=metrics,
                 )
 
-                unexpected_condition = sa.not_(expected_condition)
+                if partial_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
+                    unexpected_condition = sa.not_(expected_condition)
+                elif partial_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_SERIES:
+                    unexpected_condition = ~expected_condition
+
+                # print("JJJ"*30)
+                # print("partial_fn_type : ", partial_fn_type)
+                # unexpected_condition = sa.not_(expected_condition)
+                # print("KKK"*30)
+
                 return (
                     unexpected_condition,
                     compute_domain_kwargs,
@@ -1469,7 +1487,27 @@ def _pandas_map_condition_unexpected_count(
     **kwargs,
 ):
     """Returns unexpected count for MapExpectations"""
-    return np.count_nonzero(metrics["unexpected_condition"][0])
+
+    print("DDDD"*20)
+    print("metrics", metrics)
+    print(metrics["unexpected_condition"])
+    unexpected_count = np.count_nonzero(metrics["unexpected_condition"][0])
+    print(unexpected_count)
+    print("LLL"*30)
+    return unexpected_count
+
+
+# def _hybrid_sqlalchemy_pandas_map_condition_unexpected_count(
+#     cls,
+#     execution_engine: SqlAlchemyExecutionEngine,
+#     other_execution_engine: PandasExecutionEngine,
+#     metric_domain_kwargs: dict,
+#     metric_value_kwargs: dict,
+#     metrics: Dict[str, Any],
+#     **kwargs,
+# ):
+#     """Returns unexpected count for MapExpectations"""
+#     return np.count_nonzero(metrics["unexpected_condition"][0])
 
 
 def _pandas_column_map_condition_values(
@@ -3202,6 +3240,9 @@ class MapMetricProvider(MetricProvider):
         ):
             return
 
+        print("^"*80)
+        print("hello!", cls.__name__)
+
         for attr, candidate_metric_fn in inspect.getmembers(cls):
             if not hasattr(candidate_metric_fn, "metric_engine"):
                 # This is not a metric.
@@ -3217,6 +3258,8 @@ class MapMetricProvider(MetricProvider):
                 raise ValueError(
                     "Metric functions must be defined with an ExecutionEngine as part of registration."
                 )
+
+            # print(attr, metric_fn_type, engine)
 
             if metric_fn_type in [
                 MetricPartialFunctionTypes.MAP_CONDITION_FN,
@@ -3348,6 +3391,8 @@ class MapMetricProvider(MetricProvider):
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
                 elif issubclass(engine, SqlAlchemyExecutionEngine):
+                    print("got here:", metric_name, metric_fn_type, domain_type)
+                    print(SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value)
                     register_metric(
                         metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",
                         metric_domain_keys=metric_domain_keys,
@@ -3385,6 +3430,7 @@ class MapMetricProvider(MetricProvider):
                         metric_fn_type=MetricFunctionTypes.VALUE,
                     )
                     if metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_FN:
+                        print("now here")
                         # Documentation in "MetricProvider._register_metric_functions()" explains registration protocol.
                         if domain_type == MetricDomainTypes.COLUMN:
                             register_metric(
@@ -3415,6 +3461,75 @@ class MapMetricProvider(MetricProvider):
                                 metric_provider=_sqlalchemy_map_condition_unexpected_count_value,
                                 metric_fn_type=MetricFunctionTypes.VALUE,
                             )
+                    elif metric_fn_type == MetricPartialFunctionTypes.MAP_CONDITION_SERIES:
+                        print("now here!!!")
+                        if domain_type == MetricDomainTypes.COLUMN:
+                            register_metric(
+                                metric_name=f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=_sqlalchemy_map_condition_unexpected_count_aggregate_fn,
+                                metric_fn_type=MetricPartialFunctionTypes.AGGREGATE_FN,
+                            )
+                            register_metric(
+                                metric_name=f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                execution_engine=engine,
+                                metric_class=cls,
+                                metric_provider=None,
+                                metric_fn_type=MetricFunctionTypes.VALUE,
+                            )
+                        else:
+
+                    # register_metric(
+                    #     metric_name=f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                    #     metric_domain_keys=metric_domain_keys,
+                    #     metric_value_keys=metric_value_keys,
+                    #     execution_engine=engine,
+                    #     metric_class=cls,
+                    #     metric_provider=_pandas_map_condition_unexpected_count,
+                    #     metric_fn_type=MetricFunctionTypes.VALUE,
+                    # )
+                    # register_metric(
+                    #     metric_name=f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+                    #     metric_domain_keys=metric_domain_keys,
+                    #     metric_value_keys=(*metric_value_keys, "result_format"),
+                    #     execution_engine=engine,
+                    #     metric_class=cls,
+                    #     metric_provider=_pandas_map_condition_index,
+                    #     metric_fn_type=MetricFunctionTypes.VALUE,
+                    # )
+                    # register_metric(
+                    #     metric_name=f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+                    #     metric_domain_keys=metric_domain_keys,
+                    #     metric_value_keys=(*metric_value_keys, "result_format"),
+                    #     execution_engine=engine,
+                    #     metric_class=cls,
+                    #     metric_provider=_pandas_map_condition_query,
+                    #     metric_fn_type=MetricFunctionTypes.VALUE,
+                    # )
+                            print("CCCC"*20)
+                            # print(candidate_metric_fn)
+                            # print(engine)
+                            # print(dir(candidate_metric_fn))
+                            # print(candidate_metric_fn.metric_definition_kwargs)
+                            print(f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}")
+
+                            register_metric(
+                                metric_name=f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+                                metric_domain_keys=metric_domain_keys,
+                                metric_value_keys=metric_value_keys,
+                                # execution_engine=candidate_metric_fn.metric_definition_kwargs["other_engine"],
+                                execution_engine=engine,
+                                metric_class=cls,
+                                # metric_provider=_hybrid_sqlalchemy_pandas_map_condition_unexpected_count,#_pandas_map_condition_unexpected_count,#_sqlalchemy_map_condition_unexpected_count_value,
+                                metric_provider=_pandas_map_condition_unexpected_count,
+                                metric_fn_type=MetricFunctionTypes.VALUE,
+                            )
+
                     elif (
                         metric_fn_type == MetricPartialFunctionTypes.WINDOW_CONDITION_FN
                     ):
@@ -3484,6 +3599,9 @@ class MapMetricProvider(MetricProvider):
                             metric_provider=_sqlalchemy_multicolumn_map_condition_filtered_row_count,
                             metric_fn_type=MetricFunctionTypes.VALUE,
                         )
+
+                    print([key for key in _registered_metrics.keys() if "prophet" in key])
+                    print("end of SQLAlchemy stuff...")
                 elif issubclass(engine, SparkDFExecutionEngine):
                     register_metric(
                         metric_name=f"{metric_name}.{metric_fn_type.metric_suffix}",

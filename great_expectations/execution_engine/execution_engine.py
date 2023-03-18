@@ -556,6 +556,10 @@ class ExecutionEngine(ABC):
                     **metric_computation_configuration.metric_provider_kwargs
                 )
             except Exception as e:
+                print("EEEE"*20)
+                print(metric_computation_configuration.metric_configuration.id)
+                print(metric_computation_configuration.metric_fn)
+                # print(metric_computation_configuration.metric_provider_kwargs)
                 raise gx_exceptions.MetricResolutionError(
                     message=str(e),
                     failed_metrics=(
