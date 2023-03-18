@@ -448,7 +448,9 @@ class _PandasDatasource(Datasource, Generic[_PandasDataAssetT]):
     # End Abstract Methods
 
     def get_asset(
-        self, asset_name: str, batch_metadata: Optional[BatchMetadata]
+        self,
+        asset_name: str,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> _PandasDataAssetT:
         """Returns the DataAsset referred to by name"""
         # This default implementation will be used if protocol is inherited
