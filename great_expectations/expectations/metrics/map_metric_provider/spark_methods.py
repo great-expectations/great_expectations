@@ -11,11 +11,12 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.execution_engine import (
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.metrics.import_manager import F, quoted_name
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import SparkDFExecutionEngine
+    from great_expectations.expectations.metrics.import_manager import quoted_name
+
+from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
     verify_column_names_exist,
@@ -427,7 +428,7 @@ def _spark_column_pair_map_condition_filtered_row_count(
 
 def _spark_multicolumn_map_condition_values(
     cls,
-    execution_engine: SqlAlchemyExecutionEngine,
+    execution_engine: SparkDFExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],

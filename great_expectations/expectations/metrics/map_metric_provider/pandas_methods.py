@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from typing import (
+    TYPE_CHECKING,
     Any,
     Dict,
     List,
@@ -13,10 +14,10 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-)
-from great_expectations.expectations.metrics.import_manager import quoted_name
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import PandasExecutionEngine
+    from great_expectations.expectations.metrics.import_manager import quoted_name
 from great_expectations.expectations.metrics.util import (
     compute_unexpected_pandas_indices,
     get_dbms_compatible_column_names,

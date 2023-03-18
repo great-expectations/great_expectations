@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from typing import (
+    TYPE_CHECKING,
     Any,
     Dict,
     List,
@@ -14,9 +15,9 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.execution_engine import (
-    SqlAlchemyExecutionEngine,
-)
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,

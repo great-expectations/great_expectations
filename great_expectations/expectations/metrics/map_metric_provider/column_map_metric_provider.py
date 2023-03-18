@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import logging
-from typing import (
-    Optional,
-)
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.execution_engine import ExecutionEngine
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.metrics.map_metric_provider import (
     MapMetricProvider,
 )
