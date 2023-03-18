@@ -46,6 +46,7 @@ SQLALCHEMY_SELECTABLE_METRICS: Set[str] = {
     "compound_columns.unique",
 }
 
+
 def _is_sqlalchemy_metric_selectable(
     map_metric_provider: MetaMetricProvider,
 ) -> bool:
@@ -58,12 +59,10 @@ def _is_sqlalchemy_metric_selectable(
     # noinspection PyUnresolvedReferences
     return (
         hasattr(map_metric_provider, "condition_metric_name")
-        and map_metric_provider.condition_metric_name
-        in SQLALCHEMY_SELECTABLE_METRICS
+        and map_metric_provider.condition_metric_name in SQLALCHEMY_SELECTABLE_METRICS
     ) or (
         hasattr(map_metric_provider, "function_metric_name")
-        and map_metric_provider.function_metric_name
-        in SQLALCHEMY_SELECTABLE_METRICS
+        and map_metric_provider.function_metric_name in SQLALCHEMY_SELECTABLE_METRICS
     )
 
 
