@@ -516,15 +516,21 @@ def test_dynamic_pandas_batch_metadata(
         "pipeline_step": "transform_3",
     }
 
+    name = "my_csv_asset"
+
     csv_asset = pandas_datasource.add_csv_asset(
-        name="my_csv_asset",
+        name=name,
         filepath_or_buffer=valid_file_path,
         batch_metadata_keys=batch_metadata_keys,
     )
     assert csv_asset is None
 
+    csv_asset = pandas_datasource.get_asset(asset_name=name)
+    assert csv_asset
+    assert csv_asset.batch_metadata_keys == batch_metadata_keys
+
     csv_asset = pandas_datasource.add_csv_asset(
-        name="my_csv_asset",
+        name=name,
         filepath_or_buffer=valid_file_path,
         batch_metadata=batch_metadata,
     )

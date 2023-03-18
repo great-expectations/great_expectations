@@ -532,9 +532,10 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         return asset_name
 
     def _add_asset(self, asset: _PandasDataAssetT) -> Optional[_PandasDataAssetT]:
+        asset: _PandasDataAssetT = self.add_asset(asset=asset)
         if asset.batch_metadata_keys and not asset.batch_metadata:
             return None
-        return self.add_asset(asset=asset)
+        return asset
 
     def _get_validator(self, asset: _PandasDataAssetT) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
