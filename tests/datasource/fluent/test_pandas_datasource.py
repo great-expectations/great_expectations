@@ -480,7 +480,7 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext):
 
 
 def test_dataframe_batch_metadata(empty_data_context: AbstractDataContext):
-    pandas_datasource = empty_data_context.sources.pandas_default
+    # pandas_datasource = empty_data_context.sources.pandas_default
 
     # df = pd.DataFrame(
     #     data={
@@ -506,35 +506,37 @@ def test_dynamic_pandas_batch_metadata(
 ):
     pandas_datasource = empty_data_context.sources.pandas_default
 
-    batch_metadata_keys = (
-        "pipeline_filename",
-        "pipeline_step",
-    )
-
     batch_metadata = {
         "pipeline_filename": "my_data_pipeline.ipynb",
         "pipeline_step": "transform_3",
     }
 
-    name = "my_csv_asset"
+    batch_metadata_keys = tuple(batch_metadata.keys())
+
+    csv_asset_name_1 = "my_first_csv_asset"
 
     csv_asset = pandas_datasource.add_csv_asset(
-        name=name,
+        name=csv_asset_name_1,
         filepath_or_buffer=valid_file_path,
         batch_metadata_keys=batch_metadata_keys,
     )
     assert not csv_asset
 
-    csv_asset = pandas_datasource.get_asset(asset_name=name)
+    csv_asset = pandas_datasource.get_asset(asset_name=csv_asset_name_1)
     assert csv_asset
     assert csv_asset.batch_metadata_keys == batch_metadata_keys
     assert not csv_asset.batch_metadata
 
+    csv_asset_name_2 = "my_second_csv_asset"
+
     csv_asset = pandas_datasource.add_csv_asset(
-        name=name,
+        name=csv_asset_name_2,
         filepath_or_buffer=valid_file_path,
         batch_metadata=batch_metadata,
     )
     assert csv_asset
     assert csv_asset.batch_metadata == batch_metadata
     assert csv_asset.batch_metadata_keys == batch_metadata_keys
+
+    assert csv_asset_name_1 in pandas_datasource.assets
+    assert csv_asset_name_2 in pandas_datasource.assets
