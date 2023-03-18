@@ -2326,7 +2326,7 @@ WHERE
                 source_table=self._table,
                 column_name=column,
             )
-            self.engine.execute(temp_table_stmt)
+            self.engine.execute(sa.text(temp_table_stmt))
             dup_query = (
                 sa.select([sa.column(column)])
                 .select_from(sa.text(temp_table_name))
