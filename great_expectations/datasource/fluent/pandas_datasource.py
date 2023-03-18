@@ -44,7 +44,6 @@ from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
-    _DataAssetT,
 )
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.sources import (
@@ -264,6 +263,9 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
 
+_PandasDataAssetT = TypeVar("_PandasDataAssetT", bound=_PandasDataAsset)
+
+
 _PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_csv",
     # "read_json",
@@ -401,14 +403,14 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         return batch_list
 
 
-class _PandasDatasource(Datasource, Generic[_DataAssetT]):
+class _PandasDatasource(Datasource, Generic[_PandasDataAssetT]):
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
 
     # instance attributes
     assets: MutableMapping[
         str,
-        _DataAssetT,
+        _PandasDataAssetT,
     ] = {}
 
     # Abstract Methods
@@ -498,7 +500,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
 
-class PandasDatasource(_PandasDatasource):
+class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
         DataFrameAsset
@@ -521,12 +523,12 @@ class PandasDatasource(_PandasDatasource):
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         return asset_name
 
-    def _add_asset(self, asset: _PandasDataAsset) -> Optional[_PandasDataAsset]:
+    def _add_asset(self, asset: _PandasDataAssetT) -> Optional[_PandasDataAssetT]:
         if asset.batch_metadata_keys and not asset.batch_metadata:
             return None
         return self.add_asset(asset=asset)
 
-    def _get_validator(self, asset: _PandasDataAsset) -> Validator:
+    def _get_validator(self, asset: _PandasDataAssetT) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
         return self._data_context.get_validator(batch_request=batch_request)
 
