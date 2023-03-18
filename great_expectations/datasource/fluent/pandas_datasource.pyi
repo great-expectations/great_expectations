@@ -32,7 +32,6 @@ from great_expectations.datasource.fluent.interfaces import (
     BatchRequestOptions,
     DataAsset,
     Datasource,
-    _DataAssetT,
 )
 
 if TYPE_CHECKING:
@@ -114,9 +113,11 @@ class DataFrameAsset(_PandasDataAsset):
         self, batch_request: BatchRequest
     ) -> list[Batch]: ...
 
+_PandasDataAssetT = TypeVar("_PandasDataAssetT", bound=_PandasDataAsset)
+
 class _PandasDatasource(Datasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
-    assets: MutableMapping[str, _DataAssetT]  # type: ignore[valid-type]
+    assets: MutableMapping[str, _PandasDataAssetT]  # type: ignore[valid-type]
     @property
     def execution_engine_type(self) -> Type[PandasExecutionEngine]: ...
     def test_connection(self, test_assets: bool = ...) -> None: ...
@@ -142,10 +143,10 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"]
     assets: Dict[str, _PandasDataAsset]
     def test_connection(self, test_assets: bool = ...) -> None: ...
-    def _get_validator(self, asset: _PandasDataAsset) -> Validator: ...
+    def _get_validator(self, asset: _PandasDataAssetT) -> Validator: ...
     def add_dataframe_asset(
         self, name: str, dataframe: pd.DataFrame
-    ) -> DataFrameAsset: ...
+    ) -> Optional[DataFrameAsset]: ...
     def read_dataframe(
         self, dataframe: pd.DataFrame, asset_name: Optional[str] = ...
     ) -> Validator: ...
@@ -155,7 +156,7 @@ class PandasDatasource(_PandasDatasource):
         order_by: typing.List[Sorter] = ...,
         sep: str = "\\s+",
         kwargs: typing.Union[dict, None] = ...,
-    ) -> ClipboardAsset: ...
+    ) -> Optional[ClipboardAsset]: ...
     def add_csv_asset(
         self,
         name: str,
@@ -211,7 +212,7 @@ class PandasDatasource(_PandasDatasource):
         low_memory: typing.Any = ...,
         memory_map: bool = ...,
         storage_options: StorageOptions = ...,
-    ) -> CSVAsset: ...
+    ) -> Optional[CSVAsset]: ...
     def add_excel_asset(
         self,
         name: str,
@@ -240,7 +241,7 @@ class PandasDatasource(_PandasDatasource):
         convert_float: typing.Union[bool, None] = ...,
         mangle_dupe_cols: bool = ...,
         storage_options: StorageOptions = ...,
-    ) -> ExcelAsset: ...
+    ) -> Optional[ExcelAsset]: ...
     def add_feather_asset(
         self,
         name: str,
@@ -249,7 +250,7 @@ class PandasDatasource(_PandasDatasource):
         columns: Union[Sequence[Hashable], None] = ...,
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
-    ) -> FeatherAsset: ...
+    ) -> Optional[FeatherAsset]: ...
     def add_gbq_asset(
         self,
         name: str,
@@ -267,7 +268,7 @@ class PandasDatasource(_PandasDatasource):
         use_bqstorage_api: typing.Union[bool, None] = ...,
         max_results: typing.Union[int, None] = ...,
         progress_bar_type: typing.Union[str, None] = ...,
-    ) -> GBQAsset: ...
+    ) -> Optional[GBQAsset]: ...
     def add_hdf_asset(
         self,
         name: str,
@@ -283,7 +284,7 @@ class PandasDatasource(_PandasDatasource):
         iterator: bool = ...,
         chunksize: typing.Union[int, None] = ...,
         kwargs: typing.Union[dict, None] = ...,
-    ) -> HDFAsset: ...
+    ) -> Optional[HDFAsset]: ...
     def add_html_asset(
         self,
         name: str,
@@ -303,7 +304,7 @@ class PandasDatasource(_PandasDatasource):
         na_values: Union[Iterable[object], None] = ...,
         keep_default_na: bool = ...,
         displayed_only: bool = ...,
-    ) -> HTMLAsset: ...
+    ) -> Optional[HTMLAsset]: ...
     def add_json_asset(
         self,
         name: str,
@@ -324,7 +325,7 @@ class PandasDatasource(_PandasDatasource):
         compression: CompressionOptions = "infer",
         nrows: typing.Union[int, None] = ...,
         storage_options: StorageOptions = ...,
-    ) -> JSONAsset: ...
+    ) -> Optional[JSONAsset]: ...
     def add_orc_asset(
         self,
         name: str,
@@ -332,7 +333,7 @@ class PandasDatasource(_PandasDatasource):
         order_by: typing.List[Sorter] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         kwargs: typing.Union[dict, None] = ...,
-    ) -> ORCAsset: ...
+    ) -> Optional[ORCAsset]: ...
     def add_parquet_asset(
         self,
         name: str,
@@ -343,7 +344,7 @@ class PandasDatasource(_PandasDatasource):
         storage_options: StorageOptions = ...,
         use_nullable_dtypes: bool = ...,
         kwargs: typing.Union[dict, None] = ...,
-    ) -> ParquetAsset: ...
+    ) -> Optional[ParquetAsset]: ...
     def add_pickle_asset(
         self,
         name: str,
@@ -351,7 +352,7 @@ class PandasDatasource(_PandasDatasource):
         order_by: typing.List[Sorter] = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
-    ) -> PickleAsset: ...
+    ) -> Optional[PickleAsset]: ...
     def add_sas_asset(
         self,
         name: str,
@@ -363,7 +364,7 @@ class PandasDatasource(_PandasDatasource):
         chunksize: typing.Union[int, None] = ...,
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
-    ) -> SASAsset: ...
+    ) -> Optional[SASAsset]: ...
     def add_spss_asset(
         self,
         name: str,
@@ -371,7 +372,7 @@ class PandasDatasource(_PandasDatasource):
         order_by: typing.List[Sorter] = ...,
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
         convert_categoricals: bool = ...,
-    ) -> SPSSAsset: ...
+    ) -> Optional[SPSSAsset]: ...
     def add_sql_asset(
         self,
         name: str,
@@ -384,7 +385,7 @@ class PandasDatasource(_PandasDatasource):
         parse_dates: typing.Any = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         chunksize: typing.Union[int, None] = ...,
-    ) -> SQLAsset: ...
+    ) -> Optional[SQLAsset]: ...
     def add_sql_query_asset(
         self,
         name: str,
@@ -397,7 +398,7 @@ class PandasDatasource(_PandasDatasource):
         parse_dates: typing.Union[typing.List[str], typing.Dict[str, str], None] = ...,
         chunksize: typing.Union[int, None] = ...,
         dtype: typing.Union[dict, None] = ...,
-    ) -> SQLQueryAsset: ...
+    ) -> Optional[SQLQueryAsset]: ...
     def add_sql_table_asset(
         self,
         name: str,
@@ -410,7 +411,7 @@ class PandasDatasource(_PandasDatasource):
         parse_dates: typing.Union[typing.List[str], typing.Dict[str, str], None] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         chunksize: typing.Union[int, None] = ...,
-    ) -> SQLTableAsset: ...
+    ) -> Optional[SQLTableAsset]: ...
     def add_stata_asset(
         self,
         name: str,
@@ -427,7 +428,7 @@ class PandasDatasource(_PandasDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
-    ) -> STATAAsset: ...
+    ) -> Optional[STATAAsset]: ...
     def add_table_asset(
         self,
         name: str,
@@ -484,7 +485,7 @@ class PandasDatasource(_PandasDatasource):
         memory_map: bool = ...,
         float_precision: typing.Union[str, None] = ...,
         storage_options: StorageOptions = ...,
-    ) -> TableAsset: ...
+    ) -> Optional[TableAsset]: ...
     def add_xml_asset(
         self,
         name: str,
@@ -501,7 +502,7 @@ class PandasDatasource(_PandasDatasource):
         iterparse: typing.Union[typing.Dict[str, typing.List[str]], None] = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
-    ) -> XMLAsset: ...
+    ) -> Optional[XMLAsset]: ...
     def read_clipboard(
         self,
         asset_name: Optional[str] = ...,
