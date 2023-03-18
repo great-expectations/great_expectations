@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import dataclasses
 import datetime
 import decimal
 import logging
@@ -290,7 +289,11 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     )
 
     if isinstance(data, FluentBatchRequest):
-        return dataclasses.asdict(data)
+        return {
+            "datasource_name": data.datasource_name,
+            "data_asset_name": data.data_asset_name,
+            "options": convert_to_json_serializable(data.options),
+        }
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()

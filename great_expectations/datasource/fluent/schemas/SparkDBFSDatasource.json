@@ -1,13 +1,13 @@
 {
-    "title": "PandasFilesystemDatasource",
-    "description": "--Public API--Pandas based Datasource for filesystem based data assets.",
+    "title": "SparkDBFSDatasource",
+    "description": "--Public API--Spark based Datasource for DataBricks File System (DBFS) based data assets.",
     "type": "object",
     "properties": {
         "type": {
             "title": "Type",
-            "default": "pandas_filesystem",
+            "default": "spark_dbfs",
             "enum": [
-                "pandas_filesystem"
+                "spark_dbfs"
             ],
             "type": "string"
         },
