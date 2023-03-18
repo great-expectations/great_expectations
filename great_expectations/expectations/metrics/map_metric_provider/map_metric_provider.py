@@ -2,22 +2,13 @@ from __future__ import annotations
 
 import inspect
 import logging
-from functools import wraps
 from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
     Dict,
     List,
     Optional,
     Set,
     Tuple,
-    Type,
-    Union,
 )
-
-import numpy as np
-import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
@@ -29,85 +20,59 @@ from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
     SummarizationMetricNameSuffixes,
 )
-from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    OperationalError,
-)
 from great_expectations.expectations.metrics import MetaMetricProvider  # noqa: TCH001
-from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
+from great_expectations.expectations.metrics.map_metric_provider.pandas_methods import (
+    _pandas_column_map_condition_value_counts,
+    _pandas_column_map_condition_values,
+    _pandas_column_pair_map_condition_filtered_row_count,
+    _pandas_column_pair_map_condition_values,
+    _pandas_map_condition_index,
+    _pandas_map_condition_query,
+    _pandas_map_condition_rows,
+    _pandas_map_condition_unexpected_count,
+    _pandas_multicolumn_map_condition_filtered_row_count,
+    _pandas_multicolumn_map_condition_values,
+)
+from great_expectations.expectations.metrics.map_metric_provider.spark_methods import (
+    _spark_column_map_condition_value_counts,
+    _spark_column_map_condition_values,
+    _spark_column_pair_map_condition_filtered_row_count,
+    _spark_column_pair_map_condition_values,
+    _spark_map_condition_index,
+    _spark_map_condition_query,
+    _spark_map_condition_rows,
+    _spark_map_condition_unexpected_count_aggregate_fn,
+    _spark_map_condition_unexpected_count_value,
+    _spark_multicolumn_map_condition_filtered_row_count,
+    _spark_multicolumn_map_condition_values,
+)
+from great_expectations.expectations.metrics.map_metric_provider.sqlalchemy_methods import (
+    _sqlalchemy_column_map_condition_value_counts,
+    _sqlalchemy_column_map_condition_values,
+    _sqlalchemy_column_pair_map_condition_filtered_row_count,
+    _sqlalchemy_column_pair_map_condition_values,
+    _sqlalchemy_map_condition_index,
+    _sqlalchemy_map_condition_query,
+    _sqlalchemy_map_condition_rows,
+    _sqlalchemy_map_condition_unexpected_count_aggregate_fn,
+    _sqlalchemy_map_condition_unexpected_count_value,
+    _sqlalchemy_multicolumn_map_condition_filtered_row_count,
+    _sqlalchemy_multicolumn_map_condition_values,
+)
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
-    metric_partial,
-)
-from great_expectations.expectations.metrics.util import (
-    Engine,
-    Insert,
-    Label,
-    Select,
-    compute_unexpected_pandas_indices,
-    get_dbms_compatible_column_names,
-    get_sqlalchemy_source_table_and_schema,
-    sql_statement_with_post_compile_to_string,
-    verify_column_names_exist,
 )
 from great_expectations.expectations.registry import (
     get_metric_provider,
     register_metric,
 )
-from great_expectations.util import (
-    generate_temporary_table_name,
-    get_sqlalchemy_selectable,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.expectations.metrics.map_metric_provider.pandas_methods import (
-    _pandas_map_condition_unexpected_count,
-    _pandas_column_map_condition_values,
-    _pandas_column_pair_map_condition_values,
-    _pandas_column_pair_map_condition_filtered_row_count,
-    _pandas_multicolumn_map_condition_values,
-    _pandas_multicolumn_map_condition_filtered_row_count,
-    _pandas_column_map_series_and_domain_values,
-    _pandas_map_condition_index,
-    _pandas_map_condition_query,
-    _pandas_column_map_condition_value_counts,
-    _pandas_map_condition_rows,
-)
-from great_expectations.expectations.metrics.map_metric_provider.sqlalchemy_methods import (
-    _sqlalchemy_map_condition_unexpected_count_aggregate_fn,
-    _sqlalchemy_map_condition_unexpected_count_value,
-    _sqlalchemy_column_map_condition_values,
-    _sqlalchemy_column_pair_map_condition_values,
-    _sqlalchemy_column_pair_map_condition_filtered_row_count,
-    _sqlalchemy_multicolumn_map_condition_values,
-    _sqlalchemy_multicolumn_map_condition_filtered_row_count,
-    _sqlalchemy_map_condition_index,
-    _sqlalchemy_map_condition_query,
-    _sqlalchemy_column_map_condition_value_counts,
-    _sqlalchemy_map_condition_rows,
-)
-from great_expectations.expectations.metrics.map_metric_provider.spark_methods import (
-    _spark_map_condition_unexpected_count_aggregate_fn,
-    _spark_map_condition_unexpected_count_value,
-    _spark_column_map_condition_values,
-    _spark_column_pair_map_condition_values,
-    _spark_column_pair_map_condition_filtered_row_count,
-    _spark_multicolumn_map_condition_values,
-    _spark_multicolumn_map_condition_filtered_row_count,
-    _spark_map_condition_index,
-    _spark_map_condition_query,
-    _spark_column_map_condition_value_counts,
-    _spark_map_condition_rows,
-)
-
-if TYPE_CHECKING:
-    import pyspark
 
 logger = logging.getLogger(__name__)
 
