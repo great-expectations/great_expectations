@@ -536,7 +536,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         dataframe: pd.DataFrame,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> Optional[DataFrameAsset]:
         asset = DataFrameAsset(
@@ -564,7 +564,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
     def add_clipboard_asset(
         self,
         name: str,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[ClipboardAsset]:  # type: ignore[valid-type]
@@ -594,7 +594,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[CSVAsset]:  # type: ignore[valid-type]
@@ -627,7 +627,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         io: os.PathLike | str | bytes,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[ExcelAsset]:  # type: ignore[valid-type]
@@ -660,7 +660,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         path: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[FeatherAsset]:  # type: ignore[valid-type]
@@ -693,7 +693,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         query: str,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[GBQAsset]:  # type: ignore[valid-type]
@@ -726,7 +726,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         path_or_buf: pd.HDFStore | os.PathLike | str,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[HDFAsset]:  # type: ignore[valid-type]
@@ -759,7 +759,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         io: os.PathLike | str,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[HTMLAsset]:  # type: ignore[valid-type]
@@ -792,7 +792,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[JSONAsset]:  # type: ignore[valid-type]
@@ -825,7 +825,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         path: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[ORCAsset]:  # type: ignore[valid-type]
@@ -858,7 +858,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         path: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[ParquetAsset]:  # type: ignore[valid-type]
@@ -891,7 +891,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[PickleAsset]:  # type: ignore[valid-type]
@@ -924,7 +924,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[SASAsset]:  # type: ignore[valid-type]
@@ -957,7 +957,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         path: pydantic.FilePath,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[SPSSAsset]:  # type: ignore[valid-type]
@@ -991,7 +991,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         name: str,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[SQLAsset]:  # type: ignore[valid-type]
@@ -1028,7 +1028,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         name: str,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[SQLQueryAsset]:  # type: ignore[valid-type]
@@ -1065,7 +1065,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         name: str,
         table_name: str,
         con: sqlalchemy.engine.Engine | str,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[SQLTableAsset]:  # type: ignore[valid-type]
@@ -1101,7 +1101,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[StataAsset]:  # type: ignore[valid-type]
@@ -1134,7 +1134,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[TableAsset]:  # type: ignore[valid-type]
@@ -1167,7 +1167,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         self,
         name: str,
         path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        batch_metadata_keys: Optional[Sequence[str]] = None,
+        batch_metadata_keys: Optional[Sequence[str]] = tuple(),
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Optional[XMLAsset]:  # type: ignore[valid-type]
