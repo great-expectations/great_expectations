@@ -26,7 +26,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics import MetaMetricProvider  # noqa: TCH001
 from great_expectations.expectations.metrics.map_metric_provider.pandas_methods import (
     _pandas_column_map_condition_value_counts,
     _pandas_column_map_condition_values,
@@ -98,11 +97,6 @@ class MapMetricProvider(MetricProvider):
     condition_value_keys = tuple()
     function_value_keys = tuple()
     filter_column_isnull = True
-
-    SQLALCHEMY_SELECTABLE_METRICS: Set[str] = {
-        "compound_columns.count",
-        "compound_columns.unique",
-    }
 
     @classmethod
     def _register_metric_functions(cls):  # noqa: C901 - 28
@@ -629,24 +623,3 @@ class MapMetricProvider(MetricProvider):
                 )
 
         return dependencies
-
-    @staticmethod
-    def is_sqlalchemy_metric_selectable(
-        map_metric_provider: MetaMetricProvider,
-    ) -> bool:
-        """
-        :param map_metric_provider: object of type "MapMetricProvider", whose SQLAlchemy implementation is inspected
-        :return: boolean indicating whether or not the returned value of a method implementing the metric resolves all
-        columns -- hence the caller must not use "select_from" clause as part of its own SQLAlchemy query; otherwise an
-        unwanted selectable (e.g., table) will be added to "FROM", leading to duplicated and/or erroneous results.
-        """
-        # noinspection PyUnresolvedReferences
-        return (
-            hasattr(map_metric_provider, "condition_metric_name")
-            and map_metric_provider.condition_metric_name
-            in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
-        ) or (
-            hasattr(map_metric_provider, "function_metric_name")
-            and map_metric_provider.function_metric_name
-            in MapMetricProvider.SQLALCHEMY_SELECTABLE_METRICS
-        )

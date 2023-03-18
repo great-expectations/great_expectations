@@ -7,6 +7,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Set,
     Union,
 )
 
@@ -23,9 +24,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
 from great_expectations.expectations.metrics.import_manager import quoted_name, sa
-from great_expectations.expectations.metrics.map_metric_provider.map_metric_provider import (
-    MapMetricProvider,
-)
+from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.expectations.metrics.util import (
     Insert,
     Label,
@@ -41,6 +40,31 @@ from great_expectations.util import (
 )
 
 logger = logging.getLogger(__name__)
+
+SQLALCHEMY_SELECTABLE_METRICS: Set[str] = {
+    "compound_columns.count",
+    "compound_columns.unique",
+}
+
+def _is_sqlalchemy_metric_selectable(
+    map_metric_provider: MetaMetricProvider,
+) -> bool:
+    """
+    :param map_metric_provider: object of type "MapMetricProvider", whose SQLAlchemy implementation is inspected
+    :return: boolean indicating whether or not the returned value of a method implementing the metric resolves all
+    columns -- hence the caller must not use "select_from" clause as part of its own SQLAlchemy query; otherwise an
+    unwanted selectable (e.g., table) will be added to "FROM", leading to duplicated and/or erroneous results.
+    """
+    # noinspection PyUnresolvedReferences
+    return (
+        hasattr(map_metric_provider, "condition_metric_name")
+        and map_metric_provider.condition_metric_name
+        in SQLALCHEMY_SELECTABLE_METRICS
+    ) or (
+        hasattr(map_metric_provider, "function_metric_name")
+        and map_metric_provider.function_metric_name
+        in SQLALCHEMY_SELECTABLE_METRICS
+    )
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
@@ -101,7 +125,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     ).label("condition")
 
     count_selectable: Select = sa.select([count_case_statement])
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         count_selectable = count_selectable.select_from(selectable)
 
@@ -202,7 +226,7 @@ def _sqlalchemy_column_map_condition_values(
     query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
         unexpected_condition
     )
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = query.select_from(selectable)
 
     result_format = metric_value_kwargs["result_format"]
@@ -266,7 +290,7 @@ def _sqlalchemy_column_pair_map_condition_values(
             sa.column(column_B_name).label("unexpected_values_B"),
         ]
     ).where(boolean_mapped_unexpected_values)
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         query = query.select_from(selectable)
 
@@ -350,7 +374,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
 
     column_selector = [sa.column(column_name) for column_name in column_list]
     query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         query = query.select_from(selectable)
 
@@ -437,7 +461,7 @@ def _sqlalchemy_column_map_condition_value_counts(
         .where(unexpected_condition)
         .group_by(column)
     )
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         query = query.select_from(selectable)
 
     return execution_engine.engine.execute(query).fetchall()
@@ -468,7 +492,7 @@ def _sqlalchemy_map_condition_rows(
     table_columns = metrics.get("table.columns")
     column_selector = [sa.column(column_name) for column_name in table_columns]
     query = sa.select(column_selector).where(unexpected_condition)
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         query = query.select_from(selectable)
 
@@ -642,7 +666,7 @@ def _sqlalchemy_map_condition_index(
         column_selector
     ).where(unexpected_condition)
 
-    if not MapMetricProvider.is_sqlalchemy_metric_selectable(map_metric_provider=cls):
+    if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         domain_records_as_selectable: Union[
             sa.Table, sa.Select
         ] = get_sqlalchemy_selectable(domain_records_as_selectable)
