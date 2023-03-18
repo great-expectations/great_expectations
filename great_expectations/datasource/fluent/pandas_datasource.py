@@ -83,7 +83,9 @@ class PandasDatasourceError(Exception):
 
 
 class _PandasDataAsset(DataAsset):
-    batch_metadata_keys: Optional[Tuple[str, ...]]
+    batch_metadata_keys: Optional[Tuple[str, ...]] = pydantic.Field(
+        default_factory=tuple
+    )
     batch_metadata: Optional[BatchMetadata] = pydantic.Field(None, exclude=True)
 
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
