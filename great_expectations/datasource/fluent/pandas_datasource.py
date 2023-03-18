@@ -521,6 +521,11 @@ class PandasDatasource(_PandasDatasource):
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         return asset_name
 
+    def _add_asset(self, asset: _PandasDataAsset) -> Optional[_PandasDataAsset]:
+        if asset.batch_metadata_keys and not asset.batch_metadata:
+            return None
+        return self.add_asset(asset=asset)
+
     def _get_validator(self, asset: _PandasDataAsset) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
         return self._data_context.get_validator(batch_request=batch_request)
@@ -529,14 +534,16 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         dataframe: pd.DataFrame,
+        batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
-    ) -> DataFrameAsset:
+    ) -> Optional[DataFrameAsset]:
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
+            batch_metadata_keys=tuple(batch_metadata_keys),
             batch_metadata=batch_metadata,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_dataframe(
         self,
@@ -565,7 +572,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_clipboard(
         self,
@@ -588,7 +595,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> CSVAsset:  # type: ignore[valid-type]
+    ) -> Optional[CSVAsset]:  # type: ignore[valid-type]
         asset = CSVAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -596,7 +603,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_csv(
         self,
@@ -621,7 +628,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> ExcelAsset:  # type: ignore[valid-type]
+    ) -> Optional[ExcelAsset]:  # type: ignore[valid-type]
         asset = ExcelAsset(
             name=name,
             io=io,
@@ -629,7 +636,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_excel(
         self,
@@ -654,7 +661,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> FeatherAsset:  # type: ignore[valid-type]
+    ) -> Optional[FeatherAsset]:  # type: ignore[valid-type]
         asset = FeatherAsset(
             name=name,
             path=path,
@@ -662,7 +669,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_feather(
         self,
@@ -687,7 +694,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> GBQAsset:  # type: ignore[valid-type]
+    ) -> Optional[GBQAsset]:  # type: ignore[valid-type]
         asset = GBQAsset(
             name=name,
             query=query,
@@ -695,7 +702,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_gbq(
         self,
@@ -720,7 +727,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> HDFAsset:  # type: ignore[valid-type]
+    ) -> Optional[HDFAsset]:  # type: ignore[valid-type]
         asset = HDFAsset(
             name=name,
             path_or_buf=path_or_buf,
@@ -728,7 +735,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_hdf(
         self,
@@ -753,7 +760,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> HTMLAsset:  # type: ignore[valid-type]
+    ) -> Optional[HTMLAsset]:  # type: ignore[valid-type]
         asset = HTMLAsset(
             name=name,
             io=io,
@@ -761,7 +768,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_html(
         self,
@@ -786,7 +793,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> JSONAsset:  # type: ignore[valid-type]
+    ) -> Optional[JSONAsset]:  # type: ignore[valid-type]
         asset = JSONAsset(
             name=name,
             path_or_buf=path_or_buf,
@@ -794,7 +801,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_json(
         self,
@@ -819,7 +826,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> ORCAsset:  # type: ignore[valid-type]
+    ) -> Optional[ORCAsset]:  # type: ignore[valid-type]
         asset = ORCAsset(
             name=name,
             path=path,
@@ -827,7 +834,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_orc(
         self,
@@ -852,7 +859,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> ParquetAsset:  # type: ignore[valid-type]
+    ) -> Optional[ParquetAsset]:  # type: ignore[valid-type]
         asset = ParquetAsset(
             name=name,
             path=path,
@@ -860,7 +867,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_parquet(
         self,
@@ -885,7 +892,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> PickleAsset:  # type: ignore[valid-type]
+    ) -> Optional[PickleAsset]:  # type: ignore[valid-type]
         asset = PickleAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -893,7 +900,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_pickle(
         self,
@@ -918,7 +925,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> SASAsset:  # type: ignore[valid-type]
+    ) -> Optional[SASAsset]:  # type: ignore[valid-type]
         asset = SASAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -926,7 +933,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sas(
         self,
@@ -951,7 +958,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> SPSSAsset:  # type: ignore[valid-type]
+    ) -> Optional[SPSSAsset]:  # type: ignore[valid-type]
         asset = SPSSAsset(
             name=name,
             path=path,
@@ -959,7 +966,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_spss(
         self,
@@ -985,7 +992,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> SQLAsset:  # type: ignore[valid-type]
+    ) -> Optional[SQLAsset]:  # type: ignore[valid-type]
         asset = SQLAsset(
             name=name,
             sql=sql,
@@ -994,7 +1001,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sql(
         self,
@@ -1022,7 +1029,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> SQLQueryAsset:  # type: ignore[valid-type]
+    ) -> Optional[SQLQueryAsset]:  # type: ignore[valid-type]
         asset = SQLQueryAsset(
             name=name,
             sql=sql,
@@ -1031,7 +1038,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sql_query(
         self,
@@ -1059,7 +1066,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> SQLTableAsset:  # type: ignore[valid-type]
+    ) -> Optional[SQLTableAsset]:  # type: ignore[valid-type]
         asset = SQLTableAsset(
             name=name,
             table_name=table_name,
@@ -1068,7 +1075,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sql_table(
         self,
@@ -1095,7 +1102,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> StataAsset:  # type: ignore[valid-type]
+    ) -> Optional[StataAsset]:  # type: ignore[valid-type]
         asset = StataAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -1103,7 +1110,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_stata(
         self,
@@ -1128,7 +1135,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> TableAsset:  # type: ignore[valid-type]
+    ) -> Optional[TableAsset]:  # type: ignore[valid-type]
         asset = TableAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -1136,7 +1143,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_table(
         self,
@@ -1161,7 +1168,7 @@ class PandasDatasource(_PandasDatasource):
         batch_metadata_keys: Optional[Sequence[str]] = None,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> XMLAsset:  # type: ignore[valid-type]
+    ) -> Optional[XMLAsset]:  # type: ignore[valid-type]
         asset = XMLAsset(
             name=name,
             path_or_buffer=path_or_buffer,
@@ -1169,7 +1176,7 @@ class PandasDatasource(_PandasDatasource):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_xml(
         self,

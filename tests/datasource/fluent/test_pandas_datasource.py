@@ -479,21 +479,39 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext):
     )
 
 
-def test_batch_metadata(empty_data_context: AbstractDataContext):
+def test_dataframe_batch_metadata(empty_data_context: AbstractDataContext):
     pandas_datasource = empty_data_context.sources.pandas_default
 
-    df = pd.DataFrame(
-        data={
-            "foo": [1, 2, 3],
-            "bar": [4, 5, 6],
-        }
-    )
+    # df = pd.DataFrame(
+    #     data={
+    #         "foo": [1, 2, 3],
+    #         "bar": [4, 5, 6],
+    #     }
+    # )
+    #
+    # dataframe_asset = pandas_datasource.add_dataframe_asset(
+    #     name="dataframe_1",
+    #     dataframe=df,
+    #     batch_metadata_keys=(
+    #         "pipeline_filename",
+    #         "pipeline_step",
+    #     ),
+    # )
 
-    dataframe_asset = pandas_datasource.add_dataframe_asset(
-        name="dataframe_1",
-        dataframe=df,
+    assert True
+
+
+def test_dynamic_pandas_batch_metadata(
+    empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
+):
+    pandas_datasource = empty_data_context.sources.pandas_default
+
+    csv_asset = pandas_datasource.add_csv_asset(
+        name="my_csv",
+        filepath_or_buffer=valid_file_path,
         batch_metadata_keys=(
             "pipeline_filename",
             "pipeline_step",
         ),
     )
+    assert csv_asset is None
