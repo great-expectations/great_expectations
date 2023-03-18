@@ -506,22 +506,28 @@ def test_dynamic_pandas_batch_metadata(
 ):
     pandas_datasource = empty_data_context.sources.pandas_default
 
+    batch_metadata_keys = (
+        "pipeline_filename",
+        "pipeline_step",
+    )
+
+    batch_metadata = {
+        "pipeline_filename": "my_data_pipeline.ipynb",
+        "pipeline_step": "transform_3",
+    }
+
     csv_asset = pandas_datasource.add_csv_asset(
         name="my_csv_asset",
         filepath_or_buffer=valid_file_path,
-        batch_metadata_keys=(
-            "pipeline_filename",
-            "pipeline_step",
-        ),
+        batch_metadata_keys=batch_metadata_keys,
     )
     assert csv_asset is None
 
     csv_asset = pandas_datasource.add_csv_asset(
         name="my_csv_asset",
         filepath_or_buffer=valid_file_path,
-        batch_metadata={
-            "pipeline_filename": "my_data_pipeline.ipynb",
-            "pipeline_step": "transform_3",
-        },
+        batch_metadata=batch_metadata,
     )
     assert csv_asset
+    assert csv_asset.batch_metadata == batch_metadata
+    assert csv_asset.batch_metadata_keys == batch_metadata_keys
