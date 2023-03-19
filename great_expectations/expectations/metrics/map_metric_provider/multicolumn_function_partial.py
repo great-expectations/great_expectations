@@ -35,7 +35,9 @@ logger = logging.getLogger(__name__)
 
 
 def multicolumn_function_partial(  # noqa: C901 - 16
-    engine: Type[ExecutionEngine], partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None, **kwargs
+    engine: Type[ExecutionEngine],
+    partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
+    **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 

@@ -145,7 +145,20 @@ exclude = [
     'expectations/metrics/column_aggregate_metrics/column_partition\.py', # 10
     'expectations/metrics/column_aggregate_metrics/column_most_common_value\.py', # 4
     'expectations/metrics/column_aggregate_metrics/column_median\.py', # 1
-    'expectations/metrics/map_metric_provider\.py',  # 57
+    #'expectations/metrics/map_metric_provider\.py',  # 57
+    'expectations/metrics/map_metric_provider/column_condition_partial\.py',
+    'expectations/metrics/map_metric_provider/column_function_partial\.py',
+    'expectations/metrics/map_metric_provider/column_map_metric_provider\.py',
+    'expectations/metrics/map_metric_provider/column_pair_condition_partial\.py',
+    'expectations/metrics/map_metric_provider/column_pair_function_partial\.py',
+    'expectations/metrics/map_metric_provider/column_pair_map_metric_provider\.py',
+    'expectations/metrics/map_metric_provider/map_metric_provider\.py',
+    'expectations/metrics/map_metric_provider/multi_column_map_metric_provider\.py',
+    'expectations/metrics/map_metric_provider/multicolumn_condition_partial\.py',
+    'expectations/metrics/map_metric_provider/multicolumn_function_partial\.py',
+    'expectations/metrics/map_metric_provider/pandas_methods\.py',
+    'expectations/metrics/map_metric_provider/spark_methods\.py',
+    'expectations/metrics/map_metric_provider/sqlalchemy_methods\.py   ',
     'expectations/regex_based_column_map_expectation\.py',  # 3
     'expectations/row_conditions\.py',  # 4
     'expectations/set_based_column_map_expectation\.py',  # 3
