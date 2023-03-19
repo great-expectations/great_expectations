@@ -8,6 +8,7 @@ from typing import (
     List,
     Optional,
     Set,
+    Tuple,
     Union,
 )
 
@@ -194,7 +195,7 @@ def _sqlalchemy_column_map_condition_values(
     execution_engine: SqlAlchemyExecutionEngine,
     metric_domain_kwargs: dict,
     metric_value_kwargs: dict,
-    metrics: Dict[str, Any],
+    metrics: Dict[str, Tuple],
     **kwargs,
 ):
     """

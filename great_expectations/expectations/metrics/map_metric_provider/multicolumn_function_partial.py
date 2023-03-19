@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 def multicolumn_function_partial(  # noqa: C901 - 16
-    engine: Type[ExecutionEngine], partial_fn_type: Optional[str] = None, **kwargs
+    engine: Type[ExecutionEngine], partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None, **kwargs
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
 
@@ -55,7 +55,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
         if partial_fn_type is None:
             partial_fn_type = MetricPartialFunctionTypes.MAP_SERIES
 
-        partial_fn_type = MetricPartialFunctionTypes(partial_fn_type)
+        partial_fn_type__typed = MetricPartialFunctionTypes(partial_fn_type)
         if partial_fn_type != MetricPartialFunctionTypes.MAP_SERIES:
             raise ValueError(
                 f"""PandasExecutionEngine only supports "{MetricPartialFunctionTypes.MAP_SERIES.value}" for \
@@ -65,7 +65,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
         def wrapper(metric_fn: Callable):
             @metric_partial(
                 engine=engine,
-                partial_fn_type=partial_fn_type,
+                partial_fn_type=partial_fn_type__typed,
                 domain_type=domain_type,
                 **kwargs,
             )
