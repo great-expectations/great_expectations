@@ -71,13 +71,7 @@ class QueryTemplateValues(QueryMetricProvider):
             query = query.format(**template_dict, active_batch=f"({selectable})")
 
         engine: sqlalchemy_engine_Engine = execution_engine.engine
-        try:
-            result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
-        except Exception as e:
-            if hasattr(e, "query_id"):
-                # query_id removed because it duplicates the validation_results
-                e._query_id = None
-            raise e
+        result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
         return [dict(element) for element in result]
 
