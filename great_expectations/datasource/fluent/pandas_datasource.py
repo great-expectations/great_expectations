@@ -86,7 +86,9 @@ class _PandasDataAsset(DataAsset):
     batch_metadata_keys: Optional[Tuple[str, ...]] = pydantic.Field(
         default_factory=tuple
     )
-    batch_metadata: Optional[BatchMetadata] = pydantic.Field(None, exclude=True)
+    batch_metadata: Optional[BatchMetadata] = pydantic.Field(
+        default_factory=dict, exclude=True
+    )
 
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_metadata_keys",
@@ -345,8 +347,10 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
     dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
-    batch_metadata_keys: Optional[Tuple[str, ...]]
-    batch_metadata: Optional[BatchMetadata]
+    batch_metadata_keys: Optional[Tuple[str, ...]] = pydantic.Field(
+        default_factory=tuple
+    )
+    batch_metadata: Optional[BatchMetadata] = pydantic.Field(default_factory=dict)
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -677,7 +681,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         asset: ExcelAsset = self.add_excel_asset(  # type: ignore[valid-type]
             name=asset_name,
             io=io,
-            batch_metadata_keys=batch_metadata.keys(),
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
