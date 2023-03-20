@@ -78,3 +78,6 @@ def test_parse_condition_to_sqlalchemy(sa):
 
     res = parse_condition_to_sqlalchemy('col("foo") <= 1.34')
     assert str(res) == "foo <= :foo_1"
+
+    res = parse_condition_to_sqlalchemy('col("foo") <= date("2023-03-13")')
+    assert str(res) == "foo <= :foo_1"

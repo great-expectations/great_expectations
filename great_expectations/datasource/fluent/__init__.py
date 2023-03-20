@@ -41,6 +41,9 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
 )
+from great_expectations.datasource.fluent.spark_dbfs_datasource import (
+    SparkDBFSDatasource,
+)
 from great_expectations.datasource.fluent.spark_s3_datasource import (
     SparkS3Datasource,
 )
