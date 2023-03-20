@@ -22,12 +22,12 @@ from great_expectations.expectations.metrics.map_metric_provider.column_pair_map
 from great_expectations.expectations.metrics.map_metric_provider.map_metric_provider import (
     MapMetricProvider,
 )
-from great_expectations.expectations.metrics.map_metric_provider.multicolumn_map_metric_provider import (
-    MulticolumnMapMetricProvider,
-)
 from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
     multicolumn_condition_partial,
 )
 from great_expectations.expectations.metrics.map_metric_provider.multicolumn_function_partial import (
     multicolumn_function_partial,
+)
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_map_metric_provider import (
+    MulticolumnMapMetricProvider,
 )
