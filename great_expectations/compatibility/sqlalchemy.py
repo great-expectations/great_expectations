@@ -75,7 +75,10 @@ class SQLAlchemyShim:
             # Convert args to a list for compatibility with 1.3.x
             return sqlalchemy.select(args, **kwargs)
         elif self.is_version_1_4_x() or self.is_version_2_0_x():
-            # Pass through for 1.4.x, 2.0.x
+            # Convert list to args if list if using 1.3.x style
+            if isinstance(args[0], list):
+                # TODO: Insert deprecation warning here from great_expectations/warnings.py
+                return sqlalchemy.select(*args[0], **kwargs)
             return sqlalchemy.select(*args, **kwargs)
         else:
             # Pass through for future versions (add more version specific logic
