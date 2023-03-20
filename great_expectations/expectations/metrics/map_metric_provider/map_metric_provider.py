@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import inspect
 import logging
+import warnings
 from typing import (
+    TYPE_CHECKING,
     Dict,
     List,
     Optional,
@@ -24,6 +26,9 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
+)
+from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
+    _is_sqlalchemy_metric_selectable,
 )
 from great_expectations.expectations.metrics.map_metric_provider.pandas_methods import (
     _pandas_column_map_condition_value_counts,
@@ -71,6 +76,9 @@ from great_expectations.expectations.registry import (
     register_metric,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.expectations.metrics import MetaMetricProvider
 
 logger = logging.getLogger(__name__)
 
@@ -622,3 +630,15 @@ class MapMetricProvider(MetricProvider):
                 )
 
         return dependencies
+
+    @staticmethod
+    def is_sqlalchemy_metric_selectable(
+        map_metric_provider: MetaMetricProvider,
+    ) -> bool:
+        warnings.warn(
+            "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated."
+            "You can use the great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable._is_sqlalchemy_metric_selectable function, but please note that it is not considered part of the public API, and could change in the future.",
+            DeprecationWarning,
+        )
+
+        return _is_sqlalchemy_metric_selectable(map_metric_provider)

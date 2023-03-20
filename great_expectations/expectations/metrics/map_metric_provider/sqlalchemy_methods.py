@@ -7,7 +7,6 @@ from typing import (
     Dict,
     List,
     Optional,
-    Set,
     Tuple,
     Union,
 )
@@ -20,12 +19,14 @@ from great_expectations.core.util import convert_to_json_serializable
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-    from great_expectations.expectations.metrics import MetaMetricProvider
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
 from great_expectations.expectations.metrics.import_manager import quoted_name, sa
+from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
+    _is_sqlalchemy_metric_selectable,
+)
 from great_expectations.expectations.metrics.util import (
     Insert,
     Label,
@@ -41,30 +42,6 @@ from great_expectations.util import (
 )
 
 logger = logging.getLogger(__name__)
-
-SQLALCHEMY_SELECTABLE_METRICS: Set[str] = {
-    "compound_columns.count",
-    "compound_columns.unique",
-}
-
-
-def _is_sqlalchemy_metric_selectable(
-    map_metric_provider: MetaMetricProvider,
-) -> bool:
-    """
-    :param map_metric_provider: object of type "MapMetricProvider", whose SQLAlchemy implementation is inspected
-    :return: boolean indicating whether or not the returned value of a method implementing the metric resolves all
-    columns -- hence the caller must not use "select_from" clause as part of its own SQLAlchemy query; otherwise an
-    unwanted selectable (e.g., table) will be added to "FROM", leading to duplicated and/or erroneous results.
-    """
-    # noinspection PyUnresolvedReferences
-    return (
-        hasattr(map_metric_provider, "condition_metric_name")
-        and map_metric_provider.condition_metric_name in SQLALCHEMY_SELECTABLE_METRICS
-    ) or (
-        hasattr(map_metric_provider, "function_metric_name")
-        and map_metric_provider.function_metric_name in SQLALCHEMY_SELECTABLE_METRICS
-    )
 
 
 def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
