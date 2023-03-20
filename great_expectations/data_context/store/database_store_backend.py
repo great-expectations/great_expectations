@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.sqlalchemy import SQLAlchemyShim
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.util import (
     filter_properties_dict,
@@ -12,7 +11,7 @@ from great_expectations.util import (
     import_make_url,
 )
 
-from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.sqlalchemy import sa
 
 try:
     from sqlalchemy import Column, MetaData, String, Table, and_, column
@@ -34,9 +33,6 @@ except ImportError:
     create_engine = None
 
 logger = logging.getLogger(__name__)
-
-sqlalchemy_shim = SQLAlchemyShim()
-select = sqlalchemy_shim.select
 
 
 class DatabaseStoreBackend(StoreBackend):
@@ -247,7 +243,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _get(self, key):
         sel = (
-            select([column("value")])
+            sa.select([column("value")])
             .select_from(self._table)
             .where(
                 and_(
@@ -313,7 +309,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _has_key(self, key):
         sel = (
-            select([sa.func.count(column("value"))])
+            sa.select([sa.func.count(column("value"))])
             .select_from(self._table)
             .where(
                 and_(
@@ -332,7 +328,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def list_keys(self, prefix=()):
         sel = (
-            select([column(col) for col in self.key_columns])
+            sa.select([column(col) for col in self.key_columns])
             .select_from(self._table)
             .where(
                 and_(
