@@ -63,6 +63,7 @@ except ImportError:
 sqlalchemy_shim = SQLAlchemyShim()
 select = sqlalchemy_shim.select
 
+
 class ColumnQuantileValues(ColumnAggregateMetricProvider):
     metric_name = "column.quantile_values"
     value_keys = ("quantiles", "allow_relative_error")
