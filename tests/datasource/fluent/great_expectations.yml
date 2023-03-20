@@ -2,6 +2,8 @@ fluent_datasources:
   my_pg_ds:
     type: postgres
     connection_string: "postgresql://userName:@hostname/dbName"
+    kwargs:
+      echo: True
     assets:
       my_table_asset_wo_splitters:
         type: table
