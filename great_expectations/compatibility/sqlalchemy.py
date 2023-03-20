@@ -73,7 +73,7 @@ class SQLAlchemyShim:
         """Select method that works with all sqlalchemy versions supported in GX."""
         if self.is_version_1_3_x():
             # Convert args to a list for compatibility with 1.3.x
-            return sqlalchemy.select(args, **kwargs)
+            return sqlalchemy.select(list(args), **kwargs)
         elif self.is_version_1_4_x() or self.is_version_2_0_x():
             # Convert list to args if list if using 1.3.x style
             if isinstance(args[0], list):
