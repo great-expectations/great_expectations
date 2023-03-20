@@ -635,6 +635,7 @@ class MapMetricProvider(MetricProvider):
     def is_sqlalchemy_metric_selectable(
         map_metric_provider: MetaMetricProvider,
     ) -> bool:
+        # deprecated-v0.16.1
         warnings.warn(
             "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated."
             "You can use the great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable._is_sqlalchemy_metric_selectable function, but please note that it is not considered part of the public API, and could change in the future.",
