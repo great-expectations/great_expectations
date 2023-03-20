@@ -23,10 +23,9 @@ Welcome to Great Expectations Cloud! This tutorial will help you onboard with GX
 
 ### Step 2: Generate User Token
 
-- Go to [“Settings” > “Users”](https://app.greatexpectations.io/users) in the navigation panel. This is the screen where you can invite your mates into the app.
-- Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel. In this tutorial, we’ll create a User Token, but GX Cloud also supports Organization tokens, e.g. for use in shared execution environments. These tokens are see-once and stored as a hash in Great Expectation Cloud's backend database. Once a user copies their API key, the Cloud UI will never show the token value again.
+- Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel. In this tutorial, we’ll create a User Token, but GX Cloud also supports Organization tokens, e.g. for use in shared execution environments. These tokens are see-once and stored as a hash in Great Expectation Cloud's backend database. Once a user copies their API key, the Cloud UI will never show the token value again. 
 
-### Step 3: Set tokens & <TechnicalTag tag="data_context" text="Data Context"/>
+### Step 3: Set tokens and Create <TechnicalTag tag="data_context" text="Data Context"/>
 
 - Open Jupyter Notebook
 
@@ -54,3 +53,5 @@ context = gx.get_context()
 ## Next Steps
 
 Follow in-app snippets to create a <TechnicalTag tag="datasource" text="Datasource"/>, define an <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>, configure and run a <TechnicalTag tag="checkpoint" text="Checkpoint"/> and view <TechnicalTag tag="validation_result" text="Validation Results"/>.
+
+You can also go to [“Settings” > “Users”](https://app.greatexpectations.io/users) in the navigation panel to invite your team members to the app.
