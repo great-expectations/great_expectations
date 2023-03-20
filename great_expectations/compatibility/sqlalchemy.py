@@ -24,6 +24,23 @@ try:
 except ImportError:
     sqlalchemy = NotImported("sqlalchemy not found, please install.")
 
+import types
+import functools
+
+
+def copy_func(f):
+    """Based on http://stackoverflow.com/a/6528148/190597 (Glenn Maynard)"""
+    g = types.FunctionType(
+        f.__code__,
+        f.__globals__,
+        name=f.__name__,
+        argdefs=f.__defaults__,
+        closure=f.__closure__,
+    )
+    g = functools.update_wrapper(g, f)
+    g.__kwdefaults__ = f.__kwdefaults__
+    return g
+
 
 class SQLAlchemyShim:
     """This class is used in place of certain sqlalchemy methods that require
@@ -38,6 +55,7 @@ class SQLAlchemyShim:
     def __init__(self):
         """Create an instance."""
         self._sqlalchemy_version: None | Version = None
+        self._orig_library_select = copy_func(sqlalchemy.select)
 
     @property
     def sqlalchemy_version(self) -> None | Version:
@@ -73,17 +91,17 @@ class SQLAlchemyShim:
         """Select method that works with all sqlalchemy versions supported in GX."""
         if self.is_version_1_3_x():
             # Convert args to a list for compatibility with 1.3.x
-            return sqlalchemy.select(list(args), **kwargs)
+            return self._orig_library_select(list(args), **kwargs)
         elif self.is_version_1_4_x() or self.is_version_2_0_x():
             # Convert list to args if list if using 1.3.x style
             if isinstance(args[0], list):
                 # TODO: Insert deprecation warning here from great_expectations/warnings.py
-                return sqlalchemy.select(*args[0], **kwargs)
-            return sqlalchemy.select(*args, **kwargs)
+                return self._orig_library_select(*args[0], **kwargs)
+            return self._orig_library_select(*args, **kwargs)
         else:
             # Pass through for future versions (add more version specific logic
             # in another elif if necessary)
-            return sqlalchemy.select(*args, **kwargs)
+            return self._orig_library_select(*args, **kwargs)
 
 
 # Global instances created at import time. Use these.
