@@ -11,16 +11,15 @@ import botocore
 import pytest
 
 from great_expectations.core.util import DBFSPath
-from great_expectations.datasource.fluent import PandasDBFSDatasource
+from great_expectations.datasource.fluent import SparkDBFSDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     DBFSDataConnector,
 )
-from great_expectations.datasource.fluent.dynamic_pandas import PANDAS_VERSION
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
 )
 from tests.test_utils import create_files_in_directory
@@ -32,16 +31,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__file__)
 
 
-# apply markers to entire test module
-pytestmark = [
-    pytest.mark.skipif(
-        PANDAS_VERSION < 1.2, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
-    )
-]
-
-
 @pytest.fixture
-def pandas_dbfs_datasource(fs: FakeFilesystem) -> PandasDBFSDatasource:
+def spark_dbfs_datasource(fs: FakeFilesystem, test_backends) -> SparkDBFSDatasource:
+    if "SparkDFDataset" not in test_backends:
+        pytest.skip("No spark backend selected.")
+
     # Copy boto modules into fake filesystem (see https://github.com/spulec/moto/issues/1682#issuecomment-645016188)
     for module in [boto3, botocore]:
         module_dir = pathlib.Path(module.__file__).parent
@@ -71,38 +65,19 @@ def pandas_dbfs_datasource(fs: FakeFilesystem) -> PandasDBFSDatasource:
         ],
     )
 
-    return PandasDBFSDatasource(  # type: ignore[call-arg]
-        name="pandas_dbfs_datasource",
+    return SparkDBFSDatasource(  # type: ignore[call-arg]
+        name="spark_dbfs_datasource",
         base_directory=pathlib.Path(base_directory),
     )
 
 
 @pytest.fixture
-def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> _FilePathDataAsset:
-    asset = pandas_dbfs_datasource.add_csv_asset(
+def csv_asset(spark_dbfs_datasource: SparkDBFSDatasource) -> _FilePathDataAsset:
+    asset = spark_dbfs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
     return asset
-
-
-# TODO: <Alex>ALEX</Alex>
-def bad_batching_regex_config(
-    csv_path: pathlib.Path,
-) -> tuple[re.Pattern, TestConnectionError]:
-    batching_regex = re.compile(
-        r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-    )
-    test_connection_error = TestConnectionError(
-        "No file at base_directory path "
-        f'"{csv_path.resolve()}" matched regular expressions pattern '
-        f'"{batching_regex.pattern}" and/or glob_directive "**/*" for '
-        'DataAsset "csv_asset".'
-    )
-    return batching_regex, test_connection_error
-
-
-# TODO: <Alex>ALEX</Alex>
 
 
 @pytest.fixture
@@ -118,13 +93,13 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
 
 
 @pytest.mark.integration
-def test_construct_pandas_dbfs_datasource(pandas_dbfs_datasource: PandasDBFSDatasource):
-    assert pandas_dbfs_datasource.name == "pandas_dbfs_datasource"
+def test_construct_spark_dbfs_datasource(spark_dbfs_datasource: SparkDBFSDatasource):
+    assert spark_dbfs_datasource.name == "spark_dbfs_datasource"
 
 
 @pytest.mark.integration
-def test_add_csv_asset_to_datasource(pandas_dbfs_datasource: PandasDBFSDatasource):
-    asset = pandas_dbfs_datasource.add_csv_asset(
+def test_add_csv_asset_to_datasource(spark_dbfs_datasource: SparkDBFSDatasource):
+    asset = spark_dbfs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
     )
@@ -150,10 +125,13 @@ def test_construct_csv_asset_directly():
 
 
 @pytest.mark.integration
+@pytest.mark.xfail(
+    reason="Accessing objects on pyfakefs.fake_filesystem.FakeFilesystem using Spark is not working (this test is conducted using Jupyter notebook manually)."
+)
 def test_get_batch_list_from_fully_specified_batch_request(
-    pandas_dbfs_datasource: PandasDBFSDatasource,
+    spark_dbfs_datasource: SparkDBFSDatasource,
 ):
-    asset = pandas_dbfs_datasource.add_csv_asset(
+    asset = spark_dbfs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
@@ -164,14 +142,14 @@ def test_get_batch_list_from_fully_specified_batch_request(
     batches = asset.get_batch_list_from_batch_request(request)
     assert len(batches) == 1
     batch = batches[0]
-    assert batch.batch_request.datasource_name == pandas_dbfs_datasource.name
+    assert batch.batch_request.datasource_name == spark_dbfs_datasource.name
     assert batch.batch_request.data_asset_name == asset.name
-    assert batch.batch_request.options == {
-        "path": "alex_20200819_1300.csv",
-        "name": "alex",
-        "timestamp": "20200819",
-        "price": "1300",
-    }
+    assert batch.batch_request.options == (
+        "name",
+        "timestamp",
+        "price",
+        "path",
+    )
     assert batch.metadata == {
         "path": "alex_20200819_1300.csv",
         "name": "alex",
@@ -180,7 +158,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     }
     assert (
         batch.id
-        == "pandas_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
+        == "spark_dbfs_datasource-csv_asset-name_alex-timestamp_20200819-price_1300"
     )
 
     request = asset.build_batch_request({"name": "alex"})
@@ -190,28 +168,28 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 @pytest.mark.integration
 def test_test_connection_failures(
-    pandas_dbfs_datasource: PandasDBFSDatasource,
+    spark_dbfs_datasource: SparkDBFSDatasource,
     bad_regex_config: tuple[re.Pattern, str],
 ):
     regex, test_connection_error_message = bad_regex_config
-    csv_asset = CSVAsset(  # type: ignore[call-arg]
+    csv_asset = CSVAsset(
         name="csv_asset",
         batching_regex=regex,
     )
-    csv_asset._datasource = pandas_dbfs_datasource
-    pandas_dbfs_datasource.assets = {"csv_asset": csv_asset}
+    csv_asset._datasource = spark_dbfs_datasource
+    spark_dbfs_datasource.assets = {"csv_asset": csv_asset}
     csv_asset._data_connector = DBFSDataConnector(
-        datasource_name=pandas_dbfs_datasource.name,
+        datasource_name=spark_dbfs_datasource.name,
         data_asset_name=csv_asset.name,
         batching_regex=re.compile(regex),
-        base_directory=pandas_dbfs_datasource.base_directory,
-        data_context_root_directory=pandas_dbfs_datasource.data_context_root_directory,
+        base_directory=spark_dbfs_datasource.base_directory,
+        data_context_root_directory=spark_dbfs_datasource.data_context_root_directory,
         glob_directive="*.csv",
-        file_path_template_map_fn=DBFSPath.convert_to_file_semantics_version,
+        file_path_template_map_fn=DBFSPath.convert_to_protocol_version,
     )
     csv_asset._test_connection_error_message = test_connection_error_message
 
     with pytest.raises(TestConnectionError) as e:
-        pandas_dbfs_datasource.test_connection()
+        spark_dbfs_datasource.test_connection()
 
     assert str(e.value) == str(test_connection_error_message)
