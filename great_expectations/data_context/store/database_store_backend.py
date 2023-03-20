@@ -4,30 +4,39 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import SQLAlchemyShim
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.optional_imports import sqlalchemy_version_check
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
     import_make_url,
 )
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+
 try:
-    import sqlalchemy as sa
-
-    sqlalchemy_version_check(sa.__version__)
-
-    from sqlalchemy import Column, MetaData, String, Table, and_, column, select
+    from sqlalchemy import Column, MetaData, String, Table, and_, column
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 
     make_url = import_make_url()
 except ImportError:
-    sa = None
+    Column = None
+    MetaData = None
+    String = None
+    Table = None
+    and_ = None
+    column = None
+    URL = None
+    IntegrityError = None
+    NoSuchTableError = None
+    SQLAlchemyError = None
     create_engine = None
 
-
 logger = logging.getLogger(__name__)
+
+sqlalchemy_shim = SQLAlchemyShim()
+select = sqlalchemy_shim.select
 
 
 class DatabaseStoreBackend(StoreBackend):
