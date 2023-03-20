@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import copy
 import functools
 import json
 import logging
 import pathlib
 import re
+import uuid
 from pprint import pformat as pf
 from pprint import pprint as pp
 from typing import TYPE_CHECKING, Callable, List
@@ -11,6 +14,7 @@ from typing import TYPE_CHECKING, Callable, List
 import pydantic
 import pytest
 from ruamel.yaml import YAML
+from typing_extensions import Final
 
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
@@ -40,10 +44,10 @@ CSV_PATH = EXPERIMENTAL_DATASOURCE_TEST_DIR.joinpath(
 )
 
 PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
-PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
+PG_CONFIG_YAML_STR: Final[str] = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
-COMPLEX_CONFIG_DICT = {
+COMPLEX_CONFIG_DICT: Final[dict] = {
     "fluent_datasources": {
         "my_pg_ds": {
             "connection_string": "postgresql://userName:@hostname/dbName",
@@ -103,9 +107,9 @@ COMPLEX_CONFIG_DICT = {
         },
     }
 }
-COMPLEX_CONFIG_JSON = json.dumps(COMPLEX_CONFIG_DICT)
+COMPLEX_CONFIG_JSON: Final[str] = json.dumps(COMPLEX_CONFIG_DICT)
 
-SIMPLE_DS_DICT = {
+SIMPLE_DS_DICT: Final[dict] = {
     "fluent_datasources": {
         "my_ds": {
             "type": "sql",
@@ -175,7 +179,7 @@ COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
     },
 }
 
-DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
+DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
     "fluent_datasources": {
         DEFAULT_PANDAS_DATASOURCE_NAME: {
             "type": "pandas",
@@ -201,6 +205,11 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
         },
     }
 }
+
+
+@pytest.fixture
+def ds_dict_config() -> dict:
+    return copy.deepcopy(COMPLEX_CONFIG_DICT)
 
 
 @pytest.fixture
@@ -281,6 +290,48 @@ class TestExcludeUnsetAssetFields:
             asset_dict
             == gx_config_dict["fluent_datasources"]["my_ds"]["assets"]["my_asset"]
         )
+
+
+def test_id_only_serialized_if_present(ds_dict_config: dict):
+    print(f"\tInput:\n\n{pf(ds_dict_config, depth=3)}")
+    all_ids: list[str] = []
+    with_ids: dict = {}
+    no_ids: dict = {}
+
+    # remove or add ids
+    for ds_name, ds in ds_dict_config["fluent_datasources"].items():
+
+        with_ids[ds_name] = copy.deepcopy(ds)
+        no_ids[ds_name] = copy.deepcopy(ds)
+
+        ds_id = uuid.uuid4()
+        all_ids.append(str(ds_id))
+        with_ids[ds_name]["id"] = ds_id
+
+        no_ids[ds_name].pop("id", None)
+
+        for asset_name in ds["assets"].keys():
+
+            asset_id = uuid.uuid4()
+            all_ids.append(str(asset_id))
+            with_ids[ds_name]["assets"][asset_name]["id"] = asset_id
+
+            no_ids[ds_name]["assets"][asset_name].pop("id", None)
+
+    gx_config_no_ids = GxConfig.parse_obj({"fluent_datasources": no_ids})
+    gx_config_with_ids = GxConfig.parse_obj({"fluent_datasources": with_ids})
+
+    assert "id" not in str(gx_config_no_ids.dict())
+    assert "id" not in gx_config_no_ids.json()
+    assert "id" not in gx_config_no_ids.yaml()
+
+    for serialized_str in [
+        str(gx_config_with_ids.dict()),
+        gx_config_with_ids.json(),
+        gx_config_with_ids.yaml(),
+    ]:
+        for id_ in all_ids:
+            assert id_ in serialized_str
 
 
 @pytest.mark.parametrize(
@@ -628,15 +679,9 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT["fluent_datasources"][  # type: ignore[index]
+    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT["fluent_datasources"][
         "my_pg_ds"
-    ][
-        "assets"
-    ][
-        "with_dslish_sorters"
-    ][
-        "order_by"
-    ]
+    ]["assets"]["with_dslish_sorters"]["order_by"]
 
     assert '"reverse": True' not in dumped
     assert '{"key":' not in dumped

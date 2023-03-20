@@ -509,8 +509,10 @@ def type_schema(
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    for name, model in _iter_all_registered_types():
-
+    for name, model in [
+        (Datasource.__name__, Datasource),
+        *_iter_all_registered_types(),
+    ]:
         if issubclass(model, Datasource):
             datasource_dir = schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)

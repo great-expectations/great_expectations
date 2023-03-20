@@ -38,19 +38,19 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         name: str,
         batching_regex: Optional[Union[re.Pattern, str]] = None,
         glob_directive: str = "**/*",
+        header: bool = False,
+        infer_schema: bool = False,
         order_by: Optional[SortersDefinition] = None,
-        **kwargs,
-    ) -> CSVAsset:  # type: ignore[valid-type]
+    ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkDBFSDatasource" object.
 
         Args:
             name: The name of the CSV asset
-            batching_regex: regex pattern that matches CSV filenames that is used to label the batches
+            batching_regex: regex pattern that matches csv filenames that is used to label the batches
             glob_directive: glob for selecting files in DBFS directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "+/-  key" syntax: +/- (a/de)scending; + default
-            # TODO: <Alex>ALEX</Alex>
-            kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
-            # TODO: <Alex>ALEX</Alex>
+            header: boolean (default False) indicating whether or not first line of CSV file is header line
+            infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
@@ -59,8 +59,9 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
+            header=header,
+            inferSchema=infer_schema,
             order_by=order_by_sorters,
-            **kwargs,
         )
         asset._data_connector = DBFSDataConnector.build_data_connector(
             datasource_name=self.name,

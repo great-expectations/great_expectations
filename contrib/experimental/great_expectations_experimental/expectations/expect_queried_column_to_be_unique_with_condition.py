@@ -81,7 +81,7 @@ class ExpectQueriedColumnToBeUniqueWithCondition(QueryExpectation):
                 "success": False,
                 "result": {
                     "info": "The column values are not unique, under the condition",
-                    "observed_value": query_result,
+                    "observed_value": query_result[:10],
                 },
             }
 
