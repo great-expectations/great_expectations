@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import sqlalchemy
 import pytest
+import sqlalchemy
 
 from great_expectations.datasource.fluent import SQLDatasource
 
@@ -19,12 +19,14 @@ def test_kwargs_are_passed_to_create_engine(mocker: MockerFixture):
     ds = SQLDatasource(
         name="my_datasource",
         connection_string="sqlite:///",
-        kwargs={"foo": "bar", "fizz": "buzz"},
+        kwargs={"isolation_level": "SERIALIZABLE"},
     )
     print(ds)
     ds.test_connection()
 
-    assert create_engine_spy.called
+    create_engine_spy.assert_called_once_with(
+        "sqlite:///", **{"isolation_level": "SERIALIZABLE"}
+    )
 
 
 if __name__ == "__main__":
