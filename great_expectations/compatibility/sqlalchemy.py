@@ -84,3 +84,8 @@ class SQLAlchemyShim:
             # Pass through for future versions (add more version specific logic
             # in another elif if necessary)
             return sqlalchemy.select(*args, **kwargs)
+
+
+# Global instances created at import time. Use these.
+sqlalchemy_shim = SQLAlchemyShim()
+select = sqlalchemy_shim.select
