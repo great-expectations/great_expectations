@@ -22,7 +22,8 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
-from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
+from great_expectations.expectations.metrics.import_manager import F, quoted_name
+from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
 )
