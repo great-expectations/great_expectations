@@ -1,8 +1,8 @@
 ---
-title: How to connect to data on GCS using Pandas
+title: How to connect to data on GCS using Spark
 tag: [how-to, connect to data]
-description: A technical guide demonstrating how to connect Great Expectations to dat stored on Google Cloud Server using Pandas.
-keywords: [Great Expectations, Google Cloud Server, GCS, Pandas]
+description: A technical guide demonstrating how to connect Great Expectations to dat stored on Google Cloud Server using Spark.
+keywords: [Great Expectations, Google Cloud Server, GCS, Spark]
 ---
 
 <!-- Import statements start here. -->
@@ -19,7 +19,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 ## Introduction
 
-In this guide we will demonstrate how to use Pandas to connect to data stored on Google Cloud Server.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Pandas has read methods for.
+In this guide we will demonstrate how to use Spark to connect to data stored on Google Cloud Server.  In our examples, we will specifically be connecting to `.csv` files.
 
 ## Prerequisites
 
@@ -45,7 +45,7 @@ We can define a GCS datasource by providing three pieces of information:
 - `gcs_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
 ```python title="Python code"
-datasource_name = "my_gcs_datasource"
+datasource_name = "MyGcsDatasource"
 bucket_name = "test_docs_data"
 gcs_options = {}
 ```
@@ -53,8 +53,8 @@ gcs_options = {}
 Once we have those three elements, we can define our Datasource like so:
 
 ```python title="Python code"
-datasource = context.sources.add_pandas_gcs(
-    name=datasource_name, bucket_or_name=bucket_name, gcs_options=gcs_options
+datasource = context.sources.add_spark_gcs(
+    name=dataspirce_name, bucket_or_name=bucket_name, gcs_options=gcs_options
 )
 ```
 
@@ -64,15 +64,25 @@ datasource = context.sources.add_pandas_gcs(
 batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 prefix = "data/taxi_yellow_tripdata_samples/"
 data_asset = datasource.add_csv_asset(
-    name="MyTaxiDataAsset", batching_regex=batching_regex, prefix=prefix
+    name="MyTaxiDataAsset",
+    batching_regex=batching_regex,
+    header=True,
+    infer_schema=True,
+    prefix=prefix,
 )
 ```
 
+:::info Optional parameters: `header` and `infer_schema`
+
+In the above example there are two parameters that are optional, depending on the structure of your file.  If the file does not have a header line, the `header` parameter can be left out: it will default to `false`.  Likewise, if you do not want GX to infer the schema of your file, you can leave off the `infer_schema` parameter; it will also default to `false`.
+
+:::
+
 <BatchingRegexExplaination storage_location_type="GCS bucket" />
 
-## Next steps
-
-<AfterCreateNonSqlDatasource />
+<!-- ## Next steps
+ 
+ <AfterCreateNonSqlDatasource /> -->
 
 ## Additional information
 
@@ -88,7 +98,7 @@ To see the full source code used for the examples in this guide, please referenc
  For more information on the GX Python objects and APIs used in this guide, please reference the following pages of our public API documentation:
  
  - `get_context(...)`
- - `DataContext.datasources.add_pandas_gcs(...)`
+ - `DataContext.datasources.add_spark_gcs(...)`
  - `Datasource.add_csv_asset(...)` -->
 
 ### External APIs
