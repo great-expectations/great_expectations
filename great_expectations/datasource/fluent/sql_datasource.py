@@ -821,6 +821,8 @@ class SQLDatasource(Datasource):
         name: The name of this datasource.
         connection_string: The SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
+        kwargs: Extra SQLAlchemy keyword arguments to pass to `create_engine()`. Note, only python
+            primitive types will be serializable to config.
         assets: An optional dictionary whose keys are SQL DataAsset names and whose values
             are SQL DataAsset objects.
     """
