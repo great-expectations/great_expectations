@@ -284,6 +284,17 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     """
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
+    )
+
+    if isinstance(data, FluentBatchRequest):
+        return {
+            "datasource_name": data.datasource_name,
+            "data_asset_name": data.data_asset_name,
+            "options": convert_to_json_serializable(data.options),
+        }
+
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 

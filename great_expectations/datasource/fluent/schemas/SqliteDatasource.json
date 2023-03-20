@@ -1,6 +1,6 @@
 {
     "title": "SqliteDatasource",
-    "description": "Adds a sqlite datasource to the data context.\n\nArgs:\n    name: The name of this sqlite datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the sqlite database.\n        For example: \"sqlite:///path/to/file.db\"\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
+    "description": "--Public API--Adds a sqlite datasource to the data context.\n\nArgs:\n    name: The name of this sqlite datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the sqlite database.\n        For example: \"sqlite:///path/to/file.db\"\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
     "type": "object",
     "properties": {
         "type": {
@@ -14,6 +14,12 @@
         "name": {
             "title": "Name",
             "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
         },
         "assets": {
             "title": "Assets",
@@ -293,6 +299,12 @@
                     ],
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
@@ -360,6 +372,12 @@
                         "query"
                     ],
                     "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
                 },
                 "order_by": {
                     "title": "Order By",
