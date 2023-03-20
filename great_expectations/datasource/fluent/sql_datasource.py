@@ -19,6 +19,7 @@ import pydantic
 from typing_extensions import Literal, Protocol, Self
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed for pydantic
@@ -812,6 +813,7 @@ class TableAsset(_SQLAsset):
         }
 
 
+@public_api
 class SQLDatasource(Datasource):
     """Adds a generic SQL datasource to the data context.
 
@@ -896,6 +898,7 @@ class SQLDatasource(Datasource):
                 asset._datasource = self
                 asset.test_connection()
 
+    @public_api
     def add_table_asset(
         self,
         name: str,
@@ -925,6 +928,7 @@ class SQLDatasource(Datasource):
         )
         return self.add_asset(asset)
 
+    @public_api
     def add_query_asset(
         self,
         name: str,
