@@ -2294,12 +2294,14 @@ def sqlite_view_engine(test_backends):
             sqlite_engine = sa.create_engine("sqlite://")
             df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
             df.to_sql(name="test_table", con=sqlite_engine, index=True)
-            sqlite_engine.execute(
-                "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-            )
-            sqlite_engine.execute(
-                "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-            )
+            with sqlite_engine.connect() as connection:
+                with connection.begin():
+                    connection.execute(
+                        "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+                    )
+                    connection.execute(
+                        "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+                    )
             return sqlite_engine
         except ImportError:
             sa = None
