@@ -207,6 +207,13 @@ JSONConvertable: TypeAlias = Union[
 
 
 @overload
+def convert_to_json_serializable(  # type: ignore[misc]
+    data: sqlalchemy.sql.elements.TextClause,
+) -> str:
+    ...
+
+
+@overload
 def convert_to_json_serializable(  # type: ignore[misc] # overlap with `ToList`?
     data: ToDict,
 ) -> dict:
@@ -252,11 +259,6 @@ def convert_to_json_serializable(
 def convert_to_json_serializable(
     data: None,
 ) -> None:
-    ...
-
-
-@overload
-def convert_to_json_serializable(data: sqlalchemy.sql.elements.TextClause) -> None:
     ...
 
 
@@ -384,6 +386,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     except ValueError:
         pass
 
+    # sqlalchemy text for SqlAlchemy 2 compatibility
+    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
+        return str(data)
+
     if isinstance(data, pd.Series):
         # Converting a series is tricky since the index may not be a string, but all json
         # keys must be strings. So, we use a very ugly serialization strategy
@@ -420,10 +426,6 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     # PySpark schema serialization
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
-
-    # sqlalchemy text for SqlAlchemy 2 compatibility
-    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
-        return str(data)
 
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
