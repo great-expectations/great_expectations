@@ -94,7 +94,7 @@ except ImportError:
     )
 
 if TYPE_CHECKING:
-    from pyspark.sql import DataFrame
+    from pyspark.sql import DataFrame  # noqa: TCH004
 
 # noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):

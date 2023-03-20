@@ -75,9 +75,11 @@ except ImportError:
 try:
     import sqlalchemy
     from sqlalchemy.engine.row import LegacyRow
+    from sqlalchemy.sql.elements import TextClause
 except ImportError:
     sqlalchemy = None
     LegacyRow = None
+    TextClause = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
@@ -102,7 +104,6 @@ SCHEMAS = {
 
 if TYPE_CHECKING:
     import numpy.typing as npt
-    from pyspark.sql import SparkSession  # noqa: TCH004
     from ruamel.yaml.comments import CommentedMap
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
@@ -204,13 +205,6 @@ ToDict: TypeAlias = Union[
 JSONConvertable: TypeAlias = Union[
     ToDict, ToList, ToStr, ToInt, ToFloat, ToBool, ToBool, None
 ]
-
-
-@overload
-def convert_to_json_serializable(  # type: ignore[misc]
-    data: sqlalchemy.sql.elements.TextClause,
-) -> str:
-    ...
 
 
 @overload
@@ -386,10 +380,6 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     except ValueError:
         pass
 
-    # sqlalchemy text for SqlAlchemy 2 compatibility
-    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
-        return str(data)
-
     if isinstance(data, pd.Series):
         # Converting a series is tricky since the index may not be a string, but all json
         # keys must be strings. So, we use a very ugly serialization strategy
@@ -426,6 +416,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     # PySpark schema serialization
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
+
+    # sqlalchemy text for SqlAlchemy 2 compatibility
+    if TextClause is not None and isinstance(data, TextClause):
+        return str(data)
 
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
