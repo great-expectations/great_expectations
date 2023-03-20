@@ -51,6 +51,11 @@
                     "format": "uri"
                 }
             ]
+        },
+        "create_temp_table": {
+            "title": "Create Temp Table",
+            "default": true,
+            "type": "boolean"
         }
     },
     "required": [
