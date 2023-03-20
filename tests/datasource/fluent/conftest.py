@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Optional, Generator, List, Type, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
 
 import pytest
 from pytest import MonkeyPatch
