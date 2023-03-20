@@ -830,9 +830,10 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
-    connect_args: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
+    kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
         default={},
-        description="Optional dictionary of `connect_args` will be passed to the SQLAlchemy Engine",
+        description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"
+        " as part of `create_engine(connection_string, **kwargs)`",
     )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
@@ -855,14 +856,13 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.engine.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                engine_kwargs = self.dict(
+                model_dict = self.dict(
                     exclude=self._EXCLUDED_EXEC_ENG_ARGS,
                     config_provider=self._config_provider,
                 )
-                connection_string = engine_kwargs.pop("connection_string")
-                self._engine = sqlalchemy.create_engine(
-                    connection_string, **engine_kwargs
-                )
+                connection_string = model_dict.pop("connection_string")
+                kwargs = model_dict.pop("kwargs", {})
+                self._engine = sqlalchemy.create_engine(connection_string, **kwargs)
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
