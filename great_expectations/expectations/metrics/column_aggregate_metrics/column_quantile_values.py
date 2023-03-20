@@ -19,7 +19,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa, SQLAlchemyShim
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 
@@ -60,6 +60,8 @@ except ImportError:
         RowProxy = None
         Row = None
 
+sqlalchemy_shim = SQLAlchemyShim()
+select = sqlalchemy_shim.select
 
 class ColumnQuantileValues(ColumnAggregateMetricProvider):
     metric_name = "column.quantile_values"
