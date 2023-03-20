@@ -1,8 +1,8 @@
 ---
 title: How to connect to data on GCS using Pandas
 tag: [how-to, connect to data]
-description: A technical guide demonstrating how to connect Great Expectations to dat stored on Google Cloud Server using Pandas.
-keywords: [Great Expectations, Google Cloud Server, GCS, Pandas]
+description: A technical guide demonstrating how to connect Great Expectations to dat stored on Google Cloud Storage using Pandas.
+keywords: [Great Expectations, Google Cloud Storage, GCS, Pandas]
 ---
 
 <!-- Import statements start here. -->
@@ -19,7 +19,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 ## Introduction
 
-In this guide we will demonstrate how to use Pandas to connect to data stored on Google Cloud Server.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Pandas has read methods for.
+In this guide we will demonstrate how to use Pandas to connect to data stored on Google Cloud Storage.  In our examples, we will specifically be connecting to `.csv` files.  However, Great Expectations supports most types of files that Pandas has read methods for.
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ In this guide we will demonstrate how to use Pandas to connect to data stored on
 ### 2. Create a Datasource
 
 We can define a GCS datasource by providing three pieces of information:
-- `name`: In our example, we will name our Datasource `"MyGcsDatasource"`
+- `name`: In our example, we will name our Datasource `"my_gcs_datasource"`
 - `bucket_or_name`: In this example, we will provide a GCS bucket
 - `gcs_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
