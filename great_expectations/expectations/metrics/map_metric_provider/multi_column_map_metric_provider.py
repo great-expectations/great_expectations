@@ -5,13 +5,13 @@ from typing import TYPE_CHECKING, Optional, Tuple
 
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
-
-if TYPE_CHECKING:
-    from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.expectations.metrics.map_metric_provider import (
     MapMetricProvider,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import ExecutionEngine
 
 logger = logging.getLogger(__name__)
 
