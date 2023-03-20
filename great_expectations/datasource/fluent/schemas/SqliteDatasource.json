@@ -46,9 +46,9 @@
                 }
             ]
         },
-        "connect_args": {
-            "title": "Connect Args",
-            "description": "Optional dictionary of `connect_args` will be passed to the SQLAlchemy Engine",
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine as part of `create_engine(connection_string, **kwargs)`",
             "default": {},
             "type": "object",
             "additionalProperties": {
