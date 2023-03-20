@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 from contextlib import contextmanager
-from typing import Any, Callable, Dict, Generator, List, Type, Union
+from typing import Any, Callable, Dict, Optional, Generator, List, Type, Union
 
 import pytest
 from pytest import MonkeyPatch
@@ -58,7 +58,7 @@ class MockSaEngine:
 def sqlachemy_execution_engine_mock_cls(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
-    splitter_query_response: Union[List[Dict[str, Any]], List[Any]],
+    splitter_query_response: Optional[Union[List[Dict[str, Any]], List[Any]]] = None,
 ):
     """Creates a mock gx sql alchemy engine class
 
@@ -66,20 +66,18 @@ def sqlachemy_execution_engine_mock_cls(
         validate_batch_spec: A hook that can be used to validate the generated the batch spec
             passed into get_batch_data_and_markers
         dialect: A string representing the SQL Engine dialect. Examples include: postgresql, sqlite
-        splitter_query_response: A list of dictionaries. Each dictionary is a row returned back from
-            the splitter query. The keys are the column names and the value is the column values, eg:
-            [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
+        splitter_query_response: An optional list of dictionaries. Each dictionary is a row returned
+            from the splitter query. The keys are the column names and the value is the column values,
+            eg: [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
     """
 
-    if not splitter_query_response:
-        raise ValueError("splitter_query_response must be a non-empty list.")
-
     class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
-        def __init__(self, *args, **kwargs):
+        def __init__(self, create_temp_table: bool = True, *args, **kwargs):
             # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
             self.engine = MockSaEngine(dialect=Dialect(dialect))
+            self.create_temp_table = create_temp_table
 
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec

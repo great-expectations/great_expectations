@@ -819,6 +819,7 @@ class SQLDatasource(Datasource):
         name: The name of this datasource.
         connection_string: The SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
+        create_temp_table: Whether to leverage temporary tables during metric computation.
         assets: An optional dictionary whose keys are SQL DataAsset names and whose values
             are SQL DataAsset objects.
     """
@@ -830,6 +831,7 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
+    create_temp_table: bool = True
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
     assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
