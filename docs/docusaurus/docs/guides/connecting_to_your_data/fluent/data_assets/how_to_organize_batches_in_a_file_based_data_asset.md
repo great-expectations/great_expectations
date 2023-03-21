@@ -134,7 +134,7 @@ For more information on how to format regular expressions, we recommend referenc
 
 ### 2. Add a Data Asset using the `batching_regex`
 
-Now that we have put together a regular expression that will match one or more of the files in our Datasource's `base_folder`, we can use it to create our Data Asset.  Since the files in this particular Datasource's `base_folder` are `.csv` files, we will use the `add_pandas_csv(...)` method of our Datasource to create the new Data Asset:
+Now that we have put together a regular expression that will match one or more of the files in our Datasource's `base_folder`, we can use it to create our Data Asset.  Since the files in this particular Datasource's `base_folder` are csv files, we will use the `add_pandas_csv(...)` method of our Datasource to create the new Data Asset:
 
 ```python title="Python code"
 my_asset = my_datasource.add_csv_asset(name="my_taxi_data_asset", batching_regex=my_batching_regex)

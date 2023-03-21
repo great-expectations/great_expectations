@@ -94,7 +94,7 @@ data_asset = datasource.add_csv_asset(
 # optionally can accept the same parameters as `pandas.read_csv()`
 ```
 
-<TipUsingPandasToConnectToDifferentFileTypes this_example_file_extension=".csv" />
+<TipUsingPandasToConnectToDifferentFileTypes this_example_file_extension="csv" />
 
 
 ### 4. Repeat step 3 as needed to add additional files as Data Assets

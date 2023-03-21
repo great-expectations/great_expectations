@@ -19,7 +19,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 ## Introduction
 
-In this guide we will demonstrate how to use Spark to connect to data stored on Google Cloud Storage.  In our examples, we will specifically be connecting to `.csv` files.
+In this guide we will demonstrate how to use Spark to connect to data stored on Google Cloud Storage.  In our examples, we will specifically be connecting to csv files.
 
 ## Prerequisites
 

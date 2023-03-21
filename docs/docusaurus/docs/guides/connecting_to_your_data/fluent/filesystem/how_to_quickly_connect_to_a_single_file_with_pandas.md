@@ -48,7 +48,7 @@ validator = context.sources.pandas_default.read_csv(
 )
 ```
 
-<InfoUsingPandasToConnectToDifferentFileTypes this_example_file_extension="'.csv'"/>
+<InfoUsingPandasToConnectToDifferentFileTypes this_example_file_extension="csv"/>
 
 ## Next steps
 
