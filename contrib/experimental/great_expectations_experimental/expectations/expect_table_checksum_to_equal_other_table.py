@@ -1,6 +1,11 @@
 import re
 from copy import deepcopy
 
+try:
+    import sqlalchemy as sa
+except ImportError:
+    sa = None
+
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit
@@ -102,7 +107,7 @@ class TableChecksum(TableMetricProvider):
         if DEBUG:
             logger.error("\n***********cksumquery***********\n" + cksumquery)
 
-        return int(execution_engine.engine.execute(cksumquery).scalar())
+        return int(execution_engine.engine.execute(sa.text(cksumquery)).scalar())
 
     # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(

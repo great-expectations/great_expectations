@@ -58,7 +58,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 source_table=_table,
                 column_name=column.name,
             )
-            sql_engine.execute(temp_table_stmt)
+            sql_engine.execute(sa.text(temp_table_stmt))
             dup_query = (
                 sa.select(column)
                 .select_from(sa.text(temp_table_name))

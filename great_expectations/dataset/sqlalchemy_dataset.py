@@ -1098,7 +1098,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             or self.sql_engine_dialect.name.lower() == GXSqlDialect.TRINO
         ):
             element_values = self.engine.execute(
-                f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
+                sa.text(f"SELECT approx_percentile({column},  0.5) FROM {self._table}")
             )
             return convert_to_json_serializable(element_values.fetchone()[0])
         else:
@@ -1212,7 +1212,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             f"from (SELECT {column} from {self._table})"
         )
         try:
-            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            quantiles_results = self.engine.execute(
+                sa.text(quantiles_query)
+            ).fetchone()[0]
             quantiles_results_list = ast.literal_eval(quantiles_results)
             return quantiles_results_list
 
@@ -1227,7 +1229,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             f"from (SELECT {column} from {self._table})"
         )
         try:
-            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            quantiles_results = self.engine.execute(
+                sa.text(quantiles_query)
+            ).fetchone()[0]
             return quantiles_results
 
         except ProgrammingError as pe:
@@ -1712,11 +1716,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if engine_dialect == GXSqlDialect.ORACLE:
             try:
-                self.engine.execute(stmt_1)
+                self.engine.execute(sa.text(stmt_1))
             except DatabaseError:
-                self.engine.execute(stmt_2)
+                self.engine.execute(sa.text(stmt_2))
         else:
-            self.engine.execute(stmt)
+            self.engine.execute(sa.text(stmt))
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
@@ -2302,7 +2306,7 @@ WHERE
                 source_table=self._table,
                 column_name=column,
             )
-            self.engine.execute(temp_table_stmt)
+            self.engine.execute(sa.text(temp_table_stmt))
             dup_query = (
                 sa.select(sa.column(column))
                 .select_from(sa.text(temp_table_name))

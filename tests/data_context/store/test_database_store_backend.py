@@ -35,7 +35,7 @@ def test_database_store_backend_schema_spec(caplog, sa, test_backends):
     assert "hello" == store_backend.get(key)
 
     # clean up values
-    store_backend.engine.execute(f"DROP TABLE {store_backend._table};")
+    store_backend.engine.execute(sa.text(f"DROP TABLE {store_backend._table};"))
 
 
 @pytest.mark.integration
