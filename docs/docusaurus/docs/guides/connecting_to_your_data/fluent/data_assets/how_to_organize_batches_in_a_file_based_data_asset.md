@@ -95,12 +95,12 @@ If you are using a Datasource that was created with the advanced block-config me
 
 ### 1. Retrieve a file-based Datasource
 
-For this guide, we will use a previously defined Datasource named `"MyDatasource"`.  For purposes of our demonstration, this Datasource is a Pandas Filesystem Datasource that uses a folder named "data" as its `base_folder`.
+For this guide, we will use a previously defined Datasource named `"my_datasource"`.  For purposes of our demonstration, this Datasource is a Pandas Filesystem Datasource that uses a folder named "data" as its `base_folder`.
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
 ```python title="Python code"
-my_datasource = context.get_datasource("MyDatasource")
+my_datasource = context.get_datasource("my_datasource")
 ```
 
 ### 1. Create a `batching_regex`
@@ -137,7 +137,7 @@ For more information on how to format regular expressions, we recommend referenc
 Now that we have put together a regular expression that will match one or more of the files in our Datasource's `base_folder`, we can use it to create our Data Asset.  Since the files in this particular Datasource's `base_folder` are `.csv` files, we will use the `add_pandas_csv(...)` method of our Datasource to create the new Data Asset:
 
 ```python title="Python code"
-my_asset = my_datasource.add_csv_asset(name="MyTaxiDataAsset", batching_regex=my_batching_regex)
+my_asset = my_datasource.add_csv_asset(name="my_taxi_data_asset", batching_regex=my_batching_regex)
 ```
 
 :::tip What if I don't provide a `batching_regex`?

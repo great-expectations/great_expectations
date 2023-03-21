@@ -76,18 +76,18 @@ A Data Asset requires two pieces of information to be defined:
 
 <TipFilesystemDataAssetWhatIfBatchingRegexMatchesMultipleFiles />
 
-For this example, we will define these two values in advance by storing them in the Python variables `asset_name` and (since we are connecting to NYC taxi data in this example) `taxi_batching_regex`:
+For this example, we will define these two values in advance by storing them in the Python variables `asset_name` and (since we are connecting to NYC taxi data in this example) `batching_regex`:
 
 ```python title="Python code"
-asset_name = "MyTaxiDataAsset"
-taxi_batching_regex = "yellow_tripdata_sample_2023_01\.csv"
+name = "my_taxi_data_asset"
+batching_regex = "yellow_tripdata_sample_2023_01\.csv"
 ```
 
 Once we have determined those two values, we will pass them in as parameters when we create our Data Asset:
 
 ```python title="Python code"
 data_asset = datasource.add_csv_asset(
-    name=asset_name, batching_regex=taxi_batching_regex
+    name=name, batching_regex=batching_regex
 )
 ```
 

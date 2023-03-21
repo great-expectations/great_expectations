@@ -82,14 +82,14 @@ For this example, we will define these two values in advance by storing them in 
 
 ```python title="Python code"
 name = "my_taxi_data_asset"
-taxi_batching_regex = "yellow_tripdata_sample_2023_01\.csv"
+batching_regex = "yellow_tripdata_sample_2023_01\.csv"
 ```
 
 Once we have determined those two values, we will pass them in as parameters when we create our Data Asset:
 
 ```python title="Python code"
 data_asset = datasource.add_csv_asset(
-    name=name, batching_regex=taxi_batching_regex
+    name=name, batching_regex=batching_regex
 )
 # optionally can accept the same parameters as `pandas.read_csv()`
 ```

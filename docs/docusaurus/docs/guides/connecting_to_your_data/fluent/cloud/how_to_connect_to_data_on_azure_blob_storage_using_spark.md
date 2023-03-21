@@ -46,7 +46,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 We can create a Datasource that points to our Azure Blob Storage with the code:
 
 ```python Python code
-datasource_name = "MyDatasource"
+datasource_name = "my_datasource"
 datasource = context.sources.add_spark_abs(
     name=datasource_name,
     azure_options={
