@@ -370,12 +370,22 @@ def test_get_map_metric_dependencies():
 
 
 def test_is_sqlalchemy_metric_selectable():
-    assert MapMetricProvider.is_sqlalchemy_metric_selectable(
-        map_metric_provider=CompoundColumnsUnique
+    with pytest.warns(DeprecationWarning) as record:
+        assert MapMetricProvider.is_sqlalchemy_metric_selectable(
+            map_metric_provider=CompoundColumnsUnique
+        )
+
+    assert "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated." in str(
+        record.list[0].message
     )
 
-    assert not MapMetricProvider.is_sqlalchemy_metric_selectable(
-        map_metric_provider=ColumnValuesNonNull
+    with pytest.warns(DeprecationWarning) as record:
+        assert not MapMetricProvider.is_sqlalchemy_metric_selectable(
+            map_metric_provider=ColumnValuesNonNull
+        )
+
+    assert "MapMetricProvider.is_sqlalchemy_metric_selectable is deprecated." in str(
+        record.list[0].message
     )
 
 

@@ -34,7 +34,6 @@ except ImportError:
 
 if TYPE_CHECKING:
     import pyspark.sql
-    import sqlalchemy as sa
     from sqlalchemy.sql.expression import ColumnElement
 
 
