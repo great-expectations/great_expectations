@@ -52,6 +52,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_csv_asset(
         self,
         name: str,
+        *,
         batching_regex: Optional[Union[str, re.Pattern]] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
@@ -109,6 +110,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_excel_asset(
         self,
         name: str,
+        *,
         batching_regex: Optional[Union[str, re.Pattern]] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
@@ -139,6 +141,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_feather_asset(
         self,
         name: str,
+        *,
         order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
         columns: Union[Sequence[Hashable], None] = ...,
@@ -148,6 +151,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_hdf_asset(
         self,
         name: str,
+        *,
         order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
         key: typing.Any = ...,
@@ -164,6 +168,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_html_asset(
         self,
         name: str,
+        *,
         order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
         match: Union[str, typing.Pattern] = ".+",
@@ -184,6 +189,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_json_asset(
         self,
         name: str,
+        *,
         batching_regex: Optional[Union[str, re.Pattern]] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
@@ -206,6 +212,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_orc_asset(
         self,
         name: str,
+        *,
         order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
         columns: typing.Union[typing.List[str], None] = ...,
@@ -214,6 +221,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_parquet_asset(
         self,
         name: str,
+        *,
         batching_regex: Optional[Union[str, re.Pattern]] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
@@ -226,6 +234,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_pickle_asset(
         self,
         name: str,
+        *,
         order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
         compression: CompressionOptions = "infer",
@@ -234,6 +243,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_sas_asset(
         self,
         name: str,
+        *,
         order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
         format: typing.Union[str, None] = ...,
@@ -246,6 +256,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_spss_asset(
         self,
         name: str,
+        *,
         order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
@@ -254,6 +265,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_stata_asset(
         self,
         name: str,
+        *,
         order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
         convert_dates: bool = ...,
@@ -271,6 +283,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
     def add_xml_asset(
         self,
         name: str,
+        *,
         order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
         xpath: str = "./*",
