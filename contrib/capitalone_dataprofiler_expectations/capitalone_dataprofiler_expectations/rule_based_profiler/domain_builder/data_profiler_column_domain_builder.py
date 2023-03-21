@@ -87,4 +87,21 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
-            
+            runtime_configuration: Optional[dict] = None,
+        Returns:
+            List of domains that match the desired columns and filtering criteria.
+        """
+        batch_ids: List[str] = self.get_batch_ids(
+            variables=variables)  # type: ignore[assignment] # could be None
+
+        # type: ignore[assignment] # could be None
+        validator: Validator = self.get_validator(variables=variables)
+
+        effective_column_names: List[str] = self.get_effective_column_names(
+            batch_ids=batch_ids,
+            validator=validator,
+            variables=variables,
+            rule_name=rule_name
+        )
+
+        
