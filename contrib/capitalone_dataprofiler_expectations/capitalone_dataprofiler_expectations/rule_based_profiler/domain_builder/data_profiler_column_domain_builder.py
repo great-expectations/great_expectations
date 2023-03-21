@@ -52,4 +52,22 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
                                                      Iterable, List[str]]] = None,
         exclude_column_name_suffixes: Optional[Union[str,
                                                      Iterable, List[str]]] = None,
-        
+        semantic_type_filter_module_name: Optional[str] = None,
+        semantic_type_filter_class_name: Optional[str] = None,
+        include_semantic_types: Optional[
+            Union[str, SemanticDomainTypes,
+                  List[Union[str, SemanticDomainTypes]]]
+        ] = None,
+        exclude_semantic_types: Optional[
+            Union[str, SemanticDomainTypes,
+                  List[Union[str, SemanticDomainTypes]]]
+        ] = None,
+        data_context: Optional[AbstractDataContext] = None,
+    ) -> None:
+        super().__init__(
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
+            include_column_name_suffixes=include_column_name_suffixes,
+            exclude_column_name_suffixes=exclude_column_name_suffixes,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            
