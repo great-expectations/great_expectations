@@ -1,5 +1,7 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py imports">
-from ruamel import yaml
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml: YAMLHandler = YAMLHandler()
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import gx">
 import great_expectations as gx
