@@ -282,7 +282,7 @@ def _sqlalchemy_map_condition_unexpected_count_aggregate_fn(
     return (
         sa.func.sum(
             sa.case(
-                [(unexpected_condition, 1)],
+                (unexpected_condition, 1),
                 else_=0,
             )
         ),
@@ -314,12 +314,10 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
     # The integral values are cast to SQL Numeric in order to avoid a bug in AWS Redshift (converted to integer later).
     count_case_statement: List[Label] = sa.case(
-        [
-            (
-                unexpected_condition,
-                sa.sql.expression.cast(1, sa.Numeric),
-            )
-        ],
+        (
+            unexpected_condition,
+            sa.sql.expression.cast(1, sa.Numeric),
+        ),
         else_=sa.sql.expression.cast(0, sa.Numeric),
     ).label("condition")
 
