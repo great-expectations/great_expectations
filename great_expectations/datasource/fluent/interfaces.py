@@ -460,7 +460,9 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def add_asset(
+        self, asset: _DataAssetT, dc_options: dict | None = None
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
@@ -469,6 +471,10 @@ class Datasource(
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+
+        if not dc_options:
+            dc_options = {}
+        self._build_data_connector(asset, **dc_options)  # TODO: does this need kwargs?
 
         asset.test_connection()
 
@@ -540,13 +546,13 @@ class Datasource(
             """One needs to implement "test_connection" on a Datasource subclass."""
         )
 
-    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
+    def _build_data_connector(self, data_asset: _DataAssetT, **kwargs) -> None:
         """Any Datasource subclass that utilizes DataConnector should overwrite this method.
 
         Specific implementations instantiate appropriate DataConnector class and set "self._data_connector" to it.
 
         Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
+            data_asset: DataAsset using this DataConnector instance
             kwargs: Extra keyword arguments allow specification of arguments used by particular DataConnector subclasses
         """
         pass
