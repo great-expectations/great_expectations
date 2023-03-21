@@ -1,6 +1,6 @@
 {
     "title": "SqliteDatasource",
-    "description": "--Public API--Adds a sqlite datasource to the data context.\n\nArgs:\n    name: The name of this sqlite datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the sqlite database.\n        For example: \"sqlite:///path/to/file.db\"\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
+    "description": "--Public API--Adds a sqlite datasource to the data context.\n\nArgs:\n    name: The name of this sqlite datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the sqlite database.\n        For example: \"sqlite:///path/to/file.db\"\n    create_temp_table: Whether to leverage temporary tables during metric computation.\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
     "type": "object",
     "properties": {
         "type": {
@@ -51,6 +51,11 @@
                     "format": "uri"
                 }
             ]
+        },
+        "create_temp_table": {
+            "title": "Create Temp Table",
+            "default": true,
+            "type": "boolean"
         },
         "kwargs": {
             "title": "Kwargs",
