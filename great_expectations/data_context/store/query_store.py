@@ -8,16 +8,16 @@ from great_expectations.optional_imports import is_version_greater_or_equal
 from great_expectations.util import filter_properties_dict
 
 try:
-    import sqlalchemy
+    import sqlalchemy as sa
     from sqlalchemy import create_engine
     from sqlalchemy.engine.url import URL
 
-    if is_version_greater_or_equal(sqlalchemy.__version__, "1.4.0"):
+    if is_version_greater_or_equal(sa.__version__, "1.4.0"):
         url_create_fn = URL.create
     else:
         url_create_fn = URL
 except ImportError:
-    sqlalchemy = None
+    sa = None
     create_engine = None
     URL = None
     url_create_fn = None
@@ -40,7 +40,7 @@ class SqlAlchemyQueryStore(Store):
         runtime_environment=None,
         store_name=None,
     ) -> None:
-        if not sqlalchemy:
+        if not sa:
             raise gx_exceptions.DataContextError(
                 "sqlalchemy module not found, but is required for "
                 "SqlAlchemyQueryStore"
@@ -123,7 +123,7 @@ class SqlAlchemyQueryStore(Store):
         assert query, "Query must be specified to use SqlAlchemyQueryStore"
 
         query = Template(query).safe_substitute(query_parameters)
-        res = self.engine.execute(query).fetchall()
+        res = self.engine.execute(sa.text(query)).fetchall()
         # NOTE: 20200617 - JPC: this approach is probably overly opinionated, but we can
         # adjust based on specific user requests
         res = [val for row in res for val in row]

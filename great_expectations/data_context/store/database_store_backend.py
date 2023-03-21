@@ -111,7 +111,7 @@ class DatabaseStoreBackend(StoreBackend):
             try:
                 if self._schema_name:
                     self.engine.execute(
-                        f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};"
+                        sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
                     )
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
