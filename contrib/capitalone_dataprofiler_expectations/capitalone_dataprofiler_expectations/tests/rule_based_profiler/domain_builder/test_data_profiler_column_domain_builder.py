@@ -35,3 +35,23 @@ yaml = YAML(typ="safe")
 @pytest.mark.slow  # 1.21s
 def test_data_profiler_column_domain_builder(
 ):
+
+    test_root_path = os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+    )
+
+    profile_path = os.path.join(
+        test_root_path,
+        "data_profiler_files",
+        "profile.pkl",
+    )
+
+    variables, a, b, c = dict(), dict(), dict(), dict()
+
+    b["variables"] = c
+
+    a["variables"] = b
+
+    variables["parameter_nodes"] = a
+
+    variables["parameter_nodes"]["variables"]["variables"]["profile_path"] = profile_path
