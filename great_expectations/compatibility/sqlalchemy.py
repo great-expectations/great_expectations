@@ -105,8 +105,8 @@ class SQLAlchemyShim:
 
 
 # Global instances created at import time. Use these.
-sqlalchemy_shim = SQLAlchemyShim()
 if sqlalchemy:
+    sqlalchemy_shim = SQLAlchemyShim()
     sa = sqlalchemy
     sa.select = sqlalchemy_shim.select
 else:
