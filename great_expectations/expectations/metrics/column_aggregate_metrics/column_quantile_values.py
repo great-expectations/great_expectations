@@ -7,6 +7,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 
+from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -19,7 +20,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 

@@ -1,9 +1,9 @@
-import pytest
 from unittest import mock
 
+import pytest
 from packaging.version import Version
 
-from great_expectations.compatibility.sqlalchemy import sa, sqlalchemy_shim
+from great_expectations.compatibility.sqlalchemy import sqlalchemy_shim
 
 
 @pytest.mark.unit

@@ -4,14 +4,13 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
     import_make_url,
 )
-
-from great_expectations.compatibility.sqlalchemy import sa
 
 try:
     from sqlalchemy import Column, MetaData, String, Table, and_, column

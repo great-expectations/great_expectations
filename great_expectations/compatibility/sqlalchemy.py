@@ -24,8 +24,8 @@ try:
 except ImportError:
     sqlalchemy = NotImported("sqlalchemy not found, please install.")
 
-import types
 import functools
+import types
 
 
 def copy_func(f):
