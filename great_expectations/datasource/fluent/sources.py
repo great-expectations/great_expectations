@@ -272,13 +272,16 @@ class _SourceFactories:
 
                 # if the data_connector uses a data_connector we need to identify the
                 # asset level attributes needed by the data_connector
+                # push them to `dc_options` field
                 if self.data_connector_type:
                     dc_options = {
-                        k: kwargs.pop(k)
+                        k: v
                         for (k, v) in kwargs.items()
                         if k in self.data_connector_type.asset_level_option_keys and v
                     }
                     if dc_options:
+                        for k in dc_options:  # TODO: avoid this extra loop
+                            kwargs.pop(k)
                         kwargs["dc_options"] = dc_options
                 else:
                     dc_options = {}
