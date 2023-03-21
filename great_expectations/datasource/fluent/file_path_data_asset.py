@@ -21,6 +21,7 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
 )
@@ -60,7 +61,7 @@ class _FilePathDataAsset(DataAsset):
     }
 
     # General file-path DataAsset pertaining attributes.
-    batching_regex: Pattern
+    batching_regex: Pattern = MATCH_ALL_PATTERN
     # TODO: better name
     dc_options: Mapping = pydantic.Field(
         default_factory=dict,
