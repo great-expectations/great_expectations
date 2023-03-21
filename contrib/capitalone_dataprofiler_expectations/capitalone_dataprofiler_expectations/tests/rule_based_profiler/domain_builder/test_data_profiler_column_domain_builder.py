@@ -109,3 +109,21 @@ def test_data_profiler_column_domain_builder(
         "domain_kwargs": {
             "column": "RatecodeID"
         },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "PULocationID"
+        },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "DOLocationID"
+        },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "payment_type"
+        },
