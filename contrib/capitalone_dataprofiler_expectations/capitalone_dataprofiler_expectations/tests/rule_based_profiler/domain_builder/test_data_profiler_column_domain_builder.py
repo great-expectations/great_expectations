@@ -145,3 +145,21 @@ def test_data_profiler_column_domain_builder(
         "domain_kwargs": {
             "column": "mta_tax"
         },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "tip_amount"
+        },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "tolls_amount"
+        },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "improvement_surcharge"
+        },
