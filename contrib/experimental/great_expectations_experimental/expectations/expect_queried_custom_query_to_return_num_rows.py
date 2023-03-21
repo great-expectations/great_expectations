@@ -9,8 +9,7 @@ from great_expectations.expectations.expectation import (
     QueryExpectation,
 )
 
-
-class ExpectQueriedCustomQueryResultsToBeCustom(QueryExpectation):
+class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
     """Expect the number of rows returned from custom query to be equal to specified value.
 
     Args:
@@ -115,4 +114,4 @@ class ExpectQueriedCustomQueryResultsToBeCustom(QueryExpectation):
 
 
 if __name__ == "__main__":
-    ExpectQueriedCustomQueryResultsToBeCustom().print_diagnostic_checklist()
+    ExpectQueriedCustomQueryToReturnNumRows().print_diagnostic_checklist()
