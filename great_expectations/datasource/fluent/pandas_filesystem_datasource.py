@@ -61,7 +61,6 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         self, data_asset: _FilePathDataAsset, glob_directive: str = "**/*", **kwargs
     ) -> None:
         """Builds and attaches the `FilesystemDataConnector` to the asset."""
-        # TODO: how to pass in `glob_directive`
         if kwargs:
             raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
@@ -71,7 +70,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             data_asset_name=data_asset.name,
             batching_regex=data_asset.batching_regex,
             base_directory=self.base_directory,
-            glob_directive=glob_directive,  # TODO: glob directive is not an asset field
+            glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
         return None
