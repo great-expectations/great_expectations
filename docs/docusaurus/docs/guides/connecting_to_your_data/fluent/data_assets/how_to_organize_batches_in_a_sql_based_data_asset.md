@@ -7,6 +7,7 @@ keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration m
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 
+import AfterRequestDataFromADataAsset from '/docs/components/connect_to_data/next_steps/_after_request_data_from_a_data_asset.md'
 
 <!-- ## Introduction -->
 
@@ -136,9 +137,4 @@ for batch in batches:
 
 Now that you have further configured a file-based Data Asset, you may want to look into:
 
-### Requesting Data from a Data Asset
-- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
-
-### Using Data Assets to create Expectations
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
+<AfterRequestDataFromADataAsset />
