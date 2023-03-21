@@ -182,4 +182,4 @@ def test_create_temp_table(create_sqlite_source):
         assert source.create_temp_table is False
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
-        assert source._execution_engine.create_temp_table is False
+        assert source._execution_engine._create_temp_table is False

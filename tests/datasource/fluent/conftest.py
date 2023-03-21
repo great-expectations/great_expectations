@@ -77,7 +77,7 @@ def sqlachemy_execution_engine_mock_cls(
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
             self.engine = MockSaEngine(dialect=Dialect(dialect))
-            self.create_temp_table = create_temp_table
+            self._create_temp_table = create_temp_table
 
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
