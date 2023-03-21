@@ -34,24 +34,19 @@ if TYPE_CHECKING:
 
 
 class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
-
     def __init__(
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        include_column_name_suffixes: Optional[Union[str,
-                                                     Iterable, List[str]]] = None,
-        exclude_column_name_suffixes: Optional[Union[str,
-                                                     Iterable, List[str]]] = None,
+        include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+        exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
         semantic_type_filter_module_name: Optional[str] = None,
         semantic_type_filter_class_name: Optional[str] = None,
         include_semantic_types: Optional[
-            Union[str, SemanticDomainTypes,
-                  List[Union[str, SemanticDomainTypes]]]
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
         exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes,
-                  List[Union[str, SemanticDomainTypes]]]
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
         ] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
@@ -83,7 +78,8 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             List of domains that match the desired columns and filtering criteria.
         """
         batch_ids: List[str] = self.get_batch_ids(
-            variables=variables)  # type: ignore[assignment] # could be None
+            variables=variables
+        )  # type: ignore[assignment] # could be None
 
         # type: ignore[assignment] # could be None
         validator: Validator = self.get_validator(variables=variables)
@@ -92,7 +88,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             batch_ids=batch_ids,
             validator=validator,
             variables=variables,
-            rule_name=rule_name
+            rule_name=rule_name,
         )
 
         column_name: str
@@ -112,7 +108,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         batch_ids: Optional[List[str]] = None,
         validator: Optional[Validator] = None,
         variables: Optional[ParameterContainer] = None,
-        rule_name: Optional[str] = None
+        rule_name: Optional[str] = None,
     ) -> List[str]:
         """
         This method filters by a rule's criteria to obtain columns to be included as part of returned "Domain" objects.
@@ -120,8 +116,12 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
 
         effective_column_names = list()
 
-        rule_name_to_data_types = {"numeric_rule": {"int", "float"}, "timestamp_rule": {
-            "datetime"}, "text_rule": {"string", "text"}, "categorical_rule": {"string"}}
+        rule_name_to_data_types = {
+            "numeric_rule": {"int", "float"},
+            "timestamp_rule": {"datetime"},
+            "text_rule": {"string", "text"},
+            "categorical_rule": {"string"},
+        }
 
         if not variables:
             raise TypeError("Variables not defined")
@@ -130,7 +130,9 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             # change exception to more specific one
             raise Exception(f"'{rule_name}' is not a valid Rule name")
 
-        profile_path: str = variables["parameter_nodes"]["variables"]["variables"]["profile_path"]
+        profile_path: str = variables["parameter_nodes"]["variables"]["variables"][
+            "profile_path"
+        ]
 
         profile = Profiler.load(profile_path)
 
