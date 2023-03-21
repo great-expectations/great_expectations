@@ -196,7 +196,7 @@ def test_sqlalchemy_source_limit(sqlitedb_engine, empty_data_context):
             {"table": "table_1", "limit": 1, "offset": 2}
         )
         assert isinstance(limited_batch, Batch)
-        limited_dataset = BridgeValidator(
+        BridgeValidator(
             limited_batch,
             expectation_suite=ExpectationSuite("test", data_context=context),
             expectation_engine=SqlAlchemyDataset,
