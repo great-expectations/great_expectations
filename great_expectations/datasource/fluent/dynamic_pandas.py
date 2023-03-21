@@ -309,7 +309,9 @@ def _to_pydantic_fields(
     `pydantic.create_model()` as field arguments
     """
     fields_dict: Dict[str, _FieldSpec] = {}
-    all_parameters: Iterator[tuple[str, inspect.Parameter]] = iter(  # type: ignore[valid-type]
+    all_parameters: Iterator[
+        tuple[str, inspect.Parameter]
+    ] = iter(  # noqa: [type-checking]
         sig_tuple.signature.parameters.items()
     )
     if skip_first_param:
