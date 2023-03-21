@@ -89,6 +89,14 @@ class SQLAlchemyShim:
 
     def select(self, *args, **kwargs):
         """Select method that works with all sqlalchemy versions supported in GX."""
+        # TODO: wrap this in a make_select method and then grab signature from underlying select method
+        #  and then return new select method to monkeypatch. Won't work for pycharm, but will work for jupyter.
+        #  For IDEs, stub file like used in fluent datasources, use those here.
+        #  Would it work? Might have to generate stub files
+        #  on import. Might be other ways. Check with pod fka Mario for learnings.
+        #  How to call `make_select` not at import time?
+        #  Use property, then gets overriden when used to make this not happen during import time. If none, then call
+        #  make_select, if not short circuit and return method
         if self.is_version_1_3_x():
             # Convert args to a list for compatibility with 1.3.x
             return self._orig_library_select(list(args), **kwargs)
@@ -111,3 +119,10 @@ if sqlalchemy:
     sa.select = sqlalchemy_shim.select
 else:
     sa = NotImported
+
+# TODO: What happens if a user sidesteps and imports select instead of sa.select?
+# TODO: Replace their import of sqlalchemy? Order of imports might make this not work.
+# This might not be stable when sqlalchemy api changes more?
+# Advantage: use the same method name as sqlalchemy is simpler.
+# But can insulate from major changes if we use a different word.
+# Use same word when possible, if not then use more
