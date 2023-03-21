@@ -269,6 +269,7 @@ class _SourceFactories:
             def _add_asset_factory(
                 self: Datasource, name: str, **kwargs
             ) -> pydantic.BaseModel:
+                # TODO: identify dc kwargs and pass them to `add_asset`
                 asset = asset_type(name=name, **kwargs)
                 return self.add_asset(asset)
 
