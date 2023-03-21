@@ -33,6 +33,7 @@ if TYPE_CHECKING:
         PandasS3Datasource,
         PostgresDatasource,
         SparkAzureBlobStorageDatasource,
+        SparkDataframeDatasource,
         SparkDBFSDatasource,
         SparkFilesystemDatasource,
         SparkGoogleCloudStorageDatasource,
@@ -255,6 +256,22 @@ class _SourceFactories:
         connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
     ) -> PostgresDatasource: ...
     def delete_postgres(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_spark_dataframe(
+        self,
+        name: str,
+    ) -> SparkDataframeDatasource: ...
+    def update_spark_dataframe(
+        self,
+        name: str,
+    ) -> SparkDataframeDatasource: ...
+    def add_or_update_spark_dataframe(
+        self,
+        name: str,
+    ) -> SparkDataframeDatasource: ...
+    def delete_spark_dataframe(
         self,
         name: str,
     ) -> None: ...

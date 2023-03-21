@@ -49,19 +49,21 @@ def test_dataframe_asset(
     pandas_df = test_df
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
-    dataframe_asset_name = empty_data_context.sources.spark.add_dataframe_asset(
-        name="my_dataframe_asset", dataframe=spark_df
+    dataframe_asset_name = (
+        empty_data_context.sources.spark_dataframe.add_dataframe_asset(
+            name="my_dataframe_asset", dataframe=spark_df
+        )
     )
     assert isinstance(dataframe_asset_name, DataFrameAsset)
     assert isinstance(
-        empty_data_context.sources.spark.assets["my_dataframe_asset"],
+        empty_data_context.sources.spark_dataframe.assets["my_dataframe_asset"],
         DataFrameAsset,
     )
     assert dataframe_asset.name == "my_dataframe_asset"
-    assert len(empty_data_context.sources.spark.assets) == 2
+    assert len(empty_data_context.sources.spark_dataframe.assets) == 2
     assert all(
         [
             asset.dataframe.toPandas().equals(pandas_df)  # type: ignore[attr-defined]
-            for asset in empty_data_context.sources.spark.assets.values()
+            for asset in empty_data_context.sources.spark_dataframe.assets.values()
         ]
     )
