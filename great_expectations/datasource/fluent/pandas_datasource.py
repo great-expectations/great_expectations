@@ -347,7 +347,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         self, batch_request: BatchRequest
     ) -> list[Batch]:
         self._validate_batch_request(batch_request)
-        batch_list: List[Batch] = []
 
         batch_spec = RuntimeDataBatchSpec(batch_data=self.dataframe)
         execution_engine: PandasExecutionEngine = self.datasource.get_execution_engine()
@@ -376,7 +375,8 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         # Batch.update_forward_refs() will set the annotations before we
         # instantiate the Batch class since we can import them in this scope.
         Batch.update_forward_refs()
-        batch_list.append(
+
+        return [
             Batch(
                 datasource=self.datasource,
                 data_asset=self,
@@ -387,8 +387,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
                 legacy_batch_spec=batch_spec,
                 legacy_batch_definition=batch_definition,
             )
-        )
-        return batch_list
+        ]
 
 
 class _PandasDatasource(Datasource, Generic[_DataAssetT]):
