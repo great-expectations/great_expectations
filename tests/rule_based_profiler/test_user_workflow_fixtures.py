@@ -22,7 +22,7 @@ def test_alice_fixture_generation(
         len(
             alice_columnar_table_single_batch["expected_expectation_suite"].expectations
         )
-        == 24
+        == 22
     )
 
 

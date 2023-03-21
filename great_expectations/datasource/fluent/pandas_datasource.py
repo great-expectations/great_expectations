@@ -86,6 +86,7 @@ class _PandasDataAsset(DataAsset):
         "name",
         "order_by",
         "type",
+        "id",
     }
 
     class Config:

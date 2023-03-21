@@ -15,6 +15,12 @@
             "title": "Name",
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
+        },
         "assets": {
             "title": "Assets",
             "default": {},
@@ -45,6 +51,27 @@
                     "format": "uri"
                 }
             ]
+        },
+        "create_temp_table": {
+            "title": "Create Temp Table",
+            "default": true,
+            "type": "boolean"
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine as part of `create_engine(connection_string, **kwargs)`",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [
@@ -293,6 +320,12 @@
                     ],
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
@@ -360,6 +393,12 @@
                         "query"
                     ],
                     "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
                 },
                 "order_by": {
                     "title": "Order By",

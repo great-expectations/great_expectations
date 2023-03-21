@@ -42,18 +42,6 @@ rules:
         class_name: DefaultExpectationConfigurationBuilder
         module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
         column: $domain.domain_kwargs.column
-      - expectation_type: expect_column_values_to_be_less_than
-        class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        value: $parameter.my_max_user_id.value
-        column: $domain.domain_kwargs.column
-        condition: $parameter.my_max_user_id.value < $variables.very_large_user_id
-      - expectation_type: expect_column_values_to_be_greater_than
-        class_name: DefaultExpectationConfigurationBuilder
-        module_name: great_expectations.rule_based_profiler.expectation_configuration_builder
-        value: $parameter.my_min_user_id.value
-        column: $domain.domain_kwargs.column
-        condition: $parameter.my_min_user_id.value > 0 & $parameter.my_min_user_id.value > $variables.very_small_user_id
   my_rule_for_timestamps:
     domain_builder:
       class_name: ColumnDomainBuilder
