@@ -54,7 +54,7 @@ Creating a PostgreSQL Datasource is as simple as providing the `add_postgres(...
 
 ```python title="Python code"
 datasource_name = "my_datasource"
-my_connection_string = "postgresql+psycopg2://myusername:${MY_PASSWORD}@host:port/my_database"
+my_connection_string = "postgresql+psycopg2://username:${MY_PASSWORD}@host:65432/database"
 ```
 
 With these two values, we can create our Datasource:
