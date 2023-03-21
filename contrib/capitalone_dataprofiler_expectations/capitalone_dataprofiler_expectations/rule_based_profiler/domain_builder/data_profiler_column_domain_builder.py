@@ -104,4 +104,21 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             rule_name=rule_name
         )
 
-        
+        column_name: str
+        domains: List[Domain] = build_domains_from_column_names(
+            rule_name=rule_name,
+            column_names=effective_column_names,
+            domain_type=self.domain_type,
+            # type: ignore[union-attr] # could be None
+            table_column_name_to_inferred_semantic_domain_type_map=None,
+            # self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,
+        )
+
+        return domains
+
+    def get_effective_column_names(
+        self,
+        batch_ids: Optional[List[str]] = None,
+        validator: Optional[Validator] = None,
+        variables: Optional[ParameterContainer] = None,
+    
