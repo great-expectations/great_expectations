@@ -129,4 +129,15 @@ class SparkDataframeDatasource(_SparkDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = [DataFrameAsset]
 
     # instance attributes
+    type: Literal["spark_filesystem"] = "spark"
+
     assets: Dict[str, DataFrameAsset] = {}  # type: ignore[assignment]
+
+    def add_dataframe_asset(
+        self, name: str, dataframe: pyspark.sql.DataFrame
+    ) -> DataFrameAsset:
+        asset = DataFrameAsset(
+            name=name,
+            dataframe=dataframe,
+        )
+        return self.add_asset(asset=asset)

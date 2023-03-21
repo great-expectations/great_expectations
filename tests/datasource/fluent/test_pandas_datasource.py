@@ -438,7 +438,7 @@ def test_default_pandas_datasource_name_conflict(
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
 
 
-def test_dataframe_asset(empty_data_context: AbstractDataContext):
+def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas):
     # validates that a dataframe object is passed
     with pytest.raises(pydantic.ValidationError) as exc_info:
         _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
@@ -446,15 +446,10 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext):
     errors_dict = exc_info.value.errors()[0]
     assert errors_dict["loc"][0] == "dataframe"
 
-    df = pd.DataFrame(
-        data={
-            "foo": [1, 2, 3],
-            "bar": [4, 5, 6],
-        }
-    )
-
     # correct working behavior with read method
-    validator = empty_data_context.sources.pandas_default.read_dataframe(dataframe=df)
+    validator = empty_data_context.sources.pandas_default.read_dataframe(
+        dataframe=test_df_pandas
+    )
     assert isinstance(validator, Validator)
     assert isinstance(
         empty_data_context.sources.pandas_default.assets[
@@ -466,14 +461,14 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext):
     # correct working behavior with add method
     dataframe_asset_name = "my_dataframe_asset"
     dataframe_asset = empty_data_context.sources.pandas_default.add_dataframe_asset(
-        name=dataframe_asset_name, dataframe=df
+        name=dataframe_asset_name, dataframe=test_df_pandas
     )
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.sources.pandas_default.assets) == 2
     assert all(
         [
-            asset.dataframe.equals(df)  # type: ignore[attr-defined]
+            asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
             for asset in empty_data_context.sources.pandas_default.assets.values()
         ]
     )
