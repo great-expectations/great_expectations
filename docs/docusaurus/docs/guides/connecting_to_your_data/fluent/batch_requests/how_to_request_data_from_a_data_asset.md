@@ -47,28 +47,24 @@ my_asset = context.get_datasource("my_datasource").get_asset("my_taxi_data_asset
 
 ### 3. (Optional) Build an `options` dictionary for your Batch Request
 
-An `options` dictionary can be used to limit the Batches returned by a Batch Request.  Omitting the `options` dictionary or using an `options` dictionary where all values are set to `None` will result in all available Batches being returned.
+An `options` dictionary can be used to limit the Batches returned by a Batch Request.  Omitting the `options` dictionary will result in all available Batches being returned.
 
-The structure of the `options` dictionary will depend on the type of Data Asset being used.  A template of the dictionary can be created with the Data Asset's `batch_request_options_template()` method.  This method will return an `options` dictionary with the correct structure for the Data Asset, but with all the options set to `None`.
+The structure of the `options` dictionary will depend on the type of Data Asset being used.  The valid keys for the `options` dictionary can be found by checking the Data Asset's `batch_request_options` property.
 
 ```python title="Python code"
-request_options = my_asset.batch_request_options_template()
-print(request_options)
+print(my_asset.batch_request_options)
 ```
 
-Once you have your `options` dictionary you can overwrite the values of individual elements within it to specify the Batch or Batches your Batch Request should return.
+The `batch_request_options` property is a tuple that contains all the valid keys that can be used to limit the Batches returned in a Batch Request.
 
-The template will show all the valid keys you can use to limit the returned Batches.
-
-
-In a SQL Data Asset the `options` keys will 
+You can create a dictionary of keys pulled from the `batch_request_options` tuple and values that you want to use to specify the Batch or Batches your Batch Request should return, then pass this dictionary in as the `options` parameter when you build your Batch Request.
 
 ### 4. Build your Batch Request
 
-We will use the `build_batch_request(...)` method of our Data Asset and the `request_options` that were defined earlier to generate a Batch Request.
+We will use the `build_batch_request(...)` method of our Data Asset to generate a Batch Request.
 
 ```python title="Python code"
-my_batch_request = my_asset.build_batch_request(options=request_options)
+my_batch_request = my_asset.build_batch_request()
 ```
 
 ### 5. Verify that the correct Batches were returned
@@ -84,7 +80,7 @@ for batch in batches:
 ## Next steps
 
 Now that you have a retrieved data from a Data Asset, you may be interested in creating Expectations about your data:
-- How to create Expectations while interactively evaluating a set of data
+- [How to create Expectations while interactively evaluating a set of data]()
 - How to use a Data Assistant to evaluate data
 
 
