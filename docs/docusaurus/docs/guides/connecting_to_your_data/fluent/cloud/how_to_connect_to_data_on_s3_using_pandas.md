@@ -40,13 +40,13 @@ In this guide we will demonstrate how to use Pandas to connect to data stored on
 ### 2. Create a Datasource
 
 We can define a S3 datasource by providing three pieces of information:
-- `name`: In our example, we will name our Datasource `"MyS3Datasource"`
+- `name`: In our example, we will name our Datasource `"my_s3_datasource"`
 - `bucket_name`: The name of our S3 bucket
 - `boto3_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
 ```python title="Python code"
-datasource_name = "MyS3Datasource"
-bucket_name = "alex-test-0"
+datasource_name = "my_s3_datasource"
+bucket_name = "my_bucket"
 boto3_options = {}
 ```
 
