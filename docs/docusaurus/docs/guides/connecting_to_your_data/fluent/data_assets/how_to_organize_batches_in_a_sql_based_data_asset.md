@@ -91,8 +91,8 @@ For this guide, we will use a previously defined SQL Datasource named `"my_datas
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
 ```python title="Python code"
-my_datasource = context.get_datasource("MyDatasource")
-```
+my_datasource = context.get_datasource("my_datasource")
+my_asset = my_datasource.get_asset("my_asset")
 
 ### 2. Add a Splitter to the Data Asset
 
