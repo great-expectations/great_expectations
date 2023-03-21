@@ -23,10 +23,6 @@ from great_expectations.rule_based_profiler.domain_builder import (
     MultiColumnDomainBuilder,
     TableDomainBuilder,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
-    build_parameter_container_for_variables,
-)
 
 yaml = YAML(typ="safe")
 
