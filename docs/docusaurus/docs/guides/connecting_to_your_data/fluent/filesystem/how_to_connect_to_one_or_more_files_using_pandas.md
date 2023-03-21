@@ -51,7 +51,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 A Filesystem Datasource can be created with two pieces of information:
 - `name`: The name by which the Datasource will be referenced in the future
-- `base_path`: The path to the folder containing the files the Datasource will be used to connect to
+- `base_directory`: The path to the folder containing the files the Datasource will be used to connect to
 
 In our example, we will define these in advance by storing them in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
@@ -62,7 +62,7 @@ path_to_folder_containing_csv_files = "../taxi_data"
 
 <InfoFilesystemDatasourceRelativeBasePaths />
 
-Once we have determined our `name` and `base_path`, we pass them in as parameters when we create our Datasource:
+Once we have determined our `name` and `base_directory`, we pass them in as parameters when we create our Datasource:
 
 ```python title = "Python code"
 datasource = context.datasources.add_pandas_filesystem(name=datasource_name, base_directory=path_to_folder_containing_csv_files)
