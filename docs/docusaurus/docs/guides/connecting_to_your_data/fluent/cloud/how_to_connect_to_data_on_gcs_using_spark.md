@@ -1,8 +1,8 @@
 ---
 title: How to connect to data on GCS using Spark
 tag: [how-to, connect to data]
-description: A technical guide demonstrating how to connect Great Expectations to dat stored on Google Cloud Server using Spark.
-keywords: [Great Expectations, Google Cloud Server, GCS, Spark]
+description: A technical guide demonstrating how to connect Great Expectations to dat stored on Google Cloud Storage using Spark.
+keywords: [Great Expectations, Google Cloud Storage, GCS, Spark]
 ---
 
 <!-- Import statements start here. -->
@@ -19,7 +19,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 ## Introduction
 
-In this guide we will demonstrate how to use Spark to connect to data stored on Google Cloud Server.  In our examples, we will specifically be connecting to `.csv` files.
+In this guide we will demonstrate how to use Spark to connect to data stored on Google Cloud Storage.  In our examples, we will specifically be connecting to `.csv` files.
 
 ## Prerequisites
 
@@ -40,12 +40,12 @@ In this guide we will demonstrate how to use Spark to connect to data stored on 
 ### 2. Create a Datasource
 
 We can define a GCS datasource by providing three pieces of information:
-- `name`: In our example, we will name our Datasource `"MyGcsDatasource"`
+- `name`: In our example, we will name our Datasource `"my_gcs_datasource"`
 - `bucket_or_name`: In this example, we will provide a GCS bucket
 - `gcs_options`: We can provide various additional options here, but in this example we will leave this empty and use the default values.
 
 ```python title="Python code"
-datasource_name = "MyGcsDatasource"
+datasource_name = "my_gcs_datasource"
 bucket_name = "test_docs_data"
 gcs_options = {}
 ```
@@ -64,7 +64,7 @@ datasource = context.sources.add_spark_gcs(
 batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 prefix = "data/taxi_yellow_tripdata_samples/"
 data_asset = datasource.add_csv_asset(
-    name="MyTaxiDataAsset",
+    name="my_taxi_data_asset",
     batching_regex=batching_regex,
     header=True,
     infer_schema=True,
