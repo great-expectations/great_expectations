@@ -2,7 +2,6 @@ from typing import List
 
 import os
 
-import pandas as pd
 import pytest
 from ruamel.yaml import YAML
 
