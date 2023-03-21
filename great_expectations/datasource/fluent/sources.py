@@ -269,9 +269,22 @@ class _SourceFactories:
             def _add_asset_factory(
                 self: Datasource, name: str, **kwargs
             ) -> pydantic.BaseModel:
-                # TODO: identify dc kwargs and pass them to `add_asset`
+
+                # if the data_connector uses a data_connector we need to identify the
+                # asset level attributes needed by the data_connector
+                if self.data_connector_type:
+                    dc_options = {
+                        k: kwargs.pop(k)
+                        for (k, v) in kwargs.items()
+                        if k in self.data_connector_type.asset_level_option_keys and v
+                    }
+                    if dc_options:
+                        kwargs["dc_options"] = dc_options
+                else:
+                    dc_options = {}
+
                 asset = asset_type(name=name, **kwargs)
-                return self.add_asset(asset)
+                return self.add_asset(asset, dc_options)
 
             # attr-defined issue
             # https://github.com/python/mypy/issues/12472

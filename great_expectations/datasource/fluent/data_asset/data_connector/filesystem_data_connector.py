@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import Callable, List, Optional
+from typing import Callable, ClassVar, List, Optional
 
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
@@ -32,6 +32,8 @@ class FilesystemDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on filesystem (optional)
     """
+
+    asset_level_option_keys: ClassVar[tuple[str, ...]] = ("glob_directive",)
 
     def __init__(
         self,
