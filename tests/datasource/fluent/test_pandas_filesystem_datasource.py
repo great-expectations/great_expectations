@@ -381,6 +381,35 @@ def test_invalid_connect_options(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "glob_directive",
+    [
+        {"invalid", "type"},
+        "not_a_dir/*.csv",
+    ],
+)
+def test_invalid_connect_options_value(
+    pandas_filesystem_datasource: PandasFilesystemDatasource, glob_directive
+):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        pandas_filesystem_datasource.add_csv_asset(
+            name="csv_asset",
+            batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
+            glob_directive=glob_directive,
+        )
+
+    error_dicts = exc_info.value.errors()
+    print(pf(error_dicts))
+    assert [
+        {
+            "loc": ("glob_directive",),
+            "msg": "str type expected",
+            "type": "type_error.str",
+        }
+    ] == error_dicts
+
+
+@pytest.mark.unit
 def test_csv_asset_with_batching_regex_unnamed_parameters(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
