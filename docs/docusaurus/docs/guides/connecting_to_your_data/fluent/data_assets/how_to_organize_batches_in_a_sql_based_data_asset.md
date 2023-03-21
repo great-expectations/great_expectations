@@ -86,7 +86,7 @@ If you are using a Datasource that was created with the advanced block-config me
 
 ### 1. Retrieve a SQL Datasource and Data Asset
 
-For this guide, we will use a previously defined Datasource named `"MyDatasource"`.  For purposes of our demonstration, this Datasource is a Pandas Filesystem Datasource that uses a folder named "data" as its `base_folder`.
+For this guide, we will use a previously defined SQL Datasource named `"my_datasource"` with a TableAsset called `"my_asset"` which points to a table with taxi data. 
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
