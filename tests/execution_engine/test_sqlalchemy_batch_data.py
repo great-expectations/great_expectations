@@ -166,7 +166,7 @@ def test_instantiation_with_temp_table_schema():
         create_temp_table=True,
         temp_table_schema_name="test_schema",
     )
-    assert "test_schema" not in engine.execute.call_args[0][0]
+    assert "test_schema" not in str(engine.execute.call_args[0][0])
 
     # supported
     for dialect in ["bigquery", "snowflake", "vertica"]:
@@ -177,4 +177,4 @@ def test_instantiation_with_temp_table_schema():
             create_temp_table=True,
             temp_table_schema_name="test_schema",
         )
-        assert "test_schema" in engine.execute.call_args[0][0]
+        assert "test_schema" in str(engine.execute.call_args[0][0])

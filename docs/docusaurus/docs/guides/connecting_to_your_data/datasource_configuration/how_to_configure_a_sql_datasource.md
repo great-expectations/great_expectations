@@ -20,6 +20,7 @@ import SectionTestYourConfigurationWithTestYamlConfig from './components/_sectio
 import SectionAddMoreDataConnectorsToYourConfig from './components/_section_add_more_data_connectors_to_your_config.mdx'
 import SectionAddYourNewDatasourceToYourDataContext from './components/_section_add_your_new_datasource_to_your_data_context.mdx'
 import SectionNextSteps from './components/_section_next_steps.mdx'
+import SqlAlchemy2 from '/docs/components/warnings/_sql_alchemy2.md'
 
 import AdditionalInfoSplittingMethods from './sql_components/_table_splitting_methods.mdx'
 import AdditionalInfoSamplingMethods from './sql_components/_table_sampling_methods.mdx'
@@ -29,6 +30,7 @@ import AdditionalInfoIntrospectionDirectives from './sql_components/_part_intros
 
 <SectionIntro backend="SQL" />
 
+<SqlAlchemy2 />
 ## Steps
 
 ### 1. Import necessary modules and initialize your Data Context
