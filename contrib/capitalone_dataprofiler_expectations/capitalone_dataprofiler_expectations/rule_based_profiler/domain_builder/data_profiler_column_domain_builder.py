@@ -138,3 +138,22 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         if rule_name not in rule_name_to_data_types:
             # change exception to more specific one
             raise Exception(f"'{rule_name}' is not a valid Rule name")
+
+        profile_path: str = variables["parameter_nodes"]["variables"]["variables"]["profile_path"]
+
+        profile = Profiler.load(profile_path)
+
+        report = profile.report(report_options={"output_format": "compact"})
+
+        data_types_from_rule = rule_name_to_data_types[rule_name.lower()]
+
+        if report["data_stats"] == None:
+            return effective_column_names
+
+        for col in report["data_stats"]:
+            if col["data_type"] == None:
+                continue
+            if col["data_type"].lower() in data_types_from_rule:
+                effective_column_names.append(col["column_name"])
+
+        return effective_column_names
