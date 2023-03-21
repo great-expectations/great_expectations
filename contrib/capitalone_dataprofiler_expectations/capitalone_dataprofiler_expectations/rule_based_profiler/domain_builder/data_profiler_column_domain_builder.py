@@ -15,7 +15,6 @@ from typing import (
 
 from dataprofiler import Profiler
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import (
     ColumnDomainBuilder,
@@ -75,7 +74,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
-        Obtains and returns domains for all columns of a table (or for configured columns, if they exist in the table).
+        Obtains and returns domains for all columns of a table that match a rule.
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.
             variables: Optional variables to substitute when evaluating.
@@ -116,7 +115,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         rule_name: Optional[str] = None
     ) -> List[str]:
         """
-        This method applies multiple directives to obtain columns to be included as part of returned "Domain" objects.
+        This method filters by a rule's criteria to obtain columns to be included as part of returned "Domain" objects.
         """
 
         effective_column_names = list()
