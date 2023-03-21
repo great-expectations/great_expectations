@@ -91,6 +91,7 @@ def test_data_profiler_column_domain_builder(
         "domain_type": "column",
         "domain_kwargs": {
             "column": "VendorID"
+        },
         "rule_name": "numeric_rule"
     }, {
         "domain_type": "column",
