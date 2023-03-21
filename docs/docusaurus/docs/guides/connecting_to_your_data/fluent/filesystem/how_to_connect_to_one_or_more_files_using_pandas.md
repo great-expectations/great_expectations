@@ -56,7 +56,7 @@ A Filesystem Datasource can be created with two pieces of information:
 In our example, we will define these in advance by storing them in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
 ```python title="Python code"
-datasource_name = "MyNewDatasource"
+datasource_name = "my_new_datasource"
 path_to_folder_containing_csv_files = "../taxi_data"
 ```
 
@@ -65,7 +65,7 @@ path_to_folder_containing_csv_files = "../taxi_data"
 Once we have determined our `name` and `base_path`, we pass them in as parameters when we create our Datasource:
 
 ```python title = "Python code"
-datasource = context.datasources.add_pandas_filesystem(name=datasource_name, base_path=path_to_folder_containing_csv_files)
+datasource = context.datasources.add_pandas_filesystem(name=datasource_name, base_directory=path_to_folder_containing_csv_files)
 ```
 
 <TipFilesystemDatasourceNestedSourceDataFolders />
@@ -81,7 +81,7 @@ A Data Asset requires two pieces of information to be defined:
 For this example, we will define these two values in advance by storing them in the Python variables `asset_name` and (since we are connecting to NYC taxi data in this example) `taxi_batching_regex`:
 
 ```python title="Python code"
-asset_name = "MyTaxiDataAsset"
+name = "my_taxi_data_asset"
 taxi_batching_regex = "yellow_tripdata_sample_2023_01\.csv"
 ```
 
@@ -89,8 +89,9 @@ Once we have determined those two values, we will pass them in as parameters whe
 
 ```python title="Python code"
 data_asset = datasource.add_csv_asset(
-    name=asset_name, batching_regex=taxi_batching_regex
+    name=name, batching_regex=taxi_batching_regex
 )
+# optionally can accept the same parameters as `pandas.read_csv()`
 ```
 
 <TipUsingPandasToConnectToDifferentFileTypes this_example_file_extension=".csv" />
