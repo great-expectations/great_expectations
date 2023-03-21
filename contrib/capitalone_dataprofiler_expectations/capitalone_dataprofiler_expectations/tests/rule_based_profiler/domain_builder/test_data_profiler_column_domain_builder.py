@@ -127,3 +127,21 @@ def test_data_profiler_column_domain_builder(
         "domain_kwargs": {
             "column": "payment_type"
         },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "fare_amount"
+        },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "extra"
+        },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "mta_tax"
+        },
