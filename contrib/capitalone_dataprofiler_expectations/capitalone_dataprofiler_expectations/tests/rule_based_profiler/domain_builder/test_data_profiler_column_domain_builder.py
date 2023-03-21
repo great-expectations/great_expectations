@@ -16,3 +16,22 @@ from great_expectations.core.domain import (
     SemanticDomainTypes,
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.rule_based_profiler.domain_builder import (
+    ColumnDomainBuilder,
+    ColumnPairDomainBuilder,
+    DomainBuilder,
+    MultiColumnDomainBuilder,
+    TableDomainBuilder,
+)
+from great_expectations.rule_based_profiler.parameter_container import (
+    ParameterContainer,
+    build_parameter_container_for_variables,
+)
+
+yaml = YAML(typ="safe")
+
+
+@pytest.mark.integration
+@pytest.mark.slow  # 1.21s
+def test_data_profiler_column_domain_builder(
+):
