@@ -21,7 +21,9 @@ from typing_extensions import Literal, Protocol, Self
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.datasource.fluent.config_str import ConfigStr
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed for pydantic
+)
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
@@ -820,6 +822,8 @@ class SQLDatasource(Datasource):
         connection_string: The SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
         create_temp_table: Whether to leverage temporary tables during metric computation.
+        kwargs: Extra SQLAlchemy keyword arguments to pass to `create_engine()`. Note, only python
+            primitive types will be serializable to config.
         assets: An optional dictionary whose keys are SQL DataAsset names and whose values
             are SQL DataAsset objects.
     """
@@ -832,6 +836,11 @@ class SQLDatasource(Datasource):
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
     create_temp_table: bool = True
+    kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
+        default={},
+        description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"
+        " as part of `create_engine(connection_string, **kwargs)`",
+    )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
     assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
@@ -853,13 +862,13 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.engine.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                if isinstance(self.connection_string, ConfigStr):
-                    connection_string = self.connection_string.get_config_value(
-                        self._config_provider  # type: ignore[arg-type] # could be none
-                    )
-                else:
-                    connection_string = self.connection_string
-                self._engine = sqlalchemy.create_engine(connection_string)
+                model_dict = self.dict(
+                    exclude=self._EXCLUDED_EXEC_ENG_ARGS,
+                    config_provider=self._config_provider,
+                )
+                connection_string = model_dict.pop("connection_string")
+                kwargs = model_dict.pop("kwargs", {})
+                self._engine = sqlalchemy.create_engine(connection_string, **kwargs)
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
