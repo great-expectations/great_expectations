@@ -11,6 +11,7 @@ from typing import (
     ClassVar,
     Dict,
     List,
+    Mapping,
     Optional,
     Pattern,
     Set,
@@ -60,6 +61,11 @@ class _FilePathDataAsset(DataAsset):
 
     # General file-path DataAsset pertaining attributes.
     batching_regex: Pattern
+    # TODO: better name
+    dc_options: Mapping = pydantic.Field(
+        default_factory=dict,
+        description="Optional filesystem specific advanced parameters for connecting to data assets",
+    )
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
