@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import Callable, ClassVar, List, Optional
+from typing import Callable, ClassVar, List, Optional, Type
+
+import pydantic
 
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
@@ -14,6 +16,10 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class FilesystemOptions(pydantic.BaseModel):
+    glob_directive: str = "**/*"
 
 
 class FilesystemDataConnector(FilePathDataConnector):
@@ -34,6 +40,7 @@ class FilesystemDataConnector(FilePathDataConnector):
     """
 
     asset_level_option_keys: ClassVar[tuple[str, ...]] = ("glob_directive",)
+    asset_options_type: ClassVar[Type[FilesystemOptions]] = FilesystemOptions
 
     def __init__(
         self,

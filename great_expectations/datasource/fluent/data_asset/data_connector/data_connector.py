@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar, List
+from typing import TYPE_CHECKING, Any, ClassVar, List, Type
 
 from great_expectations.core.id_dict import BatchSpec
 
@@ -42,6 +42,7 @@ class DataConnector(ABC):
 
     # needed to select the asset level kwargs needed to build the DataConnector
     asset_level_option_keys: ClassVar[tuple[str, ...]] = ()
+    asset_options_type: ClassVar[Type] = dict
 
     def __init__(
         self,
