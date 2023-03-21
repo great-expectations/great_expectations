@@ -129,7 +129,7 @@ class SparkDataframeDatasource(_SparkDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = [DataFrameAsset]
 
     # instance attributes
-    type: Literal["spark_filesystem"] = "spark"
+    type: Literal["spark"] = "spark"
 
     assets: Dict[str, DataFrameAsset] = {}  # type: ignore[assignment]
 
