@@ -903,7 +903,9 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
     my_execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(
         engine=sqlite_view_engine
     )
-    test_df.to_sql("test_table_0", con=my_execution_engine.engine)
+    with my_execution_engine.engine.connect() as connection:
+        with connection.begin():
+            test_df.to_sql("test_table_0", con=my_execution_engine.engine)
 
     query: str = "SELECT * FROM test_table_0"
     batch_spec = RuntimeQueryBatchSpec(

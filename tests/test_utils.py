@@ -677,10 +677,10 @@ def load_data_into_test_database(
             engine.dispose()
     else:
         try:
-            connection = engine.connect()
             if drop_existing_table:
                 print(f"Dropping table {table_name}")
-                connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+                with engine.begin() as connection:
+                    connection.execute(f"DROP TABLE IF EXISTS {table_name}")
                 print(f"Creating table {table_name} and adding data from {csv_paths}")
             else:
                 print(
@@ -703,8 +703,10 @@ def load_data_into_test_database(
             # Normally we would call `raise` to re-raise the SqlAlchemyError but we don't to make sure that
             # sensitive information does not make it into our CI logs.
         finally:
-            connection.close()
-            engine.dispose()
+            if connection:
+                connection.close()
+            if engine:
+                engine.dispose()
 
 
 def load_data_into_test_bigquery_database_with_bigquery_client(

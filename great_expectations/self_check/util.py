@@ -676,13 +676,15 @@ def get_dataset(  # noqa: C901 - 110
         if table_name is None:
             table_name = generate_test_table_name()
 
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
+        with engine.connect() as connection:
+            with connection.begin():
+                df.to_sql(
+                    name=table_name,
+                    con=connection,
+                    index=False,
+                    dtype=sql_dtypes,
+                    if_exists="replace",
+                )
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
@@ -1595,14 +1597,16 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 
     _debug("Calling df.to_sql")
     _start = time.time()
-    df.to_sql(
-        name=table_name,
-        con=engine,
-        index=False,
-        dtype=sql_dtypes,
-        if_exists="replace",
-        method=sql_insert_method,
-    )
+    with engine.connect() as connection:
+        with connection.begin():
+            df.to_sql(
+                name=table_name,
+                con=connection,
+                index=False,
+                dtype=sql_dtypes,
+                if_exists="replace",
+                method=sql_insert_method,
+            )
     _end = time.time()
     _debug(
         f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"

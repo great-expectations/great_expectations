@@ -1731,12 +1731,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = f'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'
 
         if engine_dialect == GXSqlDialect.ORACLE:
-            try:
-                self.engine.execute(stmt_1)
-            except DatabaseError:
-                self.engine.execute(stmt_2)
+            with self.engine.connect() as connection:
+                with connection.begin():
+                    try:
+                        self.engine.execute(stmt_1)
+                    except DatabaseError:
+                        self.engine.execute(stmt_2)
         else:
-            self.engine.execute(stmt)
+            with self.engine.connect() as connection:
+                with connection.begin():
+                    connection.execute(stmt)
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""

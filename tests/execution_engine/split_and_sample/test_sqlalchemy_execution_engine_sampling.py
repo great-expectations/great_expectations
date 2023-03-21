@@ -284,7 +284,9 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # First, make sure that degenerative case never passes.
 
     test_df_0: pd.DataFrame = test_df.iloc[:1]
-    test_df_0.to_sql("test_table_0", con=my_execution_engine.engine)
+    with my_execution_engine.engine.connect() as connection:
+        with connection.begin():
+            test_df_0.to_sql("test_table_0", con=connection)
 
     p = 1.0
     batch_spec = SqlAlchemyDatasourceBatchSpec(
@@ -321,7 +323,9 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # Second, verify that realistic case always returns different random sample of rows.
 
     test_df_1: pd.DataFrame = test_df
-    test_df_1.to_sql("test_table_1", con=my_execution_engine.engine)
+    with my_execution_engine.engine.connect() as connection:
+        with connection.begin():
+            test_df_1.to_sql("test_table_1", con=my_execution_engine.engine)
 
     p = 2.0e-1
     batch_spec = SqlAlchemyDatasourceBatchSpec(
