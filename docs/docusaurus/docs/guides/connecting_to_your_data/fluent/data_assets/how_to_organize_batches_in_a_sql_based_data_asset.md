@@ -96,10 +96,10 @@ my_asset = my_datasource.get_asset("my_asset")
 
 ### 2. Add a Splitter to the Data Asset
 
+Our table has a datetime column called "`pickup_datetime`" which we will use to split our TableAsset into Batches.
+
 ```python title="Python code"
 table_asset.add_year_and_month_splitter(column_name="pickup_datetime")
-```
-
 ### 3. (Optional) Add Batch Sorters to the Data Asset
 
 We will now add a Batch Sorter to our Data Asset.  This will allow us to explicitly state the order in which our Batches are returned when we request data from the Data Asset.  To do this, we will pass a list of sorters to the `add_sorters(...)` method of our Data Asset.
