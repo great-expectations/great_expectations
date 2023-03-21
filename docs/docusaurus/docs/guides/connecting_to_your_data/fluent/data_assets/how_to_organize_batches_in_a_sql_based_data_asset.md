@@ -40,7 +40,7 @@ In this guide we will demonstrate the ways in which Batches can be organized in 
 </Prerequisites>
 
 
-<details>
+<!-- TODO <details>
 <summary>
 
 ### If you still need to set up and install GX...
@@ -70,6 +70,7 @@ Or, for guides on using the block-config method for advanced SQL Datasource conf
 
 
 </details>
+-->
 
 :::caution Datasources defined with the block-config method
 
@@ -85,15 +86,17 @@ If you are using a Datasource that was created with the advanced block-config me
 
 ### 1. Retrieve a SQL Datasource and Data Asset
 
-For this guide, we will use a previously defined Datasource named `"MyDatasource"`.  For purposes of our demonstration, this Datasource is a Pandas Filesystem Datasource that uses a folder named "data" as its `base_folder`.
+For this guide, we will use a previously defined SQL Datasource named `"my_datasource"` with a Table Data Asset called `"my_asset"` which points to a table with taxi data. 
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
 ```python title="Python code"
-my_datasource = context.get_datasource("MyDatasource")
-```
+my_datasource = context.get_datasource("my_datasource")
+my_asset = my_datasource.get_asset("my_asset")
 
 ### 2. Add a Splitter to the Data Asset
+
+Our table has a datetime column called "`pickup_datetime`" which we will use to split our TableAsset into Batches.
 
 ```python title="Python code"
 table_asset.add_year_and_month_splitter(column_name="pickup_datetime")
@@ -134,8 +137,8 @@ for batch in batches:
 Now that you have further configured a Data Asset, you may want to look into:
 
 ### Requesting Data from a Data Asset
-- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
-
-### Using Data Assets to create Expectations
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
+ - [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+ 
+ ### Using Data Assets to create Expectations
+ - [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
+ - [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
