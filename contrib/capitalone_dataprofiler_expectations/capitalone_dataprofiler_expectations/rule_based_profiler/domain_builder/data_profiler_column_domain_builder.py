@@ -70,4 +70,21 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             include_column_name_suffixes=include_column_name_suffixes,
             exclude_column_name_suffixes=exclude_column_name_suffixes,
             semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
+            include_semantic_types=include_semantic_types,
+            exclude_semantic_types=exclude_semantic_types,
+            data_context=data_context,
+        )
+
+    def _get_domains(
+        self,
+        rule_name: str,
+        variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
+    ) -> List[Domain]:
+        """
+        Obtains and returns domains for all columns of a table (or for configured columns, if they exist in the table).
+        Args:
+            rule_name: name of Rule object, for which "Domain" objects are obtained.
+            variables: Optional variables to substitute when evaluating.
             
