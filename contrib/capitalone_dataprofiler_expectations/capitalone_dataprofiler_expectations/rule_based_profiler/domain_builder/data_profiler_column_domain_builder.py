@@ -121,4 +121,20 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         batch_ids: Optional[List[str]] = None,
         validator: Optional[Validator] = None,
         variables: Optional[ParameterContainer] = None,
-    
+        rule_name: Optional[str] = None
+    ) -> List[str]:
+        """
+        This method applies multiple directives to obtain columns to be included as part of returned "Domain" objects.
+        """
+
+        effective_column_names = list()
+
+        rule_name_to_data_types = {"numeric_rule": {"int", "float"}, "timestamp_rule": {
+            "datetime"}, "text_rule": {"string", "text"}, "categorical_rule": {"string"}}
+
+        if not variables:
+            raise TypeError("Variables not defined")
+
+        if rule_name not in rule_name_to_data_types:
+            # change exception to more specific one
+            raise Exception(f"'{rule_name}' is not a valid Rule name")
