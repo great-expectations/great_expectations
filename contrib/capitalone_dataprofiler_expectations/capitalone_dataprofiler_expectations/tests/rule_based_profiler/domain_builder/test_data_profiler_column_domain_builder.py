@@ -55,3 +55,20 @@ def test_data_profiler_column_domain_builder(
     variables["parameter_nodes"] = a
 
     variables["parameter_nodes"]["variables"]["variables"]["profile_path"] = profile_path
+
+    batch_request: dict = {
+        "datasource_name": "alice_columnar_table_single_batch_datasource",
+        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
+        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
+    }
+
+    domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder()
+    text_column_names = domain_builder.get_effective_column_names(
+        rule_name="text_rule", variables=variables
+    )
+    numeric_column_names = domain_builder.get_effective_column_names(
+        rule_name="numeric_rule", variables=variables
+    )
+    assert (text_column_names == ['store_and_fwd_flag'])
+    assert (numeric_column_names == ['VendorID', 'passenger_count', 'trip_distance', 'RatecodeID', 'PULocationID', 'DOLocationID', 'payment_type', 'fare_amount', 'extra', 'mta_tax', 'tip_amount', 'tolls_amount', 'improvement_surcharge', 'total_amount', 'congestion_surcharge']
+)
