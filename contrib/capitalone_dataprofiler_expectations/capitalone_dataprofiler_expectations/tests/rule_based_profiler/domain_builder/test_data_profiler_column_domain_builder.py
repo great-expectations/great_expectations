@@ -163,3 +163,17 @@ def test_data_profiler_column_domain_builder(
         "domain_kwargs": {
             "column": "improvement_surcharge"
         },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "total_amount"
+        },
+        "rule_name": "numeric_rule"
+    }, {
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "congestion_surcharge"
+        },
+        "rule_name": "numeric_rule"
+    }])
