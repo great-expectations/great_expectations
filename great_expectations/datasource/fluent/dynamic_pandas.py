@@ -323,7 +323,7 @@ def _to_pydantic_fields(
         if substitution:
             fields_dict.update(substitution)
         else:
-            no_annotation: bool = param.annotation is inspect._empty  # noqa: F823
+            no_annotation: bool = param.annotation is inspect._empty
             if no_annotation:
                 logger.debug(f"`{param_name}` has no type annotation")
                 FIELD_SKIPPED_NO_ANNOTATION.add(param_name)  # TODO: not skipped
