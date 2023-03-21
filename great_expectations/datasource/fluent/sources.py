@@ -15,6 +15,7 @@ from typing import (
     Optional,
     Sequence,
     Type,
+    Union,
 )
 
 from typing_extensions import Final, TypeAlias
@@ -352,19 +353,22 @@ class _SourceFactories:
             )
 
     def _datasource_passed_in_as_only_argument(
-        self, datasource_type: Type[Datasource], first: Optional[str, Datasource], **kwargs
+        self,
+        datasource_type: Type[Datasource],
+        name_or_datasource: Optional[Union[str, Datasource]],
+        **kwargs,
     ) -> Optional[Datasource]:
         """Returns a datasource if one is passed in, otherwise None."""
         from great_expectations.datasource.fluent.interfaces import Datasource
 
         datasource: Optional[Datasource] = None
-        if first and isinstance(first, Datasource):
+        if name_or_datasource and isinstance(name_or_datasource, Datasource):
             if len(kwargs) != 0:
                 raise ValueError(
                     f"The datasource must be the sole argument. We also received: {kwargs}"
                 )
-            datasource = first
-        elif first is None and "datasource" in kwargs:
+            datasource = name_or_datasource
+        elif name_or_datasource is None and "datasource" in kwargs:
             if len(kwargs) != 1:
                 raise ValueError(
                     f"The datasource must be the sole argument. We received: {kwargs}"
@@ -378,7 +382,10 @@ class _SourceFactories:
         return datasource
 
     def _datasource_passed_in(
-        self, datasource_type: Type[Datasource], first: Optional[str, Datasource], **kwargs
+        self,
+        datasource_type: Type[Datasource],
+        name_or_datasource: Optional[Union[str, Datasource]],
+        **kwargs,
     ) -> Optional[Datasource]:
         """Validates the input is a datasource or a set of constructor parameters
 
@@ -387,7 +394,7 @@ class _SourceFactories:
 
         Args:
              datasource_type: The expected type of datasource
-             first: Either the datasource or the name of the datasource.
+             name_or_datasource: Either the datasource or the name of the datasource.
 
         Returns:
             The passed in datasource or None.
@@ -397,19 +404,25 @@ class _SourceFactories:
                         a datasource is not passed in and no name argument is present.
         """
         new_datasource = self._datasource_passed_in_as_only_argument(
-            datasource_type, first, **kwargs
+            datasource_type, name_or_datasource, **kwargs
         )
         if new_datasource:
             return new_datasource
-        if (first and isinstance(first, str) and "name" not in "kwargs") or (
-            first is None and "name" in kwargs and isinstance(kwargs["name"], str)
+        if (
+            name_or_datasource
+            and isinstance(name_or_datasource, str)
+            and "name" not in "kwargs"
+        ) or (
+            name_or_datasource is None
+            and "name" in kwargs
+            and isinstance(kwargs["name"], str)
         ):
             return None
         raise ValueError(
             "A datasource object or a name string must be present. The datasource or "
             "name can be passed in as the first and only positional argument or can be"
             "can be passed in as keyword arguments. The arguments we received were: "
-            f"positional argument: {first}, kwargs: {kwargs}"
+            f"positional argument: {name_or_datasource}, kwargs: {kwargs}"
         )
 
     def create_add_crud_method(
@@ -418,14 +431,16 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def add_datasource(
-            first: Optional[str, Datasource] = None, **kwargs
+            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
             # Because of the precedence of `or` and `if`, these grouping paranthesis are necessary.
             datasource = (
-                self._datasource_passed_in(datasource_type, first, **kwargs)
+                self._datasource_passed_in(
+                    datasource_type, name_or_datasource, **kwargs
+                )
             ) or (
-                datasource_type(name=first, **kwargs)
-                if first
+                datasource_type(name=name_or_datasource, **kwargs)
+                if name_or_datasource
                 else datasource_type(**kwargs)
             )
             logger.debug(f"Adding {datasource_type} with {datasource.name}")
@@ -452,14 +467,16 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def update_datasource(
-            first: Optional[str, Datasource] = None, **kwargs
+            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
             new_datasource: Optional[Datasource] = self._datasource_passed_in(
-                datasource_type, first, **kwargs
+                datasource_type, name_or_datasource, **kwargs
             )
-            # if new_datasource is None that means name is defined is first or as a kwarg
+            # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
             datasource_name = (
-                new_datasource.name if new_datasource else first or kwargs["name"]
+                new_datasource.name
+                if new_datasource
+                else name_or_datasource or kwargs["name"]
             )
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(datasource_name, datasource_type)
@@ -468,7 +485,9 @@ class _SourceFactories:
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
-            return self.create_add_crud_method(datasource_type)(first, **kwargs)
+            return self.create_add_crud_method(datasource_type)(
+                name_or_datasource, **kwargs
+            )
 
         update_datasource.__doc__ = doc_string
         update_datasource.__signature__ = _merge_signatures(
@@ -485,14 +504,16 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def add_or_update_datasource(
-            first: Optional[str, Datasource] = None, **kwargs
+            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
         ) -> Datasource:
             new_datasource: Optional[Datasource] = self._datasource_passed_in(
-                datasource_type, first, **kwargs
+                datasource_type, name_or_datasource, **kwargs
             )
-            # if new_datasource is None that means name is defined is first or as a kwarg
+            # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
             datasource_name = (
-                new_datasource.name if new_datasource else first or kwargs["name"]
+                new_datasource.name
+                if new_datasource
+                else name_or_datasource or kwargs["name"]
             )
             logger.debug(f"Adding or updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(
@@ -503,7 +524,9 @@ class _SourceFactories:
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
-            return self.create_add_crud_method(datasource_type)(first, **kwargs)
+            return self.create_add_crud_method(datasource_type)(
+                name_or_datasource, **kwargs
+            )
 
         add_or_update_datasource.__doc__ = doc_string
         add_or_update_datasource.__signature__ = _merge_signatures(
