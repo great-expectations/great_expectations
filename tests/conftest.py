@@ -1703,7 +1703,9 @@ def titanic_sqlite_db(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:///{titanic_db_path}")
-        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
+            0
+        ] == (1313,)
         return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1717,7 +1719,9 @@ def titanic_sqlite_db_connection_string(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:////{titanic_db_path}")
-        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
+            0
+        ] == (1313,)
         return f"sqlite:///{titanic_db_path}"
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1755,7 +1759,7 @@ def empty_sqlite_db(sa):
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
-        assert engine.execute("select 1").fetchall()[0] == (1,)
+        assert engine.execute(sa.text("select 1")).fetchall()[0] == (1,)
         return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -2297,10 +2301,14 @@ def sqlite_view_engine(test_backends):
             with sqlite_engine.connect() as connection:
                 with connection.begin():
                     connection.execute(
-                        "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+                        sa.text(
+                            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+                        )
                     )
                     connection.execute(
-                        "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+                        sa.text(
+                            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+                        )
                     )
             return sqlite_engine
         except ImportError:
@@ -3079,16 +3087,6 @@ def alice_columnar_table_single_batch(empty_data_context):
             },
             meta={},
         ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_less_than",
-            meta={},
-            kwargs={"value": 9488404, "column": "user_id"},
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_greater_than",
-            meta={},
-            kwargs={"value": 397433, "column": "user_id"},
-        ),
     ]
 
     event_ts_column_data: Dict[str, str] = {
@@ -3367,26 +3365,6 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "expectation_type": "expect_column_values_to_not_be_null",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "validation_parameter_builder_configs": None,
-                    },
-                    {
-                        "column": "$domain.domain_kwargs.column",
-                        "meta": {},
-                        "expectation_type": "expect_column_values_to_be_less_than",
-                        "condition": "$parameter.my_max_user_id.value < $variables.very_large_user_id",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_max_user_id.value",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "validation_parameter_builder_configs": None,
-                    },
-                    {
-                        "column": "$domain.domain_kwargs.column",
-                        "meta": {},
-                        "expectation_type": "expect_column_values_to_be_greater_than",
-                        "condition": "$parameter.my_min_user_id.value > 0 & $parameter.my_min_user_id.value > $variables.very_small_user_id",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_min_user_id.value",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "validation_parameter_builder_configs": None,
                     },

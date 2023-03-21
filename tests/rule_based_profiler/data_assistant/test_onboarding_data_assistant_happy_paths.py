@@ -559,7 +559,7 @@ def load_data_into_postgres_database(sa):
 
     # ensure we aren't appending to an existing table
     with engine.begin() as connection:
-        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
 
     for data_path in data_paths:
         load_data_into_test_database(
@@ -584,7 +584,7 @@ def load_data_into_postgres_database(sa):
 
     # ensure we aren't appending to an existing table
     with engine.begin() as connection:
-        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
 
     for data_path in data_paths:
         load_data_into_test_database(

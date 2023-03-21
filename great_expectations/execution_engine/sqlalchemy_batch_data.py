@@ -290,10 +290,10 @@ class SqlAlchemyBatchData(BatchData):
             with self._engine.connect() as connection:
                 with connection.begin():
                     try:
-                        connection.execute(stmt_1)
+                        connection.execute(sa.text(stmt_1))
                     except DatabaseError:
-                        connection.execute(stmt_2)
+                        connection.execute(sa.text(stmt_2))
         else:
             with self._engine.connect() as connection:
                 with connection.begin():
-                    connection.execute(stmt)
+                    connection.execute(sa.text(stmt))
