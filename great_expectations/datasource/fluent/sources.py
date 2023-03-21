@@ -348,11 +348,11 @@ class _SourceFactories:
         if current_datasource and not isinstance(current_datasource, datasource_type):
             raise ValueError(
                 f"Trying to update datasource {name} but it is not the correct type. "
-                f"Expected {datasource_type} but got {type(current_datasource)}"
+                f"Expected {datasource_type.__name__} but got {type(current_datasource).__name__}"
             )
 
     def _datasource_passed_in_as_only_argument(
-        self, datasource_type, first: Optional[str, Datasource], **kwargs
+        self, datasource_type: Type[Datasource], first: Optional[str, Datasource], **kwargs
     ) -> Optional[Datasource]:
         """Returns a datasource if one is passed in, otherwise None."""
         from great_expectations.datasource.fluent.interfaces import Datasource
@@ -378,7 +378,7 @@ class _SourceFactories:
         return datasource
 
     def _datasource_passed_in(
-        self, datasource_type, first: Optional[str, Datasource], **kwargs
+        self, datasource_type: Type[Datasource], first: Optional[str, Datasource], **kwargs
     ) -> Optional[Datasource]:
         """Validates the input is a datasource or a set of constructor parameters
 
