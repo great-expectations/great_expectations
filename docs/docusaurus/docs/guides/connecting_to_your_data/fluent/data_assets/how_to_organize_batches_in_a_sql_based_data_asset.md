@@ -93,10 +93,11 @@ To retrieve this Datasource, we will supply the `get_datasource(...)` method of 
 ```python title="Python code"
 my_datasource = context.get_datasource("my_datasource")
 my_asset = my_datasource.get_asset("my_asset")
+```
 
 ### 2. Add a Splitter to the Data Asset
 
-Our table has a datetime column called "`pickup_datetime`" which we will use to split our TableAsset into Batches.
+Our table has a datetime column called "`pickup_datetime`" which we will use to split our Table Data Asset into Batches.
 
 ```python title="Python code"
 table_asset.add_year_and_month_splitter(column_name="pickup_datetime")
@@ -130,11 +131,11 @@ for batch in batches:
     print(batch.batch_spec)
 ```
 
-## Next steps
+<!-- ## Next steps
 
 Now that you have further configured a Data Asset, you may want to look into:
 
-<!-- ### Requesting Data from a Data Asset
+### Requesting Data from a Data Asset
  - [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
  
  ### Using Data Assets to create Expectations
