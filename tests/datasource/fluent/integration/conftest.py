@@ -57,7 +57,7 @@ def pandas_sql_data(
     df.to_sql("my_table", con=con)
     pandas_ds = context.sources.add_pandas("my_pandas")
     pandas_ds.read_sql(
-        sql="SELECT * FROM my_table",
+        sql=sqlalchemy.sql.text("SELECT * FROM my_table"),
         con=con,
     )
     asset = pandas_ds.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]

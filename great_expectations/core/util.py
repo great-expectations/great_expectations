@@ -75,9 +75,11 @@ except ImportError:
 try:
     import sqlalchemy
     from sqlalchemy.engine.row import LegacyRow
+    from sqlalchemy.sql.elements import TextClause
 except ImportError:
     sqlalchemy = None
     LegacyRow = None
+    TextClause = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
@@ -100,10 +102,8 @@ SCHEMAS = {
     },
 }
 
-
 if TYPE_CHECKING:
     import numpy.typing as npt
-    from pyspark.sql import SparkSession
     from ruamel.yaml.comments import CommentedMap
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
@@ -417,6 +417,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
 
+    # sqlalchemy text for SqlAlchemy 2 compatibility
+    if TextClause is not None and isinstance(data, TextClause):
+        return str(data)
+
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
     )
@@ -522,6 +526,9 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
 
     if isinstance(data, RunIdentifier):
         return
+
+    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
+        return str(data)
 
     else:
         raise InvalidExpectationConfigurationError(
