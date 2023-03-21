@@ -33,3 +33,23 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.rule_based_profiler.semantic_type_filter import (
     SemanticTypeFilter,  # noqa: TCH001
 )
+from great_expectations.validator.metric_configuration import MetricConfiguration
+
+if TYPE_CHECKING:
+    from great_expectations.data_context.data_context.abstract_data_context import (
+        AbstractDataContext,
+    )
+    from great_expectations.validator.validator import Validator
+
+
+class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
+
+    def __init__(
+        self,
+        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        include_column_name_suffixes: Optional[Union[str,
+                                                     Iterable, List[str]]] = None,
+        exclude_column_name_suffixes: Optional[Union[str,
+                                                     Iterable, List[str]]] = None,
+        
