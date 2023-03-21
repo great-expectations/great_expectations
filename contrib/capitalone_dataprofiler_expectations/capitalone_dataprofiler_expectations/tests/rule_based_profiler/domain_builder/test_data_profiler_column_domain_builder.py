@@ -72,3 +72,22 @@ def test_data_profiler_column_domain_builder(
     assert (text_column_names == ['store_and_fwd_flag'])
     assert (numeric_column_names == ['VendorID', 'passenger_count', 'trip_distance', 'RatecodeID', 'PULocationID', 'DOLocationID', 'payment_type', 'fare_amount', 'extra', 'mta_tax', 'tip_amount', 'tolls_amount', 'improvement_surcharge', 'total_amount', 'congestion_surcharge']
 )
+
+    domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder()
+    text_domains = domain_builder._get_domains(
+        rule_name="text_rule", variables=variables
+    )
+    numeric_domains = domain_builder._get_domains(
+        rule_name="numeric_rule", variables=variables
+    )
+    assert (text_domains == [{
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "store_and_fwd_flag"
+        },
+        "rule_name": "text_rule"
+    }])
+    assert (numeric_domains == [{
+        "domain_type": "column",
+        "domain_kwargs": {
+            "column": "VendorID"
