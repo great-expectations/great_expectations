@@ -101,7 +101,7 @@ class GXExecutionEnvironment:
         if not self._all_installed_packages:
             # Only retrieve once
             self._all_installed_packages = [
-                item.metadata.get("Name")
+                item.metadata.get("Name").lower()
                 for item in metadata.distributions()
                 if item.metadata.get("Name") is not None
             ]

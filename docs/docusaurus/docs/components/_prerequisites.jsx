@@ -1,5 +1,6 @@
 import React from 'react'
 import Admonition from '@theme/Admonition'
+import GxData from '/docs/components/_data.jsx'
 
 /**
  * A flexible Prerequisites admonition block.
@@ -25,6 +26,7 @@ import Admonition from '@theme/Admonition'
  * </Prerequisites>
  *
  * Available default entries from props:
+ *   requirePython: Valid values are {true} or {false}
  *   requireInstallation: Valid values are {true} or {false}
  *   requireDataContext: Valid values are {true} or {false}
  *   requireSourceData: Valid values are 'filesystem' or 'SQL'
@@ -50,10 +52,11 @@ export default class Prerequisites extends React.Component {
   }
 
   defaultPrerequisiteItems () {
-    const returnItems = [
-      <li key={0.1}>
-        Completed the <a href='/docs/tutorials/getting_started/tutorial_overview'>Getting Started Tutorial</a>
-      </li>]
+    const returnItems = []
+    if (this.props.requirePython === true) {
+      returnItems.push(<li>A supported version of Python (versions {GxData.min_python} to {GxData.max_python})</li>)
+      returnItems.push(<ul><li>For details on how to download and install Python on your platform, please see <a href='https://www.python.org/doc/'>Python's documentation</a> and <a href='https://www.python.org/downloads/'>download sites</a></li></ul>)
+    }
     if (this.props.requireInstallation === true) {
       returnItems.push(<li>Set up an <a href='/docs/guides/setup/installation/local'>installation of Great Expectations</a></li>)
     }
@@ -84,8 +87,7 @@ export default class Prerequisites extends React.Component {
   render () {
     return (
       <div>
-        <Admonition type='caution' title='Prerequisites'>
-          <h5>This guide assumes you have:</h5>
+        <Admonition type='caution' title='This guide assumes you have:'>
           <ul>
             {this.defaultPrerequisiteItems()}
             {this.extractMarkdownListItems().map((prereq, i) => (<li key={i}>{prereq}</li>))}
@@ -97,6 +99,7 @@ export default class Prerequisites extends React.Component {
 }
 
 Prerequisites.defaultProps = {
+  requirePython: false,
   requireInstallation: false,
   requireDataContext: false,
   requireSourceData: null,

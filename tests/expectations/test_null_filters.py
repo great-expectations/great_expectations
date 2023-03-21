@@ -62,4 +62,4 @@ def test_sa_null_filters(sa):
     df = pd.DataFrame({"a": [1, 2, 3, None, None, 4]})
     df.to_sql(name="test", con=eng, index=False)
 
-    assert eng.execute("SELECT MAX(a) FROM test;").fetchone()[0] == 4
+    assert eng.execute(sa.text(f"SELECT MAX(a) FROM test;")).fetchone()[0] == 4

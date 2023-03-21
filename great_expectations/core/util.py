@@ -75,9 +75,11 @@ except ImportError:
 try:
     import sqlalchemy
     from sqlalchemy.engine.row import LegacyRow
+    from sqlalchemy.sql.elements import TextClause
 except ImportError:
     sqlalchemy = None
     LegacyRow = None
+    TextClause = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
@@ -100,10 +102,8 @@ SCHEMAS = {
     },
 }
 
-
 if TYPE_CHECKING:
     import numpy.typing as npt
-    from pyspark.sql import SparkSession
     from ruamel.yaml.comments import CommentedMap
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
@@ -284,6 +284,17 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     """
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
+    )
+
+    if isinstance(data, FluentBatchRequest):
+        return {
+            "datasource_name": data.datasource_name,
+            "data_asset_name": data.data_asset_name,
+            "options": convert_to_json_serializable(data.options),
+        }
+
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 
@@ -406,6 +417,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
 
+    # sqlalchemy text for SqlAlchemy 2 compatibility
+    if TextClause is not None and isinstance(data, TextClause):
+        return str(data)
+
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
     )
@@ -511,6 +526,9 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
 
     if isinstance(data, RunIdentifier):
         return
+
+    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
+        return str(data)
 
     else:
         raise InvalidExpectationConfigurationError(
@@ -734,30 +752,33 @@ class DBFSPath:
     """
 
     @staticmethod
+    def convert_to_file_semantics_version(path: str) -> str:
+        if re.search(r"^dbfs:", path):
+            return path.replace("dbfs:", "/dbfs", 1)
+
+        if re.search("^/dbfs", path):
+            return path
+
+        raise ValueError("Path should start with either /dbfs or dbfs:")
+
+    @staticmethod
     def convert_to_protocol_version(path: str) -> str:
         if re.search(r"^\/dbfs", path):
             candidate = path.replace("/dbfs", "dbfs:", 1)
             if candidate == "dbfs:":
                 # Must add trailing slash
                 return "dbfs:/"
-            else:
-                return candidate
-        elif re.search(r"^dbfs:", path):
+
+            return candidate
+
+        if re.search(r"^dbfs:", path):
             if path == "dbfs:":
                 # Must add trailing slash
                 return "dbfs:/"
-            return path
-        else:
-            raise ValueError("Path should start with either /dbfs or dbfs:")
 
-    @staticmethod
-    def convert_to_file_semantics_version(path: str) -> str:
-        if re.search(r"^dbfs:", path):
-            return path.replace("dbfs:", "/dbfs", 1)
-        elif re.search("^/dbfs", path):
             return path
-        else:
-            raise ValueError("Path should start with either /dbfs or dbfs:")
+
+        raise ValueError("Path should start with either /dbfs or dbfs:")
 
 
 def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:

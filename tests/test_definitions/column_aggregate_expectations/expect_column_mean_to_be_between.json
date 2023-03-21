@@ -22,6 +22,20 @@
           "z": "INTEGER",
           "n": "INTEGER",
           "b": "BIT"
+        },
+        "postgresql": {
+          "x": "DOUBLE_PRECISION",
+          "y": "INTEGER",
+          "z": "INTEGER",
+          "n": "INTEGER",
+          "b": "BOOLEAN"
+        },
+        "snowflake": {
+          "x": "DOUBLE",
+          "y": "INTEGER",
+          "z": "INTEGER",
+          "n": "INTEGER",
+          "b": "BOOLEAN"
         }
       },
       "tests": [{

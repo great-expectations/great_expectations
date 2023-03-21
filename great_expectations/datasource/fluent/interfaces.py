@@ -4,6 +4,7 @@ import dataclasses
 import functools
 import logging
 import re
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -151,6 +152,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
+    id: Optional[uuid.UUID] = Field(default=None, description="DataAsset id")
 
     order_by: List[Sorter] = Field(default_factory=list)
 
@@ -174,16 +176,24 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     # Abstract Methods
-    def batch_request_options_template(
-        self,
-    ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for build_batch_request.
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        """The potential keys for BatchRequestOptions.
+
+        Example:
+        ```python
+        >>> print(asset.batch_request_options)
+        ("day", "month", "year")
+        >>> options = {"year": "2023"}
+        >>> batch_request = asset.build_batch_request(options=options)
+        ```
 
         Returns:
-            A BatchRequestOptions dictionary with the correct shape that build_batch_request
-            will understand. All the option values are defaulted to None.
+            A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
-        raise NotImplementedError
+        raise NotImplementedError(
+            """One needs to implement "batch_request_options" on a DataAsset subclass."""
+        )
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -199,8 +209,8 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
         Args:
             options: A dict that can be used to limit the number of batches returned from the asset.
-                The dict structure depends on the asset type. A template of the dict can be obtained by
-                calling batch_request_options_template.
+                The dict structure depends on the asset type. The available keys for dict can be obtained by
+                calling batch_request_options.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -211,9 +221,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(
-            set(self.batch_request_options_template().keys())
-        )
+        return set(options.keys()).issubset(set(self.batch_request_options))
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
@@ -346,6 +354,7 @@ class Datasource(
     _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
         "type",
+        "id",
         "execution_engine",
         "assets",
         "base_directory",  # filesystem argument
@@ -370,6 +379,7 @@ class Datasource(
     # instance attrs
     type: str
     name: str
+    id: Optional[uuid.UUID] = Field(default=None, description="Datasource id")
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
