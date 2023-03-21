@@ -43,15 +43,14 @@ datasource = context.sources.add_pandas(name="my_pandas_datasource")
 
 ### 3. Read your source data into a Pandas DataFrame
 
-For this example, we will read a parquet file into a Pandas DataFrame.  We will then leverage Pandas to create a set of sampled data, which we will use in the rest of this guide.
+For this example, we will read a parquet file into a Pandas DataFrame, which we will then use in the rest of this guide.
 
 The code to create the Pandas DataFrame we are using in this guide is defined with:
 
 ```python title="Python code"
 import pandas as pd
 
-full_dataframe = pd.read_parquet("https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2022-11.parquet")
-sampled_dataframe = full_dataframe.sample(frac=0.05)
+dataframe = pd.read_parquet("https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2022-11.parquet")
 ```
 
 ### 4. Add a Data Asset to the Datasource
@@ -60,7 +59,7 @@ A Pandas DataFrame Data Asset can be defined with two elements:
 - `name`: The name by which the Datasource will be referenced in the future
 - `dataframe`: A Pandas DataFrame containing the data
 
-We will use the `sampled_dataframe` from the previous step as our `dataframe` value.  For the `name` parameter, we will define a name in advance by storing it in a Python variable:
+We will use the `dataframe` from the previous step as the corresponding parameter's value.  For the `name` parameter, we will define a name in advance by storing it in a Python variable:
 
 ```python title="Python code"
 name = "taxi_dataframe"
@@ -69,7 +68,7 @@ name = "taxi_dataframe"
 Now that we have the `name` and `dataframe` for our Data Asset, we can create the Data Asset with the code:
 
 ```python title="Python code"
-data_asset = datasource.add_dataframe(name=name, dataframe=sampled_dataframe)
+data_asset = datasource.add_dataframe(name=name, dataframe=dataframe)
 ```
 
 ## Next steps
