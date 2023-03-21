@@ -9,6 +9,9 @@ from typing_extensions import Literal
 
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed at runtime
+)
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
@@ -51,7 +54,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
 
     # S3 specific attributes
     bucket: str
-    boto3_options: Dict[str, Any] = {}
+    boto3_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _s3_client: Union[BaseClient, None] = pydantic.PrivateAttr(default=None)
 
@@ -108,7 +111,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         max_keys: int = 1000,
         order_by: Optional[SortersDefinition] = None,
     ) -> CSVAsset:
-        """Adds a CSV DataAsst to the present "SparkS3Datasource" object.
+        """Adds a CSV DataAsset to the present "SparkS3Datasource" object.
 
         Args:
             name: The name of the CSV asset
@@ -118,7 +121,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             prefix: S3 prefix
             delimiter: S3 delimiter
             max_keys: S3 max_keys (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex

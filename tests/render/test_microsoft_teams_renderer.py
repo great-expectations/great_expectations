@@ -73,7 +73,7 @@ def test_MicrosoftTeams_validation_results_with_datadocs():
                                                     "text": "May "
                                                     "08 "
                                                     "2012 "
-                                                    "07:14:45",
+                                                    "15:14:45+0800",
                                                     "type": "TextBlock",
                                                     "wrap": "true",
                                                 },

@@ -9,7 +9,6 @@ from pydantic import ValidationError
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.data_context import AbstractDataContext
-from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.datasource.fluent import PandasDatasource
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
@@ -17,6 +16,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
     HeadData,
 )
+from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -73,7 +73,7 @@ def run_checkpoint_and_data_doc(
     }
     metadata = validator.active_batch.metadata
     if isinstance(datasource, PandasDatasource):
-        checkpoint_name = f"batch_at_{asset.filepath_or_buffer}"
+        checkpoint_name = "single_batch_checkpoint"
     else:
         checkpoint_name = (
             f"batch_with_year_{metadata['year']}_month_{metadata['month']}_{suite_name}"

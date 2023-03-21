@@ -15,6 +15,12 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",
@@ -23,7 +29,20 @@
             }
         },
         "path": {
-            "title": "Path"
+            "title": "Path",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "format": "file-path"
+                },
+                {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 65536,
+                    "format": "uri"
+                },
+                {}
+            ]
         },
         "engine": {
             "title": "Engine",

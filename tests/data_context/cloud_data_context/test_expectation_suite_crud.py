@@ -278,12 +278,12 @@ def test_list_expectation_suites(
     assert suites == [
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=suite_1.id,
+            id=suite_1.id,
             resource_name=suite_1.name,
         ),
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=suite_2.id,
+            id=suite_2.id,
             resource_name=suite_2.name,
         ),
     ]
@@ -331,7 +331,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
         mock_list_expectation_suites.return_value = [
             GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.EXPECTATION,
-                cloud_id=suite_id,
+                id=suite_id,
                 resource_name=suite_name,
             )
         ]
@@ -441,6 +441,17 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
 
 @pytest.mark.unit
 @pytest.mark.cloud
+def test_get_expectation_suite_no_identifier_raises_error(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+) -> None:
+    context = empty_base_data_context_in_cloud_mode
+
+    with pytest.raises(ValueError):
+        context.get_expectation_suite()
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
 def test_save_expectation_suite_saves_suite_to_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     mocked_post_response: Callable[[], MockResponse],
@@ -544,7 +555,7 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     mock_expectations_store_has_key.assert_called_once_with(
         GXCloudIdentifier(
             GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=suite_id,
+            id=suite_id,
             resource_name=suite_name,
         )
     )

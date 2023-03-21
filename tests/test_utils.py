@@ -94,7 +94,7 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
 def safe_remove(path):
     if path is not None:
         try:
-            os.remove(path)
+            os.remove(path)  # noqa: PTH107
         except OSError as e:
             print(e)
 
@@ -106,14 +106,16 @@ def create_files_in_directory(
     for file_name in file_name_list:
         splits = file_name.split("/")
         for i in range(1, len(splits)):
-            subdirectories.append(os.path.join(*splits[:i]))
+            subdirectories.append(os.path.join(*splits[:i]))  # noqa: PTH118
     subdirectories = set(subdirectories)
 
     for subdirectory in subdirectories:
-        os.makedirs(os.path.join(directory, subdirectory), exist_ok=True)
+        os.makedirs(  # noqa: PTH103
+            os.path.join(directory, subdirectory), exist_ok=True  # noqa: PTH118
+        )
 
     for file_name in file_name_list:
-        file_path = os.path.join(directory, file_name)
+        file_path = os.path.join(directory, file_name)  # noqa: PTH118
         with open(file_path, "w") as f_:
             f_.write(file_content_fn())
 
@@ -150,12 +152,14 @@ def validate_uuid4(uuid_string: str) -> bool:
 
 def get_sqlite_temp_table_names(engine):
     result = engine.execute(
-        """
+        sa.text(
+            """
 SELECT
     name
 FROM
     sqlite_temp_master
 """
+        )
     )
     rows = result.fetchall()
     return {row[0] for row in rows}
@@ -163,12 +167,14 @@ FROM
 
 def get_sqlite_table_names(engine):
     result = engine.execute(
-        """
+        sa.text(
+            """
 SELECT
     name
 FROM
     sqlite_master
 """
+        )
     )
     rows = result.fetchall()
     return {row[0] for row in rows}
@@ -678,7 +684,7 @@ def load_data_into_test_database(
             connection = engine.connect()
             if drop_existing_table:
                 print(f"Dropping table {table_name}")
-                connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+                connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
                 print(f"Creating table {table_name} and adding data from {csv_paths}")
             else:
                 print(
@@ -808,7 +814,7 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
     connection = execution_engine.engine.connect()
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
-        connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
         tables_dropped.append(table_name)
 
     tables_skipped: List[str] = list(set(tables_to_drop) - set(tables_dropped))
@@ -1028,7 +1034,7 @@ def working_directory(directory: PathStr):
     Reference:
     https://stackoverflow.com/questions/431684/equivalent-of-shell-cd-command-to-change-the-working-directory/431747#431747
     """
-    owd = os.getcwd()
+    owd = os.getcwd()  # noqa: PTH109
     try:
         os.chdir(directory)
         yield directory

@@ -123,7 +123,7 @@ class ExpectationValidationResult(SerializableDictDot):
         #         return NotImplemented
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
+            return other == self
         try:
             if self.result and other.result:
                 common_keys = set(self.result.keys()) & other.result.keys()

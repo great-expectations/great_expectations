@@ -15,6 +15,12 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",
@@ -27,7 +33,18 @@
             "type": "string"
         },
         "con": {
-            "title": "Con"
+            "title": "Con",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                },
+                {}
+            ]
         },
         "schema": {
             "title": "Schema",

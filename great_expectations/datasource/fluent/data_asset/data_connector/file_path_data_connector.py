@@ -4,7 +4,7 @@ import copy
 import logging
 import re
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
@@ -15,6 +15,7 @@ from great_expectations.datasource.data_connector.batch_filter import (
 from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
 )
+from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     DataConnector,
 )
@@ -145,7 +146,11 @@ class FilePathDataConnector(DataConnector):
 
         if batch_request.options is not None:
             data_connector_query_dict = {
-                "batch_filter_parameters": batch_request.options.copy()
+                "batch_filter_parameters": {
+                    key: value
+                    for key, value in batch_request.options.items()
+                    if value is not None
+                }
             }
             # TODO: <Alex>ALEX-SUPPORT_LIMIT_BATCH_QUERY_OPTION_DIRECTIVE_LATER</Alex>
             # TODO: <Alex>ALEX</Alex>
@@ -192,6 +197,27 @@ class FilePathDataConnector(DataConnector):
         return total_references
 
     # Interface Method
+    def get_matched_data_references(self) -> List[str]:
+        """
+        Returns the list of data_references matched by configuration by looping through items in
+        _data_references_cache and returning data_references that have an associated data_asset.
+
+        Returns:
+            list of data_references that are matched by configuration.
+        """
+        return self._get_data_references(matched=True)
+
+    # Interface Method
+    def get_matched_data_reference_count(self) -> int:
+        """
+        Returns the list of matched data_references known by this DataConnector from its _data_references_cache
+
+        Returns:
+            number of matched data_references known by this DataConnector.
+        """
+        return len(self.get_matched_data_references())
+
+    # Interface Method
     def get_unmatched_data_references(self) -> List[str]:
         """
         Returns the list of data_references unmatched by configuration by looping through items in
@@ -200,28 +226,49 @@ class FilePathDataConnector(DataConnector):
         Returns:
             list of data_references that are not matched by configuration.
         """
+        return self._get_data_references(matched=False)
+
+    # Interface Method
+    def get_unmatched_data_reference_count(self) -> int:
+        """
+        Returns the list of unmatched data_references known by this DataConnector from its _data_references_cache
+
+        Returns:
+            number of unmached data_references known by this DataConnector.
+        """
+        return len(self.get_unmatched_data_references())
+
+    def _get_data_references(self, matched: bool) -> List[str]:
+        """
+        Returns the list of data_references unmatched by configuration by looping through items in
+        _data_references_cache and returning data_references that do not have an associated data_asset.
+
+        Returns:
+            list of data_references that are not matched by configuration.
+        """
+
+        def _matching_criterion(
+            batch_definition_list: Union[List[BatchDefinition], None]
+        ) -> bool:
+            return (
+                (batch_definition_list is not None)
+                if matched
+                else (batch_definition_list is None)
+            )
+
+        data_reference_mapped_element: Tuple[str, Union[List[BatchDefinition], None]]
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
                 filter(
-                    lambda element: element[1] is None,
+                    lambda data_reference_mapped_element: _matching_criterion(
+                        batch_definition_list=data_reference_mapped_element[1]
+                    ),
                     self._get_data_references_cache().items(),
                 )
             ).keys()
         )
         return unmatched_data_references
-
-    # Interface Method
-    def get_unmatched_data_reference_count(self) -> int:
-        """
-        Returns the list of unmached data_references known by this DataConnector from its _data_references_cache
-
-        Returns:
-            number of unmached data_references known by this DataConnector.
-        """
-        unmached_references: int = len(self.get_unmatched_data_references())
-
-        return unmached_references
 
     # Interface Method
     def _generate_batch_spec_parameters_from_batch_definition(
@@ -353,7 +400,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
         return [
             BatchDefinition(
                 datasource_name=self._datasource_name,
-                data_connector_name="fluent",
+                data_connector_name=_DATA_CONNECTOR_NAME,
                 data_asset_name=self._data_asset_name,
                 batch_identifiers=IDDict(batch_identifiers),
             )

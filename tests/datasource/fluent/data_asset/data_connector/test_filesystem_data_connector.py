@@ -44,8 +44,14 @@ def test_basic_instantiation(tmp_path_factory):
         "alpha-2.csv",
         "alpha-3.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 3
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "alpha-1.csv",
+        "alpha-2.csv",
+        "alpha-3.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     # Missing "data_asset_name" argument.
     with pytest.raises(TypeError):
@@ -88,12 +94,14 @@ def test_instantiation_batching_regex_does_not_match_paths(tmp_path_factory):
         "alpha-2.csv",
         "alpha-3.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 0
+    assert my_data_connector.get_matched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_references()[:3] == [
         "alpha-1.csv",
         "alpha-2.csv",
         "alpha-3.csv",
     ]
-    assert len(my_data_connector.get_unmatched_data_references()) == 3
+    assert my_data_connector.get_unmatched_data_reference_count() == 3
 
 
 @pytest.mark.integration
@@ -506,11 +514,17 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         "A/file_1.csv",
         "A/file_2.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 5
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "A/file_1.csv",
+        "A/file_2.csv",
+        "A/file_3.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == [
         "A",
         "B",
     ]
-    assert len(my_data_connector.get_unmatched_data_references()) == 2
+    assert my_data_connector.get_unmatched_data_reference_count() == 2
 
     expected: List[BatchDefinition] = [
         BatchDefinition(
@@ -562,6 +576,7 @@ def test_return_only_unique_batch_definitions(tmp_path_factory):
         base_directory=pathlib.Path(base_directory),
         # glob_directive="*.csv",  # omitting for purposes of this test
     )
+
     unsorted_batch_definition_list: List[
         BatchDefinition
     ] = my_data_connector.get_batch_definition_list(
@@ -601,8 +616,14 @@ def test_alpha(tmp_path_factory):
         "B.csv",
         "C.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 4
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "A.csv",
+        "B.csv",
+        "C.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_batch_definition_list: List[BatchDefinition]
     my_batch_definition: BatchDefinition
@@ -664,8 +685,10 @@ def test_foxtrot(tmp_path_factory):
     )
     assert my_data_connector.get_data_reference_count() == 0
     assert my_data_connector.get_data_references()[:3] == []
+    assert my_data_connector.get_matched_data_reference_count() == 0
+    assert my_data_connector.get_matched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
@@ -680,8 +703,14 @@ def test_foxtrot(tmp_path_factory):
         "A-2.csv",
         "A-3.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 3
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "A-1.csv",
+        "A-2.csv",
+        "A-3.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
@@ -696,8 +725,15 @@ def test_foxtrot(tmp_path_factory):
         "B-2.txt",
         "B-3.txt",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 3
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "B-1.txt",
+        "B-2.txt",
+        "B-3.txt",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
+    assert my_data_connector.get_data_reference_count() == 3
 
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
@@ -712,8 +748,14 @@ def test_foxtrot(tmp_path_factory):
         "C-2018.csv",
         "C-2019.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 3
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "C-2017.csv",
+        "C-2018.csv",
+        "C-2019.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     my_batch_request = BatchRequest(
         datasource_name="my_file_path_datasource",
@@ -755,10 +797,15 @@ def test_relative_base_directory_path(tmp_path_factory):
         "filename2.csv",
         "filename3.csv",
     ]
+    assert my_data_connector.get_matched_data_reference_count() == 2
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "filename2.csv",
+        "filename3.csv",
+    ]
     assert my_data_connector.get_unmatched_data_references()[:3] == [
         "B",
     ]
-    assert len(my_data_connector.get_unmatched_data_references()) == 1
+    assert my_data_connector.get_unmatched_data_reference_count() == 1
 
     my_data_connector = FilesystemDataConnector(
         datasource_name="my_file_path_datasource",
@@ -768,8 +815,14 @@ def test_relative_base_directory_path(tmp_path_factory):
         glob_directive="log*.csv",
     )
     assert my_data_connector.get_data_reference_count() == 1
-    assert my_data_connector.get_data_references()[:3] == ["logfile_0.csv"]
-    assert len(my_data_connector.get_unmatched_data_references()) == 0
+    assert my_data_connector.get_data_references()[:3] == [
+        "logfile_0.csv",
+    ]
+    assert my_data_connector.get_matched_data_reference_count() == 1
+    assert my_data_connector.get_matched_data_references()[:3] == [
+        "logfile_0.csv",
+    ]
+    assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert (
         my_data_connector._get_full_file_path(path="bigfile_1.csv")
         == f"{base_directory}/test_dir_0/A/B/C/bigfile_1.csv"

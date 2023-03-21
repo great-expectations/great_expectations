@@ -78,3 +78,4 @@ This guide will walk you through best practices for creating your GX Python envi
 Now that you have installed GX with the necessary dependencies for working with GCS, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX components, as well as provide you with access to GX's Python API.
 
 <LinksAfterInstallingGx />
+

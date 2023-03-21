@@ -1,23 +1,21 @@
 fluent_datasources:
   my_pg_ds:
     type: postgres
-    name: my_pg_ds
     connection_string: "postgresql://userName:@hostname/dbName"
+    kwargs:
+      echo: True
     assets:
       my_table_asset_wo_splitters:
         type: table
-        name: my_table_asset_wo_splitters
         table_name: my_table
       with_splitter:
         type: table
-        name: with_splitter
         table_name: another_table
-        column_splitter:
-              method_name: split_on_year_and_month
-              column_name: my_column
+        splitter:
+          method_name: split_on_year_and_month
+          column_name: my_column
       with_sorters:
         type: table
-        name: with_sorters
         table_name: another_table
         order_by:
           - key: year
@@ -25,8 +23,10 @@ fluent_datasources:
             reverse: true
       with_dsl_ish_sorters:
         type: table
-        name: with_dsl_ish_sorters
         table_name: another_table
         order_by:
           - year
           - -month
+  my_sqlite_ds_w_subs:
+    type: sqlite
+    connection_string: "${MY_CONN_STR}"

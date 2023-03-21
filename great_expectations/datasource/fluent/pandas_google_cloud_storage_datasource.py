@@ -9,6 +9,9 @@ from typing_extensions import Literal
 
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed at runtime
+)
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
@@ -59,7 +62,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
 
     # Google Cloud Storage specific attributes
     bucket_or_name: str
-    gcs_options: Dict[str, Any] = {}
+    gcs_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _gcs_client: Union[GoogleCloudStorageClient, None] = pydantic.PrivateAttr(
         default=None
@@ -75,7 +78,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                         GoogleServiceAccountCredentials, None
                     ] = None  # If configured with gcloud CLI / env vars
                     if "filename" in self.gcs_options:
-                        filename: str = self.gcs_options.pop("filename")
+                        filename: str = str(self.gcs_options.pop("filename"))
                         credentials = (
                             service_account.Credentials.from_service_account_file(
                                 filename=filename
@@ -115,10 +118,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if self._gcs_client is None:
+        try:
+            _ = self._get_gcs_client()
+        except Exception as e:
             raise TestConnectionError(
-                "Unable to load google.cloud.storage.client (it is required for PandasGoogleCloudStorageDatasource)."
-            )
+                "Attempt to connect to datasource failed with the following error message: "
+                f"{str(e)}"
+            ) from e
 
         if self.assets and test_assets:
             for asset in self.assets.values():
@@ -134,7 +140,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
-        """Adds a CSV DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
+        """Adds a CSV DataAsset to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
             name: The name of the CSV asset
@@ -142,7 +148,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -189,7 +195,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
-        """Adds an Excel DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
+        """Adds an Excel DataAsset to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
             name: The name of the Excel asset
@@ -197,7 +203,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -242,7 +248,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
-        """Adds a JSON DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
+        """Adds a JSON DataAsset to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
             name: The name of the JSON asset
@@ -250,7 +256,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -295,7 +301,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
-        """Adds a Parquet DataAsst to the present "PandasGoogleCloudStorageDatasource" object.
+        """Adds a Parquet DataAsset to the present "PandasGoogleCloudStorageDatasource" object.
 
         Args:
             name: The name of the Parquet asset
@@ -303,7 +309,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(

@@ -7,6 +7,7 @@ from typing import Optional, Union
 
 from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -27,7 +28,10 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class PandasFilesystemDatasource(_PandasFilePathDatasource):
+    """Pandas based Datasource for filesystem based data assets."""
+
     # instance attributes
     type: Literal["pandas_filesystem"] = "pandas_filesystem"
 
@@ -53,6 +57,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
+    @public_api
     def add_csv_asset(
         self,
         name: str,
@@ -61,13 +66,13 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
-        """Adds a CSV DataAsst to the present "PandasFilesystemDatasource" object.
+        """Adds a CSV DataAsset to the present "PandasFilesystemDatasource" object.
 
         Args:
             name: The name of the CSV asset
             batching_regex: regex pattern that matches CSV filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/-  key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -98,6 +103,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
         return self.add_asset(asset=asset)
 
+    @public_api
     def add_excel_asset(
         self,
         name: str,
@@ -106,13 +112,13 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
-        """Adds an Excel DataAsst to the present "PandasFilesystemDatasource" object.
+        """Adds an Excel DataAsset to the present "PandasFilesystemDatasource" object.
 
         Args:
             name: The name of the Excel asset
             batching_regex: regex pattern that matches Excel filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_excel`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -145,6 +151,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
         return self.add_asset(asset=asset)
 
+    @public_api
     def add_json_asset(
         self,
         name: str,
@@ -153,13 +160,13 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
-        """Adds a JSON DataAsst to the present "PandasFilesystemDatasource" object.
+        """Adds a JSON DataAsset to the present "PandasFilesystemDatasource" object.
 
         Args:
             name: The name of the JSON asset
             batching_regex: regex pattern that matches JSON filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_json`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -192,6 +199,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         )
         return self.add_asset(asset=asset)
 
+    @public_api
     def add_parquet_asset(
         self,
         name: str,
@@ -200,13 +208,13 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
-        """Adds a Parquet DataAsst to the present "PandasFilesystemDatasource" object.
+        """Adds a Parquet DataAsset to the present "PandasFilesystemDatasource" object.
 
         Args:
             name: The name of the Parquet asset
             batching_regex: regex pattern that matches Parquet filenames that is used to label the batches
             glob_directive: glob for selecting files in directory (defaults to `**/*`) or nested directories (e.g. `*/*/*.csv`)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_parquet`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(

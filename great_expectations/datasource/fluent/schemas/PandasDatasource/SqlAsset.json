@@ -15,6 +15,12 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",
@@ -26,7 +32,18 @@
             "title": "Sql"
         },
         "con": {
-            "title": "Con"
+            "title": "Con",
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                },
+                {}
+            ]
         },
         "index_col": {
             "title": "Index Col",

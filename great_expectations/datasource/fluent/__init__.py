@@ -2,7 +2,11 @@
 
 import pathlib
 
-from great_expectations.datasource.fluent.interfaces import DataAsset, Datasource
+from great_expectations.datasource.fluent.interfaces import (
+    DataAsset,
+    Datasource,
+    Sorter,
+)
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDatasource,
@@ -12,6 +16,9 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 )
 from great_expectations.datasource.fluent.pandas_filesystem_datasource import (
     PandasFilesystemDatasource,
+)
+from great_expectations.datasource.fluent.pandas_dbfs_datasource import (
+    PandasDBFSDatasource,
 )
 from great_expectations.datasource.fluent.pandas_s3_datasource import (
     PandasS3Datasource,
@@ -33,6 +40,9 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
+)
+from great_expectations.datasource.fluent.spark_dbfs_datasource import (
+    SparkDBFSDatasource,
 )
 from great_expectations.datasource.fluent.spark_s3_datasource import (
     SparkS3Datasource,

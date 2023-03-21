@@ -29,11 +29,12 @@ from typing import (
 import pandas as pd
 import pydantic
 from packaging.version import Version
-from pydantic import Field, FilePath
+from pydantic import AnyUrl, Field, FilePath
 
 # from pydantic.typing import resolve_annotations
 from typing_extensions import Final, Literal, TypeAlias
 
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,  # noqa: TCH001
 )
@@ -158,8 +159,14 @@ FIELD_SUBSTITUTIONS: Final[Dict[str, Dict[str, _FieldSpec]]] = {
             ),
         )
     },
+    # sql
+    "con": {"con": _FieldSpec(Union[ConfigStr, str, Any], ...)},  # type: ignore[arg-type]
     # misc
-    "filepath_or_buffer": {"filepath_or_buffer": _FieldSpec(FilePath, ...)},
+    "filepath_or_buffer": {"filepath_or_buffer": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
+    "io": {"io": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
+    "path": {"path": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
+    "path_or_buf": {"path_or_buf": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
+    "path_or_buffer": {"path_or_buffer": _FieldSpec(Union[FilePath, AnyUrl, Any], ...)},  # type: ignore[arg-type]
     "dtype": {"dtype": _FieldSpec(Optional[dict], None)},  # type: ignore[arg-type]
     "dialect": {"dialect": _FieldSpec(Optional[str], None)},  # type: ignore[arg-type]
     "usecols": {"usecols": _FieldSpec(Union[int, str, Sequence[int], None], None)},  # type: ignore[arg-type]

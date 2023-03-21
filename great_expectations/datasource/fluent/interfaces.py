@@ -4,6 +4,7 @@ import dataclasses
 import functools
 import logging
 import re
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -15,6 +16,7 @@ from typing import (
     List,
     MutableMapping,
     Optional,
+    Sequence,
     Set,
     Type,
     TypeVar,
@@ -28,7 +30,6 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
-from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -45,6 +46,7 @@ if TYPE_CHECKING:
         BatchDefinition,
         BatchMarkers,
     )
+    from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -150,6 +152,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
+    id: Optional[uuid.UUID] = Field(default=None, description="DataAsset id")
 
     order_by: List[Sorter] = Field(default_factory=list)
 
@@ -173,16 +176,24 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     # Abstract Methods
-    def batch_request_options_template(
-        self,
-    ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for build_batch_request.
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        """The potential keys for BatchRequestOptions.
+
+        Example:
+        ```python
+        >>> print(asset.batch_request_options)
+        ("day", "month", "year")
+        >>> options = {"year": "2023"}
+        >>> batch_request = asset.build_batch_request(options=options)
+        ```
 
         Returns:
-            A BatchRequestOptions dictionary with the correct shape that build_batch_request
-            will understand. All the option values are defaulted to None.
+            A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
-        raise NotImplementedError
+        raise NotImplementedError(
+            """One needs to implement "batch_request_options" on a DataAsset subclass."""
+        )
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -198,8 +209,8 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
         Args:
             options: A dict that can be used to limit the number of batches returned from the asset.
-                The dict structure depends on the asset type. A template of the dict can be obtained by
-                calling batch_request_options_template.
+                The dict structure depends on the asset type. The available keys for dict can be obtained by
+                calling batch_request_options.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -210,9 +221,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(
-            set(self.batch_request_options_template().keys())
-        )
+        return set(options.keys()).issubset(set(self.batch_request_options))
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
@@ -340,11 +349,12 @@ class Datasource(
     # data context method `data_context.sources.add_my_datasource` method.
 
     # class attrs
-    asset_types: ClassVar[List[Type[DataAsset]]] = []
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
     _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
         "type",
+        "id",
         "execution_engine",
         "assets",
         "base_directory",  # filesystem argument
@@ -369,11 +379,14 @@ class Datasource(
     # instance attrs
     type: str
     name: str
+    id: Optional[uuid.UUID] = Field(default=None, description="Datasource id")
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
+    _data_context = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
+    _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -408,7 +421,7 @@ class Datasource(
 
     def get_execution_engine(self) -> _ExecutionEngineT:
         current_execution_engine_kwargs = self.dict(
-            exclude=self._EXCLUDED_EXEC_ENG_ARGS
+            exclude=self._EXCLUDED_EXEC_ENG_ARGS, config_provider=self._config_provider
         )
         if (
             current_execution_engine_kwargs != self._cached_execution_engine_kwargs
@@ -458,10 +471,6 @@ class Datasource(
         asset.test_connection()
 
         self.assets[asset.name] = asset
-
-        # pydantic needs to know that an asset has been set so that it doesn't get excluded
-        # when dumping to dict, json, yaml etc.
-        self.__fields_set__.update(_FIELDS_ALWAYS_SET)
 
         return asset
 

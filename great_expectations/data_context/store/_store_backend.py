@@ -1,4 +1,5 @@
 import logging
+import urllib
 import uuid
 from abc import ABCMeta, abstractmethod
 from typing import Any, List, Optional, Union
@@ -164,6 +165,13 @@ class StoreBackend(metaclass=ABCMeta):
     def has_key(self, key) -> bool:
         self._validate_key(key)
         return self._has_key(key)
+
+    @staticmethod
+    def _url_path_escape_special_characters(path: str) -> str:
+        # will replace special characters with %xx escape
+        # this is meant to be used only on the path section of a URL
+        # https://docs.python.org/3/library/urllib.parse.html#url-quoting
+        return urllib.parse.quote(path)
 
     def get_url_for_key(self, key, protocol=None) -> None:
         raise StoreError(
