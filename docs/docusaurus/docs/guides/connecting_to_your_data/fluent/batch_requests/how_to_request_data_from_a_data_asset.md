@@ -39,10 +39,10 @@ context = gx.get_context()
 
 If you already have an instance of your Data Asset stored in a Python variable, you do not need to retrieve it again.  If you do not, you can instantiate a previously defined Datasource with your Data Context's `get_datasource(...)` method.  Likewise, a Datasource's `get_asset(...)` method will instantiate a previously defined Data Asset.
 
-In this example we will use a previously defined Datasource named `MyDatasource` and a previously defined Data Asset named `MyTaxiDataAsset`.
+In this example we will use a previously defined Datasource named `my_datasource` and a previously defined Data Asset named `my_taxi_data_asset`.
 
 ```python title="Python code
-my_asset = context.get_datasource("MyDatasource").get_asset("MyTaxiDataAsset")
+my_asset = context.get_datasource("my_datasource").get_asset("my_taxi_data_asset")
 ```
 
 ### 3. (Optional) Build an `options` dictionary for your Batch Request
