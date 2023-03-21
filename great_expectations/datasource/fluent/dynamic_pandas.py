@@ -309,6 +309,7 @@ def _to_pydantic_fields(
     `pydantic.create_model()` as field arguments
     """
     fields_dict: Dict[str, _FieldSpec] = {}
+    # noinspection PyTypeChecker
     all_parameters: Iterator[tuple[str, inspect.Parameter]] = iter(
         sig_tuple.signature.parameters.items()
     )
@@ -321,6 +322,7 @@ def _to_pydantic_fields(
         if substitution:
             fields_dict.update(substitution)
         else:
+            # noinspection PyUnresolvedReferences
             no_annotation: bool = param.annotation is inspect._empty
             if no_annotation:
                 logger.debug(f"`{param_name}` has no type annotation")
@@ -368,6 +370,7 @@ def _create_pandas_asset_model(
     def _get_reader_method(self) -> str:
         return f"read_{self.type}"
 
+    # noinspection PyUnusedLocal
     def _get_reader_options_include(self) -> set[str] | None:
         return None
 

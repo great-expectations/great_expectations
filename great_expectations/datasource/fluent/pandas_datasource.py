@@ -490,6 +490,7 @@ _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
 class PandasDatasource(_PandasDatasource):
     # class attributes
+    # noinspection PyTypeChecker
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
         DataFrameAsset
     ]
@@ -520,6 +521,7 @@ class PandasDatasource(_PandasDatasource):
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=asset_name, dataframe=dataframe
         )
+        # noinspection PyTypeChecker
         return self._get_validator(asset=asset)
 
     def add_clipboard_asset(self, name: str, **kwargs) -> ClipboardAsset:  # type: ignore[valid-type]
@@ -541,6 +543,7 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = CSVAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -566,6 +569,7 @@ class PandasDatasource(_PandasDatasource):
     def add_excel_asset(
         self, name: str, io: os.PathLike | str | bytes, **kwargs
     ) -> ExcelAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = ExcelAsset(
             name=name,
             io=io,
@@ -591,6 +595,7 @@ class PandasDatasource(_PandasDatasource):
     def add_feather_asset(
         self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
     ) -> FeatherAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = FeatherAsset(
             name=name,
             path=path,
@@ -616,6 +621,7 @@ class PandasDatasource(_PandasDatasource):
     def add_gbq_asset(
         self, name: str, query: str, **kwargs
     ) -> GBQAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = GBQAsset(
             name=name,
             query=query,
@@ -641,6 +647,7 @@ class PandasDatasource(_PandasDatasource):
     def add_hdf_asset(
         self, name: str, path_or_buf: pd.HDFStore | os.PathLike | str, **kwargs
     ) -> HDFAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = HDFAsset(
             name=name,
             path_or_buf=path_or_buf,
@@ -666,6 +673,7 @@ class PandasDatasource(_PandasDatasource):
     def add_html_asset(
         self, name: str, io: os.PathLike | str, **kwargs
     ) -> HTMLAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = HTMLAsset(
             name=name,
             io=io,
@@ -694,6 +702,7 @@ class PandasDatasource(_PandasDatasource):
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = JSONAsset(
             name=name,
             path_or_buf=path_or_buf,
@@ -719,6 +728,7 @@ class PandasDatasource(_PandasDatasource):
     def add_orc_asset(
         self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
     ) -> ORCAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = ORCAsset(
             name=name,
             path=path,
@@ -744,6 +754,7 @@ class PandasDatasource(_PandasDatasource):
     def add_parquet_asset(
         self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
     ) -> ParquetAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = ParquetAsset(
             name=name,
             path=path,
@@ -772,6 +783,7 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> PickleAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = PickleAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -800,6 +812,7 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> SASAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = SASAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -825,6 +838,7 @@ class PandasDatasource(_PandasDatasource):
     def add_spss_asset(
         self, name: str, path: pydantic.FilePath, **kwargs
     ) -> SPSSAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = SPSSAsset(
             name=name,
             path=path,
@@ -854,6 +868,7 @@ class PandasDatasource(_PandasDatasource):
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = SQLAsset(
             name=name,
             sql=sql,
@@ -886,6 +901,7 @@ class PandasDatasource(_PandasDatasource):
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = SQLQueryAsset(
             name=name,
             sql=sql,
@@ -914,6 +930,7 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_table_asset(
         self, name: str, table_name: str, con: sqlalchemy.engine.Engine | str, **kwargs
     ) -> SQLTableAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = SQLTableAsset(
             name=name,
             table_name=table_name,
@@ -945,6 +962,7 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> StataAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = StataAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -973,6 +991,7 @@ class PandasDatasource(_PandasDatasource):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         **kwargs,
     ) -> TableAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = TableAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -998,6 +1017,7 @@ class PandasDatasource(_PandasDatasource):
     def add_xml_asset(
         self, name: str, path_or_buffer: pydantic.FilePath | pydantic.AnyUrl, **kwargs
     ) -> XMLAsset:  # type: ignore[valid-type]
+        # noinspection PyArgumentList
         asset = XMLAsset(
             name=name,
             path_or_buffer=path_or_buffer,
