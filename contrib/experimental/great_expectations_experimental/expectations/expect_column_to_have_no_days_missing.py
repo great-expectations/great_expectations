@@ -8,7 +8,7 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 

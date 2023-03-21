@@ -15,12 +15,12 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
+from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.expectations.metrics.import_manager import (
     F,
     pyspark_sql_Column,
     pyspark_sql_DataFrame,
     pyspark_sql_Row,
-    sa,
     sa_func_count,
     sa_sql_expression_ColumnClause,
     sa_sql_expression_Selectable,

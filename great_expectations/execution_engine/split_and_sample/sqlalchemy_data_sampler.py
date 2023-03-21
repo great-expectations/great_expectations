@@ -9,15 +9,12 @@ from great_expectations.execution_engine.split_and_sample.data_sampler import (
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
-try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
+from great_expectations.compatibility.sqlalchemy import sa
 
 try:
-    from sqlalchemy.engine import Dialect
-    from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
+    from sa.engine import Dialect
+    from sa.sql import Selectable
+    from sa.sql.elements import BinaryExpression, BooleanClauseList
 except ImportError:
     Selectable = None
     BinaryExpression = None
@@ -26,8 +23,6 @@ except ImportError:
 
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
-
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 

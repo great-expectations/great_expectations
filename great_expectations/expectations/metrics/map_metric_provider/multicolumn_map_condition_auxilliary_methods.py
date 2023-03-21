@@ -9,7 +9,8 @@ from typing import (
     Union,
 )
 
-from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
+from great_expectations.compatibility.sqlalchemy import sa
+from great_expectations.expectations.metrics.import_manager import F, quoted_name
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
 )

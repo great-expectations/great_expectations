@@ -9,7 +9,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
+from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
