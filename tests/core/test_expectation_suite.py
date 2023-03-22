@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 from ruamel.yaml import YAML
 
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -1039,3 +1040,20 @@ def test_expectation_suite_send_usage_message(success: bool):
         "event_payload": {},
         "success": success,
     }
+
+
+@pytest.mark.unit
+def test_add_expectation_fails_validation(empty_suite_with_meta: ExpectationSuite):
+    suite = empty_suite_with_meta
+
+    expectation_type = "my_fake_expectation"
+    kwargs = {"foo": "bar"}
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type=expectation_type,
+        kwargs=kwargs,
+    )
+
+    with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
+        suite.add_expectation(expectation_configuration)
+
+    assert f"{expectation_type} not found" in str(e)

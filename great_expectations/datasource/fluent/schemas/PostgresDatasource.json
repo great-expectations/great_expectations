@@ -51,6 +51,27 @@
                     "format": "uri"
                 }
             ]
+        },
+        "create_temp_table": {
+            "title": "Create Temp Table",
+            "default": true,
+            "type": "boolean"
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine as part of `create_engine(connection_string, **kwargs)`",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [

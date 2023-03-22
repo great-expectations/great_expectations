@@ -51,6 +51,7 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
     "fluent_datasources": {
         "my_pg_ds": {
             "connection_string": "postgresql://userName:@hostname/dbName",
+            "kwargs": {"echo": True},
             "name": "my_pg_ds",
             "type": "postgres",
             "assets": {
