@@ -173,9 +173,9 @@ You can provide the path to a specific folder when you convert your Ephemeral Da
 
 By completing the "Getting Started" tutorial, you have taken the necessary steps to see how Great Expectations Cloud visualizes and creates a shareable link for anyone on your team. The GX Cloud interface makes it much easier to collaborate between data teams and domain experts.
 
-To gain access to the GX cloud, you need to join our beta program. While we are in our beta phase, there are limited seats available, but joining the queue will keep you informed of the product's progress.
+To gain access to the GX Cloud, you need to join our Cloud early access program. While we are in our beta phase, there are limited seats available, but joining the queue will keep you informed of the product's progress.
 
-**[Sign up for beta here!](https://greatexpectations.io/cloud)**
+**[Sign up for Cloud early access here!](https://greatexpectations.io/cloud)**
 
 ## Next Steps 
 
