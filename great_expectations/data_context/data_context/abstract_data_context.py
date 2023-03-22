@@ -1025,16 +1025,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
+    @public_api
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
+
         The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
         Legacy (V2) Datasource schemas.  The version-specific implementations are contained in "_get_batch_v2()" and
         "_get_batch_v3()", respectively, both of which are in the present module.
 
         For the V3 API parameters, please refer to the signature and parameter description of method "_get_batch_v3()".
         For the Legacy usage, please refer to the signature and parameter description of the method "_get_batch_v2()".
+
+        Processing Steps:
+            1. Determine the version (possible values are "v3" or "v2").
+            2. Convert the positional arguments to the appropriate named arguments, based on the version.
+            3. Package the remaining arguments as variable keyword arguments (applies only to V3).
+            4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
 
         Args:
             arg1: the first positional argument (can take on various types)
@@ -1045,12 +1053,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Returns:
             Batch (V3) or DataAsset (V2) -- the requested batch
-
-        Processing Steps:
-        1. Determine the version (possible values are "v3" or "v2").
-        2. Convert the positional arguments to the appropriate named arguments, based on the version.
-        3. Package the remaining arguments as variable keyword arguments (applies only to V3).
-        4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
         """
 
         api_version: Optional[str] = self._get_data_context_version(arg1=arg1, **kwargs)
