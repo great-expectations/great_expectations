@@ -501,8 +501,8 @@ class PandasDatasource(_PandasDatasource):
         ...
 
     def _get_validator(self, asset: _PandasDataAsset) -> Validator:
-        batch_request: BatchRequest | None = asset.build_batch_request()
-        return self._data_context.get_validator(batch_request=batch_request)
+        batch_request: BatchRequest = asset.build_batch_request()
+        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type]
 
     def add_dataframe_asset(self, name: str, dataframe: pd.DataFrame) -> DataFrameAsset:
         asset = DataFrameAsset(
