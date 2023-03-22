@@ -43,12 +43,7 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import D
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.util import NotImported
-
-try:
-    import sqlalchemy
-except ImportError:
-    sqlalchemy = NotImported("sqlalchemy not found, please install.")
+from great_expectations.optional_imports import sqlalchemy
 
 if TYPE_CHECKING:
     import sqlalchemy as sa
