@@ -4,8 +4,9 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
@@ -19,17 +20,17 @@ try:
 
     make_url = import_make_url()
 except ImportError:
-    Column = None
-    MetaData = None
-    String = None
-    Table = None
-    and_ = None
-    column = None
-    URL = None
-    IntegrityError = None
-    NoSuchTableError = None
-    SQLAlchemyError = None
-    create_engine = None
+    Column = SQLALCHEMY_NOT_IMPORTED
+    MetaData = SQLALCHEMY_NOT_IMPORTED
+    String = SQLALCHEMY_NOT_IMPORTED
+    Table = SQLALCHEMY_NOT_IMPORTED
+    and_ = SQLALCHEMY_NOT_IMPORTED
+    column = SQLALCHEMY_NOT_IMPORTED
+    URL = SQLALCHEMY_NOT_IMPORTED
+    IntegrityError = SQLALCHEMY_NOT_IMPORTED
+    NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
+    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
+    create_engine = SQLALCHEMY_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
