@@ -1477,6 +1477,30 @@ class CodeReferenceFilter:
             name="get_available_data_asset_names",
             filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="LegacyDatasource is not included in the public API",
+            name="get_batch",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/sqlalchemy_datasource.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="LegacyDatasource is not included in the public API",
+            name="get_batch",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/sparkdf_datasource.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="LegacyDatasource is not included in the public API",
+            name="get_batch",
+            filepath=pathlib.Path("great_expectations/datasource/pandas_datasource.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="LegacyDatasource is not included in the public API",
+            name="get_batch",
+            filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
+        ),
     ]
 
     def __init__(
