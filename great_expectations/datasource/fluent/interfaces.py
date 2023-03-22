@@ -30,7 +30,9 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
-from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
+from great_expectations.datasource.fluent.constants import (
+    MATCH_ALL_PATTERN,
+)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
