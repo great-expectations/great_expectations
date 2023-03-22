@@ -866,14 +866,14 @@ def get_or_create_spark_application(
     ):
         if not sc_stopped:
             print(
-                f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] NOT-FORCE_REUSE_SPARK_CONTEXT-AND_SPARK_RESTART_REQUIRED-WITH-SC_STOPPED:\n{sc_stopped} ; TYPE: {str(type(sc_stopped))}"
+                f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] NOT-FORCE_REUSE_SPARK_CONTEXT-AND_SPARK_RESTART_REQUIRED-WITH-SC_STOPPED:\n{sc_stopped} ; TYPE: {str(type(sc_stopped))} -- SO_GOING_TO_STOP_CURRENT_SPARK_SESSION()!!!"
             )
             try:
                 # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
                 logger.info("Stopping existing spark context to reconfigure.")
                 spark_session.sparkContext.stop()
                 print(
-                    f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] NOT-FORCE_REUSE_SPARK_CONTEXT-AND_SPARK_RESTART_REQUIRED-WITH-SC_STOPPED-EXITING_SESSION_WAS_STOPPED:\n{sc_stopped} ; TYPE: {str(type(sc_stopped))}"
+                    f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] NOT-FORCE_REUSE_SPARK_CONTEXT-AND_SPARK_RESTART_REQUIRED-WITH-SC_STOPPED-EXITING_SESSION_WAS_STOPPED:\n{sc_stopped} ; TYPE: {str(type(sc_stopped))} -- STOP_CURRENT_SPARK_SESSION()-WAS_CALLED_AND_RETURNED_SUCCESSFULLY!!!!!!!"
                 )
             except AttributeError:
                 logger.error(
@@ -881,7 +881,7 @@ def get_or_create_spark_application(
                 )
         spark_session = get_or_create_spark_session(spark_config=spark_config)
         print(
-            f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_SESSION-1:\n{spark_session} ; TYPE: {str(type(spark_session))}"
+            f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] GOT_NEW_SPARK_SESSTION()--SPARK_SESSION-1:\n{spark_session} ; TYPE: {str(type(spark_session))}"
         )
         if spark_session is None:
             raise ValueError("SparkContext could not be started.")
@@ -895,7 +895,7 @@ def get_or_create_spark_application(
         raise ValueError("SparkContext stopped unexpectedly.")
 
     print(
-        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_SESSION-2:\n{spark_session} ; TYPE: {str(type(spark_session))}"
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] FINAL_SPARK_SESSTION()--BEING_RETURNED--SPARK_SESSION-2:\n{spark_session} ; TYPE: {str(type(spark_session))}"
     )
     print(
         "\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] TROUBLESHOOTING_END"
