@@ -73,4 +73,4 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        return None
+        # TODO: attach more specific `_test_connection_error_message`
