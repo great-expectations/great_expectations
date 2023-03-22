@@ -29,12 +29,12 @@ try:
 
     make_url = import_make_url()
 
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     create_engine = None
     logger.debug("Unable to import sqlalchemy.")
 
 
-if sa is not None:
+if sa:
     try:
         import google.auth
 
