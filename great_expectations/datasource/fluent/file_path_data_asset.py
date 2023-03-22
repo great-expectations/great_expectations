@@ -77,8 +77,12 @@ class _FilePathDataAsset(DataAsset):
     _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
     _all_group_names: List[str] = pydantic.PrivateAttr()
 
+    # `_data_connector`` should be set inside `_build_data_connector()`
     _data_connector: DataConnector = pydantic.PrivateAttr()
-    _test_connection_error_message: str = pydantic.PrivateAttr()
+    # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
+    _test_connection_error_message: str = pydantic.PrivateAttr(
+        "Could not connect to your asset"
+    )
 
     class Config:
         """
