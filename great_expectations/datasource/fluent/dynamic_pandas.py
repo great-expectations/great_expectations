@@ -309,9 +309,7 @@ def _to_pydantic_fields(
     `pydantic.create_model()` as field arguments
     """
     fields_dict: Dict[str, _FieldSpec] = {}
-    all_parameters: Iterator[
-        tuple[str, inspect.Parameter]
-    ] = iter(  # noqa: [type-checking]
+    all_parameters: Iterator[tuple[str, inspect.Parameter]] = iter(
         sig_tuple.signature.parameters.items()
     )
     if skip_first_param:
@@ -370,7 +368,7 @@ def _create_pandas_asset_model(
     def _get_reader_method(self) -> str:
         return f"read_{self.type}"
 
-    def _get_reader_options_include(self) -> set[str] | None:  # noqa: F841
+    def _get_reader_options_include(self) -> set[str] | None:
         return None
 
     setattr(model, "_get_reader_method", _get_reader_method)

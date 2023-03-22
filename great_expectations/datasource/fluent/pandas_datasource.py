@@ -492,7 +492,7 @@ _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
 class PandasDatasource(_PandasDatasource):
     # class attributes
-    asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [  # type: ignore[arg-type]
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
         DataFrameAsset
     ]
 
@@ -522,7 +522,7 @@ class PandasDatasource(_PandasDatasource):
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=asset_name, dataframe=dataframe
         )
-        return self._get_validator(asset=asset)  # type: ignore[arg-type]
+        return self._get_validator(asset=asset)
 
     def add_clipboard_asset(self, name: str, **kwargs) -> ClipboardAsset:  # type: ignore[valid-type]
         asset = ClipboardAsset(
@@ -545,7 +545,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> CSVAsset:  # type: ignore[valid-type]
         asset = CSVAsset(
             name=name,
-            filepath_or_buffer=filepath_or_buffer,  # type: ignore[valid-arg]
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -570,7 +570,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> ExcelAsset:  # type: ignore[valid-type]
         asset = ExcelAsset(
             name=name,
-            io=io,  # type: ignore[valid-arg]
+            io=io,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -595,7 +595,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> FeatherAsset:  # type: ignore[valid-type]
         asset = FeatherAsset(
             name=name,
-            path=path,  # type: ignore[valid-arg]
+            path=path,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -620,7 +620,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> GBQAsset:  # type: ignore[valid-type]
         asset = GBQAsset(
             name=name,
-            query=query,  # type: ignore[valid-arg]
+            query=query,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -645,7 +645,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> HDFAsset:  # type: ignore[valid-type]
         asset = HDFAsset(
             name=name,
-            path_or_buf=path_or_buf,  # type: ignore[valid-arg]
+            path_or_buf=path_or_buf,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -670,7 +670,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> HTMLAsset:  # type: ignore[valid-type]
         asset = HTMLAsset(
             name=name,
-            io=io,  # type: ignore[valid-arg]
+            io=io,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -698,7 +698,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> JSONAsset:  # type: ignore[valid-type]
         asset = JSONAsset(
             name=name,
-            path_or_buf=path_or_buf,  # type: ignore[valid-arg]
+            path_or_buf=path_or_buf,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -723,7 +723,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> ORCAsset:  # type: ignore[valid-type]
         asset = ORCAsset(
             name=name,
-            path=path,  # type: ignore[valid-arg]
+            path=path,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -748,7 +748,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> ParquetAsset:  # type: ignore[valid-type]
         asset = ParquetAsset(
             name=name,
-            path=path,  # type: ignore[valid-arg]
+            path=path,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -776,7 +776,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> PickleAsset:  # type: ignore[valid-type]
         asset = PickleAsset(
             name=name,
-            filepath_or_buffer=filepath_or_buffer,  # type: ignore[valid-arg]
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -804,7 +804,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> SASAsset:  # type: ignore[valid-type]
         asset = SASAsset(
             name=name,
-            filepath_or_buffer=filepath_or_buffer,  # type: ignore[valid-arg]
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -829,7 +829,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> SPSSAsset:  # type: ignore[valid-type]
         asset = SPSSAsset(
             name=name,
-            path=path,  # type: ignore[valid-arg]
+            path=path,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -858,8 +858,8 @@ class PandasDatasource(_PandasDatasource):
     ) -> SQLAsset:  # type: ignore[valid-type]
         asset = SQLAsset(
             name=name,
-            sql=sql,  # type: ignore[valid-arg]
-            con=con,  # type: ignore[valid-arg]
+            sql=sql,
+            con=con,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -890,8 +890,8 @@ class PandasDatasource(_PandasDatasource):
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
         asset = SQLQueryAsset(
             name=name,
-            sql=sql,  # type: ignore[valid-arg]
-            con=con,  # type: ignore[valid-arg]
+            sql=sql,
+            con=con,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -918,8 +918,8 @@ class PandasDatasource(_PandasDatasource):
     ) -> SQLTableAsset:  # type: ignore[valid-type]
         asset = SQLTableAsset(
             name=name,
-            table_name=table_name,  # type: ignore[valid-arg]
-            con=con,  # type: ignore[valid-arg]
+            table_name=table_name,
+            con=con,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -949,7 +949,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> StataAsset:  # type: ignore[valid-type]
         asset = StataAsset(
             name=name,
-            filepath_or_buffer=filepath_or_buffer,  # type: ignore[valid-arg]
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -977,7 +977,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> TableAsset:  # type: ignore[valid-type]
         asset = TableAsset(
             name=name,
-            filepath_or_buffer=filepath_or_buffer,  # type: ignore[valid-arg]
+            filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
         return self.add_asset(asset=asset)
@@ -1002,7 +1002,7 @@ class PandasDatasource(_PandasDatasource):
     ) -> XMLAsset:  # type: ignore[valid-type]
         asset = XMLAsset(
             name=name,
-            path_or_buffer=path_or_buffer,  # type: ignore[valid-arg]
+            path_or_buffer=path_or_buffer,
             **kwargs,
         )
         return self.add_asset(asset=asset)
