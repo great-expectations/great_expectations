@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.sqlalchemy import sa
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )

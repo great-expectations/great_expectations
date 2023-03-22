@@ -2,7 +2,7 @@ import logging
 
 import pandas as pd
 
-from great_expectations.compatibility.sqlalchemy import sa
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,

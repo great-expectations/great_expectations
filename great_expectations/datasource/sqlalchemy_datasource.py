@@ -21,7 +21,7 @@ from great_expectations.util import get_sqlalchemy_url, import_make_url
 
 logger = logging.getLogger(__name__)
 
-from great_expectations.compatibility.sqlalchemy import sa
+from great_expectations.optional_imports import sqlalchemy as sa
 
 try:
     from sqlalchemy import create_engine

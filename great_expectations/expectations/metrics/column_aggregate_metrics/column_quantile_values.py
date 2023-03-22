@@ -7,7 +7,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 
-from great_expectations.compatibility.sqlalchemy import sa
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
