@@ -787,7 +787,12 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
-    force_reuse_spark_context: bool = False,
+    # TODO: <Alex>ALEX</Alex>
+    # force_reuse_spark_context: bool = False,
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    force_reuse_spark_context: bool = True,
+    # TODO: <Alex>ALEX</Alex>
 ) -> SparkSession:
     print(
         "\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] TROUBLESHOOTING_START"
