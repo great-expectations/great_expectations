@@ -62,8 +62,7 @@ class _FilePathDataAsset(DataAsset):
 
     # General file-path DataAsset pertaining attributes.
     batching_regex: Pattern = MATCH_ALL_PATTERN
-    # TODO: better name
-    dc_options: Mapping = pydantic.Field(
+    connect_options: Mapping = pydantic.Field(
         default_factory=dict,
         description="Optional filesystem specific advanced parameters for connecting to data assets",
     )

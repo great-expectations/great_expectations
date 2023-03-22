@@ -274,24 +274,24 @@ class _SourceFactories:
 
                 # if the data_connector uses a data_connector we need to identify the
                 # asset level attributes needed by the data_connector
-                # push them to `dc_options` field
+                # push them to `connect_options` field
                 if self.data_connector_type:
-                    dc_options = {
+                    connect_options = {
                         k: v
                         for (k, v) in kwargs.items()
                         if k in self.data_connector_type.asset_level_option_keys and v
                     }
-                    if dc_options:
-                        for k in dc_options:  # TODO: avoid this extra loop
+                    if connect_options:
+                        for k in connect_options:  # TODO: avoid this extra loop
                             kwargs.pop(k)
-                        kwargs["dc_options"] = dc_options
+                        kwargs["connect_options"] = connect_options
                         # asset_options_type should raise an error if the options are invalid
-                        self.data_connector_type.asset_options_type(**dc_options)
+                        self.data_connector_type.asset_options_type(**connect_options)
                 else:
-                    dc_options = {}
+                    connect_options = {}
 
                 asset = asset_type(name=name, **kwargs)
-                return self.add_asset(asset, dc_options)
+                return self.add_asset(asset, connect_options)
 
             # attr-defined issue
             # https://github.com/python/mypy/issues/12472

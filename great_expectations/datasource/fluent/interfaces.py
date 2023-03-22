@@ -433,12 +433,12 @@ class Datasource(
     #     if not cls.data_connector_type:
     #         return data_asset
 
-    #     dc_options = getattr(data_asset, "dc_options", None)
-    #     if not dc_options:
+    #     connect_options = getattr(data_asset, "connect_options", None)
+    #     if not connect_options:
     #         return data_asset
 
     #     # asset_options_type should raise an error if the options are invalid
-    #     cls.data_connector_type.asset_options_type(**dc_options)
+    #     cls.data_connector_type.asset_options_type(**connect_options)
 
     #     return data_asset
 
@@ -486,7 +486,7 @@ class Datasource(
             ) from exc
 
     def add_asset(
-        self, asset: _DataAssetT, dc_options: dict | None = None
+        self, asset: _DataAssetT, connect_options: dict | None = None
     ) -> _DataAssetT:
         """Adds an asset to a datasource
 
@@ -497,9 +497,11 @@ class Datasource(
         # See the comment in DataAsset for more information.
         asset._datasource = self
 
-        if not dc_options:
-            dc_options = {}
-        self._build_data_connector(asset, **dc_options)  # TODO: does this need kwargs?
+        if not connect_options:
+            connect_options = {}
+        self._build_data_connector(
+            asset, **connect_options
+        )  # TODO: does this need kwargs?
 
         asset.test_connection()
 

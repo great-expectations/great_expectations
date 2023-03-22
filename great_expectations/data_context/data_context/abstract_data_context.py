@@ -5436,8 +5436,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             # if Datasource required a data_connector we need to build the data_connector for each asset
             if datasource.data_connector_type:
                 for data_asset in datasource.assets.values():
-                    dc_options = getattr(data_asset, "dc_options", {})
-                    datasource._build_data_connector(data_asset, **dc_options)
+                    connect_options = getattr(data_asset, "connect_options", {})
+                    datasource._build_data_connector(data_asset, **connect_options)
 
             self._add_fluent_datasource(datasource)
 
