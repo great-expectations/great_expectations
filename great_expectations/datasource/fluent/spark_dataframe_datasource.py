@@ -65,6 +65,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
 
         return dataframe
 
+    def test_connection(self) -> None:
+        ...
+
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """Spark DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
@@ -132,6 +135,9 @@ class SparkDataframeDatasource(_SparkDatasource):
     type: Literal["spark_dataframe"] = "spark_dataframe"
 
     assets: Dict[str, DataFrameAsset] = {}  # type: ignore[assignment]
+
+    def test_connection(self, test_assets: bool = True) -> None:
+        ...
 
     def add_dataframe_asset(
         self, name: str, dataframe: pyspark.sql.DataFrame
