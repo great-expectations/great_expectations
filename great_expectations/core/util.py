@@ -804,7 +804,7 @@ def get_or_create_spark_application(
     Returns: SparkSession (new or existing as per "isStopped()" status and "force_reuse_spark_context" directive).
     """
     print(
-        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_CONFIG:\n{spark_config} ; TYPE: {str(type(spark_config))}"
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_CONFIG-0:\n{spark_config} ; TYPE: {str(type(spark_config))}"
     )
     print(
         f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] FORCE_REUSE_SPARK_CONTEXT:\n{force_reuse_spark_context} ; TYPE: {str(type(force_reuse_spark_context))}"
@@ -815,41 +815,85 @@ def get_or_create_spark_application(
         spark_config = copy.deepcopy(spark_config)
 
     name: Optional[str] = spark_config.get("spark.app.name")
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] NAME-0:\n{name} ; TYPE: {str(type(name))}"
+    )
     if not name:
         name = "default_great_expectations_spark_application"
 
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] NAME-1:\n{name} ; TYPE: {str(type(name))}"
+    )
     spark_config.update({"spark.app.name": name})
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_CONFIG-1:\n{spark_config} ; TYPE: {str(type(spark_config))}"
+    )
 
     spark_session: Optional[SparkSession] = get_or_create_spark_session(
         spark_config=spark_config
+    )
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_SESSION-0:\n{spark_session} ; TYPE: {str(type(spark_session))}"
     )
     if spark_session is None:
         raise ValueError("SparkContext could not be started.")
 
     # noinspection PyUnresolvedReferences
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SC_STOPPED:\n{sc_stopped} ; TYPE: {str(type(sc_stopped))}"
+    )
+    # TODO: <Alex>ALEX</Alex>
+    a = spark_session.sparkContext.getConf().getAll()
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] CURRENT-SPARK_CONFIG:\n{a} ; TYPE: {str(type(a))}"
+    )
+    b = spark_config
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] DESIRED-SPARK_CONFIG:\n{b} ; TYPE: {str(type(b))}"
+    )
+    c = spark_restart_required(current_spark_config=a, desired_spark_config=b)
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_RESTART_REQUIRED()-RETURNED:\n{c} ; TYPE: {str(type(c))}"
+    )
+    # TODO: <Alex>ALEX</Alex>
     if not force_reuse_spark_context and spark_restart_required(
         current_spark_config=spark_session.sparkContext.getConf().getAll(),
         desired_spark_config=spark_config,
     ):
         if not sc_stopped:
+            print(
+                f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] NOT-FORCE_REUSE_SPARK_CONTEXT-AND_SPARK_RESTART_REQUIRED-WITH-SC_STOPPED:\n{sc_stopped} ; TYPE: {str(type(sc_stopped))}"
+            )
             try:
                 # We need to stop the old/default Spark session in order to reconfigure it with the desired options.
                 logger.info("Stopping existing spark context to reconfigure.")
                 spark_session.sparkContext.stop()
+                print(
+                    f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] NOT-FORCE_REUSE_SPARK_CONTEXT-AND_SPARK_RESTART_REQUIRED-WITH-SC_STOPPED-EXITING_SESSION_WAS_STOPPED:\n{sc_stopped} ; TYPE: {str(type(sc_stopped))}"
+                )
             except AttributeError:
                 logger.error(
                     "Unable to load spark context; install optional spark dependency for support."
                 )
         spark_session = get_or_create_spark_session(spark_config=spark_config)
+        print(
+            f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_SESSION-1:\n{spark_session} ; TYPE: {str(type(spark_session))}"
+        )
         if spark_session is None:
             raise ValueError("SparkContext could not be started.")
         # noinspection PyProtectedMember,PyUnresolvedReferences
         sc_stopped = spark_session.sparkContext._jsc.sc().isStopped()
+        print(
+            f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] AFTER_NEW_SPARK_SESSION_WAS_CREATED-SC_STOPPED:\n{sc_stopped} ; TYPE: {str(type(sc_stopped))}"
+        )
 
     if sc_stopped:
         raise ValueError("SparkContext stopped unexpectedly.")
 
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_SESSION-2:\n{spark_session} ; TYPE: {str(type(spark_session))}"
+    )
     return spark_session
 
 
