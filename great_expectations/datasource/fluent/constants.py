@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 from typing_extensions import Final
 
 # these fields must be added to `__fields_set__` before pydantic model serialization
@@ -12,3 +14,5 @@ _FIELDS_ALWAYS_SET: Final[set[str]] = {
 _ASSETS_KEY: Final[str] = "assets"
 
 _DATA_CONNECTOR_NAME: Final[str] = "fluent"
+
+MATCH_ALL_PATTERN: Final[re.Pattern] = re.compile(".*")
