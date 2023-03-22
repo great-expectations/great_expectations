@@ -72,16 +72,14 @@ except ImportError:
     MultiPolygon = None
     LineString = None
 
-try:
-    import sqlalchemy
-    from sqlalchemy.engine.row import LegacyRow
-    from sqlalchemy.sql.elements import TextClause
-except ImportError:
-    sqlalchemy = None
-    LegacyRow = None
-    TextClause = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalchemy
 
+try:
+    LegacyRow = sqlalchemy.engine.row.LegacyRow
+    TextClause = sqlalchemy.sql.elements.TextClause
+except ImportError:
+    LegacyRow = SQLALCHEMY_NOT_IMPORTED
+    TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
     "api_np": {
@@ -407,6 +405,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if LegacyRow and isinstance(data, LegacyRow):
         return dict(data)
 
+    # sqlalchemy text for SqlAlchemy 2 compatibility
+    if TextClause and isinstance(data, TextClause):
+        return str(data)
+
     if isinstance(data, decimal.Decimal):
         return convert_decimal_to_float(d=data)
 
@@ -416,10 +418,6 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     # PySpark schema serialization
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
-
-    # sqlalchemy text for SqlAlchemy 2 compatibility
-    if TextClause is not None and isinstance(data, TextClause):
-        return str(data)
 
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."

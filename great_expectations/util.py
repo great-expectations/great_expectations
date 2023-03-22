@@ -2152,20 +2152,3 @@ def numpy_quantile(
         )
 
     return quantile
-
-
-class NotImported:
-    def __init__(self, message: str):
-        self.__dict__["gx_error_message"] = message
-
-    def __getattr__(self, attr: str) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __setattr__(self, key: str, value: Any) -> None:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __call__(self, *args, **kwargs) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __str__(self) -> str:
-        return self.__dict__["gx_error_message"]
