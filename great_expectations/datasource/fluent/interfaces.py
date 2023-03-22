@@ -580,19 +580,6 @@ class Datasource(
         """
         pass
 
-    def _build_test_connection_error_message(
-        self, data_asset_name: str, **kwargs
-    ) -> None:
-        """Any Datasource subclass can overwrite this method.
-
-        Specific implementations create appropriate error message and set "self._test_connection_error_message" to it.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
-            kwargs: Extra keyword arguments allow specification of arguments used by particular subclass' error message
-        """
-        pass
-
     # End Abstract Methods
 
 
