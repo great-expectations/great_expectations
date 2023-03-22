@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -37,6 +36,7 @@ from great_expectations.expectations.metrics.util import (
     sql_statement_with_post_compile_to_string,
     verify_column_names_exist,
 )
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     generate_temporary_table_name,
     get_sqlalchemy_selectable,

@@ -1,4 +1,3 @@
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -8,6 +7,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
 )
+from great_expectations.optional_imports import sqlalchemy as sa
 
 
 class ColumnPairValuesEqual(ColumnPairMapMetricProvider):

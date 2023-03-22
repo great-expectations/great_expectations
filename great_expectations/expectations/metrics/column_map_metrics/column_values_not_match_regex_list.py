@@ -2,7 +2,6 @@ import logging
 
 import pandas as pd
 
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -13,6 +12,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.util import get_dialect_regex_expression
+from great_expectations.optional_imports import sqlalchemy as sa
 
 logger = logging.getLogger(__name__)
 

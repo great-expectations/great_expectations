@@ -3,12 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.optional_imports import sqlalchemy as sa
 
 try:
     from sa.engine import Dialect
