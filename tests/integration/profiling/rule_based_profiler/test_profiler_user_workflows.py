@@ -321,16 +321,6 @@ def test_alice_profiler_user_workflow_single_batch(
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "expectation_type": "expect_column_values_to_not_be_null",
                             },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "anonymized_expectation_type": "49e0013b377d4c7d9604d73fd672aa63",
-                                "anonymized_condition": "5191ecaeb23644e402e68b1c641b1342",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "anonymized_expectation_type": "5a4993ff394c8cf957dbe7964798f5a5",
-                                "anonymized_condition": "a7f49ffeced7b75c9e0d958e9d010ddd",
-                            },
                         ],
                     },
                     {

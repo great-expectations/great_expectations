@@ -43,12 +43,7 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import D
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.util import NotImported
-
-try:
-    import sqlalchemy
-except ImportError:
-    sqlalchemy = NotImported("sqlalchemy not found, please install.")
+from great_expectations.optional_imports import sqlalchemy
 
 if TYPE_CHECKING:
     import sqlalchemy as sa
@@ -821,6 +816,7 @@ class SQLDatasource(Datasource):
         name: The name of this datasource.
         connection_string: The SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
+        create_temp_table: Whether to leverage temporary tables during metric computation.
         kwargs: Extra SQLAlchemy keyword arguments to pass to `create_engine()`. Note, only python
             primitive types will be serializable to config.
         assets: An optional dictionary whose keys are SQL DataAsset names and whose values
@@ -834,6 +830,7 @@ class SQLDatasource(Datasource):
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
     connection_string: Union[ConfigStr, str]
+    create_temp_table: bool = True
     kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
         default={},
         description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"
