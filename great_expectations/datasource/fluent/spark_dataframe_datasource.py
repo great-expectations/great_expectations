@@ -25,6 +25,7 @@ from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     DataAsset,
 )
+from great_expectations.optional_imports import SPARK_NOT_IMPORTED, pyspark
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine.sparkdf_execution_engine import (
@@ -36,13 +37,10 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    import pyspark
+    DataFrame = pyspark.sql.DataFrame
 except ImportError:
-    pyspark = None  # type: ignore[assignment]
+    DataFrame = SPARK_NOT_IMPORTED
 
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
 
 # this enables us to include dataframe in the json schema
 _SparkDataFrameT = TypeVar("_SparkDataFrameT")
@@ -57,10 +55,8 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         extra = pydantic.Extra.forbid
 
     @pydantic.validator("dataframe")
-    def _validate_dataframe(
-        cls, dataframe: pyspark.sql.DataFrame
-    ) -> pyspark.sql.DataFrame:
-        if not isinstance(dataframe, pyspark.sql.DataFrame):
+    def _validate_dataframe(cls, dataframe: DataFrame) -> DataFrame:
+        if not isinstance(dataframe, DataFrame):
             raise ValueError("dataframe must be of type pyspark.sql.DataFrame")
 
         return dataframe
@@ -139,9 +135,7 @@ class SparkDataframeDatasource(_SparkDatasource):
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
-    def add_dataframe_asset(
-        self, name: str, dataframe: pyspark.sql.DataFrame
-    ) -> DataFrameAsset:
+    def add_dataframe_asset(self, name: str, dataframe: DataFrame) -> DataFrameAsset:
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,

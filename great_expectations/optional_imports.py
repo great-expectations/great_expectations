@@ -81,3 +81,12 @@ try:
     sqlalchemy_version_check(sqlalchemy.__version__)
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+
+
+SPARK_NOT_IMPORTED = NotImported(
+    "pyspark is not installed, please 'pip install pyspark'"
+)
+try:
+    import pyspark
+except ImportError:
+    pyspark = SPARK_NOT_IMPORTED
