@@ -2,16 +2,11 @@ from __future__ import annotations
 
 from typing import (
     TYPE_CHECKING,
-    ClassVar,
     Iterable,
     List,
     Optional,
-    Set,
-    Tuple,
     Union,
-    cast,
 )
-
 
 from dataprofiler import Profiler
 
@@ -140,11 +135,11 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
 
         data_types_from_rule = rule_name_to_data_types[rule_name.lower()]
 
-        if report["data_stats"] == None:
+        if report["data_stats"] is None:
             return effective_column_names
 
         for col in report["data_stats"]:
-            if col["data_type"] == None:
+            if col["data_type"] is None:
                 continue
             if col["data_type"].lower() in data_types_from_rule:
                 effective_column_names.append(col["column_name"])
