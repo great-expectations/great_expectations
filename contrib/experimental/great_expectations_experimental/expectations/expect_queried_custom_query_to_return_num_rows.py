@@ -67,7 +67,7 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
                     "data": {"col1": [1, 2, 3, 4, 5, 5], "col2": [10, 3, 4, 4, 5, 5]},
                 }
             ],
-            "only_for": ["sqlite", "bigquery", "redshift", "snowflake"],
+            "only_for": ["sqlite", "postgresql", "bigquery", "trino", "redshift", "snowflake"],
             "tests": [
                 {
                     "title": "basic_positive_test",
