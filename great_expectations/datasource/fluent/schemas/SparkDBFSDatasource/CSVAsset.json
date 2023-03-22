@@ -30,13 +30,13 @@
         },
         "batching_regex": {
             "title": "Batching Regex",
+            "default": ".*",
             "type": "string",
             "format": "regex"
         }
     },
     "required": [
-        "name",
-        "batching_regex"
+        "name"
     ],
     "definitions": {
         "Sorter": {
