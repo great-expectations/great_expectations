@@ -89,4 +89,4 @@ SPARK_NOT_IMPORTED = NotImported(
 try:
     import pyspark
 except ImportError:
-    pyspark = SPARK_NOT_IMPORTED
+    pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]

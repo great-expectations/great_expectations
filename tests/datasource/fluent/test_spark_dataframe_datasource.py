@@ -51,7 +51,7 @@ def test_dataframe_asset(
 
     assert all(
         [
-            asset.dataframe.toPandas().equals(pandas_df)  # type: ignore[attr-defined]
+            asset.dataframe.toPandas().equals(pandas_df)
             for asset in datasource.assets.values()
         ]
     )

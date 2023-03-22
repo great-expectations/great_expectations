@@ -6,7 +6,6 @@ import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
-import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
