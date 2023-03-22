@@ -73,4 +73,13 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
-        # TODO: attach more specific `_test_connection_error_message`
+
+        # build a more specific `_test_connection_error_message`
+        data_asset._test_connection_error_message = (
+            self.data_connector_type.build_test_connection_error_message(
+                data_asset_name=data_asset.name,
+                batching_regex=data_asset.batching_regex,
+                glob_directive=glob_directive,
+                base_directory=self.base_directory,
+            )
+        )
