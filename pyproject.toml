@@ -225,6 +225,8 @@ select = [
     "I", # isort
     # https://beta.ruff.rs/docs/rules/#flake8-type-checking-tch
     "TCH", # flake8-type-checking-tch
+    # https://beta.ruff.rs/docs/rules/#flake8-tidy-imports-tid
+    "TID", # flake8-tidy-imports
     # https://beta.ruff.rs/docs/rules/#flake8-pyi-pyi
     "PYI", # flake8-pyi - type stub files
     # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
@@ -254,6 +256,7 @@ ignore = [
     "TCH003", # typing-only-standard-library-import
     # gives false positives if we use try imports and type-checking import
     "TCH004", # runtime-import-in-type-checking-block
+    "TID252",  # Relative imports from parent modules are banned
     # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
     "PTH123", # pathlib-open - this would force pathlib usage anytime open or with open was used.
 ]
@@ -281,12 +284,20 @@ extend-exclude = [
     "F401",  # unused import
     "F403",  # star imports
     ]
+"great_expectations/optional_imports.py" = [
+    "TID251",  # flake8-banned-api
+]
 
 [tool.ruff.mccabe]
 max-complexity = 15
 
 [tool.ruff.pydocstyle]
 convention = "google"
+
+[tool.ruff.flake8-tidy-imports]
+[tool.ruff.flake8-tidy-imports.banned-api]
+# Uncomment this to prevent importing sqlalchemy everywhere but optional_imports.py
+# "sqlalchemy".msg = "Don't import sqlalchemy directly, please use the great_expectations.import_manager."
 
 [tool.pytest.ini_options]
 filterwarnings = [
