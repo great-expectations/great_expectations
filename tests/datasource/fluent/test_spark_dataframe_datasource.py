@@ -37,7 +37,7 @@ def test_dataframe_asset(
     empty_data_context: AbstractDataContext,
     spark_session,
     spark_df_from_pandas_df,
-    test_df,
+    test_df_pandas,
 ):
     # validates that a dataframe object is passed
     with pytest.raises(pydantic.ValidationError) as exc_info:
@@ -50,7 +50,7 @@ def test_dataframe_asset(
         name="my_spark_dataframe_datasource"
     )
 
-    pandas_df = test_df
+    pandas_df = test_df_pandas
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
     dataframe_asset = datasource.add_dataframe_asset(
