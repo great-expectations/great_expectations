@@ -121,7 +121,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
                 ).label("bin_0")
             )
             query = (
-                sa.select(case_conditions)
+                sa.select(*case_conditions)
                 .where(
                     sa.column(column) != None,  # noqa: E711
                 )
@@ -214,7 +214,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             )
 
         query = (
-            sa.select(case_conditions)
+            sa.select(*case_conditions)
             .where(
                 sa.column(column) != None,  # noqa: E711
             )
