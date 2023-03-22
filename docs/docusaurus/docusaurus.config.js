@@ -250,7 +250,6 @@ module.exports = {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
           remarkPlugins: [remarkNamedSnippets],
-          editUrl: 'https://github.com/great-expectations/great_expectations/tree/develop/',
           lastVersion: 'current',
           versions: {
             current: {
