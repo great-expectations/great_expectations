@@ -1232,7 +1232,6 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         return _get_test_validator_with_data_spark(
             data=data,
             schemas=schemas,
-            table_name=table_name,
             context=context,
             pk_column=pk_column,
         )
@@ -1329,7 +1328,6 @@ def _get_test_validator_with_data_sqlalchemy(
 def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     data: dict,
     schemas: dict | None,
-    table_name: str | None,
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator:
@@ -1435,10 +1433,6 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
         # if no schema provided, uses Spark's schema inference
         columns = list(data.keys())
         spark_df = spark.createDataFrame(data_reshaped, columns)
-
-    if table_name is None:
-        # noinspection PyUnusedLocal
-        table_name = generate_test_table_name()
 
     batch_definition = BatchDefinition(
         datasource_name="spark_datasource",
