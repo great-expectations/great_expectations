@@ -5422,10 +5422,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         return GxConfig(fluent_datasources={})
 
-    def _attach_fluent_config_datasources(self, config: GxConfig):
+    def _attach_fluent_config_datasources(self, config: GxConfig):  # TODO: update name
         """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
             logger.info(f"Loaded '{ds_name}' from fluent config")
+
+            # if Datasource required a data_connector we need to build the data_connector
+            if datasource.data_connector_type:
+                for data_asset in datasource.assets.values():
+                    dc_options = getattr(data_asset, "dc_options", {})
+                    datasource._build_data_connector(data_asset, **dc_options)
+
             self._add_fluent_datasource(datasource)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
