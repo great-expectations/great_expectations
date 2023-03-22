@@ -357,7 +357,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         count_selectable = get_sqlalchemy_selectable(count_selectable)
         unexpected_count_query: Select = (
             sa.select(
-                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
+                sa.func.sum(sa.column("condition")).label("unexpected_count"),
             )
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
@@ -365,9 +365,9 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
         unexpected_count: Union[float, int] = execution_engine.engine.execute(
             sa.select(
-                    unexpected_count_query.c[
-                        f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-                    ],
+                unexpected_count_query.c[
+                    f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                ],
             )
         ).scalar()
         # Unexpected count can be None if the table is empty, in which case the count
