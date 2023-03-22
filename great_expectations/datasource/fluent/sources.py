@@ -291,7 +291,7 @@ class _SourceFactories:
                     connect_options = {}
 
                 asset = asset_type(name=name, **kwargs)
-                return self.add_asset(asset, connect_options)
+                return self.add_asset(asset, connect_options=connect_options)
 
             # attr-defined issue
             # https://github.com/python/mypy/issues/12472
