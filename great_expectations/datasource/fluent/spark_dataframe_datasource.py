@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 try:
     DataFrame = pyspark.sql.DataFrame
 except ImportError:
-    DataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment]
+    DataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 
 # this enables us to include dataframe in the json schema
