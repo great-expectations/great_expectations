@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 from contextlib import _GeneratorContextManager, contextmanager
-from typing import Any, Callable, Generator
+from typing import Any, Callable, Generator, Optional
 
 import pytest
 from pydantic import ValidationError
@@ -79,7 +79,8 @@ def test_non_select_query_asset(sqlite_datasource):
 # Test double used to return canned responses for splitter queries.
 @contextmanager
 def _create_sqlite_source(
-    splitter_query_response: list[tuple[str]],
+    splitter_query_response: Optional[list[tuple[str]]] = None,
+    create_temp_table: bool = True,
 ) -> Generator[Any, Any, Any]:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
         validate_batch_spec=lambda _: None,
@@ -95,6 +96,7 @@ def _create_sqlite_source(
         yield SqliteDatasource(
             name="sqlite_datasource",
             connection_string="sqlite://",  # type: ignore[arg-type]  # pydantic will coerce
+            create_temp_table=create_temp_table,
         )
     finally:
         SqliteDatasource.execution_engine_override = original_override  # type: ignore[misc]
@@ -172,3 +174,12 @@ def test_sqlite_specific_splitter(
         )
         assert len(specified_batches) == specified_batch_cnt
         assert specified_batches[-1].metadata == last_specified_batch_metadata
+
+
+@pytest.mark.unit
+def test_create_temp_table(create_sqlite_source):
+    with create_sqlite_source(create_temp_table=False) as source:
+        assert source.create_temp_table is False
+        asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
+        _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+        assert source._execution_engine._create_temp_table is False

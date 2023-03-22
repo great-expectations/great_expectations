@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
 
+from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -20,7 +21,6 @@ from great_expectations.expectations.metrics.import_manager import (
     pyspark_sql_Column,
     pyspark_sql_DataFrame,
     pyspark_sql_Row,
-    sa,
     sa_func_count,
     sa_sql_expression_ColumnClause,
     sa_sql_expression_Selectable,

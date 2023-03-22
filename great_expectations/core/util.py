@@ -72,14 +72,14 @@ except ImportError:
     MultiPolygon = None
     LineString = None
 
-try:
-    import sqlalchemy
-    from sqlalchemy.engine.row import LegacyRow
-except ImportError:
-    sqlalchemy = None
-    LegacyRow = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalchemy
 
+try:
+    LegacyRow = sqlalchemy.engine.row.LegacyRow
+    TextClause = sqlalchemy.sql.elements.TextClause
+except ImportError:
+    LegacyRow = SQLALCHEMY_NOT_IMPORTED
+    TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
     "api_np": {
@@ -100,10 +100,8 @@ SCHEMAS = {
     },
 }
 
-
 if TYPE_CHECKING:
     import numpy.typing as npt
-    from pyspark.sql import SparkSession
     from ruamel.yaml.comments import CommentedMap
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
@@ -407,6 +405,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if LegacyRow and isinstance(data, LegacyRow):
         return dict(data)
 
+    # sqlalchemy text for SqlAlchemy 2 compatibility
+    if TextClause and isinstance(data, TextClause):
+        return str(data)
+
     if isinstance(data, decimal.Decimal):
         return convert_decimal_to_float(d=data)
 
@@ -522,6 +524,9 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
 
     if isinstance(data, RunIdentifier):
         return
+
+    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
+        return str(data)
 
     else:
         raise InvalidExpectationConfigurationError(

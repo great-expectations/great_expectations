@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.optional_imports import sqlalchemy_version_check
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
@@ -13,19 +13,23 @@ from great_expectations.util import (
 )
 
 try:
-    import sqlalchemy as sa
-
-    sqlalchemy_version_check(sa.__version__)
-
-    from sqlalchemy import Column, MetaData, String, Table, and_, column, select
+    from sqlalchemy import Column, MetaData, String, Table, and_, column
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 
     make_url = import_make_url()
 except ImportError:
-    sa = None
+    Column = None
+    MetaData = None
+    String = None
+    Table = None
+    and_ = None
+    column = None
+    URL = None
+    IntegrityError = None
+    NoSuchTableError = None
+    SQLAlchemyError = None
     create_engine = None
-
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +115,7 @@ class DatabaseStoreBackend(StoreBackend):
             try:
                 if self._schema_name:
                     self.engine.execute(
-                        f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};"
+                        sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
                     )
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
@@ -238,7 +242,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _get(self, key):
         sel = (
-            select([column("value")])
+            sa.select([column("value")])
             .select_from(self._table)
             .where(
                 and_(
@@ -304,7 +308,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _has_key(self, key):
         sel = (
-            select([sa.func.count(column("value"))])
+            sa.select([sa.func.count(column("value"))])
             .select_from(self._table)
             .where(
                 and_(
@@ -323,7 +327,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def list_keys(self, prefix=()):
         sel = (
-            select([column(col) for col in self.key_columns])
+            sa.select([column(col) for col in self.key_columns])
             .select_from(self._table)
             .where(
                 and_(

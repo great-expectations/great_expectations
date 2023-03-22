@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import sa
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
@@ -10,14 +11,9 @@ from great_expectations.execution_engine.split_and_sample.data_sampler import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
-
-try:
-    from sqlalchemy.engine import Dialect
-    from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
+    from sa.engine import Dialect
+    from sa.sql import Selectable
+    from sa.sql.elements import BinaryExpression, BooleanClauseList
 except ImportError:
     Selectable = None
     BinaryExpression = None
@@ -26,8 +22,6 @@ except ImportError:
 
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
-
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 

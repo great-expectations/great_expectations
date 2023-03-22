@@ -319,7 +319,7 @@ class MetaSqlAlchemyDataset(Dataset):
             # limit doesn't compile properly for oracle so we will append rownum to query string later
             if self.engine.dialect.name.lower() == GXSqlDialect.ORACLE:
                 raw_query = (
-                    sa.select([sa.column(column)])
+                    sa.select(sa.column(column))
                     .select_from(self._table)
                     .where(
                         sa.and_(
@@ -336,7 +336,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 query += "\nAND ROWNUM <= %d" % unexpected_count_limit
             else:
                 query = (
-                    sa.select([sa.column(column)])
+                    sa.select(sa.column(column))
                     .select_from(self._table)
                     .where(
                         sa.and_(
@@ -472,36 +472,34 @@ class MetaSqlAlchemyDataset(Dataset):
                 raise ValueError("Unknown value of ignore_row_if: %s", (ignore_row_if,))
 
             count_value_query = sa.select(
-                [
-                    sa.func.sum(
-                        sa.case(
-                            [
-                                (
-                                    sa.or_(
-                                        sa.column(column_A) != (None),
-                                        sa.column(column_A) == (None),
-                                    ),
-                                    1,
-                                )
-                            ],
-                            else_=0,
-                        )
-                    ).label("column_A_count"),
-                    sa.func.sum(
-                        sa.case(
-                            [
-                                (
-                                    sa.or_(
-                                        sa.column(column_B) != (None),
-                                        sa.column(column_B) == (None),
-                                    ),
-                                    1,
-                                )
-                            ],
-                            else_=0,
-                        )
-                    ).label("column_B_count"),
-                ]
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.or_(
+                                    sa.column(column_A) != (None),
+                                    sa.column(column_A) == (None),
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label("column_A_count"),
+                sa.func.sum(
+                    sa.case(
+                        [
+                            (
+                                sa.or_(
+                                    sa.column(column_B) != (None),
+                                    sa.column(column_B) == (None),
+                                ),
+                                1,
+                            )
+                        ],
+                        else_=0,
+                    )
+                ).label("column_B_count"),
             ).select_from(self._table)
             count_value_query_results = dict(
                 self.engine.execute(count_value_query).fetchone()
@@ -556,7 +554,7 @@ class MetaSqlAlchemyDataset(Dataset):
             # limit doesn't compile properly for oracle so we will append rownum to query string later
             if self.engine.dialect.name.lower() == "oracle":
                 raw_query = (
-                    sa.select([sa.column(column_A), sa.column(column_B)])
+                    sa.select(sa.column(column_A), sa.column(column_B))
                     .select_from(self._table)
                     .where(
                         sa.and_(
@@ -573,7 +571,7 @@ class MetaSqlAlchemyDataset(Dataset):
                 query += "\nAND ROWNUM <= %d" % unexpected_count_limit
             else:
                 query = (
-                    sa.select([sa.column(column_A), sa.column(column_B)])
+                    sa.select(sa.column(column_A), sa.column(column_B))
                     .select_from(self._table)
                     .where(
                         sa.and_(
@@ -633,7 +631,62 @@ class MetaSqlAlchemyDataset(Dataset):
             )
             temp_table_obj.create(self.engine, checkfirst=True)
 
-            count_case_statement: List[sa.sql.elements.Label] = [
+            count_case_statement: List[sa.sql.elements.Label] = sa.case(
+                [
+                    (
+                        sa.and_(
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
+                        ),
+                        1,
+                    )
+                ],
+                else_=0,
+            ).label("condition")
+            inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
+                count_case_statement,
+                sa.select(count_case_statement).select_from(self._table),
+            )
+            self.engine.execute(inner_case_query)
+
+        element_count_query: Select = (
+            sa.select(
+                sa.func.count().label("element_count"),
+                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                    "null_count"
+                ),
+            )
+            .select_from(self._table)
+            .alias("ElementAndNullCountsSubquery")
+        )
+
+        unexpected_count_query: Select = (
+            sa.select(
+                sa.func.sum(sa.column("condition")).label("unexpected_count"),
+            )
+            .select_from(temp_table_obj)
+            .alias("UnexpectedCountSubquery")
+        )
+
+        count_query: Select = sa.select(
+            element_count_query.c.element_count,
+            element_count_query.c.null_count,
+            unexpected_count_query.c.unexpected_count,
+        )
+
+        return count_query
+
+    def _get_count_query_generic_sqlalchemy(
+        self,
+        expected_condition: BinaryExpression,
+        ignore_values_condition: BinaryExpression,
+    ) -> Select:
+        return sa.select(
+            sa.func.count().label("element_count"),
+            sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                "null_count"
+            ),
+            sa.func.sum(
                 sa.case(
                     [
                         (
@@ -645,73 +698,8 @@ class MetaSqlAlchemyDataset(Dataset):
                         )
                     ],
                     else_=0,
-                ).label("condition")
-            ]
-            inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
-                count_case_statement,
-                sa.select(count_case_statement).select_from(self._table),
-            )
-            self.engine.execute(inner_case_query)
-
-        element_count_query: Select = (
-            sa.select(
-                [
-                    sa.func.count().label("element_count"),
-                    sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
-                        "null_count"
-                    ),
-                ]
-            )
-            .select_from(self._table)
-            .alias("ElementAndNullCountsSubquery")
-        )
-
-        unexpected_count_query: Select = (
-            sa.select(
-                [
-                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
-                ]
-            )
-            .select_from(temp_table_obj)
-            .alias("UnexpectedCountSubquery")
-        )
-
-        count_query: Select = sa.select(
-            [
-                element_count_query.c.element_count,
-                element_count_query.c.null_count,
-                unexpected_count_query.c.unexpected_count,
-            ]
-        )
-
-        return count_query
-
-    def _get_count_query_generic_sqlalchemy(
-        self,
-        expected_condition: BinaryExpression,
-        ignore_values_condition: BinaryExpression,
-    ) -> Select:
-        return sa.select(
-            [
-                sa.func.count().label("element_count"),
-                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
-                    "null_count"
-                ),
-                sa.func.sum(
-                    sa.case(
-                        [
-                            (
-                                sa.and_(
-                                    sa.not_(expected_condition),
-                                    sa.not_(ignore_values_condition),
-                                ),
-                                1,
-                            )
-                        ],
-                        else_=0,
-                    )
-                ).label("unexpected_count"),
-            ]
+                )
+            ).label("unexpected_count"),
         ).select_from(self._table)
 
 
@@ -989,7 +977,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             table_name = self._table
         else:
             table_name = sa.table(table_name)
-        count_query = sa.select([sa.func.count()]).select_from(table_name)
+        count_query = sa.select(sa.func.count()).select_from(table_name)
         return int(self.engine.execute(count_query).scalar())
 
     def get_column_count(self):
@@ -1001,31 +989,29 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_column_nonnull_count(self, column):
         ignore_values = [None]
         count_query = sa.select(
-            [
-                sa.func.count().label("element_count"),
-                sa.func.sum(
-                    sa.case(
-                        [
-                            (
-                                sa.or_(
-                                    # first part of OR(IN (NULL)) gives error in teradata
-                                    sa.column(column).in_(ignore_values)
-                                    if self.engine.dialect.name.lower()
-                                    != GXSqlDialect.TERADATASQL
-                                    else False,
-                                    # Below is necessary b/c sa.in_() uses `==` but None != None
-                                    # But we only consider this if None is actually in the list of ignore values
-                                    sa.column(column).is_(None)
-                                    if None in ignore_values
-                                    else False,
-                                ),
-                                1,
-                            )
-                        ],
-                        else_=0,
-                    )
-                ).label("null_count"),
-            ]
+            sa.func.count().label("element_count"),
+            sa.func.sum(
+                sa.case(
+                    [
+                        (
+                            sa.or_(
+                                # first part of OR(IN (NULL)) gives error in teradata
+                                sa.column(column).in_(ignore_values)
+                                if self.engine.dialect.name.lower()
+                                != GXSqlDialect.TERADATASQL
+                                else False,
+                                # Below is necessary b/c sa.in_() uses `==` but None != None
+                                # But we only consider this if None is actually in the list of ignore values
+                                sa.column(column).is_(None)
+                                if None in ignore_values
+                                else False,
+                            ),
+                            1,
+                        )
+                    ],
+                    else_=0,
+                )
+            ).label("null_count"),
         ).select_from(self._table)
         count_results = dict(self.engine.execute(count_query).fetchone())
         element_count = int(count_results.get("element_count") or 0)
@@ -1035,7 +1021,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
     def get_column_sum(self, column):
         return convert_to_json_serializable(
             self.engine.execute(
-                sa.select([sa.func.sum(sa.column(column))]).select_from(self._table)
+                sa.select(sa.func.sum(sa.column(column))).select_from(self._table)
             ).scalar()
         )
 
@@ -1044,7 +1030,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise NotImplementedError
         return convert_to_json_serializable(
             self.engine.execute(
-                sa.select([sa.func.max(sa.column(column))]).select_from(self._table)
+                sa.select(sa.func.max(sa.column(column))).select_from(self._table)
             ).scalar()
         )
 
@@ -1053,7 +1039,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             raise NotImplementedError
         return convert_to_json_serializable(
             self.engine.execute(
-                sa.select([sa.func.min(sa.column(column))]).select_from(self._table)
+                sa.select(sa.func.min(sa.column(column))).select_from(self._table)
             ).scalar()
         )
 
@@ -1063,10 +1049,8 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         query = (
             sa.select(
-                [
-                    sa.column(column).label("value"),
-                    sa.func.count(sa.column(column)).label("count"),
-                ]
+                sa.column(column).label("value"),
+                sa.func.count(sa.column(column)).label("count"),
             )
             .where(sa.column(column) != None)
             .group_by(sa.column(column))
@@ -1094,9 +1078,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # column * 1.0 needed for correct calculation of avg in MSSQL
         return convert_to_json_serializable(
             self.engine.execute(
-                sa.select([sa.func.avg(sa.column(column) * 1.0)]).select_from(
-                    self._table
-                )
+                sa.select(sa.func.avg(sa.column(column) * 1.0)).select_from(self._table)
             ).scalar()
         )
 
@@ -1104,7 +1086,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         return convert_to_json_serializable(
             self.engine.execute(
                 sa.select(
-                    [sa.func.count(sa.func.distinct(sa.column(column)))]
+                    sa.func.count(sa.func.distinct(sa.column(column)))
                 ).select_from(self._table)
             ).scalar()
         )
@@ -1116,14 +1098,14 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             or self.sql_engine_dialect.name.lower() == GXSqlDialect.TRINO
         ):
             element_values = self.engine.execute(
-                f"SELECT approx_percentile({column},  0.5) FROM {self._table}"
+                sa.text(f"SELECT approx_percentile({column},  0.5) FROM {self._table}")
             )
             return convert_to_json_serializable(element_values.fetchone()[0])
         else:
 
             nonnull_count = self.get_column_nonnull_count(column)
             element_values = self.engine.execute(
-                sa.select([sa.column(column)])
+                sa.select(sa.column(column))
                 .order_by(sa.column(column))
                 .where(sa.column(column) != None)
                 .offset(max(nonnull_count // 2 - 1, 0))
@@ -1213,7 +1195,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             .over()
             for quantile in quantiles
         ]
-        quantiles_query: Select = sa.select(selects).select_from(self._table)
+        quantiles_query: Select = sa.select(*selects).select_from(self._table)
 
         try:
             quantiles_results: Row = self.engine.execute(quantiles_query).fetchone()
@@ -1230,7 +1212,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             f"from (SELECT {column} from {self._table})"
         )
         try:
-            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            quantiles_results = self.engine.execute(
+                sa.text(quantiles_query)
+            ).fetchone()[0]
             quantiles_results_list = ast.literal_eval(quantiles_results)
             return quantiles_results_list
 
@@ -1245,7 +1229,9 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             f"from (SELECT {column} from {self._table})"
         )
         try:
-            quantiles_results = self.engine.execute(quantiles_query).fetchone()[0]
+            quantiles_results = self.engine.execute(
+                sa.text(quantiles_query)
+            ).fetchone()[0]
             return quantiles_results
 
         except ProgrammingError as pe:
@@ -1257,7 +1243,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.func.percentile_disc(sa.column(column), quantile).over()
             for quantile in quantiles
         ]
-        quantiles_query: Select = sa.select(selects).select_from(self._table)
+        quantiles_query: Select = sa.select(*selects).select_from(self._table)
 
         try:
             quantiles_results = self.engine.execute(quantiles_query).fetchone()
@@ -1270,13 +1256,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
         percent_rank_query: CTE = (
             sa.select(
-                [
-                    sa.column(column),
-                    sa.cast(
-                        sa.func.percent_rank().over(order_by=sa.column(column).asc()),
-                        sa.dialects.mysql.DECIMAL(18, 15),
-                    ).label("p"),
-                ]
+                sa.column(column),
+                sa.cast(
+                    sa.func.percent_rank().over(order_by=sa.column(column).asc()),
+                    sa.dialects.mysql.DECIMAL(18, 15),
+                ).label("p"),
             )
             .order_by(sa.column("p").asc())
             .select_from(self._table)
@@ -1306,7 +1290,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
             selects.append(quantile_column)
         quantiles_query: Select = (
-            sa.select(selects).distinct().order_by(percent_rank_query.c.p.desc())
+            sa.select(*selects).distinct().order_by(percent_rank_query.c.p.desc())
         )
 
         try:
@@ -1326,7 +1310,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         only mechanism available for SQLite at the present time (11/17/2021), because the analytical processing is not a
         very strongly represented capability of the SQLite database management system.
         """
-        table_row_count_query: Select = sa.select([sa.func.count()]).select_from(
+        table_row_count_query: Select = sa.select(sa.func.count()).select_from(
             self._table
         )
         table_row_count_result: Optional[Row] = None
@@ -1345,7 +1329,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         offsets: List[int] = [quantile * table_row_count - 1 for quantile in quantiles]
         quantile_queries: List[Select] = [
-            sa.select([sa.column(column)])
+            sa.select(sa.column(column))
             .order_by(sa.column(column).asc())
             .offset(offset)
             .limit(1)
@@ -1379,7 +1363,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             sa.func.percentile_disc(quantile).within_group(sa.column(column).asc())
             for quantile in quantiles
         ]
-        quantiles_query: Select = sa.select(selects).select_from(self._table)
+        quantiles_query: Select = sa.select(*selects).select_from(self._table)
 
         try:
             quantiles_results: Row = self.engine.execute(quantiles_query).fetchone()
@@ -1393,7 +1377,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                     selects=selects, sql_engine_dialect=self.sql_engine_dialect
                 )
                 selects_approx: List[TextClause] = [sa.text(sql_approx)]
-                quantiles_query_approx: Select = sa.select(selects_approx).select_from(
+                quantiles_query_approx: Select = sa.select(*selects_approx).select_from(
                     self._table
                 )
                 if allow_relative_error:
@@ -1421,13 +1405,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             # This function is used to compute statistical standard deviation from sample data (per the reference in
             # https://sqlserverrider.wordpress.com/2013/03/06/standard-deviation-functions-stdev-and-stdevp-sql-server).
             res = self.engine.execute(
-                sa.select([sa.func.stdev(sa.column(column))])
+                sa.select(sa.func.stdev(sa.column(column)))
                 .select_from(self._table)
                 .where(sa.column(column) is not None)
             ).fetchone()
         else:
             res = self.engine.execute(
-                sa.select([sa.func.stddev_samp(sa.column(column))])
+                sa.select(sa.func.stddev_samp(sa.column(column)))
                 .select_from(self._table)
                 .where(sa.column(column) is not None)
             ).fetchone()
@@ -1523,7 +1507,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
 
         query = (
-            sa.select(case_conditions)
+            sa.select(*case_conditions)
             .where(
                 sa.column(column) != None,
             )
@@ -1623,7 +1607,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             condition = max_condition
 
         query = (
-            sa.select([sa.func.count(sa.column(column))])
+            sa.select(sa.func.count(sa.column(column)))
             .where(sa.and_(sa.column(column) != None, condition))
             .select_from(self._table)
         )
@@ -1732,11 +1716,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
 
         if engine_dialect == GXSqlDialect.ORACLE:
             try:
-                self.engine.execute(stmt_1)
+                self.engine.execute(sa.text(stmt_1))
             except DatabaseError:
-                self.engine.execute(stmt_2)
+                self.engine.execute(sa.text(stmt_2))
         else:
-            self.engine.execute(stmt)
+            self.engine.execute(sa.text(stmt))
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
@@ -1765,7 +1749,7 @@ WHERE
                 for col_name, col_type in col_info_tuples_list
             ]
         else:
-            query: Select = sa.select([sa.text("*")]).select_from(self._table).limit(1)
+            query: Select = sa.select(sa.text("*")).select_from(self._table).limit(1)
             col_names: list = self.engine.execute(query).keys()
             col_info_dict_list = [{"name": col_name} for col_name in col_names]
         return col_info_dict_list
@@ -1865,7 +1849,7 @@ WHERE
             sa.column(col["name"]) for col in self.columns if col["name"] in column_list
         ]
         query = (
-            sa.select([sa.func.count()])
+            sa.select(sa.func.count())
             .group_by(*columns)
             .having(sa.func.count() > 1)
             .select_from(self._table)
@@ -1890,7 +1874,7 @@ WHERE
         else:
             unexpected_count = unexpected_count[0]
 
-        total_count_query = sa.select([sa.func.count()]).select_from(self._table)
+        total_count_query = sa.select(sa.func.count()).select_from(self._table)
         total_count = self.engine.execute(total_count_query).fetchone()[0]
 
         if total_count > 0:
@@ -2305,7 +2289,7 @@ WHERE
     ):
         # Duplicates are found by filtering a group by query
         dup_query = (
-            sa.select([sa.column(column)])
+            sa.select(sa.column(column))
             .select_from(self._table)
             .group_by(sa.column(column))
             .having(sa.func.count(sa.column(column)) > 1)
@@ -2322,9 +2306,9 @@ WHERE
                 source_table=self._table,
                 column_name=column,
             )
-            self.engine.execute(temp_table_stmt)
+            self.engine.execute(sa.text(temp_table_stmt))
             dup_query = (
-                sa.select([sa.column(column)])
+                sa.select(sa.column(column))
                 .select_from(sa.text(temp_table_name))
                 .group_by(sa.column(column))
                 .having(sa.func.count(sa.column(column)) > 1)
