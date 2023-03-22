@@ -31,7 +31,7 @@ def s3_base():
             r = requests.get(endpoint_uri)
             if r.ok:
                 break
-        except:
+        except:  # noqa: E722
             pass
         timeout -= 0.1
         time.sleep(0.1)

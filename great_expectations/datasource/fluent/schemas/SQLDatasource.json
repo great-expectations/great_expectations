@@ -1,6 +1,6 @@
 {
     "title": "SQLDatasource",
-    "description": "Adds a generic SQL datasource to the data context.\n\nArgs:\n    name: The name of this datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the database.\n        For example: \"postgresql+psycopg2://postgres:@localhost/test_database\"\n    assets: An optional dictionary whose keys are SQL DataAsset names and whose values\n        are SQL DataAsset objects.",
+    "description": "--Public API--Adds a generic SQL datasource to the data context.\n\nArgs:\n    name: The name of this datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the database.\n        For example: \"postgresql+psycopg2://postgres:@localhost/test_database\"\n    kwargs: Extra SQLAlchemy keyword arguments to pass to `create_engine()`. Note, only python\n        primitive types will be serializable to config.\n    assets: An optional dictionary whose keys are SQL DataAsset names and whose values\n        are SQL DataAsset objects.",
     "type": "object",
     "properties": {
         "type": {
@@ -14,6 +14,12 @@
         "name": {
             "title": "Name",
             "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
         },
         "assets": {
             "title": "Assets",
@@ -32,7 +38,32 @@
         },
         "connection_string": {
             "title": "Connection String",
-            "type": "string"
+            "anyOf": [
+                {
+                    "type": "string",
+                    "writeOnly": true,
+                    "format": "password"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine as part of `create_engine(connection_string, **kwargs)`",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [
@@ -59,8 +90,8 @@
                 "key"
             ]
         },
-        "ColumnSplitterColumnValue": {
-            "title": "ColumnSplitterColumnValue",
+        "SplitterColumnValue": {
+            "title": "SplitterColumnValue",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -82,8 +113,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterMultiColumnValue": {
-            "title": "ColumnSplitterMultiColumnValue",
+        "SplitterMultiColumnValue": {
+            "title": "SplitterMultiColumnValue",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -108,8 +139,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterDividedInteger": {
-            "title": "ColumnSplitterDividedInteger",
+        "SplitterDividedInteger": {
+            "title": "SplitterDividedInteger",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -136,8 +167,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterModInteger": {
-            "title": "ColumnSplitterModInteger",
+        "SplitterModInteger": {
+            "title": "SplitterModInteger",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -164,8 +195,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterYear": {
-            "title": "ColumnSplitterYear",
+        "SplitterYear": {
+            "title": "SplitterYear",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -187,8 +218,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterYearAndMonth": {
-            "title": "ColumnSplitterYearAndMonth",
+        "SplitterYearAndMonth": {
+            "title": "SplitterYearAndMonth",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -210,8 +241,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterYearAndMonthAndDay": {
-            "title": "ColumnSplitterYearAndMonthAndDay",
+        "SplitterYearAndMonthAndDay": {
+            "title": "SplitterYearAndMonthAndDay",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -233,8 +264,8 @@
             ],
             "additionalProperties": false
         },
-        "ColumnSplitterDatetimePart": {
-            "title": "ColumnSplitterDatetimePart",
+        "SplitterDatetimePart": {
+            "title": "SplitterDatetimePart",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -281,6 +312,12 @@
                     ],
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
@@ -288,32 +325,32 @@
                         "$ref": "#/definitions/Sorter"
                     }
                 },
-                "column_splitter": {
-                    "title": "Column Splitter",
+                "splitter": {
+                    "title": "Splitter",
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/ColumnSplitterColumnValue"
+                            "$ref": "#/definitions/SplitterColumnValue"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterMultiColumnValue"
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterDividedInteger"
+                            "$ref": "#/definitions/SplitterDividedInteger"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterModInteger"
+                            "$ref": "#/definitions/SplitterModInteger"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterYear"
+                            "$ref": "#/definitions/SplitterYear"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterYearAndMonth"
+                            "$ref": "#/definitions/SplitterYearAndMonth"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterYearAndMonthAndDay"
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterDatetimePart"
+                            "$ref": "#/definitions/SplitterDatetimePart"
                         }
                     ]
                 },
@@ -349,6 +386,12 @@
                     ],
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
@@ -356,32 +399,32 @@
                         "$ref": "#/definitions/Sorter"
                     }
                 },
-                "column_splitter": {
-                    "title": "Column Splitter",
+                "splitter": {
+                    "title": "Splitter",
                     "anyOf": [
                         {
-                            "$ref": "#/definitions/ColumnSplitterColumnValue"
+                            "$ref": "#/definitions/SplitterColumnValue"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterMultiColumnValue"
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterDividedInteger"
+                            "$ref": "#/definitions/SplitterDividedInteger"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterModInteger"
+                            "$ref": "#/definitions/SplitterModInteger"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterYear"
+                            "$ref": "#/definitions/SplitterYear"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterYearAndMonth"
+                            "$ref": "#/definitions/SplitterYearAndMonth"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterYearAndMonthAndDay"
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
                         },
                         {
-                            "$ref": "#/definitions/ColumnSplitterDatetimePart"
+                            "$ref": "#/definitions/SplitterDatetimePart"
                         }
                     ]
                 },

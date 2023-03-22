@@ -103,8 +103,7 @@ class DataConnector(ABC):
     @abstractmethod
     def get_data_references(self) -> List[Any]:
         """
-        List objects in the underlying data store to create a list of data_references (type depends on cloud storage
-        environment, SQL DBMS, etc.).
+        This interface method lists objects in the underlying data store used to create a list of data_references (type depends on cloud storage environment, SQL DBMS, etc.).
         """
         pass
 
@@ -119,10 +118,29 @@ class DataConnector(ABC):
         pass
 
     @abstractmethod
+    def get_matched_data_references(self) -> List[Any]:
+        """
+        This interface method returns (e.g., cached) data references that were successfully matched based on "BatchRequest" options.
+
+        Returns:
+            List[Any] -- unmatched data references (type depends on cloud storage environment, SQL DBMS, etc.)
+        """
+        pass
+
+    @abstractmethod
+    def get_matched_data_reference_count(self) -> int:
+        """
+        This interface method returns number of all (e.g., cached) matched data references (useful for diagnostics).
+
+        Returns:
+            int -- number of data references identified
+        """
+        pass
+
+    @abstractmethod
     def get_unmatched_data_references(self) -> List[Any]:
         """
-        This interface method returns (e.g., cached) data references that could not be matched based on "BatchRequest"
-        options.
+        This interface method returns (e.g., cached) data references that could not be matched based on "BatchRequest" options.
 
         Returns:
             List[Any] -- unmatched data references (type depends on cloud storage environment, SQL DBMS, etc.)
@@ -132,7 +150,7 @@ class DataConnector(ABC):
     @abstractmethod
     def get_unmatched_data_reference_count(self) -> int:
         """
-        This interface method returns number of all (e.g., cached) unmached data references (useful for diagnostics).
+        This interface method returns number of all (e.g., cached) unmatched data references (useful for diagnostics).
 
         Returns:
             int -- number of data references identified
@@ -167,8 +185,8 @@ class DataConnector(ABC):
             return False
 
         if batch_request.options:
-            for key in batch_request.options.keys():
-                if not (
+            for key, value in batch_request.options.items():
+                if value is not None and not (
                     (key in batch_definition.batch_identifiers)
                     and (
                         batch_definition.batch_identifiers[key]

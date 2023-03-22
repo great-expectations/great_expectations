@@ -28,6 +28,8 @@ def _models_and_schema_dirs() -> Generator[
     datasource: Type[Datasource] = Datasource
     ds_type_name: str = ""
 
+    yield Datasource, _SCHEMAS_DIR, Datasource.__name__
+
     for name, model in _iter_all_registered_types():
         if issubclass(model, Datasource):
             datasource = model
@@ -91,7 +93,6 @@ def test_vcs_schemas_match(
         "SqliteTableAsset.json",
         "SqliteQueryAsset.json",
         "SASAsset.json",
-        "PandasSASAsset.json",
     ):
         pytest.xfail(f"{schema_path.name} does not exist")
 
@@ -118,6 +119,7 @@ def test_no_orphaned_schemas():
 
     # NOTE: this is a very low fidelity check
     all_schemas: set[str] = {t[1].__name__ for t in _iter_all_registered_types()}
+    all_schemas.add(Datasource.__name__)
 
     orphans: list[pathlib.Path] = []
 

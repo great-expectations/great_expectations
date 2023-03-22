@@ -1,8 +1,9 @@
+from __future__ import annotations
+
 import datetime
 import hashlib
 import logging
 import pickle
-import warnings
 from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
@@ -67,7 +68,7 @@ try:
 except ImportError:
     storage = None
     service_account = None
-    GoogleAPIError = None
+    GoogleAPIError = None  # type: ignore[assignment,misc] # assigning None to a type
     DefaultCredentialsError = None
     logger.debug(
         "Unable to load GCS connection object; install optional google dependency for support"
@@ -343,11 +344,23 @@ Bucket: {error}"""
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
             reader_fn = self._get_reader_fn(reader_method)
-            df = reader_fn(**reader_options)
+            reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
+                **reader_options
+            )
+            if isinstance(reader_fn_result, list):
+                if len(reader_fn_result) > 1:
+                    raise gx_exceptions.ExecutionEngineError(
+                        "Pandas reader method must return a single DataFrame, "
+                        f'but "{reader_method}" returned {len(reader_fn_result)} DataFrames.'
+                    )
+                else:
+                    df = reader_fn_result[0]
+            else:
+                df = reader_fn_result
 
         else:
             raise gx_exceptions.BatchSpecError(
-                f"""batch_spec must be of type RuntimeDataBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, \
+                f"""batch_spec must be of type RuntimeDataBatchSpec, PandasBatchSpec, PathBatchSpec, S3BatchSpec, or AzureBatchSpec, \
 not {batch_spec.__class__.__name__}"""
             )
 
@@ -569,19 +582,9 @@ not {batch_spec.__class__.__name__}"""
                     subset=[column_A_name, column_B_name],
                 )
             else:
-                if ignore_row_if not in ["neither", "never"]:
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
-
-                if ignore_row_if == "never":
-                    # deprecated-v0.13.29
-                    warnings.warn(
-                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  \
-Please use "neither" instead.
-""",
-                        DeprecationWarning,
                     )
 
             return data

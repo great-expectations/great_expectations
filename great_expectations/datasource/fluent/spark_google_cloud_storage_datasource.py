@@ -9,6 +9,9 @@ from typing_extensions import Literal
 
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed at runtime
+)
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
@@ -55,7 +58,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
 
     # Google Cloud Storage specific attributes
     bucket_or_name: str
-    gcs_options: Dict[str, Any] = {}
+    gcs_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _gcs_client: Union[GoogleCloudStorageClient, None] = pydantic.PrivateAttr(
         default=None
@@ -71,7 +74,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                         GoogleServiceAccountCredentials, None
                     ] = None  # If configured with gcloud CLI / env vars
                     if "filename" in self.gcs_options:
-                        filename: str = self.gcs_options.pop("filename")
+                        filename: str = str(self.gcs_options.pop("filename"))
                         credentials = (
                             service_account.Credentials.from_service_account_file(
                                 filename=filename
@@ -111,10 +114,13 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if self._gcs_client is None:
+        try:
+            _ = self._get_gcs_client()
+        except Exception as e:
             raise TestConnectionError(
-                "Unable to load google.cloud.storage.client (it is required for SparkGoogleCloudStorageDatasource)."
-            )
+                "Attempt to connect to datasource failed with the following error message: "
+                f"{str(e)}"
+            ) from e
 
         if self.assets and test_assets:
             for asset in self.assets.values():
@@ -124,20 +130,24 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         self,
         name: str,
         batching_regex: Union[re.Pattern, str],
+        header: bool = False,
+        infer_schema: bool = False,
         prefix: str = "",
         delimiter: str = "/",
         max_results: int = 1000,
         order_by: Optional[SortersDefinition] = None,
     ) -> CSVAsset:
-        """Adds a CSV DataAsst to the present "SparkGoogleCloudStorageDatasource" object.
+        """Adds a CSV DataAsset to the present "SparkGoogleCloudStorageDatasource" object.
 
         Args:
             name: The name of the CSV asset
             batching_regex: regex pattern that matches csv filenames that is used to label the batches
+            header: boolean (default False) indicating whether or not first line of CSV file is header line
+            infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             prefix (str): Google Cloud Storage object name prefix
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
@@ -146,6 +156,8 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
+            header=header,
+            inferSchema=infer_schema,
             order_by=order_by_sorters,
         )
         asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(

@@ -116,7 +116,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     # Test for an unknown datasource
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -137,7 +137,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     # Test for an unknown data_connector
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -159,7 +159,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     # Test for illegal absence of batch_identifiers when batch_data is specified
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -181,7 +181,7 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     # Test for illegal falsiness of batch_identifiers when batch_data is specified
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -282,7 +282,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_mo
 
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -310,7 +310,7 @@ def test_batch_identifiers_and_batch_identifiers_error_illegal_key_with_query_si
 
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -493,7 +493,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_batch_identifiers_e
 
     with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(**batch_request)

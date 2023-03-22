@@ -29,7 +29,6 @@ from typing import (
     overload,
 )
 
-from dateutil.parser import parse
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Literal
@@ -231,7 +230,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     # test_yml_config module so AbstractDataContext is not so cluttered.
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser("~/.great_expectations/great_expectations.conf"),
+        os.path.expanduser(  # noqa: PTH111
+            "~/.great_expectations/great_expectations.conf"
+        ),
         "/etc/great_expectations.conf",
     ]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
@@ -256,7 +257,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override those set in config_variables.yml and the environment
         """
-        self.fluent_config = self._load_fluent_config()
 
         if runtime_environment is None:
             runtime_environment = {}
@@ -266,8 +266,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._config_variables = self._load_config_variables()
         self._variables = self._init_variables()
 
+        # config providers must be provisioned before loading zep_config
+        self.fluent_config = self._load_fluent_config(self._config_provider)
+
         # Init plugin support
-        if self.plugins_directory is not None and os.path.exists(
+        if self.plugins_directory is not None and os.path.exists(  # noqa: PTH110
             self.plugins_directory
         ):
             sys.path.append(self.plugins_directory)
@@ -567,7 +570,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             if self.root_directory:
-                checkpoint_store_directory: str = os.path.join(
+                checkpoint_store_directory: str = os.path.join(  # noqa: PTH118
                     self.root_directory,
                     DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
                 )
@@ -633,7 +636,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ):
                 return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
             if self.root_directory:
-                checkpoint_store_directory: str = os.path.join(
+                checkpoint_store_directory: str = os.path.join(  # noqa: PTH118
                     self.root_directory,
                     DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
                 )
@@ -697,7 +700,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _attach_datasource_to_context(self, datasource: FluentDatasource):
+    def _add_fluent_datasource(self, datasource: FluentDatasource) -> None:
         # We currently don't allow one to overwrite a datasource with this internal method
         if datasource.name in self.datasources:
             raise gx_exceptions.DataContextError(
@@ -705,6 +708,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "name already exists in the data context."
             )
         self.datasources[datasource.name] = datasource
+
+    def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
+        self.datasources[datasource.name] = datasource
+
+    def _delete_fluent_datasource(self, datasource_name: str) -> None:
+        self.datasources.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -1395,7 +1404,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.cloud_id
+            ge_cloud_id = response.id
 
         # If an id is present, we want to prioritize that as our key for object retrieval
         if ge_cloud_id:
@@ -2024,10 +2033,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             The requested Checkpoint.
 
         Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exist.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+
+        if not name and not id:
+            raise ValueError("name and id cannot both be None")
+
         del ge_cloud_id
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -2063,7 +2076,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
 
         Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exist.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
@@ -3616,21 +3629,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif not isinstance(run_id, RunIdentifier):
             run_name = run_name or "profiling"
@@ -3890,17 +3889,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             BatchKwargs
 
         """
-        if kwargs.get("name"):
-            if data_asset_name:
-                raise ValueError(
-                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
-                )
-            # deprecated-v0.11.2
-            warnings.warn(
-                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
@@ -4092,11 +4080,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if not directory_path:
             return False
 
-        profiler_directory_path: str = os.path.join(
+        profiler_directory_path: str = os.path.join(  # noqa: PTH118
             directory_path,
             DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
         )
-        return os.path.isdir(profiler_directory_path)
+        return os.path.isdir(profiler_directory_path)  # noqa: PTH112
 
     @staticmethod
     def _get_global_config_value(
@@ -4228,10 +4216,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         if path is None:
             return None
-        if os.path.isabs(path):
+        if os.path.isabs(path):  # noqa: PTH117
             return path
         else:
-            return os.path.join(self.root_directory, path)  # type: ignore[arg-type]
+            return os.path.join(self.root_directory, path)  # type: ignore[arg-type]  # noqa: PTH118
 
     def _apply_global_config_overrides(
         self, config: DataContextConfig
@@ -5408,12 +5396,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
             )
 
-        config_variables_filepath = os.path.join(
+        config_variables_filepath = os.path.join(  # noqa: PTH118
             self.root_directory, config_variables_filepath  # type: ignore[arg-type]
         )
 
-        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
-        if not os.path.isfile(config_variables_filepath):
+        os.makedirs(  # noqa: PTH103
+            os.path.dirname(config_variables_filepath), exist_ok=True  # noqa: PTH120
+        )
+        if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
             logger.info(
                 "Creating new substitution_variables file at {config_variables_filepath}".format(
                     config_variables_filepath=config_variables_filepath
@@ -5425,8 +5415,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def _load_fluent_config(self) -> GxConfig:
-        """Called at beginning of DataContext __init__"""
+    def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:
+        """Called at beginning of DataContext __init__ after config_providers init."""
         logger.info(
             f"{self.__class__.__name__} has not implemented `_load_fluent_config()` returning empty `GxConfig`"
         )
@@ -5436,7 +5426,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
             logger.info(f"Loaded '{ds_name}' from fluent config")
-            self._attach_datasource_to_context(datasource)
+            self._add_fluent_datasource(datasource)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """

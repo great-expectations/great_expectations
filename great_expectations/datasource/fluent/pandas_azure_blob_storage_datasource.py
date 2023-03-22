@@ -110,10 +110,13 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if self._azure_client is None:
+        try:
+            _ = self._get_azure_client()
+        except Exception as e:
             raise TestConnectionError(
-                "Unable to load azure.storage.blob.BlobServiceClient (it is required for PandasAzureBlobStorageDatasource)."
-            )
+                "Attempt to connect to datasource failed with the following error message: "
+                f"{str(e)}"
+            ) from e
 
         if self.assets and test_assets:
             for asset in self.assets.values():
@@ -129,7 +132,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
-        """Adds a CSV DataAsst to the present "PandasAzureBlobStorageDatasource" object.
+        """Adds a CSV DataAsset to the present "PandasAzureBlobStorageDatasource" object.
 
         Args:
             name: The name of the CSV asset
@@ -137,7 +140,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -185,7 +188,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
-        """Adds an Excel DataAsst to the present "PandasAzureBlobStorageDatasource" object.
+        """Adds an Excel DataAsset to the present "PandasAzureBlobStorageDatasource" object.
 
         Args:
             name: The name of the Excel asset
@@ -193,7 +196,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -241,7 +244,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
-        """Adds a JSON DataAsst to the present "PandasAzureBlobStorageDatasource" object.
+        """Adds a JSON DataAsset to the present "PandasAzureBlobStorageDatasource" object.
 
         Args:
             name: The name of the JSON asset
@@ -249,7 +252,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
@@ -297,7 +300,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         order_by: Optional[SortersDefinition] = None,
         **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
-        """Adds a Parquet DataAsst to the present "PandasAzureBlobStorageDatasource" object.
+        """Adds a Parquet DataAsset to the present "PandasAzureBlobStorageDatasource" object.
 
         Args:
             name: The name of the Parquet asset
@@ -305,7 +308,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             container: container name for Microsoft Azure Blob Storage
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "{+|-}key" syntax: +/- (a/de)scending; + default
+            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
             kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(

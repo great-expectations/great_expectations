@@ -392,9 +392,11 @@ try:
         "BYTEINT": snowflaketypes.BYTEINT,
         "CHARACTER": snowflaketypes.CHARACTER,
         "DEC": snowflaketypes.DEC,
+        "BOOLEAN": snowflakeDialect.BOOLEAN,
         "DOUBLE": snowflaketypes.DOUBLE,
         "FIXED": snowflaketypes.FIXED,
         "NUMBER": snowflaketypes.NUMBER,
+        "INTEGER": snowflakeDialect.INTEGER,
         "OBJECT": snowflaketypes.OBJECT,
         "STRING": snowflaketypes.STRING,
         "TEXT": snowflaketypes.TEXT,
@@ -446,9 +448,9 @@ try:
         "JSON": athenatypes.String,
     }
 except ImportError:
-    pyathena = None
+    pyathena = None  # type: ignore[assignment]
     athenatypes = None
-    athenaDialect = None
+    athenaDialect = None  # type: ignore[assignment,misc]
     ATHENA_TYPES = {}
 
 # # Others from great_expectations/dataset/sqlalchemy_dataset.py
@@ -1546,7 +1548,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         }
         for col in schema:
             type_ = schema[col]
-            if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+            if type_ in ["INTEGER", "SMALLINT", "BIGINT", "NUMBER"]:
                 df[col] = pd.to_numeric(df[col], downcast="signed")
             elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                 df[col] = pd.to_numeric(df[col])
@@ -1568,7 +1570,14 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                         value=[min_value_dbms, max_value_dbms],
                         inplace=True,
                     )
-            elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
+            elif type_ in [
+                "DATETIME",
+                "TIMESTAMP",
+                "DATE",
+                "TIMESTAMP_NTZ",  # the following 3 types are snowflake-specific
+                "TIMESTAMP_LTZ",
+                "TIMESTAMP_TZ",
+            ]:
                 df[col] = pd.to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
@@ -3376,8 +3385,8 @@ def generate_sqlite_db_path():
         str: An absolute path to the ephemeral db within the created temporary directory.
     """
     tmp_dir = str(tempfile.mkdtemp())
-    abspath = os.path.abspath(
-        os.path.join(
+    abspath = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             tmp_dir,
             "sqlite_db"
             + "".join(

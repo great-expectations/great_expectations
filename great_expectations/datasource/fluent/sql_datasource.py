@@ -19,7 +19,12 @@ import pydantic
 from typing_extensions import Literal, Protocol, Self
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed for pydantic
+)
+from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -53,7 +58,7 @@ class SQLDatasourceError(Exception):
     pass
 
 
-class _ColumnSplitter(Protocol):
+class _Splitter(Protocol):
     @property
     def columns(self) -> list[str]:
         """The names of the column used to split the data"""
@@ -68,21 +73,21 @@ class _ColumnSplitter(Protocol):
 
     @property
     def param_names(self) -> List[str]:
-        """Returns the parameter names that specify a batch derived from this column splitter
+        """Returns the parameter names that specify a batch derived from this splitter
 
-        For example, for ColumnSplitterYearMonth this returns ["year", "month"]. For more
-        examples, please see ColumnSplitter* classes below.
+        For example, for SplitterYearMonth this returns ["year", "month"]. For more
+        examples, please see Splitter* classes below.
         """
 
     def splitter_method_kwargs(self) -> Dict[str, Any]:
         """A shim to our sqlalchemy execution engine splitter methods
 
-        We translate any internal _ColumnSplitter state and what is passed in from
+        We translate any internal _Splitter state and what is passed in from
         a batch_request to the splitter_kwargs required by our execution engine
         data splitters defined in:
         great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter
 
-        Look at ColumnSplitter* classes for concrete examples.
+        Look at Splitter* classes for concrete examples.
         """
 
     def batch_request_options_to_batch_spec_kwarg_identifiers(
@@ -92,13 +97,13 @@ class _ColumnSplitter(Protocol):
 
         Arguments:
             options: A BatchRequest.options dictionary that specifies ALL the fields necessary
-                     to specify a batch with respect to this column splitter.
+                     to specify a batch with respect to this splitter.
 
         Returns:
             A dictionary that can be added to batch_spec_kwargs["batch_identifiers"].
             This has one of 2 forms:
               1. This category has many parameters are derived from 1 column.
-                 The only are datetime column splitters and the batch_spec_kwargs["batch_identifiers"]
+                 These only are datetime splitters and the batch_spec_kwargs["batch_identifiers"]
                  look like:
                    {column_name: {datepart_1: value, datepart_2: value, ...}
                  where datepart_* are strings like "year", "month", "day". The exact
@@ -109,7 +114,7 @@ class _ColumnSplitter(Protocol):
                  look like:
                    {column_name_1: value, column_name_2: value, ...}
                  where value is the value of the column after being processed by the splitter.
-                 For example, for the ColumnSplitterModInteger where mod = 3,
+                 For example, for the SplitterModInteger where mod = 3,
                  {"passenger_count": 2}, means the raw passenger count value is in the set:
                  {2, 5, 8, ...} = {2*n + 1 | n is a nonnegative integer }
                  This category was only 1 parameter per column.
@@ -128,7 +133,7 @@ class _ColumnSplitter(Protocol):
 
 
 def _splitter_and_sql_asset_to_batch_identifier_data(
-    splitter: _ColumnSplitter, asset: _SQLAsset
+    splitter: _Splitter, asset: _SQLAsset
 ) -> list[dict]:
     execution_engine = asset.datasource.get_execution_engine()
     sqlalchemy_data_splitter = SqlAlchemyDataSplitter(execution_engine.dialect_name)
@@ -140,7 +145,7 @@ def _splitter_and_sql_asset_to_batch_identifier_data(
     )
 
 
-class _ColumnSplitterDatetime(FluentBaseModel):
+class _SplitterDatetime(FluentBaseModel):
     column_name: str
     method_name: str
 
@@ -178,7 +183,7 @@ class _ColumnSplitterDatetime(FluentBaseModel):
         raise NotImplementedError
 
 
-class ColumnSplitterYear(_ColumnSplitterDatetime):
+class SplitterYear(_SplitterDatetime):
     column_name: str
     method_name: Literal["split_on_year"] = "split_on_year"
 
@@ -190,7 +195,7 @@ class ColumnSplitterYear(_ColumnSplitterDatetime):
         return {"column_name": self.column_name}
 
 
-class ColumnSplitterYearAndMonth(_ColumnSplitterDatetime):
+class SplitterYearAndMonth(_SplitterDatetime):
     column_name: str
     method_name: Literal["split_on_year_and_month"] = "split_on_year_and_month"
 
@@ -202,7 +207,7 @@ class ColumnSplitterYearAndMonth(_ColumnSplitterDatetime):
         return {"column_name": self.column_name}
 
 
-class ColumnSplitterYearAndMonthAndDay(_ColumnSplitterDatetime):
+class SplitterYearAndMonthAndDay(_SplitterDatetime):
     column_name: str
     method_name: Literal[
         "split_on_year_and_month_and_day"
@@ -216,7 +221,7 @@ class ColumnSplitterYearAndMonthAndDay(_ColumnSplitterDatetime):
         return {"column_name": self.column_name}
 
 
-class ColumnSplitterDatetimePart(_ColumnSplitterDatetime):
+class SplitterDatetimePart(_SplitterDatetime):
     datetime_parts: List[str]
     column_name: str
     method_name: Literal["split_on_date_parts"] = "split_on_date_parts"
@@ -237,7 +242,7 @@ class ColumnSplitterDatetimePart(_ColumnSplitterDatetime):
         return v
 
 
-class _ColumnSplitterOneColumnOneParam(FluentBaseModel):
+class _SplitterOneColumnOneParam(FluentBaseModel):
     column_name: str
     method_name: str
 
@@ -267,7 +272,7 @@ class _ColumnSplitterOneColumnOneParam(FluentBaseModel):
         raise NotImplementedError
 
 
-class ColumnSplitterDividedInteger(_ColumnSplitterOneColumnOneParam):
+class SplitterDividedInteger(_SplitterOneColumnOneParam):
     divisor: int
     column_name: str
     method_name: Literal["split_on_divided_integer"] = "split_on_divided_integer"
@@ -289,7 +294,7 @@ class ColumnSplitterDividedInteger(_ColumnSplitterOneColumnOneParam):
         return {self.column_name: options["quotient"]}
 
 
-class ColumnSplitterModInteger(_ColumnSplitterOneColumnOneParam):
+class SplitterModInteger(_SplitterOneColumnOneParam):
     mod: int
     column_name: str
     method_name: Literal["split_on_mod_integer"] = "split_on_mod_integer"
@@ -311,7 +316,7 @@ class ColumnSplitterModInteger(_ColumnSplitterOneColumnOneParam):
         return {self.column_name: options["remainder"]}
 
 
-class ColumnSplitterColumnValue(_ColumnSplitterOneColumnOneParam):
+class SplitterColumnValue(_SplitterOneColumnOneParam):
     column_name: str
     method_name: Literal["split_on_column_value"] = "split_on_column_value"
 
@@ -339,7 +344,7 @@ class ColumnSplitterColumnValue(_ColumnSplitterOneColumnOneParam):
         )
 
 
-class ColumnSplitterMultiColumnValue(FluentBaseModel):
+class SplitterMultiColumnValue(FluentBaseModel):
     column_names: List[str]
     method_name: Literal[
         "split_on_multi_column_values"
@@ -372,43 +377,49 @@ class ColumnSplitterMultiColumnValue(FluentBaseModel):
         )
 
 
-# We create this type instead of using _ColumnSplitter so pydantic can use to this to
-# coerce the column splitter to the right type during deserialization from config.
-ColumnSplitter = Union[
-    ColumnSplitterColumnValue,
-    ColumnSplitterMultiColumnValue,
-    ColumnSplitterDividedInteger,
-    ColumnSplitterModInteger,
-    ColumnSplitterYear,
-    ColumnSplitterYearAndMonth,
-    ColumnSplitterYearAndMonthAndDay,
-    ColumnSplitterDatetimePart,
+# We create this type instead of using _Splitter so pydantic can use to this to
+# coerce the splitter to the right type during deserialization from config.
+Splitter = Union[
+    SplitterColumnValue,
+    SplitterMultiColumnValue,
+    SplitterDividedInteger,
+    SplitterModInteger,
+    SplitterYear,
+    SplitterYearAndMonth,
+    SplitterYearAndMonthAndDay,
+    SplitterDatetimePart,
 ]
 
 
 class _SQLAsset(DataAsset):
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
-    column_splitter: Optional[ColumnSplitter] = None
+    splitter: Optional[Splitter] = None
     name: str
 
-    def batch_request_options_template(
-        self,
-    ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for build_batch_request.
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        """The potential keys for BatchRequestOptions.
+
+        Example:
+        ```python
+        >>> print(asset.batch_request_options)
+        ("day", "month", "year")
+        >>> options = {"year": "2023"}
+        >>> batch_request = asset.build_batch_request(options=options)
+        ```
 
         Returns:
-            A BatchRequestOptions dictionary with the correct shape that build_batch_request
-            will understand. All the option values are defaulted to None.
+            A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
-        template: BatchRequestOptions = {}
-        if not self.column_splitter:
-            return template
-        return {p: None for p in self.column_splitter.param_names}
+        options: tuple[str, ...] = tuple()
+        if self.splitter:
+            options = tuple(self.splitter.param_names)
+        return options
 
-    def _add_splitter(self: Self, column_splitter: ColumnSplitter) -> Self:
-        self.column_splitter = column_splitter
-        self.test_column_splitter_connection()
+    def _add_splitter(self: Self, splitter: Splitter) -> Self:
+        self.splitter = splitter
+        self.test_splitter_connection()
         return self
 
     def add_splitter_year(
@@ -422,7 +433,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_splitter(
-            ColumnSplitterYear(method_name="split_on_year", column_name=column_name)
+            SplitterYear(method_name="split_on_year", column_name=column_name)
         )
 
     def add_splitter_year_and_month(
@@ -436,7 +447,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_splitter(
-            ColumnSplitterYearAndMonth(
+            SplitterYearAndMonth(
                 method_name="split_on_year_and_month", column_name=column_name
             )
         )
@@ -452,7 +463,7 @@ class _SQLAsset(DataAsset):
             This sql asset so we can use this method fluently.
         """
         return self._add_splitter(
-            ColumnSplitterYearAndMonthAndDay(
+            SplitterYearAndMonthAndDay(
                 method_name="split_on_year_and_month_and_day", column_name=column_name
             )
         )
@@ -461,7 +472,7 @@ class _SQLAsset(DataAsset):
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
         return self._add_splitter(
-            ColumnSplitterDatetimePart(
+            SplitterDatetimePart(
                 method_name="split_on_date_parts",
                 column_name=column_name,
                 datetime_parts=datetime_parts,
@@ -470,7 +481,7 @@ class _SQLAsset(DataAsset):
 
     def add_splitter_column_value(self: Self, column_name: str) -> Self:
         return self._add_splitter(
-            ColumnSplitterColumnValue(
+            SplitterColumnValue(
                 method_name="split_on_column_value",
                 column_name=column_name,
             )
@@ -480,7 +491,7 @@ class _SQLAsset(DataAsset):
         self: Self, column_name: str, divisor: int
     ) -> Self:
         return self._add_splitter(
-            ColumnSplitterDividedInteger(
+            SplitterDividedInteger(
                 method_name="split_on_divided_integer",
                 column_name=column_name,
                 divisor=divisor,
@@ -489,7 +500,7 @@ class _SQLAsset(DataAsset):
 
     def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
         return self._add_splitter(
-            ColumnSplitterModInteger(
+            SplitterModInteger(
                 method_name="split_on_mod_integer",
                 column_name=column_name,
                 mod=mod,
@@ -498,7 +509,7 @@ class _SQLAsset(DataAsset):
 
     def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
         return self._add_splitter(
-            ColumnSplitterMultiColumnValue(
+            SplitterMultiColumnValue(
                 column_names=column_names, method_name="split_on_multi_column_values"
             )
         )
@@ -506,7 +517,7 @@ class _SQLAsset(DataAsset):
     def test_connection(self) -> None:
         pass
 
-    def test_column_splitter_connection(self) -> None:
+    def test_splitter_connection(self) -> None:
         pass
 
     @staticmethod
@@ -522,19 +533,19 @@ class _SQLAsset(DataAsset):
         self, batch_request: BatchRequest
     ) -> List[BatchRequest]:
         """Populates a batch requests unspecified params producing a list of batch requests."""
-        if self.column_splitter is None:
+        if self.splitter is None:
             # Currently batch_request.options is complete determined by the presence of a
-            # column splitter. If column_splitter is None, then there are no specifiable options
+            # splitter. If splitter is None, then there are no specifiable options
             # so we return early. Since the passed in batch_request is verified, it must be the
             # empty, ie {}.
-            # In the future, if there are options that are not determined by the column splitter
+            # In the future, if there are options that are not determined by the splitter
             # this check will have to be generalized.
             return [batch_request]
 
         batch_requests: List[BatchRequest] = []
-        # We iterate through all possible batches as determined by the column splitter
-        for params in self.column_splitter.param_defaults(self):
-            # If the params from the column splitter don't match the batch request options
+        # We iterate through all possible batches as determined by the splitter
+        for params in self.splitter.param_defaults(self):
+            # If the params from the splitter don't match the batch request options
             # we don't create this batch.
             if not _SQLAsset._matches_request_options(params, batch_request.options):
                 continue
@@ -564,20 +575,18 @@ class _SQLAsset(DataAsset):
         self._validate_batch_request(batch_request)
 
         batch_list: List[Batch] = []
-        column_splitter = self.column_splitter
+        splitter = self.splitter
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
             batch_metadata = copy.deepcopy(request.options)
             batch_spec_kwargs = self._create_batch_spec_kwargs()
-            if column_splitter:
-                batch_spec_kwargs["splitter_method"] = column_splitter.method_name
-                batch_spec_kwargs[
-                    "splitter_kwargs"
-                ] = column_splitter.splitter_method_kwargs()
+            if splitter:
+                batch_spec_kwargs["splitter_method"] = splitter.method_name
+                batch_spec_kwargs["splitter_kwargs"] = splitter.splitter_method_kwargs()
                 # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
                 # it is hardcoded to a dict above, so we cast it here.
                 cast(Dict, batch_spec_kwargs["batch_identifiers"]).update(
-                    column_splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
+                    splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
                         request.options
                     )
                 )
@@ -599,7 +608,7 @@ class _SQLAsset(DataAsset):
 
             batch_definition = BatchDefinition(
                 datasource_name=self.datasource.name,
-                data_connector_name="fluent_sql",
+                data_connector_name=_DATA_CONNECTOR_NAME,
                 data_asset_name=self.name,
                 batch_identifiers=IDDict(batch_spec["batch_identifiers"]),
                 batch_spec_passthrough=None,
@@ -631,15 +640,15 @@ class _SQLAsset(DataAsset):
 
         Args:
             options: A dict that can be used to limit the number of batches returned from the asset.
-                The dict structure depends on the asset type. A template of the dict can be obtained by
-                calling batch_request_options_template.
+                The dict structure depends on the asset type. The available keys for dict can be obtained by
+                calling batch_request_options.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
         if options is not None and not self._valid_batch_request_options(options):
-            allowed_keys = set(self.batch_request_options_template().keys())
+            allowed_keys = set(self.batch_request_options)
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -663,10 +672,11 @@ class _SQLAsset(DataAsset):
             and batch_request.data_asset_name == self.name
             and self._valid_batch_request_options(batch_request.options)
         ):
+            options = {option: None for option in self.batch_request_options}
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
-                options=self.batch_request_options_template(),
+                options=options,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
@@ -770,8 +780,8 @@ class TableAsset(_SQLAsset):
                 f'"{self.table_name}" does not exist.'
             )
 
-    def test_column_splitter_connection(self) -> None:
-        if self.column_splitter:
+    def test_splitter_connection(self) -> None:
+        if self.splitter:
             datasource: SQLDatasource = self.datasource
             engine: sqlalchemy.engine.Engine = datasource.get_engine()
             inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
@@ -780,7 +790,7 @@ class TableAsset(_SQLAsset):
                 table_name=self.table_name, schema=self.schema_name
             )
             column_names: list[str] = [column["name"] for column in columns]
-            for splitter_column_name in self.column_splitter.columns:
+            for splitter_column_name in self.splitter.columns:
                 if splitter_column_name not in column_names:
                     raise TestConnectionError(
                         f'The column "{splitter_column_name}" was not found in table "{self.qualified_name}"'
@@ -803,6 +813,7 @@ class TableAsset(_SQLAsset):
         }
 
 
+@public_api
 class SQLDatasource(Datasource):
     """Adds a generic SQL datasource to the data context.
 
@@ -810,6 +821,8 @@ class SQLDatasource(Datasource):
         name: The name of this datasource.
         connection_string: The SQLAlchemy connection string used to connect to the database.
             For example: "postgresql+psycopg2://postgres:@localhost/test_database"
+        kwargs: Extra SQLAlchemy keyword arguments to pass to `create_engine()`. Note, only python
+            primitive types will be serializable to config.
         assets: An optional dictionary whose keys are SQL DataAsset names and whose values
             are SQL DataAsset objects.
     """
@@ -820,13 +833,18 @@ class SQLDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
-    connection_string: str
+    connection_string: Union[ConfigStr, str]
+    kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
+        default={},
+        description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"
+        " as part of `create_engine(connection_string, **kwargs)`",
+    )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
     assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
 
     # private attrs
-    _cached_connection_string: str = pydantic.PrivateAttr("")
+    _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
     _engine: Union[sa.engine.Engine, None] = pydantic.PrivateAttr(None)
 
     # These are instance var because ClassVars can't contain Type variables. See
@@ -842,7 +860,13 @@ class SQLDatasource(Datasource):
     def get_engine(self) -> sqlalchemy.engine.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
-                self._engine = sqlalchemy.create_engine(self.connection_string)
+                model_dict = self.dict(
+                    exclude=self._EXCLUDED_EXEC_ENG_ARGS,
+                    config_provider=self._config_provider,
+                )
+                connection_string = model_dict.pop("connection_string")
+                kwargs = model_dict.pop("kwargs", {})
+                self._engine = sqlalchemy.create_engine(connection_string, **kwargs)
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
@@ -876,6 +900,7 @@ class SQLDatasource(Datasource):
                 asset._datasource = self
                 asset.test_connection()
 
+    @public_api
     def add_table_asset(
         self,
         name: str,
@@ -905,6 +930,7 @@ class SQLDatasource(Datasource):
         )
         return self.add_asset(asset)
 
+    @public_api
     def add_query_asset(
         self,
         name: str,

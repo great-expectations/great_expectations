@@ -10,7 +10,6 @@ from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     BatchRequestOptions,
@@ -21,10 +20,11 @@ from great_expectations.datasource.fluent.postgres_datasource import (
     PostgresDatasource,
 )
 from great_expectations.datasource.fluent.sql_datasource import (
-    ColumnSplitter,
-    ColumnSplitterYearAndMonth,
+    Splitter,
+    SplitterYearAndMonth,
     TableAsset,
 )
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from tests.datasource.fluent.conftest import (
     Dialect,
     MockSaEngine,
@@ -93,12 +93,12 @@ def assert_table_asset(
     name: str,
     table_name: str,
     source: PostgresDatasource,
-    batch_request_template: BatchRequestOptions,
+    batch_request_options: tuple[str, ...],
 ):
     assert asset.name == name
     assert asset.table_name == table_name
     assert asset.datasource == source
-    assert asset.batch_request_options_template() == batch_request_template
+    assert asset.batch_request_options == batch_request_options
 
 
 def assert_batch_request(
@@ -136,7 +136,7 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_template={"year": None, "month": None},
+            batch_request_options=("year", "month"),
         )
         assert_batch_request(
             batch_request=asset.build_batch_request({"year": 2021, "month": 10}),
@@ -163,7 +163,7 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_template={},
+            batch_request_options=tuple(),
         )
         assert_batch_request(
             batch_request=asset.build_batch_request(),
@@ -195,12 +195,12 @@ def create_and_add_table_asset_without_testing_connection(
     source: PostgresDatasource,
     name: str,
     table_name: str,
-    column_splitter: Optional[ColumnSplitter] = None,
+    splitter: Optional[Splitter] = None,
 ) -> Tuple[PostgresDatasource, TableAsset]:
     table_asset = TableAsset(
         name=name,
         table_name=table_name,
-        column_splitter=column_splitter,
+        splitter=splitter,
     )
     # TODO: asset custom init
     table_asset._datasource = source
@@ -208,8 +208,8 @@ def create_and_add_table_asset_without_testing_connection(
     return source, table_asset
 
 
-def year_month_splitter(column_name: str) -> ColumnSplitterYearAndMonth:
-    return ColumnSplitterYearAndMonth(
+def year_month_splitter(column_name: str) -> SplitterYearAndMonth:
+    return SplitterYearAndMonth(
         column_name=column_name,
         method_name="split_on_year_and_month",
     )
@@ -224,14 +224,14 @@ def test_construct_table_asset_directly_with_splitter(create_source):
             source=source,
             name="my_asset",
             table_name="my_table",
-            column_splitter=year_month_splitter(column_name="col"),
+            splitter=year_month_splitter(column_name="col"),
         )
         assert_table_asset(
             asset,
             "my_asset",
             "my_table",
             source,
-            {"year": None, "month": None},
+            ("year", "month"),
         )
         batch_request_options = {"year": 2022, "month": 10}
         assert_batch_request(
@@ -305,7 +305,7 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         empty_batch_request = asset.build_batch_request()
         assert empty_batch_request.options == {}
         batches = source.get_batch_list_from_batch_request(empty_batch_request)
@@ -328,9 +328,10 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
+        assert asset.batch_request_options == ("year", "month")
         batch_request_with_none = asset.build_batch_request(
-            asset.batch_request_options_template()
+            {"year": None, "month": None}
         )
         assert batch_request_with_none.options == {"year": None, "month": None}
         batches = source.get_batch_list_from_batch_request(batch_request_with_none)
@@ -359,7 +360,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request({"year": year})
         )
@@ -409,7 +410,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(
             asset.build_batch_request({"month": month, "year": year})
         )
@@ -513,7 +514,7 @@ def test_get_batch_list_from_batch_request_with_good_batch_request(
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         batch_request = BatchRequest(
             datasource_name=source.name,
             data_asset_name=asset.name,
@@ -542,7 +543,7 @@ def test_get_batch_list_from_batch_request_with_malformed_batch_request(
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         src, ast, op = batch_request_args
         batch_request = BatchRequest(
             datasource_name=src or source.name,
@@ -560,7 +561,7 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         with pytest.raises(ge_exceptions.InvalidBatchRequestError):
             asset.build_batch_request({"invalid_key": None})
 
@@ -629,7 +630,7 @@ def test_sort_batch_list_by_metadata(sort_info, create_source: CreateSourceFixtu
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         asset.add_sorters(sort_keys)
         batch_request = BatchRequest(
             datasource_name=source.name,
@@ -658,7 +659,7 @@ def test_sort_batch_list_by_unknown_key(create_source: CreateSourceFixture):
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         asset.add_sorters(["yr", "month"])
         batch_request = BatchRequest(
             datasource_name=source.name,
@@ -701,7 +702,7 @@ def test_data_source_json_has_properties(create_source: CreateSourceFixture):
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         asset.add_sorters(["year", "month"])
         source_json = source.json(indent=4, sort_keys=True)
         print(source_json)
@@ -718,7 +719,7 @@ def test_data_source_yaml_has_properties(create_source: CreateSourceFixture):
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         asset.add_sorters(["year", "month"])
         source_str = source.__str__()
         assert "order_by:" in source_str
@@ -734,7 +735,7 @@ def test_datasource_dict_has_properties(create_source):
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
         )
-        asset.column_splitter = year_month_splitter(column_name="my_col")
+        asset.splitter = year_month_splitter(column_name="my_col")
         asset.add_sorters(["year", "month"])
         source_dict = source.dict()
         pprint(source_dict)
@@ -1143,7 +1144,7 @@ def test_splitter_year_and_month_and_day(
         ),
     ],
 )
-def test_column_splitter(
+def test_splitter(
     create_source: CreateSourceFixture,
     add_splitter_method,
     splitter_kwargs,
