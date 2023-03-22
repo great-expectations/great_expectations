@@ -242,7 +242,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _get(self, key):
         sel = (
-            sa.select([column("value")])
+            sa.select(column("value"))
             .select_from(self._table)
             .where(
                 and_(
@@ -308,7 +308,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _has_key(self, key):
         sel = (
-            sa.select([sa.func.count(column("value"))])
+            sa.select(sa.func.count(column("value")))
             .select_from(self._table)
             .where(
                 and_(
@@ -327,7 +327,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def list_keys(self, prefix=()):
         sel = (
-            sa.select([column(col) for col in self.key_columns])
+            sa.select(column(col) for col in self.key_columns)
             .select_from(self._table)
             .where(
                 and_(
