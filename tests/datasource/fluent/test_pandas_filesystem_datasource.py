@@ -363,7 +363,7 @@ def test_invalid_connect_options(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     with pytest.raises(pydantic.ValidationError) as exc_info:
-        pandas_filesystem_datasource.add_csv_asset(
+        pandas_filesystem_datasource.add_csv_asset(  # type: ignore[call-arg]
             name="csv_asset",
             batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
             glob_foobar="invalid",
@@ -412,6 +412,35 @@ def test_invalid_connect_options_value(
                 "type": "type_error.str",
             }
         ] == error_dicts
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "connect_options",
+    [
+        param({"glob_directive": "**/*"}, id="glob **/*"),
+        param({"glob_directive": "**/*.csv"}, id="glob **/*.csv"),
+        param({}, id="default connect options"),
+    ],
+)
+def test_asset_connect_options_in_repr(
+    pandas_filesystem_datasource: PandasFilesystemDatasource, connect_options: dict
+):
+    asset = pandas_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
+        **connect_options,
+    )
+    asset_repr = repr(asset)
+    print(asset_repr)
+
+    if connect_options:
+        assert "glob_directive" in asset_repr
+        assert connect_options["glob_directive"] in asset_repr
+    else:
+        # if no connect options are provided the defaults should be used and should not
+        # be part of any serialization. repr == asset.yaml()
+        assert "glob_directive" not in asset_repr
 
 
 @pytest.mark.unit
