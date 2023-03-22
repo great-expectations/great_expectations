@@ -803,6 +803,12 @@ def get_or_create_spark_application(
 
     Returns: SparkSession (new or existing as per "isStopped()" status and "force_reuse_spark_context" directive).
     """
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_CONFIG:\n{spark_config} ; TYPE: {str(type(spark_config))}"
+    )
+    print(
+        f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] FORCE_REUSE_SPARK_CONTEXT:\n{force_reuse_spark_context} ; TYPE: {str(type(force_reuse_spark_context))}"
+    )
     if spark_config is None:
         spark_config = {}
     else:
