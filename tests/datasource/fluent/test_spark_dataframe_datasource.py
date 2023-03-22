@@ -30,9 +30,7 @@ def test_dataframe_asset(
     errors_dict = exc_info.value.errors()[0]
     assert errors_dict["loc"][0] == "dataframe"
 
-    datasource = empty_data_context.sources.add_spark_dataframe(
-        name="my_spark_dataframe_datasource"
-    )
+    datasource = empty_data_context.sources.add_spark(name="my_spark_datasource")
 
     pandas_df = test_df_pandas
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)

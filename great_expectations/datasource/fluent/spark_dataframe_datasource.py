@@ -123,12 +123,12 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         ]
 
 
-class SparkDataframeDatasource(_SparkDatasource):
+class SparkDatasource(_SparkDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [DataFrameAsset]
 
     # instance attributes
-    type: Literal["spark_dataframe"] = "spark_dataframe"
+    type: Literal["spark"] = "spark"
 
     assets: Dict[str, DataFrameAsset] = {}  # type: ignore[assignment]
 

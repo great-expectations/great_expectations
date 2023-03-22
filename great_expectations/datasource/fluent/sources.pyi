@@ -34,7 +34,7 @@ if TYPE_CHECKING:
         PandasS3Datasource,
         PostgresDatasource,
         SparkAzureBlobStorageDatasource,
-        SparkDataframeDatasource,
+        SparkDatasource,
         SparkDBFSDatasource,
         SparkFilesystemDatasource,
         SparkGoogleCloudStorageDatasource,
@@ -308,19 +308,19 @@ class _SourceFactories:
         self,
         name: str,
     ) -> None: ...
-    def add_spark_dataframe(
+    def add_spark(
         self,
         name: str,
-    ) -> SparkDataframeDatasource: ...
-    def update_spark_dataframe(
+    ) -> SparkDatasource: ...
+    def update_spark(
         self,
         name: str,
-    ) -> SparkDataframeDatasource: ...
-    def add_or_update_spark_dataframe(
+    ) -> SparkDatasource: ...
+    def add_or_update_spark(
         self,
         name: str,
-    ) -> SparkDataframeDatasource: ...
-    def delete_spark_dataframe(
+    ) -> SparkDatasource: ...
+    def delete_spark(
         self,
         name: str,
     ) -> None: ...

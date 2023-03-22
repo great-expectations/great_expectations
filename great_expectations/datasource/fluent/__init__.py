@@ -35,8 +35,8 @@ from great_expectations.datasource.fluent.postgres_datasource import (
 from great_expectations.datasource.fluent.spark_datasource import (
     _SparkDatasource,
 )
-from great_expectations.datasource.fluent.spark_dataframe_datasource import (
-    SparkDataframeDatasource,
+from great_expectations.datasource.fluent.spark_datasource import (
+    SparkDatasource,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     _SparkFilePathDatasource,
