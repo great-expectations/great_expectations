@@ -2011,7 +2011,7 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: str = "ge_temp_",
+    default_table_name_prefix: str = "gx_temp_",
     num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
@@ -2152,20 +2152,3 @@ def numpy_quantile(
         )
 
     return quantile
-
-
-class NotImported:
-    def __init__(self, message: str):
-        self.__dict__["gx_error_message"] = message
-
-    def __getattr__(self, attr: str) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __setattr__(self, key: str, value: Any) -> None:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __call__(self, *args, **kwargs) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __str__(self) -> str:
-        return self.__dict__["gx_error_message"]

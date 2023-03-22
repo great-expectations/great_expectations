@@ -48,15 +48,13 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
-from great_expectations.util import NotImported
+from great_expectations.optional_imports import sqlalchemy
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
-try:
-    import sqlalchemy
 
+if sqlalchemy:
     _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.engine.Engine]
-except ImportError:
-    sqlalchemy = NotImported("sqlalchemy not found, please install.")
+
 
 if TYPE_CHECKING:
     import os
@@ -86,6 +84,7 @@ class _PandasDataAsset(DataAsset):
         "name",
         "order_by",
         "type",
+        "id",
     }
 
     class Config:
