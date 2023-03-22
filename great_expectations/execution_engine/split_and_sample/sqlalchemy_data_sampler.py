@@ -159,7 +159,7 @@ class SqlAlchemyDataSampler(DataSampler):
         table_name: str = batch_spec["table_name"]
 
         num_rows: int = execution_engine.engine.execute(
-            sa.select([sa.func.count()])
+            sa.select(sa.func.count())
             .select_from(
                 sa.table(table_name, schema=batch_spec.get("schema_name", None))
             )

@@ -345,7 +345,7 @@ def _get_column_quantiles_sqlite(
     """
     offsets: List[int] = [quantile * table_row_count - 1 for quantile in quantiles]
     quantile_queries: List[Select] = [
-        sa.select([column])
+        sa.select(column)
         .order_by(column.asc())
         .offset(offset)
         .limit(1)

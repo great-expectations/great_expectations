@@ -151,7 +151,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     )
 
     column_selector = [sa.column(column_name) for column_name in column_list]
-    query = sa.select(column_selector).where(boolean_mapped_unexpected_values)
+    query = sa.select(*column_selector).where(boolean_mapped_unexpected_values)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         query = query.select_from(selectable)
@@ -195,7 +195,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
     selectable = get_sqlalchemy_selectable(selectable)
 
     return execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(selectable)
+        sa.select(sa.func.count()).select_from(selectable)
     ).scalar()
 
 

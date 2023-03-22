@@ -439,12 +439,12 @@ class SqlAlchemyDatasource(LegacyDatasource):
                     schema = batch_kwargs.get("schema")
                 # limit doesn't compile properly for oracle so we will append rownum to query string later
                 if self.engine.dialect.name.lower() == GXSqlDialect.ORACLE:
-                    raw_query = sa.select([sa.text("*")]).select_from(
+                    raw_query = sa.select(sa.text("*")).select_from(
                         sa.schema.Table(table, sa.MetaData(), schema=schema)
                     )
                 else:
                     raw_query = (
-                        sa.select([sa.text("*")])
+                        sa.select(sa.text("*"))
                         .select_from(
                             sa.schema.Table(table, sa.MetaData(), schema=schema)
                         )

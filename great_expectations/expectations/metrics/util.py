@@ -618,10 +618,10 @@ def column_reflection_fallback(
             if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # Redshift needs temp tables to be declared as text
                 query = (
-                    sa.select([sa.text("*")]).select_from(sa.text(selectable)).limit(1)
+                    sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
                 )
             else:
-                query = sa.select([sa.text("*")]).select_from(selectable).limit(1)
+                query = sa.select(sa.text("*")).select_from(selectable).limit(1)
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys

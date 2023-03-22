@@ -41,7 +41,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
         sqlalchemy_engine = execution_engine.engine
 
         # get all unique dates from timestamp
-        query = sa.select([sa.func.Date(column).distinct()]).select_from(selectable)
+        query = sa.select(sa.func.Date(column).distinct()).select_from(selectable)
         all_unique_dates = [i[0] for i in sqlalchemy_engine.execute(query).fetchall()]
 
         # Only sqlite returns as strings, so make date objects be strings

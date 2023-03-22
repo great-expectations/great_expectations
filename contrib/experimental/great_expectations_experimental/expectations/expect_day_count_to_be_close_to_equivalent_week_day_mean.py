@@ -72,7 +72,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
         # get counts for dates
         query = (
-            sa.select([sa.func.Date(column), sa.func.count()])
+            sa.select(sa.func.Date(column), sa.func.count())
             .group_by(sa.func.Date(column))
             .select_from(selectable)
             .order_by(sa.func.Date(column).desc())

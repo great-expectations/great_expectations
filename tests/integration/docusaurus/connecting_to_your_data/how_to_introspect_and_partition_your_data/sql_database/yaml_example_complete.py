@@ -192,7 +192,7 @@ assert len(batch_list) == 6  # ride occupancy ranges from 1 passenger to 6 passe
 
 batch_data = batch_list[1].data  # 2-passenger sample of batch data
 num_rows = batch_data.execution_engine.engine.execute(
-    sa.select([sa.func.count()]).select_from(batch_data.selectable)
+    sa.select(sa.func.count()).select_from(batch_data.selectable)
 ).scalar()
 assert num_rows < 200
 # </snippet>

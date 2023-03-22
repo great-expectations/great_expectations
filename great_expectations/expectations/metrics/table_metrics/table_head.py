@@ -134,7 +134,7 @@ class TableHead(TableMetricProvider):
 
         if df is None:
             # we want to compile our selectable
-            stmt = sa.select(["*"]).select_from(selectable)
+            stmt = sa.select("*").select_from(selectable)
             fetch_all = metric_value_kwargs["fetch_all"]
             if fetch_all:
                 sql = stmt.compile(

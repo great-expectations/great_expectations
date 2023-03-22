@@ -61,14 +61,14 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         distinct_values: List[sqlalchemy_engine_Engine]
         if hasattr(column, "is_not"):
             distinct_values = sqlalchemy_engine.execute(
-                sa.select([column])
+                sa.select(column)
                 .where(column.is_not(None))
                 .distinct()
                 .select_from(selectable)
             ).fetchall()
         else:
             distinct_values = sqlalchemy_engine.execute(
-                sa.select([column])
+                sa.select(column)
                 .where(column.isnot(None))
                 .distinct()
                 .select_from(selectable)
