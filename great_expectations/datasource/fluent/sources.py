@@ -283,6 +283,8 @@ class _SourceFactories:
                         for k in dc_options:  # TODO: avoid this extra loop
                             kwargs.pop(k)
                         kwargs["dc_options"] = dc_options
+                        # asset_options_type should raise an error if the options are invalid
+                        self.data_connector_type.asset_options_type(**dc_options)
                 else:
                     dc_options = {}
 

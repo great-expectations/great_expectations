@@ -418,26 +418,27 @@ class Datasource(
         logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
         return asset_of_intended_type
 
-    @pydantic.validator("assets", each_item=True)
-    @classmethod
-    def _validate_data_connector_options(
-        cls: Type[Datasource[_DataAssetT, _ExecutionEngineT]], data_asset: _DataAssetT
-    ) -> _DataAssetT:
-        """
-        If the `Datasource` uses a `DataConnector`, check that any specific asset level
-        options are correct according to the specific `DataConnector`.
-        """
-        if not cls.data_connector_type:
-            return data_asset
+    # TODO: do this inside of the add_asset_factory methods? If so remove this
+    # @pydantic.validator("assets", each_item=True)
+    # @classmethod
+    # def _validate_data_connector_options(
+    #     cls: Type[Datasource[_DataAssetT, _ExecutionEngineT]], data_asset: _DataAssetT
+    # ) -> _DataAssetT:
+    #     """
+    #     If the `Datasource` uses a `DataConnector`, check that any specific asset level
+    #     options are correct according to the specific `DataConnector`.
+    #     """
+    #     if not cls.data_connector_type:
+    #         return data_asset
 
-        dc_options = getattr(data_asset, "dc_options", None)
-        if not dc_options:
-            return data_asset
+    #     dc_options = getattr(data_asset, "dc_options", None)
+    #     if not dc_options:
+    #         return data_asset
 
-        # asset_options_type should raise an error if the options are invalid
-        cls.data_connector_type.asset_options_type(**dc_options)
+    #     # asset_options_type should raise an error if the options are invalid
+    #     cls.data_connector_type.asset_options_type(**dc_options)
 
-        return data_asset
+    #     return data_asset
 
     def _execution_engine_type(self) -> Type[_ExecutionEngineT]:
         """Returns the execution engine to be used"""
