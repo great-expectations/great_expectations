@@ -90,11 +90,12 @@ Different SQL dialects have different requirements for connection strings and me
 
 There may also be third party utilities for setting up credentials of a given SQL database type.  For more information on setting up credentials for a given source database, please reference the official documentation for that SQL dialect as well as our guide on [how to set up credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md).
 
-<!-- ## Next steps
- 
- Now that you have installed GX with the necessary dependencies for working with SQL databases, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX components, as well as provide you with access to GX's Python API.
- 
- <LinksAfterInstallingGx /> -->
+## Next steps
+
+Now that you have installed GX with the necessary dependencies for working with SQL databases, you are ready to initialize your <TechnicalTag tag="data_context" text="Data Context" />.  The Data Context will contain your configurations for GX components, as well as provide you with access to GX's Python API.
+
+<LinksAfterInstallingGx />
+
 
 
 
