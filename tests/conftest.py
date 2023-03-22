@@ -3085,16 +3085,6 @@ def alice_columnar_table_single_batch(empty_data_context):
             },
             meta={},
         ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_less_than",
-            meta={},
-            kwargs={"value": 9488404, "column": "user_id"},
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_greater_than",
-            meta={},
-            kwargs={"value": 397433, "column": "user_id"},
-        ),
     ]
 
     event_ts_column_data: Dict[str, str] = {
@@ -3373,26 +3363,6 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "expectation_type": "expect_column_values_to_not_be_null",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "validation_parameter_builder_configs": None,
-                    },
-                    {
-                        "column": "$domain.domain_kwargs.column",
-                        "meta": {},
-                        "expectation_type": "expect_column_values_to_be_less_than",
-                        "condition": "$parameter.my_max_user_id.value < $variables.very_large_user_id",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_max_user_id.value",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "validation_parameter_builder_configs": None,
-                    },
-                    {
-                        "column": "$domain.domain_kwargs.column",
-                        "meta": {},
-                        "expectation_type": "expect_column_values_to_be_greater_than",
-                        "condition": "$parameter.my_min_user_id.value > 0 & $parameter.my_min_user_id.value > $variables.very_small_user_id",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_min_user_id.value",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "validation_parameter_builder_configs": None,
                     },
