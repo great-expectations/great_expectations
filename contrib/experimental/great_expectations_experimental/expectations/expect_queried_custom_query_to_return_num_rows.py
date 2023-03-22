@@ -22,7 +22,7 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
 
     query = """
             select count(1)
-            from ({user_query})
+            from ({user_query}) as main
             """
 
     success_keys = (
@@ -64,9 +64,10 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
             "data": [
                 {
                     "dataset_name": "test",
-                    "data": {"col1": [1, 2, 3, 4, 5, 5], "col2": ["10", 3, 4, 4, 5, 5]},
+                    "data": {"col1": [1, 2, 3, 4, 5, 5], "col2": [10, 3, 4, 4, 5, 5]},
                 }
             ],
+            "only_for": ["sqlite", "bigquery", "redshift", "snowflake"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -77,7 +78,6 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
                         "value": 6,
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -88,7 +88,6 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
                         "value": 1,
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
                 },
             ],
         }
