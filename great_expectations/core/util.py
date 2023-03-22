@@ -789,6 +789,9 @@ def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
     force_reuse_spark_context: bool = False,
 ) -> SparkSession:
+    print(
+        "\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] TROUBLESHOOTING_START"
+    )
     """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
@@ -893,6 +896,9 @@ def get_or_create_spark_application(
 
     print(
         f"\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] SPARK_SESSION-2:\n{spark_session} ; TYPE: {str(type(spark_session))}"
+    )
+    print(
+        "\n[ALEX_TEST] [CORE/UTIL.PY::get_or_create_spark_application()] TROUBLESHOOTING_END"
     )
     return spark_session
 
