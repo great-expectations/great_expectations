@@ -33,7 +33,7 @@ Welcome to Great Expectations Cloud! This tutorial will help you onboard with GX
 Any Python Interpreter or script file will work for the remaining steps in the guide, we recommend using a Jupyter Notebook, since they are included in the OSS GX installation and give the best experience of both composing a script file and running code in a live interpreter.
 :::
 
-- Set environment variables in the notebook (alternatively, add these as [Data Context config variables](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials))
+- Set environment variables in the notebook (alternatively, add these as [Data Context config variables](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md))
 
 ```console
 import os
