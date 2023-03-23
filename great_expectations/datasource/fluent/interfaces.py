@@ -50,6 +50,7 @@ if TYPE_CHECKING:
         BatchMarkers,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -388,7 +389,7 @@ class Datasource(
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
-    _data_context = pydantic.PrivateAttr()
+    _data_context: GXDataContext = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
