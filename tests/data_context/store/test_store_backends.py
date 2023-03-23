@@ -1032,6 +1032,10 @@ def test_TupleS3StoreBackend_with_s3_put_options():
 
 
 @pytest.mark.skipif(
+    not is_library_loadable(library_name="google.cloud"),
+    reason="google is not installed",
+)
+@pytest.mark.skipif(
     not is_library_loadable(library_name="google"),
     reason="google is not installed",
 )
@@ -1083,6 +1087,10 @@ def test_TupleGCSStoreBackend_base_public_path():
     )
 
 
+@pytest.mark.skipif(
+    not is_library_loadable(library_name="google.cloud"),
+    reason="google is not installed",
+)
 @pytest.mark.skipif(
     not is_library_loadable(library_name="google"),
     reason="google is not installed",

@@ -15,6 +15,12 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",

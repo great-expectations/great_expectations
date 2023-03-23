@@ -1,0 +1,12 @@
+
+:::info Using Pandas to connect to different file types
+
+<p>In this example, we are connecting to a <span>{props.this_example_file_extension}</span> file.  However, Great Expectations supports connecting to most types of files that Pandas has <code>read_*</code> methods for.</p>
+
+Because you will be using Pandas to connect to these files, the specific `add_*_asset` methods that will be available to you will be determined by your currently installed version of Pandas.
+
+For more information on which Pandas `read_*` methods are available to you as `add_*_asset` methods, please reference [the official Pandas Input/Output documentation](https://pandas.pydata.org/docs/reference/io.html) for the version of Pandas that you have installed.
+
+In the GX Python API, `add_*_asset` methods will require the same parameters as the corresponding Pandas `read_*` method, with one caveat: In Great Expectations, you will also be required to provide a value for an `asset_name` parameter.
+
+:::

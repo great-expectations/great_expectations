@@ -15,6 +15,12 @@
             "title": "Name",
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
+        },
         "assets": {
             "title": "Assets",
             "default": {},
@@ -71,6 +77,12 @@
                     "title": "Type",
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
@@ -80,14 +92,14 @@
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
+                    "default": ".*",
                     "type": "string",
                     "format": "regex"
                 }
             },
             "required": [
                 "name",
-                "type",
-                "batching_regex"
+                "type"
             ]
         }
     }

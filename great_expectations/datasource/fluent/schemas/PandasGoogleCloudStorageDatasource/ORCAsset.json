@@ -15,6 +15,12 @@
             ],
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
+        },
         "order_by": {
             "title": "Order By",
             "type": "array",
@@ -24,6 +30,7 @@
         },
         "batching_regex": {
             "title": "Batching Regex",
+            "default": ".*",
             "type": "string",
             "format": "regex"
         },
@@ -41,8 +48,7 @@
         }
     },
     "required": [
-        "name",
-        "batching_regex"
+        "name"
     ],
     "additionalProperties": false,
     "definitions": {
