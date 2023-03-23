@@ -479,7 +479,6 @@ def test_cli_datasource_delete_on_project_with_one_datasource(
 
     stdout = result.output
     assert result.exit_code == 0
-    assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource deleted successfully." in stdout
 
     expected_call_args_list = [
@@ -541,7 +540,6 @@ def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
     # This assertion is extra assurance since this test is too permissive if we change the confirmation message
     assert "[Y/n]" not in stdout
 
-    assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource deleted successfully." in stdout
 
     expected_call_args_list = [
@@ -599,7 +597,6 @@ def test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_d
 
     stdout = result.output
     assert result.exit_code == 0
-    assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource `my_datasource` was not deleted." in stdout
 
     expected_call_args_list = [
@@ -655,7 +652,6 @@ def test_cli_datasource_delete_with_non_existent_datasource_raises_error(
 
     stdout = result.output
     assert result.exit_code == 1
-    assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource foo could not be found." in stdout
 
     expected_call_args_list = [

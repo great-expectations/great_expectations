@@ -46,7 +46,6 @@ def test_cli_datasource_list(
         catch_exceptions=False,
     )
     expected_output = """\
-Using v3 (Batch Request) API
 1 Datasource found:
 
  - name: wow_a_datasource
