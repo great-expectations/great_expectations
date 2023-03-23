@@ -52,7 +52,7 @@ The following cell creates a Great Expectations folder in the filesystem
 which will hold all of the forthcoming project configurations. Note that if this folder already exists, Great Expectations gracefully allows us to continue.
 
 ```bash
-!great_expectations --yes --v3-api init
+!great_expectations --yes init
 ```
 
 ### 3. Validate a Pandas DataFrame
