@@ -15,7 +15,7 @@ yaml = YAML()
 yaml.default_flow_style = False
 
 
-@pytest.mark.parametrize("invocation", [None, "--help", "--v3-api --help"])
+@pytest.mark.parametrize("invocation", [None, "--help"])
 def test_cli_command_help(caplog, invocation):
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(cli, invocation, catch_exceptions=False)
@@ -35,9 +35,7 @@ def test_cli_command_help(caplog, invocation):
     )
     assert (
         """Options:
-  --version                Show the version and exit.
-  --v3-api / --v2-api      Default to v3 (Batch Request) API. Use --v2-api for
-                           v2 (Batch Kwargs) API"""
+  --version                Show the version and exit."""
         in result.output
     )
     assert (
