@@ -296,8 +296,7 @@ class ExpectColumnValuesToNotBeNull(ColumnMapExpectation):
         )
 
         if total_count is None or total_count == 0:
-            # Vacuously true
-            success = True
+            success = False
         else:
             success_ratio = (total_count - unexpected_count) / total_count
             success = success_ratio >= mostly
