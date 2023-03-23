@@ -80,4 +80,4 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
                 base_directory=self.base_directory,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
