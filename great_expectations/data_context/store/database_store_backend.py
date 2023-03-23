@@ -327,8 +327,9 @@ class DatabaseStoreBackend(StoreBackend):
             return False
 
     def list_keys(self, prefix=()):
+        columns = [column(col) for col in self.key_columns]
         sel = (
-            sa.select(column(col) for col in self.key_columns)
+            sa.select(*columns)
             .select_from(self._table)
             .where(
                 and_(
