@@ -34,6 +34,11 @@
             "type": "string",
             "format": "regex"
         },
+        "connect_options": {
+            "title": "Connect Options",
+            "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+            "type": "object"
+        },
         "compression": {
             "title": "Compression",
             "default": "infer",
