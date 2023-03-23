@@ -505,36 +505,12 @@ def test_dynamic_pandas_batch_metadata(
         "pipeline_step": "transform_3",
     }
 
-    batch_metadata_keys = tuple(batch_metadata.keys())
-
-    csv_asset_name_1 = "my_first_csv_asset"
+    csv_asset_name = "my_csv_asset"
 
     csv_asset = pandas_datasource.add_csv_asset(
-        name=csv_asset_name_1,
-        filepath_or_buffer=valid_file_path,
-        batch_metadata_keys=batch_metadata_keys,
-    )
-    assert not csv_asset
-    assert csv_asset_name_1 in pandas_datasource.assets
-
-    csv_asset = pandas_datasource.get_asset(
-        asset_name=csv_asset_name_1,
-        batch_metadata=batch_metadata,
-    )
-    assert csv_asset
-    assert csv_asset.batch_metadata_keys == batch_metadata_keys
-    assert csv_asset.batch_metadata == batch_metadata
-
-    csv_asset_name_2 = "my_second_csv_asset"
-
-    csv_asset = pandas_datasource.add_csv_asset(
-        name=csv_asset_name_2,
+        name=csv_asset_name,
         filepath_or_buffer=valid_file_path,
         batch_metadata=batch_metadata,
     )
     assert csv_asset
     assert csv_asset.batch_metadata == batch_metadata
-    assert csv_asset.batch_metadata_keys == batch_metadata_keys
-
-    assert csv_asset_name_1 in pandas_datasource.assets
-    assert csv_asset_name_2 in pandas_datasource.assets

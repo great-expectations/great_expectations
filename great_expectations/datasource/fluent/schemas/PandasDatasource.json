@@ -79,13 +79,6 @@
                         "$ref": "#/definitions/Sorter"
                     }
                 },
-                "batch_metadata_keys": {
-                    "title": "Batch Metadata Keys",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "batch_metadata": {
                     "title": "Batch Metadata",
                     "type": "object"
