@@ -139,9 +139,7 @@ def cli(
         # Note we are explicitly not using a logger in all CLI output to have
         # more control over console UI.
         logger.setLevel(logging.DEBUG)
-    ctx.obj = CLIState(
-        config_file_location=config_file_location, assume_yes=assume_yes
-    )
+    ctx.obj = CLIState(config_file_location=config_file_location, assume_yes=assume_yes)
 
     ge_config_version: float = (
         ctx.obj.get_data_context_from_config_file().get_config().config_version  # type: ignore[union-attr]  # config_version
