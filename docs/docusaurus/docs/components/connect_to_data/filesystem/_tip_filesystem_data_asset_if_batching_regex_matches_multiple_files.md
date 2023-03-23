@@ -6,7 +6,8 @@ For example:
 Let's say that you have a filesystem Datasource pointing to a base folder that contains the following files:
 - "taxi_data_2019.csv"
 - "taxi_data_2020.csv"
-- "taxi_data.2021.csv"
+- "taxi_data_2021.csv"
+
 
 If you define a Data Asset using the full file name with no regex groups, such as "taxi_data_2019\.csv" your Data Asset will contain only one Batch, which will correspond to that file.
 

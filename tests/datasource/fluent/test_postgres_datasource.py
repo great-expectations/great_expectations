@@ -43,6 +43,7 @@ def _source(
     dialect: str,
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
     splitter_query_response: Optional[List[Dict[str, Any]]] = None,
+    create_temp_table: bool = True,
 ) -> Generator[PostgresDatasource, None, None]:
     splitter_response = splitter_query_response or (
         [
@@ -63,6 +64,7 @@ def _source(
         yield PostgresDatasource(
             name="my_datasource",
             connection_string=connection_string,  # type: ignore[arg-type] # coerced
+            create_temp_table=create_temp_table,
         )
     finally:
         PostgresDatasource.execution_engine_override = original_override  # type: ignore[misc]
@@ -1197,3 +1199,16 @@ def test_sorting_none_in_metadata(
         batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
         assert len(batches) == len(years)
         assert batches[-1].metadata["year"] is None
+
+
+@pytest.mark.unit
+def test_create_temp_table(create_source):
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        create_temp_table=False,
+    ) as source:
+        assert source.create_temp_table is False
+        asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
+        _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+        assert source._execution_engine._create_temp_table is False

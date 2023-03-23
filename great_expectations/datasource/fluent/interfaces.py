@@ -30,6 +30,9 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.datasource.fluent.constants import (
+    MATCH_ALL_PATTERN,
+)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -47,6 +50,7 @@ if TYPE_CHECKING:
         BatchMarkers,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -383,7 +387,7 @@ class Datasource(
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
-    _data_context = pydantic.PrivateAttr()
+    _data_context: GXDataContext = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
@@ -508,7 +512,7 @@ class Datasource(
     ) -> re.Pattern:
         pattern: re.Pattern
         if not batching_regex:
-            pattern = re.compile(".*")
+            pattern = MATCH_ALL_PATTERN
         elif isinstance(batching_regex, str):
             pattern = re.compile(batching_regex)
         elif isinstance(batching_regex, re.Pattern):
