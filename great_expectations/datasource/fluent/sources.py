@@ -272,7 +272,7 @@ class _SourceFactories:
                 self: Datasource, name: str, **kwargs
             ) -> pydantic.BaseModel:
 
-                # if the data_connector uses a data_connector we need to identify the
+                # if the Datasource uses a data_connector we need to identify the
                 # asset level attributes needed by the data_connector
                 # push them to `connect_options` field
                 if self.data_connector_type:
