@@ -92,14 +92,19 @@
                 },
                 "batching_regex": {
                     "title": "Batching Regex",
+                    "default": ".*",
                     "type": "string",
                     "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
                 }
             },
             "required": [
                 "name",
-                "type",
-                "batching_regex"
+                "type"
             ]
         }
     }

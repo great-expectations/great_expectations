@@ -11,6 +11,7 @@ from typing import (
     ClassVar,
     Dict,
     List,
+    Mapping,
     Optional,
     Pattern,
     Set,
@@ -20,6 +21,7 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
 )
@@ -59,7 +61,11 @@ class _FilePathDataAsset(DataAsset):
     }
 
     # General file-path DataAsset pertaining attributes.
-    batching_regex: Pattern
+    batching_regex: Pattern = MATCH_ALL_PATTERN
+    connect_options: Mapping = pydantic.Field(
+        default_factory=dict,
+        description="Optional filesystem specific advanced parameters for connecting to data assets",
+    )
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -70,8 +76,12 @@ class _FilePathDataAsset(DataAsset):
     _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
     _all_group_names: List[str] = pydantic.PrivateAttr()
 
+    # `_data_connector`` should be set inside `_build_data_connector()`
     _data_connector: DataConnector = pydantic.PrivateAttr()
-    _test_connection_error_message: str = pydantic.PrivateAttr()
+    # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
+    _test_connection_error_message: str = pydantic.PrivateAttr(
+        "Could not connect to your asset"
+    )
 
     class Config:
         """

@@ -1,6 +1,6 @@
 import pytest
 
-from great_expectations.util import NotImported
+from great_expectations.optional_imports import NotImported
 
 
 @pytest.fixture

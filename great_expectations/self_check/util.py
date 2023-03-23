@@ -1277,7 +1277,14 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         )
 
     elif execution_engine == "spark":
-        import pyspark.sql.types as sparktypes
+        return _get_test_validator_with_data_spark(
+            data=data,
+            schemas=schemas,
+            context=context,
+            pk_column=pk_column,
+        )
+    else:
+        raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
 
         spark_types: dict = {
             "StringType": sparktypes.StringType,
@@ -1358,20 +1365,99 @@ def get_test_validator_with_data(  # noqa: C901 - 31
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
-                string_schema = sparktypes.StructType(
-                    [
-                        sparktypes.StructField(column, sparktypes.StringType())
-                        for column in schema
-                    ]
-                )
-                spark_df = spark.createDataFrame(data_reshaped, string_schema)
-                for c in spark_df.columns:
-                    spark_df = spark_df.withColumn(
-                        c, spark_df[c].cast(spark_types[schema[c]]())
-                    )
-        elif len(data_reshaped) == 0:
-            # if we have an empty dataset and no schema, need to assign an arbitrary type
-            columns = list(data.keys())
+                # noinspection PyUnresolvedReferences
+                type_ = getattr(pd, value)()
+            pandas_schema[key] = type_
+        # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
+        df = df.astype(pandas_schema)
+
+    if table_name is None:
+        # noinspection PyUnusedLocal
+        table_name = generate_test_table_name()
+
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+
+    return build_pandas_validator_with_data(
+        df=df, batch_definition=batch_definition, context=context
+    )
+
+
+def _get_test_validator_with_data_sqlalchemy(
+    df: pd.DataFrame,
+    execution_engine: str,
+    schemas: dict | None,
+    caching: bool,
+    table_name: str | None,
+    sqlite_db_path: str | None,
+    extra_debug_info: str,
+    debug_logger: logging.Logger | None,
+    context: AbstractDataContext | None,
+    pk_column: bool,
+) -> Validator | None:
+    if not create_engine:
+        return None
+
+    if table_name is None:
+        table_name = generate_test_table_name().lower()
+
+    return build_sa_validator_with_data(
+        df=df,
+        sa_engine_name=execution_engine,
+        schemas=schemas,
+        caching=caching,
+        table_name=table_name,
+        sqlite_db_path=sqlite_db_path,
+        extra_debug_info=extra_debug_info,
+        debug_logger=debug_logger,
+        batch_definition=None,
+        context=context,
+        pk_column=pk_column,
+    )
+
+
+def _get_test_validator_with_data_spark(  # noqa: C901 - 19
+    data: dict,
+    schemas: dict | None,
+    context: AbstractDataContext | None,
+    pk_column: bool,
+) -> Validator:
+    import pyspark.sql.types as sparktypes
+
+    spark_types: dict = {
+        "StringType": sparktypes.StringType,
+        "IntegerType": sparktypes.IntegerType,
+        "LongType": sparktypes.LongType,
+        "DateType": sparktypes.DateType,
+        "TimestampType": sparktypes.TimestampType,
+        "FloatType": sparktypes.FloatType,
+        "DoubleType": sparktypes.DoubleType,
+        "BooleanType": sparktypes.BooleanType,
+        "DataType": sparktypes.DataType,
+        "NullType": sparktypes.NullType,
+    }
+
+    spark = get_or_create_spark_application(
+        spark_config={
+            "spark.sql.catalogImplementation": "hive",
+            "spark.executor.memory": "450m",
+            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+        }
+    )
+    # We need to allow null values in some column types that do not support them natively, so we skip
+    # use of df in this case.
+    data_reshaped = list(zip(*(v for _, v in data.items())))  # create a list of rows
+    if schemas and "spark" in schemas:
+        schema = schemas["spark"]
+        if pk_column:
+            schema["pk_index"] = "IntegerType"
+        # sometimes first method causes Spark to throw a TypeError
+        try:
             spark_schema = sparktypes.StructType(
                 [
                     sparktypes.StructField(column, sparktypes.StringType())
@@ -1384,27 +1470,20 @@ def get_test_validator_with_data(  # noqa: C901 - 31
             columns = list(data.keys())
             spark_df = spark.createDataFrame(data_reshaped, columns)
 
-        if table_name is None:
-            # noinspection PyUnusedLocal
-            table_name = generate_test_table_name()
-
-        batch_definition = BatchDefinition(
-            datasource_name="spark_datasource",
-            data_connector_name="runtime_data_connector",
-            data_asset_name="my_asset",
-            batch_identifiers=IDDict({}),
-            batch_spec_passthrough=None,
-        )
-        return build_spark_validator_with_data(
-            df=spark_df,
-            spark=spark,
-            batch_definition=batch_definition,
-            context=context,
-        )
-
-    else:
-        raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
-
+    batch_definition = BatchDefinition(
+        datasource_name="spark_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    return build_spark_validator_with_data(
+        df=spark_df,
+        spark=spark,
+        batch_definition=batch_definition,
+        context=context,
+    )
+    
 
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
