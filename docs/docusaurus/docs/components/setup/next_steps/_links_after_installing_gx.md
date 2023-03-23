@@ -1,5 +1,5 @@
 To quickly create a Data Context and dive into working with GX, please see:
-- [How to quickly instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context.md)
+- [How to quickly instantiate a Data Context](/docs/docusaurus/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context.md)
 
 To initialize a Data Context on your filesystem, please reference:
 - [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)

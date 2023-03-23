@@ -77,7 +77,8 @@ class LinkChecker:
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
         # docroot links start without a . or a slash
-        docroot_link_regex = r"^(?P<path>\w[\.\w\/-]+\.md)(?:#\S+)?$"
+        docroot_link_regex = r"^(?P<path>\/*\w[\.\w\/-]+\.md)(?:#\S+)?$"
+
         self._docroot_link_pattern = re.compile(docroot_link_regex)
 
         # links starting a . or .., file ends with .md, may include an anchor with #abc
@@ -143,8 +144,17 @@ class LinkChecker:
         directory = os.path.dirname(file)  # noqa: PTH120
         return os.path.join(directory, self._get_os_path(path))  # noqa: PTH118
 
+    # the issue is that we add the thing?
     def _get_docroot_path(self, path: str) -> str:
-        return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
+        os_path = self._get_os_path(path)
+        # if we already have the docs_root, don't add it again
+        if os_path.startswith(self._docs_root):
+            return os_path.strip(os.path.sep)
+        else:
+            joined_path = os.path.join(
+                self._docs_root, self._get_os_path(path)
+            )  # noqa: PTH118
+            return joined_path.strip(os.path.sep)
 
     def _check_absolute_link(
         self, link: str, file: str, path: str
@@ -207,7 +217,6 @@ class LinkChecker:
         self, link: str, file: str, path: str
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking docroot link {link} in file {file}")
-
         md_file = self._get_docroot_path(path)
         if not os.path.isfile(md_file):  # noqa: PTH113
             logger.info(f"Docroot link {link} in file {file} was not found")
