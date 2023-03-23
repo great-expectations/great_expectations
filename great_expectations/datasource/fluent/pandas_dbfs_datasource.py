@@ -33,7 +33,7 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
     def _build_data_connector(
         self, data_asset: _FilePathDataAsset, glob_directive: str = "**/*", **kwargs
     ) -> None:
-        """Builds and attaches the `FilesystemDataConnector` to the asset."""
+        """Builds and attaches the `DBFSDataConnector` to the asset."""
         if kwargs:
             raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"

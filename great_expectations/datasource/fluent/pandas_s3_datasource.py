@@ -106,7 +106,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         max_keys: int = 1000,
         **kwargs,
     ) -> None:
-        """Builds and attaches the `FilesystemDataConnector` to the asset."""
+        """Builds and attaches the `S3DataConnector` to the asset."""
         if kwargs:
             raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
