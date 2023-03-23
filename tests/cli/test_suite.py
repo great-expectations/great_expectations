@@ -71,8 +71,7 @@ def test_suite_help_output(caplog):
     assert result.exit_code == 0
     stdout: str = result.stdout
     assert (
-        """
-Usage: great_expectations suite [OPTIONS] COMMAND [ARGS]...
+        """Usage: great_expectations suite [OPTIONS] COMMAND [ARGS]...
 
   Expectation Suite operations
 
