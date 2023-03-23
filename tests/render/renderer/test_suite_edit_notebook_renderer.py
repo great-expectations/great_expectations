@@ -3,6 +3,7 @@ import os
 import shutil
 
 import pytest
+
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
