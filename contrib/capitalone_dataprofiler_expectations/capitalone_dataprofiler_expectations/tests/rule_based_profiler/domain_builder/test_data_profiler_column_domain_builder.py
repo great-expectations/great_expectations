@@ -1,6 +1,5 @@
-from typing import List
 
-import os
+from pathlib import Path, PurePath
 
 import pytest
 from ruamel.yaml import YAML
@@ -8,7 +7,6 @@ from ruamel.yaml import YAML
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.domain_builder.data_profiler_column_domain_builder import (
     DataProfilerColumnDomainBuilder,
 )
-
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 
 yaml = YAML(typ="safe")
@@ -18,11 +16,9 @@ yaml = YAML(typ="safe")
 @pytest.mark.slow  # 1.21s
 def test_data_profiler_column_domain_builder():
 
-    test_root_path = os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    )
+    test_root_path = str(Path(__file__).parents[2])
 
-    profile_path = os.path.join(
+    profile_path = PurePath(
         test_root_path,
         "data_profiler_files",
         "profile.pkl",
@@ -40,11 +36,6 @@ def test_data_profiler_column_domain_builder():
         "profile_path"
     ] = profile_path
 
-    batch_request: dict = {
-        "datasource_name": "alice_columnar_table_single_batch_datasource",
-        "data_connector_name": "alice_columnar_table_single_batch_data_connector",
-        "data_asset_name": "alice_columnar_table_single_batch_data_asset",
-    }
 
     domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder()
     text_column_names = domain_builder.get_effective_column_names(
