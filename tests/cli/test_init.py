@@ -18,8 +18,8 @@ from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 @pytest.mark.parametrize(
     "invocation,input",
     [
-        ("--v3-api init", "Y\n"),
-        ("--v3-api --assume-yes init", ""),
+        ("init", "Y\n"),
+        ("--assume-yes init", ""),
     ],
 )
 @mock.patch(
@@ -50,9 +50,9 @@ def test_cli_init_on_new_project(
     lets_create_data_context = (
         "Let's create a new Data Context to hold your project configuration."
     )
-    if invocation == "--v3-api init":
+    if invocation == "init":
         assert lets_create_data_context in stdout
-    if invocation == "--v3-api --assume-yes init":
+    if invocation == "--assume-yes init":
         assert lets_create_data_context not in stdout
     assert (
         "Congratulations! You are now ready to customize your Great Expectations configuration."
@@ -143,7 +143,7 @@ def test_cancelled_cli_init_on_new_project(mock_emit, caplog, tmp_path, monkeypa
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        "--v3-api init",
+        "init",
         input="n\n",
         catch_exceptions=False,
     )

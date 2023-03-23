@@ -72,7 +72,7 @@ Commands:
 
 def test_cli_command_invalid_command(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, "--v3-api blarg")
+    result = runner.invoke(cli, "blarg")
     assert result.exit_code == 2
     assert "Error: No such command" in result.stderr
     assert ("'blarg'" in result.stderr) or ('"blarg"' in result.stderr)
@@ -80,7 +80,7 @@ def test_cli_command_invalid_command(caplog):
 
 def test_cli_ge_version_exists(caplog):
     runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(cli, "--v3-api --version", catch_exceptions=False)
+    result = runner.invoke(cli, "--version", catch_exceptions=False)
     assert ge_version in str(result.output)
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
@@ -91,7 +91,7 @@ def test_cli_works_from_adjacent_directory_without_config_flag(
     """We don't care about the NOUN here just combinations of the config flag"""
     runner = CliRunner(mix_stderr=True)
     monkeypatch.chdir(os.path.dirname(empty_data_context.root_directory))
-    result = runner.invoke(cli, "--v3-api checkpoint list", catch_exceptions=False)
+    result = runner.invoke(cli, "checkpoint list", catch_exceptions=False)
     assert result.exit_code == 0
     assert "No Checkpoints found" in result.output
 
@@ -102,7 +102,7 @@ def test_cli_works_from_great_expectations_directory_without_config_flag(
     """We don't care about the NOUN here just combinations of the config flag"""
     runner = CliRunner(mix_stderr=True)
     monkeypatch.chdir(empty_data_context.root_directory)
-    result = runner.invoke(cli, "--v3-api checkpoint list", catch_exceptions=False)
+    result = runner.invoke(cli, "checkpoint list", catch_exceptions=False)
     assert result.exit_code == 0
     assert "No Checkpoints found" in result.output
 
@@ -117,7 +117,7 @@ def test_cli_works_from_random_directory_with_config_flag_fully_specified_yml(
     monkeypatch.chdir(temp_dir)
     result = runner.invoke(
         cli,
-        f"--config {context.root_directory}/great_expectations.yml --v3-api checkpoint list",
+        f"--config {context.root_directory}/great_expectations.yml checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -134,7 +134,7 @@ def test_cli_works_from_random_directory_with_config_flag_great_expectations_dir
     monkeypatch.chdir(temp_dir)
     result = runner.invoke(
         cli,
-        f"--config {context.root_directory} --v3-api checkpoint list",
+        f"--config {context.root_directory} checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -151,7 +151,7 @@ def test_cli_works_from_random_directory_with_c_flag_fully_specified_yml(
     monkeypatch.chdir(temp_dir)
     result = runner.invoke(
         cli,
-        f"-c {context.root_directory}/great_expectations.yml --v3-api checkpoint list",
+        f"-c {context.root_directory}/great_expectations.yml checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -168,7 +168,7 @@ def test_cli_works_from_random_directory_with_c_flag_great_expectations_director
     monkeypatch.chdir(temp_dir)
     result = runner.invoke(
         cli,
-        f"-c {context.root_directory} --v3-api checkpoint list",
+        f"-c {context.root_directory} checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -492,7 +492,7 @@ def test_assume_yes_using_full_flag_using_checkpoint_delete(
     checkpoint_name: str = "my_v1_checkpoint"
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --assume-yes checkpoint delete {checkpoint_name}",
+        f"--assume-yes checkpoint delete {checkpoint_name}",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -537,7 +537,7 @@ def test_assume_yes_using_full_flag_using_checkpoint_delete(
 
     result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -564,7 +564,7 @@ def test_assume_yes_using_yes_flag_using_checkpoint_delete(
     checkpoint_name: str = "my_v1_checkpoint"
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --yes checkpoint delete {checkpoint_name}",
+        f"--yes checkpoint delete {checkpoint_name}",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -609,7 +609,7 @@ def test_assume_yes_using_yes_flag_using_checkpoint_delete(
 
     result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -636,7 +636,7 @@ def test_assume_yes_using_y_flag_using_checkpoint_delete(
     checkpoint_name: str = "my_v1_checkpoint"
     result: Result = runner.invoke(
         cli,
-        f"--v3-api -y checkpoint delete {checkpoint_name}",
+        f"-y checkpoint delete {checkpoint_name}",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -681,7 +681,7 @@ def test_assume_yes_using_y_flag_using_checkpoint_delete(
 
     result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -707,7 +707,7 @@ def test_using_assume_yes_flag_on_command_with_no_assume_yes_implementation(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        "--v3-api --assume-yes checkpoint list",
+        "--assume-yes checkpoint list",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
