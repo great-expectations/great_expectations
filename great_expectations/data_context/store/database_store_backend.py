@@ -110,7 +110,7 @@ class DatabaseStoreBackend(StoreBackend):
             table = Table(table_name, meta, *cols)
             try:
                 if self._schema_name:
-                    self.engine.execute(
+                    self._get_connection().execute(
                         sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
                     )
                 meta.create_all(self.engine)
@@ -185,6 +185,11 @@ class DatabaseStoreBackend(StoreBackend):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
+    def _get_connection(self) -> sa.engine.Connection:
+        """Get a connection from an SQLAlchemy engine."""
+        with self.engine.connect() as connection:
+            yield connection
+
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str, credentials: dict
@@ -250,7 +255,7 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(sel).fetchone()[0]
+            return self._get_connection().execute(sel).fetchone()[0]
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error fetching value: {str(e)}")
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
@@ -272,7 +277,7 @@ class DatabaseStoreBackend(StoreBackend):
             ins = self._table.insert().values(**cols)
 
         try:
-            self.engine.execute(ins)
+            self._get_connection().execute(ins)
         except IntegrityError as e:
             if self._get(key) == value:
                 logger.info(f"Key {str(key)} already exists with the same value.")
@@ -316,7 +321,7 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(sel).fetchone()[0] == 1
+            return self._get_connection().execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error checking for value: {str(e)}")
             return False
@@ -335,7 +340,7 @@ class DatabaseStoreBackend(StoreBackend):
                 )
             )
         )
-        return [tuple(row) for row in self.engine.execute(sel).fetchall()]
+        return [tuple(row) for row in self._get_connection().execute(sel).fetchall()]
 
     def remove_key(self, key):
         delete_statement = self._table.delete().where(
@@ -347,7 +352,7 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(delete_statement)
+            return self._get_connection().execute(delete_statement)
         except SQLAlchemyError as e:
             raise gx_exceptions.StoreBackendError(
                 f"Unable to delete key: got sqlalchemy error {str(e)}"
