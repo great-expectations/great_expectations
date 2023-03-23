@@ -26,6 +26,12 @@ except ImportError:
     )
 
 
+def test_current_pyspark_version_installed(spark_session):
+    pyspark_version: Version = parse_version(pyspark.__version__)
+    # Spark versions less than 3.0 are not supported.
+    assert pyspark_version.major >= 3, "Spark versions less than 3.0 are not supported."
+
+
 def test_spark_config_datasource(spark_session_v012):
     name: str = "great_expectations-ds-config"
     spark_config: Dict[str, str] = {
@@ -49,10 +55,6 @@ def test_spark_config_datasource(spark_session_v012):
 
 
 def test_spark_config_execution_engine(spark_session):
-    pyspark_version: Version = parse_version(pyspark.__version__)
-    # Spark versions less than 3.0 are not supported.
-    assert pyspark_version.major >= 3
-
     old_app_id = spark_session.sparkContext.applicationId
     new_spark_config: Dict[str, str] = {
         "spark.app.name": "great_expectations-ee-config",
@@ -73,6 +75,7 @@ def test_spark_config_execution_engine(spark_session):
     ] = execution_engine.spark.sparkContext.getConf().getAll()
     assert old_app_id == execution_engine.spark.sparkContext.applicationId
     assert ("spark.sql.catalogImplementation", "hive") in current_spark_config
+    # Confirm that "spark.app.name" was not changed upon "SparkDFExecutionEngine" instantiation (from original value).
     assert (
         "spark.app.name",
         "default_great_expectations_spark_application",
