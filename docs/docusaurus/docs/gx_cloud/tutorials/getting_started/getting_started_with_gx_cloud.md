@@ -53,6 +53,6 @@ context = gx.get_context()
 
 ## Next Steps
 
-Follow in-app snippets to create a <TechnicalTag tag="datasource" text="Datasource"/>, define an <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>, configure and run a <TechnicalTag tag="checkpoint" text="Checkpoint"/> and view <TechnicalTag tag="validation_result" text="Validation Results"/>.
+Jump to [Cloud Quickstart](/docs/docusaurus/docs/gx_cloud/tutorials/getting_started/cloud_quickstart.md) to connect to your data!
 
 You can also go to [“Settings” > “Users”](https://app.greatexpectations.io/users) in the navigation panel to invite your team members to the app.
