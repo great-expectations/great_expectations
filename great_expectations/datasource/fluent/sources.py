@@ -291,7 +291,6 @@ class _SourceFactories:
                     connect_options = {}
 
                 asset = asset_type(name=name, **kwargs)
-
                 return self._add_asset(asset, connect_options=connect_options)
 
             # attr-defined issue
