@@ -205,7 +205,7 @@ class SqlAlchemyBatchData(BatchData):
 
     def _create_temporary_table(  # noqa: C901 - 18
         self, temp_table_name, query, temp_table_schema_name=None
-    ) -> None:
+    ) -> str:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:
@@ -213,6 +213,7 @@ class SqlAlchemyBatchData(BatchData):
 
         dialect: GXSqlDialect = self.dialect
 
+        # breakpoint()
         # dialects that support temp schemas
         if temp_table_schema_name is not None and dialect in [
             GXSqlDialect.BIGQUERY,
@@ -291,9 +292,12 @@ class SqlAlchemyBatchData(BatchData):
                 with connection.begin():
                     try:
                         connection.execute(sa.text(stmt_1))
+                        stmt = stmt_1
                     except DatabaseError:
                         connection.execute(sa.text(stmt_2))
+                        stmt = stmt_2
         else:
             with self._engine.connect() as connection:
                 with connection.begin():
                     connection.execute(sa.text(stmt))
+        return str(stmt)

@@ -2,6 +2,8 @@ from unittest.mock import Mock
 
 import pytest
 
+from contextlib import contextmanager
+
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
@@ -153,28 +155,70 @@ def test_instantiation_with_unknown_dialect(sqlite_view_engine):
     assert batch_data.dialect == GXSqlDialect.OTHER
 
 
+class Dialect:
+    def __init__(self, dialect: str):
+        self.name = dialect
+
+
+class _MockConnection:
+    def __init__(self, dialect: Dialect, statement=None):
+        self.dialect = dialect
+        self.statement = statement
+
+    @contextmanager
+    def begin(self):
+        yield _MockConnection(self.dialect)
+
+    def execute(self, statement):
+        self.statement = statement
+        return
+
+
+class MockSaEngine:
+    def __init__(self, dialect: Dialect):
+        self.dialect = dialect
+
+    @contextmanager
+    def begin(self):
+        yield _MockConnection(self.dialect)
+
+    @contextmanager
+    def connect(self):
+        """A contextmanager that yields a _MockConnection"""
+        yield _MockConnection(self.dialect)
+
+
 @pytest.mark.unit
 def test_instantiation_with_temp_table_schema():
-    engine = Mock(spec=["dialect", "execute"])
-    execution_engine = Mock(spec=SqlAlchemyExecutionEngine, engine=engine)
 
     # not supported
-    engine.dialect.name = "sqlite"
-    SqlAlchemyBatchData(
+    engine = MockSaEngine(dialect=Dialect(dialect="sqlite"))
+    execution_engine = Mock(spec=SqlAlchemyExecutionEngine, engine=engine)
+    batch_data = SqlAlchemyBatchData(
         execution_engine=execution_engine,
         query="test_query",
         create_temp_table=True,
         temp_table_schema_name="test_schema",
     )
-    assert "test_schema" not in str(engine.execute.call_args[0][0])
+    created_table_name: str = batch_data._create_temporary_table(
+        temp_table_name="hello",
+        query="test_query",
+        temp_table_schema_name="test_schema",
+    )
+    assert "test_schema" not in created_table_name
 
     # supported
     for dialect in ["bigquery", "snowflake", "vertica"]:
         engine.dialect.name = dialect
-        SqlAlchemyBatchData(
+        batch_data = SqlAlchemyBatchData(
             execution_engine=execution_engine,
             query="test_query",
             create_temp_table=True,
             temp_table_schema_name="test_schema",
         )
-        assert "test_schema" in str(engine.execute.call_args[0][0])
+        created_table_name: str = batch_data._create_temporary_table(
+            temp_table_name="hello",
+            query="test_query",
+            temp_table_schema_name="test_schema",
+        )
+        assert "test_schema" in created_table_name
