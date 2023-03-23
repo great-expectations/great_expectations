@@ -478,9 +478,7 @@ class Datasource(
 
         if not connect_options:
             connect_options = {}
-        self._build_data_connector(
-            asset, **connect_options
-        )  # TODO: does this need kwargs?
+        self._build_data_connector(asset, **connect_options)
 
         asset.test_connection()
 
