@@ -31,6 +31,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
+    from pytest import FixtureRequest
     from great_expectations.datasource.fluent import SqliteDatasource
 
 yaml = YAML(typ="safe")
@@ -571,6 +572,17 @@ def from_yaml_gx_config() -> GxConfig:
     return gx_config
 
 
+@pytest.fixture(params=[from_dict_gx_config, from_json_gx_config, from_yaml_gx_config])
+def from_all_config(request: FixtureRequest) -> GxConfig:
+    """
+    This fixture parametrizes all our config fixtures.
+    This will in-turn parametrize any test that uses it, creating a test case for each
+    `from_*_config` fixture
+    """
+    fixture_name = request.param.__name__
+    return request.getfixturevalue(fixture_name)
+
+
 def test_dict_config_round_trip(
     inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
@@ -653,9 +665,9 @@ def test_assets_key_presence(
 
 
 def test_splitters_deserialization(
-    inject_engine_lookup_double, from_json_gx_config: GxConfig
+    inject_engine_lookup_double, from_all_config: GxConfig
 ):
-    table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
+    table_asset: TableAsset = from_all_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
     assert isinstance(table_asset.splitter, SplitterYearAndMonth)
