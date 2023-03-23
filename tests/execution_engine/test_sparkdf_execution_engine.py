@@ -46,35 +46,6 @@ except ImportError:
     StructField = None
 
 
-@pytest.fixture
-def spark_df_from_pandas_df():
-    """
-    Construct a spark dataframe from pandas dataframe.
-    Returns:
-        Function that can be used in your test e.g.:
-        spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
-    """
-
-    def _construct_spark_df_from_pandas(
-        spark_session,
-        pandas_df,
-    ):
-
-        spark_df = spark_session.createDataFrame(
-            [
-                tuple(
-                    None if isinstance(x, (float, int)) and np.isnan(x) else x
-                    for x in record.tolist()
-                )
-                for record in pandas_df.to_records(index=False)
-            ],
-            pandas_df.columns.tolist(),
-        )
-        return spark_df
-
-    return _construct_spark_df_from_pandas
-
-
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
     engine = basic_spark_df_execution_engine
     # Testing that can recognize basic csv file
