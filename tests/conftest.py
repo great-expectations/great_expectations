@@ -98,6 +98,7 @@ from great_expectations.util import (
     build_in_memory_runtime_context,
     get_context,
     is_library_loadable,
+    add_dataframe_to_db,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.rule_based_profiler.parameter_builder.conftest import (
@@ -2297,7 +2298,12 @@ def sqlite_view_engine(test_backends):
 
             sqlite_engine = sa.create_engine("sqlite://")
             df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-            df.to_sql(name="test_table", con=sqlite_engine, index=True)
+            add_dataframe_to_db(
+                df=df,
+                name="test_table",
+                con=sqlite_engine,
+                index=True,
+            )
             with sqlite_engine.connect() as connection:
                 with connection.begin():
                     connection.execute(

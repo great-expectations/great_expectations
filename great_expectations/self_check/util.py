@@ -66,9 +66,9 @@ from great_expectations.self_check.sqlalchemy_connection_manager import (
     connection_manager,
 )
 from great_expectations.util import (
+    add_dataframe_to_db,
     build_in_memory_runtime_context,
     import_library_module,
-    pandas_to_sql,
 )
 from great_expectations.validator.validator import Validator
 
@@ -677,22 +677,14 @@ def get_dataset(  # noqa: C901 - 110
         if table_name is None:
             table_name = generate_test_table_name()
 
-        pandas_to_sql(
-            name=table_name,
+        add_dataframe_to_db(
             df=df,
+            name=table_name,
             con=engine,
             index=False,
             dtype=sql_dtypes,
             if_exists="replace",
         )
-        #    with connection.begin():
-        #     name=table_name,
-        #     con=connection,
-        #     index=False,
-        #     dtype=sql_dtypes,
-        #     if_exists="replace",
-        #     )
-        # connection.commit()
 
         # Build a SqlAlchemyDataset using that database
         return SqlAlchemyDataset(
