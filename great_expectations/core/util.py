@@ -82,7 +82,7 @@ except (
 ):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
 
-# This is a separate try/except that the LegacyRow one since TextClause exists in sqlalchemy 2 so LegacyRow
+# This is a separate try/except than the LegacyRow one since TextClause exists in sqlalchemy 2. This means LegacyRow
 # may be not importable while TextClause is.
 try:
     TextClause = sqlalchemy.sql.elements.TextClause
