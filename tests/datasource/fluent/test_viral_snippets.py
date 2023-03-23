@@ -99,7 +99,7 @@ def test_serialize_fluent_config(fluent_file_context: FileDataContext):
 
 
 def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataContext):
-    dc_datasource_count: dict[str, list[str]] = defaultdict(list)
+    dc_datasources: dict[str, list[str]] = defaultdict(list)
 
     for datasource in fluent_file_context.fluent_datasources.values():
         if datasource.data_connector_type:
@@ -107,15 +107,15 @@ def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataC
             print(f"type: {datasource.type}")
             print(f"name: {datasource.name}", end="\n\n")
 
-            dc_datasource_count[datasource.type].append(datasource.name)
+            dc_datasources[datasource.type].append(datasource.name)
 
             for asset in datasource.assets.values():
                 asset.test_connection()
                 print(f"✅ '{asset.name}' connected with {type(asset._data_connector)}")
             print()
 
-    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasource_count))}")
-    assert dc_datasource_count
+    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
+    assert dc_datasources
 
 
 def test_fluent_simple_validate_workflow(fluent_file_context: FileDataContext):
