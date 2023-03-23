@@ -102,6 +102,7 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "type": "json",
                     "name": "my_json_asset",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "connect_options": {"glob_directive": "**/*.json"},
                     "orient": "records",
                 },
             },

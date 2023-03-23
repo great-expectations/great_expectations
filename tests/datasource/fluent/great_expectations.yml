@@ -30,3 +30,15 @@ fluent_datasources:
   my_sqlite_ds_w_subs:
     type: sqlite
     connection_string: "${MY_CONN_STR}"
+  my_pandas_fs_ds:
+    type: pandas_filesystem
+    base_directory: "."
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        sep: ","
+        connect_options:
+          glob_directive: "**/*.csv"
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        sep: ","
