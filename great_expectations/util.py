@@ -2162,7 +2162,7 @@ def add_dataframe_to_db(
     schema=None,
     if_exists: str = "fail",
     index: bool = True,
-    index_label: str = None,
+    index_label: str | None = None,
     chunksize: int | None = None,
     dtype: dict | None = None,
     method: str | Callable | None = None,
