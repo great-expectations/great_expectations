@@ -48,7 +48,6 @@ def test_spark_config_datasource(spark_session_v012):
     spark_session.sparkContext.stop()
 
 
-# @pytest.mark.parametrize("databricks_runtime", [False, True])
 def test_spark_config_execution_engine(spark_session):
     pyspark_version: Version = parse_version(pyspark.__version__)
     # Spark versions less than 3.0 are not supported.
