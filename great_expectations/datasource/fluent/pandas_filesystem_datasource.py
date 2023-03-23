@@ -101,7 +101,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
                 base_directory=self.base_directory,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     @public_api
     def add_excel_asset(
@@ -149,7 +149,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
                 base_directory=self.base_directory,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     @public_api
     def add_json_asset(
@@ -197,7 +197,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
                 base_directory=self.base_directory,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     @public_api
     def add_parquet_asset(
@@ -245,7 +245,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
                 base_directory=self.base_directory,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
