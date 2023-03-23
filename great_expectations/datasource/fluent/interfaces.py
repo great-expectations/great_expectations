@@ -464,7 +464,7 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(
+    def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
     ) -> _DataAssetT:
         """Adds an asset to a datasource
