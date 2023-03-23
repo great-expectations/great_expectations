@@ -291,7 +291,7 @@ class _SourceFactories:
                     connect_options = {}
 
                 asset = asset_type(name=name, **kwargs)
-                return self.add_asset(asset, connect_options=connect_options)
+                return self._add_asset(asset, connect_options=connect_options)
 
             # attr-defined issue
             # https://github.com/python/mypy/issues/12472
@@ -309,7 +309,7 @@ class _SourceFactories:
             ) -> Validator:
                 name = asset_name or DEFAULT_PANDAS_DATA_ASSET_NAME
                 asset = asset_type(name=name, **kwargs)
-                self.add_asset(asset)
+                self._add_asset(asset)
                 batch_request = asset.build_batch_request()
                 return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[attr-defined]
 
