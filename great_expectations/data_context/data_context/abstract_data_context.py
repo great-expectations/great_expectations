@@ -324,7 +324,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                     validation_operator_config,
                 )
 
-        self._attach_fluent_config_datasources(self.fluent_config)
+        self._attach_fluent_config_datasources_and_build_data_connectors(
+            self.fluent_config
+        )
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -5424,10 +5426,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         return GxConfig(fluent_datasources={})
 
-    def _attach_fluent_config_datasources(self, config: GxConfig):
+    def _attach_fluent_config_datasources_and_build_data_connectors(
+        self, config: GxConfig
+    ):
         """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
             logger.info(f"Loaded '{ds_name}' from fluent config")
+
+            # if Datasource required a data_connector we need to build the data_connector for each asset
+            if datasource.data_connector_type:
+                for data_asset in datasource.assets.values():
+                    connect_options = getattr(data_asset, "connect_options", {})
+                    datasource._build_data_connector(data_asset, **connect_options)
+
             self._add_fluent_datasource(datasource)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
