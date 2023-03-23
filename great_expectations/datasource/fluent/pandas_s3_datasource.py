@@ -111,7 +111,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
-        
+
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
             data_asset_name=data_asset.name,
