@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import difflib
 import functools
 import logging
 import pathlib
+from collections import defaultdict
 from pprint import pformat as pf
 
 import pytest
@@ -123,6 +126,24 @@ def test_serialize_fluent_config(fluent_file_context: FileDataContext):
 
         for asset_name in datasource.assets.keys():
             assert asset_name in dumped_yaml
+
+
+def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataContext):
+    dc_datasource_count: dict[str, list[str]] = defaultdict(list)
+
+    for ds_name, datasource in fluent_file_context.fluent_datasources.items():
+        if datasource.data_connector_type:
+            print(f"class: {datasource.__class__.__name__}")
+            print(f"type: {datasource.type}")
+            print(f"name: {ds_name}")
+
+            dc_datasource_count[datasource.type] += datasource.name
+
+            for asset in datasource.assets.values():
+                asset.test_connection()
+
+    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasource_count))}")
+    assert dc_datasource_count
 
 
 def test_fluent_simple_validate_workflow(fluent_file_context: FileDataContext):
