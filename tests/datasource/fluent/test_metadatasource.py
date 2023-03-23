@@ -528,7 +528,6 @@ def test_update_datasource_with_datasource_object(
                     "csv_asset": {
                         "batching_regex": "(?P<file_name>.*).csv",
                         "name": "csv_asset",
-                        "order_by": [],
                         "type": "csv",
                     }
                 },
