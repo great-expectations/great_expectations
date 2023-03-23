@@ -217,7 +217,7 @@ def _get_column_quantiles_mssql(
         sa.func.percentile_disc(quantile).within_group(column.asc()).over()
         for quantile in quantiles
     ]
-    quantiles_query: Select = sa.select(selects).select_from(selectable)
+    quantiles_query: Select = sa.select(*selects).select_from(selectable)
 
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
@@ -239,7 +239,7 @@ def _get_column_quantiles_bigquery(
     selects: List[WithinGroup] = [
         sa.func.percentile_disc(column, quantile).over() for quantile in quantiles
     ]
-    quantiles_query: Select = sa.select(selects).select_from(selectable)
+    quantiles_query: Select = sa.select(*selects).select_from(selectable)
 
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
@@ -261,13 +261,11 @@ def _get_column_quantiles_mysql(
     # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
     percent_rank_query: CTE = (
         sa.select(
-            [
-                column,
-                sa.cast(
-                    sa.func.percent_rank().over(order_by=column.asc()),
-                    sa.dialects.mysql.DECIMAL(18, 15),
-                ).label("p"),
-            ]
+            column,
+            sa.cast(
+                sa.func.percent_rank().over(order_by=column.asc()),
+                sa.dialects.mysql.DECIMAL(18, 15),
+            ).label("p"),
         )
         .order_by(sa.column("p").asc())
         .select_from(selectable)
@@ -297,7 +295,7 @@ def _get_column_quantiles_mysql(
         )
         selects.append(quantile_column)
     quantiles_query: Select = (
-        sa.select(selects).distinct().order_by(percent_rank_query.c.p.desc())
+        sa.select(*selects).distinct().order_by(percent_rank_query.c.p.desc())
     )
 
     try:
@@ -319,7 +317,7 @@ def _get_column_quantiles_trino(
     # Trino does not have the percentile_disc func, but instead has approx_percentile
     sql_approx: str = f"approx_percentile({column}, ARRAY{list(quantiles)})"
     selects_approx: List[TextClause] = [sa.text(sql_approx)]
-    quantiles_query: Select = sa.select(selects_approx).select_from(selectable)
+    quantiles_query: Select = sa.select(*selects_approx).select_from(selectable)
 
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
@@ -383,7 +381,7 @@ def _get_column_quantiles_athena(
 ) -> list:
     approx_percentiles = f"approx_percentile({column}, ARRAY{list(quantiles)})"
     selects_approx: List[TextClause] = [sa.text(approx_percentiles)]
-    quantiles_query_approx: Select = sa.select(selects_approx).select_from(selectable)
+    quantiles_query_approx: Select = sa.select(*selects_approx).select_from(selectable)
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(
             quantiles_query_approx
@@ -419,7 +417,7 @@ def _get_column_quantiles_generic_sqlalchemy(
         sa.func.percentile_disc(quantile).within_group(column.asc())
         for quantile in quantiles
     ]
-    quantiles_query: Select = sa.select(selects).select_from(selectable)
+    quantiles_query: Select = sa.select(*selects).select_from(selectable)
 
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
@@ -433,7 +431,7 @@ def _get_column_quantiles_generic_sqlalchemy(
                 selects=selects, sql_engine_dialect=dialect
             )
             selects_approx: List[TextClause] = [sa.text(sql_approx)]
-            quantiles_query_approx: Select = sa.select(selects_approx).select_from(
+            quantiles_query_approx: Select = sa.select(*selects_approx).select_from(
                 selectable
             )
             if allow_relative_error or sqlalchemy_engine.driver == "psycopg2":
