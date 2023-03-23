@@ -144,7 +144,7 @@ class LinkChecker:
         return os.path.join(directory, self._get_os_path(path))  # noqa: PTH118
 
     def _get_docroot_path(self, path: str) -> str:
-        return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
+        return self._docs_root + self._get_os_path(path)  # noqa: PTH118
 
     def _check_absolute_link(
         self, link: str, file: str, path: str
@@ -208,12 +208,10 @@ class LinkChecker:
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking docroot link {link} in file {file}")
 
-        # path_joined_md_file = self._get_docroot_path(path)
-        path_joined_md_file = os.path.join(self._docs_root, self._get_os_path(path))
-        str_joined_md_file = self._docs_root + self._get_os_path(path)
-        if not os.path.isfile(str_joined_md_file):  # noqa: PTH113
+        md_file = self._get_docroot_path(path)
+        if not os.path.isfile(md_file):  # noqa: PTH113
             logger.info(f"Docroot link {link} in file {file} was not found")
-            return LinkReport(link, file, f"Linked file {str_joined_md_file} not found")
+            return LinkReport(link, file, f"Linked file {md_file} not found")
         else:
             logger.debug(f"Docroot link {link} in file {file} found")
             return None
