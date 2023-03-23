@@ -32,6 +32,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
 
 if TYPE_CHECKING:
     from pytest import FixtureRequest
+
     from great_expectations.datasource.fluent import SqliteDatasource
 
 yaml = YAML(typ="safe")
