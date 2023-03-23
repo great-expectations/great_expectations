@@ -42,7 +42,7 @@ def test_cli_datasource_list(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "datasource", "list"],
+        ["datasource", "list"],
         catch_exceptions=False,
     )
     expected_output = """\

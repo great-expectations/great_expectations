@@ -67,7 +67,7 @@ validator.expectation_suite = result.get_expectation_suite(
 def test_suite_help_output(caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
-    result: Result = runner.invoke(cli, ["--v3-api", "suite"], catch_exceptions=False)
+    result: Result = runner.invoke(cli, ["suite"], catch_exceptions=False)
     assert result.exit_code == 0
     stdout: str = result.stdout
     assert (
@@ -1270,7 +1270,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1308,7 +1307,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1525,7 +1523,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1562,7 +1559,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1762,7 +1758,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1803,7 +1798,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -2019,7 +2013,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -2056,7 +2049,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -2881,7 +2873,6 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--interactive",
@@ -2981,7 +2972,6 @@ def test_suite_new_profile_on_existing_suite_raises_error(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3085,7 +3075,6 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3315,7 +3304,6 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3541,7 +3529,6 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3673,7 +3660,6 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",

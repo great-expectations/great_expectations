@@ -185,12 +185,10 @@ def test_cli_config_not_found_raises_error_for_datasource_list(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "datasource", "list"], catch_exceptions=False
+        cli, ["-c", "./", "datasource", "list"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "datasource", "list"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["datasource", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -201,12 +199,10 @@ def test_cli_config_not_found_raises_error_for_datasource_new(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "datasource", "new"], catch_exceptions=False
+        cli, ["-c", "./", "datasource", "new"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "datasource", "new"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["datasource", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -218,13 +214,11 @@ def test_cli_config_not_found_raises_error_for_datasource_delete(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "datasource", "delete", "new"],
+        ["-c", "./", "datasource", "delete", "new"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "datasource", "delete", "new"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["datasource", "delete", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -236,13 +230,11 @@ def test_cli_config_not_found_raises_error_for_project_check_config(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "project", "check-config"],
+        ["-c", "./", "project", "check-config"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "project", "check-config"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["project", "check-config"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -254,13 +246,11 @@ def test_cli_config_not_found_raises_error_for_project_upgrade(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "project", "upgrade"],
+        ["-c", "./", "project", "upgrade"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "project", "upgrade"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["project", "upgrade"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -270,11 +260,9 @@ def test_cli_config_not_found_raises_error_for_store_list(
     tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "store", "list"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["-c", "./", "store", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "store", "list"], catch_exceptions=False)
+    result = runner.invoke(cli, ["store", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -282,11 +270,9 @@ def test_cli_config_not_found_raises_error_for_suite_new(tmp_path_factory, monke
     tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "suite", "new"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["-c", "./", "suite", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "suite", "new"], catch_exceptions=False)
+    result = runner.invoke(cli, ["suite", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -296,11 +282,9 @@ def test_cli_config_not_found_raises_error_for_suite_list(
     tmp_dir = str(tmp_path_factory.mktemp("test_cli_config_not_found"))
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
-    result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "suite", "list"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["-c", "./", "suite", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "suite", "list"], catch_exceptions=False)
+    result = runner.invoke(cli, ["suite", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -312,13 +296,13 @@ def test_cli_config_not_found_raises_error_for_suite_scaffold(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "suite", "new", "--profile", "--interactive"],
+        ["-c", "./", "suite", "new", "--profile", "--interactive"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
     result = runner.invoke(
         cli,
-        ["--v3-api", "suite", "new", "--profile", "--interactive"],
+        ["suite", "new", "--profile", "--interactive"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
@@ -331,12 +315,10 @@ def test_cli_config_not_found_raises_error_for_suite_edit(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "suite", "edit", "FAKE"], catch_exceptions=False
+        cli, ["-c", "./", "suite", "edit", "FAKE"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "suite", "edit", "FAKE"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["suite", "edit", "FAKE"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -350,9 +332,7 @@ def test_cli_config_not_found_raises_error_for_suite_delete(
         cli, ["-c", "./", "suite", "delete", "deleteme"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "suite", "delete", "deleteme"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["suite", "delete", "deleteme"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -363,12 +343,10 @@ def test_cli_config_not_found_raises_error_for_checkpoint_new(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "checkpoint", "new"], catch_exceptions=False
+        cli, ["-c", "./", "checkpoint", "new"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "checkpoint", "new"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["checkpoint", "new"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -379,12 +357,10 @@ def test_cli_config_not_found_raises_error_for_checkpoint_list(
     monkeypatch.chdir(tmp_dir)
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
-        cli, ["-c", "./", "--v3-api", "checkpoint", "list"], catch_exceptions=False
+        cli, ["-c", "./", "checkpoint", "list"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "checkpoint", "list"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["checkpoint", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -396,12 +372,12 @@ def test_cli_config_not_found_raises_error_for_checkpoint_delete(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "checkpoint", "delete", "deleteme"],
+        ["-c", "./", "checkpoint", "delete", "deleteme"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
     result = runner.invoke(
-        cli, ["--v3-api", "checkpoint", "delete", "deleteme"], catch_exceptions=False
+        cli, ["checkpoint", "delete", "deleteme"], catch_exceptions=False
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
@@ -417,14 +393,13 @@ def test_cli_config_not_found_raises_error_for_docs_clean(
         [
             "-c",
             "./",
-            "--v3-api",
             "docs",
             "clean",
         ],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "docs", "clean"], catch_exceptions=False)
+    result = runner.invoke(cli, ["docs", "clean"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -437,14 +412,13 @@ def test_cli_config_not_found_raises_error_for_docs_list(tmp_path_factory, monke
         [
             "-c",
             "./",
-            "--v3-api",
             "docs",
             "list",
         ],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(cli, ["--v3-api", "docs", "list"], catch_exceptions=False)
+    result = runner.invoke(cli, ["docs", "list"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 
@@ -456,20 +430,18 @@ def test_cli_config_not_found_raises_error_for_docs_build(
     runner = CliRunner(mix_stderr=True)
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "docs", "build", "--no-view"],
+        ["-c", "./", "docs", "build", "--no-view"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
     result = runner.invoke(
         cli,
-        ["-c", "./", "--v3-api", "docs", "build", "--no-view"],
+        ["-c", "./", "docs", "build", "--no-view"],
         catch_exceptions=False,
     )
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
-    result = runner.invoke(
-        cli, ["--v3-api", "docs", "build", "--no-view"], catch_exceptions=False
-    )
+    result = runner.invoke(cli, ["docs", "build", "--no-view"], catch_exceptions=False)
     assert CONFIG_NOT_FOUND_ERROR_MESSAGE in result.output
 
 

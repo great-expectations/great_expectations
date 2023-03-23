@@ -202,7 +202,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     monkeypatch.chdir(root_dir)
     result = runner.invoke(
         cli,
-        ["--v3-api", "init"],
+        ["init"],
         input="Y\n",
         catch_exceptions=False,
     )
@@ -227,7 +227,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     with pytest.warns(UserWarning):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="N\n",
             catch_exceptions=False,
         )
@@ -257,7 +257,7 @@ def test_cli_init_on_existing_project_with_no_uncommitted_dirs_answering_no_then
     ):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="Y\n",
             catch_exceptions=False,
         )
@@ -300,7 +300,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     monkeypatch.chdir(root_dir)
     result: Result = runner.invoke(
         cli,
-        ["--v3-api", "init"],
+        ["init"],
         input="Y\n",
         catch_exceptions=False,
     )
@@ -315,7 +315,7 @@ def test_cli_init_on_complete_existing_project_all_uncommitted_dirs_exist(
     ):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="",
             catch_exceptions=False,
         )

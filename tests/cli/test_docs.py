@@ -14,7 +14,7 @@ from tests.cli.utils import (
 
 def test_docs_help_output(caplog):
     runner = CliRunner(mix_stderr=False)
-    result = runner.invoke(cli, ["--v3-api", "docs"], catch_exceptions=False)
+    result = runner.invoke(cli, ["docs"], catch_exceptions=False)
     assert result.exit_code == 0
     assert "build  Build Data Docs for a project." in result.stdout
     assert "list   List known Data Docs sites." in result.stdout
