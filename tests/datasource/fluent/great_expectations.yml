@@ -27,6 +27,19 @@ fluent_datasources:
         order_by:
           - year
           - -month
+  sqlite_taxi:
+    type: sql
+    connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+    assets:
+      my_asset:
+        type: table
+        table_name: yellow_tripdata_sample_2019_01
+        splitter:
+            column_name: pickup_datetime
+            method_name: split_on_year_and_month
+        order_by:
+            - key: year
+            - key: month
   my_sqlite_ds_w_subs:
     type: sqlite
     connection_string: "${MY_CONN_STR}"

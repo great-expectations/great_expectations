@@ -36,44 +36,17 @@ def db_file() -> pathlib.Path:
 
 
 @pytest.fixture
-def fluent_config_dict(db_file) -> dict:
-    return {
-        "fluent_datasources": {
-            "my_sql_ds": {
-                "connection_string": f"sqlite:///{db_file}",
-                "name": "my_sql_ds",
-                "type": "sql",
-                "assets": {
-                    "my_asset": {
-                        "name": "my_asset",
-                        "table_name": "yellow_tripdata_sample_2019_01",
-                        "type": "table",
-                        "splitter": {
-                            "column_name": "pickup_datetime",
-                            "method_name": "split_on_year_and_month",
-                        },
-                        "order_by": [
-                            {"key": "year"},
-                            {"key": "month"},
-                        ],
-                    },
-                },
-            }
-        }
-    }
-
-
-@pytest.fixture
-def fluent_only_config(fluent_config_dict: dict) -> GxConfig:
+def fluent_only_config(fluent_gx_config_yml_str: str) -> GxConfig:
     """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
-    fluent_config = GxConfig.parse_obj(fluent_config_dict)
+    fluent_config = GxConfig.parse_yaml(fluent_gx_config_yml_str)
     assert fluent_config.datasources
     return fluent_config
 
 
 @pytest.fixture
 def fluent_yaml_config_file(
-    file_dc_config_dir_init: pathlib.Path, fluent_only_config: GxConfig
+    file_dc_config_dir_init: pathlib.Path,
+    fluent_gx_config_yml_str: str,
 ) -> pathlib.Path:
     """
     Dump the provided GxConfig to a temporary path. File is removed during test teardown.
@@ -85,11 +58,8 @@ def fluent_yaml_config_file(
     assert config_file_path.exists() is True
 
     with open(config_file_path, mode="a") as f_append:
-        yaml_string = "\n# Fluent\n" + fluent_only_config.yaml()
+        yaml_string = "\n# Fluent\n" + fluent_gx_config_yml_str
         f_append.write(yaml_string)
-
-    for ds_name in fluent_only_config.datasources.keys():
-        assert ds_name in yaml_string
 
     logger.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
@@ -131,23 +101,25 @@ def test_serialize_fluent_config(fluent_file_context: FileDataContext):
 def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataContext):
     dc_datasource_count: dict[str, list[str]] = defaultdict(list)
 
-    for ds_name, datasource in fluent_file_context.fluent_datasources.items():
+    for datasource in fluent_file_context.fluent_datasources.values():
         if datasource.data_connector_type:
             print(f"class: {datasource.__class__.__name__}")
             print(f"type: {datasource.type}")
-            print(f"name: {ds_name}")
+            print(f"name: {datasource.name}", end="\n\n")
 
-            dc_datasource_count[datasource.type] += datasource.name
+            dc_datasource_count[datasource.type].append(datasource.name)
 
             for asset in datasource.assets.values():
                 asset.test_connection()
+                print(f"✅ '{asset.name}' connected with {type(asset._data_connector)}")
+            print()
 
     print(f"Datasources with DataConnectors\n{pf(dict(dc_datasource_count))}")
     assert dc_datasource_count
 
 
 def test_fluent_simple_validate_workflow(fluent_file_context: FileDataContext):
-    datasource = fluent_file_context.get_datasource("my_sql_ds")
+    datasource = fluent_file_context.get_datasource("sqlite_taxi")
     assert isinstance(datasource, Datasource)
     batch_request = datasource.get_asset("my_asset").build_batch_request(
         {"year": 2019, "month": 1}
