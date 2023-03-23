@@ -6,16 +6,12 @@ from typing import List, Optional
 
 import click
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import _set_up_logger
 from great_expectations.cli.pretty_printing import cli_message
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
-)
-from great_expectations.data_context.types.base import (
-    FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE,
 )
 
 try:
@@ -140,15 +136,6 @@ def cli(
         # more control over console UI.
         logger.setLevel(logging.DEBUG)
     ctx.obj = CLIState(config_file_location=config_file_location, assume_yes=assume_yes)
-
-    ge_config_version: float = (
-        ctx.obj.get_data_context_from_config_file().get_config().config_version  # type: ignore[union-attr]  # config_version
-    )
-    if ge_config_version >= FIRST_GX_CONFIG_VERSION_WITH_CHECKPOINT_STORE:
-        raise gx_exceptions.InvalidDataContextConfigError(
-            f"Using the legacy v2 (Batch Kwargs) API with a recent config version ({ge_config_version}) is illegal."
-        )
-
 
 def main() -> None:
     cli()
