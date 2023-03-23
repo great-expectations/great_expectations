@@ -75,8 +75,8 @@ except ImportError:
 from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalchemy
 
 try:
-    LegacyRow = sqlalchemy.engine.row.LegacyRow
-    TextClause = sqlalchemy.sql.elements.TextClause
+    LegacyRow = sqlalchemy.engine.row
+    TextClause = sqlalchemy.sql.elements
 except ImportError:
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
     TextClause = SQLALCHEMY_NOT_IMPORTED
