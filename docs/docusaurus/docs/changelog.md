@@ -35,7 +35,7 @@ title: Changelog
 * [MAINTENANCE] Validate `ExpectationConfiguration` before adding to suite ([#7366](https://github.com/great-expectations/great_expectations/pull/7366))
 * [MAINTENANCE] Convert to python built in warning categories ([#7415](https://github.com/great-expectations/great_expectations/pull/7415))
 * [MAINTENANCE] Move NotImported to optional_imports.py and start using it. ([#7421](https://github.com/great-expectations/great_expectations/pull/7421))
-* [MAINTENANCE] Bump minimist from 1.2.5 to 1.2.8 in /docs/docusaurus ([#7419](https://github.com/great-expectations/great_expectations/pull/7419)) (thanks @dependabot[bot])
+* [MAINTENANCE] Bump minimist from 1.2.5 to 1.2.8 in /docs/docusaurus ([#7419](https://github.com/great-expectations/great_expectations/pull/7419))
 * [MAINTENANCE] PandasFilesystemDatasource stubs and Schema corrections ([#7428](https://github.com/great-expectations/great_expectations/pull/7428))
 * [MAINTENANCE] Bump loader-utils from 2.0.2 to 2.0.4 in /docs/docusaurus ([#7429](https://github.com/great-expectations/great_expectations/pull/7429)) (thanks @dependabot[bot])
 * [MAINTENANCE] Bump webpack from 5.74.0 to 5.76.3 in /docs/docusaurus ([#7430](https://github.com/great-expectations/great_expectations/pull/7430)) (thanks @dependabot[bot])
