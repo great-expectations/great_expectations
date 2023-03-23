@@ -73,6 +73,7 @@ class PandasFilesystemDatasource(_PandasFilePathDatasource):
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
         )
+
         # build a more specific `_test_connection_error_message`
         data_asset._test_connection_error_message = (
             self.data_connector_type.build_test_connection_error_message(
