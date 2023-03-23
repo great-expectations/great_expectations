@@ -35,16 +35,17 @@ Any Python Interpreter or script file will work for the remaining steps in the g
 
 - Set environment variables in the notebook (alternatively, add these as [Data Context config variables](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials))
 
-```console
+```python
 import os
 
-os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
 os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<user_token_you_just_generated_in_the_app>"
+# use Organization ID you have on the Tokens page
+os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
 ```
 
 - Set Cloud data context in the notebook
 
-```console
+```python
 import great_expectations as gx
 
 context = gx.get_context()
