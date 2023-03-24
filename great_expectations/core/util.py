@@ -76,9 +76,17 @@ from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalch
 
 try:
     LegacyRow = sqlalchemy.engine.row.LegacyRow
+except (
+    ImportError,
+    AttributeError,
+):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
+    LegacyRow = SQLALCHEMY_NOT_IMPORTED
+
+# This is a separate try/except than the LegacyRow one since TextClause exists in sqlalchemy 2. This means LegacyRow
+# may be not importable while TextClause is.
+try:
     TextClause = sqlalchemy.sql.elements.TextClause
 except ImportError:
-    LegacyRow = SQLALCHEMY_NOT_IMPORTED
     TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
