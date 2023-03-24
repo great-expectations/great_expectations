@@ -212,7 +212,7 @@ class SqlAlchemyBatchData(BatchData):
         """
 
         dialect: GXSqlDialect = self.dialect
-
+        stmt: str = ""
         # dialects that support temp schemas
         if temp_table_schema_name is not None and dialect in [
             GXSqlDialect.BIGQUERY,
@@ -290,22 +290,11 @@ class SqlAlchemyBatchData(BatchData):
             with self._engine.connect() as connection:
                 with connection.begin():
                     try:
-                        stmt = sa.text(stmt_1)
-                        connection.execute(stmt)
+                        connection.execute(sa.text(stmt_1))
                     except DatabaseError:
-                        stmt = sa.text(stmt_2)
-                        connection.execute(stmt)
+                        connection.execute(sa.text(stmt_2))
         else:
             with self._engine.connect() as connection:
                 with connection.begin():
-                    stmt = sa.text(stmt)
-                    connection.execute(stmt)
-
-        return str(
-            stmt.compile(
-                # dialect=self._engine.dialect,
-                compile_kwargs={"literal_binds": True},
-            )
-        )
-
-    # return str(stmt)
+                    connection.execute(sa.text(stmt))
+        return stmt
