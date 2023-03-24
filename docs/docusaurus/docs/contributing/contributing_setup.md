@@ -52,9 +52,9 @@ In order to contribute to Great Expectations, you will need the following:
 Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.7 - 3.10), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
 
 ```
-python3 -m venv ge_dev
+python3 -m venv gx_dev
 
-source ge_dev/bin/activate
+source gx_dev/bin/activate
 
 pip install --upgrade pip==21.3.1
 
