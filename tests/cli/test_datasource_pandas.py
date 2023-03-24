@@ -23,7 +23,7 @@ def test_cli_datasource_list_on_project_with_no_datasources(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api datasource list",
+        "datasource list",
         catch_exceptions=False,
     )
 
@@ -71,12 +71,11 @@ def test_cli_datasource_list_on_project_with_one_datasource(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api datasource list",
+        "datasource list",
         catch_exceptions=False,
     )
 
-    expected_output = """Using v3 (Batch Request) API
-1 Datasource found:
+    expected_output = """1 Datasource found:
 
  - name: my_datasource
    class_name: Datasource
@@ -130,7 +129,7 @@ def test_cli_datasource_new(
     monkeypatch.chdir(os.path.dirname(root_dir))
     result = runner.invoke(
         cli,
-        "--v3-api datasource new",
+        "datasource new",
         input=f"1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
@@ -245,7 +244,7 @@ def test_cli_datasource_new_no_jupyter_writes_notebook(
     monkeypatch.chdir(os.path.dirname(root_dir))
     result = runner.invoke(
         cli,
-        "--v3-api datasource new --no-jupyter",
+        "datasource new --no-jupyter",
         input=f"1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
@@ -310,7 +309,7 @@ def test_cli_datasource_new_with_name_param(
     monkeypatch.chdir(os.path.dirname(root_dir))
     result = runner.invoke(
         cli,
-        "--v3-api datasource new --name foo",
+        "datasource new --name foo",
         input=f"1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
@@ -394,7 +393,7 @@ def test_cli_datasource_new_from_misc_directory(
     monkeypatch.chdir(misc_dir)
     result = runner.invoke(
         cli,
-        f"--config {root_dir} --v3-api datasource new",
+        f"--config {root_dir} datasource new",
         input=f"1\n1\n{filesystem_csv_2}\n",
         catch_exceptions=False,
     )
@@ -472,14 +471,13 @@ def test_cli_datasource_delete_on_project_with_one_datasource(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api datasource delete my_datasource",
+        "datasource delete my_datasource",
         input="Y\n",
         catch_exceptions=False,
     )
 
     stdout = result.output
     assert result.exit_code == 0
-    assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource deleted successfully." in stdout
 
     expected_call_args_list = [
@@ -530,7 +528,7 @@ def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api --assume-yes datasource delete my_datasource",
+        "--assume-yes datasource delete my_datasource",
         catch_exceptions=False,
     )
 
@@ -541,7 +539,6 @@ def test_cli_datasource_delete_on_project_with_one_datasource_assume_yes_flag(
     # This assertion is extra assurance since this test is too permissive if we change the confirmation message
     assert "[Y/n]" not in stdout
 
-    assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource deleted successfully." in stdout
 
     expected_call_args_list = [
@@ -592,14 +589,13 @@ def test_cli_datasource_delete_on_project_with_one_datasource_declining_prompt_d
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api datasource delete my_datasource",
+        "datasource delete my_datasource",
         input="n\n",
         catch_exceptions=False,
     )
 
     stdout = result.output
     assert result.exit_code == 0
-    assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource `my_datasource` was not deleted." in stdout
 
     expected_call_args_list = [
@@ -649,13 +645,12 @@ def test_cli_datasource_delete_with_non_existent_datasource_raises_error(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api datasource delete foo",
+        "datasource delete foo",
         catch_exceptions=False,
     )
 
     stdout = result.output
     assert result.exit_code == 1
-    assert "Using v3 (Batch Request) API" in stdout
     assert "Datasource foo could not be found." in stdout
 
     expected_call_args_list = [
