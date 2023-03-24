@@ -28,7 +28,7 @@ from great_expectations.self_check.util import (
     connection_manager,
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.util import is_library_loadable, add_dataframe_to_db
+from great_expectations.util import add_dataframe_to_db, is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
