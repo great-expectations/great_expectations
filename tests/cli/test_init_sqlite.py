@@ -70,7 +70,7 @@ def test_cli_init_on_new_project(
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["--v3-api", "init"],
+        ["init"],
         input=f"\n\n2\n6\ntitanic\n{engine.url}\n\n\n1\n{default_schema}\n{default_table}\nwarning\n\n\n\n",
         catch_exceptions=False,
     )
@@ -231,7 +231,7 @@ def test_cli_init_on_new_project_extra_whitespace_in_url(
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["--v3-api", "init"],
+        ["init"],
         input=f"\n\n2\n6\ntitanic\n{engine_url_with_added_whitespace}\n\n\n1\n{default_schema}\n{default_table}\nwarning\n\n\n\n",
         catch_exceptions=False,
     )
@@ -342,7 +342,7 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     ):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input=f"\n\n2\n6\nsqlite\n{url}\n\n\n1\n{default_schema}\n{default_table}\nmy_suite\n\n\n\n",
             catch_exceptions=False,
         )
@@ -443,7 +443,7 @@ def initialized_sqlite_project(
     monkeypatch.chdir(project_dir)
     result = runner.invoke(
         cli,
-        ["--v3-api", "init"],
+        ["init"],
         input=f"\n\n2\n6\ntitanic\n{engine.url}\n\n\n1\n{default_schema}\n{default_table}\nwarning\n\n\n\n",
         catch_exceptions=False,
     )
@@ -507,7 +507,7 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     ):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -547,7 +547,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     ):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="n\n",
             catch_exceptions=False,
         )
@@ -587,7 +587,7 @@ def test_init_on_existing_project_with_datasource_with_existing_suite_offer_to_b
     ):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="\n\n",
             catch_exceptions=False,
         )
@@ -662,7 +662,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     ):
         result = runner.invoke(
             cli,
-            ["--v3-api", "init"],
+            ["init"],
             input="\n1\n{schema}\n{table}\nsink_me\n\n\n\n".format(
                 os.path.join(project_dir, "data/Titanic.csv"),
                 schema=default_schema,
