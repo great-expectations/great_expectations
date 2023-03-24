@@ -146,3 +146,7 @@ metastore_db
 # dependency management
 Pipfile
 Pipfile.lock
+
+# recommended venv directories from our contributor guide
+gx_dev
+.gx_dev
