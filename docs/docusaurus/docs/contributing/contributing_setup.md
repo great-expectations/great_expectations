@@ -209,16 +209,6 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 * You can find official installation instructions for [Spark here](https://spark.apache.org/docs/latest/index.html#downloading).
 
-## If you want to build documentation locally:
-
-* `pip install -r docs/requirements.txt`
-
-* To build documentation, the command is `cd docs; make html`
-
-* Documentation will be generated in `docs/build/html/` with the `index.html` as the index page.
-
-* Note: we use `autoapi` to generate API reference docs, but it’s not compatible with pandas 1.1.0. You’ll need to have pandas 1.0.5 (or a previous version) installed in order to successfully build docs.
-
 ## Run tests to confirm that everything is working
 
 * You can run all tests by running `pytest` in the great_expectations directory root. Please see [Testing](./contributing_test.md) for testing options and details.
