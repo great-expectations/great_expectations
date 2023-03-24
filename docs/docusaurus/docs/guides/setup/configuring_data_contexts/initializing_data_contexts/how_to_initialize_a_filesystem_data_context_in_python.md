@@ -66,22 +66,22 @@ If a Data Context already exists at the provided `path`, the `get_context(...)` 
 ## Next steps
 
 For guidance on further customizing your Data Context's configurations for <TechnicalTag tag="store" text="Metadata Stores" /> and <TechnicalTag tag="data_docs" text="Data Docs" />, please see:
-- [How to configure an Expectation Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)
-- [How to configure a Validation Result Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.md)
-- [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
-- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md)
+- [How to configure an Expectation Store on a filesystem](docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)
+- [How to configure a Validation Result Store on a filesystem](docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.md)
+- [How to configure and use a Metric Store](docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
+- [How to host and share Data Docs on a filesystem](docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md)
 
 If you are content with the default configuration of your Data Context, you can move on to connecting GX to your source data:
-- [How to configure a Pandas Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.md)
-- [How to configure a Spark Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.md)
-- [How to configure a SQL Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+- [How to configure a Pandas Datasource](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.md)
+- [How to configure a Spark Datasource](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.md)
+- [How to configure a SQL Datasource](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
 
 ## Additional information
 
 ### Related guides
 
 To initialize a Filesystem Data Context from the terminal, please see:
-- [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
+- [How to initialize a new Data Context with the CLI](docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
 
 <!-- TODO
 To instantiate an existing Data Context, reference:

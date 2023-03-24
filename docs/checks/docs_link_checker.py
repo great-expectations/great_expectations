@@ -77,7 +77,7 @@ class LinkChecker:
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
         # docroot links start without a . or a slash
-        docroot_link_regex = r"^(?P<path>\/\w[\.\w\/-]+\.md)(?:#\S+)?$"
+        docroot_link_regex = r"^(?P<path>\w[\.\w\/-]+\.md)(?:#\S+)?$"
         self._docroot_link_pattern = re.compile(docroot_link_regex)
 
         # links starting a . or .., file ends with .md, may include an anchor with #abc
@@ -144,7 +144,7 @@ class LinkChecker:
         return os.path.join(directory, self._get_os_path(path))  # noqa: PTH118
 
     def _get_docroot_path(self, path: str) -> str:
-        return self._docs_root + self._get_os_path(path)  # noqa: PTH118
+        return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
 
     def _check_absolute_link(
         self, link: str, file: str, path: str
