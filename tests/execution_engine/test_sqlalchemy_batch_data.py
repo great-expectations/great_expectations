@@ -16,7 +16,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from tests.test_utils import get_sqlite_temp_table_names
 
-from tests.test_utils import MockSaEngine, Dialect
+from tests.sqlalchemy_test_doubles import MockSaEngine, Dialect
 
 
 def test_instantiation_with_table_name(sqlite_view_engine):
@@ -167,12 +167,12 @@ def test_instantiation_with_temp_table_schema():
         create_temp_table=True,
         temp_table_schema_name="test_schema",
     )
-    created_table_name: str = batch_data._create_temporary_table(
+    query_to_create_temp_table: str = batch_data._create_temporary_table(
         temp_table_name="hello",
         query="test_query",
         temp_table_schema_name="test_schema",
     )
-    assert "test_schema" not in created_table_name
+    assert "test_schema" not in query_to_create_temp_table
 
     # supported
     for dialect in ["bigquery", "snowflake", "vertica"]:
@@ -183,9 +183,9 @@ def test_instantiation_with_temp_table_schema():
             create_temp_table=True,
             temp_table_schema_name="test_schema",
         )
-        created_table_name: str = batch_data._create_temporary_table(
+        query_to_create_temp_table: str = batch_data._create_temporary_table(
             temp_table_name="hello",
             query="test_query",
             temp_table_schema_name="test_schema",
         )
-        assert "test_schema" in created_table_name
+        assert "test_schema" in query_to_create_temp_table
