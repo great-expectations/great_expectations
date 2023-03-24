@@ -283,13 +283,11 @@ def _get_column_quantiles_mysql(
             sa.func.first_value(column)
             .over(
                 order_by=sa.case(
-                    [
-                        (
-                            percent_rank_query.c.p
-                            <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
-                            percent_rank_query.c.p,
-                        )
-                    ],
+                    (
+                        percent_rank_query.c.p
+                        <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
+                        percent_rank_query.c.p,
+                    ),
                     else_=None,
                 ).desc()
             )
