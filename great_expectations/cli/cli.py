@@ -137,6 +137,7 @@ def cli(
         logger.setLevel(logging.DEBUG)
     ctx.obj = CLIState(config_file_location=config_file_location, assume_yes=assume_yes)
 
+
 def main() -> None:
     cli()
 
