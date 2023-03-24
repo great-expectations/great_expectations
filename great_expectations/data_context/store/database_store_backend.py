@@ -141,9 +141,10 @@ class DatabaseStoreBackend(StoreBackend):
         }
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
-        print(
-            f"\n[ALEX_TEST] [DatabaseStoreBackend.__init__()] SELF._CONFIG:\n{self._config} ; TYPE: {str(type(self._config))}"
-        )
+        if self.store_name == "metric_store":
+            print(
+                f"\n[ALEX_TEST] [DatabaseStoreBackend.__init__()] SELF._CONFIG:\n{self._config} ; TYPE: {str(type(self._config))}"
+            )
 
     @property
     def store_backend_id(self) -> str:
