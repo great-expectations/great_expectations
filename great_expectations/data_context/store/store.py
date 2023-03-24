@@ -190,11 +190,16 @@ class Store:
             return self._store_backend.set(key, value, **kwargs)
 
         self._validate_key(key)
-        print(f"\n[ALEX_TEST] [Store.set()] KEY:\n{key} ; TYPE: {str(type(key))}")
-        print(f"\n[ALEX_TEST] [Store.set()] VALUE:\n{value} ; TYPE: {str(type(value))}")
-        print(
-            f"\n[ALEX_TEST] [Store.set()] KWARGS:\n{kwargs} ; TYPE: {str(type(kwargs))}"
-        )
+        # TODO: <Alex>ALEX</Alex>
+        if self._store_name == "metric_store":
+            print(f"\n[ALEX_TEST] [Store.set()] KEY:\n{key} ; TYPE: {str(type(key))}")
+            print(
+                f"\n[ALEX_TEST] [Store.set()] VALUE:\n{value} ; TYPE: {str(type(value))}"
+            )
+            print(
+                f"\n[ALEX_TEST] [Store.set()] KWARGS:\n{kwargs} ; TYPE: {str(type(kwargs))}"
+            )
+        # TODO: <Alex>ALEX</Alex>
         return self._store_backend.set(
             self.key_to_tuple(key), self.serialize(value), **kwargs
         )

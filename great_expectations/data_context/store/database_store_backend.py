@@ -262,20 +262,22 @@ class DatabaseStoreBackend(StoreBackend):
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
     def _set(self, key, value, allow_update=True, **kwargs) -> None:
-        print(
-            f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] KEY:\n{key} ; TYPE: {str(type(key))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] VALUE:\n{value} ; TYPE: {str(type(value))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] KWARGS:\n{kwargs} ; TYPE: {str(type(kwargs))}"
-        )
+        if self.store_name == "metric_store":
+            print(
+                f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] KEY:\n{key} ; TYPE: {str(type(key))}"
+            )
+            print(
+                f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] VALUE:\n{value} ; TYPE: {str(type(value))}"
+            )
+            print(
+                f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] KWARGS:\n{kwargs} ; TYPE: {str(type(kwargs))}"
+            )
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
-        print(
-            f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] FULL-COLS:\n{cols} ; TYPE: {str(type(cols))}"
-        )
+        if self.store_name == "metric_store":
+            print(
+                f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] FULL-COLS:\n{cols} ; TYPE: {str(type(cols))}"
+            )
 
         if allow_update:
             if self.has_key(key):  # noqa: W601
