@@ -83,6 +83,7 @@ try:
     from sqlalchemy import Table
     from sqlalchemy.engine import reflection
     from sqlalchemy.exc import RemovedIn20Warning
+    from sqlalchemy.sql import Select
 
 except ImportError:
     logger.debug(
