@@ -25,12 +25,8 @@ from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from tests.datasource.fluent.conftest import (
-    Dialect,
-    MockSaEngine,
-    MockSaInspector,
-    sqlachemy_execution_engine_mock_cls,
-)
+from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
+from tests.test_utils import MockSaEngine, Dialect, MockSaInspector
 
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
@@ -120,13 +116,9 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         mocker.patch("sqlalchemy.engine")
         inspect = mocker.patch("sqlalchemy.inspect")
         inspect.return_value = MockSaInspector()
-        get_column_names = mocker.patch(
-            "tests.datasource.fluent.conftest.MockSaInspector.get_columns"
-        )
+        get_column_names = mocker.patch("tests.test_utils.MockSaInspector.get_columns")
         get_column_names.return_value = [{"name": "my_col"}]
-        has_table = mocker.patch(
-            "tests.datasource.fluent.conftest.MockSaInspector.has_table"
-        )
+        has_table = mocker.patch("tests.test_utils.MockSaInspector.has_table")
         has_table.return_value = True
 
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
@@ -865,13 +857,9 @@ def test_test_connection_failures(
     mocker.patch("tests.datasource.fluent.conftest.MockSaEngine.connect")
     inspect = mocker.patch("sqlalchemy.inspect")
     inspect.return_value = MockSaInspector()
-    get_schema_names = mocker.patch(
-        "tests.datasource.fluent.conftest.MockSaInspector.get_schema_names"
-    )
+    get_schema_names = mocker.patch("tests.test_utils.MockSaInspector.get_schema_names")
     get_schema_names.return_value = ["good_schema"]
-    has_table = mocker.patch(
-        "tests.datasource.fluent.conftest.MockSaInspector.has_table"
-    )
+    has_table = mocker.patch("tests.test_utils.MockSaInspector.has_table")
     has_table.return_value = False
 
     with pytest.raises(TestConnectionError):

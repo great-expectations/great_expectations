@@ -2169,47 +2169,39 @@ def add_dataframe_to_db(
 ) -> None:
     """Write records stored in a DataFrame to a SQL database.
 
-    Wrapper for `to_sql()` method in pandas. It is used to suppress warnings that come from implicit auto-commits.
-    This is part of the effort for allowing GX to be compatible with SqlAlchemy 2.0
-    - [add link for the warning]
+    Wrapper for `to_sql()` method in Pandas. Created as part of the effort to allow GX to be compatible
+    with SqlAlchemy 2, and is used to suppress warnings that arise from implicit auto-commits.
 
-    It will eventually go away once we migrate to Pandas 1.4.0.
+    The need for this function will eventually go away once we migrate to Pandas 1.4.0.
 
     Args:
-        name (str): name of SQL Table
-        con (sqlalchemy engine or connection): sqlalchemy.engine.(Engine or Connection) or sqlite3.Connection
-            Using SQLAlchemy makes it possible to use any DB supported by that
-            library.
-        schema (str, optional): Specify the schema (if database flavor supports this). If None, use
+        name (str): name of SQL Table.
+        con (sqlalchemy engine or connection): sqlalchemy.engine or sqlite3.Connection
+        schema (str | None): Specify the schema (if database flavor supports this). If None, use
             default schema. Defaults to None.
-        if_exists (str, optional):{'fail', 'replace', 'append'}, default 'fail'
-            How to behave if the table already exists.
-
+        if_exists (str | None): Can be either 'fail', 'replace', or 'append'. Defaults to `fail`.
             * fail: Raise a ValueError.
             * replace: Drop the table before inserting new values.
             * append: Insert new values to the existing table.
-        index (bool, optional): Write DataFrame index as a column. Uses `index_label` as the column
+        index (bool): Write DataFrame index as a column. Uses `index_label` as the column
             name in the table. Defaults to True.
-        index_label (str, optional): str or sequence, default None
+        index_label (str | None):
             Column label for index column(s). If None is given (default) and
             `index` is True, then the index names are used.
-            A sequence should be given if the DataFrame uses MultiIndex.
-        chunksize (int | None, optional): int, optional
+        chunksize (int | None):
             Specify the number of rows in each batch to be written at a time.
             By default, all rows will be written at once.
-        dtype (dict | int | float | bool | None, optional): dict or scalar, optional
+        dtype (dict | int | float | bool | None):
             Specifying the datatype for columns. If a dictionary is used, the
             keys should be the column names and the values should be the
             SQLAlchemy types or strings for the sqlite3 legacy mode. If a
             scalar is provided, it will be applied to all columns.
-        method (str | Callable | None, optional):  {None, 'multi', callable}, optional
+        method (str | Callable | None):
             Controls the SQL insertion clause used:
-
-            * None : Uses standard SQL ``INSERT`` clause (one per row).
-            * 'multi': Pass multiple values in a single ``INSERT`` clause.
-            * callable with signature ``(pd_table, conn, keys, data_iter)``.
+                * None : Uses standard SQL ``INSERT`` clause (one per row).
+                * 'multi': Pass multiple values in a single ``INSERT`` clause.
+                * callable with signature ``(pd_table, conn, keys, data_iter)``.
     """
-
     if isinstance(con, sa.engine.Engine):
         con = con.connect()
     with warnings.catch_warnings():
@@ -2217,9 +2209,13 @@ def add_dataframe_to_db(
         df.to_sql(
             name=name,
             con=con,
-            index=False,
+            schema=schema,
+            if_exists=if_exists,  # type: ignore
+            index=True,
+            index_label=index_label,
+            chunksize=chunksize,
             dtype=dtype,
-            if_exists="replace",
+            method=method,  # type: ignore
         )
 
 

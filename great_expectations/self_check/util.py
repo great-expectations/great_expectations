@@ -1241,39 +1241,6 @@ def get_test_validator_with_data(  # noqa: C901 - 31
         raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
 
 
-def _get_test_validator_with_data_sqlalchemy(
-    df: pd.DataFrame,
-    execution_engine: str,
-    schemas: dict | None,
-    caching: bool,
-    table_name: str | None,
-    sqlite_db_path: str | None,
-    extra_debug_info: str,
-    debug_logger: logging.Logger | None,
-    context: AbstractDataContext | None,
-    pk_column: bool,
-) -> Validator | None:
-    if not create_engine:
-        return None
-
-    if table_name is None:
-        table_name = generate_test_table_name().lower()
-
-    return build_sa_validator_with_data(
-        df=df,
-        sa_engine_name=execution_engine,
-        schemas=schemas,
-        caching=caching,
-        table_name=table_name,
-        sqlite_db_path=sqlite_db_path,
-        extra_debug_info=extra_debug_info,
-        debug_logger=debug_logger,
-        batch_definition=None,
-        context=context,
-        pk_column=pk_column,
-    )
-
-
 def _get_test_validator_with_data_pandas(
     df: pd.DataFrame,
     schemas: dict | None,
@@ -1324,6 +1291,39 @@ def _get_test_validator_with_data_pandas(
 
     return build_pandas_validator_with_data(
         df=df, batch_definition=batch_definition, context=context
+    )
+
+
+def _get_test_validator_with_data_sqlalchemy(
+    df: pd.DataFrame,
+    execution_engine: str,
+    schemas: dict | None,
+    caching: bool,
+    table_name: str | None,
+    sqlite_db_path: str | None,
+    extra_debug_info: str,
+    debug_logger: logging.Logger | None,
+    context: AbstractDataContext | None,
+    pk_column: bool,
+) -> Validator | None:
+    if not create_engine:
+        return None
+
+    if table_name is None:
+        table_name = generate_test_table_name().lower()
+
+    return build_sa_validator_with_data(
+        df=df,
+        sa_engine_name=execution_engine,
+        schemas=schemas,
+        caching=caching,
+        table_name=table_name,
+        sqlite_db_path=sqlite_db_path,
+        extra_debug_info=extra_debug_info,
+        debug_logger=debug_logger,
+        batch_definition=None,
+        context=context,
+        pk_column=pk_column,
     )
 
 

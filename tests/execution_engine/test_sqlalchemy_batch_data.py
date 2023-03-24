@@ -2,8 +2,6 @@ from unittest.mock import Mock
 
 import pytest
 
-from contextlib import contextmanager
-
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
@@ -17,6 +15,8 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from tests.test_utils import get_sqlite_temp_table_names
+
+from tests.test_utils import MockSaEngine, Dialect
 
 
 def test_instantiation_with_table_name(sqlite_view_engine):
@@ -153,39 +153,6 @@ def test_instantiation_with_unknown_dialect(sqlite_view_engine):
     )
 
     assert batch_data.dialect == GXSqlDialect.OTHER
-
-
-class Dialect:
-    def __init__(self, dialect: str):
-        self.name = dialect
-
-
-class _MockConnection:
-    def __init__(self, dialect: Dialect, statement=None):
-        self.dialect = dialect
-        self.statement = statement
-
-    @contextmanager
-    def begin(self):
-        yield _MockConnection(self.dialect)
-
-    def execute(self, statement):
-        self.statement = statement
-        return
-
-
-class MockSaEngine:
-    def __init__(self, dialect: Dialect):
-        self.dialect = dialect
-
-    @contextmanager
-    def begin(self):
-        yield _MockConnection(self.dialect)
-
-    @contextmanager
-    def connect(self):
-        """A contextmanager that yields a _MockConnection"""
-        yield _MockConnection(self.dialect)
 
 
 @pytest.mark.unit
