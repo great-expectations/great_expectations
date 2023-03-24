@@ -126,6 +126,15 @@ class StoreBackend(metaclass=ABCMeta):
         self._validate_value(value)
         # Allow the implementing setter to return something (e.g. a path used for its key)
         try:
+            print(
+                f"\n[ALEX_TEST] [StoreBackend.set()] KEY:\n{key} ; TYPE: {str(type(key))}"
+            )
+            print(
+                f"\n[ALEX_TEST] [StoreBackend.set()] VALUE:\n{value} ; TYPE: {str(type(value))}"
+            )
+            print(
+                f"\n[ALEX_TEST] [StoreBackend.set()] KWARGS:\n{kwargs} ; TYPE: {str(type(kwargs))}"
+            )
             return self._set(key, value, **kwargs)
         except ValueError as e:
             logger.debug(str(e))

@@ -141,6 +141,9 @@ class DatabaseStoreBackend(StoreBackend):
         }
         self._config.update(kwargs)
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
+        print(
+            f"\n[ALEX_TEST] [DatabaseStoreBackend.__init__()] SELF._CONFIG:\n{self._config} ; TYPE: {str(type(self._config))}"
+        )
 
     @property
     def store_backend_id(self) -> str:
@@ -158,6 +161,9 @@ class DatabaseStoreBackend(StoreBackend):
                 else str(uuid.uuid4())
             )
             self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIX}{store_id}"
+        print(
+            f"\n[ALEX_TEST] [DatabaseStoreBackend.store_backend_id-property] SELF._STORE_BACKEND_ID:\n{self._store_backend_id} ; TYPE: {str(type(self._store_backend_id))}"
+        )
         return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
     def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
@@ -256,8 +262,20 @@ class DatabaseStoreBackend(StoreBackend):
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
     def _set(self, key, value, allow_update=True, **kwargs) -> None:
+        print(
+            f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] KEY:\n{key} ; TYPE: {str(type(key))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] VALUE:\n{value} ; TYPE: {str(type(value))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] KWARGS:\n{kwargs} ; TYPE: {str(type(kwargs))}"
+        )
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
         cols["value"] = value
+        print(
+            f"\n[ALEX_TEST] [DatabaseStoreBackend._set()] FULL-COLS:\n{cols} ; TYPE: {str(type(cols))}"
+        )
 
         if allow_update:
             if self.has_key(key):  # noqa: W601
