@@ -28,7 +28,7 @@ from great_expectations.self_check.util import (
     connection_manager,
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.util import is_library_loadable
+from great_expectations.util import is_library_loadable, add_dataframe_to_db
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
@@ -158,7 +158,8 @@ def get_sqlalchemy_runtime_validator_postgresql(
         table_name = "test_data_" + "".join(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
-    df.to_sql(
+    add_dataframe_to_db(
+        df=df,
         name=table_name,
         con=engine,
         index=False,
