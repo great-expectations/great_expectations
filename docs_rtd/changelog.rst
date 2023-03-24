@@ -4,6 +4,10 @@
 Changelog
 #########
 
+0.16.3
+-----------------
+* [BUGFIX] Fix LegacyRow import. ([#7446](https://github.com/great-expectations/great_expectations/pull/7446))
+
 0.16.2
 -----------------
 * [FEATURE] Develop PandasDBFSDatasource (as part of Fluent Datasources) ([#7372](https://github.com/great-expectations/great_expectations/pull/7372))
