@@ -47,6 +47,7 @@ from great_expectations.core.util import (
 from great_expectations.dataset import PandasDataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
     MetricProviderError,
@@ -66,7 +67,6 @@ from great_expectations.self_check.sqlalchemy_connection_manager import (
     connection_manager,
 )
 from great_expectations.util import (
-    add_dataframe_to_db,
     build_in_memory_runtime_context,
     import_library_module,
 )

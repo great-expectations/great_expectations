@@ -31,7 +31,9 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
 )
 from great_expectations.self_check.util import build_sa_engine
-from great_expectations.util import get_sqlalchemy_domain_data, add_dataframe_to_db
+from great_expectations.util import get_sqlalchemy_domain_data
+from great_expectations.df_to_database_loader import add_dataframe_to_db
+
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator

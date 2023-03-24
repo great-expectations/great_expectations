@@ -78,6 +78,7 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
@@ -95,7 +96,6 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import (
-    add_dataframe_to_db,
     build_in_memory_runtime_context,
     get_context,
     is_library_loadable,
