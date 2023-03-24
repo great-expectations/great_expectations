@@ -11,6 +11,7 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.dataset import SqlAlchemyDataset
 from great_expectations.datasource import SqlAlchemyDatasource
+from great_expectations.util import add_dataframe_to_db
 from great_expectations.validator.validator import BridgeValidator
 
 try:
@@ -189,8 +190,10 @@ def test_sqlalchemy_source_limit(sqlitedb_engine, empty_data_context):
         df2 = pd.DataFrame(
             {"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]}
         )
-        df1.to_sql(name="table_1", con=connection, index=True)
-        df2.to_sql(name="table_2", con=connection, index=True, schema="main")
+        add_dataframe_to_db(df=df1, name="table_1", con=connection, index=True)
+        add_dataframe_to_db(
+            df=df2, name="table_2", con=connection, index=True, schema="main"
+        )
         datasource = SqlAlchemyDatasource("SqlAlchemy", engine=sqlitedb_engine)
         limited_batch = datasource.get_batch(
             {"table": "table_1", "limit": 1, "offset": 2}
