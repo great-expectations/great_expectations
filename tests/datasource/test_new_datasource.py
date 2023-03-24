@@ -6,6 +6,8 @@ from typing import Any, Dict, List, Optional, Union
 import pandas as pd
 import pytest
 
+from great_expectations.util import is_candidate_subset_of_target
+
 try:
     pyspark = pytest.importorskip("pyspark")
     from pyspark.sql.types import Row
@@ -100,9 +102,8 @@ execution_engine:
     class_name: SparkDFExecutionEngine
     spark_config:
         spark.master: local[*]
-        spark.executor.memory: 6g
+        spark.executor.memory: 450m
         spark.driver.memory: 6g
-        spark.ui.showConsoleProgress: false
         spark.sql.shuffle.partitions: 2
         spark.default.parallelism: 4
 data_connectors:
@@ -234,7 +235,7 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
     }
 
 
-def test_basic_spark_datasource_self_check_spark_app_name(basic_spark_datasource):
+def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
     """What does this test do and why?
 
     We are testing that the spark application referenced in the datasource
@@ -242,18 +243,26 @@ def test_basic_spark_datasource_self_check_spark_app_name(basic_spark_datasource
     """
     report: dict = basic_spark_datasource.self_check()
 
+    # The structure of this config is dynamic based on PySpark version;
+    # we deem asserting certain key-value pairs sufficient for purposes of this test
+    expected_spark_config: Dict[str, str] = {
+        "spark.app.name": "default_great_expectations_spark_application",
+        "spark.default.parallelism": 4,
+        "spark.driver.memory": "6g",
+        "spark.executor.memory": "450m",
+        "spark.master": "local[*]",
+    }
     actual_spark_config: Dict[str, Any] = report["execution_engine"]["spark_config"]
 
-    # The structure of the spark config is dynamic based on PySpark version;
-    # we deem asserting certain key-value pairs sufficient for purposes of this test
-    expected_spark_app_name = "default_great_expectations_spark_application"
-    assert actual_spark_config["spark.app.name"] == expected_spark_app_name
+    assert is_candidate_subset_of_target(
+        candidate=expected_spark_config, target=actual_spark_config
+    )
 
 
 def test_basic_spark_datasource_self_check(basic_spark_datasource):
     report: dict = basic_spark_datasource.self_check()
 
-    # Remove Spark-specific information so that we can assert against the rest of the payload
+    # Remove Spark-specific information so we can assert against the rest of the payload
     report["execution_engine"].pop("spark_config")
 
     assert report == {
@@ -906,9 +915,8 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
             class_name: SparkDFExecutionEngine
             spark_config:
                 spark.master: local[*]
-                spark.executor.memory: 6g
+                spark.executor.memory: 450m
                 spark.driver.memory: 6g
-                spark.ui.showConsoleProgress: false
                 spark.sql.shuffle.partitions: 2
                 spark.default.parallelism: 4
         data_connectors:
