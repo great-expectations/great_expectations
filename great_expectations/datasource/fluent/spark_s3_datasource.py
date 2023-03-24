@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import logging
-import re
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 
 import pydantic
 from typing_extensions import Literal
@@ -19,16 +18,12 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
-)
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.datasource.fluent.interfaces import (
-        Sorter,
-        SortersDefinition,
+    from great_expectations.datasource.fluent.file_path_data_asset import (
+        _FilePathDataAsset,
     )
 
 
@@ -49,6 +44,9 @@ class SparkS3DatasourceError(SparkDatasourceError):
 
 
 class SparkS3Datasource(_SparkFilePathDatasource):
+    # class attributes
+    data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
+
     # instance attributes
     type: Literal["spark_s3"] = "spark_s3"
 
@@ -100,58 +98,39 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
-    def add_csv_asset(
+    def _build_data_connector(
         self,
-        name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = None,
-        header: bool = False,
-        infer_schema: bool = False,
+        data_asset: _FilePathDataAsset,
         prefix: str = "",
-        delimiter: str = "/",
+        delimiter: str = "/",  # TODO: delimiter conflicts with csv asset args
         max_keys: int = 1000,
-        order_by: Optional[SortersDefinition] = None,
-    ) -> CSVAsset:
-        """Adds a CSV DataAsset to the present "SparkS3Datasource" object.
+        **kwargs,
+    ) -> None:
+        """Builds and attaches the `S3DataConnector` to the asset."""
+        if kwargs:
+            raise TypeError(
+                f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
+            )
 
-        Args:
-            name: The name of the CSV asset
-            batching_regex: regex pattern that matches CSV filenames that is used to label the batches
-            header: boolean (default False) indicating whether or not first line of CSV file is header line
-            infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
-            prefix: S3 prefix
-            delimiter: S3 delimiter
-            max_keys: S3 max_keys (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
-        """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-        asset = CSVAsset(
-            name=name,
-            batching_regex=batching_regex_pattern,
-            header=header,
-            inferSchema=infer_schema,
-            order_by=order_by_sorters,
-        )
-        asset._data_connector = S3DataConnector.build_data_connector(
+        data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
-            data_asset_name=name,
+            data_asset_name=data_asset.name,
             s3_client=self._get_s3_client(),
-            batching_regex=batching_regex_pattern,
+            batching_regex=data_asset.batching_regex,
             bucket=self.bucket,
             prefix=prefix,
             delimiter=delimiter,
             max_keys=max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
-        asset._test_connection_error_message = (
-            S3DataConnector.build_test_connection_error_message(
-                data_asset_name=name,
-                batching_regex=batching_regex_pattern,
+
+        # build a more specific `_test_connection_error_message`
+        data_asset._test_connection_error_message = (
+            self.data_connector_type.build_test_connection_error_message(
+                data_asset_name=data_asset.name,
+                batching_regex=data_asset.batching_regex,
                 bucket=self.bucket,
                 prefix=prefix,
                 delimiter=delimiter,
             )
         )
-        return self._add_asset(asset=asset)
