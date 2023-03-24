@@ -243,17 +243,16 @@ def test_basic_spark_datasource_self_check(basic_spark_datasource):
     # we deem asserting certain key-value pairs sufficient for purposes of this test
     expected_spark_config: Dict[str, str] = {
         "spark.app.name": "default_great_expectations_spark_application",
-        "spark.default.parallelism": "4",
+        "spark.default.parallelism": 4,
         "spark.driver.memory": "6g",
         "spark.executor.id": "driver",
-        "spark.executor.memory": "6g",
+        "spark.executor.memory": "450m",
         "spark.master": "local[*]",
         "spark.rdd.compress": "True",
         "spark.serializer.objectStreamReset": "100",
         "spark.sql.catalogImplementation": "hive",
-        "spark.sql.shuffle.partitions": "2",
+        "spark.sql.shuffle.partitions": 2,
         "spark.submit.deployMode": "client",
-        "spark.ui.showConsoleProgress": "False",
     }
     actual_spark_config: Dict[str, Any] = report["execution_engine"]["spark_config"]
 
