@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import pandas as pd
+import warnings
 from typing import Callable
 
-import warnings
+import pandas as pd
 
 from great_expectations.optional_imports import sqlalchemy
 
