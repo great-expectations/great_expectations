@@ -155,7 +155,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 delimiter=delimiter,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def add_excel_asset(
         self,
@@ -208,7 +208,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 delimiter=delimiter,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def add_json_asset(
         self,
@@ -261,7 +261,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 delimiter=delimiter,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def add_parquet_asset(
         self,
@@ -314,7 +314,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 delimiter=delimiter,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     # attr-defined issue
     # https://github.com/python/mypy/issues/12472
