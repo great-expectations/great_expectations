@@ -60,7 +60,7 @@ class ColumnPairValuesInSet(ColumnPairMapMetricProvider):
 
         if value_pairs_set is None:
             # vacuously true
-            return sa.case([(column_A == column_B, True)], else_=True)
+            return sa.case((column_A == column_B, True), else_=True)
 
         value_pairs_set = [(x, y) for x, y in value_pairs_set]
 
