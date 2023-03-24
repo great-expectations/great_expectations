@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 import logging
-import re
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 
 import pydantic
 from typing_extensions import Literal
 
 from great_expectations.core.util import GCSUrl
-from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent import (
+    _SparkFilePathDatasource,
+)
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,  # noqa: TCH001 # needed at runtime  # noqa: TCH001 # needed at runtime
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
@@ -19,9 +20,6 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
-)
 
 if TYPE_CHECKING:
     from google.cloud.storage.client import Client as GoogleCloudStorageClient
@@ -29,9 +27,8 @@ if TYPE_CHECKING:
         Credentials as GoogleServiceAccountCredentials,
     )
 
-    from great_expectations.datasource.fluent.interfaces import (
-        Sorter,
-        SortersDefinition,
+    from great_expectations.datasource.fluent.file_path_data_asset import (
+        _FilePathDataAsset,
     )
 
 
@@ -53,6 +50,11 @@ class SparkGoogleCloudStorageDatasourceError(SparkDatasourceError):
 
 
 class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
+    # class attributes
+    data_connector_type: ClassVar[
+        Type[GoogleCloudStorageDataConnector]
+    ] = GoogleCloudStorageDataConnector
+
     # instance attributes
     type: Literal["spark_gcs"] = "spark_gcs"
 
@@ -126,58 +128,38 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
-    def add_csv_asset(
+    def _build_data_connector(
         self,
-        name: str,
-        batching_regex: Union[re.Pattern, str],
-        header: bool = False,
-        infer_schema: bool = False,
+        data_asset: _FilePathDataAsset,
         prefix: str = "",
         delimiter: str = "/",
         max_results: int = 1000,
-        order_by: Optional[SortersDefinition] = None,
-    ) -> CSVAsset:
-        """Adds a CSV DataAsset to the present "SparkGoogleCloudStorageDatasource" object.
-
-        Args:
-            name: The name of the CSV asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            header: boolean (default False) indicating whether or not first line of CSV file is header line
-            infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
-            prefix (str): Google Cloud Storage object name prefix
-            delimiter (str): Google Cloud Storage object name delimiter
-            max_results (int): Google Cloud Storage max_results (default is 1000)
-            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
-        """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-        asset = CSVAsset(
-            name=name,
-            batching_regex=batching_regex_pattern,
-            header=header,
-            inferSchema=infer_schema,
-            order_by=order_by_sorters,
-        )
-        asset._data_connector = GoogleCloudStorageDataConnector.build_data_connector(
+        **kwargs,
+    ) -> None:
+        """Builds and attaches the `GoogleCloudStorageDataConnector` to the asset."""
+        if kwargs:
+            raise TypeError(
+                f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
+            )
+        data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
-            data_asset_name=name,
+            data_asset_name=data_asset.name,
             gcs_client=self._get_gcs_client(),
-            batching_regex=batching_regex_pattern,
+            batching_regex=data_asset.batching_regex,
             bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
             max_results=max_results,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
-        asset._test_connection_error_message = (
-            GoogleCloudStorageDataConnector.build_test_connection_error_message(
-                data_asset_name=name,
-                batching_regex=batching_regex_pattern,
+
+        # build a more specific `_test_connection_error_message`
+        data_asset._test_connection_error_message = (
+            self.data_connector_type.build_test_connection_error_message(
+                data_asset_name=data_asset.name,
+                batching_regex=data_asset.batching_regex,
                 bucket_or_name=self.bucket_or_name,
                 prefix=prefix,
                 delimiter=delimiter,
             )
         )
-        return self._add_asset(asset=asset)
