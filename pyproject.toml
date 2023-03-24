@@ -28,6 +28,18 @@ python_version = "3.7"
 plugins = ["pydantic.mypy"]
 files = [
     "great_expectations",
+    # source files that have a corresponding stub must be added manually otherwise mypy
+    # will only check the `.pyi` stub file
+    "great_expectations/datasource/fluent/pandas_file_path_datasource.py",
+    "great_expectations/datasource/fluent/pandas_google_cloud_storage_datasource.py",
+    "great_expectations/datasource/fluent/pandas_azure_blob_storage_datasource.py",
+    "great_expectations/datasource/fluent/pandas_filesystem_datasource.py",
+    "great_expectations/datasource/fluent/pandas_s3_datasource.py",
+    "great_expectations/datasource/fluent/sources.py",
+    "great_expectations/datasource/fluent/spark_dbfs_datasource.py",
+    "great_expectations/datasource/fluent/pandas_dbfs_datasource.py",
+    "great_expectations/datasource/fluent/pandas_datasource.py",
+    # test modules
     "tests/datasource/fluent",
     # "contrib" # ignore entire `contrib` package
     ]
