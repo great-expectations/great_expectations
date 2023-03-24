@@ -300,9 +300,4 @@ class SqlAlchemyBatchData(BatchData):
                 with connection.begin():
                     connection.execute(sa.text(stmt))
 
-        return str(
-            stmt.compile(
-                dialect=dialect,
-                compile_kwargs={"literal_binds": True},
-            )
-        )
+        return str(stmt)
