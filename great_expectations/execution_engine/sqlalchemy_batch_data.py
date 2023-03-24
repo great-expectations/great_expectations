@@ -213,7 +213,6 @@ class SqlAlchemyBatchData(BatchData):
 
         dialect: GXSqlDialect = self.dialect
 
-        # breakpoint()
         # dialects that support temp schemas
         if temp_table_schema_name is not None and dialect in [
             GXSqlDialect.BIGQUERY,
