@@ -67,12 +67,11 @@ validator.expectation_suite = result.get_expectation_suite(
 def test_suite_help_output(caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
-    result: Result = runner.invoke(cli, ["--v3-api", "suite"], catch_exceptions=False)
+    result: Result = runner.invoke(cli, ["suite"], catch_exceptions=False)
     assert result.exit_code == 0
     stdout: str = result.stdout
     assert (
-        """
-Usage: great_expectations suite [OPTIONS] COMMAND [ARGS]...
+        """Usage: great_expectations suite [OPTIONS] COMMAND [ARGS]...
 
   Expectation Suite operations
 
@@ -108,7 +107,7 @@ def test_suite_demo_deprecation_message(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite demo",
+        "suite demo",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -175,7 +174,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite new",
+        "suite new",
         input="\n",
         catch_exceptions=False,
     )
@@ -290,7 +289,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_custom_runs_notebook
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite new",
+        "suite new",
         input=f"1\n{expectation_suite_name}\n",
         catch_exceptions=False,
     )
@@ -405,7 +404,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_open
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --expectation-suite {expectation_suite_name}",
+        f"suite new --expectation-suite {expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -518,7 +517,7 @@ def test_suite_new_non_interactive_with_suite_name_arg_custom_runs_notebook_no_j
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite new --expectation-suite {expectation_suite_name} --no-jupyter",
+        f"suite new --expectation-suite {expectation_suite_name} --no-jupyter",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -629,7 +628,7 @@ def test_suite_new_interactive_nonexistent_batch_request_json_file_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+        f"""suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
 nonexistent_file.json --no-jupyter
 """,
         catch_exceptions=False,
@@ -713,7 +712,7 @@ def test_suite_new_interactive_malformed_batch_request_json_file_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+        f"""suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
 {batch_request_file_path} --no-jupyter
 """,
         catch_exceptions=False,
@@ -805,7 +804,7 @@ def test_suite_new_interactive_valid_batch_request_from_json_file_in_notebook_ru
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
+        f"""suite new --expectation-suite {expectation_suite_name} --interactive --batch-request
 {batch_request_file_path} --no-jupyter
 """,
         catch_exceptions=False,
@@ -945,7 +944,7 @@ def test_suite_edit_without_suite_name_raises_error(
 
     runner: CliRunner = CliRunner(mix_stderr=False)
     # noinspection PyTypeChecker
-    result: Result = runner.invoke(cli, "--v3-api suite edit", catch_exceptions=False)
+    result: Result = runner.invoke(cli, "suite edit", catch_exceptions=False)
     assert result.exit_code == 2
 
     assert (
@@ -999,7 +998,7 @@ def test_suite_edit_datasource_and_batch_request_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit {expectation_suite_name} --datasource-name some_datasource_name --batch-request some_file.json --interactive",
+        f"suite edit {expectation_suite_name} --datasource-name some_datasource_name --batch-request some_file.json --interactive",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1071,7 +1070,7 @@ def test_suite_edit_with_non_existent_suite_name_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite edit not_a_real_suite",
+        "suite edit not_a_real_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1152,7 +1151,7 @@ def test_suite_edit_with_non_existent_datasource_shows_helpful_error_message(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite edit {expectation_suite_name} --interactive --datasource-name not_real",
+        f"suite edit {expectation_suite_name} --interactive --datasource-name not_real",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1270,7 +1269,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1308,7 +1306,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_without_citatio
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1525,7 +1522,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1562,7 +1558,6 @@ def test_suite_edit_multiple_datasources_with_no_additional_args_with_citations_
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -1762,7 +1757,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -1803,7 +1797,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -2019,7 +2012,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -2056,7 +2048,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
     result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "edit",
             f"{expectation_suite_name}",
@@ -2237,7 +2228,7 @@ def test_suite_edit_interactive_batch_request_without_datasource_json_file_raise
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"""--v3-api suite edit {expectation_suite_name} --interactive --batch-request
+        f"""suite edit {expectation_suite_name} --interactive --batch-request
 {batch_request_file_path} --no-jupyter
 """,
         catch_exceptions=False,
@@ -2305,7 +2296,7 @@ def test_suite_list_with_zero_suites(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
 
@@ -2371,7 +2362,7 @@ def test_suite_list_with_one_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2442,7 +2433,7 @@ def test_suite_list_with_multiple_suites(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2497,7 +2488,7 @@ def test_suite_delete_with_zero_suites(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite delete not_a_suite",
+        "suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2562,7 +2553,7 @@ def test_suite_delete_with_non_existent_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api suite delete not_a_suite",
+        "suite delete not_a_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2637,7 +2628,7 @@ def test_suite_delete_with_one_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        f"suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         input="\n",
         catch_exceptions=False,
     )
@@ -2718,7 +2709,7 @@ def test_suite_delete_canceled_with_one_suite(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        f"suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         input="n\n",
         catch_exceptions=False,
     )
@@ -2792,7 +2783,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --assume-yes suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
+        f"--assume-yes suite delete {expectation_suite_dir_name}.{expectation_suite_name}",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2842,7 +2833,7 @@ def test_suite_delete_with_one_suite_assume_yes_flag(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        "--v3-api suite list",
+        "suite list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2881,7 +2872,6 @@ def test_suite_new_profile_on_context_with_no_datasource_raises_error(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--interactive",
@@ -2981,7 +2971,6 @@ def test_suite_new_profile_on_existing_suite_raises_error(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3085,7 +3074,6 @@ def test_suite_new_profile_runs_notebook_no_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3315,7 +3303,6 @@ def test_suite_new_profile_runs_notebook_opens_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3541,7 +3528,6 @@ def test_suite_new_profile_with_named_arg_runs_notebook_no_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
@@ -3673,7 +3659,6 @@ def test_suite_new_profile_with_named_arg_runs_notebook_opens_jupyter(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "suite",
             "new",
             "--expectation-suite",
