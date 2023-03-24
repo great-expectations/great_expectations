@@ -66,9 +66,7 @@ def add_dataframe_to_db(
     if isinstance(con, sqlalchemy.engine.Engine):
         con = con.connect()
     with warnings.catch_warnings():
-        warnings.filterwarnings(
-            action="ignore", category=RemovedIn20Warning, module="sqlalchemy"
-        )
+        warnings.filterwarnings(action="ignore", category=RemovedIn20Warning)
         df.to_sql(
             name=name,
             con=con,
