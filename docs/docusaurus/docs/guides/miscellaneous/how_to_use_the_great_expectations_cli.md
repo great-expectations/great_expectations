@@ -53,7 +53,6 @@ You can further explore available options and commands with the `--help` flag, f
 
 ```bash
 $ great_expectations datasource --help
-Using v3 (Batch Request) API
 Usage: great_expectations datasource [OPTIONS] COMMAND [ARGS]...
 
   Datasource operations
