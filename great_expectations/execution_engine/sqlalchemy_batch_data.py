@@ -290,14 +290,22 @@ class SqlAlchemyBatchData(BatchData):
             with self._engine.connect() as connection:
                 with connection.begin():
                     try:
-                        connection.execute(sa.text(stmt_1))
-                        stmt = stmt_1
+                        stmt = sa.text(stmt_1)
+                        connection.execute(stmt)
                     except DatabaseError:
-                        connection.execute(sa.text(stmt_2))
-                        stmt = stmt_2
+                        stmt = sa.text(stmt_2)
+                        connection.execute(stmt)
         else:
             with self._engine.connect() as connection:
                 with connection.begin():
-                    connection.execute(sa.text(stmt))
+                    stmt = sa.text(stmt)
+                    connection.execute(stmt)
 
-        return str(stmt)
+        return str(
+            stmt.compile(
+                # dialect=self._engine.dialect,
+                compile_kwargs={"literal_binds": True},
+            )
+        )
+
+    # return str(stmt)

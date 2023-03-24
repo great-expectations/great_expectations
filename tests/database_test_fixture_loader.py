@@ -7,6 +7,14 @@ import pandas as pd
 
 from great_expectations.optional_imports import sqlalchemy
 
+try:
+    import sqlalchemy as sa
+    from sqlalchemy.exc import RemovedIn20Warning
+
+except ImportError:
+    sa = None
+    RemovedIn20Warning = None
+
 
 def add_dataframe_to_db(
     df: pd.DataFrame,
@@ -59,7 +67,7 @@ def add_dataframe_to_db(
         con = con.connect()
     with warnings.catch_warnings():
         warnings.filterwarnings(
-            action="ignore", category=DeprecationWarning, module="sqlalchemy"
+            action="ignore", category=RemovedIn20Warning, module="sqlalchemy"
         )
         df.to_sql(
             name=name,
