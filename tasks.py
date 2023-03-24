@@ -227,6 +227,7 @@ def type_check(
     clear_cache: bool = False,
     report: bool = False,
     ci: bool = False,
+    check_source_files: bool = True,
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -262,6 +263,16 @@ def type_check(
         bin = "mypy"
 
     ge_pkgs = [f"great_expectations.{p}" for p in packages]
+
+    if check_source_files:
+
+        for stub_file in GX_ROOT_DIR.glob("**/*.pyi"):
+            source_file = stub_file.with_name(  # TODO:py3.9 .with_stem()
+                f"{stub_file.name[:-1]}"
+            )
+            relative_path = source_file.relative_to(GX_ROOT_DIR.parent)
+            ge_pkgs.append(str(relative_path))
+
     cmds = [
         bin,
         *ge_pkgs,
