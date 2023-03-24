@@ -95,7 +95,6 @@ from great_expectations.self_check.util import (
     get_dataset,
 )
 from great_expectations.util import (
-    add_dataframe_to_db,
     build_in_memory_runtime_context,
     get_context,
     is_library_loadable,
@@ -105,6 +104,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
     RANDOM_SEED,
     RANDOM_STATE,
 )
+from tests.database_test_fixture_loader import add_dataframe_to_db
 
 if TYPE_CHECKING:
     import pyspark.sql
