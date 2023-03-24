@@ -18,7 +18,7 @@ from great_expectations.cli.datasource import (
 #     monkeypatch.chdir(os.path.dirname(context.root_directory))
 #     result = runner.invoke(
 #         cli,
-#         "--v3-api datasource new",
+#         "datasource new",
 #         catch_exceptions=False,
 #         input="2\n4\n1\n",
 #     )
