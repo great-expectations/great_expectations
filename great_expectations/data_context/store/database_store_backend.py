@@ -162,9 +162,10 @@ class DatabaseStoreBackend(StoreBackend):
                 else str(uuid.uuid4())
             )
             self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIX}{store_id}"
-        print(
-            f"\n[ALEX_TEST] [DatabaseStoreBackend.store_backend_id-property] SELF._STORE_BACKEND_ID:\n{self._store_backend_id} ; TYPE: {str(type(self._store_backend_id))}"
-        )
+        if self.store_name == "metric_store":
+            print(
+                f"\n[ALEX_TEST] [DatabaseStoreBackend.store_backend_id-property] SELF._STORE_BACKEND_ID:\n{self._store_backend_id} ; TYPE: {str(type(self._store_backend_id))}"
+            )
         return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
     def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
