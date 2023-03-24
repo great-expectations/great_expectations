@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
 
 import pytest
 from pytest import MonkeyPatch
+from typing_extensions import Final
 
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
@@ -20,6 +21,9 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+
+EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
+PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 
 logger = logging.getLogger(__name__)
 
@@ -148,3 +152,14 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     tmp_gx_dir = gx_yml.parent.absolute()
     logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
     return tmp_gx_dir
+
+
+@pytest.fixture(scope="session")
+def fluent_gx_config_yml() -> pathlib.Path:
+    assert PG_CONFIG_YAML_FILE.exists()
+    return PG_CONFIG_YAML_FILE
+
+
+@pytest.fixture(scope="session")
+def fluent_gx_config_yml_str(fluent_gx_config_yml: pathlib.Path) -> str:
+    return fluent_gx_config_yml.read_text()
