@@ -3,7 +3,6 @@ from __future__ import annotations
 import dataclasses
 import functools
 import logging
-import re
 import uuid
 from pprint import pformat as pf
 from typing import (
@@ -30,9 +29,6 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
-from great_expectations.datasource.fluent.constants import (
-    MATCH_ALL_PATTERN,
-)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -513,21 +509,6 @@ class Datasource(
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
-
-    @staticmethod
-    def parse_batching_regex_string(
-        batching_regex: Optional[Union[re.Pattern, str]] = None
-    ) -> re.Pattern:
-        pattern: re.Pattern
-        if not batching_regex:
-            pattern = MATCH_ALL_PATTERN
-        elif isinstance(batching_regex, str):
-            pattern = re.compile(batching_regex)
-        elif isinstance(batching_regex, re.Pattern):
-            pattern = batching_regex
-        else:
-            raise ValueError('"batching_regex" must be either re.Pattern, str, or None')
-        return pattern
 
     # Abstract Methods
     @property

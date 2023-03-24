@@ -168,7 +168,7 @@ def test_sql_query_data_asset(empty_data_context):
                     "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
                 )
             ),
-            None,
+            r".*",
             False,
             id="default regex",
         ),
@@ -177,7 +177,7 @@ def test_sql_query_data_asset(empty_data_context):
 def test_filesystem_data_asset_batching_regex(
     filesystem_datasource: PandasFilesystemDatasource | SparkFilesystemDatasource,
     base_directory: pathlib.Path,
-    batching_regex: str | None,
+    batching_regex: str,
     raises_test_connection_error: bool,
 ):
     filesystem_datasource.base_directory = base_directory
