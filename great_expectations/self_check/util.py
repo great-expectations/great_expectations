@@ -66,11 +66,11 @@ from great_expectations.self_check.sqlalchemy_connection_manager import (
     connection_manager,
 )
 from great_expectations.util import (
+    add_dataframe_to_db,
     build_in_memory_runtime_context,
     import_library_module,
 )
 from great_expectations.validator.validator import Validator
-from tests.database_test_fixture_loader import add_dataframe_to_db
 
 if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
