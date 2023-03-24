@@ -5,21 +5,20 @@ import json
 import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING, List, Optional
-from uuid import UUID
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__ as ge_version
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.batch import BatchDefinition, BatchMarkers
+from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa: TCH001
 from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
-from great_expectations.core.id_dict import BatchSpec
-from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations.core.util import (
     convert_to_json_serializable,
     ensure_json_serializable,
@@ -124,7 +123,7 @@ class ExpectationValidationResult(SerializableDictDot):
         #         return NotImplemented
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
+            return other == self
         try:
             if self.result and other.result:
                 common_keys = set(self.result.keys()) & other.result.keys()
@@ -433,15 +432,73 @@ class ExpectationSuiteValidationResultMeta(TypedDict):
     validation_time: str
 
 
+@public_api
 class ExpectationSuiteValidationResult(SerializableDictDot):
+    """The result of a batch of data validated against an Expectation Suite.
+
+    When a Checkpoint is run, it produces an instance of this class. The primary property
+    of this class is `results`, which contains the individual ExpectationValidationResult
+    instances which were produced by the Checkpoint run.
+
+    ExpectationSuiteValidationResult.success will be True if all Expectations passed, otherwise it will be False.
+
+    ExpectationSuiteValidationResult.statistics contains information about the Checkpoint run.:
+
+    ```python
+    {
+        "evaluated_expectations": 14,
+        "success_percent": 71.42857142857143,
+        "successful_expectations": 10,
+        "unsuccessful_expectations": 4
+    }
+    ```
+
+    The meta property is an instance of ExpectationSuiteValidationResultMeta, and
+    contains information identifying the resources used during the Checkpoint run.:
+
+    ```python
+    {
+        "active_batch_definition": {
+          "batch_identifiers": {},
+          "data_asset_name": "taxi_data_1.csv",
+          "data_connector_name": "default_inferred_data_connector_name",
+          "datasource_name": "pandas"
+        },
+        "batch_markers": {
+          "ge_load_time": "20220727T154327.630107Z",
+          "pandas_data_fingerprint": "c4f929e6d4fab001fedc9e075bf4b612"
+        },
+        "batch_spec": {
+          "path": "/Users/username/work/gx_example_projects/great_expectations/../data/taxi_data_1.csv"
+        },
+        "checkpoint_name": "single_validation_checkpoint",
+        "expectation_suite_name": "taxi_suite_1",
+        "great_expectations_version": "0.15.15",
+        "run_id": {
+          "run_name": "20220727-114327-my-run-name-template",
+          "run_time": "2022-07-27T11:43:27.625252+00:00"
+        },
+        "validation_time": "20220727T154327.701100Z"
+    }
+    ```
+
+    Args:
+        success: Boolean indicating the success or failure of this collection of results, or None.
+        results: List of ExpectationValidationResults, or None.
+        evaluation_parameters: Dict of Evaluation Parameters used to produce these results, or None.
+        statistics: Dict of values describing the results.
+        meta: Instance of ExpectationSuiteValidationResult, a Dict of meta values, or None.
+
+    """
+
     def __init__(
         self,
         success: Optional[bool] = None,
         results: Optional[list] = None,
         evaluation_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
-        meta: Optional[ExpectationSuiteValidationResultMeta | dict] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        meta: Optional[ExpectationSuiteValidationResult | dict] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> None:
         self.success = success
         if results is None:
@@ -593,9 +650,20 @@ class ExpectationSuiteValidationResultSchema(Schema):
             )
         return data
 
+    def _convert_uuids_to_str(self, data):
+        """
+        Utilize UUID for data validation but convert to string before usage in business logic
+        """
+        attr = "ge_cloud_id"
+        uuid_val = data.get(attr)
+        if uuid_val:
+            data[attr] = str(uuid_val)
+        return data
+
     # noinspection PyUnusedLocal
     @post_load
     def make_expectation_suite_validation_result(self, data, **kwargs):
+        data = self._convert_uuids_to_str(data=data)
         return ExpectationSuiteValidationResult(**data)
 
 

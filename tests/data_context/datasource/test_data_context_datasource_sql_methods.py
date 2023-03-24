@@ -143,7 +143,7 @@ def test_get_validator_bad_batch_request(
     context: "DataContext" = (
         data_context_with_simple_sql_datasource_for_testing_get_batch
     )
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
     batch_request: BatchRequest = BatchRequest(
         datasource_name="my_sqlite_db",
         data_connector_name="daily",
@@ -160,7 +160,7 @@ def test_get_validator_bad_batch_request(
 
 def test_get_validator(data_context_with_simple_sql_datasource_for_testing_get_batch):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
-    context.create_expectation_suite("my_expectations")
+    context.add_expectation_suite("my_expectations")
 
     # Successful specification using a typed BatchRequest
     context.get_validator(
@@ -292,7 +292,7 @@ def test_get_validator_expectation_suite_options(
     data_context_with_simple_sql_datasource_for_testing_get_batch,
 ):
     context = data_context_with_simple_sql_datasource_for_testing_get_batch
-    context.create_expectation_suite("some_expectations")
+    context.add_expectation_suite("some_expectations")
 
     # Successful specification with an existing expectation_suite_name
     context.get_validator(
@@ -314,7 +314,7 @@ def test_get_validator_expectation_suite_options(
     )
 
     # Successful specification with a fresh ExpectationSuite object
-    some_more_expectations = context.create_expectation_suite(
+    some_more_expectations = context.add_expectation_suite(
         expectation_suite_name="some_more_expectations"
     )
     context.get_validator(

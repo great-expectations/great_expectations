@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 from great_expectations.core.usage_statistics.anonymizers.base import BaseAnonymizer
-from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.store import Store  # noqa: TCH001
 
 
 class StoreAnonymizer(BaseAnonymizer):

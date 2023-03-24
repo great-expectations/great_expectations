@@ -77,8 +77,6 @@ from great_expectations.exceptions import (
 )
 from great_expectations.execution_engine import (
     ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.registry import (
@@ -122,9 +120,10 @@ from great_expectations.self_check.util import (
     generate_expectation_tests,
 )
 from great_expectations.util import camel_to_snake, is_parseable_date
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import ValidationDependencies, Validator
+from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -134,8 +133,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-_TEST_DEFS_DIR = os.path.join(
-    os.path.dirname(__file__),
+_TEST_DEFS_DIR = os.path.join(  # noqa: PTH118
+    os.path.dirname(__file__),  # noqa: PTH120
     "..",
     "..",
     "tests",
@@ -143,7 +142,20 @@ _TEST_DEFS_DIR = os.path.join(
 )
 
 
+@public_api
 def render_evaluation_parameter_string(render_func) -> Callable:
+    """Decorator for Expectation classes that renders evaluation parameters as strings.
+
+    allows Expectations that use Evaluation Parameters to render the values
+    of the Evaluation Parameters along with the rest of the output.
+
+    Args:
+        render_func: The render method of the Expectation class.
+
+    Raises:
+        GreatExpectationsError: If runtime_configuration with evaluation_parameters is not provided.
+    """
+
     def inner_func(
         *args: Tuple[MetaExpectation], **kwargs: dict
     ) -> Union[List[RenderedStringTemplateContent], RenderedAtomicContent]:
@@ -178,7 +190,7 @@ def render_evaluation_parameter_string(render_func) -> Callable:
                             app_params["eval_param"] = key
                             app_params["eval_param_value"] = val
                             rendered_content = RenderedStringTemplateContent(
-                                **{
+                                **{  # type: ignore[arg-type]
                                     "content_block_type": "string_template",
                                     "string_template": {
                                         "template": app_template_str,
@@ -532,7 +544,7 @@ class Expectation(metaclass=MetaExpectation):
         )
         return [
             RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "styling": {"parent": {"classes": ["alert", "alert-warning"]}},
                     "string_template": {
@@ -624,7 +636,7 @@ class Expectation(metaclass=MetaExpectation):
         assert result, "Must provide a result object."
         if result.exception_info["raised_exception"]:
             return RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
@@ -647,7 +659,7 @@ class Expectation(metaclass=MetaExpectation):
 
         if result.success:
             return RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
@@ -674,7 +686,7 @@ class Expectation(metaclass=MetaExpectation):
             )
         else:
             return RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": "$icon",
@@ -714,7 +726,7 @@ class Expectation(metaclass=MetaExpectation):
                 expectation_type = None
 
             exception_message = RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": exception_message_template_str,
@@ -739,11 +751,11 @@ class Expectation(metaclass=MetaExpectation):
             )
 
             exception_traceback_collapse = CollapseContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "collapse_toggle_link": "Show exception traceback...",
                     "collapse": [
                         RenderedStringTemplateContent(
-                            **{
+                            **{  # type: ignore[arg-type]
                                 "content_block_type": "string_template",
                                 "string_template": {
                                     "template": result.exception_info[
@@ -779,7 +791,7 @@ class Expectation(metaclass=MetaExpectation):
 
             return [
                 RenderedStringTemplateContent(
-                    **{
+                    **{  # type: ignore[arg-type]
                         "content_block_type": "string_template",
                         "string_template": {
                             "template": template_str,
@@ -867,7 +879,7 @@ class Expectation(metaclass=MetaExpectation):
                         sampled_values_set.add(string_unexpected_value)
 
         unexpected_table_content_block = RenderedTableContent(
-            **{
+            **{  # type: ignore[arg-type]
                 "content_block_type": "table",
                 "table": table_rows,
                 "header_row": header_row,
@@ -882,11 +894,11 @@ class Expectation(metaclass=MetaExpectation):
             if not isinstance(query, str):
                 query = str(query)
             query_info = CollapseContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "collapse_toggle_link": "To retrieve all unexpected values...",
                     "collapse": [
                         RenderedStringTemplateContent(
-                            **{
+                            **{  # type: ignore[arg-type]
                                 "content_block_type": "string_template",
                                 "string_template": {
                                     "template": query,
@@ -1115,9 +1127,16 @@ class Expectation(metaclass=MetaExpectation):
             )
         return domain_kwargs
 
+    @public_api
     def get_success_kwargs(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> Dict[str, Any]:
+        """Retrieve the success kwargs.
+
+        Args:
+            configuration: The `ExpectationConfiguration` that contains the kwargs. If no configuration arg is provided,
+                the success kwargs from the configuration attribute of the Expectation instance will be returned.
+        """
         if not configuration:
             configuration = self.configuration
 
@@ -1201,6 +1220,7 @@ class Expectation(metaclass=MetaExpectation):
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
 
+    @public_api
     def validate(
         self,
         validator: Validator,
@@ -1210,6 +1230,21 @@ class Expectation(metaclass=MetaExpectation):
         data_context: Optional[AbstractDataContext] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> ExpectationValidationResult:
+        """Validates the expectation against the provided data.
+
+        Args:
+            validator: A Validator object that can be used to create Expectations, validate Expectations,
+                and get Metrics for Expectations.
+            configuration: Defines the parameters and name of a specific expectation.
+            evaluation_parameters: Dictionary of dynamic values used during Validation of an Expectation.
+            interactive_evaluation: Setting the interactive_evaluation flag on a DataAsset
+                make it possible to declare expectations and store expectations without
+                immediately evaluating them.
+            data_context: An instance of a GX DataContext.
+            runtime_configuration: The runtime configuration for the Expectation.
+        Returns:
+            An ExpectationValidationResult object
+        """
         if not configuration:
             configuration = deepcopy(self.configuration)
 
@@ -1240,6 +1275,7 @@ class Expectation(metaclass=MetaExpectation):
             )
         return self._configuration
 
+    @public_api
     def run_diagnostics(
         self,
         raise_exceptions_for_backends: bool = False,
@@ -1269,6 +1305,18 @@ class Expectation(metaclass=MetaExpectation):
         If errors are encountered in the process of running the diagnostics, they are assumed to be due to
         incompleteness of the Expectation's implementation (e.g., declaring a dependency on Metrics
         that do not exist). These errors are added under "errors" key in the report.
+
+        Args:
+            raise_exceptions_for_backends: Bool object that when True will raise an Exception if a backend fails to connect.
+            ignore_suppress:  Bool object that when True will ignore the suppress_test_for list on Expectation sample tests.
+            ignore_only_for:  Bool object that when True will ignore the only_for list on Expectation sample tests.
+            for_gallery:  Bool object that when True will create empty arrays to use as examples for the Expectation Diagnostics.
+            debug_logger (optional[logging.Logger]):  Logger object to use for sending debug messages to.
+            only_consider_these_backends (optional[List[str]])  List of backends to consider.
+            context (optional[AbstractDataContext]): Instance of any child of "AbstractDataContext" class.
+
+        Returns:
+            An Expectation Diagnostics report object
         """
 
         if debug_logger is not None:
@@ -1445,6 +1493,7 @@ class Expectation(metaclass=MetaExpectation):
                 UserWarning,
             )
 
+    @public_api
     def print_diagnostic_checklist(
         self,
         diagnostics: Optional[ExpectationDiagnostics] = None,
@@ -1454,6 +1503,10 @@ class Expectation(metaclass=MetaExpectation):
 
         This output from this method is a thin wrapper for ExpectationDiagnostics.generate_checklist()
         This method is experimental.
+
+        Args:
+            diagnostics (optional[ExpectationDiagnostics]): If diagnostics are not provided, diagnostics will be ran on self.
+            show_failed_tests (bool): If true, failing tests will be printed.
         """
 
         if diagnostics is None:
@@ -1463,7 +1516,6 @@ class Expectation(metaclass=MetaExpectation):
             for test in diagnostics.tests:
                 if test.test_passed is False:
                     print(f"=== {test.test_title} ({test.backend}) ===\n")
-                    print(test.stack_trace)  # type: ignore[attr-defined]
                     print(f"{80 * '='}\n")
 
         checklist: str = diagnostics.generate_checklist()
@@ -1475,7 +1527,9 @@ class Expectation(metaclass=MetaExpectation):
         """Only meant to be called by self._get_examples"""
         results = []
         found = glob.glob(
-            os.path.join(_TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"),
+            os.path.join(  # noqa: PTH118
+                _TEST_DEFS_DIR, "**", f"{self.expectation_type}.json"
+            ),
             recursive=True,
         )
         if found:
@@ -2153,8 +2207,6 @@ class Expectation(metaclass=MetaExpectation):
                 backend_test_result_counts
             )
         )
-        experimental_checks.append(ExpectationDiagnostics._check_linting(self))
-
         beta_checks.append(
             ExpectationDiagnostics._check_input_validation(self, examples)
         )
@@ -2252,20 +2304,14 @@ class TableExpectation(Expectation, ABC):
             return True
 
         # Validating that Minimum and Maximum values are of the proper format and type
-        min_val = None
-        max_val = None
-
-        if "min_value" in configuration.kwargs:
-            min_val = configuration.kwargs["min_value"]
-
-        if "max_value" in configuration.kwargs:
-            max_val = configuration.kwargs["max_value"]
+        min_val = configuration.kwargs.get("min_value")
+        max_val = configuration.kwargs.get("max_value")
 
         try:
             assert (
                 min_val is None
                 or is_parseable_date(min_val)
-                or isinstance(min_val, (float, int, dict))
+                or isinstance(min_val, (float, int, dict, datetime.datetime))
             ), "Provided min threshold must be a datetime (for datetime columns) or number"
             if isinstance(min_val, dict):
                 assert (
@@ -2275,7 +2321,7 @@ class TableExpectation(Expectation, ABC):
             assert (
                 max_val is None
                 or is_parseable_date(max_val)
-                or isinstance(max_val, (float, int, dict))
+                or isinstance(max_val, (float, int, dict, datetime.datetime))
             ), "Provided max threshold must be a datetime (for datetime columns) or number"
             if isinstance(max_val, dict):
                 assert (
@@ -2319,14 +2365,7 @@ class TableExpectation(Expectation, ABC):
         ).get("parse_strings_as_datetimes")
 
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
             if min_value is not None:
                 try:
@@ -2493,7 +2532,30 @@ class QueryExpectation(TableExpectation, ABC):
             warnings.warn(str(e), UserWarning)
 
 
+@public_api
 class ColumnExpectation(TableExpectation, ABC):
+    """Base class for column-type Expectations.
+
+    These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
+    number of unique values, column type, etc.
+
+    --Documentation--
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/
+
+    Args:
+     domain_keys (tuple): A tuple of the keys used to determine the domain of the
+         expectation.
+     success_keys (tuple): A tuple of the keys used to determine the success of
+         the expectation.
+     default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
+         kwargs from the Expectation Configuration.
+
+         - A  "column" key is required for column expectations.
+
+    Raises:
+        InvalidExpectationConfigurationError: If no `column` is specified
+    """
+
     domain_keys = ("batch_id", "table", "column", "row_condition", "condition_parser")
     domain_type = MetricDomainTypes.COLUMN
 
@@ -2691,64 +2753,33 @@ class ColumnMapExpectation(TableExpectation, ABC):
         if result_format_str in ["BASIC"]:
             return validation_dependencies
 
-        # only for SUMMARY and COMPLETE
-        if isinstance(execution_engine, PandasExecutionEngine):
-            metric_kwargs = get_metric_kwargs(
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-            metric_kwargs = get_metric_kwargs(
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-        if isinstance(
-            execution_engine, (SparkDFExecutionEngine, SqlAlchemyExecutionEngine)
-        ):
-            if "unexpected_index_column_names" in validation_dependencies.result_format:
-                metric_kwargs = get_metric_kwargs(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                )
-                validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                    ),
-                )
-                metric_kwargs = get_metric_kwargs(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    configuration=configuration,
-                    runtime_configuration=runtime_configuration,
-                )
-                validation_dependencies.set_metric_configuration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    metric_configuration=MetricConfiguration(
-                        metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                        metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                        metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                    ),
-                )
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
+
         return validation_dependencies
 
     def _validate(
@@ -2983,9 +3014,6 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
             ),
         )
 
-        if result_format_str in ["BASIC", "SUMMARY"]:
-            return validation_dependencies
-
         if include_unexpected_rows:
             metric_kwargs = get_metric_kwargs(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
@@ -3000,36 +3028,35 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
                     metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
                 ),
             )
+        if result_format_str in ["BASIC"]:
+            return validation_dependencies
 
-        if isinstance(execution_engine, PandasExecutionEngine):
-            metric_kwargs = get_metric_kwargs(
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-            metric_kwargs = get_metric_kwargs(
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-        # TODO: Add SQL and Spark to enable ID/PK for ColumnPairMapExpectation
-
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
         return validation_dependencies
 
     def _validate(
@@ -3254,7 +3281,7 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
             ),
         )
 
-        if result_format_str in ["BASIC", "SUMMARY"]:
+        if result_format_str in ["BASIC"]:
             return validation_dependencies
 
         if include_unexpected_rows:
@@ -3272,34 +3299,38 @@ class MulticolumnMapExpectation(TableExpectation, ABC):
                 ),
             )
 
-        if isinstance(execution_engine, PandasExecutionEngine):
-            metric_kwargs = get_metric_kwargs(
+        # ID/PK currently doesn't work for ExpectCompoundColumnsToBeUnique in SQL
+        if self.map_metric == "compound_columns.unique" and isinstance(
+            execution_engine, SqlAlchemyExecutionEngine
+        ):
+            return validation_dependencies
+
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_LIST.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-            metric_kwargs = get_metric_kwargs(
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
+        metric_kwargs = get_metric_kwargs(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            configuration=configuration,
+            runtime_configuration=runtime_configuration,
+        )
+        validation_dependencies.set_metric_configuration(
+            metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
+            metric_configuration=MetricConfiguration(
                 metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                configuration=configuration,
-                runtime_configuration=runtime_configuration,
-            )
-            validation_dependencies.set_metric_configuration(
-                metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                metric_configuration=MetricConfiguration(
-                    metric_name=f"{self.map_metric}.{SummarizationMetricNameSuffixes.UNEXPECTED_INDEX_QUERY.value}",
-                    metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
-                    metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
-                ),
-            )
-            # TODO: Add SQL and Spark to enable ID/PK for MultiColumnMapExpectations
+                metric_domain_kwargs=metric_kwargs["metric_domain_kwargs"],
+                metric_value_kwargs=metric_kwargs["metric_value_kwargs"],
+            ),
+        )
 
         return validation_dependencies
 

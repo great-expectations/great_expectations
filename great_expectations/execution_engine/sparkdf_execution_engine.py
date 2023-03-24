@@ -3,9 +3,20 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
-import warnings
 from functools import reduce
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+    overload,
+)
 
 from dateutil.parser import parse
 
@@ -19,7 +30,9 @@ from great_expectations.core.batch_spec import (
     RuntimeDataBatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_domain_types import (
+    MetricDomainTypes,  # noqa: TCH001
+)
 from great_expectations.core.util import (
     AzureUrl,
     convert_to_json_serializable,
@@ -34,8 +47,8 @@ from great_expectations.exceptions import (
 from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.execution_engine.execution_engine import (
-    MetricComputationConfiguration,
-    SplitDomainKwargs,
+    MetricComputationConfiguration,  # noqa: TCH001
+    SplitDomainKwargs,  # noqa: TCH001
 )
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.split_and_sample.sparkdf_data_sampler import (
@@ -49,8 +62,10 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_spark,
 )
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 logger = logging.getLogger(__name__)
 
@@ -64,20 +79,22 @@ try:
     from pyspark.sql import DataFrame, Row, SparkSession
     from pyspark.sql.readwriter import DataFrameReader
 except ImportError:
-    pyspark = None
-    SparkContext = None
-    SparkSession = None
-    Row = None
-    DataFrame = None
-    DataFrameReader = None
-    F = None
+    pyspark = None  # type: ignore[assignment]
+    SparkContext = None  # type: ignore[assignment,misc]
+    SparkSession = None  # type: ignore[assignment,misc]
+    Row = None  # type: ignore[assignment,misc]
+    DataFrame = None  # type: ignore[assignment,misc]
+    DataFrameReader = None  # type: ignore[assignment,misc]
+    F = None  # type: ignore[assignment]
     # noinspection SpellCheckingInspection
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
 
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
 
+if TYPE_CHECKING:
+    from pyspark.sql import DataFrame  # noqa: TCH004
 
 # noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):
@@ -195,7 +212,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         *args,
         persist=True,
         spark_config=None,
-        force_reuse_spark_context=False,
+        force_reuse_spark_context=True,
         **kwargs,
     ) -> None:
         self._persist = persist
@@ -240,7 +257,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
-    def load_batch_data(
+    def load_batch_data(  # type: ignore[override]
         self, batch_id: str, batch_data: Union[SparkDFBatchData, DataFrame]
     ) -> None:
         if isinstance(batch_data, DataFrame):
@@ -269,7 +286,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         formats for accessing Azure Blob Storage service.  However, Pandas and Spark execution engines utilize identical
         path formats for accessing all other supported cloud storage services (AWS S3 and Google Cloud Storage).
         Moreover, these formats (encapsulated in S3BatchSpec and GCSBatchSpec) extend PathBatchSpec (common to them).
-        Therefore, at the present time, all cases with the exception of Azure Blob Storage , are handled generically.
+        Therefore, at the present time, all cases with the exception of Azure Blob Storage, are handled generically.
         """
 
         batch_data: Any
@@ -335,10 +352,10 @@ illegal.  Please check your config."""
             elif isinstance(schema, str):
                 raise gx_exceptions.ExecutionEngineError(
                     """
-                                Spark schema was not properly serialized.
-                                Please run the .jsonValue() method on the schema object before loading into GX.
-                                schema: your_schema.jsonValue()
-                                """
+                    Spark schema was not properly serialized.
+                    Please run the .jsonValue() method on the schema object before loading into GX.
+                    schema: your_schema.jsonValue()
+                    """
                 )
             # noinspection PyUnresolvedReferences
             try:
@@ -346,6 +363,7 @@ illegal.  Please check your config."""
                     reader = self.spark.read.schema(schema).options(**reader_options)
                 else:
                     reader = self.spark.read.options(**reader_options)
+
                 reader_fn = self._get_reader_fn(
                     reader=reader,
                     reader_method=reader_method,
@@ -429,7 +447,19 @@ illegal.  Please check your config."""
             f"Unable to determine reader method from path: {path}"
         )
 
-    def _get_reader_fn(self, reader, reader_method=None, path=None):
+    @overload
+    def _get_reader_fn(
+        self, reader, reader_method: str = ..., path: Optional[str] = ...
+    ) -> Callable:
+        ...
+
+    @overload
+    def _get_reader_fn(
+        self, reader, reader_method: None = ..., path: str = ...
+    ) -> Callable:
+        ...
+
+    def _get_reader_fn(self, reader, reader_method=None, path=None) -> Callable:
         """Static helper for providing reader_fn
 
         Args:
@@ -545,19 +575,9 @@ illegal.  Please check your config."""
                 )
                 data = data.filter(~ignore_condition)
             else:
-                if ignore_row_if not in ["neither", "never"]:
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
-
-                if ignore_row_if == "never":
-                    # deprecated-v0.13.29
-                    warnings.warn(
-                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use \
-"neither" moving forward.
-""",
-                        DeprecationWarning,
                     )
 
             return data

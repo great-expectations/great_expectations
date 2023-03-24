@@ -42,19 +42,23 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
     engine = sa.create_engine(url)
 
     schema_check_results = engine.execute(
-        "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
+        sa.text(
+            "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
+        )
     ).fetchall()
     if len(schema_check_results) == 0:
-        engine.execute("CREATE SCHEMA connection_test;")
+        engine.execute(sa.text("CREATE SCHEMA connection_test;"))
 
     table_check_results = engine.execute(
-        """
+        sa.text(
+            """
 SELECT EXISTS (
    SELECT FROM information_schema.tables
    WHERE  table_schema = 'connection_test'
    AND    table_name   = 'test_df'
 );
 """
+        )
     ).fetchall()
     if table_check_results != [(True,)]:
         test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
@@ -1529,3 +1533,40 @@ data_connectors:
         ]
         == f"${variable}"
     )
+
+
+@pytest.mark.integration
+def test_test_yaml_config_on_datasources_persists_object_id(
+    empty_data_context_stats_enabled,
+):
+    context = empty_data_context_stats_enabled
+
+    name = "test_datasource"
+    id = "6f48a6be-5fc1-4205-80a9-2061059e125a"
+
+    # Set up datasource cache with object with id
+    context.add_datasource(
+        name=name, id=id, execution_engine={"class_name": "PandasExecutionEngine"}
+    )
+
+    assert name in context.datasources
+    assert context.datasources[name].id == id
+
+    datasource_yaml = f"""
+    name: {name}
+    class_name: Datasource
+    execution_engine:
+        class_name: PandasExecutionEngine
+    data_connectors:
+        runtime:
+            class_name: RuntimeDataConnector
+            assets:
+                demo:
+                    class_name: Asset
+                    batch_identifiers:
+                        - load_id
+    """
+
+    datasource = context.test_yaml_config(datasource_yaml)
+
+    assert datasource.id == id

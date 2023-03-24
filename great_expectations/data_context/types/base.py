@@ -6,6 +6,7 @@ import enum
 import itertools
 import json
 import logging
+import tempfile
 import uuid
 import warnings
 from typing import (
@@ -22,7 +23,6 @@ from typing import (
     TypeVar,
     Union,
 )
-from uuid import UUID
 
 from marshmallow import (
     INCLUDE,
@@ -41,8 +41,8 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues
-from great_expectations.core._docs_decorators import public_api
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
 from great_expectations.core.run_identifier import RunIdentifier
@@ -54,7 +54,7 @@ from great_expectations.util import deep_filter_properties_iterable
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None
+    StructType = None  # type: ignore[assignment,misc]
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -150,7 +150,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile: Union[str, "TextIOWrapper"]) -> None:
+    def to_yaml(self, outfile: Union[str, TextIOWrapper]) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -1628,7 +1628,7 @@ class DataContextConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
-    xdatasources = fields.Dict(
+    fluent_datasources = fields.Dict(
         required=False,
         allow_none=True,
         load_only=True,
@@ -1665,7 +1665,7 @@ class DataContextConfigSchema(Schema):
         "concurrency",  # 0.13.33
         "progress_bars",  # 0.13.49
         "include_rendered_content",  # 0.15.19,
-        "xdatasources",
+        "fluent_datasources",
     ]
 
     # noinspection PyUnusedLocal
@@ -1775,6 +1775,8 @@ will appear repeatedly until your configuration is updated.)
 
 class DataContextConfigDefaults(enum.Enum):
     DEFAULT_CONFIG_VERSION = CURRENT_GX_CONFIG_VERSION
+    UNCOMMITTED = "uncommitted"
+
     DEFAULT_EXPECTATIONS_STORE_NAME = "expectations_store"
     EXPECTATIONS_BASE_DIRECTORY = "expectations"
     DEFAULT_EXPECTATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
@@ -1783,12 +1785,19 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_VALIDATIONS_STORE_NAME = "validations_store"
     VALIDATIONS_BASE_DIRECTORY = "validations"
     DEFAULT_VALIDATIONS_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
-        f"uncommitted/{VALIDATIONS_BASE_DIRECTORY}/"
+        f"{UNCOMMITTED}/{VALIDATIONS_BASE_DIRECTORY}/"
     )
     DEFAULT_EVALUATION_PARAMETER_STORE_NAME = "evaluation_parameter_store"
     DEFAULT_EVALUATION_PARAMETER_STORE_BASE_DIRECTORY_RELATIVE_NAME = (
         "evaluation_parameters/"
     )
+    DATA_DOCS_BASE_DIRECTORY = "data_docs"
+    DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME = (
+        f"{UNCOMMITTED}/{DATA_DOCS_BASE_DIRECTORY}"
+    )
+
+    # Datasource
+    DEFAULT_DATASOURCE_STORE_NAME = "datasource_store"
 
     # Checkpoints
     DEFAULT_CHECKPOINT_STORE_NAME = "checkpoint_store"
@@ -1803,7 +1812,7 @@ class DataContextConfigDefaults(enum.Enum):
     DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME = f"{PROFILERS_BASE_DIRECTORY}/"
 
     DEFAULT_DATA_DOCS_SITE_NAME = "local_site"
-    DEFAULT_CONFIG_VARIABLES_FILEPATH = "uncommitted/config_variables.yml"
+    DEFAULT_CONFIG_VARIABLES_FILEPATH = f"{UNCOMMITTED}/config_variables.yml"
     PLUGINS_BASE_DIRECTORY = "plugins"
     DEFAULT_PLUGINS_DIRECTORY = f"{PLUGINS_BASE_DIRECTORY}/"
     DEFAULT_VALIDATION_OPERATORS = {
@@ -1866,7 +1875,7 @@ class DataContextConfigDefaults(enum.Enum):
             "show_how_to_buttons": True,
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": "uncommitted/data_docs/local_site/",
+                "base_directory": f"{DEFAULT_DATA_DOCS_BASE_DIRECTORY_RELATIVE_NAME}/local_site/",
             },
             "site_index_builder": {
                 "class_name": "DefaultSiteIndexBuilder",
@@ -2080,6 +2089,7 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
 
     def __init__(
         self,
+        init_temp_docs_sites: bool = False,
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -2113,7 +2123,15 @@ class InMemoryStoreBackendDefaults(BaseStoreBackendDefaults):
                 },
             },
         }
-        self.data_docs_sites = {}
+        if init_temp_docs_sites:
+            temp_dir = tempfile.TemporaryDirectory()
+            path = temp_dir.name
+            logger.info(f"Created temporary directory '{path}' for ephemeral docs site")
+            self.data_docs_sites[  # type: ignore[index]
+                DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value
+            ]["store_backend"]["base_directory"] = path
+        else:
+            self.data_docs_sites = {}
 
 
 class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
@@ -2340,7 +2358,51 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
         }
 
 
+@public_api
+@deprecated_argument(argument_name="validation_operators", version="0.14.0")
 class DataContextConfig(BaseYamlConfig):
+    """Config class for DataContext.
+
+    The DataContextConfig holds all associated configuration parameters to build a Data Context. There are defaults set
+    for minimizing configuration in typical cases, but every parameter is configurable and all defaults are overridable.
+
+    In cases where the DataContext is instantitated without a yml file, the DataContextConfig can be instantiated directly.
+
+    --Documentation--
+        - https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file/
+
+    Args:
+        config_version (Optional[float]): config version of this DataContext.
+        datasources (Optional[Union[Dict[str, DatasourceConfig], Dict[str, Dict[str, Union[Dict[str, str], str, dict]]]]):
+            DatasourceConfig or Dict containing configurations for Datasources associated with DataContext.
+        fluent_datasources (Optional[dict]): temporary placeholder for Experimental Datasources.
+        expectations_store_name (Optional[str]): name of ExpectationStore to be used by DataContext.
+        validations_store_name (Optional[str]): name of ValidationsStore to be used by DataContext.
+        evaluation_parameter_store_name (Optional[str]): name of EvaluationParamterStore to be used by DataContext.
+        checkpoint_store_name (Optional[str]): name of CheckpointStore to be used by DataContext.
+        profiler_store_name (Optional[str]): name of ProfilerStore to be used by DataContext.
+        plugins_directory (Optional[str]): the directory in which custom plugin modules should be placed.
+        validation_operators: list of validation operators configured by this DataContext.
+        stores (Optional[dict]): single holder for all Stores associated with this DataContext.
+        data_docs_sites (Optional[dict]): DataDocs sites associated with DataContext.
+        notebooks (Optional[NotebookConfig]): Configurations for Jupyter Notebooks associated with DataContext, such as
+            the `suite_edit` Notebook.
+        config_variables_file_path (Optional[str]): path for config_variables file, if used.
+        anonymous_usage_statistics (Optional[AnonymizedUsageStatisticsConfig]): configuration for enabling or disabling
+            anonymous usage statistics for GX.
+        store_backend_defaults (Optional[BaseStoreBackendDefaults]):  define base defaults for platform specific StoreBackendDefaults.
+            For example, if you plan to store expectations, validations, and data_docs in s3 use the S3StoreBackendDefaults
+            and you may be able to specify fewer parameters.
+        commented_map (Optional[CommentedMap]): the CommentedMap associated with DataContext configuration. Used when
+            instantiating with yml file.
+        concurrency (Optional[Union[ConcurrencyConfig, Dict]]): if enabled, Checkpoints associated with the DataContext
+            can run validations in parallel with multithreading.
+        progress_bars (Optional[ProgressBarsConfig]): allows progress_bars to be enabled or disabled globally, for
+            profilers, or metrics calculations.
+        include_rendered_content (Optional[IncludedRenderedContentConfig]): allows rendered content to be configured
+            globally, at the ExpectationSuite or ExpectationValidationResults-level.
+    """
+
     # TODO: <Alex>ALEX (does not work yet)</Alex>
     # _config_schema_class = DataContextConfigSchema
 
@@ -2353,7 +2415,7 @@ class DataContextConfig(BaseYamlConfig):
                 Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
             ]
         ] = None,
-        xdatasources: Optional[dict] = None,
+        fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
@@ -2372,9 +2434,6 @@ class DataContextConfig(BaseYamlConfig):
         progress_bars: Optional[ProgressBarsConfig] = None,
         include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
     ) -> None:
-        if xdatasources:
-            logger.warning("`xdatasources` are an experimental feature")
-
         # Set defaults
         if config_version is None:
             config_version = DataContextConfigDefaults.DEFAULT_CONFIG_VERSION.value
@@ -2752,13 +2811,13 @@ class CheckpointConfig(BaseYamlConfig):
         validation_operator_name: Optional[str] = None,
         batches: Optional[List[dict]] = None,
         commented_map: Optional[CommentedMap] = None,
-        ge_cloud_id: Optional[Union[UUID, str]] = None,
+        ge_cloud_id: Optional[str] = None,
         # the following four args are used by SimpleCheckpoint
         site_names: Optional[Union[list, str]] = None,
         slack_webhook: Optional[str] = None,
         notify_on: Optional[str] = None,
         notify_with: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[Union[UUID, str]] = None,
+        expectation_suite_ge_cloud_id: Optional[str] = None,
     ) -> None:
         self._name = name
         self._config_version = config_version
@@ -2818,19 +2877,19 @@ class CheckpointConfig(BaseYamlConfig):
         self._batches = value  # type: ignore[has-type]
 
     @property
-    def ge_cloud_id(self) -> Optional[Union[UUID, str]]:
+    def ge_cloud_id(self) -> Optional[str]:
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
-    def ge_cloud_id(self, value: Union[UUID, str]) -> None:
+    def ge_cloud_id(self, value: str) -> None:
         self._ge_cloud_id = value
 
     @property
-    def expectation_suite_ge_cloud_id(self) -> Optional[Union[UUID, str]]:
+    def expectation_suite_ge_cloud_id(self) -> Optional[str]:
         return self._expectation_suite_ge_cloud_id
 
     @expectation_suite_ge_cloud_id.setter
-    def expectation_suite_ge_cloud_id(self, value: Union[UUID, str]) -> None:
+    def expectation_suite_ge_cloud_id(self, value: str) -> None:
         self._expectation_suite_ge_cloud_id = value
 
     @property
@@ -3044,7 +3103,7 @@ class CheckpointConfig(BaseYamlConfig):
     # noinspection PyUnusedLocal,PyUnresolvedReferences
     @staticmethod
     def resolve_config_using_acceptable_arguments(
-        checkpoint: "Checkpoint",  # noqa: F821
+        checkpoint: Checkpoint,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
@@ -3074,12 +3133,13 @@ class CheckpointConfig(BaseYamlConfig):
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
 
-        run_time = run_time or datetime.datetime.now()
+        run_time = run_time or datetime.datetime.now(tz=datetime.timezone.utc)
         runtime_configuration = runtime_configuration or {}
 
         from great_expectations.checkpoint.util import (
             get_substituted_validation_dict,
             get_validations_with_batch_request_as_dict,
+            validate_validation_dict,
         )
 
         batch_request = get_batch_request_as_dict(batch_request=batch_request)
@@ -3111,7 +3171,7 @@ class CheckpointConfig(BaseYamlConfig):
         batch_request = substituted_runtime_config.get("batch_request")
         if len(validations) == 0 and not batch_request:
             raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{checkpoint.name}" must contain either a batch_request or validations.'
+                f'Checkpoint "{checkpoint.name}" configuration must contain either a batch_request or validations.'
             )
 
         if run_name is None and run_name_template is not None:
@@ -3126,6 +3186,10 @@ class CheckpointConfig(BaseYamlConfig):
             substituted_validation_dict: dict = get_substituted_validation_dict(
                 substituted_runtime_config=substituted_runtime_config,
                 validation_dict=validation_dict,
+            )
+            validate_validation_dict(
+                validation_dict=substituted_validation_dict,
+                batch_request_required=False,
             )
             validation_batch_request: BatchRequestBase = substituted_validation_dict.get(  # type: ignore[assignment]
                 "batch_request"

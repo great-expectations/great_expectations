@@ -40,7 +40,7 @@
       },
       "out":{
         "success":false,
-        "unexpected_index_list": [2],
+        "unexpected_index_list": [{"s2": "collected", "pk_index": 2}],
         "unexpected_list": ["collected"]
       }
     },{
@@ -53,7 +53,7 @@
       },
       "out":{
         "success":false,
-        "unexpected_index_list": [0, 1],
+        "unexpected_index_list": [{"s2": "cool", "pk_index": 0}, {"s2": "calm", "pk_index": 1}],
         "unexpected_list": ["cool", "calm"]
       }
     },{
@@ -92,7 +92,7 @@
       },
       "out":{
         "success":false,
-        "unexpected_index_list": [0, 1, 2, 3, 4],
+        "unexpected_index_list": [{"s1": "smart", "pk_index": 0}, {"s1": "silly", "pk_index": 1}, {"s1": "sassy", "pk_index": 2}, {"s1": "slimy", "pk_index": 3}, {"s1": "sexy", "pk_index": 4}],
         "unexpected_list": ["smart","silly","sassy","slimy","sexy"]
       }
     },{
@@ -189,7 +189,7 @@
       },
       "out" : {
         "success":false,
-        "unexpected_index_list": [3],
+        "unexpected_index_list": [{"s1": "slimy", "pk_index": 3}],
         "unexpected_list": ["slimy"]
       }
     }, {

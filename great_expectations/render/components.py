@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, List, Optional, Union
 from marshmallow import Schema, fields, post_dump, post_load
 from typing_extensions import Final
 
-from great_expectations.alias_types import JSONValues
+from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.render.exceptions import InvalidRenderedContentError
 from great_expectations.types import DictDot
@@ -279,17 +279,38 @@ class RenderedGraphContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedTableContent(RenderedComponentContent):
+    """RenderedTableContent is RenderedComponentContent that is a table.
+
+    Args:
+        table: The table to be rendered.
+        header: The header for this content block.
+        subheader: The subheader for this content block.
+        header_row: The header row for the table.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+        table_options: The options that can be set for the table.
+
+            search: A boolean indicating whether to include search with the table.
+
+            icon-size: The size of the icons in the table. One of "sm", "md", or "lg".
+        header_row_options: The options that can be set for the header_row. A dictionary with the keys being the column
+            name and the values being a dictionary with the following form:
+
+            sortable: A boolean indicating whether the column is sortable.
+    """
+
     def __init__(
         self,
-        table,
-        header=None,
-        subheader=None,
-        header_row=None,
-        styling=None,
-        content_block_type="table",
-        table_options=None,
-        header_row_options=None,
+        table: list[RenderedContent],
+        header: Optional[Union[RenderedContent, dict]] = None,
+        subheader: Optional[Union[RenderedContent, dict]] = None,
+        header_row: Optional[list[RenderedContent]] = None,
+        styling: Optional[dict] = None,
+        content_block_type: str = "table",
+        table_options: Optional[dict] = None,
+        header_row_options: Optional[dict] = None,
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
@@ -454,9 +475,27 @@ class RenderedMarkdownContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class RenderedStringTemplateContent(RenderedComponentContent):
+    """RenderedStringTemplateContent is RenderedComponentContent that represents a templated string.
+
+    Args:
+        string_template: A dictionary containing:
+
+            template: The string to perform substitution on. Variables are denoted with a preceeding $.
+
+            params: A dictionary with keys that match variable names and values which will be substituted.
+
+            styling: A dictionary containing styling information.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+    """
+
     def __init__(
-        self, string_template, styling=None, content_block_type="string_template"
+        self,
+        string_template: dict,
+        styling: Optional[dict] = None,
+        content_block_type: str = "string_template",
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.string_template = string_template
@@ -588,16 +627,29 @@ class TextContent(RenderedComponentContent):
         return d
 
 
+@public_api
 class CollapseContent(RenderedComponentContent):
+    """CollapseContent is RenderedComponentContent that can be collapsed.
+
+    Args:
+        collapse: The content to be collapsed. If a list is provided, it can recursively contain RenderedContent.
+        collpase_toggle_link: The toggle link for this CollapseContent.
+        header: The header for this content block.
+        subheader: The subheader for this content block.
+        styling: A dictionary containing styling information.
+        content_block_type: The type of content block.
+        inline_link: Whether to include a link inline.
+    """
+
     def __init__(
         self,
-        collapse,
-        collapse_toggle_link=None,
-        header=None,
-        subheader=None,
-        styling=None,
-        content_block_type="collapse",
-        inline_link=False,
+        collapse: Union[RenderedContent, list],
+        collapse_toggle_link: Optional[Union[RenderedContent, dict]] = None,
+        header: Optional[Union[RenderedContent, dict]] = None,
+        subheader: Optional[Union[RenderedContent, dict]] = None,
+        styling: Optional[dict] = None,
+        content_block_type: str = "collapse",
+        inline_link: bool = False,
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.collapse_toggle_link = collapse_toggle_link
@@ -757,19 +809,25 @@ class RenderedAtomicValue(DictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
+    def to_json_dict(self, remove_null_attrs: bool = True) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this RenderedAtomicValue.
 
         Returns:
             A JSON-serializable dict representation of this RenderedAtomicValue.
         """
-        d = renderedAtomicValueSchema.dump(self)
-        json_dict: dict = {}
-        for key in d:
+        json_dict = super().to_dict()
+        if remove_null_attrs:
+            json_dict = RenderedAtomicValueSchema.remove_null_attrs(data=json_dict)
+        for key in json_dict:
+            value = getattr(self, key)
             if key == "graph":
-                json_dict[key] = getattr(self, key).to_json_dict()
-            else:
-                json_dict[key] = getattr(self, key)
+                json_dict[key] = value.to_json_dict()
+            elif key == "params":
+                for param_name, param in value.items():
+                    if not isinstance(param["schema"]["type"], str):
+                        json_dict[key][param_name]["schema"]["type"] = param["schema"][
+                            "type"
+                        ].value
         return json_dict
 
 
@@ -828,21 +886,27 @@ class RenderedAtomicValueSchema(Schema):
         "meta_notes",
     )
 
-    @post_dump
-    def clean_null_attrs(self, data: dict, **kwargs: dict) -> dict:
-        """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE during serialization if
+    @staticmethod
+    def remove_null_attrs(data: dict) -> dict:
+        """Removes the attributes in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE if
         their values are None."""
-        data = deepcopy(data)
+        cleaned_serialized_dict = deepcopy(data)
         for key in RenderedAtomicValueSchema.REMOVE_KEYS_IF_NONE:
             if (
                 key == "graph"
-                and key in data
-                and data.get(key, {}).get("graph") is None
+                and key in cleaned_serialized_dict
+                and cleaned_serialized_dict.get(key, {}).get("graph") is None
             ):
-                data.pop(key)
-            elif key in data and data[key] is None:
-                data.pop(key)
-        return data
+                cleaned_serialized_dict.pop(key)
+            elif (
+                key in cleaned_serialized_dict and cleaned_serialized_dict[key] is None
+            ):
+                cleaned_serialized_dict.pop(key)
+        return cleaned_serialized_dict
+
+    @post_dump
+    def clean_null_attrs(self, data, **kwargs: dict):
+        return RenderedAtomicValueSchema.remove_null_attrs(data=data)
 
 
 class RenderedAtomicContent(RenderedContent):
@@ -866,7 +930,7 @@ class RenderedAtomicContent(RenderedContent):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
-    def to_json_dict(self) -> dict[str, JSONValues]:
+    def to_json_dict(self, remove_null_attrs: bool = True) -> dict[str, JSONValues]:
         """Returns a JSON-serializable dict representation of this RenderedAtomicContent.
 
         Returns:
@@ -874,7 +938,7 @@ class RenderedAtomicContent(RenderedContent):
         """
         """Returns RenderedAtomicContent as a json dictionary."""
         d = renderedAtomicContentSchema.dump(self)
-        d["value"] = self.value.to_json_dict()
+        d["value"] = self.value.to_json_dict(remove_null_attrs=remove_null_attrs)
         return d
 
 

@@ -21,6 +21,7 @@ from great_expectations.self_check.util import (
     mssqlDialect,
     mysqlDialect,
     postgresqlDialect,
+    snowflakeDialect,
     sqliteDialect,
     trinoDialect,
 )
@@ -30,18 +31,18 @@ from tests.conftest import build_test_backends_list_v3_api
 
 def pytest_generate_tests(metafunc):  # noqa C901 - 35
     # Load all the JSON files in the directory
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     expectation_dirs = [
         dir_
         for dir_ in os.listdir(dir_path)
-        if os.path.isdir(os.path.join(dir_path, dir_))
+        if os.path.isdir(os.path.join(dir_path, dir_))  # noqa: PTH118, PTH112
     ]
     parametrized_tests = []
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
-    for expectation_category in expectation_dirs:
 
+    for expectation_category in expectation_dirs:
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
@@ -125,7 +126,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 validator_with_data.active_batch_data,
                                 SqlAlchemyBatchData,
                             ):
-                                # Call out supported dialects
                                 if "sqlalchemy" in only_for:
                                     generate_test = True
                                 elif (
@@ -152,6 +152,15 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     and isinstance(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
                                         mysqlDialect,
+                                    )
+                                ):
+                                    generate_test = True
+                                elif (
+                                    "snowflake" in only_for
+                                    and snowflakeDialect is not None
+                                    and isinstance(
+                                        validator_with_data.active_batch_data.sql_engine_dialect,
+                                        snowflakeDialect.SnowflakeDialect,
                                     )
                                 ):
                                     generate_test = True
@@ -206,6 +215,9 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 validator_with_data.active_batch_data,
                                 PandasBatchData,
                             ):
+                                # Call out supported dialects
+                                if "pandas_v3_api" in only_for:
+                                    generate_test = True
                                 major, minor, *_ = pd.__version__.split(".")
                                 if "pandas" in only_for:
                                     generate_test = True
@@ -300,6 +312,19 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     )
                                 )
                                 or (
+                                    "snowflake" in suppress_test_for
+                                    and snowflakeDialect is not None
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.active_batch_data,
+                                        SqlAlchemyBatchData,
+                                    )
+                                    and isinstance(
+                                        validator_with_data.active_batch_data.sql_engine_dialect,
+                                        snowflakeDialect.SnowflakeDialect,
+                                    )
+                                )
+                                or (
                                     "bigquery" in suppress_test_for
                                     and BigQueryDialect is not None
                                     and validator_with_data
@@ -346,6 +371,14 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 )
                                 or (
                                     "pandas" in suppress_test_for
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.active_batch_data,
+                                        PandasBatchData,
+                                    )
+                                )
+                                or (
+                                    "pandas_v3_api" in suppress_test_for
                                     and validator_with_data
                                     and isinstance(
                                         validator_with_data.active_batch_data,

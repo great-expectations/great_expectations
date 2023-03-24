@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 import nbformat
 
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_suite import ExpectationSuite  # noqa: TCH001
 from great_expectations.dataset import Dataset
 from great_expectations.render.renderer.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
@@ -50,7 +50,7 @@ context = gx.get_context()
 expectation_suite_name = "{self.suite_name}"
 
 # Wipe the suite clean to prevent unwanted expectations in the batch
-suite = context.create_expectation_suite(expectation_suite_name, overwrite_existing=True)
+suite = context.add_or_update_expectation_suite(expectation_suite_name)
 
 batch_kwargs = {self.batch_kwargs}
 batch = context.get_batch(batch_kwargs, suite)
@@ -79,7 +79,7 @@ Let's save the scaffolded expectation suite as a JSON file in the
             "action_list_operator"
         ):
             code_cell = """\
-context.save_expectation_suite(suite, expectation_suite_name)
+context.update_expectation_suite(expectation_suite=suite)
 
 results = LegacyCheckpoint(
     name="_temp_checkpoint",
@@ -97,7 +97,7 @@ context.build_data_docs()
 context.open_data_docs(validation_result_identifier)"""
         else:
             code_cell = """\
-context.save_expectation_suite(suite, expectation_suite_name)
+context.update_expectation_suite(expectation_suite=suite)
 
 results = LegacyCheckpoint(
     name="_temp_checkpoint",

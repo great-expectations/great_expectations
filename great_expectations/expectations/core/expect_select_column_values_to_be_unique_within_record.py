@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     MulticolumnMapExpectation,
@@ -179,9 +179,9 @@ class ExpectSelectColumnValuesToBeUniqueWithinRecord(MulticolumnMapExpectation):
         )
 
         if params["mostly"] is not None and params["mostly"] < 1.0:
-            params_with_json_schema["mostly_pct"][  # noqa: F821 # FIXME: this breaks
-                "value"
-            ] = num_to_str(params["mostly"] * 100, precision=15, no_scientific=True)
+            params["mostly_pct"]["value"] = num_to_str(
+                params["mostly"] * 100, precision=15, no_scientific=True
+            )
             template_str = "Values must be unique across columns, at least $mostly_pct % of the time: "
         else:
             template_str = "Values must always be unique across columns: "

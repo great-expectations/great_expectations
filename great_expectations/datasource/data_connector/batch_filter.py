@@ -3,7 +3,7 @@ import logging
 from typing import Callable, Dict, List, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition
+from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
 from great_expectations.core.id_dict import IDDict
 from great_expectations.util import is_int
 

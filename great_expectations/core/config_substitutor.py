@@ -6,6 +6,8 @@ from collections import OrderedDict
 from functools import lru_cache
 from typing import Any, Dict, Optional
 
+from typing_extensions import Final
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.types.base import BaseYamlConfig
 
@@ -26,9 +28,13 @@ except ImportError:
 try:
     from google.cloud import secretmanager
 except ImportError:
-    secretmanager = None
+    secretmanager = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
+
+TEMPLATE_STR_REGEX: Final[re.Pattern] = re.compile(
+    r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)"
+)
 
 
 class _ConfigurationSubstitutor:
@@ -125,9 +131,7 @@ class _ConfigurationSubstitutor:
 
         # 1. Make substitutions for non-escaped patterns
         try:
-            match = re.finditer(
-                r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)", template_str
-            )
+            match = re.finditer(TEMPLATE_STR_REGEX, template_str)
         except TypeError:
             # If the value is not a string (e.g., a boolean), we should return it as is
             return template_str

@@ -2,6 +2,7 @@ import random
 import uuid
 from typing import Dict
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.expectation_suite import ExpectationSuiteSchema
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -176,6 +177,22 @@ class ExpectationsStore(Store):
         suite_dict["ge_cloud_id"] = ge_cloud_suite_id
 
         return suite_dict
+
+    def add(self, key, value, **kwargs):
+        try:
+            return super().add(key=key, value=value, **kwargs)
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.ExpectationSuiteError(
+                f"An ExpectationSuite named {value.expectation_suite_name} already exists."
+            )
+
+    def update(self, key, value, **kwargs):
+        try:
+            return super().update(key=key, value=value, **kwargs)
+        except gx_exceptions.StoreBackendError:
+            raise gx_exceptions.ExpectationSuiteError(
+                f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
+            )
 
     def get(self, key) -> ExpectationSuite:
         return super().get(key)  # type: ignore[return-value]

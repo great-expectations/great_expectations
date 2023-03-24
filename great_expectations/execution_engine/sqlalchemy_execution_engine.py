@@ -44,7 +44,8 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.optional_imports import sqlalchemy_version_check
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
 
@@ -81,12 +82,16 @@ from great_expectations.util import (
     import_library_module,
     import_make_url,
 )
-from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
 
 logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+
+    sqlalchemy_version_check(sa.__version__)
 
     make_url = import_make_url()
 except ImportError:
@@ -200,8 +205,14 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
+try:
+    import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
+except ImportError:
+    trino = None
+    trinotypes = None
+
 if TYPE_CHECKING:
-    import sqlalchemy as sa
     from sqlalchemy.engine import Engine as SaEngine
 
 
@@ -244,6 +255,19 @@ def _get_dialect_type_module(dialect):
             and teradatatypes is not None
         ):
             return teradatatypes
+    except (TypeError, AttributeError):
+        pass
+
+    # Trino types module
+    try:
+        if (
+            isinstance(
+                dialect,
+                trino.sqlalchemy.dialect.TrinoDialect,
+            )
+            and trinotypes is not None
+        ):
+            return trinotypes
     except (TypeError, AttributeError):
         pass
 
@@ -375,6 +399,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
             )
+        elif self.dialect_name == GXSqlDialect.TRINO:
+            # WARNING: Trino Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="trino.sqlalchemy.dialect"
+            )
         else:
             self.dialect_module = None
 
@@ -477,7 +506,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self.engine.dialect.name.lower()
 
-    def _build_engine(self, credentials: dict, **kwargs) -> "sa.engine.Engine":
+    def _build_engine(self, credentials: dict, **kwargs) -> sa.engine.Engine:
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -511,7 +540,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str,
         credentials: dict,
-    ) -> Tuple["sa.engine.url.URL", dict]:
+    ) -> Tuple[sa.engine.url.URL, dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -715,19 +744,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             else:
-                if ignore_row_if not in ["neither", "never"]:
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
-
-                if ignore_row_if == "never":
-                    # deprecated-v0.13.29
-                    warnings.warn(
-                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use \
-"neither" moving forward.
-""",
-                        DeprecationWarning,
                     )
 
             return selectable
@@ -1123,14 +1142,14 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return self.engine.execute(split_query).fetchall()
 
     def get_data_for_batch_identifiers(
-        self, table_name: str, splitter_method_name: str, splitter_kwargs: dict
+        self, selectable: Selectable, splitter_method_name: str, splitter_kwargs: dict
     ) -> List[dict]:
         """Build data used to construct batch identifiers for the input table using the provided splitter config.
 
         Sql splitter configurations yield the unique values that comprise a batch by introspecting your data.
 
         Args:
-            table_name: Table to split.
+            selectable: Selectable to split.
             splitter_method_name: Desired splitter method to use.
             splitter_kwargs: Dict of directives used by the splitter method as keyword arguments of key=value.
 
@@ -1139,7 +1158,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self._data_splitter.get_data_for_batch_identifiers(
             execution_engine=self,
-            table_name=table_name,
+            selectable=selectable,
             splitter_method_name=splitter_method_name,
             splitter_kwargs=splitter_kwargs,
         )
@@ -1147,6 +1166,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
     ) -> Union[Selectable, str]:
+        if (
+            batch_spec.get("query") is not None
+            and batch_spec.get("sampling_method") is not None
+        ):
+            raise ValueError(
+                "Sampling is not supported on query data. "
+                "It is currently only supported on table data."
+            )
+
         if "splitter_method" in batch_spec:
             splitter_fn: Callable = self._get_splitter_method(
                 splitter_method_name=batch_spec["splitter_method"]
@@ -1162,7 +1190,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             else:
                 split_clause = sa.true()
 
-        table_name: str = batch_spec["table_name"]
+        selectable: Selectable = self._subselectable(batch_spec)
         sampling_method: Optional[str] = batch_spec.get("sampling_method")
         if sampling_method is not None:
             if sampling_method in [
@@ -1181,9 +1209,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 sampler_fn = self._data_sampler.get_sampler_method(sampling_method)
                 return (
                     sa.select("*")
-                    .select_from(
-                        sa.table(table_name, schema=batch_spec.get("schema_name", None))
-                    )
+                    .select_from(selectable)
                     .where(
                         sa.and_(
                             split_clause,
@@ -1192,13 +1218,23 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
 
-        return (
-            sa.select("*")
-            .select_from(
-                sa.table(table_name, schema=batch_spec.get("schema_name", None))
+        return sa.select("*").select_from(selectable).where(split_clause)
+
+    def _subselectable(self, batch_spec: BatchSpec) -> Selectable:
+        table_name = batch_spec.get("table_name")
+        query = batch_spec.get("query")
+        selectable: Selectable
+        if table_name:
+            selectable = sa.table(
+                table_name, schema=batch_spec.get("schema_name", None)
             )
-            .where(split_clause)
-        )
+        else:
+            if not isinstance(query, str):
+                raise ValueError(f"SQL query should be a str but got {query}")
+            # Query is a valid SELECT query that begins with r"\w+select\w"
+            selectable = sa.select(sa.text(query.lstrip()[6:].lstrip())).subquery()
+
+        return selectable
 
     def get_batch_data_and_markers(
         self, batch_spec: BatchSpec
@@ -1210,6 +1246,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 f"""SqlAlchemyExecutionEngine accepts batch_spec only of type SqlAlchemyDatasourceBatchSpec or
         RuntimeQueryBatchSpec (illegal type "{str(type(batch_spec))}" was received).
                         """
+            )
+        if (
+            sum(
+                1 if x else 0
+                for x in [batch_spec.get("query"), batch_spec.get("table_name")]
+            )
+            != 1
+        ):
+            raise InvalidBatchSpecError(
+                "SqlAlchemyExecutionEngine only accepts a batch_spec where exactly 1 of "
+                "'query' or 'table_name' is specified. "
+                f"table_name={batch_spec.get('table_name')}, query={batch_spec.get('query')}"
             )
 
         batch_data: Optional[SqlAlchemyBatchData] = None

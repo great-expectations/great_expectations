@@ -5,6 +5,7 @@ import datetime
 import decimal
 import logging
 import os
+import pathlib
 import re
 import sys
 import uuid
@@ -32,7 +33,6 @@ from IPython import get_ipython
 from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.alias_types import JSONValues
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -43,12 +43,25 @@ from great_expectations.types.base import SerializableDotDict
 # https://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
 from great_expectations.util import convert_decimal_to_float
 
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
+
+logger = logging.getLogger(__name__)
+
+try:
+    import pyspark
+    from pyspark.sql import SparkSession  # noqa: F401
+except ImportError:
+    pyspark = None  # type: ignore[assignment]
+    SparkSession = None  # type: ignore[assignment,misc]
+    logger.debug(
+        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
+    )
+
 try:
     from pyspark.sql.types import StructType
 except ImportError:
-    StructType = None
-
-logger = logging.getLogger(__name__)
+    StructType = None  # type: ignore[assignment,misc]
 
 
 try:
@@ -59,14 +72,22 @@ except ImportError:
     MultiPolygon = None
     LineString = None
 
-try:
-    import sqlalchemy
-    from sqlalchemy.engine.row import LegacyRow
-except ImportError:
-    sqlalchemy = None
-    LegacyRow = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalchemy
 
+try:
+    LegacyRow = sqlalchemy.engine.row.LegacyRow
+except (
+    ImportError,
+    AttributeError,
+):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
+    LegacyRow = SQLALCHEMY_NOT_IMPORTED
+
+# This is a separate try/except than the LegacyRow one since TextClause exists in sqlalchemy 2. This means LegacyRow
+# may be not importable while TextClause is.
+try:
+    TextClause = sqlalchemy.sql.elements.TextClause
+except ImportError:
+    TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
     "api_np": {
@@ -87,23 +108,9 @@ SCHEMAS = {
     },
 }
 
-try:
-    import pyspark
-    from pyspark.sql import SparkSession
-
-except ImportError:
-    pyspark = None
-    SparkSession = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
-
-
 if TYPE_CHECKING:
     import numpy.typing as npt
-    from pyspark.sql import SparkSession  # noqa: F401
     from ruamel.yaml.comments import CommentedMap
-
 
 _SUFFIX_TO_PD_KWARG = {"gz": "gzip", "zip": "zip", "bz2": "bz2", "xz": "xz"}
 
@@ -283,6 +290,17 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     """
     # If it's one of our types, we use our own conversion; this can move to full schema
     # once nesting goes all the way down
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
+    )
+
+    if isinstance(data, FluentBatchRequest):
+        return {
+            "datasource_name": data.datasource_name,
+            "data_asset_name": data.data_asset_name,
+            "options": convert_to_json_serializable(data.options),
+        }
+
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
 
@@ -331,6 +349,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return str(data)
 
     if isinstance(data, bytes):
+        return str(data)
+
+    if isinstance(data, pathlib.PurePath):
         return str(data)
 
     # noinspection PyTypeChecker
@@ -392,6 +413,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if LegacyRow and isinstance(data, LegacyRow):
         return dict(data)
 
+    # sqlalchemy text for SqlAlchemy 2 compatibility
+    if TextClause and isinstance(data, TextClause):
+        return str(data)
+
     if isinstance(data, decimal.Decimal):
         return convert_decimal_to_float(d=data)
 
@@ -399,15 +424,12 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return data.to_json_dict()
 
     # PySpark schema serialization
-    if StructType is not None:
-        if isinstance(data, StructType):
-            return dict(data.jsonValue())
+    if StructType is not None and isinstance(data, StructType):
+        return dict(data.jsonValue())
 
-    else:
-        raise TypeError(
-            f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
-        )
-    return None
+    raise TypeError(
+        f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
+    )
 
 
 def ensure_json_serializable(data):  # noqa: C901 - complexity 21
@@ -448,6 +470,9 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
         return
 
     if isinstance(data, (datetime.datetime, datetime.date)):
+        return
+
+    if isinstance(data, pathlib.PurePath):
         return
 
     # Use built in base type from numpy, https://docs.scipy.org/doc/numpy-1.13.0/user/basics.types.html
@@ -507,6 +532,9 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
 
     if isinstance(data, RunIdentifier):
         return
+
+    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
+        return str(data)
 
     else:
         raise InvalidExpectationConfigurationError(
@@ -730,30 +758,33 @@ class DBFSPath:
     """
 
     @staticmethod
+    def convert_to_file_semantics_version(path: str) -> str:
+        if re.search(r"^dbfs:", path):
+            return path.replace("dbfs:", "/dbfs", 1)
+
+        if re.search("^/dbfs", path):
+            return path
+
+        raise ValueError("Path should start with either /dbfs or dbfs:")
+
+    @staticmethod
     def convert_to_protocol_version(path: str) -> str:
         if re.search(r"^\/dbfs", path):
             candidate = path.replace("/dbfs", "dbfs:", 1)
             if candidate == "dbfs:":
                 # Must add trailing slash
                 return "dbfs:/"
-            else:
-                return candidate
-        elif re.search(r"^dbfs:", path):
+
+            return candidate
+
+        if re.search(r"^dbfs:", path):
             if path == "dbfs:":
                 # Must add trailing slash
                 return "dbfs:/"
-            return path
-        else:
-            raise ValueError("Path should start with either /dbfs or dbfs:")
 
-    @staticmethod
-    def convert_to_file_semantics_version(path: str) -> str:
-        if re.search(r"^dbfs:", path):
-            return path.replace("dbfs:", "/dbfs", 1)
-        elif re.search("^/dbfs", path):
             return path
-        else:
-            raise ValueError("Path should start with either /dbfs or dbfs:")
+
+        raise ValueError("Path should start with either /dbfs or dbfs:")
 
 
 def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
@@ -764,7 +795,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
-    force_reuse_spark_context: bool = False,
+    force_reuse_spark_context: bool = True,
 ) -> SparkSession:
     """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
 
@@ -778,7 +809,7 @@ def get_or_create_spark_application(
         spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
         force_reuse_spark_context: Boolean flag indicating (if True) that creating new Spark context is forbidden.
 
-    Returns: SparkSession (new or existing as per "isStopped()" status and "force_reuse_spark_context" directive).
+    Returns: SparkSession (new or existing as per "isStopped()" status).
     """
     if spark_config is None:
         spark_config = {}
@@ -827,7 +858,7 @@ def get_or_create_spark_application(
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
-) -> SparkSession:
+) -> SparkSession | None:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.

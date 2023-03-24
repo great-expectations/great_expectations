@@ -12,7 +12,7 @@ from great_expectations.cli import toolkit
 # noinspection PyPep8Naming
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
-from great_expectations.core import ExpectationSuite
+from great_expectations.core import ExpectationSuite  # noqa: TCH001
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
@@ -22,7 +22,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
+from great_expectations.render.renderer.notebook_renderer import (
+    BaseNotebookRenderer,  # noqa: TCH001
+)
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -976,8 +978,8 @@ def suite_list(ctx: click.Context) -> None:
 
 
 def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
-    return os.path.abspath(
-        os.path.join(
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )

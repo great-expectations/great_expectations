@@ -5,7 +5,7 @@ from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
 
-from ..alias_types import JSONValues
+from ..alias_types import JSONValues  # noqa: TCH001
 from ..core._docs_decorators import public_api
 from .base import SerializableDotDict
 from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 try:
     import pyspark
 except ImportError:
-    pyspark = None
+    pyspark = None  # type: ignore[assignment]
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )

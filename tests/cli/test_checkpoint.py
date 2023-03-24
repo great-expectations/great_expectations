@@ -1068,7 +1068,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
 
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="bar"
     )
     context.save_expectation_suite(expectation_suite=suite)
@@ -1439,7 +1439,7 @@ def test_checkpoint_run_on_non_existent_validations(
 
     stdout: str = result.stdout
     assert (
-        'Checkpoint "no_validations" must contain either a batch_request or validations.'
+        'Checkpoint "no_validations" must be called with a validator or contain either a batch_request or validations.'
         in stdout
     )
 
@@ -3595,7 +3595,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     monkeypatch.setenv("OLD_PARAM", "2")
 
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    suite: ExpectationSuite = context.create_expectation_suite(
+    suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="users.delivery"
     )
     context.save_expectation_suite(expectation_suite=suite)

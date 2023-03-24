@@ -4,17 +4,10 @@ import pandas as pd
 import pygeos as geos
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
 

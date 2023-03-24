@@ -53,7 +53,7 @@ class JsonSchemaProfiler(Profiler):
         super().__init__(configuration)
 
     @public_api
-    def validate(self, schema: dict) -> bool:
+    def validate(self, schema: dict) -> bool:  # type: ignore[override]
         """
         Check if `schema` can be profiled.
 
@@ -133,7 +133,7 @@ class JsonSchemaProfiler(Profiler):
                 }
             }
         suite = ExpectationSuite(
-            suite_name, expectations=expectations, meta=meta, data_context=None  # type: ignore[arg-type]
+            suite_name, expectations=expectations, meta=meta, data_context=None
         )
         suite.add_citation(
             comment=f"This suite was built by the {self.__class__.__name__}",

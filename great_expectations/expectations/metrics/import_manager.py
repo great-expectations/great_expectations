@@ -50,20 +50,20 @@ try:
     import pyspark.sql.types as sparktypes
 except ImportError:
     logger.debug("No spark functions module available.")
-    sparktypes = None
-    F = None
+    sparktypes = None  # type: ignore[assignment]
+    F = None  # type: ignore[assignment]
 
 try:
     from pyspark.ml.feature import Bucketizer
 except ImportError:
     logger.debug("No spark Bucketizer available.")
-    Bucketizer = None
+    Bucketizer = None  # type: ignore[assignment,misc]
 
 try:
     from pyspark.sql import Window
 except ImportError:
     logger.debug("No spark Window function available.")
-    Window = None
+    Window = None  # type: ignore[assignment,misc]
 
 try:
     from pyspark.sql import Column as pyspark_sql_Column
@@ -73,8 +73,8 @@ try:
     from pyspark.sql import SQLContext
 except ImportError:
     logger.debug("No spark SQLContext available.")
-    SQLContext = None
-    pyspark_sql_Column = None
-    pyspark_sql_DataFrame = None
-    pyspark_sql_Row = None
-    pyspark_sql_SparkSession = None
+    SQLContext = None  # type: ignore[assignment,misc]
+    pyspark_sql_Column = None  # type: ignore[assignment,misc]
+    pyspark_sql_DataFrame = None  # type: ignore[assignment,misc]
+    pyspark_sql_Row = None  # type: ignore[assignment,misc]
+    pyspark_sql_SparkSession = None  # type: ignore[assignment,misc]

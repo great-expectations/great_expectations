@@ -589,7 +589,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     selectable_count_sql_str = f"select count(*) from {selectable_table_name}"
     sa_engine = batch.data.execution_engine.engine
 
-    assert sa_engine.execute(selectable_count_sql_str).scalar() == 123
+    assert sa_engine.execute(sa.text(selectable_count_sql_str)).scalar() == 123
     assert batch.batch_markers.get("ge_load_time") is not None
     # since create_temp_table defaults to True, there should be 1 temp table
     assert len(get_sqlite_temp_table_names(batch.data.execution_engine.engine)) == 1
@@ -620,7 +620,7 @@ def test_get_validator_with_query_in_runtime_parameters_using_runtime_data_conne
     context: DataContext = (
         data_context_with_runtime_sql_datasource_for_testing_get_batch
     )
-    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+    my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
         "my_expectations"
     )
 
@@ -728,7 +728,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     data_asset_path = os.path.join(
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
-    my_expectation_suite: ExpectationSuite = context.create_expectation_suite(
+    my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
         "my_expectations"
     )
 

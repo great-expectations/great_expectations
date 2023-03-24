@@ -5,21 +5,24 @@ The only requirement from an action is for it to have a take_action method.
 """
 from __future__ import annotations
 
+import json
 import logging
-import warnings
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
+import requests
 from typing_extensions import Final
 
-from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
-from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.data_context.types.refs import (
+    GXCloudResourceRef,  # noqa: TCH001
+)
 
 try:
     import pypd
 except ImportError:
     pypd = None
+
+from typing import Optional
 
 from great_expectations.checkpoint.util import (
     send_email,
@@ -28,6 +31,11 @@ from great_expectations.checkpoint.util import (
     send_slack_notification,
     send_sns_notification,
 )
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.expectation_validation_result import (
+    ExpectationSuiteValidationResult,  # noqa: TCH001
+)
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -65,6 +73,7 @@ class ValidationAction:
 
         return isinstance(self.data_context, CloudDataContext)
 
+    @public_api
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -76,15 +85,21 @@ class ValidationAction:
         checkpoint_identifier=None,
         **kwargs,
     ):
-        """
+        """Public entrypoint GX uses to trigger a ValidationAction.
 
-        :param validation_result_suite:
-        :param validation_result_suite_identifier:
-        :param data_asset:
-        :param expectation_suite_identifier:  The ExpectationSuiteIdentifier to use
-        :param checkpoint_identifier:  The Checkpoint to use
-        :param: kwargs - any additional arguments the child might use
-        :return:
+        When a ValidationAction is configured in a Checkpoint, this method gets called
+        after the Checkpoint produces an ExpectationSuiteValidationResult.
+
+        Args:
+            validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
+            validation_result_suite_identifier: an instance of either the ValidationResultIdentifier class (for open source Great Expectations) or the GXCloudIdentifier (from Great Expectations Cloud).
+            data_asset: An instance of the Validator class.
+            expectation_suite_identifier: Optionally, an instance of the ExpectationSuiteIdentifier class.
+            checkpoint_identifier: Optionally, an Identifier for the Checkpoint.
+            kwargs: named parameters that are specific to a given Action, and need to be assigned a value in the Action's configuration in a Checkpoint's action_list.
+
+        Returns:
+            A Dict describing the result of the Action.
         """
         return self._run(
             validation_result_suite=validation_result_suite,
@@ -95,6 +110,7 @@ class ValidationAction:
             **kwargs,
         )
 
+    @public_api
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
@@ -105,6 +121,24 @@ class ValidationAction:
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
     ):
+        """Private method containing the logic specific to a ValidationAction's implementation.
+
+        The implementation details specific to this ValidationAction must live in this method.
+        Additional context required by the ValidationAction may be specified in the Checkpoint's
+        `action_list` under the `action` key. These arbitrary key/value pairs will be passed into
+        the ValidationAction as keyword arguments.
+
+        Args:
+            validation_result_suite: An instance of the ExpectationSuiteValidationResult class.
+            validation_result_suite_identifier: an instance of either the ValidationResultIdentifier
+                class (for open source Great Expectations) or the GeCloudIdentifier (from Great Expectations Cloud).
+            data_asset: An instance of the Validator class.
+            expectation_suite_identifier:  Optionally, an instance of the ExpectationSuiteIdentifier class.
+            checkpoint_identifier:  Optionally, an Identifier for the Checkpoints.
+
+        Returns:
+            A Dict describing the result of the Action.
+        """
         return NotImplementedError
 
 
@@ -258,10 +292,10 @@ class SlackNotificationAction(ValidationAction):
         ]
         if (
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
-            and validation_result_suite_identifier.cloud_id
+            and validation_result_suite_identifier.id
         ):
             cloud_base_url: Final[str] = CLOUD_APP_DEFAULT_BASE_URL
-            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.cloud_id}"
+            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.id}"
             validation_result_urls.append(validation_result_url)
 
         if (
@@ -855,11 +889,11 @@ class StoreValidationResultAction(ValidationAction):
 
         checkpoint_ge_cloud_id = None
         if self._using_cloud_context and checkpoint_identifier:
-            checkpoint_ge_cloud_id = checkpoint_identifier.cloud_id
+            checkpoint_ge_cloud_id = checkpoint_identifier.id
 
         expectation_suite_ge_cloud_id = None
         if self._using_cloud_context and expectation_suite_identifier:
-            expectation_suite_ge_cloud_id = str(expectation_suite_identifier.cloud_id)
+            expectation_suite_ge_cloud_id = expectation_suite_identifier.id
 
         return_val = self.target_store.set(
             validation_result_suite_identifier,
@@ -869,8 +903,8 @@ class StoreValidationResultAction(ValidationAction):
         )
         if self._using_cloud_context:
             return_val: GXCloudResourceRef
-            new_ge_cloud_id = return_val.cloud_id
-            validation_result_suite_identifier.cloud_id = new_ge_cloud_id
+            new_ge_cloud_id = return_val.id
+            validation_result_suite_identifier.id = new_ge_cloud_id
 
 
 @public_api
@@ -1028,11 +1062,6 @@ class StoreMetricsAction(ValidationAction):
 
 
 @public_api
-@deprecated_argument(
-    argument_name="target_site_names",
-    version="0.10.10",
-    message="target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
-)
 class UpdateDataDocsAction(ValidationAction):
     """Notify the site builders of all data docs sites of a Data Context that a validation result should be added to the data docs.
 
@@ -1058,32 +1087,18 @@ class UpdateDataDocsAction(ValidationAction):
     Args:
         data_context: Data Context that is used by the Action.
         site_names: Optional. A list of the names of sites to update.
-        target_site_names: Optional. Deprecated. A list of the names of sites to update.
     """
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         site_names: Optional[Union[List[str], str]] = None,
-        target_site_names: Optional[Union[List[str], str]] = None,
     ) -> None:
         """
         :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
         """
         super().__init__(data_context)
-        if target_site_names:
-            # deprecated-v0.10.10
-            warnings.warn(
-                "target_site_names is deprecated as of v0.10.10 and will be removed in v0.16. Please use site_names instead.",
-                DeprecationWarning,
-            )
-            if site_names:
-                raise DataContextError(
-                    "Invalid configuration: legacy key target_site_names and site_names key are "
-                    "both present in UpdateDataDocsAction configuration"
-                )
-            site_names = target_site_names
         self._site_names = site_names
 
     def _run(
@@ -1213,3 +1228,69 @@ class SNSNotificationAction(ValidationAction):
         return send_sns_notification(
             self.sns_topic_arn, subject, validation_result_suite.__str__(), **kwargs
         )
+
+
+class APINotificationAction(ValidationAction):
+    def __init__(self, data_context, url) -> None:
+        super().__init__(data_context)
+        self.url = url
+
+    def _run(
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: ValidationResultIdentifier,
+        data_asset,
+        expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
+        checkpoint_identifier=None,
+        **kwargs,
+    ):
+        suite_name: str = validation_result_suite.meta["expectation_suite_name"]
+        if "batch_kwargs" in validation_result_suite.meta:
+            data_asset_name = validation_result_suite.meta["batch_kwargs"].get(
+                "data_asset_name", "__no_data_asset_name__"
+            )
+        elif "active_batch_definition" in validation_result_suite.meta:
+            data_asset_name = (
+                validation_result_suite.meta["active_batch_definition"].data_asset_name
+                if validation_result_suite.meta[
+                    "active_batch_definition"
+                ].data_asset_name
+                else "__no_data_asset_name__"
+            )
+        else:
+            data_asset_name = "__no_data_asset_name__"
+
+        validation_results: list = validation_result_suite.get("results")
+        validation_results_serializable: list = convert_to_json_serializable(
+            validation_results
+        )
+
+        payload = self.create_payload(
+            data_asset_name, suite_name, validation_results_serializable
+        )
+
+        response = self.send_results(payload)
+        return (
+            f"Successfully Posted results to API, status code - {response.status_code}"
+        )
+
+    def send_results(self, payload) -> None:
+        try:
+            headers = {"Content-Type": "application/json"}
+            return requests.post(self.url, headers=headers, data=payload)
+        except Exception as e:
+            print(f"Exception when sending data to API - {e}")
+            raise e
+
+    @staticmethod
+    def create_payload(
+        data_asset_name, suite_name, validation_results_serializable
+    ) -> str:
+        payload = json.dumps(
+            {
+                "test_suite_name": suite_name,
+                "data_asset_name": data_asset_name,
+                "validation_results": validation_results_serializable,
+            }
+        )
+        return payload

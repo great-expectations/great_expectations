@@ -26,11 +26,11 @@ logger = logging.getLogger(__name__)
 
 def pytest_generate_tests(metafunc):  # noqa: C901 - 38
     # Load all the JSON files in the directory
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    dir_path = os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
     expectation_dirs = [
         dir_
         for dir_ in os.listdir(dir_path)
-        if os.path.isdir(os.path.join(dir_path, dir_))
+        if os.path.isdir(os.path.join(dir_path, dir_))  # noqa: PTH118, PTH112
     ]
 
     parametrized_tests = []
@@ -111,6 +111,8 @@ def pytest_generate_tests(metafunc):  # noqa: C901 - 38
 
                             if isinstance(data_asset, SqlAlchemyDataset):
                                 # Call out supported dialects
+                                if "pandas_v2_api" in only_for:
+                                    generate_test = True
                                 if "sqlalchemy" in only_for:
                                     generate_test = True
                                 elif (
@@ -262,6 +264,10 @@ def pytest_generate_tests(metafunc):  # noqa: C901 - 38
                                 )
                                 or (
                                     "pandas" in suppress_test_for
+                                    and isinstance(data_asset, PandasDataset)
+                                )
+                                or (
+                                    "pandas_v2_api" in suppress_test_for
                                     and isinstance(data_asset, PandasDataset)
                                 )
                                 or (

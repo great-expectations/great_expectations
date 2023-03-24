@@ -23,10 +23,14 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.datasource_serializer import (
     YAMLReadyDictDatasourceConfigSerializer,
 )
-from great_expectations.experimental.datasources.config import GxConfig
+from great_expectations.datasource.fluent.config import GxConfig
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
+    from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.data_context.store.datasource_store import (
+        DatasourceStore,
+    )
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -88,7 +92,7 @@ class FileDataContext(SerializableDataContext):
             )
         return self._apply_global_config_overrides(config=project_config)
 
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
@@ -114,17 +118,7 @@ class FileDataContext(SerializableDataContext):
                 schema=datasourceConfigSchema
             ),
         )
-        self._datasource_store = datasource_store
-
-    @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        return self._context_root_directory
+        return datasource_store
 
     def _init_variables(self) -> FileDataContextVariables:
         variables = FileDataContextVariables(
@@ -165,13 +159,19 @@ class FileDataContext(SerializableDataContext):
             # Just to be explicit about what we intended to catch
             raise
 
-    def _load_zep_config(self) -> GxConfig:
-        logger.info(f"{type(self).__name__} loading zep config")
+    def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:
+        logger.info(f"{type(self).__name__} loading fluent config")
         if not self.root_directory:
-            logger.warning("`root_directory` not set, cannot load zep config")
+            logger.warning("`root_directory` not set, cannot load fluent config")
         else:
-            path_to_zep_yaml = pathlib.Path(self.root_directory) / self.GX_YML
-            if path_to_zep_yaml.exists():
-                return GxConfig.parse_yaml(path_to_zep_yaml, _allow_empty=True)
-            logger.info(f"no zep config at {path_to_zep_yaml.absolute()}")
-        return GxConfig(xdatasources={})
+            path_to_fluent_yaml = pathlib.Path(self.root_directory) / self.GX_YML
+            if path_to_fluent_yaml.exists():
+                gx_config = GxConfig.parse_yaml(path_to_fluent_yaml, _allow_empty=True)
+
+                # attach the config_provider for each loaded datasource
+                for datasource in gx_config.datasources.values():
+                    datasource._config_provider = config_provider
+
+                return gx_config
+            logger.info(f"no fluent config at {path_to_fluent_yaml.absolute()}")
+        return GxConfig(fluent_datasources={})
