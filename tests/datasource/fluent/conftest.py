@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from contextlib import contextmanager
 from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
 
 import pytest
@@ -21,8 +20,7 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from tests.test_utils import MockSaEngine, Dialect
-
+from tests.test_utils import Dialect, MockSaEngine
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
 PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML

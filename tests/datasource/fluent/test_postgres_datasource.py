@@ -26,7 +26,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
-from tests.test_utils import MockSaEngine, Dialect, MockSaInspector
+from tests.test_utils import Dialect, MockSaEngine, MockSaInspector
 
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
