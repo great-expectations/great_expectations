@@ -58,7 +58,9 @@ def add_dataframe_to_db(
     if isinstance(con, sqlalchemy.engine.Engine):
         con = con.connect()
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
+        warnings.filterwarnings(
+            action="ignore", category=DeprecationWarning, module="sqlalchemy"
+        )
         df.to_sql(
             name=name,
             con=con,

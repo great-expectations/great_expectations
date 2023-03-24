@@ -1,9 +1,10 @@
+from __future__ import annotations
 from contextlib import contextmanager
-from typing import Any
+from typing import Any, Dict
 
 
 class MockSaInspector:
-    def get_columns(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]
+    def get_columns(self) -> list[Dict[str, Any]]:  # type: ignore[empty-body]
         ...
 
     def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
