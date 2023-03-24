@@ -53,13 +53,22 @@ class MetricStore(Store):
                             "metric_kwargs_id",
                         ],
                     )
+                print(
+                    f'\n[ALEX_TEST] [MetricStore.__init__()] STORE_BACKEND["KEY_COLUMNS"]:\n{store_backend["key_columns"]} ; TYPE: {str(type(store_backend["key_columns"]))}'
+                )
 
         super().__init__(store_backend=store_backend, store_name=store_name)
 
     def serialize(self, value):
+        print(
+            f"\n[ALEX_TEST] [MetricStore.serialize()] VALUE:\n{value} ; TYPE: {str(type(value))}"
+        )
         return json.dumps({"value": value})
 
     def deserialize(self, value):
+        print(
+            f"\n[ALEX_TEST] [MetricStore.deserialize()] VALUE:\n{value} ; TYPE: {str(type(value))}"
+        )
         if value:
             return json.loads(value)["value"]
 
