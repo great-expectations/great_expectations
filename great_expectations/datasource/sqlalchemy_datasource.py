@@ -21,34 +21,34 @@ from great_expectations.util import get_sqlalchemy_url, import_make_url
 
 logger = logging.getLogger(__name__)
 
+from great_expectations.optional_imports import sqlalchemy as sa
+
 try:
-    import sqlalchemy
     from sqlalchemy import create_engine
     from sqlalchemy.sql.elements import quoted_name
 
     make_url = import_make_url()
 
-except ImportError:
-    sqlalchemy = None
+except (ImportError, ModuleNotFoundError):
     create_engine = None
     logger.debug("Unable to import sqlalchemy.")
 
 
-if sqlalchemy is not None:
+if sa:
     try:
         import google.auth
 
         datasource_initialization_exceptions = (
-            sqlalchemy.exc.OperationalError,
-            sqlalchemy.exc.DatabaseError,
-            sqlalchemy.exc.ArgumentError,
+            sa.exc.OperationalError,
+            sa.exc.DatabaseError,
+            sa.exc.ArgumentError,
             google.auth.exceptions.GoogleAuthError,
         )
     except ImportError:
         datasource_initialization_exceptions = (
-            sqlalchemy.exc.OperationalError,  # type: ignore[assignment]
-            sqlalchemy.exc.DatabaseError,
-            sqlalchemy.exc.ArgumentError,
+            sa.exc.OperationalError,  # type: ignore[assignment]
+            sa.exc.DatabaseError,
+            sa.exc.ArgumentError,
         )
 
 
@@ -215,7 +215,7 @@ class SqlAlchemyDatasource(LegacyDatasource):
         batch_kwargs_generators=None,
         **kwargs
     ) -> None:
-        if not sqlalchemy:
+        if not sa:
             raise DatasourceInitializationError(
                 name, "ModuleNotFoundError: No module named 'sqlalchemy'"
             )
@@ -439,18 +439,14 @@ class SqlAlchemyDatasource(LegacyDatasource):
                     schema = batch_kwargs.get("schema")
                 # limit doesn't compile properly for oracle so we will append rownum to query string later
                 if self.engine.dialect.name.lower() == GXSqlDialect.ORACLE:
-                    raw_query = sqlalchemy.select([sqlalchemy.text("*")]).select_from(
-                        sqlalchemy.schema.Table(
-                            table, sqlalchemy.MetaData(), schema=schema
-                        )
+                    raw_query = sa.select(sa.text("*")).select_from(
+                        sa.schema.Table(table, sa.MetaData(), schema=schema)
                     )
                 else:
                     raw_query = (
-                        sqlalchemy.select([sqlalchemy.text("*")])
+                        sa.select(sa.text("*"))
                         .select_from(
-                            sqlalchemy.schema.Table(
-                                table, sqlalchemy.MetaData(), schema=schema
-                            )
+                            sa.schema.Table(table, sa.MetaData(), schema=schema)
                         )
                         .offset(offset)
                         .limit(limit)

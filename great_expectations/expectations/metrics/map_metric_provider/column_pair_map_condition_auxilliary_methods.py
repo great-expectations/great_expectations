@@ -9,7 +9,7 @@ from typing import (
     Union,
 )
 
-from great_expectations.expectations.metrics.import_manager import F, quoted_name, sa
+from great_expectations.expectations.metrics.import_manager import F, quoted_name
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
 )
@@ -17,6 +17,7 @@ from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
     verify_column_names_exist,
 )
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     get_sqlalchemy_selectable,
 )
@@ -170,10 +171,8 @@ def _sqlalchemy_column_pair_map_condition_values(
     )
 
     query = sa.select(
-        [
-            sa.column(column_A_name).label("unexpected_values_A"),
-            sa.column(column_B_name).label("unexpected_values_B"),
-        ]
+        sa.column(column_A_name).label("unexpected_values_A"),
+        sa.column(column_B_name).label("unexpected_values_B"),
     ).where(boolean_mapped_unexpected_values)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
@@ -218,7 +217,7 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     )
 
     return execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(selectable)
+        sa.select(sa.func.count()).select_from(selectable)
     ).scalar()
 
 
