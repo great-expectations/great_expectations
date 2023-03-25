@@ -73,7 +73,6 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
@@ -2318,11 +2317,6 @@ def sqlite_view_engine(test_backends):
 @pytest.fixture
 def expectation_suite_identifier():
     return ExpectationSuiteIdentifier("my.expectation.suite.name")
-
-
-@pytest.fixture
-def basic_sqlalchemy_datasource(sqlitedb_engine):
-    return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)
 
 
 @pytest.fixture

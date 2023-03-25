@@ -8,7 +8,6 @@ from great_expectations.datasource import (
     PandasDatasource,
     SimpleSqlalchemyDatasource,
     SparkDFDatasource,
-    SqlAlchemyDatasource,
 )
 
 
@@ -16,7 +15,6 @@ class DatasourceAnonymizer(BaseAnonymizer):
     # ordered bottom up in terms of inheritance order
     _legacy_ge_classes = [
         PandasDatasource,
-        SqlAlchemyDatasource,
         SparkDFDatasource,
         LegacyDatasource,
     ]
