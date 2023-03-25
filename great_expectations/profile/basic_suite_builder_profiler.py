@@ -743,7 +743,7 @@ class BasicSuiteBuilderProfiler(BasicDatasetProfilerBase):
                 """#### This is an _example_ suite
 
 - This suite was made by quickly glancing at 1000 rows of your data.
-- This is **not a production suite**. It is meant to show examples of expectations.
+- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.
 - Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.
 """
             ],
