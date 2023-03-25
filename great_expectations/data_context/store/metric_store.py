@@ -95,8 +95,23 @@ class EvaluationParameterStore(MetricStore):
             "class_name": self.__class__.__name__,
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
+        print(
+            f"\n[ALEX_TEST] [MetricStore.__init__()] self._config:\n{self._config} ; TYPE: {str(type(self._config))}"
+        )
 
     def get_bind_params(self, run_id: RunIdentifier) -> dict:
+        print(
+            f"\n[ALEX_TEST] [MetricStore.get_bind_params()] RUN_ID:\n{run_id} ; TYPE: {str(type(run_id))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [MetricStore.get_bind_params()] RUN_ID.TO_TUPLE():\n{run_id.to_tuple()} ; TYPE: {str(type(run_id.to_tuple()))}"
+        )
+        # TODO: <Alex>ALEX</Alex>
+        a = self._store_backend.list_keys(run_id.to_tuple())
+        print(
+            f"\n[ALEX_TEST] [MetricStore.get_bind_params()] LISTED_KEYS:\n{a} ; TYPE: {str(type(a))}"
+        )
+        # TODO: <Alex>ALEX</Alex>
         params = {}
         for k in self._store_backend.list_keys(run_id.to_tuple()):
             key = self.tuple_to_key(k)

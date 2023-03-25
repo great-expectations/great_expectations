@@ -125,17 +125,28 @@ def test_evaluation_parameter_store_methods(
         ],
         success=True,
     )
+    print(
+        f"\n[ALEX_TEST] [test_evaluation_parameter_store::test_evaluation_parameter_store_methods()] SOURCE_PATIENT_DATA_RESULTS:\n{source_patient_data_results} ; TYPE: {str(type(source_patient_data_results))}"
+    )
 
     data_context_parameterized_expectation_suite.store_evaluation_parameters(
         source_patient_data_results
+    )
+    print(
+        f"\n[ALEX_TEST] [test_evaluation_parameter_store::test_evaluation_parameter_store_methods()] DATA_CONTEXT_PARAMETERIZED_EXPECTATION_SUITE:\n{data_context_parameterized_expectation_suite} ; TYPE: {str(type(data_context_parameterized_expectation_suite))}"
     )
 
     bound_parameters = data_context_parameterized_expectation_suite.evaluation_parameter_store.get_bind_params(
         run_id
     )
+    print(
+        f"\n[ALEX_TEST] [test_evaluation_parameter_store::test_evaluation_parameter_store_methods()] BOUND_PARAMETERS:\n{bound_parameters} ; TYPE: {str(type(bound_parameters))}"
+    )
     assert bound_parameters == {
+        # TODO: <Alex>ALEX</Alex>
         "urn:great_expectations:validations:source_patient_data.default:expect_table_row_count_to_equal.result"
         ".observed_value": 1024
+        # TODO: <Alex>ALEX</Alex>
     }
     source_diabetes_data_results = ExpectationSuiteValidationResult(
         meta={
