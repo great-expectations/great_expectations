@@ -4826,9 +4826,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         # )
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
-        data_asset_name = validation_results.meta.get("batch_spec", {}).get(
-            "data_asset_name"
-        )
+        # data_asset_name = validation_results.meta.get("batch_spec", {}).get(
+        #     "data_asset_name"
+        # )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        data_asset_name = validation_results.meta.get(
+            "active_batch_definition", {}
+        ).get("data_asset_name")
         # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         if target_store_name == "metric_store":
