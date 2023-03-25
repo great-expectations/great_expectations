@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def get_metric_kwargs_id(metric_name: str, metric_kwargs: dict) -> str:
+def get_metric_kwargs_id(metric_name: str, metric_kwargs: dict) -> str | None:
     ###
     #
     # WARNING
@@ -69,6 +69,7 @@ def get_metric_kwargs_id(metric_name: str, metric_kwargs: dict) -> str:
         print(
             f"\n[ALEX_TEST] [ExpectationValidationResult::get_metric_kwargs_id()] NEW_CASE-RETVAL:\n{a} ; TYPE: {str(type(a))}"
         )
+        return a
     # TODO: <Alex>ALEX</Alex>
     return None
 
