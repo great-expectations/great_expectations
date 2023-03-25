@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def get_metric_kwargs_id(metric_name, metric_kwargs):
+def get_metric_kwargs_id(metric_name: str, metric_kwargs: dict) -> str:
     ###
     #
     # WARNING
@@ -55,12 +55,15 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     # WARNING
     #
     ###
+    if metric_kwargs is None:
+        metric_kwargs = {}
+
     if "metric_kwargs_id" in metric_kwargs:
         return metric_kwargs["metric_kwargs_id"]
     if "column" in metric_kwargs:
         return f"column={metric_kwargs.get('column')}"
     # TODO: <Alex>ALEX</Alex>
-    if metric_kwargs and not isinstance(metric_kwargs, IDDict):
+    if not isinstance(metric_kwargs, IDDict):
         metric_kwargs = IDDict(metric_kwargs)
         a = metric_kwargs.to_id()
         print(
