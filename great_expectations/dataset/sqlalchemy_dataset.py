@@ -628,15 +628,15 @@ class MetaSqlAlchemyDataset(Dataset):
             temp_table_obj.create(self.engine, checkfirst=True)
 
             count_case_statement: List[sa.sql.elements.Label] = sa.case(
-                    (
-                        sa.and_(
-                            sa.not_(expected_condition),
-                            sa.not_(ignore_values_condition),
-                        ),
-                        1,
+                (
+                    sa.and_(
+                        sa.not_(expected_condition),
+                        sa.not_(ignore_values_condition),
                     ),
-                    else_=0,
-                ).label("condition")
+                    1,
+                ),
+                else_=0,
+            ).label("condition")
             inner_case_query: sa.sql.dml.Insert = temp_table_obj.insert().from_select(
                 count_case_statement,
                 sa.select(count_case_statement).select_from(self._table),
