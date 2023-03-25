@@ -4826,6 +4826,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         # TODO: <Alex>ALEX</Alex>
         if target_store_name == "metric_store":
             print(
+                f"\n[ALEX_TEST] [AbstractDataContext._store_metrics()] VALIDATION_RESULTS:\n{validation_results} ; TYPE: {str(type(validation_results))}"
+            )
+            print(
                 f"\n[ALEX_TEST] [AbstractDataContext._store_metrics()] DATA_ASSET_NAME-0:\n{data_asset_name} ; TYPE: {str(type(data_asset_name))}"
             )
         # TODO: <Alex>ALEX</Alex>
