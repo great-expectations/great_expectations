@@ -20,13 +20,13 @@ from great_expectations.expectations.metrics.import_manager import (
     pyspark_sql_Column,
     pyspark_sql_DataFrame,
     pyspark_sql_Row,
-    sa,
     sa_func_count,
     sa_sql_expression_ColumnClause,
     sa_sql_expression_Selectable,
     sqlalchemy_engine_Engine,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -61,14 +61,14 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         distinct_values: List[sqlalchemy_engine_Engine]
         if hasattr(column, "is_not"):
             distinct_values = sqlalchemy_engine.execute(
-                sa.select([column])
+                sa.select(column)
                 .where(column.is_not(None))
                 .distinct()
                 .select_from(selectable)
             ).fetchall()
         else:
             distinct_values = sqlalchemy_engine.execute(
-                sa.select([column])
+                sa.select(column)
                 .where(column.isnot(None))
                 .distinct()
                 .select_from(selectable)

@@ -559,7 +559,7 @@ def test_sqlite_split(
 
         # Right number of rows?
         num_rows: int = batch_data.execution_engine.engine.execute(
-            sa.select([sa.func.count()]).select_from(batch_data.selectable)
+            sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
         # noinspection PyUnresolvedReferences
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
@@ -589,13 +589,13 @@ def test_sqlite_split_on_year(
 
     # Right number of rows?
     num_rows: int = batch_data.execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+        sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: sa.Row = batch_data.execution_engine.engine.execute(
-        sa.select([sa.text("*")]).select_from(batch_data.selectable)
+        sa.select(sa.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
@@ -631,13 +631,13 @@ def test_sqlite_split_and_sample_using_limit(
 
     # Right number of rows?
     num_rows: int = batch_data.execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+        sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: sa.Row = batch_data.execution_engine.engine.execute(
-        sa.select([sa.text("*")]).select_from(batch_data.selectable)
+        sa.select(sa.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
