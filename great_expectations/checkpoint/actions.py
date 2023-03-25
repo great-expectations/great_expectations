@@ -1056,18 +1056,6 @@ class StoreMetricsAction(ValidationAction):
                 )
             )
 
-        # TODO: <Alex>ALEX</Alex>
-        if self._target_store_name == "metric_store":
-            print(
-                f"\n[ALEX_TEST] [StoreMetricsAction._run()] SELF._REQUESTED_METRICS:\n{self._requested_metrics} ; TYPE: {str(type(self._requested_metrics))}"
-            )
-            print(
-                f"\n[ALEX_TEST] [StoreMetricsAction._run()] VALIDATION_RESULT_SUITE:\n{validation_result_suite} ; TYPE: {str(type(validation_result_suite))}"
-            )
-            print(
-                f"\n[ALEX_TEST] [StoreMetricsAction._run()] SELF._TARGET_STORE_NAME:\n{self._target_store_name} ; TYPE: {str(type(self._target_store_name))}"
-            )
-        # TODO: <Alex>ALEX</Alex>
         self.data_context.store_validation_result_metrics(
             requested_metrics=self._requested_metrics,
             validation_results=validation_result_suite,

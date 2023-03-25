@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def get_metric_kwargs_id(metric_name: str, metric_kwargs: dict) -> str | None:
+def get_metric_kwargs_id(metric_kwargs: dict) -> str:
     ###
     #
     # WARNING
@@ -60,18 +60,14 @@ def get_metric_kwargs_id(metric_name: str, metric_kwargs: dict) -> str | None:
 
     if "metric_kwargs_id" in metric_kwargs:
         return metric_kwargs["metric_kwargs_id"]
+
     if "column" in metric_kwargs:
         return f"column={metric_kwargs.get('column')}"
-    # TODO: <Alex>ALEX</Alex>
-    if not isinstance(metric_kwargs, IDDict):
-        metric_kwargs = IDDict(metric_kwargs)
-        a = metric_kwargs.to_id()
-        print(
-            f"\n[ALEX_TEST] [ExpectationValidationResult::get_metric_kwargs_id()] NEW_CASE-RETVAL:\n{a} ; TYPE: {str(type(a))}"
-        )
-        return a
-    # TODO: <Alex>ALEX</Alex>
-    return None
+
+    if isinstance(metric_kwargs, IDDict):
+        metric_kwargs.to_id()
+
+    return IDDict(metric_kwargs).to_id()
 
 
 @public_api
@@ -349,11 +345,11 @@ class ExpectationValidationResult(SerializableDictDot):
             )
 
         metric_name_parts = metric_name.split(".")
-        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
+        metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
         if metric_name_parts[0] == self.expectation_config.expectation_type:
             curr_metric_kwargs = get_metric_kwargs_id(
-                metric_name, self.expectation_config.kwargs
+                metric_kwargs=self.expectation_config.kwargs
             )
             if metric_kwargs_id != curr_metric_kwargs:
                 raise gx_exceptions.UnavailableMetricError(
@@ -571,7 +567,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     def get_metric(self, metric_name, **kwargs):
         metric_name_parts = metric_name.split(".")
-        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
+        metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
         metric_value = None
         # Expose overall statistics
