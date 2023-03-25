@@ -1,5 +1,7 @@
 # This file configures the `docs_integration` pipeline (https://dev.azure.com/great-expectations/great_expectations/_build)
 #
+# This pipeline runs tests against scripts that contain code samples that we use in our documentation.
+#
 # The pipeline is run under the following conditions:
 #   - On any PR
 
@@ -59,39 +61,6 @@ stages:
           - bash: ./ci/checks/check_for_docs_deps_changes.sh
             name: CheckDocsDependenciesChanges
 
-  - stage: custom_checks
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-    - job: link_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-      - bash: python scripts/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
-        name: LinkChecker
-
-    - job: docs_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-      - script: |
-          yarn install
-          python ci/checks/validate_docs_snippets.py
-        name: DocsSnippetChecker
-
-    - job: line_number_snippet_checker
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            python ci/checks/check_no_line_number_snippets.py
-          name: LineNumberSnippetChecker
-
-    - job: public_api_report
-      condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
-      steps:
-        - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
-          name: PublicAPIReport
-
   - stage: docusaurus_tests
     dependsOn: scope_check
     pool:
@@ -121,8 +90,8 @@ stages:
       timeoutInMinutes: 30
       condition: or(
           eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
-          eq(variables.isDevelop, true), 
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
+          eq(variables.isDevelop, true),
           eq(variables.isManual, true)
         )
       variables:
@@ -146,8 +115,8 @@ stages:
       timeoutInMinutes: 30
       condition: or(
           eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
-          eq(variables.isDevelop, true), 
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
+          eq(variables.isDevelop, true),
           eq(variables.isManual, true)
         )
       variables:
@@ -173,8 +142,8 @@ stages:
       timeoutInMinutes: 30
       condition: or(
           eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), 
-          eq(variables.isDevelop, true), 
+          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
+          eq(variables.isDevelop, true),
           eq(variables.isManual, true)
         )
       variables:
