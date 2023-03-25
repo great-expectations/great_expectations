@@ -4796,7 +4796,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
-        self._store_metrics(requested_metrics, validation_results, target_store_name)
+        self._store_metrics(
+            requested_metrics=requested_metrics,
+            validation_results=validation_results,
+            target_store_name=target_store_name,
+        )
 
     def _store_metrics(
         self, requested_metrics, validation_results, target_store_name
@@ -4819,6 +4823,12 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         data_asset_name = validation_results.meta.get("batch_kwargs", {}).get(
             "data_asset_name"
         )
+        # TODO: <Alex>ALEX</Alex>
+        if target_store_name == "metric_store":
+            print(
+                f"\n[ALEX_TEST] [AbstractDataContext._store_metrics()] DATA_ASSET_NAME-0:\n{data_asset_name} ; TYPE: {str(type(data_asset_name))}"
+            )
+        # TODO: <Alex>ALEX</Alex>
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
             if (expectation_suite_dependency != "*") and (
@@ -4838,11 +4848,41 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                         metric_configuration
                     )
                 )
+                # TODO: <Alex>ALEX</Alex>
+                if target_store_name == "metric_store":
+                    print(
+                        f"\n[ALEX_TEST] [AbstractDataContext._store_metrics()] METRIC_CONFIGURATION:\n{metric_configuration} ; TYPE: {str(type(metric_configuration))}"
+                    )
+                # TODO: <Alex>ALEX</Alex>
                 for metric_name, metric_kwargs in metric_configurations:
+                    # TODO: <Alex>ALEX</Alex>
+                    if target_store_name == "metric_store":
+                        print(
+                            f"\n[ALEX_TEST] [AbstractDataContext._store_metrics()] METRIC_NAME:\n{metric_name} ; TYPE: {str(type(metric_name))}"
+                        )
+                        print(
+                            f"\n[ALEX_TEST] [AbstractDataContext._store_metrics()] METRIC_KWARGS:\n{metric_kwargs} ; TYPE: {str(type(metric_kwargs))}"
+                        )
+                    # TODO: <Alex>ALEX</Alex>
                     try:
                         metric_value = validation_results.get_metric(
                             metric_name, **metric_kwargs
                         )
+                        # TODO: <Alex>ALEX</Alex>
+                        if target_store_name == "metric_store":
+                            print(
+                                f"\n[ALEX_TEST] [AbstractDataContext._store_metrics()] METRIC_VALUE:\n{metric_value} ; TYPE: {str(type(metric_value))}"
+                            )
+                            print(
+                                f"\n[ALEX_TEST] [AbstractDataContext._store_metrics()] DATA_ASSET_NAME-1:\n{data_asset_name} ; TYPE: {str(type(data_asset_name))}"
+                            )
+                            a = get_metric_kwargs_id(
+                                metric_name=metric_name, metric_kwargs=metric_kwargs
+                            )
+                            print(
+                                f"\n[ALEX_TEST] [AbstractDataContext._store_metrics()] metric_kwargs_id:\n{a} ; TYPE: {str(type(a))}"
+                            )
+                        # TODO: <Alex>ALEX</Alex>
                         self.stores[target_store_name].set(
                             ValidationMetricIdentifier(
                                 run_id=run_id,

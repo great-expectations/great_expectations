@@ -17,7 +17,7 @@ from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa:
 from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
-from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.core.id_dict import BatchSpec, IDDict  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -59,6 +59,14 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
         return metric_kwargs["metric_kwargs_id"]
     if "column" in metric_kwargs:
         return f"column={metric_kwargs.get('column')}"
+    # TODO: <Alex>ALEX</Alex>
+    if metric_kwargs and not isinstance(metric_kwargs, IDDict):
+        metric_kwargs = IDDict(metric_kwargs)
+        a = metric_kwargs.to_id()
+        print(
+            f"\n[ALEX_TEST] [ExpectationValidationResult::get_metric_kwargs_id()] NEW_CASE-RETVAL:\n{a} ; TYPE: {str(type(a))}"
+        )
+    # TODO: <Alex>ALEX</Alex>
     return None
 
 
