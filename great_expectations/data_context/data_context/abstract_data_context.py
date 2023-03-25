@@ -4820,9 +4820,16 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
-        data_asset_name = validation_results.meta.get("batch_kwargs", {}).get(
+        # TODO: <Alex>ALEX</Alex>
+        # data_asset_name = validation_results.meta.get("batch_kwargs", {}).get(
+        #     "data_asset_name"
+        # )
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        data_asset_name = validation_results.meta.get("batch_spec", {}).get(
             "data_asset_name"
         )
+        # TODO: <Alex>ALEX</Alex>
         # TODO: <Alex>ALEX</Alex>
         if target_store_name == "metric_store":
             print(
