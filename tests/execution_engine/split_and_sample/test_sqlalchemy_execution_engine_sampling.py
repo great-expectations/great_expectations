@@ -98,6 +98,11 @@ def dialect_name_to_sql_statement():
     return _dialect_name_to_sql_statement
 
 
+@pytest.fixture
+def pytest_parsed_arguments(request):
+    return request.config.option
+
+
 @pytest.mark.parametrize(
     "dialect_name",
     [
@@ -108,13 +113,25 @@ def dialect_name_to_sql_statement():
     ],
 )
 def test_sample_using_limit_builds_correct_query_where_clause_none(
-    dialect_name: GXSqlDialect, dialect_name_to_sql_statement, sa
+    dialect_name: GXSqlDialect,
+    dialect_name_to_sql_statement,
+    sa,
+    pytest_parsed_arguments,
 ):
     """What does this test and why?
 
     split_on_limit should build the appropriate query based on input parameters.
     This tests dialects that differ from the standard dialect, not each dialect exhaustively.
     """
+    if hasattr(pytest_parsed_arguments, str(dialect_name.value)):
+        if not getattr(pytest_parsed_arguments, str(dialect_name.value)):
+            pytest.skip(
+                f"Skipping {str(dialect_name.value)} since the --{str(dialect_name.value)} pytest flag was not set"
+            )
+    else:
+        pytest.skip(
+            f"Skipping {str(dialect_name.value)} since the dialect is not runnable via pytest flag"
+        )
 
     # 1. Setup
     class MockSqlAlchemyExecutionEngine:
@@ -133,7 +150,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             GXSqlDialect.BIGQUERY: "bigquery://",
             GXSqlDialect.SNOWFLAKE: "snowflake://",
             GXSqlDialect.REDSHIFT: "redshift+psycopg2://",
-            GXSqlDialect.AWSATHENA: f"awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
+            GXSqlDialect.AWSATHENA: "awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
             GXSqlDialect.DREMIO: "dremio://",
             GXSqlDialect.TERADATASQL: "teradatasql://",
             GXSqlDialect.TRINO: "trino://",

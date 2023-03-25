@@ -512,7 +512,7 @@ class PandasDatasource(_PandasDatasource):
             name=name,
             dataframe=dataframe,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_dataframe(
         self, dataframe: pd.DataFrame, asset_name: Optional[str] = None
@@ -529,7 +529,7 @@ class PandasDatasource(_PandasDatasource):
             name=name,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_clipboard(self, asset_name: Optional[str] = None, **kwargs) -> Validator:
         if not asset_name:
@@ -548,7 +548,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_csv(
         self,
@@ -573,7 +573,7 @@ class PandasDatasource(_PandasDatasource):
             io=io,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_excel(
         self,
@@ -598,7 +598,7 @@ class PandasDatasource(_PandasDatasource):
             path=path,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_feather(
         self,
@@ -623,7 +623,7 @@ class PandasDatasource(_PandasDatasource):
             query=query,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_gbq(
         self,
@@ -648,7 +648,7 @@ class PandasDatasource(_PandasDatasource):
             path_or_buf=path_or_buf,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_hdf(
         self,
@@ -673,7 +673,7 @@ class PandasDatasource(_PandasDatasource):
             io=io,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_html(
         self,
@@ -701,7 +701,7 @@ class PandasDatasource(_PandasDatasource):
             path_or_buf=path_or_buf,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_json(
         self,
@@ -726,7 +726,7 @@ class PandasDatasource(_PandasDatasource):
             path=path,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_orc(
         self,
@@ -751,7 +751,7 @@ class PandasDatasource(_PandasDatasource):
             path=path,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_parquet(
         self,
@@ -779,7 +779,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_pickle(
         self,
@@ -807,7 +807,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sas(
         self,
@@ -832,7 +832,7 @@ class PandasDatasource(_PandasDatasource):
             path=path,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_spss(
         self,
@@ -862,7 +862,7 @@ class PandasDatasource(_PandasDatasource):
             con=con,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sql(
         self,
@@ -894,7 +894,7 @@ class PandasDatasource(_PandasDatasource):
             con=con,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sql_query(
         self,
@@ -922,7 +922,7 @@ class PandasDatasource(_PandasDatasource):
             con=con,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sql_table(
         self,
@@ -952,7 +952,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_stata(
         self,
@@ -980,7 +980,7 @@ class PandasDatasource(_PandasDatasource):
             filepath_or_buffer=filepath_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_table(
         self,
@@ -1005,7 +1005,7 @@ class PandasDatasource(_PandasDatasource):
             path_or_buffer=path_or_buffer,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_xml(
         self,

@@ -154,4 +154,4 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 delimiter=delimiter,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
