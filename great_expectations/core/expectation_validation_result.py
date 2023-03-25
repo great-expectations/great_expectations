@@ -17,7 +17,7 @@ from great_expectations.core.batch import BatchDefinition, BatchMarkers  # noqa:
 from great_expectations.core.expectation_configuration import (
     ExpectationConfigurationSchema,
 )
-from great_expectations.core.id_dict import BatchSpec, IDDict  # noqa: TCH001
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier  # noqa: TCH001
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -44,7 +44,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def get_metric_kwargs_id(metric_kwargs: dict) -> str:
+def get_metric_kwargs_id(metric_kwargs: dict) -> str | None:
     ###
     #
     # WARNING
@@ -64,10 +64,7 @@ def get_metric_kwargs_id(metric_kwargs: dict) -> str:
     if "column" in metric_kwargs:
         return f"column={metric_kwargs.get('column')}"
 
-    if isinstance(metric_kwargs, IDDict):
-        metric_kwargs.to_id()
-
-    return IDDict(metric_kwargs).to_id()
+    return None
 
 
 @public_api
