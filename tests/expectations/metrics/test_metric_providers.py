@@ -1,12 +1,23 @@
+from typing import Any, Dict
+
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.metrics.metric_provider import (
+    MetricProvider,
+)
+from great_expectations.expectations.metrics.table_metric_provider import (
+    TableMetricProvider,
+)
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     ColumnPairMapMetricProvider,
     MulticolumnMapMetricProvider,
+)
+from great_expectations.expectations.metrics.metric_provider import (
+    metric_value,
 )
 from great_expectations.expectations.metrics.map_metric_provider.column_condition_partial import (
     column_condition_partial,
@@ -21,6 +32,106 @@ from great_expectations.expectations.registry import (
     _registered_metrics,
 )
 
+
+def test__base_metric_provider__registration():
+    """This tests whether the MetricProvider class registers the correct metrics."""
+
+    registered_metric_keys = list(_registered_metrics.keys())
+    for key in registered_metric_keys:
+        assert "custom_metric" not in key
+    prev_registered_metric_key_count = len(registered_metric_keys)
+
+
+    class CustomMetricProvider(MetricProvider):
+        metric_name = "custom_metric"
+        value_keys = ()
+
+        @metric_value(engine=PandasExecutionEngine)
+        def _pandas(
+            cls,
+            execution_engine: PandasExecutionEngine,
+            metric_domain_kwargs: dict,
+            metric_value_kwargs: dict,
+            metrics: Dict[str, Any],
+            runtime_configuration: dict,
+        ):
+            raise NotImplementedError
+
+        @metric_value(engine=SqlAlchemyExecutionEngine)
+        def _sqlalchemy(
+            cls,
+            execution_engine: SqlAlchemyExecutionEngine,
+            metric_domain_kwargs: dict,
+            metric_value_kwargs: dict,
+            metrics: Dict[str, Any],
+            runtime_configuration: dict,
+        ):
+            raise NotImplementedError
+
+        @metric_value(engine=SparkDFExecutionEngine)
+        def _spark(
+            cls,
+            execution_engine: SparkDFExecutionEngine,
+            metric_domain_kwargs: dict,
+            metric_value_kwargs: dict,
+            metrics: Dict[str, Any],
+            runtime_configuration: dict,
+        ):
+            raise NotImplementedError
+
+    CustomMetricProvider()
+
+    assert len(_registered_metrics.keys()) == prev_registered_metric_key_count + 1
+    assert "custom_metric" in _registered_metrics.keys()
+
+def test__table_metric_provider__registration():
+    """This tests whether the TableMetricProvider class registers the correct metrics."""
+
+    registered_metric_keys = list(_registered_metrics.keys())
+    for key in registered_metric_keys:
+        assert "table.custom_metric" not in key
+    prev_registered_metric_key_count = len(registered_metric_keys)
+
+    class CustomTableMetricProvider(TableMetricProvider):
+        metric_name = "table.custom_metric"
+
+        @metric_value(engine=PandasExecutionEngine)
+        def _pandas(
+            cls,
+            execution_engine: PandasExecutionEngine,
+            metric_domain_kwargs: dict,
+            metric_value_kwargs: dict,
+            metrics: Dict[str, Any],
+            runtime_configuration: dict,
+        ):
+            raise NotImplementedError
+        
+        @metric_value(engine=SqlAlchemyExecutionEngine)
+        def _sqlalchemy(
+            cls,
+            execution_engine: SqlAlchemyExecutionEngine,
+            metric_domain_kwargs: dict,
+            metric_value_kwargs: dict,
+            metrics: Dict[str, Any],
+            runtime_configuration: dict,
+        ):
+            raise NotImplementedError
+
+        @metric_value(engine=SparkDFExecutionEngine)
+        def _spark(
+            cls,
+            execution_engine: SparkDFExecutionEngine,
+            metric_domain_kwargs: dict,
+            metric_value_kwargs: dict,
+            metrics: Dict[str, Any],
+            runtime_configuration: dict,
+        ):
+            raise NotImplementedError
+
+    CustomTableMetricProvider()
+
+    assert len(_registered_metrics.keys()) == prev_registered_metric_key_count + 1
+    assert "table.custom_metric" in _registered_metrics.keys()
 
 def test__column_map_metric__registration():
     """This tests whether the ColumnMapMetricProvider class registers the correct metrics.
