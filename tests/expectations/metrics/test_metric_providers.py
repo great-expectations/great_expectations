@@ -5,22 +5,10 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.metric_provider import (
-    MetricProvider,
-)
-from great_expectations.expectations.metrics.table_metric_provider import (
-    TableMetricProvider,
-)
-from great_expectations.expectations.metrics.query_metric_provider import (
-    QueryMetricProvider,
-)
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     ColumnPairMapMetricProvider,
     MulticolumnMapMetricProvider,
-)
-from great_expectations.expectations.metrics.metric_provider import (
-    metric_value,
 )
 from great_expectations.expectations.metrics.map_metric_provider.column_condition_partial import (
     column_condition_partial,
@@ -30,6 +18,16 @@ from great_expectations.expectations.metrics.map_metric_provider.column_pair_con
 )
 from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
     multicolumn_condition_partial,
+)
+from great_expectations.expectations.metrics.metric_provider import (
+    MetricProvider,
+    metric_value,
+)
+from great_expectations.expectations.metrics.query_metric_provider import (
+    QueryMetricProvider,
+)
+from great_expectations.expectations.metrics.table_metric_provider import (
+    TableMetricProvider,
 )
 from great_expectations.expectations.registry import (
     _registered_metrics,
@@ -43,7 +41,6 @@ def test__base_metric_provider__registration():
     for key in registered_metric_keys:
         assert "custom_metric" not in key
     prev_registered_metric_key_count = len(registered_metric_keys)
-
 
     class CustomMetricProvider(MetricProvider):
         metric_name = "custom_metric"
@@ -87,6 +84,7 @@ def test__base_metric_provider__registration():
     assert len(_registered_metrics.keys()) == prev_registered_metric_key_count + 1
     assert "custom_metric" in _registered_metrics.keys()
 
+
 def test__table_metric_provider__registration():
     """This tests whether the TableMetricProvider class registers the correct metrics."""
 
@@ -108,7 +106,7 @@ def test__table_metric_provider__registration():
             runtime_configuration: dict,
         ):
             raise NotImplementedError
-        
+
         @metric_value(engine=SqlAlchemyExecutionEngine)
         def _sqlalchemy(
             cls,
@@ -135,6 +133,7 @@ def test__table_metric_provider__registration():
 
     assert len(_registered_metrics.keys()) == prev_registered_metric_key_count + 1
     assert "table.custom_metric" in _registered_metrics.keys()
+
 
 def test__column_map_metric__registration():
     """This tests whether the ColumnMapMetricProvider class registers the correct metrics.
@@ -276,6 +275,7 @@ def test__multicolumn_map_metric__registration():
     for key in new_keys:
         assert key in _registered_metrics.keys()
 
+
 def test__query_metric_provider__registration():
     """This tests whether the QueryMetricProvider class registers the correct metrics."""
 
@@ -313,4 +313,3 @@ def test__query_metric_provider__registration():
 
     assert len(_registered_metrics.keys()) == prev_registered_metric_key_count + 1
     assert "query.custom_metric" in _registered_metrics.keys()
-
