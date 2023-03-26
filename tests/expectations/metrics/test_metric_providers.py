@@ -234,7 +234,7 @@ def test__multicolumn_map_metric__registration():
         assert "multicolumn_values.equal_seven" not in key
     prev_registered_metric_key_count = len(registered_metric_keys)
 
-    class CustomColumnPairValuesEqualSeven(MulticolumnMapMetricProvider):
+    class CustomMultiColumnValuesEqualSeven(MulticolumnMapMetricProvider):
         condition_metric_name = "multicolumn_values.equal_seven"
 
         condition_domain_keys = (
@@ -259,7 +259,7 @@ def test__multicolumn_map_metric__registration():
         def _spark(cls, column_list, **kwargs):
             raise NotImplementedError
 
-    CustomColumnPairValuesEqualSeven()
+    CustomMultiColumnValuesEqualSeven()
 
     assert len(_registered_metrics.keys()) == prev_registered_metric_key_count + 7
 
