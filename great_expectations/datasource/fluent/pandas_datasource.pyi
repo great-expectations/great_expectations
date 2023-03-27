@@ -23,7 +23,6 @@ from typing import (
 
 import pandas as pd
 import pydantic
-import sqlalchemy
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent.interfaces import (
@@ -34,6 +33,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
     _DataAssetT,
 )
+from great_expectations.optional_imports import sqlalchemy
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent import Sorter

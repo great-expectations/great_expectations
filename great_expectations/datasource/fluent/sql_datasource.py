@@ -46,7 +46,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 from great_expectations.optional_imports import sqlalchemy
 
 if TYPE_CHECKING:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251 # type-checking only
 
 
 class SQLDatasourceError(Exception):
