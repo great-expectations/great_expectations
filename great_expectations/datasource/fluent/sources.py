@@ -339,21 +339,22 @@ class _SourceFactories:
         ] = self._data_context.datasources  # type: ignore[union-attr]  # typing information is being lost in DataContext factory
 
         # if a legacy datasource with this name already exists, we try a different name
-        existing_datasource: LegacyDatasource | BaseDatasource | Datasource | None = (
-            datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
+        existing_datasource: LegacyDatasource | BaseDatasource | Datasource | PandasDatasource | None = datasources.get(
+            DEFAULT_PANDAS_DATASOURCE_NAME
         )
 
-        # if a legacy datasource exists for all possible_default_datasource_names, raise an error
-        if existing_datasource and not isinstance(
-            existing_datasource, PandasDatasource
-        ):
-            raise DefaultPandasDatasourceError(
-                f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
-                "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."
+        if not existing_datasource:
+            return self._data_context.sources.add_pandas(
+                name=DEFAULT_PANDAS_DATASOURCE_NAME
             )
 
-        return existing_datasource or self._data_context.sources.add_pandas(
-            name=DEFAULT_PANDAS_DATASOURCE_NAME
+        if isinstance(existing_datasource, PandasDatasource):
+            return existing_datasource
+
+        # if a legacy datasource exists for all possible_default_datasource_names, raise an error
+        raise DefaultPandasDatasourceError(
+            f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
+            "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."
         )
 
     @property
