@@ -391,7 +391,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         """
         column_name: str
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
-        metric_value: Union[int, float]
+        metric_value: MetricValue
 
         resolved_metrics_by_column_name: Dict[
             str, Dict[Tuple[str, str, str], MetricValue]
