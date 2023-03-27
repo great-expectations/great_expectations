@@ -4,9 +4,12 @@
 extend = "../pyproject.toml"
 
 extend-ignore = [
-    # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
+    # https://beta.ruff.rs/docs/rules/#flake8-type-checking-tch
     # This is likely to be a high-touch rule that most contribs don't need to care about.
     "TCH001",
+    # https://beta.ruff.rs/docs/rules/#flake8-tidy-imports-tid
+    "TID251",  # banned-api - this is a new process for great_expecations once we've firmly established this pattern we
+    # can enable it for contrib packages
 ]
 
 [isort]
