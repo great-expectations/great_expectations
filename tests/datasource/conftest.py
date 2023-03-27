@@ -128,6 +128,11 @@ def basic_sparkdf_datasource(test_backends):
 
 
 @pytest.fixture
+def mysql_sqlalchemy_datasource(mysql_engine):
+    return Datasource("mysql_sqlalchemy_datasource", engine=mysql_engine)
+
+
+@pytest.fixture
 def test_cases_for_sql_data_connector_sqlite_connection_url(sa):
     if sa is None:
         raise ValueError("SQL Database tests require sqlalchemy to be installed.")
