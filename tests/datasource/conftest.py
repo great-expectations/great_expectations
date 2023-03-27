@@ -8,6 +8,7 @@ from moto import mock_glue
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
+    Datasource,
     PandasDatasource,
     SparkDFDatasource,
 )
