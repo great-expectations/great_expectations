@@ -206,7 +206,10 @@ class _SourceFactories:
 
     @classmethod
     def _register_crud_method(
-        cls, crud_fn_name: str, crud_fn_doc: str, crud_method_info: SourceFactoryFn
+        cls,
+        crud_fn_name: str,
+        crud_fn_doc: str | None,
+        crud_method_info: SourceFactoryFn,
     ):
         # We set the name and doc and the crud_method_info because that will be used as a proxy
         # for the real crud method so we can call public_api to generate docs for these dynamically
