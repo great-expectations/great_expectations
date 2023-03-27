@@ -28,7 +28,6 @@ python_version = "3.7"
 plugins = ["pydantic.mypy"]
 files = [
     "great_expectations",
-    # test modules
     "tests/datasource/fluent",
     # "contrib" # ignore entire `contrib` package
     ]
