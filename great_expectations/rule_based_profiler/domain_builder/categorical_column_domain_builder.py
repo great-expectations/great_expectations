@@ -1,6 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Union,
+)
 
 from great_expectations.core.domain import Domain, SemanticDomainTypes
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -35,7 +46,9 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     This DomainBuilder uses column cardinality to identify domains.
     """
 
-    exclude_field_names: Set[str] = ColumnDomainBuilder.exclude_field_names | {
+    exclude_field_names: ClassVar[
+        Set[str]
+    ] = ColumnDomainBuilder.exclude_field_names | {
         "cardinality_checker",
     }
     cardinality_limit_modes: CardinalityLimitMode = CardinalityLimitMode
