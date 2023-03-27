@@ -160,8 +160,17 @@ validation_result_identifier = checkpoint_result.list_validation_result_identifi
 context.open_data_docs(resource_identifier=validation_result_identifier)
 ```
 
-#### 4.3 Save the Data Context for future use
-Because we did not previously initialize a Filesystem Data Context or specify a path at which to create one, the Data Context we recieved from `gx.get_context()` was a temporary, in-memory Ephemeral Data Context.  To save this Data Context for future use, we will convert it to a Filesystem Data Context:
+#### 4.3 Save the Ephemeral Data Context for future use
+
+Because we did not previously initialize a Filesystem Data Context or specify a path at which to create one, the Data Context we recieved from `gx.get_context()` was a temporary, in-memory Ephemeral Data Context.  
+
+:::tip What if I have previously created a Filesystem Data Context?
+
+If you have previously created a Filesystem Data Context, the `get_context()` command will return an instance of your Filesystem Data Context, rather than a new Ephemeral Data Context.  In that case, you will not need to run the `convert_to_file_context()` code: your Data Context already is a Filesystem Data Context.
+
+:::
+
+To save an Ephemeral Data Context for future use, we convert it to a Filesystem Data Context:
 
 ```python title="Python code"
 context = context.convert_to_file_context()
