@@ -328,7 +328,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             rule_name=rule_name,
             column_names=candidate_column_names,
             domain_type=self.domain_type,
-            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,
+            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,  # type: ignore[union-attr] # could be None
         )
 
         return domains
