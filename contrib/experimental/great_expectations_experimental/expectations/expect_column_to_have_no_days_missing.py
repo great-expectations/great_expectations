@@ -8,8 +8,8 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.optional_imports import sqlalchemy as sa
 
 
 class ColumnDistinctDates(ColumnAggregateMetricProvider):
@@ -41,7 +41,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
         sqlalchemy_engine = execution_engine.engine
 
         # get all unique dates from timestamp
-        query = sa.select([sa.func.Date(column).distinct()]).select_from(selectable)
+        query = sa.select(sa.func.Date(column).distinct()).select_from(selectable)
         all_unique_dates = [i[0] for i in sqlalchemy_engine.execute(query).fetchall()]
 
         # Only sqlite returns as strings, so make date objects be strings

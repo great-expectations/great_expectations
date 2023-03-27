@@ -78,6 +78,7 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
@@ -2297,17 +2298,24 @@ def sqlite_view_engine(test_backends):
 
             sqlite_engine = sa.create_engine("sqlite://")
             df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-            df.to_sql(name="test_table", con=sqlite_engine, index=True)
-            sqlite_engine.execute(
-                sa.text(
-                    "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-                )
+            add_dataframe_to_db(
+                df=df,
+                name="test_table",
+                con=sqlite_engine,
+                index=True,
             )
-            sqlite_engine.execute(
-                sa.text(
-                    "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-                )
-            )
+            with sqlite_engine.connect() as connection:
+                with connection.begin():
+                    connection.execute(
+                        sa.text(
+                            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+                        )
+                    )
+                    connection.execute(
+                        sa.text(
+                            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+                        )
+                    )
             return sqlite_engine
         except ImportError:
             sa = None
@@ -7335,6 +7343,35 @@ def taxi_test_file_directory():
 def test_df_pandas():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     return test_df
+
+
+@pytest.fixture
+def spark_df_from_pandas_df():
+    """
+    Construct a spark dataframe from pandas dataframe.
+    Returns:
+        Function that can be used in your test e.g.:
+        spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+    """
+
+    def _construct_spark_df_from_pandas(
+        spark_session,
+        pandas_df,
+    ):
+
+        spark_df = spark_session.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in pandas_df.to_records(index=False)
+            ],
+            pandas_df.columns.tolist(),
+        )
+        return spark_df
+
+    return _construct_spark_df_from_pandas
 
 
 @pytest.fixture

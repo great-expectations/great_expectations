@@ -212,7 +212,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         *args,
         persist=True,
         spark_config=None,
-        force_reuse_spark_context=False,
+        force_reuse_spark_context=True,
         **kwargs,
     ) -> None:
         self._persist = persist

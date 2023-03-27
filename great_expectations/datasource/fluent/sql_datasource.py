@@ -925,7 +925,7 @@ class SQLDatasource(Datasource):
             schema_name=schema_name,
             order_by=order_by_sorters,
         )
-        return self.add_asset(asset)
+        return self._add_asset(asset)
 
     @public_api
     def add_query_asset(
@@ -952,4 +952,4 @@ class SQLDatasource(Datasource):
             query=query,
             order_by=order_by_sorters,
         )
-        return self.add_asset(asset)
+        return self._add_asset(asset)
