@@ -556,10 +556,11 @@ def load_data_into_postgres_database(sa):
     table_name: str = "yellow_tripdata_sample_2019"
 
     engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
-    connection: sa.engine.Connection = engine.connect()
 
     # ensure we aren't appending to an existing table
-    connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+    with engine.begin() as connection:
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+
     for data_path in data_paths:
         load_data_into_test_database(
             table_name=table_name,
@@ -580,10 +581,11 @@ def load_data_into_postgres_database(sa):
     table_name: str = "yellow_tripdata_sample_2020"
 
     engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
-    connection: sa.engine.Connection = engine.connect()
 
     # ensure we aren't appending to an existing table
-    connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+    with engine.begin() as connection:
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+
     for data_path in data_paths:
         load_data_into_test_database(
             table_name=table_name,

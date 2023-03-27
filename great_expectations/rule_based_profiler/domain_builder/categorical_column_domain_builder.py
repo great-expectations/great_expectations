@@ -29,16 +29,16 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
     get_resolved_metrics_by_key,
 )
-from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,  # noqa: TCH001
-)
-from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
+    from great_expectations.rule_based_profiler.parameter_container import (
+        ParameterContainer,  # noqa: TCH001
+    )
+    from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
     from great_expectations.validator.validator import Validator
 
 
@@ -407,7 +407,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             if all(
                 [
                     self.cardinality_checker.cardinality_within_limit(  # type: ignore[union-attr] # could be None
-                        metric_value=metric_value
+                        metric_value=metric_value  # type: ignore[arg-type] # Expecting Union[int, float] (subset of "MetricValue").
                     )
                     for metric_value in resolved_metrics.values()
                 ]
