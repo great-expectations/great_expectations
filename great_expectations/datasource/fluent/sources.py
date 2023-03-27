@@ -317,7 +317,7 @@ class _SourceFactories:
                 asset = asset_type(name=name, **kwargs)
                 self._add_asset(asset)
                 batch_request = asset.build_batch_request()
-                return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[attr-defined,arg-type] # batches.py not properly typed
+                return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # batches.py not properly typed
 
             _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
                 _read_asset_factory, asset_type, exclude={"type"}
@@ -335,13 +335,11 @@ class _SourceFactories:
         from great_expectations.datasource.fluent import PandasDatasource
 
         datasources: dict[
-            str, LegacyDatasource | BaseDatasource | Datasource
-        ] = self._data_context.datasources  # type: ignore[union-attr]  # typing information is being lost in DataContext factory
+            str, LegacyDatasource | BaseDatasource | Datasource | PandasDatasource
+        ] = self._data_context.datasources
 
         # if a legacy datasource with this name already exists, we try a different name
-        existing_datasource: LegacyDatasource | BaseDatasource | Datasource | PandasDatasource | None = datasources.get(
-            DEFAULT_PANDAS_DATASOURCE_NAME
-        )
+        existing_datasource = datasources.get(DEFAULT_PANDAS_DATASOURCE_NAME)
 
         if not existing_datasource:
             return self._data_context.sources.add_pandas(
