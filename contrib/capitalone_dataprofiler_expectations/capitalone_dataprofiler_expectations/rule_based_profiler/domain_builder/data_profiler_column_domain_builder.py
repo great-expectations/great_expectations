@@ -9,9 +9,14 @@ from great_expectations.core.domain import (
     SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
+from great_expectations.rule_based_profiler.helpers.util import (
+    get_parameter_value_and_validate_return_type,
+)
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,  # noqa: TCH001
 )
+from great_expectations.util import is_candidate_subset_of_target
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
     from great_expectations.data_context.data_context.abstract_data_context import (
@@ -27,6 +32,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
 
     def __init__(
         self,
+        profile_path: str,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -43,6 +49,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
     ) -> None:
         """
         Args:
+            profile_path: path to output (in ".pkl" format) of CapitalOne DataProfiler
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             include_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to match.
@@ -66,6 +73,12 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             exclude_semantic_types=exclude_semantic_types,
             data_context=data_context,
         )
+
+        self._profile_path = profile_path
+
+    @property
+    def profile_path(self) -> str:
+        return self._profile_path
 
     def _get_domains(
         self,
@@ -93,9 +106,40 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             variables=variables,
         )
 
-        if not (self.include_column_names and effective_column_names):
+        # Obtain profile_path from "rule state" (i.e., variables and parameters); from instance variable otherwise.
+        profile_path: str = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=self.profile_path,
+            expected_return_type=str,
+            variables=variables,
+            parameters=None,
+        )
+
+        profile_report: dict = validator.get_metric(  # type: ignore[assignment] # could be None
+            metric=MetricConfiguration(
+                metric_name="data_profiler.profile_report",
+                # batch_id is irrelevant, because CapitalOne DataProfiler report is used
+                metric_domain_kwargs={
+                    "profile_path": profile_path,
+                },
+                metric_value_kwargs=None,
+            )
+        )
+
+        profile_report_column_names: List[str] = [
+            element["column_name"] for element in profile_report["data_stats"]
+        ]
+
+        if not (profile_report_column_names and effective_column_names):
             raise gx_exceptions.ProfilerExecutionError(
-                message=f'Error: "column_list" in {self.__class__.__name__} must not be empty.'
+                message=f"Error: List of profiled columns in {self.__class__.__name__} must not be empty."
+            )
+
+        if not is_candidate_subset_of_target(
+            candidate=profile_report_column_names, target=effective_column_names
+        ):
+            raise gx_exceptions.ProfilerExecutionError(
+                message=f"Error: Some of profiled columns in {self.__class__.__name__} are not found in Batch table."
             )
 
         column_name: str
