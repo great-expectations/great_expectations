@@ -1,8 +1,8 @@
 {
   "expectation_type" : "expect_column_value_lengths_to_be_between",
   "datasets" : [{
+    "dataset_name": "expect_column_value_lengths_to_be_between_1",
     "data" : {
-      "dataset_name": "expect_column_value_lengths_to_be_between_1",
       "s1":["smart","silly","sassy","slimy","sexy"],
       "s2":["cool","calm","collected","casual","creepy"],
       "s3":["cool","calm","collected","casual", null],
