@@ -38,7 +38,6 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
             batch_columns_list=metrics["table.columns"],
-            execution_engine=execution_engine,
         )
 
         profile_path = metric_value_kwargs["profile_path"]

@@ -11,11 +11,11 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -134,7 +134,7 @@ class TableHead(TableMetricProvider):
 
         if df is None:
             # we want to compile our selectable
-            stmt = sa.select(["*"]).select_from(selectable)
+            stmt = sa.select("*").select_from(selectable)
             fetch_all = metric_value_kwargs["fetch_all"]
             if fetch_all:
                 sql = stmt.compile(
