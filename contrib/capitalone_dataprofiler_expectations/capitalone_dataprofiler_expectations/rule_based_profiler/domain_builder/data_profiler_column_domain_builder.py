@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
@@ -8,7 +8,6 @@ from great_expectations.core.domain import (
     Domain,
     SemanticDomainTypes,
 )
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,  # noqa: TCH001
@@ -21,48 +20,52 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import Validator
 
 
-class MultiColumnDomainBuilder(ColumnDomainBuilder):
+class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
     """
-    This DomainBuilder uses relative tolerance of specified map metric to identify domains.
+    This DomainBuilder emits "Domain" object for every column available in CapitalOne DataProfiler report.
     """
-
-    exclude_field_names: ClassVar[
-        Set[str]
-    ] = ColumnDomainBuilder.exclude_field_names | {
-        "exclude_column_names",
-        "include_column_name_suffixes",
-        "exclude_column_name_suffixes",
-        "semantic_type_filter_module_name",
-        "semantic_type_filter_class_name",
-        "include_semantic_types",
-        "exclude_semantic_types",
-    }
 
     def __init__(
         self,
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
+        include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+        exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
+        semantic_type_filter_module_name: Optional[str] = None,
+        semantic_type_filter_class_name: Optional[str] = None,
+        include_semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        ] = None,
+        exclude_semantic_types: Optional[
+            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
+        ] = None,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
         """
         Args:
-            include_column_names: Explicitly specified desired columns
+            include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
+            exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
+            include_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to match.
+            exclude_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to not match.
+            semantic_type_filter_module_name: module_name containing class that implements SemanticTypeFilter interfaces
+            semantic_type_filter_class_name: class_name of class that implements SemanticTypeFilter interfaces
+            include_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
+            to be included
+            exclude_semantic_types: single/multiple type specifications using SemanticDomainTypes (or str equivalents)
+            to be excluded
             data_context: AbstractDataContext associated with this DomainBuilder
         """
         super().__init__(
             include_column_names=include_column_names,
-            exclude_column_names=None,
-            include_column_name_suffixes=None,
-            exclude_column_name_suffixes=None,
-            semantic_type_filter_module_name=None,
-            semantic_type_filter_class_name=None,
-            include_semantic_types=None,
-            exclude_semantic_types=None,
+            exclude_column_names=exclude_column_names,
+            include_column_name_suffixes=include_column_name_suffixes,
+            exclude_column_name_suffixes=exclude_column_name_suffixes,
+            semantic_type_filter_module_name=semantic_type_filter_module_name,
+            semantic_type_filter_class_name=semantic_type_filter_class_name,
+            include_semantic_types=include_semantic_types,
+            exclude_semantic_types=exclude_semantic_types,
             data_context=data_context,
         )
-
-    @property
-    def domain_type(self) -> MetricDomainTypes:
-        return MetricDomainTypes.MULTICOLUMN
 
     def _get_domains(
         self,
