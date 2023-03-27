@@ -8,6 +8,9 @@ from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
 )
+from great_expectations.data_context.store.gx_cloud_store_backend import (
+    GXCloudStoreBackend,
+)
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
@@ -275,12 +278,12 @@ def test_list_expectation_suites(
     assert suites == [
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=suite_1.id,
+            id=suite_1.id,
             resource_name=suite_1.name,
         ),
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=suite_2.id,
+            id=suite_2.id,
             resource_name=suite_2.name,
         ),
     ]
@@ -328,7 +331,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
         mock_list_expectation_suites.return_value = [
             GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.EXPECTATION,
-                cloud_id=suite_id,
+                id=suite_id,
                 resource_name=suite_name,
             )
         ]
@@ -417,7 +420,7 @@ def test_get_expectation_suite_by_name_retrieves_suite_from_cloud(
             params={"name": suite_1.name},
         )
 
-    assert str(suite.ge_cloud_id) == str(suite_id)
+    assert suite.ge_cloud_id == suite_id
 
 
 @pytest.mark.unit
@@ -434,6 +437,17 @@ def test_get_expectation_suite_nonexistent_suite_raises_error(
             "requests.Session.get", autospec=True, side_effect=mocked_404_response
         ):
             context.get_expectation_suite(ge_cloud_id=suite_id)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_get_expectation_suite_no_identifier_raises_error(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+) -> None:
+    context = empty_base_data_context_in_cloud_mode
+
+    with pytest.raises(ValueError):
+        context.get_expectation_suite()
 
 
 @pytest.mark.unit
@@ -541,10 +555,55 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     mock_expectations_store_has_key.assert_called_once_with(
         GXCloudIdentifier(
             GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=suite_id,
+            id=suite_id,
             resource_name=suite_name,
         )
     )
     assert f"expectation_suite with GX Cloud ID {suite_id} already exists" in str(
         e.value
     )
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_add_or_update_expectation_suite_adds_new_obj(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+):
+    context = empty_base_data_context_in_cloud_mode
+    mock_expectations_store_has_key.return_value = True
+
+    name = "my_suite"
+    suite = ExpectationSuite(expectation_suite_name=name)
+
+    with mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
+        return_value=False,
+    ), mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.add",
+    ) as mock_add:
+        context.add_or_update_expectation_suite(expectation_suite=suite)
+
+    mock_add.assert_called_once()
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_add_or_update_expectation_suite_updates_existing_obj(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+):
+    context = empty_base_data_context_in_cloud_mode
+    mock_expectations_store_has_key.return_value = True
+
+    name = "my_suite"
+    id = "861955f0-121e-40ea-9f4f-7b4fc78d9225"
+    suite = ExpectationSuite(expectation_suite_name=name, ge_cloud_id=id)
+
+    with mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.has_key",
+        return_value=True,
+    ), mock.patch(
+        f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.update",
+    ) as mock_update:
+        context.add_or_update_expectation_suite(expectation_suite=suite)
+
+    mock_update.assert_called_once()

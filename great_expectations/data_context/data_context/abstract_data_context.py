@@ -29,7 +29,6 @@ from typing import (
     overload,
 )
 
-from dateutil.parser import parse
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Literal
@@ -108,13 +107,13 @@ from great_expectations.datasource import LegacyDatasource
 from great_expectations.datasource.datasource_serializer import (
     NamedDatasourceSerializer,
 )
-from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.experimental.datasources.config import GxConfig
-from great_expectations.experimental.datasources.interfaces import Batch as XBatch
-from great_expectations.experimental.datasources.interfaces import (
-    Datasource as XDatasource,
+from great_expectations.datasource.fluent.config import GxConfig
+from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
+from great_expectations.datasource.fluent.interfaces import (
+    Datasource as FluentDatasource,
 )
-from great_expectations.experimental.datasources.sources import _SourceFactories
+from great_expectations.datasource.fluent.sources import _SourceFactories
+from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
 from great_expectations.profile.basic_dataset_profiler import BasicDatasetProfiler
 from great_expectations.rule_based_profiler.data_assistant.data_assistant_dispatcher import (
     DataAssistantDispatcher,
@@ -153,6 +152,7 @@ if TYPE_CHECKING:
         CheckpointStore,
         EvaluationParameterStore,
     )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.store.expectations_store import (
         ExpectationsStore,
     )
@@ -230,7 +230,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     # test_yml_config module so AbstractDataContext is not so cluttered.
     FALSEY_STRINGS = ["FALSE", "false", "False", "f", "F", "0"]
     GLOBAL_CONFIG_PATHS = [
-        os.path.expanduser("~/.great_expectations/great_expectations.conf"),
+        os.path.expanduser(  # noqa: PTH111
+            "~/.great_expectations/great_expectations.conf"
+        ),
         "/etc/great_expectations.conf",
     ]
     DOLLAR_SIGN_ESCAPE_STRING = r"\$"
@@ -242,7 +244,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     PROFILING_ERROR_CODE_MULTIPLE_BATCH_KWARGS_GENERATORS_FOUND = 5
 
     # instance attribute type annotations
-    zep_config: GxConfig
+    fluent_config: GxConfig
 
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
@@ -255,7 +257,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             runtime_environment (dict): a dictionary of config variables that
                 override those set in config_variables.yml and the environment
         """
-        self.zep_config = self._load_zep_config()
 
         if runtime_environment is None:
             runtime_environment = {}
@@ -265,8 +266,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._config_variables = self._load_config_variables()
         self._variables = self._init_variables()
 
+        # config providers must be provisioned before loading zep_config
+        self.fluent_config = self._load_fluent_config(self._config_provider)
+
         # Init plugin support
-        if self.plugins_directory is not None and os.path.exists(
+        if self.plugins_directory is not None and os.path.exists(  # noqa: PTH110
             self.plugins_directory
         ):
             sys.path.append(self.plugins_directory)
@@ -278,7 +282,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         # Init stores
         self._stores: dict = {}
-        self._init_stores(self.project_config_with_variables_substituted.stores)
+        self._init_primary_stores(self.project_config_with_variables_substituted.stores)
+        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
+        # As such, it must be instantiated separately.
+        self._datasource_store = self._init_datasource_store()
 
         # Init data_context_id
         self._data_context_id = self._construct_data_context_id()
@@ -317,7 +324,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                     validation_operator_config,
                 )
 
-        self._attach_zep_config_datasources(self.zep_config)
+        self._attach_fluent_config_datasources_and_build_data_connectors(
+            self.fluent_config
+        )
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -563,7 +572,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ):
                 return DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value
             if self.root_directory:
-                checkpoint_store_directory: str = os.path.join(
+                checkpoint_store_directory: str = os.path.join(  # noqa: PTH118
                     self.root_directory,
                     DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
                 )
@@ -629,7 +638,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             ):
                 return DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value
             if self.root_directory:
-                checkpoint_store_directory: str = os.path.join(
+                checkpoint_store_directory: str = os.path.join(  # noqa: PTH118
                     self.root_directory,
                     DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
                 )
@@ -693,14 +702,20 @@ class AbstractDataContext(ConfigPeer, ABC):
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _attach_datasource_to_context(self, datasource: XDatasource):
+    def _add_fluent_datasource(self, datasource: FluentDatasource) -> None:
         # We currently don't allow one to overwrite a datasource with this internal method
         if datasource.name in self.datasources:
             raise gx_exceptions.DataContextError(
-                f"Can not write the experimental datasource {datasource.name} because a datasource of that "
+                f"Can not write the fluent datasource {datasource.name} because a datasource of that "
                 "name already exists in the data context."
             )
         self.datasources[datasource.name] = datasource
+
+    def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
+        self.datasources[datasource.name] = datasource
+
+    def _delete_fluent_datasource(self, datasource_name: str) -> None:
+        self.datasources.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -743,8 +758,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config = datasourceConfigSchema.load(datasource_config_dict)
         datasource_name: str = datasource.name
 
-        updated_datasource_config_from_store: DatasourceConfig = self._datasource_store.set(  # type: ignore[attr-defined]
-            key=None, value=datasource_config
+        updated_datasource_config_from_store: DatasourceConfig = (
+            self._datasource_store.set(key=None, value=datasource_config)
         )
         # Use the updated datasource config, since the store may populate additional info on update.
         self.config.datasources[datasource_name] = updated_datasource_config_from_store  # type: ignore[index,assignment]
@@ -923,7 +938,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config = DatasourceConfig(**datasource_config_dict)
 
         if save_changes:
-            self._datasource_store.update_by_name(  # type: ignore[attr-defined]
+            self._datasource_store.update_by_name(
                 datasource_name=name, datasource_config=datasource_config
             )
 
@@ -1012,16 +1027,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
+    @public_api
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
+
         The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
         Legacy (V2) Datasource schemas.  The version-specific implementations are contained in "_get_batch_v2()" and
         "_get_batch_v3()", respectively, both of which are in the present module.
 
         For the V3 API parameters, please refer to the signature and parameter description of method "_get_batch_v3()".
         For the Legacy usage, please refer to the signature and parameter description of the method "_get_batch_v2()".
+
+        Processing Steps:
+            1. Determine the version (possible values are "v3" or "v2").
+            2. Convert the positional arguments to the appropriate named arguments, based on the version.
+            3. Package the remaining arguments as variable keyword arguments (applies only to V3).
+            4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
 
         Args:
             arg1: the first positional argument (can take on various types)
@@ -1032,12 +1055,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Returns:
             Batch (V3) or DataAsset (V2) -- the requested batch
-
-        Processing Steps:
-        1. Determine the version (possible values are "v3" or "v2").
-        2. Convert the positional arguments to the appropriate named arguments, based on the version.
-        3. Package the remaining arguments as variable keyword arguments (applies only to V3).
-        4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
         """
 
         api_version: Optional[str] = self._get_data_context_version(arg1=arg1, **kwargs)
@@ -1114,7 +1131,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             datasource_name = arg1
         try:
-            datasource: LegacyDatasource | BaseDatasource | XDatasource = (
+            datasource: LegacyDatasource | BaseDatasource | FluentDatasource = (
                 self.get_datasource(datasource_name=datasource_name)
             )
             if issubclass(type(datasource), BaseDatasource):
@@ -1182,14 +1199,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
         datasource_name: Optional[Any] = batch_kwargs.get("datasource")
-        datasource: LegacyDatasource | BaseDatasource | XDatasource
+        datasource: LegacyDatasource | BaseDatasource | FluentDatasource
         if isinstance(datasource_name, str):
             datasource = self.get_datasource(datasource_name)
         else:
             datasource = self.get_datasource(None)  #  type: ignore[arg-type]
         assert not isinstance(
-            datasource, XDatasource
-        ), "Experimental Datasource cannot be built from batch_kwargs"
+            datasource, FluentDatasource
+        ), "Fluent Datasource cannot be built from batch_kwargs"
         batch = datasource.get_batch(  #  type: ignore[union-attr]
             batch_kwargs=batch_kwargs, batch_parameters=batch_parameters
         )
@@ -1391,7 +1408,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.cloud_id
+            ge_cloud_id = response.id
 
         # If an id is present, we want to prioritize that as our key for object retrieval
         if ge_cloud_id:
@@ -1408,7 +1425,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def get_datasource(
         self, datasource_name: str = "default"
-    ) -> Union[LegacyDatasource, BaseDatasource, XDatasource]:
+    ) -> Union[LegacyDatasource, BaseDatasource, FluentDatasource]:
         """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
         Args:
@@ -1428,7 +1445,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if datasource_name in self._cached_datasources:
             return self._cached_datasources[datasource_name]
 
-        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(  # type: ignore[attr-defined]
+        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
             datasource_name=datasource_name
         )
 
@@ -1568,7 +1585,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         if save_changes and isinstance(datasource, (LegacyDatasource, BaseDatasource)):
             datasource_config = datasourceConfigSchema.load(datasource.config)
-            self._datasource_store.delete(datasource_config)  # type: ignore[attr-defined]
+            self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
@@ -1761,7 +1778,16 @@ class AbstractDataContext(ConfigPeer, ABC):
             checkpoint=checkpoint,
         )
 
-        return self.checkpoint_store.add_checkpoint(checkpoint)
+        try:
+            return self.checkpoint_store.add_checkpoint(checkpoint)
+        except gx_exceptions.CheckpointError as e:
+            # deprecated-v0.15.50
+            warnings.warn(
+                f"{e.message}; using add_checkpoint to overwrite an existing value is deprecated as of v0.15.50 "
+                "and will be removed in v0.18. Please use add_or_update_checkpoint instead.",
+                DeprecationWarning,
+            )
+            return self.checkpoint_store.add_or_update_checkpoint(checkpoint)
 
     @public_api
     @new_method_or_class(version="0.15.48")
@@ -1783,6 +1809,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_checkpoint(
         self,
         name: str = ...,
+        id: str | None = ...,
         config_version: int | float | None = ...,
         template_name: str | None = ...,
         module_name: str | None = ...,
@@ -1795,19 +1822,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: dict | None = ...,
         validations: list[dict] | None = ...,
         profilers: list[dict] | None = ...,
-        # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: str | None = ...,
-        batches: list[dict] | None = ...,
-        # the following four arguments are used by SimpleCheckpoint
         site_names: str | list[str] | None = ...,
         slack_webhook: str | None = ...,
         notify_on: str | None = ...,
         notify_with: str | list[str] | None = ...,
-        ge_cloud_id: str | None = ...,
-        expectation_suite_ge_cloud_id: str | None = ...,
-        default_validation_id: str | None = ...,
-        id: str | None = ...,
         expectation_suite_id: str | None = ...,
+        default_validation_id: str | None = ...,
         checkpoint: None = ...,
     ) -> Checkpoint:
         """
@@ -1820,6 +1840,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_checkpoint(
         self,
         name: None = ...,
+        id: None = ...,
         config_version: None = ...,
         template_name: None = ...,
         module_name: None = ...,
@@ -1832,17 +1853,12 @@ class AbstractDataContext(ConfigPeer, ABC):
         runtime_configuration: None = ...,
         validations: None = ...,
         profilers: None = ...,
-        validation_operator_name: None = ...,
-        batches: None = ...,
         site_names: None = ...,
         slack_webhook: None = ...,
         notify_on: None = ...,
         notify_with: None = ...,
-        ge_cloud_id: None = ...,
-        expectation_suite_ge_cloud_id: None = ...,
-        default_validation_id: None = ...,
-        id: None = ...,
         expectation_suite_id: None = ...,
+        default_validation_id: None = ...,
         checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
@@ -2021,10 +2037,14 @@ class AbstractDataContext(ConfigPeer, ABC):
             The requested Checkpoint.
 
         Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exist.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+
+        if not name and not id:
+            raise ValueError("name and id cannot both be None")
+
         del ge_cloud_id
 
         from great_expectations.checkpoint.checkpoint import Checkpoint
@@ -2060,7 +2080,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             id: The id associated with the target Checkpoint (preferred over `ge_cloud_id`).
 
         Raises:
-            CheckpointNotFoundError: If the requested Checkpoint does not exists.
+            CheckpointNotFoundError: If the requested Checkpoint does not exist.
         """
         # <GX_RENAME>
         id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
@@ -2442,7 +2462,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
-        batch_list: Sequence[Union[Batch, XBatch]],
+        batch_list: Sequence[Union[Batch, FluentBatch]],
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> Validator:
@@ -2472,13 +2492,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         # We get a single batch_definition so we can get the execution_engine here. All batches will share the same one
         # So the batch itself doesn't matter. But we use -1 because that will be the latest batch loaded.
         datasource_name: str = batch_list[-1].batch_definition.datasource_name
-        datasource: LegacyDatasource | BaseDatasource | XDatasource = self.datasources[
-            datasource_name
-        ]
+        datasource: LegacyDatasource | BaseDatasource | FluentDatasource = (
+            self.datasources[datasource_name]
+        )
         execution_engine: ExecutionEngine
-        if isinstance(datasource, XDatasource):
+        if isinstance(datasource, FluentDatasource):
             batch = batch_list[-1]
-            assert isinstance(batch, XBatch)
+            assert isinstance(batch, FluentBatch)
             execution_engine = batch.data.execution_engine
         elif isinstance(datasource, BaseDatasource):
             execution_engine = datasource.execution_engine
@@ -3125,15 +3145,32 @@ class AbstractDataContext(ConfigPeer, ABC):
         Returns:
             The persisted Profiler constructed by the input arguments.
         """
-        return RuleBasedProfiler.add_profiler(
-            data_context=self,
-            profiler_store=self.profiler_store,
-            name=name,
-            config_version=config_version,
-            rules=rules,
-            variables=variables,
-            profiler=profiler,
-        )
+        try:
+            return RuleBasedProfiler.add_profiler(
+                data_context=self,
+                profiler_store=self.profiler_store,
+                name=name,
+                config_version=config_version,
+                rules=rules,
+                variables=variables,
+                profiler=profiler,
+            )
+        except gx_exceptions.ProfilerError as e:
+            # deprecated-v0.15.50
+            warnings.warn(
+                f"{e.message}; using add_profiler to overwrite an existing value is deprecated as of v0.15.50 "
+                "and will be removed in v0.18. Please use add_or_update_profiler instead.",
+                DeprecationWarning,
+            )
+            return RuleBasedProfiler.add_or_update_profiler(
+                data_context=self,
+                profiler_store=self.profiler_store,
+                name=name,
+                config_version=config_version,
+                rules=rules,
+                variables=variables,
+                profiler=profiler,
+            )
 
     @public_api
     @new_argument(
@@ -3596,21 +3633,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif not isinstance(run_id, RunIdentifier):
             run_name = run_name or "profiling"
@@ -3808,8 +3831,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
                     assert not isinstance(
-                        datasource, XDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
+                        datasource, FluentDatasource
+                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
                     data_asset_names[
                         datasource_name
                     ] = datasource.get_available_data_asset_names(
@@ -3819,8 +3842,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
                 assert not isinstance(
-                    datasource, XDatasource
-                ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
+                    datasource, FluentDatasource
+                ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
                 # 20230120 - Chetan - I believe this is a latent bug - we should not be doing string-based indexing
                 #                     within a list. This will result in a runtime error.
                 datasource_names[  # type:ignore[call-overload]
@@ -3839,8 +3862,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 try:
                     datasource = self.get_datasource(datasource_name)
                     assert not isinstance(
-                        datasource, XDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for XDatasource'
+                        datasource, FluentDatasource
+                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
                     data_asset_names[
                         datasource_name
                     ] = datasource.get_available_data_asset_names()
@@ -3870,17 +3893,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             BatchKwargs
 
         """
-        if kwargs.get("name"):
-            if data_asset_name:
-                raise ValueError(
-                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
-                )
-            # deprecated-v0.11.2
-            warnings.warn(
-                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
@@ -4072,11 +4084,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if not directory_path:
             return False
 
-        profiler_directory_path: str = os.path.join(
+        profiler_directory_path: str = os.path.join(  # noqa: PTH118
             directory_path,
             DataContextConfigDefaults.DEFAULT_PROFILER_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
         )
-        return os.path.isdir(profiler_directory_path)
+        return os.path.isdir(profiler_directory_path)  # noqa: PTH112
 
     @staticmethod
     def _get_global_config_value(
@@ -4208,10 +4220,10 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         if path is None:
             return None
-        if os.path.isabs(path):
+        if os.path.isabs(path):  # noqa: PTH117
             return path
         else:
-            return os.path.join(self.root_directory, path)  # type: ignore[arg-type]
+            return os.path.join(self.root_directory, path)  # type: ignore[arg-type]  # noqa: PTH118
 
     def _apply_global_config_overrides(
         self, config: DataContextConfig
@@ -4423,23 +4435,25 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def datasources(
         self,
-    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, XDatasource]]:
+    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, FluentDatasource]]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
     @property
-    def xdatasources(self) -> Dict[str, XDatasource]:
+    def fluent_datasources(self) -> Dict[str, FluentDatasource]:
         return {
             name: ds
             for (name, ds) in self.datasources.items()
-            if isinstance(ds, XDatasource)
+            if isinstance(ds, FluentDatasource)
         }
 
     @property
     def data_context_id(self) -> str:
         return self.variables.anonymous_usage_statistics.data_context_id  # type: ignore[union-attr]
 
-    def _init_stores(self, store_configs: Dict[str, StoreConfigTypedDict]) -> None:
+    def _init_primary_stores(
+        self, store_configs: Dict[str, StoreConfigTypedDict]
+    ) -> None:
         """Initialize all Stores for this DataContext.
 
         Stores are a good fit for reading/writing objects that:
@@ -4451,12 +4465,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         for store_name, store_config in store_configs.items():
             self._build_store_from_config(store_name, store_config)
 
-        # The DatasourceStore is inherent to all DataContexts but is not an explicit part of the project config.
-        # As such, it must be instantiated separately.
-        self._init_datasource_store()
-
     @abstractmethod
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         """Internal utility responsible for creating a DatasourceStore to persist and manage a user's Datasources.
 
         Please note that the DatasourceStore lacks the same extensibility that other analagous Stores do; a default
@@ -4637,10 +4647,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         Raises:
             DatasourceInitializationError
         """
+        # If attempting to override an existing value, ensure that the id persists
+        name = config.name
+        if not config.id and name in self._cached_datasources:
+            existing_datasource = self._cached_datasources[name]
+            if isinstance(existing_datasource, BaseDatasource):
+                config.id = existing_datasource.id
+
         # Note that the call to `DatasourceStore.set` may alter the config object's state
         # As such, we invoke it at the top of our function so any changes are reflected downstream
         if save_changes:
-            config = self._datasource_store.set(key=None, value=config)  # type: ignore[attr-defined]
+            config = self._datasource_store.set(key=None, value=config)
 
         datasource: Optional[Datasource] = None
         if initialize:
@@ -4648,16 +4665,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 substituted_config = self._perform_substitutions_on_datasource_config(
                     config
                 )
+
                 datasource = self._instantiate_datasource_from_config(
                     raw_config=config, substituted_config=substituted_config
                 )
-                self._cached_datasources[config.name] = datasource
+                self._cached_datasources[name] = datasource
             except gx_exceptions.DatasourceInitializationError as e:
                 if save_changes:
-                    self._datasource_store.delete(config)  # type: ignore[attr-defined]
+                    self._datasource_store.delete(config)
                 raise e
 
-        self.config.datasources[config.name] = config  # type: ignore[index,assignment]
+        self.config.datasources[name] = config  # type: ignore[index,assignment]
 
         return datasource
 
@@ -4778,7 +4796,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
-        self._store_metrics(requested_metrics, validation_results, target_store_name)
+        self._store_metrics(
+            requested_metrics=requested_metrics,
+            validation_results=validation_results,
+            target_store_name=target_store_name,
+        )
 
     def _store_metrics(
         self, requested_metrics, validation_results, target_store_name
@@ -4798,9 +4820,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
-        data_asset_name = validation_results.meta.get("batch_kwargs", {}).get(
-            "data_asset_name"
-        )
+        data_asset_name = validation_results.meta.get(
+            "active_batch_definition", {}
+        ).get("data_asset_name")
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
             if (expectation_suite_dependency != "*") and (
@@ -4834,7 +4856,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                                 ),
                                 metric_name=metric_name,
                                 metric_kwargs_id=get_metric_kwargs_id(
-                                    metric_name, metric_kwargs
+                                    metric_kwargs=metric_kwargs
                                 ),
                             ),
                             metric_value,
@@ -5382,12 +5404,14 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 "'config_variables_file_path' property is not found in config - setting it is required to use this feature"
             )
 
-        config_variables_filepath = os.path.join(
+        config_variables_filepath = os.path.join(  # noqa: PTH118
             self.root_directory, config_variables_filepath  # type: ignore[arg-type]
         )
 
-        os.makedirs(os.path.dirname(config_variables_filepath), exist_ok=True)
-        if not os.path.isfile(config_variables_filepath):
+        os.makedirs(  # noqa: PTH103
+            os.path.dirname(config_variables_filepath), exist_ok=True  # noqa: PTH120
+        )
+        if not os.path.isfile(config_variables_filepath):  # noqa: PTH113
             logger.info(
                 "Creating new substitution_variables file at {config_variables_filepath}".format(
                     config_variables_filepath=config_variables_filepath
@@ -5399,28 +5423,37 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         with open(config_variables_filepath, "w") as config_variables_file:
             yaml.dump(config_variables, config_variables_file)
 
-    def _load_zep_config(self) -> GxConfig:
-        """Called at beginning of DataContext __init__"""
+    def _load_fluent_config(self, config_provider: _ConfigurationProvider) -> GxConfig:
+        """Called at beginning of DataContext __init__ after config_providers init."""
         logger.info(
-            f"{self.__class__.__name__} has not implemented `_load_zep_config()` returning empty `GxConfig`"
+            f"{self.__class__.__name__} has not implemented `_load_fluent_config()` returning empty `GxConfig`"
         )
-        return GxConfig(xdatasources={})
+        return GxConfig(fluent_datasources={})
 
-    def _attach_zep_config_datasources(self, config: GxConfig):
+    def _attach_fluent_config_datasources_and_build_data_connectors(
+        self, config: GxConfig
+    ):
         """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
-            logger.info(f"Loaded '{ds_name}' from ZEP config")
-            self._attach_datasource_to_context(datasource)
+            logger.info(f"Loaded '{ds_name}' from fluent config")
 
-    def _synchronize_zep_datasources(self) -> Dict[str, XDatasource]:
+            # if Datasource required a data_connector we need to build the data_connector for each asset
+            if datasource.data_connector_type:
+                for data_asset in datasource.assets.values():
+                    connect_options = getattr(data_asset, "connect_options", {})
+                    datasource._build_data_connector(data_asset, **connect_options)
+
+            self._add_fluent_datasource(datasource)
+
+    def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
-        Update `self.zep_config.xdatasources` with any newly added datasources.
-        Should be called before serializing `zep_config`.
+        Update `self.fluent_config.fluent_datasources` with any newly added datasources.
+        Should be called before serializing `fluent_config`.
         """
-        xdatasources = self.xdatasources
-        if xdatasources:
-            self.zep_config.xdatasources.update(xdatasources)
-        return self.zep_config.xdatasources
+        fluent_datasources = self.fluent_datasources
+        if fluent_datasources:
+            self.fluent_config.fluent_datasources.update(fluent_datasources)
+        return self.fluent_config.fluent_datasources
 
     @staticmethod
     def _resolve_id_and_ge_cloud_id(

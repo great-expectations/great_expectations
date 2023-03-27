@@ -102,11 +102,11 @@ class CheckpointStore(ConfigurationStore):
         if not directory_path:
             return False
 
-        checkpoints_directory_path: str = os.path.join(
+        checkpoints_directory_path: str = os.path.join(  # noqa: PTH118
             directory_path,
             DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_BASE_DIRECTORY_RELATIVE_NAME.value,
         )
-        return os.path.isdir(checkpoints_directory_path)
+        return os.path.isdir(checkpoints_directory_path)  # noqa: PTH112
 
     def list_checkpoints(
         self, ge_cloud_mode: bool = False
@@ -121,8 +121,8 @@ class CheckpointStore(ConfigurationStore):
         name: str | None = None,
         id: str | None = None,
     ) -> None:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=id
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+            name=name, id=id
         )
         try:
             self.remove_key(key=key)
@@ -136,7 +136,7 @@ class CheckpointStore(ConfigurationStore):
     ) -> CheckpointConfig:
         key: GXCloudIdentifier | ConfigurationIdentifier
         if not isinstance(name, ConfigurationIdentifier):
-            key = self.determine_key(name=name, ge_cloud_id=id)
+            key = self._determine_key(name=name, id=id)
         else:
             key = name
 
@@ -240,8 +240,8 @@ class CheckpointStore(ConfigurationStore):
         name = checkpoint.name
         id = checkpoint.ge_cloud_id
         if id:
-            return self.determine_key(ge_cloud_id=str(id))
-        return self.determine_key(name=name)
+            return self._determine_key(id=id)
+        return self._determine_key(name=name)
 
     def _persist_checkpoint(
         self,
@@ -251,8 +251,8 @@ class CheckpointStore(ConfigurationStore):
     ) -> Checkpoint:
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            cloud_id = checkpoint_ref.cloud_id
-            checkpoint.config.ge_cloud_id = uuid.UUID(cloud_id)
+            cloud_id = checkpoint_ref.id
+            checkpoint.config.ge_cloud_id = cloud_id
         return checkpoint
 
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
@@ -273,7 +273,7 @@ class CheckpointStore(ConfigurationStore):
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
         ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
         if ref and isinstance(ref, GXCloudResourceRef):
-            key.cloud_id = ref.cloud_id  # type: ignore[attr-defined]
+            key.id = ref.id  # type: ignore[attr-defined]
 
         config = self.get(key=key)
 

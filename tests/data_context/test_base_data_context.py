@@ -177,7 +177,7 @@ def prepare_validator_for_cloud_e2e() -> Callable[
     def _closure(context: CloudDataContext) -> Tuple[Validator, str]:
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
-        expectation_suite_ge_cloud_id = suites[0].cloud_id
+        expectation_suite_ge_cloud_id = suites[0].id
 
         # To ensure we don't accidentally impact parallel test runs in Azure, we randomly generate a suite name in this E2E test.
         # To limit the number of generated suites, we limit the randomization to 20 numbers.
@@ -330,7 +330,7 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     suite_on_context = context.get_expectation_suite(
         ge_cloud_id=expectation_suite_ge_cloud_id
     )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_ge_cloud_id == suite_on_context.ge_cloud_id
 
     validator.save_expectation_suite()
     assert len(validator.expectation_suite.expectations) == 5
@@ -340,5 +340,5 @@ def test_validator_e2e_workflow_with_cloud_enabled_context(
     suite_on_context = context.get_expectation_suite(
         ge_cloud_id=expectation_suite_ge_cloud_id
     )
-    assert str(expectation_suite_ge_cloud_id) == str(suite_on_context.ge_cloud_id)
+    assert expectation_suite_ge_cloud_id == suite_on_context.ge_cloud_id
     assert len(suite_on_context.expectations) == 5

@@ -156,7 +156,7 @@ def read_package_from_file(path: str) -> GreatExpectationsContribPackageManifest
         A GreatExpectationsContribPackageManifest instance to represent the current package's state.
     """
     # If config file isn't found, create a blank JSON and write to disk
-    if not os.path.exists(path):
+    if not os.path.exists(path):  # noqa: PTH110
         instance = GreatExpectationsContribPackageManifest()
         logger.debug("Could not find existing package JSON; instantiated a new one")
         return instance

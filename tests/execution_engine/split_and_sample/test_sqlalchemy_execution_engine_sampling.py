@@ -98,6 +98,11 @@ def dialect_name_to_sql_statement():
     return _dialect_name_to_sql_statement
 
 
+@pytest.fixture
+def pytest_parsed_arguments(request):
+    return request.config.option
+
+
 @pytest.mark.parametrize(
     "dialect_name",
     [
@@ -108,13 +113,25 @@ def dialect_name_to_sql_statement():
     ],
 )
 def test_sample_using_limit_builds_correct_query_where_clause_none(
-    dialect_name: GXSqlDialect, dialect_name_to_sql_statement, sa
+    dialect_name: GXSqlDialect,
+    dialect_name_to_sql_statement,
+    sa,
+    pytest_parsed_arguments,
 ):
     """What does this test and why?
 
     split_on_limit should build the appropriate query based on input parameters.
     This tests dialects that differ from the standard dialect, not each dialect exhaustively.
     """
+    if hasattr(pytest_parsed_arguments, str(dialect_name.value)):
+        if not getattr(pytest_parsed_arguments, str(dialect_name.value)):
+            pytest.skip(
+                f"Skipping {str(dialect_name.value)} since the --{str(dialect_name.value)} pytest flag was not set"
+            )
+    else:
+        pytest.skip(
+            f"Skipping {str(dialect_name.value)} since the dialect is not runnable via pytest flag"
+        )
 
     # 1. Setup
     class MockSqlAlchemyExecutionEngine:
@@ -133,7 +150,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             GXSqlDialect.BIGQUERY: "bigquery://",
             GXSqlDialect.SNOWFLAKE: "snowflake://",
             GXSqlDialect.REDSHIFT: "redshift+psycopg2://",
-            GXSqlDialect.AWSATHENA: f"awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
+            GXSqlDialect.AWSATHENA: "awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
             GXSqlDialect.DREMIO: "dremio://",
             GXSqlDialect.TERADATASQL: "teradatasql://",
             GXSqlDialect.TRINO: "trino://",
@@ -254,13 +271,13 @@ def test_sqlite_sample_using_limit(sa):
 
     # Right number of rows?
     num_rows: int = batch_data.execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+        sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: sa.Row = batch_data.execution_engine.engine.execute(
-        sa.select([sa.text("*")]).select_from(batch_data.selectable)
+        sa.select(sa.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
@@ -296,22 +313,22 @@ def test_sample_using_random(sqlite_view_engine, test_df):
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
     rows_0: List[tuple] = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
     rows_1: List[tuple] = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     assert len(rows_0) == len(rows_1) == 1
@@ -333,22 +350,22 @@ def test_sample_using_random(sqlite_view_engine, test_df):
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
     rows_0 = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
     rows_1 = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     assert len(rows_0) == len(rows_1)

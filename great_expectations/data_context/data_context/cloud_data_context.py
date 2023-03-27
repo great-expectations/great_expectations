@@ -57,6 +57,7 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 
@@ -206,12 +207,14 @@ class CloudDataContext(SerializableDataContext):
         cls, context_root_dir: Optional[PathStr]
     ) -> str:
         if context_root_dir is None:
-            context_root_dir = os.getcwd()
+            context_root_dir = os.getcwd()  # noqa: PTH109
             logger.info(
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )
-        return os.path.abspath(os.path.expanduser(context_root_dir))
+        return os.path.abspath(  # noqa: PTH100
+            os.path.expanduser(context_root_dir)  # noqa: PTH111
+        )
 
     @classmethod
     def retrieve_data_context_config_from_cloud(
@@ -367,7 +370,7 @@ class CloudDataContext(SerializableDataContext):
             conf_file_option=conf_file_option,
         )
 
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
@@ -375,8 +378,9 @@ class CloudDataContext(SerializableDataContext):
             GXCloudStoreBackend,
         )
 
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
+        # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
+        store_name = DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME.value
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
@@ -391,7 +395,7 @@ class CloudDataContext(SerializableDataContext):
             runtime_environment=runtime_environment,
             serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
-        self._datasource_store = datasource_store
+        return datasource_store
 
     def list_expectation_suite_names(self) -> List[str]:
         """
@@ -512,12 +516,12 @@ class CloudDataContext(SerializableDataContext):
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=cloud_id,
+            id=cloud_id,
         )
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.cloud_id
+            expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
 
@@ -541,7 +545,7 @@ class CloudDataContext(SerializableDataContext):
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=id,
+            id=id,
         )
 
         return self.expectations_store.remove_key(key)
@@ -562,9 +566,14 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             An existing ExpectationSuite
         """
+        if ge_cloud_id is None and expectation_suite_name is None:
+            raise ValueError(
+                "ge_cloud_id and expectation_suite_name cannot both be None"
+            )
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=ge_cloud_id,
+            id=ge_cloud_id,
             resource_name=expectation_suite_name,
         )
 
@@ -591,14 +600,10 @@ class CloudDataContext(SerializableDataContext):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        id = (
-            str(expectation_suite.ge_cloud_id)
-            if expectation_suite.ge_cloud_id
-            else None
-        )
+        id = expectation_suite.ge_cloud_id
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=id,
+            id=id,
             resource_name=expectation_suite.expectation_suite_name,
         )
 
@@ -616,12 +621,12 @@ class CloudDataContext(SerializableDataContext):
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.cloud_id
+            expectation_suite.ge_cloud_id = response.id
 
     def _validate_suite_unique_constaints_before_save(
         self, key: GXCloudIdentifier
     ) -> None:
-        ge_cloud_id = key.cloud_id
+        ge_cloud_id = key.id
         if ge_cloud_id:
             if self.expectations_store.has_key(key):  # noqa: W601
                 raise gx_exceptions.DataContextError(
@@ -636,16 +641,6 @@ class CloudDataContext(SerializableDataContext):
                 f"expectation_suite '{suite_name}' already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True."
             )
-
-    @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        return self._context_root_directory
 
     def add_checkpoint(
         self,
@@ -767,9 +762,7 @@ class CloudDataContext(SerializableDataContext):
         The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
         instead of the usual `ConfigurationIdentifier` for `Store` interaction.
         """
-        return GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.PROFILER, cloud_id=id
-        )
+        return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER, id=id)
 
     @classmethod
     def _load_cloud_backed_project_config(
@@ -786,9 +779,16 @@ class CloudDataContext(SerializableDataContext):
         overwrite_existing: bool,
         **kwargs,
     ) -> ExpectationSuite:
+        cloud_id: str | None
+        if expectation_suite.ge_cloud_id:
+            cloud_id = expectation_suite.ge_cloud_id
+        else:
+            cloud_id = None
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             resource_name=expectation_suite.expectation_suite_name,
+            id=cloud_id,
         )
 
         persistence_fn: Callable
@@ -799,6 +799,6 @@ class CloudDataContext(SerializableDataContext):
 
         response = persistence_fn(key=key, value=expectation_suite, **kwargs)
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.cloud_id
+            expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite

@@ -1241,9 +1241,15 @@ class BaseRuleBasedProfiler(ConfigPeer):
                 configuration_key=config.name,
             )
 
-        response = persistence_fn(key=key, value=config)
+        try:
+            response = persistence_fn(key=key, value=config)
+        except gx_exceptions.StoreBackendError as e:
+            raise gx_exceptions.ProfilerError(
+                f"{e.message}; could not persist profiler"
+            ) from e
+
         if isinstance(response, GXCloudResourceRef):
-            new_profiler.ge_cloud_id = response.cloud_id
+            new_profiler.ge_cloud_id = response.id
 
         return new_profiler
 
@@ -1393,9 +1399,7 @@ class BaseRuleBasedProfiler(ConfigPeer):
         assert bool(name) ^ bool(id), "Must provide either name or id (but not both)"
 
         if id:
-            return GXCloudIdentifier(
-                resource_type=GXCloudRESTResource.PROFILER, cloud_id=id
-            )
+            return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER, id=id)
         return ConfigurationIdentifier(
             configuration_key=name,
         )

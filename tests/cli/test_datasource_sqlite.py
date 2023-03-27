@@ -25,7 +25,7 @@ def test_cli_datasource_list(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api datasource list",
+        "datasource list",
         catch_exceptions=False,
     )
 
@@ -42,11 +42,10 @@ def test_cli_datasource_list(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        ["--v3-api", "datasource", "list"],
+        ["datasource", "list"],
         catch_exceptions=False,
     )
     expected_output = """\
-Using v3 (Batch Request) API
 1 Datasource found:
 
  - name: wow_a_datasource
@@ -236,8 +235,8 @@ def test_cli_datasource_new_connection_string(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api datasource new",
-        input="2\n7\n",
+        "datasource new",
+        input="2\n8\n",
         catch_exceptions=False,
     )
     stdout = result.stdout

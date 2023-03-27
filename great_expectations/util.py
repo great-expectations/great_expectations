@@ -1094,7 +1094,7 @@ def gen_directory_tree_str(startpath):
     for root, dirs, files in tuples:
         level = root.replace(startpath, "").count(os.sep)
         indent = " " * 4 * level
-        output_str += f"{indent}{os.path.basename(root)}/\n"
+        output_str += f"{indent}{os.path.basename(root)}/\n"  # noqa: PTH119
         subindent = " " * 4 * (level + 1)
 
         files.sort()
@@ -2011,7 +2011,7 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: str = "ge_temp_",
+    default_table_name_prefix: str = "gx_temp_",
     num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
@@ -2072,7 +2072,7 @@ def get_sqlalchemy_domain_data(domain_data):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
         # select(query).subquery() should be used instead
-        domain_data = sa.select(["*"]).select_from(domain_data)
+        domain_data = sa.select(sa.text("*")).select_from(domain_data)
     # engine.get_domain_records returns a valid select object;
     # calling fetchall at execution is equivalent to a SELECT *
     return domain_data

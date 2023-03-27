@@ -10,18 +10,17 @@ To show task help page `invoke <NAME> --help`
 """
 from __future__ import annotations
 
-import io
 import json
 import os
 import pathlib
 import shutil
-import sys
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING, Union
 
 import invoke
 from typing_extensions import Final
 
-from scripts import check_public_api_docstrings
+from docs.sphinx_api_docs_source import check_public_api_docstrings, public_api_report
+from docs.sphinx_api_docs_source.build_sphinx_api_docs import SphinxInvokeDocsBuilder
 
 try:
     from tests.integration.usage_statistics import usage_stats_utils
@@ -33,9 +32,6 @@ except ModuleNotFoundError:
 if TYPE_CHECKING:
     from invoke.context import Context
 
-    from great_expectations.experimental.datasources.experimental_base_model import (
-        ExperimentalBaseModel,
-    )
 
 GX_ROOT_DIR: Final = pathlib.Path(__file__).parent / "great_expectations"
 
@@ -186,7 +182,7 @@ def hooks(
         ctx.run(" ".join(["pre-commit", "install"]), echo=True)
 
 
-@invoke.task(aliases=["docstring"], iterable=("paths",))
+@invoke.task(aliases=("docstring",), iterable=("paths",))
 def docstrings(ctx: Context, paths: list[str] | None = None):
     """
     Check public API docstrings.
@@ -195,8 +191,6 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
     To pass multiple items:
         invoke docstrings -p=great_expectations/core -p=great_expectations/util.py
     """
-    scripts_path = pathlib.Path.cwd().parent.parent / "scripts"
-    sys.path.append(str(scripts_path))
 
     if paths:
         select_paths = [pathlib.Path(p) for p in paths]
@@ -426,7 +420,9 @@ def docker(
 
     _exit_with_error_if_not_in_repo_root(task_name="docker")
 
-    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
+    filedir = os.path.realpath(
+        os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
+    )
 
     cmds = ["docker"]
 
@@ -471,107 +467,145 @@ def docker(
 @invoke.task(
     aliases=("schema", "schemas"),
     help={
-        "type": "Simple type name for a registered ZEP `DataAsset` or `Datasource` class.",
-        "sync": "Update the json schemas at `great_expectations/experimental/datasources/schemas`",
+        "sync": "Update the json schemas at `great_expectations/datasource/fluent/schemas`",
         "indent": "Indent size for nested json objects. Default: 4",
-        "save_path": (
-            "Filepath to write the schema to. Will overwrite or create the file if it does not exist."
-            " If not provided the schema will be sent to the console."
-        ),
+        "clean": "Delete all schema files and sub directories."
+        " Can be combined with `--sync` to reset the /schemas dir and remove stale schemas",
     },
 )
 def type_schema(
     ctx: Context,
-    type_: str | None = None,
-    save_path: str | pathlib.Path | None = None,
     sync: bool = False,
+    clean: bool = False,
     indent: int = 4,
 ):
     """
-    Show the jsonschema for a given ZEP `type`
+    Show all the json schemas for Fluent Datasources & DataAssets
 
-    Example: invoke schema sqlite
-
-    --list to show all available types
+    Generate json schema for each Datasource & DataAsset with `--sync`.
     """
     import pandas
 
-    from great_expectations.experimental.datasources import _PANDAS_SCHEMA_VERSION
-    from great_expectations.experimental.datasources.pandas_datasource import (
-        PandasDatasource,
-        PandasFilesystemDatasource,
-        _PandasDatasource,
+    from great_expectations.datasource.fluent import (
+        _PANDAS_SCHEMA_VERSION,
+        Datasource,
     )
-    from great_expectations.experimental.datasources.sources import _SourceFactories
+    from great_expectations.datasource.fluent.sources import (
+        _iter_all_registered_types,
+    )
 
-    buffer = io.StringIO()
+    schema_dir_root: Final[pathlib.Path] = (
+        GX_ROOT_DIR / "datasource" / "fluent" / "schemas"
+    )
+    if clean:
+        file_count = len(list(schema_dir_root.glob("**/*.json")))
+        print(f"🗑️ removing schema directory and contents - {file_count} .json files")
+        shutil.rmtree(schema_dir_root)
 
-    if not type_:
-        buffer.write(
-            "--------------------\nRegistered ZEP types\n--------------------\n"
-        )
-        buffer.write("\t" + "\n\t".join(_SourceFactories.type_lookup.type_names()))
-    else:
-        try:
-            model: Type[ExperimentalBaseModel] = _SourceFactories.type_lookup[type_]
-            buffer.write(model.schema_json(indent=indent))
-        except KeyError:
-            raise invoke.Exit(
-                f"No '{type_}' type found. Try 'invoke schema --list' to see available types",
-                code=1,
+    schema_dir_root.mkdir(exist_ok=True)
+
+    datasource_dir: pathlib.Path = schema_dir_root
+
+    if not sync:
+        print("--------------------\nRegistered Fluent types\n--------------------\n")
+
+    for name, model in [
+        (Datasource.__name__, Datasource),
+        *_iter_all_registered_types(),
+    ]:
+        if issubclass(model, Datasource):
+            datasource_dir = schema_dir_root.joinpath(model.__name__)
+            datasource_dir.mkdir(exist_ok=True)
+            schema_dir = schema_dir_root
+            print("-" * shutil.get_terminal_size()[0])
+        else:
+            schema_dir = datasource_dir
+            print("  ", end="")
+
+        if not sync:
+            print(f"{name} - {model.__name__}.json")
+            continue
+
+        if (
+            datasource_dir.name.startswith("Pandas")
+            and _PANDAS_SCHEMA_VERSION != pandas.__version__
+        ):
+            print(
+                f"🙈  {name} - was generated with pandas"
+                f" {_PANDAS_SCHEMA_VERSION} but you have {pandas.__version__}; skipping"
             )
-    if sync:
-        schema_dir = GX_ROOT_DIR / "experimental" / "datasources" / "schemas"
-        for name in _SourceFactories.type_lookup.type_names():
-            model = _SourceFactories.type_lookup[name]
+            continue
 
-            if (
-                issubclass(
-                    model,
-                    (
-                        _PandasDatasource,
-                        *PandasDatasource.asset_types,
-                        *PandasFilesystemDatasource.asset_types,
-                    ),
-                )
-                and _PANDAS_SCHEMA_VERSION != pandas.__version__
-            ):
-                print(
-                    f"🙈  {name} - was generated with pandas"
-                    f" {_PANDAS_SCHEMA_VERSION} but you have {pandas.__version__}; skipping"
-                )
-                continue
+        try:
+            schema_path = schema_dir.joinpath(f"{model.__name__}.json")
+            json_str: str = model.schema_json(indent=indent) + "\n"
 
-            try:
-                schema_path = schema_dir.joinpath(f"{model.__name__}.json")
-                json_str: str = model.schema_json(indent=indent) + "\n"
+            if schema_path.exists():
+                if json_str == schema_path.read_text():
+                    print(f"✅  {name} - {schema_path.name} unchanged")
+                    continue
 
-                if schema_path.exists():
-                    if json_str == schema_path.read_text():
-                        print(f"✅  {name} - {schema_path.name} unchanged")
-                        continue
-
-                schema_path.write_text(json_str)
-                print(f"🔃  {name} - {schema_path.name} schema updated")
-            except TypeError as err:
-                print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
-        raise invoke.Exit(code=0)
-
-    text: str = buffer.getvalue()
-    if save_path:
-        save_path = pathlib.Path(save_path).resolve()
-        save_path.write_text(text)
-        print(f"'{type}' schema written to {save_path}")
-    else:
-        print(text)
+            schema_path.write_text(json_str)
+            print(f"🔃  {name} - {schema_path.name} schema updated")
+        except TypeError as err:
+            print(f"❌  {name} - Could not sync schema - {type(err).__name__}:{err}")
+    raise invoke.Exit(code=0)
 
 
 def _exit_with_error_if_not_in_repo_root(task_name: str):
     """Exit if the command was not run from the repository root."""
-    filedir = os.path.realpath(os.path.dirname(os.path.realpath(__file__)))
-    curdir = os.path.realpath(os.getcwd())
+    filedir = os.path.realpath(
+        os.path.dirname(os.path.realpath(__file__))  # noqa: PTH120
+    )
+    curdir = os.path.realpath(os.getcwd())  # noqa: PTH109
     exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file at the top of the repo."
     if filedir != curdir:
+        raise invoke.Exit(
+            exit_message,
+            code=1,
+        )
+
+
+@invoke.task
+def docs(ctx):
+    """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="docs", correct_dir=repo_root
+    )
+    sphinx_api_docs_source_dir = repo_root / "docs" / "sphinx_api_docs_source"
+
+    doc_builder = SphinxInvokeDocsBuilder(
+        ctx=ctx, api_docs_source_path=sphinx_api_docs_source_dir, repo_root=repo_root
+    )
+
+    doc_builder.build_docs()
+
+
+@invoke.task(name="public-api")
+def public_api_task(ctx):
+    """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="public-api", correct_dir=repo_root
+    )
+
+    public_api_report.main()
+
+
+def _exit_with_error_if_not_run_from_correct_dir(
+    task_name: str, correct_dir: Union[pathlib.Path, None] = None
+) -> None:
+    """Exit if the command was not run from the correct directory."""
+    if not correct_dir:
+        correct_dir = pathlib.Path(__file__).parent
+    curdir = pathlib.Path.cwd()
+    exit_message = f"The {task_name} task must be invoked from the same directory as the tasks.py file."
+    if correct_dir != curdir:
         raise invoke.Exit(
             exit_message,
             code=1,

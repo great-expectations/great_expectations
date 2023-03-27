@@ -111,7 +111,7 @@ def test_batch_data_pandas_execution_engine_unknown_datasource(
     with pytest.raises(ValueError):
         # Test for an unknown datasource
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -132,7 +132,7 @@ def test_batch_data_pandas_execution_engine_unknown_data_connector(
     with pytest.raises(ValueError):
         # Test for an unknown data_connector
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -168,7 +168,7 @@ def test_batch_data_pandas_execution_engine_no_batch_identifiers(
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # batch_identifiers missing
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -189,7 +189,7 @@ def test_batch_data_pandas_execution_engine_incorrect_batch_identifiers(
     # raised by _validate_batch_identifiers_configuration() in RuntimeDataConnector
     with pytest.raises(gx_exceptions.DataConnectorError):
         # runtime_parameters are not configured in the DataConnector
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=RuntimeBatchRequest(
@@ -257,7 +257,7 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_mostly_legal
 
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -285,7 +285,7 @@ def test_batch_data_pandas_execution_engine_batch_identifiers_error_one_illegal_
 
     with pytest.raises(gx_exceptions.DataConnectorError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -616,7 +616,7 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
     batch_request: RuntimeBatchRequest = RuntimeBatchRequest(**batch_request)
 
     with pytest.raises((IsADirectoryError, pd.errors.ParserError)):
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -642,7 +642,7 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
 
     # raised by guess_reader_method_from_path() in ExecutionEngine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -669,7 +669,7 @@ def test_file_path_pandas_execution_engine_batch_definition_list_from_batch_requ
 
     # raised by _get_reader_fn() in ExecutionEngine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = datasource_with_runtime_data_connector_and_pandas_execution_engine.get_batch_list_from_batch_request(
             batch_request=batch_request

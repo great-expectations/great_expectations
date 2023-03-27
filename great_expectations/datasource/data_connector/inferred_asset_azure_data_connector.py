@@ -140,7 +140,7 @@ class InferredAssetAzureDataConnector(InferredAssetFilePathDataConnector):
         }
 
         path_list: List[str] = list_azure_keys(
-            azure=self._azure,
+            azure_client=self._azure,
             query_options=query_options,
             recursive=True,
         )

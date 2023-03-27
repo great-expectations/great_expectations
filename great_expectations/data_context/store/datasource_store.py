@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import (
@@ -9,7 +9,6 @@ from great_expectations.core.data_context_key import (
     DataContextVariableKey,
 )
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.base import (
     DatasourceConfig,
     datasourceConfigSchema,
@@ -57,18 +56,6 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def list_keys(self) -> List[str]:  # type: ignore[override]
-        """
-        See parent 'Store.list_keys()' for more information
-        """
-        keys_without_store_backend_id: List[str] = list(
-            filter(
-                lambda k: k != StoreBackend.STORE_BACKEND_ID_KEY,
-                self._store_backend.list_keys(),
-            )
-        )
-        return keys_without_store_backend_id
-
     def remove_key(self, key: Union[DataContextVariableKey, GXCloudIdentifier]) -> None:
         """
         See parent `Store.remove_key()` for more information
@@ -102,7 +89,7 @@ class DatasourceStore(Store):
         datasource_config_dict: dict = response_json["data"]["attributes"][
             "datasource_config"
         ]
-        datasource_config_dict["ge_cloud_id"] = datasource_ge_cloud_id
+        datasource_config_dict["id"] = datasource_ge_cloud_id
 
         return datasource_config_dict
 
@@ -171,7 +158,7 @@ class DatasourceStore(Store):
             key=key, value=config
         )
         if ref and isinstance(ref, GXCloudResourceRef):
-            key.cloud_id = ref.cloud_id  # type: ignore[attr-defined]
+            key.id = ref.id  # type: ignore[attr-defined]
 
         return_value: DatasourceConfig = self.get(key)  # type: ignore[assignment]
         if not return_value.name and isinstance(key, DataContextVariableKey):

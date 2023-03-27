@@ -25,7 +25,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
     # )
     # def _sqlalchemy(cls, column, _table, **kwargs):
     #     dup_query = (
-    #         sa.select([column])
+    #         sa.select(column)
     #         .select_from(_table)
     #         .group_by(column)
     #         .having(sa.func.count(column) > 1)
@@ -58,16 +58,16 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 source_table=_table,
                 column_name=column.name,
             )
-            sql_engine.execute(temp_table_stmt)
+            sql_engine.execute(sa.text(temp_table_stmt))
             dup_query = (
-                sa.select([column])
+                sa.select(column)
                 .select_from(sa.text(temp_table_name))
                 .group_by(column)
                 .having(sa.func.count(column) > 1)
             )
         else:
             dup_query = (
-                sa.select([column])
+                sa.select(column)
                 .select_from(_table)
                 .group_by(column)
                 .having(sa.func.count(column) > 1)

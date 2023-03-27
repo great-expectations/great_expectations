@@ -24,7 +24,6 @@ from typing import (
     Union,
 )
 
-from dateutil.parser import parse
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
@@ -97,12 +96,10 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.data_context.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
-    from great_expectations.experimental.datasources.interfaces import Batch as XBatch
-    from great_expectations.rule_based_profiler import (
-        RuleBasedProfilerResult,
-    )
+    from great_expectations.rule_based_profiler import RuleBasedProfilerResult
     from great_expectations.rule_based_profiler.expectation_configuration_builder import (
         ExpectationConfigurationBuilder,
     )
@@ -114,9 +111,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.rule_based_profiler.rule import Rule
     from great_expectations.validator.computed_metric import MetricValue
-    from great_expectations.validator.metric_configuration import (
-        MetricConfiguration,
-    )
+    from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
 @dataclass
@@ -203,7 +198,9 @@ class Validator:
         expectation_suite: Optional[ExpectationSuite] = None,
         expectation_suite_name: Optional[str] = None,
         data_context: Optional[AbstractDataContext] = None,
-        batches: Optional[Union[List[Batch], Sequence[Union[Batch, XBatch]]]] = None,
+        batches: Optional[
+            Union[List[Batch], Sequence[Union[Batch, FluentBatch]]]
+        ] = None,
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
@@ -282,7 +279,7 @@ class Validator:
         return self._execution_engine.batch_manager.batch_cache
 
     @property
-    def batches(self) -> Dict[str, Union[Batch, XBatch]]:
+    def batches(self) -> Dict[str, Union[Batch, FluentBatch]]:
         """Getter for dictionary of Batch objects (alias convenience property, to be deprecated)"""
         return self.batch_cache
 
@@ -1262,51 +1259,6 @@ class Validator:
 
         return evrs
 
-    def append_expectation(self, expectation_config: ExpectationConfiguration) -> None:
-        """This method is a thin wrapper for ExpectationSuite.append_expectation"""
-        # deprecated-v0.13.0
-        warnings.warn(
-            "append_expectation is deprecated as of v0.13.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.add_expectation instead.",
-            DeprecationWarning,
-        )
-        self._expectation_suite.append_expectation(expectation_config)
-
-    def find_expectation_indexes(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        match_type: str = "domain",
-    ) -> List[int]:
-        """This method is a thin wrapper for ExpectationSuite.find_expectation_indexes"""
-        # deprecated-v0.13.0
-        warnings.warn(
-            "find_expectation_indexes is deprecated as of v0.13.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.find_expectation_indexes instead.",
-            DeprecationWarning,
-        )
-        return self._expectation_suite.find_expectation_indexes(
-            expectation_configuration=expectation_configuration, match_type=match_type
-        )
-
-    def find_expectations(
-        self,
-        expectation_configuration: ExpectationConfiguration,
-        match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None,
-    ) -> List[ExpectationConfiguration]:
-        """This method is a thin wrapper for ExpectationSuite.find_expectations()"""
-        # deprecated-v0.13.0
-        warnings.warn(
-            "find_expectations is deprecated as of v0.13.0 and will be removed in v0.16. "
-            + "Please use ExpectationSuite.find_expectation_indexes instead.",
-            DeprecationWarning,
-        )
-        return self._expectation_suite.find_expectations(
-            expectation_configuration=expectation_configuration,
-            match_type=match_type,
-            ge_cloud_id=ge_cloud_id,
-        )
-
     def remove_expectation(
         self,
         expectation_configuration: ExpectationConfiguration,
@@ -1389,32 +1341,6 @@ class Validator:
         """
 
         self._default_expectation_args[argument] = value
-
-    def get_expectations_config(
-        self,
-        discard_failed_expectations: bool = True,
-        discard_result_format_kwargs: bool = True,
-        discard_include_config_kwargs: bool = True,
-        discard_catch_exceptions_kwargs: bool = True,
-        suppress_warnings: bool = False,
-    ) -> ExpectationSuite:
-        """
-        Returns an expectation configuration, providing an option to discard failed expectation and discard/ include'
-        different result aspects, such as exceptions and result format.
-        """
-        # deprecated-v0.13.0
-        warnings.warn(
-            "get_expectations_config is deprecated as of v0.13.0 and will be removed in v0.16. "
-            + "Please use get_expectation_suite instead.",
-            DeprecationWarning,
-        )
-        return self.get_expectation_suite(
-            discard_failed_expectations,
-            discard_result_format_kwargs,
-            discard_include_config_kwargs,
-            discard_catch_exceptions_kwargs,
-            suppress_warnings,
-        )
 
     @public_api
     def get_expectation_suite(  # noqa: C901 - complexity 17
@@ -1547,7 +1473,7 @@ class Validator:
             )
             if self.cloud_mode:
                 updated_suite = self._data_context.get_expectation_suite(
-                    ge_cloud_id=str(expectation_suite.ge_cloud_id)
+                    ge_cloud_id=expectation_suite.ge_cloud_id
                 )
                 self._initialize_expectations(expectation_suite=updated_suite)
         elif filepath is not None:
@@ -1617,21 +1543,7 @@ class Validator:
             assert not (run_id and run_name) and not (
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
-            if isinstance(run_id, str) and not run_name:
-                # deprecated-v0.13.0
-                warnings.warn(
-                    "String run_ids are deprecated as of v0.13.0 and support will be removed in v0.16. Please provide a run_id of type "
-                    "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                    "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                    "run_name and run_time separately.",
-                    DeprecationWarning,
-                )
-                try:
-                    run_time = parse(run_id)
-                except (ValueError, TypeError):
-                    pass
-                run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-            elif isinstance(run_id, dict):
+            if isinstance(run_id, dict):
                 run_id = RunIdentifier(**run_id)
             elif not isinstance(run_id, RunIdentifier):
                 run_id = RunIdentifier(run_name=run_name, run_time=run_time)
@@ -1769,7 +1681,7 @@ class Validator:
                     "great_expectations_version": ge_version,
                     "expectation_suite_name": expectation_suite_name,
                     "run_id": run_id,
-                    "batch_spec": self.active_batch_spec,
+                    "batch_spec": convert_to_json_serializable(self.active_batch_spec),
                     "batch_markers": self.active_batch_markers,
                     "active_batch_definition": self.active_batch_definition,
                     "validation_time": validation_time,

@@ -22,7 +22,6 @@ You will see the following output:
 
 .. code-block:: bash
 
-    Using v3 (Batch Request) API
     How would you like to create your Expectation Suite?
         1. Manually, without interacting with a sample Batch of data (default)
         2. Interactively, with a sample Batch of data

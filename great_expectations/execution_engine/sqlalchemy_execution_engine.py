@@ -44,6 +44,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
+from great_expectations.optional_imports import sqlalchemy_version_check
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
@@ -89,6 +90,8 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+
+    sqlalchemy_version_check(sa.__version__)
 
     make_url = import_make_url()
 except ImportError:
@@ -202,8 +205,14 @@ except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
 
+try:
+    import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
+except ImportError:
+    trino = None
+    trinotypes = None
+
 if TYPE_CHECKING:
-    import sqlalchemy as sa  # noqa: TCH004
     from sqlalchemy.engine import Engine as SaEngine
 
 
@@ -246,6 +255,19 @@ def _get_dialect_type_module(dialect):
             and teradatatypes is not None
         ):
             return teradatatypes
+    except (TypeError, AttributeError):
+        pass
+
+    # Trino types module
+    try:
+        if (
+            isinstance(
+                dialect,
+                trino.sqlalchemy.dialect.TrinoDialect,
+            )
+            and trinotypes is not None
+        ):
+            return trinotypes
     except (TypeError, AttributeError):
         pass
 
@@ -376,6 +398,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # WARNING: Teradata Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="teradatasqlalchemy.dialect"
+            )
+        elif self.dialect_name == GXSqlDialect.TRINO:
+            # WARNING: Trino Support is experimental, functionality is not fully under test
+            self.dialect_module = import_library_module(
+                module_name="trino.sqlalchemy.dialect"
             )
         else:
             self.dialect_module = None
@@ -636,7 +663,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     domain_kwargs["row_condition"]
                 )
                 selectable = (
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(selectable)
                     .where(parsed_condition)
                 )
@@ -657,7 +684,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
 
             selectable = (
-                sa.select([sa.text("*")])
+                sa.select(sa.text("*"))
                 .select_from(selectable)
                 .where(parse_condition_to_sqlalchemy(filter_condition.condition))
             )
@@ -692,7 +719,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "both_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -705,7 +732,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             elif ignore_row_if == "either_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -717,19 +744,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
                 )
             else:
-                if ignore_row_if not in ["neither", "never"]:
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
-
-                if ignore_row_if == "never":
-                    # deprecated-v0.13.29
-                    warnings.warn(
-                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use \
-"neither" moving forward.
-""",
-                        DeprecationWarning,
                     )
 
             return selectable
@@ -749,7 +766,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -764,7 +781,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             elif ignore_row_if == "any_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -1023,17 +1040,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 to TextualSelect using sa.columns() before it can be converted to type Subquery
                 """
                 if TextClause and isinstance(selectable, TextClause):
-                    sa_query_object = sa.select(query["select"]).select_from(
+                    sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.columns().subquery()
                     )
                 elif (Select and isinstance(selectable, Select)) or (
                     TextualSelect and isinstance(selectable, TextualSelect)
                 ):
-                    sa_query_object = sa.select(query["select"]).select_from(
+                    sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.subquery()
                     )
                 else:
-                    sa_query_object = sa.select(query["select"]).select_from(selectable)
+                    sa_query_object = sa.select(*query["select"]).select_from(
+                        selectable
+                    )
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
                 res = self.engine.execute(sa_query_object).fetchall()

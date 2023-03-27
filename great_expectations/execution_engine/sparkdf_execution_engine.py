@@ -3,9 +3,9 @@ from __future__ import annotations
 import copy
 import datetime
 import logging
-import warnings
 from functools import reduce
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -79,20 +79,22 @@ try:
     from pyspark.sql import DataFrame, Row, SparkSession
     from pyspark.sql.readwriter import DataFrameReader
 except ImportError:
-    pyspark = None
-    SparkContext = None
-    SparkSession = None
-    Row = None
-    DataFrame = None
-    DataFrameReader = None
-    F = None
+    pyspark = None  # type: ignore[assignment]
+    SparkContext = None  # type: ignore[assignment,misc]
+    SparkSession = None  # type: ignore[assignment,misc]
+    Row = None  # type: ignore[assignment,misc]
+    DataFrame = None  # type: ignore[assignment,misc]
+    DataFrameReader = None  # type: ignore[assignment,misc]
+    F = None  # type: ignore[assignment]
     # noinspection SpellCheckingInspection
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
 
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
     )
 
+if TYPE_CHECKING:
+    from pyspark.sql import DataFrame  # noqa: TCH004
 
 # noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):
@@ -210,7 +212,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         *args,
         persist=True,
         spark_config=None,
-        force_reuse_spark_context=False,
+        force_reuse_spark_context=True,
         **kwargs,
     ) -> None:
         self._persist = persist
@@ -255,7 +257,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
 
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
-    def load_batch_data(
+    def load_batch_data(  # type: ignore[override]
         self, batch_id: str, batch_data: Union[SparkDFBatchData, DataFrame]
     ) -> None:
         if isinstance(batch_data, DataFrame):
@@ -573,19 +575,9 @@ illegal.  Please check your config."""
                 )
                 data = data.filter(~ignore_condition)
             else:
-                if ignore_row_if not in ["neither", "never"]:
+                if ignore_row_if != "neither":
                     raise ValueError(
                         f'Unrecognized value of ignore_row_if ("{ignore_row_if}").'
-                    )
-
-                if ignore_row_if == "never":
-                    # deprecated-v0.13.29
-                    warnings.warn(
-                        f"""The correct "no-action" value of the "ignore_row_if" directive for the column pair case is \
-"neither" (the use of "{ignore_row_if}" is deprecated as of v0.13.29 and will be removed in v0.16).  Please use \
-"neither" moving forward.
-""",
-                        DeprecationWarning,
                     )
 
             return data

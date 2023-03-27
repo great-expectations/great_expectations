@@ -216,7 +216,9 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
     try:
         # Trino
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+        if hasattr(dialect, "TrinoDialect") or isinstance(
+            dialect, trino.sqlalchemy.dialect.TrinoDialect
+        ):
             if positive:
                 return sa.func.regexp_like(column, literal(regex))
             else:
@@ -417,13 +419,11 @@ def column_reflection_fallback(
         ).alias("sys_tables_table_clause")
         tables_table_query: Select = (
             sa.select(
-                [
-                    tables_table_clause.c.object_id.label("object_id"),
-                    sa.func.schema_name(tables_table_clause.c.schema_id).label(
-                        "schema_name"
-                    ),
-                    tables_table_clause.c.name.label("table_name"),
-                ]
+                tables_table_clause.c.object_id.label("object_id"),
+                sa.func.schema_name(tables_table_clause.c.schema_id).label(
+                    "schema_name"
+                ),
+                tables_table_clause.c.name.label("table_name"),
             )
             .select_from(tables_table_clause)
             .alias("sys_tables_table_subquery")
@@ -440,14 +440,12 @@ def column_reflection_fallback(
         ).alias("sys_columns_table_clause")
         columns_table_query: Select = (
             sa.select(
-                [
-                    columns_table_clause.c.object_id.label("object_id"),
-                    columns_table_clause.c.user_type_id.label("user_type_id"),
-                    columns_table_clause.c.column_id.label("column_id"),
-                    columns_table_clause.c.name.label("column_name"),
-                    columns_table_clause.c.max_length.label("column_max_length"),
-                    columns_table_clause.c.precision.label("column_precision"),
-                ]
+                columns_table_clause.c.object_id.label("object_id"),
+                columns_table_clause.c.user_type_id.label("user_type_id"),
+                columns_table_clause.c.column_id.label("column_id"),
+                columns_table_clause.c.name.label("column_name"),
+                columns_table_clause.c.max_length.label("column_max_length"),
+                columns_table_clause.c.precision.label("column_precision"),
             )
             .select_from(columns_table_clause)
             .alias("sys_columns_table_subquery")
@@ -460,10 +458,8 @@ def column_reflection_fallback(
         ).alias("sys_types_table_clause")
         types_table_query: Select = (
             sa.select(
-                [
-                    types_table_clause.c.user_type_id.label("user_type_id"),
-                    types_table_clause.c.name.label("column_data_type"),
-                ]
+                types_table_clause.c.user_type_id.label("user_type_id"),
+                types_table_clause.c.name.label("column_data_type"),
             )
             .select_from(types_table_clause)
             .alias("sys_types_table_subquery")
@@ -479,15 +475,13 @@ def column_reflection_fallback(
         )
         col_info_query = (
             sa.select(
-                [
-                    tables_table_query.c.schema_name,
-                    tables_table_query.c.table_name,
-                    columns_table_query.c.column_id,
-                    columns_table_query.c.column_name,
-                    types_table_query.c.column_data_type,
-                    columns_table_query.c.column_max_length,
-                    columns_table_query.c.column_precision,
-                ]
+                tables_table_query.c.schema_name,
+                tables_table_query.c.table_name,
+                columns_table_query.c.column_id,
+                columns_table_query.c.column_name,
+                types_table_query.c.column_data_type,
+                columns_table_query.c.column_max_length,
+                columns_table_query.c.column_precision,
             )
             .select_from(
                 tables_table_query.join(
@@ -538,10 +532,8 @@ def column_reflection_fallback(
         )
         tables_table_query = (
             sa.select(
-                [
-                    sa.column("table_schema").label("schema_name"),
-                    sa.column("table_name").label("table_name"),
-                ]
+                sa.column("table_schema").label("schema_name"),
+                sa.column("table_name").label("table_name"),
             )
             .select_from(tables_table)
             .alias("information_schema_tables_table")
@@ -553,12 +545,10 @@ def column_reflection_fallback(
         )
         columns_table_query = (
             sa.select(
-                [
-                    sa.column("column_name").label("column_name"),
-                    sa.column("table_name").label("table_name"),
-                    sa.column("table_schema").label("schema_name"),
-                    sa.column("data_type").label("column_data_type"),
-                ]
+                sa.column("column_name").label("column_name"),
+                sa.column("table_name").label("table_name"),
+                sa.column("table_schema").label("schema_name"),
+                sa.column("data_type").label("column_data_type"),
             )
             .select_from(columns_table)
             .alias("information_schema_columns_table")
@@ -571,12 +561,10 @@ def column_reflection_fallback(
         )
         col_info_query = (
             sa.select(
-                [
-                    tables_table_query.c.schema_name,
-                    tables_table_query.c.table_name,
-                    columns_table_query.c.column_name,
-                    columns_table_query.c.column_data_type,
-                ]
+                tables_table_query.c.schema_name,
+                tables_table_query.c.table_name,
+                columns_table_query.c.column_name,
+                columns_table_query.c.column_data_type,
             )
             .select_from(
                 tables_table_query.join(
@@ -616,10 +604,10 @@ def column_reflection_fallback(
             if dialect.name.lower() == GXSqlDialect.REDSHIFT:
                 # Redshift needs temp tables to be declared as text
                 query = (
-                    sa.select([sa.text("*")]).select_from(sa.text(selectable)).limit(1)
+                    sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
                 )
             else:
-                query = sa.select([sa.text("*")]).select_from(selectable).limit(1)
+                query = sa.select(sa.text("*")).select_from(selectable).limit(1)
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys
@@ -808,7 +796,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901 - 28
 
     try:
         # noinspection PyUnresolvedReferences
-        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect):
+        if isinstance(dialect, trino.sqlalchemy.dialect.TrinoDialect) or hasattr(
+            dialect, "TrinoDialect"
+        ):
             dialect_supported = True
     except (AttributeError, TypeError):
         pass

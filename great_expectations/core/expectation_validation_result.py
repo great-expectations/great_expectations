@@ -5,7 +5,6 @@ import json
 import logging
 from copy import deepcopy
 from typing import TYPE_CHECKING, List, Optional
-from uuid import UUID
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
@@ -45,7 +44,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def get_metric_kwargs_id(metric_name, metric_kwargs):
+def get_metric_kwargs_id(metric_kwargs: dict) -> str | None:
     ###
     #
     # WARNING
@@ -56,10 +55,15 @@ def get_metric_kwargs_id(metric_name, metric_kwargs):
     # WARNING
     #
     ###
+    if metric_kwargs is None:
+        metric_kwargs = {}
+
     if "metric_kwargs_id" in metric_kwargs:
         return metric_kwargs["metric_kwargs_id"]
+
     if "column" in metric_kwargs:
         return f"column={metric_kwargs.get('column')}"
+
     return None
 
 
@@ -124,7 +128,7 @@ class ExpectationValidationResult(SerializableDictDot):
         #         return NotImplemented
         if not isinstance(other, self.__class__):
             # Delegate comparison to the other instance's __eq__.
-            return NotImplemented
+            return other == self
         try:
             if self.result and other.result:
                 common_keys = set(self.result.keys()) & other.result.keys()
@@ -338,11 +342,11 @@ class ExpectationValidationResult(SerializableDictDot):
             )
 
         metric_name_parts = metric_name.split(".")
-        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
+        metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
         if metric_name_parts[0] == self.expectation_config.expectation_type:
             curr_metric_kwargs = get_metric_kwargs_id(
-                metric_name, self.expectation_config.kwargs
+                metric_kwargs=self.expectation_config.kwargs
             )
             if metric_kwargs_id != curr_metric_kwargs:
                 raise gx_exceptions.UnavailableMetricError(
@@ -499,7 +503,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         evaluation_parameters: Optional[dict] = None,
         statistics: Optional[dict] = None,
         meta: Optional[ExpectationSuiteValidationResult | dict] = None,
-        ge_cloud_id: Optional[UUID] = None,
+        ge_cloud_id: Optional[str] = None,
     ) -> None:
         self.success = success
         if results is None:
@@ -560,7 +564,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     def get_metric(self, metric_name, **kwargs):
         metric_name_parts = metric_name.split(".")
-        metric_kwargs_id = get_metric_kwargs_id(metric_name, kwargs)
+        metric_kwargs_id = get_metric_kwargs_id(metric_kwargs=kwargs)
 
         metric_value = None
         # Expose overall statistics
@@ -651,9 +655,20 @@ class ExpectationSuiteValidationResultSchema(Schema):
             )
         return data
 
+    def _convert_uuids_to_str(self, data):
+        """
+        Utilize UUID for data validation but convert to string before usage in business logic
+        """
+        attr = "ge_cloud_id"
+        uuid_val = data.get(attr)
+        if uuid_val:
+            data[attr] = str(uuid_val)
+        return data
+
     # noinspection PyUnusedLocal
     @post_load
     def make_expectation_suite_validation_result(self, data, **kwargs):
+        data = self._convert_uuids_to_str(data=data)
         return ExpectationSuiteValidationResult(**data)
 
 

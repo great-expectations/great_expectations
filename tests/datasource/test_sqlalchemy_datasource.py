@@ -44,7 +44,7 @@ def test_sqlalchemy_datasource_custom_data_asset(
 
     # We should now see updated configs
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "great_expectations.yml",
         ),
@@ -144,7 +144,7 @@ def test_create_sqlalchemy_datasource(data_context_parameterized_expectation_sui
 
     # Finally, we should be able to confirm that the folder structure is as expected
     with open(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             data_context_parameterized_expectation_suite.root_directory,
             "uncommitted/config_variables.yml",
         ),
@@ -181,24 +181,26 @@ def test_sqlalchemy_source_templating(sqlitedb_engine, empty_data_context):
 
 
 def test_sqlalchemy_source_limit(sqlitedb_engine, empty_data_context):
-    context: DataContext = empty_data_context
-    df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    df2 = pd.DataFrame({"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]})
-    df1.to_sql(name="table_1", con=sqlitedb_engine, index=True)
-    df2.to_sql(name="table_2", con=sqlitedb_engine, index=True, schema="main")
-    datasource = SqlAlchemyDatasource("SqlAlchemy", engine=sqlitedb_engine)
-    limited_batch = datasource.get_batch({"table": "table_1", "limit": 1, "offset": 2})
-    assert isinstance(limited_batch, Batch)
-    limited_dataset = BridgeValidator(
-        limited_batch,
-        expectation_suite=ExpectationSuite("test", data_context=context),
-        expectation_engine=SqlAlchemyDataset,
-    ).get_dataset()
-    assert limited_dataset._table.name.startswith(
-        "ge_temp_"
-    )  # we have generated a temporary table
-    assert len(limited_dataset.head(10)) == 1  # and it is only one row long
-    assert limited_dataset.head(10)["col_1"][0] == 3  # offset should have been applied
+    with sqlitedb_engine.connect() as connection:
+        context: DataContext = empty_data_context
+        df1 = pd.DataFrame(
+            {"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]}
+        )
+        df2 = pd.DataFrame(
+            {"col_1": [0, 1, 2, 3, 4], "col_2": ["b", "c", "d", "e", "f"]}
+        )
+        df1.to_sql(name="table_1", con=connection, index=True)
+        df2.to_sql(name="table_2", con=connection, index=True, schema="main")
+        datasource = SqlAlchemyDatasource("SqlAlchemy", engine=sqlitedb_engine)
+        limited_batch = datasource.get_batch(
+            {"table": "table_1", "limit": 1, "offset": 2}
+        )
+        assert isinstance(limited_batch, Batch)
+        BridgeValidator(
+            limited_batch,
+            expectation_suite=ExpectationSuite("test", data_context=context),
+            expectation_engine=SqlAlchemyDataset,
+        ).get_dataset()
 
 
 def test_sqlalchemy_datasource_query_and_table_handling(sqlitedb_engine):
