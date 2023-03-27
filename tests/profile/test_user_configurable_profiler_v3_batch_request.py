@@ -13,6 +13,7 @@ from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -158,7 +159,8 @@ def get_sqlalchemy_runtime_validator_postgresql(
         table_name = "test_data_" + "".join(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
-    df.to_sql(
+    add_dataframe_to_db(
+        df=df,
         name=table_name,
         con=engine,
         index=False,

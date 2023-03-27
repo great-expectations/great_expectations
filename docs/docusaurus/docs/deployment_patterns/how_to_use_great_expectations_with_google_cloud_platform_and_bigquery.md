@@ -292,7 +292,7 @@ Next, you can either run the Checkpoint directly in-code,
 or through the following CLI command.
 
 ```bash
-great_expectations --v3-api checkpoint run gcs_checkpoint
+great_expectations checkpoint run gcs_checkpoint
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
@@ -322,7 +322,7 @@ Next, you can either run the Checkpoint directly in-code,
 or through the following CLI command.
 
 ```bash
-great_expectations --v3-api checkpoint run bigquery_checkpoint
+great_expectations checkpoint run bigquery_checkpoint
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
@@ -416,7 +416,7 @@ The `BashOperator` will first change directories to `/home/airflow/gcsfuse/great
 Then we will run the Checkpoint using same CLI command we used to run the Checkpoint locally:
 
 ```bash
-great_expectations --v3-api checkpoint run gcs_checkpoint
+great_expectations checkpoint run gcs_checkpoint
 ````
 
 To add the DAG to Cloud Composer, move `ge_checkpoint_gcs.py` to the environment's DAGs folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.
@@ -438,7 +438,7 @@ Then we will run the Checkpoint using same CLI command we used to run the Checkp
 
 
 ```bash
-great_expectations --v3-api checkpoint run bigquery_checkpoint
+great_expectations checkpoint run bigquery_checkpoint
 ```
 
 To add the DAG to Cloud Composer, move `ge_checkpoint_bigquery.py` to the environment's DAGs folder in Cloud Storage. First, open the Environments page in the Cloud Console, then click on the name of the environment to open the Environment details page.

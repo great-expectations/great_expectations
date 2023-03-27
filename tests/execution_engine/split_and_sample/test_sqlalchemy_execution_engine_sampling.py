@@ -19,6 +19,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import import_library_module
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -98,6 +99,11 @@ def dialect_name_to_sql_statement():
     return _dialect_name_to_sql_statement
 
 
+@pytest.fixture
+def pytest_parsed_arguments(request):
+    return request.config.option
+
+
 @pytest.mark.parametrize(
     "dialect_name",
     [
@@ -108,13 +114,25 @@ def dialect_name_to_sql_statement():
     ],
 )
 def test_sample_using_limit_builds_correct_query_where_clause_none(
-    dialect_name: GXSqlDialect, dialect_name_to_sql_statement, sa
+    dialect_name: GXSqlDialect,
+    dialect_name_to_sql_statement,
+    sa,
+    pytest_parsed_arguments,
 ):
     """What does this test and why?
 
     split_on_limit should build the appropriate query based on input parameters.
     This tests dialects that differ from the standard dialect, not each dialect exhaustively.
     """
+    if hasattr(pytest_parsed_arguments, str(dialect_name.value)):
+        if not getattr(pytest_parsed_arguments, str(dialect_name.value)):
+            pytest.skip(
+                f"Skipping {str(dialect_name.value)} since the --{str(dialect_name.value)} pytest flag was not set"
+            )
+    else:
+        pytest.skip(
+            f"Skipping {str(dialect_name.value)} since the dialect is not runnable via pytest flag"
+        )
 
     # 1. Setup
     class MockSqlAlchemyExecutionEngine:
@@ -133,7 +151,7 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
             GXSqlDialect.BIGQUERY: "bigquery://",
             GXSqlDialect.SNOWFLAKE: "snowflake://",
             GXSqlDialect.REDSHIFT: "redshift+psycopg2://",
-            GXSqlDialect.AWSATHENA: f"awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
+            GXSqlDialect.AWSATHENA: "awsathena+rest://@athena.us-east-1.amazonaws.com/some_test_db?s3_staging_dir=s3://some-s3-path/",
             GXSqlDialect.DREMIO: "dremio://",
             GXSqlDialect.TERADATASQL: "teradatasql://",
             GXSqlDialect.TRINO: "trino://",
@@ -284,7 +302,9 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # First, make sure that degenerative case never passes.
 
     test_df_0: pd.DataFrame = test_df.iloc[:1]
-    test_df_0.to_sql("test_table_0", con=my_execution_engine.engine)
+    add_dataframe_to_db(
+        df=test_df_0, name="test_table_0", con=my_execution_engine.engine
+    )
 
     p = 1.0
     batch_spec = SqlAlchemyDatasourceBatchSpec(
@@ -321,7 +341,9 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # Second, verify that realistic case always returns different random sample of rows.
 
     test_df_1: pd.DataFrame = test_df
-    test_df_1.to_sql("test_table_1", con=my_execution_engine.engine)
+    add_dataframe_to_db(
+        df=test_df_1, name="test_table_1", con=my_execution_engine.engine
+    )
 
     p = 2.0e-1
     batch_spec = SqlAlchemyDatasourceBatchSpec(

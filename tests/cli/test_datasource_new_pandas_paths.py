@@ -101,7 +101,7 @@ def test_cli_datasource_new_run_from_ge_dir_absolute_data_path(
     context = empty_data_context
     files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(context.root_directory)
-    invocation = "--v3-api datasource new"
+    invocation = "datasource new"
     invocation_input = f"1\n1\n{filesystem_csv_2}\n"
     _run_cli_datasource_new_path_test(
         context, invocation, invocation_input, files_directory
@@ -116,7 +116,7 @@ def test_cli_datasource_new_run_from_ge_dir_relative_data_path(
     context = empty_data_context
     files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(context.root_directory)
-    invocation = "--v3-api datasource new"
+    invocation = "datasource new"
     invocation_input = f"1\n1\n../../{files_directory}\n"
     _run_cli_datasource_new_path_test(
         context, invocation, invocation_input, files_directory
@@ -132,7 +132,7 @@ def test_cli_datasource_new_run_from_adjacent_dir_absolute_data_path(
     adjacent_dir = os.path.dirname(context.root_directory)
     files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(adjacent_dir)
-    invocation = "--v3-api datasource new"
+    invocation = "datasource new"
     invocation_input = f"1\n1\n{filesystem_csv_2}\n"
     _run_cli_datasource_new_path_test(
         context, invocation, invocation_input, files_directory
@@ -148,7 +148,7 @@ def test_cli_datasource_new_run_from_adjacent_dir_relative_data_path(
     adjacent_dir = os.path.dirname(context.root_directory)
     files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(adjacent_dir)
-    invocation = "--v3-api datasource new"
+    invocation = "datasource new"
     invocation_input = f"1\n1\n../{files_directory}\n"
     _run_cli_datasource_new_path_test(
         context, invocation, invocation_input, files_directory
@@ -163,7 +163,7 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_absolute_data_pa
     context = empty_data_context
     files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(misc_directory)
-    invocation = f"--config {context.root_directory} --v3-api datasource new"
+    invocation = f"--config {context.root_directory} datasource new"
     invocation_input = f"1\n1\n{filesystem_csv_2}\n"
     _run_cli_datasource_new_path_test(
         context, invocation, invocation_input, files_directory
@@ -178,7 +178,7 @@ def test_cli_datasource_new_run_from_misc_dir_using_config_flag_relative_data_pa
     context = empty_data_context
     files_directory = os.path.basename(filesystem_csv_2)
     monkeypatch.chdir(misc_directory)
-    invocation = f"--config {context.root_directory} --v3-api datasource new"
+    invocation = f"--config {context.root_directory} datasource new"
     invocation_input = f"1\n1\n../{files_directory}\n"
     _run_cli_datasource_new_path_test(
         context, invocation, invocation_input, files_directory

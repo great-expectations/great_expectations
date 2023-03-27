@@ -475,29 +475,25 @@ class MetaSqlAlchemyDataset(Dataset):
                 [
                     sa.func.sum(
                         sa.case(
-                            [
-                                (
-                                    sa.or_(
-                                        sa.column(column_A) != (None),
-                                        sa.column(column_A) == (None),
-                                    ),
-                                    1,
-                                )
-                            ],
+                            (
+                                sa.or_(
+                                    sa.column(column_A) != (None),
+                                    sa.column(column_A) == (None),
+                                ),
+                                1,
+                            ),
                             else_=0,
                         )
                     ).label("column_A_count"),
                     sa.func.sum(
                         sa.case(
-                            [
-                                (
-                                    sa.or_(
-                                        sa.column(column_B) != (None),
-                                        sa.column(column_B) == (None),
-                                    ),
-                                    1,
-                                )
-                            ],
+                            (
+                                sa.or_(
+                                    sa.column(column_B) != (None),
+                                    sa.column(column_B) == (None),
+                                ),
+                                1,
+                            ),
                             else_=0,
                         )
                     ).label("column_B_count"),
@@ -635,15 +631,13 @@ class MetaSqlAlchemyDataset(Dataset):
 
             count_case_statement: List[sa.sql.elements.Label] = [
                 sa.case(
-                    [
-                        (
-                            sa.and_(
-                                sa.not_(expected_condition),
-                                sa.not_(ignore_values_condition),
-                            ),
-                            1,
-                        )
-                    ],
+                    (
+                        sa.and_(
+                            sa.not_(expected_condition),
+                            sa.not_(ignore_values_condition),
+                        ),
+                        1,
+                    ),
                     else_=0,
                 ).label("condition")
             ]
@@ -657,7 +651,7 @@ class MetaSqlAlchemyDataset(Dataset):
             sa.select(
                 [
                     sa.func.count().label("element_count"),
-                    sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                    sa.func.sum(sa.case((ignore_values_condition, 1), else_=0)).label(
                         "null_count"
                     ),
                 ]
@@ -694,20 +688,18 @@ class MetaSqlAlchemyDataset(Dataset):
         return sa.select(
             [
                 sa.func.count().label("element_count"),
-                sa.func.sum(sa.case([(ignore_values_condition, 1)], else_=0)).label(
+                sa.func.sum(sa.case((ignore_values_condition, 1), else_=0)).label(
                     "null_count"
                 ),
                 sa.func.sum(
                     sa.case(
-                        [
-                            (
-                                sa.and_(
-                                    sa.not_(expected_condition),
-                                    sa.not_(ignore_values_condition),
-                                ),
-                                1,
-                            )
-                        ],
+                        (
+                            sa.and_(
+                                sa.not_(expected_condition),
+                                sa.not_(ignore_values_condition),
+                            ),
+                            1,
+                        ),
                         else_=0,
                     )
                 ).label("unexpected_count"),
@@ -1005,23 +997,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 sa.func.count().label("element_count"),
                 sa.func.sum(
                     sa.case(
-                        [
-                            (
-                                sa.or_(
-                                    # first part of OR(IN (NULL)) gives error in teradata
-                                    sa.column(column).in_(ignore_values)
-                                    if self.engine.dialect.name.lower()
-                                    != GXSqlDialect.TERADATASQL
-                                    else False,
-                                    # Below is necessary b/c sa.in_() uses `==` but None != None
-                                    # But we only consider this if None is actually in the list of ignore values
-                                    sa.column(column).is_(None)
-                                    if None in ignore_values
-                                    else False,
-                                ),
-                                1,
-                            )
-                        ],
+                        (
+                            sa.or_(
+                                # first part of OR(IN (NULL)) gives error in teradata
+                                sa.column(column).in_(ignore_values)
+                                if self.engine.dialect.name.lower()
+                                != GXSqlDialect.TERADATASQL
+                                else False,
+                                # Below is necessary b/c sa.in_() uses `==` but None != None
+                                # But we only consider this if None is actually in the list of ignore values
+                                sa.column(column).is_(None)
+                                if None in ignore_values
+                                else False,
+                            ),
+                            1,
+                        ),
                         else_=0,
                     )
                 ).label("null_count"),
@@ -1296,13 +1286,11 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
                 sa.func.first_value(sa.column(column))
                 .over(
                     order_by=sa.case(
-                        [
-                            (
-                                percent_rank_query.c.p
-                                <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
-                                percent_rank_query.c.p,
-                            )
-                        ],
+                        (
+                            percent_rank_query.c.p
+                            <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
+                            percent_rank_query.c.p,
+                        ),
                         else_=None,
                     ).desc()
                 )
@@ -1469,7 +1457,7 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
         ):
             case_conditions.append(
                 sa.func.sum(
-                    sa.case([(sa.column(column) < bins[idx + 1], 1)], else_=0)
+                    sa.case((sa.column(column) < bins[idx + 1], 1), else_=0)
                 ).label(f"bin_{str(idx)}")
             )
             idx += 1
@@ -1478,15 +1466,13 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
-                        [
-                            (
-                                sa.and_(
-                                    sa.column(column) >= bins[idx],
-                                    sa.column(column) < bins[idx + 1],
-                                ),
-                                1,
-                            )
-                        ],
+                        (
+                            sa.and_(
+                                sa.column(column) >= bins[idx],
+                                sa.column(column) < bins[idx + 1],
+                            ),
+                            1,
+                        ),
                         else_=0,
                     )
                 ).label(f"bin_{str(idx)}")
@@ -1504,23 +1490,21 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             )
         ):
             case_conditions.append(
-                sa.func.sum(
-                    sa.case([(sa.column(column) >= bins[-2], 1)], else_=0)
-                ).label(f"bin_{str(len(bins) - 1)}")
+                sa.func.sum(sa.case((sa.column(column) >= bins[-2], 1), else_=0)).label(
+                    f"bin_{str(len(bins) - 1)}"
+                )
             )
         else:
             case_conditions.append(
                 sa.func.sum(
                     sa.case(
-                        [
-                            (
-                                sa.and_(
-                                    sa.column(column) >= bins[-2],
-                                    sa.column(column) <= bins[-1],
-                                ),
-                                1,
-                            )
-                        ],
+                        (
+                            sa.and_(
+                                sa.column(column) >= bins[-2],
+                                sa.column(column) <= bins[-1],
+                            ),
+                            1,
+                        ),
                         else_=0,
                     )
                 ).label(f"bin_{str(len(bins) - 1)}")
@@ -1735,12 +1719,16 @@ class SqlAlchemyDataset(MetaSqlAlchemyDataset):
             stmt = f'CREATE TEMPORARY TABLE "{table_name}" AS {custom_sql}'
 
         if engine_dialect == GXSqlDialect.ORACLE:
-            try:
-                self.engine.execute(sa.text(stmt_1))
-            except DatabaseError:
-                self.engine.execute(sa.text(stmt_2))
+            with self.engine.connect() as connection:
+                with connection.begin():
+                    try:
+                        self.engine.execute(sa.text(stmt_1))
+                    except DatabaseError:
+                        self.engine.execute(sa.text(stmt_2))
         else:
-            self.engine.execute(sa.text(stmt))
+            with self.engine.connect() as connection:
+                with connection.begin():
+                    connection.execute(sa.text(stmt))
 
     def column_reflection_fallback(self):
         """If we can't reflect the table, use a query to at least get column names."""
@@ -2326,7 +2314,9 @@ WHERE
                 source_table=self._table,
                 column_name=column,
             )
-            self.engine.execute(sa.text(temp_table_stmt))
+            with self.engine.connect() as connection:
+                with connection.begin():
+                    connection.execute(sa.text(temp_table_stmt))
             dup_query = (
                 sa.select([sa.column(column)])
                 .select_from(sa.text(temp_table_name))

@@ -110,9 +110,10 @@ class DatabaseStoreBackend(StoreBackend):
             table = Table(table_name, meta, *cols)
             try:
                 if self._schema_name:
-                    self._get_connection().execute(
-                        sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
-                    )
+                    with self.engine.begin() as connection:
+                        connection.execute(
+                            sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
+                        )
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise gx_exceptions.StoreBackendError(
@@ -277,7 +278,8 @@ class DatabaseStoreBackend(StoreBackend):
             ins = self._table.insert().values(**cols)
 
         try:
-            self._get_connection().execute(ins)
+            with self.engine.begin() as connection:
+                connection.execute(ins)
         except IntegrityError as e:
             if self._get(key) == value:
                 logger.info(f"Key {str(key)} already exists with the same value.")

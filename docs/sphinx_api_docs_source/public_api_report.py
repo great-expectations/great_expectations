@@ -860,14 +860,6 @@ class CodeReferenceFilter:
         ),
         IncludeExcludeDefinition(
             reason="Exclude code from v2 API",
-            filepath=pathlib.Path("great_expectations/cli/v012/datasource.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="Exclude code from v2 API",
-            filepath=pathlib.Path("great_expectations/cli/v012/toolkit.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="Exclude code from v2 API",
             filepath=pathlib.Path(
                 "great_expectations/datasource/batch_kwargs_generator/batch_kwargs_generator.py"
             ),
