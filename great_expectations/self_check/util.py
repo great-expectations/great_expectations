@@ -661,7 +661,7 @@ def get_dataset(  # noqa: C901 - 110
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
     else:
-        raise ValueError(f"Unknown dataset_type {str(dataset_type)}")
+        warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
 
 
 def get_test_validator_with_data(  # noqa: C901 - 31

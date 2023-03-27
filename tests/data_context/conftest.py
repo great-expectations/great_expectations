@@ -108,10 +108,6 @@ def create_common_data_context_files(context_path, asset_config_path):
         str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
     )
     copy_relative_path(
-        "../test_fixtures/custom_sqlalchemy_dataset.py",
-        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
-    )
-    copy_relative_path(
         "../test_fixtures/custom_sparkdf_dataset.py",
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
