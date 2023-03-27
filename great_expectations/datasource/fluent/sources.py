@@ -465,7 +465,7 @@ class _SourceFactories:
                     datasource_type, name_or_datasource, **kwargs
                 )
             ) or (
-                datasource_type(name=name_or_datasource, **kwargs)
+                datasource_type(name=name_or_datasource, **kwargs)  # type: ignore[arg-type] # could be Datasource - expect str
                 if name_or_datasource
                 else datasource_type(**kwargs)
             )
@@ -506,9 +506,9 @@ class _SourceFactories:
                 else name_or_datasource or kwargs["name"]
             )
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
-            self._validate_current_datasource_type(datasource_name, datasource_type)
+            self._validate_current_datasource_type(datasource_name, datasource_type)  # type: ignore[arg-type] # expected str only
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name
+                datasource_name=datasource_name  # type: ignore[arg-type] # expected str only
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
@@ -545,10 +545,10 @@ class _SourceFactories:
             )
             logger.debug(f"Adding or updating {datasource_type} with {datasource_name}")
             self._validate_current_datasource_type(
-                datasource_name, datasource_type, raise_if_none=False
+                datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
             )
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name
+                datasource_name=datasource_name  # type: ignore[arg-type] # expected str only
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
