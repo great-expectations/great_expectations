@@ -505,13 +505,12 @@ class SqlAlchemyDataSplitter(DataSplitter):
         concat_date_parts: Cast | ColumnOperators
         if len(date_parts) == 1:
             # MSSql does not accept single item concatenation
-            concat_clause = [
-                sa.func.distinct(
-                    sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
-                        date_parts[0].value
-                    )
-                ).label("concat_distinct_values")
-            ]
+            concat_clause = sa.func.distinct(
+                sa.func.extract(date_parts[0].value, sa.column(column_name)).label(
+                    date_parts[0].value
+                )
+            ).label("concat_distinct_values")
+
         else:
             """
             # NOTE: <Alex>6/29/2022</Alex>
@@ -532,9 +531,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
                         )
                     )
 
-                concat_clause = [
-                    sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
-                ]
+                concat_clause = sa.func.distinct(concat_date_parts).label(
+                    "concat_distinct_values"
+                )
             else:
                 concat_date_parts = sa.func.concat(
                     "",
@@ -553,18 +552,18 @@ class SqlAlchemyDataSplitter(DataSplitter):
                         ),
                     )
 
-                concat_clause = [
-                    sa.func.distinct(concat_date_parts).label("concat_distinct_values"),
-                ]
+                concat_clause = sa.func.distinct(concat_date_parts).label(
+                    "concat_distinct_values"
+                )
 
         split_query: Selectable = sa.select(
-            concat_clause
-            + [
+            concat_clause,
+            *[
                 sa.cast(
                     sa.func.extract(date_part.value, sa.column(column_name)), sa.Integer
                 ).label(date_part.value)
                 for date_part in date_parts
-            ]
+            ],
         ).select_from(selectable)
 
         return split_query
@@ -748,7 +747,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
         Note: the selectable parameter is a required to keep the signature of this method consistent with other methods.
         """
-        return sa.select([sa.true()])
+        return sa.select(sa.true())
 
     @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_column_value(
@@ -757,7 +756,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     ) -> Selectable:
         """Split using the values in the named column"""
         return (
-            sa.select([sa.func.distinct(sa.column(column_name))])
+            sa.select(sa.func.distinct(sa.column(column_name)))
             .select_from(selectable)
             .order_by(sa.column(column_name).asc())
         )
@@ -771,14 +770,12 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """Convert the values in the named column to the given date_format, and split on that"""
         if self._dialect == "sqlite":
             return sa.select(
-                [
-                    sa.func.distinct(
-                        sa.func.strftime(
-                            date_format_string,
-                            sa.column(column_name),
-                        )
+                sa.func.distinct(
+                    sa.func.strftime(
+                        date_format_string,
+                        sa.column(column_name),
                     )
-                ]
+                )
             ).select_from(selectable)
 
         raise NotImplementedError(
@@ -794,72 +791,62 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """Divide the values in the named column by `divisor`, and split on that"""
         if self._dialect == GXSqlDialect.SQLITE:
             return sa.select(
-                [
-                    sa.func.distinct(
-                        sa.cast(
-                            (sa.cast(sa.column(column_name), sa.Integer) / divisor),
-                            sa.Integer,
-                        )
+                sa.func.distinct(
+                    sa.cast(
+                        (sa.cast(sa.column(column_name), sa.Integer) / divisor),
+                        sa.Integer,
                     )
-                ]
+                )
             ).select_from(selectable)
 
         if self._dialect == GXSqlDialect.MYSQL:
             return sa.select(
-                [
-                    sa.func.distinct(
-                        sa.cast(
-                            sa.func.truncate(
-                                (sa.cast(sa.column(column_name), sa.Integer) / divisor),
-                                0,
-                            ),
-                            sa.Integer,
-                        )
-                    )
-                ]
-            ).select_from(selectable)
-
-        if self._dialect == GXSqlDialect.MSSQL:
-            return sa.select(
-                [
-                    sa.func.distinct(
-                        sa.cast(
-                            sa.func.round(
-                                (sa.cast(sa.column(column_name), sa.Integer) / divisor),
-                                0,
-                                1,
-                            ),
-                            sa.Integer,
-                        )
-                    )
-                ]
-            ).select_from(selectable)
-
-        if self._dialect == GXSqlDialect.AWSATHENA:
-            return sa.select(
-                [
-                    sa.func.distinct(
-                        sa.cast(
-                            sa.func.truncate(
-                                sa.cast(sa.column(column_name), sa.Integer) / divisor
-                            ),
-                            sa.Integer,
-                        )
-                    )
-                ]
-            ).select_from(selectable)
-
-        return sa.select(
-            [
                 sa.func.distinct(
                     sa.cast(
-                        sa.func.trunc(
-                            (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
+                        sa.func.truncate(
+                            (sa.cast(sa.column(column_name), sa.Integer) / divisor),
+                            0,
                         ),
                         sa.Integer,
                     )
                 )
-            ]
+            ).select_from(selectable)
+
+        if self._dialect == GXSqlDialect.MSSQL:
+            return sa.select(
+                sa.func.distinct(
+                    sa.cast(
+                        sa.func.round(
+                            (sa.cast(sa.column(column_name), sa.Integer) / divisor),
+                            0,
+                            1,
+                        ),
+                        sa.Integer,
+                    )
+                )
+            ).select_from(selectable)
+
+        if self._dialect == GXSqlDialect.AWSATHENA:
+            return sa.select(
+                sa.func.distinct(
+                    sa.cast(
+                        sa.func.truncate(
+                            sa.cast(sa.column(column_name), sa.Integer) / divisor
+                        ),
+                        sa.Integer,
+                    )
+                )
+            ).select_from(selectable)
+
+        return sa.select(
+            sa.func.distinct(
+                sa.cast(
+                    sa.func.trunc(
+                        (sa.cast(sa.column(column_name), sa.Integer) / divisor), 0
+                    ),
+                    sa.Integer,
+                )
+            )
         ).select_from(selectable)
 
     def get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer(
@@ -874,15 +861,13 @@ class SqlAlchemyDataSplitter(DataSplitter):
             GXSqlDialect.MSSQL,
         ]:
             return sa.select(
-                [sa.func.distinct(sa.cast(sa.column(column_name), sa.Integer) % mod)]
+                sa.func.distinct(sa.cast(sa.column(column_name), sa.Integer) % mod)
             ).select_from(selectable)
 
         return sa.select(
-            [
-                sa.func.distinct(
-                    sa.func.mod(sa.cast(sa.column(column_name), sa.Integer), mod)
-                )
-            ]
+            sa.func.distinct(
+                sa.func.mod(sa.cast(sa.column(column_name), sa.Integer), mod)
+            )
         ).select_from(selectable)
 
     @staticmethod
@@ -892,7 +877,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     ) -> Selectable:
         """Split on the joint values in the named columns"""
         return (
-            sa.select([sa.column(column_name) for column_name in column_names])
+            sa.select(*[sa.column(column_name) for column_name in column_names])
             .distinct()
             .select_from(selectable)
         )
@@ -906,13 +891,11 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """Note: this method is experimental. It does not work with all SQL dialects."""
         if self._dialect == GXSqlDialect.SQLITE:
             return sa.select(
-                [
-                    sa.func.distinct(
-                        sa.func.md5(
-                            sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits
-                        )
+                sa.func.distinct(
+                    sa.func.md5(
+                        sa.cast(sa.column(column_name), sa.VARCHAR), hash_digits
                     )
-                ]
+                )
             ).select_from(selectable)
 
         raise NotImplementedError(
