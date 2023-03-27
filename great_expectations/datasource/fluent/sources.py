@@ -14,6 +14,7 @@ from typing import (
     NamedTuple,
     Optional,
     Sequence,
+    Tuple,
     Type,
     Union,
 )
@@ -75,6 +76,9 @@ class CrudMethodType(str, Enum):
     ADD_OR_UPDATE = "ADD_OR_UPDATE"
 
 
+CrudMethodInfoFn: TypeAlias = Callable[..., Tuple[CrudMethodType, Type["Datasource"]]]
+
+
 class _SourceFactories:
     """
     Contains a collection of datasource factory methods in the format `.add_<TYPE_NAME>()`
@@ -84,7 +88,7 @@ class _SourceFactories:
     """
 
     type_lookup: ClassVar = TypeLookup()
-    __crud_registry: ClassVar[Dict[str, SourceFactoryFn]] = {}
+    __crud_registry: ClassVar[Dict[str, CrudMethodInfoFn]] = {}
 
     _data_context: GXDataContext
 
@@ -183,7 +187,7 @@ class _SourceFactories:
     ):
         method_name = f"add_or_update_{ds_type_name}"
 
-        def crud_method_info() -> tuple[CrudMethodType, Type[Datasource], str]:
+        def crud_method_info() -> tuple[CrudMethodType, Type[Datasource]]:
             return CrudMethodType.ADD_OR_UPDATE, ds_type
 
         cls._register_crud_method(
@@ -196,7 +200,7 @@ class _SourceFactories:
     def _register_delete_datasource(cls, ds_type: Type[Datasource], ds_type_name: str):
         method_name = f"delete_{ds_type_name}"
 
-        def crud_method_info() -> tuple[CrudMethodType, Type[Datasource], str]:
+        def crud_method_info() -> tuple[CrudMethodType, Type[Datasource]]:
             return CrudMethodType.DELETE, ds_type
 
         cls._register_crud_method(
@@ -208,7 +212,7 @@ class _SourceFactories:
         cls,
         crud_fn_name: str,
         crud_fn_doc: str | None,
-        crud_method_info: SourceFactoryFn,
+        crud_method_info: CrudMethodInfoFn,
     ):
         # We set the name and doc and the crud_method_info because that will be used as a proxy
         # for the real crud method so we can call public_api to generate docs for these dynamically
