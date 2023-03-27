@@ -73,7 +73,6 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
@@ -1985,14 +1984,6 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
         ),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sqlalchemy_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
         str(
             os.path.join(  # noqa: PTH118
@@ -2040,14 +2031,6 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
         ),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sqlalchemy_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
         str(
             os.path.join(  # noqa: PTH118
@@ -2091,14 +2074,6 @@ def data_context_simple_expectation_suite(tmp_path_factory):
         str(
             os.path.join(  # noqa: PTH118
                 context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sqlalchemy_dataset.py"
             )
         ),
     )
@@ -2326,11 +2301,6 @@ def sqlite_view_engine(test_backends):
 @pytest.fixture
 def expectation_suite_identifier():
     return ExpectationSuiteIdentifier("my.expectation.suite.name")
-
-
-@pytest.fixture
-def basic_sqlalchemy_datasource(sqlitedb_engine):
-    return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)
 
 
 @pytest.fixture
