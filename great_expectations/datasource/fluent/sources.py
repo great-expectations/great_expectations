@@ -587,19 +587,19 @@ class _SourceFactories:
             crud_method_type, datasource_type = crud_method_info()
             if crud_method_type == CrudMethodType.ADD:
                 return self.create_add_crud_method(
-                    datasource_type, crud_method_info.__doc__
+                    datasource_type, crud_method_info.__doc__  # type: ignore[arg-type] # could be None
                 )
             elif crud_method_type == CrudMethodType.UPDATE:
                 return self.create_update_crud_method(
-                    datasource_type, crud_method_info.__doc__
+                    datasource_type, crud_method_info.__doc__  # type: ignore[arg-type] # could be None
                 )
             elif crud_method_type == CrudMethodType.ADD_OR_UPDATE:
                 return self.create_add_or_update_crud_method(
-                    datasource_type, crud_method_info.__doc__
+                    datasource_type, crud_method_info.__doc__  # type: ignore[arg-type] # could be None
                 )
             elif crud_method_type == CrudMethodType.DELETE:
                 return self.create_delete_crud_method(
-                    datasource_type, crud_method_info.__doc__
+                    datasource_type, crud_method_info.__doc__  # type: ignore[arg-type] # could be None
                 )
             else:
                 raise TypeRegistrationError(
