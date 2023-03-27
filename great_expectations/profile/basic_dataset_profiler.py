@@ -1,15 +1,14 @@
 import logging
 
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
+from great_expectations.optional_imports import OperationalError
 from great_expectations.profile.base import (
     DatasetProfiler,
     ProfilerCardinality,
     ProfilerDataType,
 )
 
-try:
-    from sqlalchemy.exc import OperationalError
-except ModuleNotFoundError:
+if not OperationalError:
     OperationalError = RuntimeError
 
 logger = logging.getLogger(__name__)
