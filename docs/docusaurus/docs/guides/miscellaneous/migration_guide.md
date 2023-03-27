@@ -36,7 +36,6 @@ great_expectations project check-config
 If your configuration is up-to-date and does not need to be upgraded, you will see the following message:
 
 ```bash
-Using v3 (Batch Request) API
 Checking your config files for validity...
 
 Your config file appears valid!
@@ -46,7 +45,6 @@ Your config file appears valid!
 If your configuration needs to be upgraded, you will see a message like this:
 
 ```bash
-Using v3 (Batch Request) API
 Checking your config files for validity...
 
 Unfortunately, your config appears to be invalid:
@@ -65,8 +63,6 @@ great_expectations project upgrade
 Then you will see the following prompt:
 
 ```bash
-Using v3 (Batch Request) API
-
 Checking project...
 
 ================================================================================
@@ -365,7 +361,6 @@ For additional examples on how to configure V3-style checkpoints, including how 
 If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
 
 ```bash
-Using v3 (Batch Request) API
 Found 1 Checkpoint.
  - test_v3_checkpoint
  ```
@@ -379,7 +374,6 @@ great_expectations checkpoint run test_v3_checkpoint
 If everything is successful, then you should see output similar to below.:
 
 ```bash
-Using v3 (Batch Request) API
 Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 604.83it/s]
 Validation succeeded!
 
@@ -445,7 +439,6 @@ For additional examples on how to configure V3-style checkpoints, including how 
 If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
 
 ```bash
-Using v3 (Batch Request) API
 Found 1 Checkpoint.
  - test_v3_checkpoint
  ```
@@ -459,7 +452,6 @@ great_expectations checkpoint run test_v3_checkpoint
 If everything is successful, then you should see output similar to below.:
 
 ```bash
-Using v3 (Batch Request) API
 Calculating Metrics: 100%|█████████████████████████████████████████████████████████████████████████████| 4/4 [00:00<00:00,  6.67it/s]
 Validation succeeded!
 
@@ -524,7 +516,6 @@ For additional examples on how to configure V3-style checkpoints, including how 
 If the update was successful, then you should be able to see the updated Checkpoint `test_v3_checkpoint` by running `great_expectations checkpoint list`.
 
 ```bash
-Using v3 (Batch Request) API
 Found 1 Checkpoint.
  - test_v3_checkpoint
  ```
@@ -538,7 +529,6 @@ great_expectations checkpoint run test_v3_checkpoint
 If everything is successful, then you should see output similar to below.:
 
 ```bash
-Using v3 (Batch Request) API
 Calculating Metrics: 100%|████████████████████████████████████████████████████████████████████████████████████| 3/3 [00:00<00:00, 604.83it/s]
 Validation succeeded!
 

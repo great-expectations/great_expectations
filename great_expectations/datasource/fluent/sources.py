@@ -271,8 +271,27 @@ class _SourceFactories:
             def _add_asset_factory(
                 self: Datasource, name: str, **kwargs
             ) -> pydantic.BaseModel:
+
+                # if the Datasource uses a data_connector we need to identify the
+                # asset level attributes needed by the data_connector
+                # push them to `connect_options` field
+                if self.data_connector_type:
+                    connect_options = {
+                        k: v
+                        for (k, v) in kwargs.items()
+                        if k in self.data_connector_type.asset_level_option_keys and v
+                    }
+                    if connect_options:
+                        for k in connect_options:  # TODO: avoid this extra loop
+                            kwargs.pop(k)
+                        kwargs["connect_options"] = connect_options
+                        # asset_options_type should raise an error if the options are invalid
+                        self.data_connector_type.asset_options_type(**connect_options)
+                else:
+                    connect_options = {}
+
                 asset = asset_type(name=name, **kwargs)
-                return self.add_asset(asset)
+                return self._add_asset(asset, connect_options=connect_options)
 
             # attr-defined issue
             # https://github.com/python/mypy/issues/12472
@@ -290,7 +309,7 @@ class _SourceFactories:
             ) -> Validator:
                 name = asset_name or DEFAULT_PANDAS_DATA_ASSET_NAME
                 asset = asset_type(name=name, **kwargs)
-                self.add_asset(asset)
+                self._add_asset(asset)
                 batch_request = asset.build_batch_request()
                 return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[attr-defined]
 

@@ -30,6 +30,9 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.datasource.fluent.constants import (
+    MATCH_ALL_PATTERN,
+)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -47,6 +50,7 @@ if TYPE_CHECKING:
         BatchMarkers,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -350,6 +354,8 @@ class Datasource(
 
     # class attrs
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
+    # Not all Datasources require a DataConnector
+    data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
     _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
@@ -383,7 +389,7 @@ class Datasource(
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
-    _data_context = pydantic.PrivateAttr()
+    _data_context: GXDataContext = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
@@ -458,7 +464,9 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def _add_asset(
+        self, asset: _DataAssetT, connect_options: dict | None = None
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
@@ -467,6 +475,10 @@ class Datasource(
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+
+        if not connect_options:
+            connect_options = {}
+        self._build_data_connector(asset, **connect_options)
 
         asset.test_connection()
 
@@ -508,7 +520,7 @@ class Datasource(
     ) -> re.Pattern:
         pattern: re.Pattern
         if not batching_regex:
-            pattern = re.compile(".*")
+            pattern = MATCH_ALL_PATTERN
         elif isinstance(batching_regex, str):
             pattern = re.compile(batching_regex)
         elif isinstance(batching_regex, re.Pattern):
@@ -538,27 +550,14 @@ class Datasource(
             """One needs to implement "test_connection" on a Datasource subclass."""
         )
 
-    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
+    def _build_data_connector(self, data_asset: _DataAssetT, **kwargs) -> None:
         """Any Datasource subclass that utilizes DataConnector should overwrite this method.
 
         Specific implementations instantiate appropriate DataConnector class and set "self._data_connector" to it.
 
         Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
+            data_asset: DataAsset using this DataConnector instance
             kwargs: Extra keyword arguments allow specification of arguments used by particular DataConnector subclasses
-        """
-        pass
-
-    def _build_test_connection_error_message(
-        self, data_asset_name: str, **kwargs
-    ) -> None:
-        """Any Datasource subclass can overwrite this method.
-
-        Specific implementations create appropriate error message and set "self._test_connection_error_message" to it.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
-            kwargs: Extra keyword arguments allow specification of arguments used by particular subclass' error message
         """
         pass
 
