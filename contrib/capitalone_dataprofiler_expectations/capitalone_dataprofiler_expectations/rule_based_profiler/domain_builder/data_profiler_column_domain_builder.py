@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Iterable, List, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
-    INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
     SemanticDomainTypes,
 )
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
+    build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -142,25 +142,11 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
                 message=f"Error: Some of profiled columns in {self.__class__.__name__} are not found in Batch table."
             )
 
-        column_name: str
-        semantic_types_by_column_name: Dict[str, SemanticDomainTypes] = {
-            column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr] # could be None
-                column_name
-            ]
-            for column_name in effective_column_names
-        }
-
-        domains: List[Domain] = [
-            Domain(
-                domain_type=self.domain_type,
-                domain_kwargs={
-                    "column_list": effective_column_names,
-                },
-                details={
-                    INFERRED_SEMANTIC_TYPE_KEY: semantic_types_by_column_name,
-                },
-                rule_name=rule_name,
-            ),
-        ]
+        domains: List[Domain] = build_domains_from_column_names(
+            rule_name=rule_name,
+            column_names=profile_report_column_names,
+            domain_type=self.domain_type,
+            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,  # type: ignore[union-attr] # could be None
+        )
 
         return domains
