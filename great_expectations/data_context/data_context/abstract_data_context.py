@@ -132,9 +132,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     usage_statistics_enabled_method,
 )
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
+from great_expectations.optional_imports import SQLAlchemyError
+
+if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = gx_exceptions.ProfilerError
