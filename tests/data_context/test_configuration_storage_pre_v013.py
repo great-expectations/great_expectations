@@ -51,10 +51,6 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store_with_usage_
         str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
-    )
-    shutil.copy(
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )

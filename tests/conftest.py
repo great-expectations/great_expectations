@@ -1983,14 +1983,6 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
         ),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sqlalchemy_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
         str(
             os.path.join(  # noqa: PTH118
@@ -2081,14 +2073,6 @@ def data_context_simple_expectation_suite(tmp_path_factory):
         str(
             os.path.join(  # noqa: PTH118
                 context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sqlalchemy_dataset.py"
             )
         ),
     )
