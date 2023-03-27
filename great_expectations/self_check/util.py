@@ -1192,9 +1192,9 @@ def get_dataset(  # noqa: C901 - 110
 def get_test_validator_with_data(  # noqa: C901 - 31
     execution_engine: str,
     data: dict,
+    table_name: str,
     schemas: dict | None = None,
     caching: bool = True,
-    table_name: str | None = None,
     sqlite_db_path: str | None = None,
     extra_debug_info: str = "",
     debug_logger: logging.Logger | None = None,

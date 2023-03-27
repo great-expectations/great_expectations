@@ -105,10 +105,6 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 if "schemas" in test_config
                                 else None
                             )
-                            # add check?
-                            table_name = test_config.get("dataset_name")
-                            if not table_name:
-                                raise Exception(f"bro that didn't work: {test_config}")
                             validator_with_data = get_test_validator_with_data(
                                 execution_engine=backend,
                                 data=test_config["data"],
