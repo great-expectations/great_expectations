@@ -479,7 +479,8 @@ class _SourceFactories:
             return datasource
 
         add_datasource.__doc__ = doc_string
-        add_datasource.__signature__ = _merge_signatures(
+        # attr-defined issue https://github.com/python/mypy/issues/12472
+        add_datasource.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
             add_datasource,
             datasource_type,
             exclude={"type", "assets"},
@@ -516,7 +517,8 @@ class _SourceFactories:
             )
 
         update_datasource.__doc__ = doc_string
-        update_datasource.__signature__ = _merge_signatures(
+        # attr-defined issue https://github.com/python/mypy/issues/12472
+        update_datasource.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
             update_datasource,
             datasource_type,
             exclude={"type", "assets"},
@@ -555,7 +557,8 @@ class _SourceFactories:
             )
 
         add_or_update_datasource.__doc__ = doc_string
-        add_or_update_datasource.__signature__ = _merge_signatures(
+        # attr-defined issue https://github.com/python/mypy/issues/12472
+        add_or_update_datasource.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
             add_or_update_datasource,
             datasource_type,
             exclude={"type", "assets"},
@@ -574,7 +577,8 @@ class _SourceFactories:
             self._data_context._delete_fluent_datasource(datasource_name=name)
 
         delete_datasource.__doc__ = doc_string
-        delete_datasource.__signature__ = inspect.signature(delete_datasource)
+        # attr-defined issue https://github.com/python/mypy/issues/12472
+        delete_datasource.__signature__ = inspect.signature(delete_datasource)  # type: ignore[attr-defined]
         return delete_datasource
 
     def __getattr__(self, attr_name: str):
