@@ -22,10 +22,8 @@ def custom_dataset(sa):
         def expect_column_mode_to_equal_0(self, column):
             mode_query = (
                 sa.select(
-                    [
-                        sa.column(column).label("value"),
-                        sa.func.count(sa.column(column)).label("frequency"),
-                    ]
+                    sa.column(column).label("value"),
+                    sa.func.count(sa.column(column)).label("frequency"),
                 )
                 .select_from(self._table)
                 .group_by(sa.column(column))
