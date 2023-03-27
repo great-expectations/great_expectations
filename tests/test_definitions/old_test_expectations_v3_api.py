@@ -1,7 +1,7 @@
 import glob
 import json
 import os
-from typing import List, cast, Set
+from typing import List, cast
 
 import pandas as pd
 import pytest
@@ -35,7 +35,8 @@ from tests.conftest import build_test_backends_list_v3_api
 
 from sqlalchemy import text as sa_text
 
-table_names: Set = set()
+
+validator_list: List[Validator] = list()
 
 
 def pytest_generate_tests(metafunc):  # noqa C901 - 35
@@ -91,10 +92,15 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                         if isinstance(configured_dataset["data"], list):
                             sqlite_db_path = generate_sqlite_db_path()
                             for dataset in configured_dataset["data"]:
+                                # to eventually drop
+                                table_number += 1
                                 temp_table_name = dataset.get(
-                                    "dataset_name", generate_test_table_name().lower()
+                                    "dataset_name",
+                                    generate_test_table_name_with_number(
+                                        table_number
+                                    ).lower(),
                                 )
-                                table_names.add(temp_table_name)
+                                print(f"creating table: {temp_table_name}")
                                 datasets.append(
                                     get_test_validator_with_data(
                                         backend,
@@ -117,10 +123,14 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                             ]:
 
                                 pk_column: bool = True
+                            table_number += 1
                             temp_table_name = configured_dataset.get(
-                                "dataset_name", generate_test_table_name().lower()
+                                "dataset_name",
+                                generate_test_table_name_with_number(
+                                    table_number
+                                ).lower(),
                             )
-                            table_names.add(temp_table_name)
+
                             schemas = (
                                 configured_dataset["schemas"]
                                 if "schemas" in configured_dataset
@@ -441,7 +451,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 "validator_with_data": validator_with_data,
                                 "test": test,
                                 "skip": skip_expectation or skip_test,
-                                "backend": backend,
+                                "tables_to_drop": tables_to_drop,
                             }
                         )
 
@@ -481,12 +491,6 @@ def test_case_runner_v3_api(test_case):
             test=test_case["test"],
             pk_column=test_case["pk_column"],
         )
-
-
-# def test_case_runner_v3_api(test_case):
-#     if test_case["skip"]:
-#         pytest.skip()
-#         )
 
 
 def test_drop_tables(test_case):

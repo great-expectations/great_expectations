@@ -1599,14 +1599,18 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 
     _debug("Calling df.to_sql")
     _start = time.time()
-    df.to_sql(
-        name=table_name,
-        con=engine,
-        index=False,
-        dtype=sql_dtypes,
-        if_exists="replace",
-        method=sql_insert_method,
-    )
+    try:
+        df.to_sql(
+            name=table_name,
+            con=engine,
+            index=False,
+            dtype=sql_dtypes,
+            if_exists="fail",
+            method=sql_insert_method,
+        )
+    except ValueError:
+        # we don't adding the same table multiple times
+        pass
     _end = time.time()
     _debug(
         f"Took {_end - _start} seconds to df.to_sql for {sa_engine_name} {extra_debug_info}"
@@ -3214,6 +3218,14 @@ def generate_test_table_name(
     table_name: str = default_table_name_prefix + "".join(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
+    return table_name
+
+
+def generate_test_table_name_with_number(
+    table_number: int,
+    default_table_name_prefix: str = "v3_api_expectation_test_data_",
+) -> str:
+    table_name: str = default_table_name_prefix + str(table_number)
     return table_name
 
 
