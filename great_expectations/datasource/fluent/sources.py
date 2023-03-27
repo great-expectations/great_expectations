@@ -83,7 +83,6 @@ class _SourceFactories:
     or `DataAsset` types and a simplified name for those types.
     """
 
-    # TODO (kilo59): split DataAsset & Datasource lookups
     type_lookup: ClassVar = TypeLookup()
     __crud_registry: ClassVar[Dict[str, SourceFactoryFn]] = {}
 
