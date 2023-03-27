@@ -19,6 +19,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import import_library_module
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -301,7 +302,9 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # First, make sure that degenerative case never passes.
 
     test_df_0: pd.DataFrame = test_df.iloc[:1]
-    test_df_0.to_sql("test_table_0", con=my_execution_engine.engine)
+    add_dataframe_to_db(
+        df=test_df_0, name="test_table_0", con=my_execution_engine.engine
+    )
 
     p = 1.0
     batch_spec = SqlAlchemyDatasourceBatchSpec(
@@ -338,7 +341,9 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # Second, verify that realistic case always returns different random sample of rows.
 
     test_df_1: pd.DataFrame = test_df
-    test_df_1.to_sql("test_table_1", con=my_execution_engine.engine)
+    add_dataframe_to_db(
+        df=test_df_1, name="test_table_1", con=my_execution_engine.engine
+    )
 
     p = 2.0e-1
     batch_spec = SqlAlchemyDatasourceBatchSpec(

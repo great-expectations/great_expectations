@@ -47,6 +47,7 @@ from great_expectations.core.util import (
 from great_expectations.dataset import PandasDataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
     MetricProviderError,
@@ -676,7 +677,8 @@ def get_dataset(  # noqa: C901 - 110
         if table_name is None:
             table_name = generate_test_table_name()
 
-        df.to_sql(
+        add_dataframe_to_db(
+            df=df,
             name=table_name,
             con=engine,
             index=False,
@@ -1640,7 +1642,8 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 
     _debug("Calling df.to_sql")
     _start = time.time()
-    df.to_sql(
+    add_dataframe_to_db(
+        df=df,
         name=table_name,
         con=engine,
         index=False,

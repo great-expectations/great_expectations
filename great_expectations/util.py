@@ -82,6 +82,7 @@ try:
     from sqlalchemy import Table
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql import Select
+
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
@@ -90,6 +91,8 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
+    RemovedIn20Warning = None
+
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
