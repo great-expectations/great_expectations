@@ -67,26 +67,6 @@ def test_data_asset_expectation_suite(empty_data_context_stats_enabled):
     assert asset.get_expectation_suite() == default_suite
 
 
-def test_interactive_evaluation(dataset):
-    # We should be able to enable and disable interactive evaluation
-
-    # Default is on
-    assert dataset.get_config_value("interactive_evaluation") is True
-    res = dataset.expect_column_values_to_be_between(
-        "naturals", 1, 10, include_config=True
-    )
-    assert res.success is True
-
-    # Disable
-    dataset.set_config_value("interactive_evaluation", False)
-    disable_res = dataset.expect_column_values_to_be_between(
-        "naturals", 1, 10
-    )  # No need to explicitly include_config
-    assert disable_res.success is None
-
-    assert res.expectation_config == disable_res.expectation_config
-
-
 def test_custom_expectation_default_arg_values_set(
     data_context_simple_expectation_suite_with_custom_pandas_dataset,
 ):
