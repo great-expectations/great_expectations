@@ -165,7 +165,7 @@ my_asset.add_sorters(["+year"])
 To verify that our Data Asset will return the desired files as Batches, we will define a quick Batch Request that will include all the Batches available in the Data asset.  Then we will use that Batch Request to get a list of the returned Batches.
 
 ```python title="Python code"
-my_batch_request = my_asset.my_asset.build_batch_request()
+my_batch_request = my_asset.build_batch_request()
 batches = datasource.get_batch_list_from_batch_request(my_batch_request)
 ```
 
