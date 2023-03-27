@@ -84,7 +84,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             sa.column(column_name) for column_name in table_columns
         ]
         original_table_clause = (
-            sa.select(table_columns_selector)
+            sa.select(*table_columns_selector)
             .select_from(table)
             .alias("original_table_clause")
         )
@@ -95,7 +95,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # Give the resulting sub-query a unique alias in order to disambiguate column names in subsequent queries.
         count_selector = column_list + [sa.func.count().label("_num_rows")]
         group_count_query = (
-            sa.select(count_selector)
+            sa.select(*count_selector)
             .group_by(*column_list)
             .select_from(original_table_clause)
             .alias("group_counts_subquery")
@@ -115,10 +115,8 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # noinspection PyProtectedMember
         compound_columns_count_query = (
             sa.select(
-                [
-                    original_table_clause,
-                    group_count_query.c._num_rows.label("_num_rows"),
-                ]
+                original_table_clause,
+                group_count_query.c._num_rows.label("_num_rows"),
             )
             .select_from(
                 original_table_clause.join(
