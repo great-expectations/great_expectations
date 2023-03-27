@@ -36,9 +36,9 @@ if TYPE_CHECKING:
         AbstractDataContext,
     )
     from great_expectations.rule_based_profiler.parameter_container import (
-        ParameterContainer,  # noqa: TCH001
+        ParameterContainer,
     )
-    from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
+    from great_expectations.validator.computed_metric import MetricValue
     from great_expectations.validator.validator import Validator
 
 
