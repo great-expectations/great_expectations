@@ -287,6 +287,51 @@ extend-exclude = [
 "great_expectations/optional_imports.py" = [
     "TID251",  # flake8-banned-api
 ]
+"great_expectations/dataset/*" = [ # dataset is deprecated
+    "TID251",  # flake8-banned-api
+]
+
+# #########################################
+# BEGIN temporary banned-api exclusion list
+# TODO: remove packages from this list as they are addressed
+"great_expectations/cli/*" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/data_context/store/*" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/datasource/batch_kwargs_generator/*" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/datasource/data_connector/*" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/execution_engine/*" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/expectations/core/*" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/expectations/metrics/*" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/self_check/util.py" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/self_check/sqlalchemy_connection_manager.py" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/util.py" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/rule_based_profiler/attributed_resolved_metrics.py" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/expectations/row_conditions.py" = [
+    "TID251",  # flake8-banned-api
+]
+# END temporary banned-api exclusion list
+# #########################################
 
 [tool.ruff.mccabe]
 max-complexity = 15
@@ -297,7 +342,7 @@ convention = "google"
 [tool.ruff.flake8-tidy-imports]
 [tool.ruff.flake8-tidy-imports.banned-api]
 # Uncomment this to prevent importing sqlalchemy everywhere but optional_imports.py
-# "sqlalchemy".msg = "Don't import sqlalchemy directly, please use the great_expectations.import_manager."
+"sqlalchemy".msg = "Don't import sqlalchemy directly, please use the great_expectations.optional_imports."
 
 [tool.pytest.ini_options]
 filterwarnings = [
