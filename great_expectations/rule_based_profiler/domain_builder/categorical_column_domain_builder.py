@@ -407,7 +407,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             if all(
                 [
                     self.cardinality_checker.cardinality_within_limit(  # type: ignore[union-attr] # could be None
-                        metric_value=metric_value
+                        metric_value=metric_value  # type: ignore[arg-type] # Expecting Union[int, float] (subset of "MetricValue").
                     )
                     for metric_value in resolved_metrics.values()
                 ]
