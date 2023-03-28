@@ -1057,7 +1057,9 @@ class StoreMetricsAction(ValidationAction):
             )
 
         self.data_context.store_validation_result_metrics(
-            self._requested_metrics, validation_result_suite, self._target_store_name
+            requested_metrics=self._requested_metrics,
+            validation_results=validation_result_suite,
+            target_store_name=self._target_store_name,
         )
 
 

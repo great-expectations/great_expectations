@@ -264,7 +264,7 @@ def _sqlalchemy_column_map_condition_values(
         batch_columns_list=metrics["table.columns"],
     )
 
-    query = sa.select([sa.column(column_name).label("unexpected_values")]).where(
+    query = sa.select(sa.column(column_name).label("unexpected_values")).where(
         unexpected_condition
     )
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
@@ -325,7 +325,7 @@ def _sqlalchemy_column_map_condition_value_counts(
     column: sa.Column = sa.column(column_name)
 
     query = (
-        sa.select([column, sa.func.count(column)])
+        sa.select(column, sa.func.count(column))
         .where(unexpected_condition)
         .group_by(column)
     )
