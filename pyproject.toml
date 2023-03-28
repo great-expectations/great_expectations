@@ -467,10 +467,6 @@ filterwarnings = [
     # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
     # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
     'ignore: The Engine.execute\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. All statement execution in SQLAlchemy 2.0 is performed by the Connection.execute\(\) method of Connection, or in the ORM by the Session.execute\(\) method of Session.:DeprecationWarning',
-    # Error with link to docs: sqlalchemy.exc.RemovedIn20Warning: The Connection.connect() method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    # Found so far in pytest tests/test_ge_utils.py, which is a v2 API reference. We won't fix this since the v2 API
-    # code will be deleted soon.
-    'ignore: The Connection.connect\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:DeprecationWarning',
     # Example Actual Warning: sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     # Found so far in test_cli_datasource_list
     'ignore: Deprecated API features detected!:DeprecationWarning',
