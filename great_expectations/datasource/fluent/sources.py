@@ -585,7 +585,7 @@ class _SourceFactories:
             crud_method_type, datasource_type = crud_method_info()
             if crud_method_type == CrudMethodType.ADD:
                 return self.create_add_crud_method(
-                    datasource_type, crud_method_info.__doc__  # type: ignore[arg-type] # could be None
+                    datasource_type, crud_method_info.__doc__ or ""
                 )
             elif crud_method_type == CrudMethodType.UPDATE:
                 return self.create_update_crud_method(
