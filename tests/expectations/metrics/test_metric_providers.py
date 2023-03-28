@@ -39,7 +39,7 @@ from great_expectations.expectations import registry
 
 @pytest.fixture
 def mock_registry(monkeypatch: pytest.MonkeyPatch):
-    # ensures consistent state among test cases runs
+    """Ensures consistent `_registered_metrics` state among test cases runs."""
     monkeypatch.setattr(
         registry,
         "_registered_metrics",
