@@ -231,4 +231,4 @@
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-create /docs/reference/api/great_expectations.util
 
 # Redirects for renamed reference docs
-docs/docusaurus/docs/reference/anonymous_usage_statistics docs/docusaurus/docs/reference/usage_statistics
+/docs/docusaurus/docs/reference/anonymous_usage_statistics /docs/docusaurus/docs/reference/usage_statistics
