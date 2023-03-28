@@ -21,8 +21,8 @@ from great_expectations.exceptions import ClassInstantiationError, DataContextEr
 try:
     from typing_extensions import NotRequired
 except ImportError:
-    NotRequired = (
-        Optional  # TODO: remove this once min typing_extensions version allows
+    NotRequired = (  # TODO: remove this once min typing_extensions version allows
+        Optional  # type:ignore[assignment]
     )
 
 if TYPE_CHECKING:
