@@ -516,9 +516,6 @@ def test_expectation_is_abstract():
     assert not ExpectColumnValuesToEqualThree.is_abstract()
 
 
-@pytest.mark.skip(
-    "This is broken because Expectation._get_execution_engine_diagnostics is broken"
-)
 def test_run_diagnostics_on_an_expectation_with_errors_in_its_tests():
     expectation_diagnostics = (
         ExpectColumnValuesToEqualThree__BrokenIteration().run_diagnostics()

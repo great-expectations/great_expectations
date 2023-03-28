@@ -40,8 +40,8 @@ class ExpectColumnValuesToEqualThree__SecondIteration(ExpectColumnValuesToEqualT
 
     examples = [
         {
+            "dataset_name": "mostly_threes_second_iteration",
             "data": {
-                "dataset_name": "mostly_threes_second_iteration",
                 "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
             },
             "tests": [
@@ -191,8 +191,8 @@ class ExpectColumnValuesToEqualThree__BrokenIteration(
 
     examples = [
         {
+            "dataset_name": "mostly_threes_third_broken_iteration",
             "data": {
-                "dataset_name": "mostly_threes_third_broken_iteration",
                 "mostly_threes": [3, 3, 3, 3, 3, 3, 2, -1, None, None],
                 "broken_column": [3, 3, 3, 3, 3, 3, 2, -1, "b", "b"],
             },

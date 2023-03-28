@@ -1511,7 +1511,6 @@ class Expectation(metaclass=MetaExpectation):
 
         if diagnostics is None:
             diagnostics = self.run_diagnostics()
-        print("hello")
         if show_failed_tests:
             for test in diagnostics.tests:
                 if test.test_passed is False:
@@ -1582,7 +1581,6 @@ class Expectation(metaclass=MetaExpectation):
                             copied_test["suppress_test_for"].extend(
                                 top_level_suppress_test_for
                             )
-                    # breakpoint()
                     included_test_cases.append(
                         ExpectationLegacyTestCaseAdapter(**copied_test)
                     )
