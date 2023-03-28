@@ -162,6 +162,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     id: Optional[uuid.UUID] = Field(default=None, description="DataAsset id")
 
     order_by: List[Sorter] = Field(default_factory=list)
+    batch_metadata: Optional[BatchMetadata] = pydantic.Field(default_factory=dict)
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()

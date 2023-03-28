@@ -80,8 +80,6 @@ class PandasDatasourceError(Exception):
 
 
 class _PandasDataAsset(DataAsset):
-    batch_metadata: Optional[BatchMetadata] = pydantic.Field(default_factory=dict)
-
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
         "batch_metadata",
         "name",
