@@ -110,7 +110,6 @@ class XMLAsset(_PandasDataAsset): ...
 class DataFrameAsset(_PandasDataAsset):
     type: Literal["dataframe"]
     dataframe: _PandasDataFrameT  # type: ignore[valid-type]
-    batch_metadata: Optional[BatchMetadata]
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
