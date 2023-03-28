@@ -63,7 +63,7 @@ path_to_folder_containing_csv_files = "../taxi_data"
 Once we have determined our `name` and `base_directory`, we pass them in as parameters when we create our Datasource:
 
 ```python title = "Python code"
-datasource = context.datasources.add_spark_filesystem(name=datasource_name, base_path=path_to_folder_containing_csv_files)
+datasource = context.sources.add_spark_filesystem(name=datasource_name, base_path=path_to_folder_containing_csv_files)
 ```
 
 <TipFilesystemDatasourceNestedSourceDataFolders />
@@ -114,6 +114,6 @@ To see the full source code used for the examples in this guide, please referenc
 
 For more information on the concepts and reasoning employed by this guide, please reference the following informational guides:
 
-- [What does a Datasource do behind the scenes?](/docs/corresponding/link.md)
-- [What are use the use cases for single vs multiple Batch Data Assets?](/docs/link/to/conceptual/guide.md)
+- [What does a Datasource do behind the scenes?]
+- [What are use the use cases for single vs multiple Batch Data Assets?]
 -->

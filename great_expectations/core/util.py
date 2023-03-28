@@ -76,9 +76,17 @@ from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalch
 
 try:
     LegacyRow = sqlalchemy.engine.row.LegacyRow
+except (
+    ImportError,
+    AttributeError,
+):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
+    LegacyRow = SQLALCHEMY_NOT_IMPORTED
+
+# This is a separate try/except than the LegacyRow one since TextClause exists in sqlalchemy 2. This means LegacyRow
+# may be not importable while TextClause is.
+try:
     TextClause = sqlalchemy.sql.elements.TextClause
 except ImportError:
-    LegacyRow = SQLALCHEMY_NOT_IMPORTED
     TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
@@ -787,7 +795,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
-    force_reuse_spark_context: bool = False,
+    force_reuse_spark_context: bool = True,
 ) -> SparkSession:
     """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
 
@@ -801,7 +809,7 @@ def get_or_create_spark_application(
         spark_config: Dictionary containing Spark configuration (string-valued keys mapped to string-valued properties).
         force_reuse_spark_context: Boolean flag indicating (if True) that creating new Spark context is forbidden.
 
-    Returns: SparkSession (new or existing as per "isStopped()" status and "force_reuse_spark_context" directive).
+    Returns: SparkSession (new or existing as per "isStopped()" status).
     """
     if spark_config is None:
         spark_config = {}

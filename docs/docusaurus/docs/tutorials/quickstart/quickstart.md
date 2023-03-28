@@ -169,6 +169,14 @@ context = context.convert_to_file_context()
 
 You can provide the path to a specific folder when you convert your Ephemeral Data Context to a Filesystem Data Context.  If you do, your Filesystem Data Context will be initialized at that location.  If you do not, your new Filesystem Data Context will be initialized in the folder that your script is executed in.
 
+### 5. (Optional) Great Expectations Cloud
+
+By completing the Quickstart guide, you now have the opportunity to join the Cloud Early Access program and explore how Great Expectations Cloud visualizes and creates shareable links for anyone on your team. The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
+
+To access GX Cloud, you need to join our Cloud Early Access program. During this program, limited seats are available, but joining the queue will keep you informed of the product's progress.
+
+**[Sign up for the Cloud Early Access program!](https://greatexpectations.io/cloud)**
+
 ## Next Steps 
 
 Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases! To help with this we have prepared some more detailed installation and setting up guides tailored to specific environments and resources.
