@@ -49,6 +49,7 @@ from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.exceptions.exceptions import (
+    ExecutionEngineError,
     InvalidExpectationConfigurationError,
     MetricProviderError,
     MetricResolutionError,
@@ -1192,7 +1193,7 @@ def get_dataset(  # noqa: C901 - 110
 def get_test_validator_with_data(  # noqa: C901 - 31
     execution_engine: str,
     data: dict,
-    table_name: str,
+    table_name: str | None = None,
     schemas: dict | None = None,
     caching: bool = True,
     sqlite_db_path: str | None = None,
@@ -1310,8 +1311,9 @@ def _get_test_validator_with_data_sqlalchemy(
         return None
 
     if table_name is None:
-        table_name = generate_test_table_name().lower()
-
+        raise ExecutionEngineError(
+            "Creating Validator in Sql tests requires `table_name` to be defined. Please check your configuration"
+        )
     return build_sa_validator_with_data(
         df=df,
         sa_engine_name=execution_engine,
@@ -1473,9 +1475,9 @@ def build_pandas_validator_with_data(
 def build_sa_validator_with_data(  # noqa: C901 - 39
     df,
     sa_engine_name,
+    table_name,
     schemas=None,
     caching=True,
-    table_name=None,
     sqlite_db_path=None,
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
@@ -1628,9 +1630,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                 df[col] = pd.to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
-
-    if table_name is None:
-        table_name = generate_test_table_name()
 
     if sa_engine_name in [
         "trino",
