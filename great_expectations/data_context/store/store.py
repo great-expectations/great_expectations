@@ -18,14 +18,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
-try:
-    from typing_extensions import NotRequired
-except ImportError:
-    NotRequired = (  # TODO: remove this once min typing_extensions version allows
-        Optional  # type:ignore[assignment]
+if TYPE_CHECKING:
+    # min version of typing_extension missing `NotRequired`, so it can't be imported at runtime
+    from typing_extensions import (
+        NotRequired,
     )
 
-if TYPE_CHECKING:
     from great_expectations.core.configuration import AbstractConfig
 
 logger = logging.getLogger(__name__)
