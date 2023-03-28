@@ -3,7 +3,7 @@ import os
 import dataprofiler as dp
 import pandas as pd
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (  # registers these metrics
     DataProfilerColumnProfileReport,
     DataProfilerProfileReport,
 )
@@ -11,8 +11,8 @@ from great_expectations.self_check.util import build_pandas_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
-_ = DataProfilerColumnProfileReport  # registers this metric
-_ = DataProfilerProfileReport  # registers this metric
+_ = DataProfilerColumnProfileReport  # prevents removal of "unused" import
+_ = DataProfilerProfileReport  # prevents removal of "unused" import
 
 
 test_root_path: str = os.path.dirname(  # noqa: PTH120

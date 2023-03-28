@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (  # registers these metrics
     DataProfilerColumnProfileReport,
     DataProfilerProfileReport,
 )
@@ -14,13 +14,13 @@ from great_expectations.data_context.types.base import AnonymizedUsageStatistics
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.self_check.util import build_test_backends_list
 from tests.conftest import (
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,  # implicitly used fixture
 )
 
-_ = DataProfilerProfileReport  # registers this metric
-_ = DataProfilerColumnProfileReport  # registers this metric
+_ = DataProfilerProfileReport  # prevents removal of "unused" import
+_ = DataProfilerColumnProfileReport  # prevents removal of "unused" import
 
-_ = set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder  # avoids removal of "unused" import
+_ = set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder  # prevents removal of "unused" import
 
 sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 
