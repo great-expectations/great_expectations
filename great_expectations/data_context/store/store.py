@@ -18,6 +18,13 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
+try:
+    from typing_extensions import NotRequired
+except ImportError:
+    NotRequired = (
+        Optional  # TODO: remove this once min typing_extensions version allows
+    )
+
 if TYPE_CHECKING:
     from great_expectations.core.configuration import AbstractConfig
 
@@ -27,7 +34,7 @@ logger = logging.getLogger(__name__)
 class StoreConfigTypedDict(TypedDict):
     # NOTE: TypeDict values may be incomplete, update as needed
     class_name: str
-    module_name: Optional[str]
+    module_name: NotRequired[str]
     store_backend: dict
 
 
