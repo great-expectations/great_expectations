@@ -6,10 +6,11 @@ AIRFLOW_VERSION=2.2.3
 PYTHON_VERSION="$(python --version | cut -d " " -f 2 | cut -d "." -f 1-2)"
 
 CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${AIRFLOW_VERSION}/constraints-${PYTHON_VERSION}.txt"
-# 3.7 https://raw.githubusercontent.com/apache/airflow/constraints-2.5.2/constraints-3.7.txt
+# 3.7 example
+# https://raw.githubusercontent.com/apache/airflow/constraints-2.2.3/constraints-3.7.txt
 
 echo "Install gx dependencies using airflow constraint file"
-echo "  ${CONSTRAINT_URL}\n"
+echo "Python:${PYTHON_VERSION}\nAirflow:${AIRFLOW_VERSION}\n${CONSTRAINT_URL}\n"
 
 pip install -e . --constraint "${CONSTRAINT_URL}"
 
