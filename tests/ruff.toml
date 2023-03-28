@@ -9,7 +9,7 @@ extend-ignore = [
     # Let's differ this for tests until there are auto-fixes
     "TCH001",
     # https://beta.ruff.rs/docs/rules/#flake8-tidy-imports-tid
-    "TID251",  # banned-api - is used to prevent meanigless attribute errors caused by missing optional depedencies
+    "TID251",  # banned-api - is used to prevent opaque attribute errors caused by missing optional dependencies
     # not something we have to worry about in test code
 ]
 
