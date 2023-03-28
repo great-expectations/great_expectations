@@ -244,7 +244,7 @@ stages:
               if $(run_unit_tests); then
                 # TODO: grep+sed >=VERSION -> ==VERSION
                 pip install typing-extentions==typing-extentions==3.10.0.0
-                invoke tests --ci --cloud --timeout=3.0
+                invoke tests --ci --timeout=3.0
               fi
 
             displayName: 'Min Versions Unit Tests'
