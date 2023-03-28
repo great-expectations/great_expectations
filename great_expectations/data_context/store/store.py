@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class StoreConfigTypedDict(TypedDict):
     # NOTE: TypeDict values may be incomplete, update as needed
     class_name: str
-    module_name: NotRequired[str]
+    module_name: Optional[str]
     store_backend: dict
 
 
