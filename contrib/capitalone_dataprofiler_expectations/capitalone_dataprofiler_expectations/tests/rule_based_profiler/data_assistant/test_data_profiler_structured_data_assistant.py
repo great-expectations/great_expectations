@@ -1,15 +1,18 @@
+from __future__ import annotations
+
 import os
 import unittest
-from typing import Dict, List, Optional, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, cast
 from unittest import mock
 
 import pytest
 
 # noinspection PyUnresolvedReferences
+# noinspection PyUnresolvedReferences
+# noinspection PyUnresolvedReferences
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
     DataProfilerStructuredDataAssistantResult,
 )
-from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -22,21 +25,22 @@ from great_expectations.rule_based_profiler.parameter_container import (
     ParameterNode,
 )
 
-# noinspection PyUnresolvedReferences
+if TYPE_CHECKING:
+    from great_expectations.data_context import FileDataContext
 
 
-# noinspection PyUnresolvedReferences
-
-test_root_path = os.path.dirname(  # noqa: PTH120
+test_root_path: str = os.path.dirname(  # noqa: PTH120
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
 
 
 @pytest.fixture
 def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_enabled(
-    bobby_columnar_table_multi_batch_deterministic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_deterministic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",
@@ -69,9 +73,11 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
 
 @pytest.fixture(scope="module")
 def bobby_profile_data_profiler_structured_data_assistant_result(
-    bobby_columnar_table_multi_batch_probabilistic_data_context: DataContext,
+    bobby_columnar_table_multi_batch_probabilistic_data_context: FileDataContext,
 ) -> DataProfilerStructuredDataAssistantResult:
-    context: DataContext = bobby_columnar_table_multi_batch_probabilistic_data_context
+    context: FileDataContext = (
+        bobby_columnar_table_multi_batch_probabilistic_data_context
+    )
 
     batch_request: dict = {
         "datasource_name": "taxi_pandas",

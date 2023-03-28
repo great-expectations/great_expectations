@@ -23,7 +23,7 @@ class DataProfilerProfileReport(DataProfilerProfileMetricProvider):
     ):
         profile_path = metric_value_kwargs["profile_path"]
         try:
-            profile: dp.profilers.profile_builder.StructuredProfiler = dp.Profiler.load(
+            profile: dp.profilers.profile_builder.BaseProfiler = dp.Profiler.load(
                 profile_path
             )
             profile_report = profile.report(

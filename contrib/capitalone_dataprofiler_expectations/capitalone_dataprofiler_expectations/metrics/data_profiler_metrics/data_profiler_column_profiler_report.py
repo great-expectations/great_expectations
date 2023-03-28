@@ -62,9 +62,8 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
         }
         dependencies["data_profiler.profile_report"] = MetricConfiguration(
             metric_name="data_profiler.profile_report",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs=None,
-            metric_dependencies=None,
+            metric_domain_kwargs={},
+            metric_value_kwargs=metric.metric_value_kwargs,
         )
         dependencies["table.column_types"] = MetricConfiguration(
             metric_name="table.column_types",
@@ -72,18 +71,15 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         dependencies["table.row_count"] = MetricConfiguration(
             metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
-            metric_dependencies=None,
         )
         return dependencies

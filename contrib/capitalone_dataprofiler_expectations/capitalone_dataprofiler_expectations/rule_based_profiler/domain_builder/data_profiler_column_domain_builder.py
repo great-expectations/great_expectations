@@ -118,11 +118,10 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         profile_report: dict = validator.get_metric(  # type: ignore[assignment] # could be None
             metric=MetricConfiguration(
                 metric_name="data_profiler.profile_report",
-                # batch_id is irrelevant, because CapitalOne DataProfiler report is used
-                metric_domain_kwargs={
+                metric_domain_kwargs={},
+                metric_value_kwargs={
                     "profile_path": profile_path,
                 },
-                metric_value_kwargs=None,
             )
         )
 
