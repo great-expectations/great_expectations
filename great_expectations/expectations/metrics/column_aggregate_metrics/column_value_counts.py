@@ -98,10 +98,8 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if hasattr(sa.column(column), "is_not"):
             query: sa_sql_expression_Select = (
                 sa.select(
-                    [
-                        sa.column(column).label("value"),
-                        sa.func.count(sa.column(column)).label("count"),
-                    ]
+                    sa.column(column).label("value"),
+                    sa.func.count(sa.column(column)).label("count"),
                 )
                 .where(sa.column(column).is_not(None))
                 .group_by(sa.column(column))
@@ -109,10 +107,8 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         else:
             query: sa_sql_expression_Select = (
                 sa.select(
-                    [
-                        sa.column(column).label("value"),
-                        sa.func.count(sa.column(column)).label("count"),
-                    ]
+                    sa.column(column).label("value"),
+                    sa.func.count(sa.column(column)).label("count"),
                 )
                 .where(sa.column(column).isnot(None))
                 .group_by(sa.column(column))
