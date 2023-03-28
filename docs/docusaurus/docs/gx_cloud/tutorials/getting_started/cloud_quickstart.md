@@ -2,7 +2,7 @@
 title: Quickstart with GX Cloud
 tag: [tutorial, getting started, quickstart, cloud]
 ---
-# Quickstart with Great Expectations
+# Quickstart with Great Expectations Cloud
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
