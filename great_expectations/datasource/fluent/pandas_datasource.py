@@ -333,7 +333,6 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
     dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
-    batch_metadata: Optional[BatchMetadata] = pydantic.Field(default_factory=dict)
 
     class Config:
         extra = pydantic.Extra.forbid
