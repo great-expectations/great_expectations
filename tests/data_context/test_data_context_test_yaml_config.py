@@ -47,7 +47,8 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
         )
     ).fetchall()
     if len(schema_check_results) == 0:
-        engine.execute(sa.text("CREATE SCHEMA connection_test;"))
+        with engine.begin() as connection:
+            connection.execute(sa.text("CREATE SCHEMA connection_test;"))
 
     table_check_results = engine.execute(
         sa.text(

@@ -52,9 +52,9 @@ In order to contribute to Great Expectations, you will need the following:
 Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.7 - 3.10), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
 
 ```
-python3 -m venv ge_dev
+python3 -m venv gx_dev
 
-source ge_dev/bin/activate
+source gx_dev/bin/activate
 
 pip install --upgrade pip==21.3.1
 
@@ -203,21 +203,18 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 ## If you want to develop against local Spark:
 
-* In most cases, `pip install requirements-dev.txt` should set up pyspark for you.
-
 * If you don’t have Java installed, you will probably need to install it and set your `PATH` or `JAVA_HOME` environment variables appropriately.
 
 * You can find official installation instructions for [Spark here](https://spark.apache.org/docs/latest/index.html#downloading).
 
-## If you want to build documentation locally:
+* After Spark is installed, you need to install the version of pyspark that exactly matches the Spark version
 
-* `pip install -r docs/requirements.txt`
+    ```console
+    spark-submit --version 2>&1 | grep -o "version [0-9][^ ]*$"
+    version 3.2.0
 
-* To build documentation, the command is `cd docs; make html`
-
-* Documentation will be generated in `docs/build/html/` with the `index.html` as the index page.
-
-* Note: we use `autoapi` to generate API reference docs, but it’s not compatible with pandas 1.1.0. You’ll need to have pandas 1.0.5 (or a previous version) installed in order to successfully build docs.
+    pip install "pyspark==3.2.0"
+    ```
 
 ## Run tests to confirm that everything is working
 

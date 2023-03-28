@@ -25,12 +25,8 @@ from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from tests.datasource.fluent.conftest import (
-    Dialect,
-    MockSaEngine,
-    MockSaInspector,
-    sqlachemy_execution_engine_mock_cls,
-)
+from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
+from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
@@ -121,11 +117,11 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         inspect = mocker.patch("sqlalchemy.inspect")
         inspect.return_value = MockSaInspector()
         get_column_names = mocker.patch(
-            "tests.datasource.fluent.conftest.MockSaInspector.get_columns"
+            "tests.sqlalchemy_test_doubles.MockSaInspector.get_columns"
         )
         get_column_names.return_value = [{"name": "my_col"}]
         has_table = mocker.patch(
-            "tests.datasource.fluent.conftest.MockSaInspector.has_table"
+            "tests.sqlalchemy_test_doubles.MockSaInspector.has_table"
         )
         has_table.return_value = True
 
@@ -866,12 +862,10 @@ def test_test_connection_failures(
     inspect = mocker.patch("sqlalchemy.inspect")
     inspect.return_value = MockSaInspector()
     get_schema_names = mocker.patch(
-        "tests.datasource.fluent.conftest.MockSaInspector.get_schema_names"
+        "tests.sqlalchemy_test_doubles.MockSaInspector.get_schema_names"
     )
     get_schema_names.return_value = ["good_schema"]
-    has_table = mocker.patch(
-        "tests.datasource.fluent.conftest.MockSaInspector.has_table"
-    )
+    has_table = mocker.patch("tests.sqlalchemy_test_doubles.MockSaInspector.has_table")
     has_table.return_value = False
 
     with pytest.raises(TestConnectionError):

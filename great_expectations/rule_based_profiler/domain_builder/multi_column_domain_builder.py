@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 class MultiColumnDomainBuilder(ColumnDomainBuilder):
     """
-    This DomainBuilder uses relative tolerance of specified map metric to identify domains.
+    This DomainBuilder uses "include_column_names" property of its parent class to specify "column_list" (order-non-preserving).
     """
 
     exclude_field_names: ClassVar[
@@ -70,7 +70,7 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
         variables: Optional[ParameterContainer] = None,
         runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
-        """Return domains matching the specified tolerance limits.
+        """Obtains and returns Domain object, whose domain_kwargs consists of "column_list" (order-non-preserving).
 
         Args:
             rule_name: name of Rule object, for which "Domain" objects are obtained.

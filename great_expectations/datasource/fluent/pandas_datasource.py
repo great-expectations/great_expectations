@@ -554,7 +554,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             dataframe=dataframe,
             batch_metadata=batch_metadata,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_dataframe(
         self,
@@ -581,7 +581,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_clipboard(
         self,
@@ -610,7 +610,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_csv(
         self,
@@ -641,7 +641,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_excel(
         self,
@@ -672,7 +672,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_feather(
         self,
@@ -703,7 +703,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_gbq(
         self,
@@ -734,7 +734,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_hdf(
         self,
@@ -765,7 +765,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_html(
         self,
@@ -796,7 +796,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_json(
         self,
@@ -827,7 +827,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_orc(
         self,
@@ -858,7 +858,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_parquet(
         self,
@@ -889,7 +889,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_pickle(
         self,
@@ -920,7 +920,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sas(
         self,
@@ -951,7 +951,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_spss(
         self,
@@ -984,7 +984,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sql(
         self,
@@ -1019,7 +1019,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sql_query(
         self,
@@ -1054,7 +1054,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_sql_table(
         self,
@@ -1087,7 +1087,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_stata(
         self,
@@ -1118,7 +1118,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_table(
         self,
@@ -1149,7 +1149,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             batch_metadata=batch_metadata,
             **kwargs,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
 
     def read_xml(
         self,

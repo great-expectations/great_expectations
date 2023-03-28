@@ -170,4 +170,4 @@ class SparkDatasource(_SparkDatasource):
             name=name,
             dataframe=dataframe,
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
