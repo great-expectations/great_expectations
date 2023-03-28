@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import copy
 from typing import Any, Dict, List
+
+import pytest
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -31,16 +35,21 @@ from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.expectations import registry
+import great_expectations as gx
 
 
 _REGISTERED_METRICS_ORIGINAL: dict = copy.deepcopy(registry._registered_metrics)
 
 
-def test__base_metric_provider__registration():
+def test__base_metric_provider__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the MetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
+    # ensures consistent state among test cases runs
+    monkeypatch.setattr(
+        gx.expectations.registry,
+        "_registered_metrics",
+        _REGISTERED_METRICS_ORIGINAL,
+        raising=False,
+    )
 
     registered_metric_keys = list(registry._registered_metrics.keys())
     for key in registered_metric_keys:
@@ -93,11 +102,15 @@ def test__base_metric_provider__registration():
     assert "custom_metric" in registry._registered_metrics.keys()
 
 
-def test__table_metric_provider__registration():
+def test__table_metric_provider__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the TableMetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
+    # ensures consistent state among test cases runs
+    monkeypatch.setattr(
+        gx.expectations.registry,
+        "_registered_metrics",
+        _REGISTERED_METRICS_ORIGINAL,
+        raising=False,
+    )
 
     registered_metric_keys = list(registry._registered_metrics.keys())
     for key in registered_metric_keys:
@@ -149,16 +162,20 @@ def test__table_metric_provider__registration():
     assert "table.custom_metric" in registry._registered_metrics.keys()
 
 
-def test__column_map_metric__registration():
+def test__column_map_metric__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the ColumnMapMetricProvider class registers the correct metrics.
 
     The actual logic for this lives in the private method: `_register_metric_functions`, which is invoked from within `__new__` for the ancestor class `MetricProvider`.
 
     Since _register_metric_functions is private, we don't want to test it directly. Instead, we declare a custom ColumnMapMetricProvider, and test that the correct metrics are registered.
     """
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
+    # ensures consistent state among test cases runs
+    monkeypatch.setattr(
+        gx.expectations.registry,
+        "_registered_metrics",
+        _REGISTERED_METRICS_ORIGINAL,
+        raising=False,
+    )
 
     registered_metric_keys = list(registry._registered_metrics.keys())
     for key in registered_metric_keys:
@@ -202,11 +219,15 @@ def test__column_map_metric__registration():
         assert key in registry._registered_metrics.keys()
 
 
-def test__column_pair_map_metric__registration():
+def test__column_pair_map_metric__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the ColumnPairMapMetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
+    # ensures consistent state among test cases runs
+    monkeypatch.setattr(
+        gx.expectations.registry,
+        "_registered_metrics",
+        _REGISTERED_METRICS_ORIGINAL,
+        raising=False,
+    )
 
     registered_metric_keys = list(registry._registered_metrics.keys())
     for key in registered_metric_keys:
@@ -252,11 +273,15 @@ def test__column_pair_map_metric__registration():
         assert key in registry._registered_metrics.keys()
 
 
-def test__multicolumn_map_metric__registration():
+def test__multicolumn_map_metric__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the MultiColumnMapMetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
+    # ensures consistent state among test cases runs
+    monkeypatch.setattr(
+        gx.expectations.registry,
+        "_registered_metrics",
+        _REGISTERED_METRICS_ORIGINAL,
+        raising=False,
+    )
 
     registered_metric_keys = list(registry._registered_metrics.keys())
     for key in registered_metric_keys:
@@ -308,11 +333,15 @@ def test__multicolumn_map_metric__registration():
         assert key in registry._registered_metrics.keys()
 
 
-def test__query_metric_provider__registration():
+def test__query_metric_provider__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the QueryMetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
+    # ensures consistent state among test cases runs
+    monkeypatch.setattr(
+        gx.expectations.registry,
+        "_registered_metrics",
+        _REGISTERED_METRICS_ORIGINAL,
+        raising=False,
+    )
 
     registered_metric_keys = list(registry._registered_metrics.keys())
     for key in registered_metric_keys:
