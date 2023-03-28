@@ -9,6 +9,7 @@ from great_expectations.core.domain import (
 )
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
+    build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -140,8 +141,18 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
                 message=f"Error: Some of profiled columns in {self.__class__.__name__} are not found in Batch table."
             )
 
-        return super()._get_domains(
-            rule_name=rule_name,
+        effective_column_names: List[str] = self.get_filtered_column_names(
+            column_names=profile_report_column_names,
+            batch_ids=batch_ids,
+            validator=validator,
             variables=variables,
-            runtime_configuration=runtime_configuration,
         )
+
+        domains: List[Domain] = build_domains_from_column_names(
+            rule_name=rule_name,
+            column_names=effective_column_names,
+            domain_type=self.domain_type,
+            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,  # type: ignore[union-attr] # could be None
+        )
+
+        return domains
