@@ -165,7 +165,7 @@ module.exports = {
             'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark',
             {
               type: 'html',
-              value: '<h4>Google Cloud Server</h4>',
+              value: '<h4>Google Cloud Storage</h4>',
               defaultStyle: true
             },
             'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas',
