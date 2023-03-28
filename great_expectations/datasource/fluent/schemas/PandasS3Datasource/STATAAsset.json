@@ -1,5 +1,5 @@
 {
-    "title": "STATAAsset",
+    "title": "StataAsset",
     "description": "Read Stata file into DataFrame.",
     "type": "object",
     "properties": {
