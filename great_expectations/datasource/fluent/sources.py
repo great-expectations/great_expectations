@@ -504,9 +504,12 @@ class _SourceFactories:
                 else name_or_datasource or kwargs["name"]
             )
             logger.debug(f"Updating {datasource_type} with {datasource_name}")
-            self._validate_current_datasource_type(datasource_name, datasource_type)  # type: ignore[arg-type] # expected str only
+            self._validate_current_datasource_type(
+                datasource_name,  # type:ignore[arg-type] # datasource_name is expected to be a str
+                datasource_type,
+            )
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name  # type: ignore[arg-type] # expected str only
+                datasource_name=datasource_name  # type: ignore[arg-type] # datasource_name is expected to be a str
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
