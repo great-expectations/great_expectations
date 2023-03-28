@@ -9,7 +9,6 @@ from great_expectations.core.domain import (
 )
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
 from great_expectations.rule_based_profiler.helpers.util import (
-    build_domains_from_column_names,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -100,7 +99,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
 
         validator: Validator = self.get_validator(variables=variables)  # type: ignore[assignment] # could be None
 
-        effective_column_names: List[str] = self.get_effective_column_names(
+        table_column_names: List[str] = self.get_table_column_names(
             batch_ids=batch_ids,
             validator=validator,
             variables=variables,
@@ -129,23 +128,20 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             element["column_name"] for element in profile_report["data_stats"]
         ]
 
-        if not (profile_report_column_names and effective_column_names):
+        if not (profile_report_column_names and table_column_names):
             raise gx_exceptions.ProfilerExecutionError(
-                message=f"Error: List of profiled columns in {self.__class__.__name__} must not be empty."
+                message=f"Error: List of available table columns in {self.__class__.__name__} must not be empty."
             )
 
         if not is_candidate_subset_of_target(
-            candidate=profile_report_column_names, target=effective_column_names
+            candidate=profile_report_column_names, target=table_column_names
         ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"Error: Some of profiled columns in {self.__class__.__name__} are not found in Batch table."
             )
 
-        domains: List[Domain] = build_domains_from_column_names(
+        return super()._get_domains(
             rule_name=rule_name,
-            column_names=profile_report_column_names,
-            domain_type=self.domain_type,
-            table_column_name_to_inferred_semantic_domain_type_map=self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map,  # type: ignore[union-attr] # could be None
+            variables=variables,
+            runtime_configuration=runtime_configuration,
         )
-
-        return domains
