@@ -349,7 +349,6 @@ class _SourceFactories:
         if isinstance(existing_datasource, PandasDatasource):
             return existing_datasource
 
-        # if a legacy datasource exists for all possible_default_datasource_names, raise an error
         raise DefaultPandasDatasourceError(
             f'A datasource with a legacy type already exists with the name: "{DEFAULT_PANDAS_DATASOURCE_NAME}". '
             "Please rename this datasources if you wish to use the pandas_default `PandasDatasource`."
