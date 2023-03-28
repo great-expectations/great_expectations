@@ -11,12 +11,13 @@ from typing import (
     List,
     Optional,
     Type,
+    TypeVar,
     Union,
     cast,
 )
 
 import pydantic
-from typing_extensions import Literal, Protocol, Self
+from typing_extensions import Literal, Protocol
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -44,6 +45,13 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
     SqlAlchemyDataSplitter,
 )
 from great_expectations.optional_imports import sqlalchemy
+
+try:
+    from typing_extensions import Self
+except ImportError:
+    # TODO (kilo59): replace this with `typing_extensions.Self` once our min typing_extensions supports it
+    # Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
+    Self = TypeVar("Self", bound="_SQLAsset")
 
 if TYPE_CHECKING:
     import sqlalchemy as sa

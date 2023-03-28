@@ -1,9 +1,20 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import pydantic
-from typing_extensions import Literal, Self
+from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr  # noqa: TCH001
@@ -18,6 +29,13 @@ from great_expectations.datasource.fluent.sql_datasource import (
 from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset as SqlTableAsset,
 )
+
+try:
+    from typing_extensions import Self
+except ImportError:
+    # TODO (kilo59): replace this with `typing_extensions.Self` once our min typing_extensions supports it
+    # Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
+    Self = TypeVar("Self", bound="_SQLiteAssetMixin")
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import (
