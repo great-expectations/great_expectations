@@ -519,23 +519,6 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         return asset_name
 
-    def get_asset(
-        self,
-        asset_name: str,
-        batch_metadata: Optional[BatchMetadata] = None,
-    ) -> _PandasDataAssetT:
-        """Returns the DataAsset referred to by name"""
-        # This default implementation will be used if protocol is inherited
-        try:
-            asset = self.assets[asset_name]
-            if batch_metadata:
-                asset.batch_metadata = batch_metadata
-            return asset
-        except KeyError as exc:
-            raise LookupError(
-                f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
-            ) from exc
-
     def _get_validator(self, asset: _PandasDataAssetT) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
         return self._data_context.get_validator(batch_request=batch_request)
@@ -545,7 +528,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         name: str,
         dataframe: pd.DataFrame,
         batch_metadata: Optional[BatchMetadata] = None,
-    ) -> Optional[DataFrameAsset]:
+    ) -> DataFrameAsset:
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
@@ -572,7 +555,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         name: str,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[ClipboardAsset]:  # type: ignore[valid-type]
+    ) -> ClipboardAsset:  # type: ignore[valid-type]
         asset = ClipboardAsset(
             name=name,
             batch_metadata=batch_metadata,
@@ -600,7 +583,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[CSVAsset]:  # type: ignore[valid-type]
+    ) -> CSVAsset:  # type: ignore[valid-type]
         asset = CSVAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -631,7 +614,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         io: os.PathLike | str | bytes,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[ExcelAsset]:  # type: ignore[valid-type]
+    ) -> ExcelAsset:  # type: ignore[valid-type]
         asset = ExcelAsset(
             name=name,
             io=io,
@@ -662,7 +645,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         path: pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[FeatherAsset]:  # type: ignore[valid-type]
+    ) -> FeatherAsset:  # type: ignore[valid-type]
         asset = FeatherAsset(
             name=name,
             path=path,
@@ -693,7 +676,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         query: str,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[GBQAsset]:  # type: ignore[valid-type]
+    ) -> GBQAsset:  # type: ignore[valid-type]
         asset = GBQAsset(
             name=name,
             query=query,
@@ -724,7 +707,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         path_or_buf: pd.HDFStore | os.PathLike | str,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[HDFAsset]:  # type: ignore[valid-type]
+    ) -> HDFAsset:  # type: ignore[valid-type]
         asset = HDFAsset(
             name=name,
             path_or_buf=path_or_buf,
@@ -755,7 +738,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         io: os.PathLike | str,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[HTMLAsset]:  # type: ignore[valid-type]
+    ) -> HTMLAsset:  # type: ignore[valid-type]
         asset = HTMLAsset(
             name=name,
             io=io,
@@ -786,7 +769,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[JSONAsset]:  # type: ignore[valid-type]
+    ) -> JSONAsset:  # type: ignore[valid-type]
         asset = JSONAsset(
             name=name,
             path_or_buf=path_or_buf,
@@ -817,7 +800,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         path: pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[ORCAsset]:  # type: ignore[valid-type]
+    ) -> ORCAsset:  # type: ignore[valid-type]
         asset = ORCAsset(
             name=name,
             path=path,
@@ -848,7 +831,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         path: pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[ParquetAsset]:  # type: ignore[valid-type]
+    ) -> ParquetAsset:  # type: ignore[valid-type]
         asset = ParquetAsset(
             name=name,
             path=path,
@@ -879,7 +862,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[PickleAsset]:  # type: ignore[valid-type]
+    ) -> PickleAsset:  # type: ignore[valid-type]
         asset = PickleAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -910,7 +893,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[SASAsset]:  # type: ignore[valid-type]
+    ) -> SASAsset:  # type: ignore[valid-type]
         asset = SASAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -941,7 +924,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         path: pydantic.FilePath,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[SPSSAsset]:  # type: ignore[valid-type]
+    ) -> SPSSAsset:  # type: ignore[valid-type]
         asset = SPSSAsset(
             name=name,
             path=path,
@@ -973,7 +956,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[SQLAsset]:  # type: ignore[valid-type]
+    ) -> SQLAsset:  # type: ignore[valid-type]
         asset = SQLAsset(
             name=name,
             sql=sql,
@@ -1008,7 +991,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[SQLQueryAsset]:  # type: ignore[valid-type]
+    ) -> SQLQueryAsset:  # type: ignore[valid-type]
         asset = SQLQueryAsset(
             name=name,
             sql=sql,
@@ -1043,7 +1026,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         con: sqlalchemy.engine.Engine | str,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[SQLTableAsset]:  # type: ignore[valid-type]
+    ) -> SQLTableAsset:  # type: ignore[valid-type]
         asset = SQLTableAsset(
             name=name,
             table_name=table_name,
@@ -1077,7 +1060,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[StataAsset]:  # type: ignore[valid-type]
+    ) -> StataAsset:  # type: ignore[valid-type]
         asset = StataAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -1108,7 +1091,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[TableAsset]:  # type: ignore[valid-type]
+    ) -> TableAsset:  # type: ignore[valid-type]
         asset = TableAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
@@ -1139,7 +1122,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
-    ) -> Optional[XMLAsset]:  # type: ignore[valid-type]
+    ) -> XMLAsset:  # type: ignore[valid-type]
         asset = XMLAsset(
             name=name,
             path_or_buffer=path_or_buffer,
