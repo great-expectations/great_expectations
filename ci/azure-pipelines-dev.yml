@@ -240,16 +240,6 @@ stages:
               SQLALCHEMY_WARN_20: true
 
           - script: |
-              # Run unit-tests with select minamum versions
-              if $(run_unit_tests); then
-                # TODO: grep+sed >=VERSION -> ==VERSION
-                pip install typing-extensions==3.10.0.0
-                invoke tests --ci --timeout=3.0
-              fi
-
-            displayName: 'Min Versions Unit Tests'
-
-          - script: |
               # Run pytest
               pytest $(pytest_args) \
                 --no-sqlalchemy \
@@ -567,6 +557,9 @@ stages:
             inputs:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
+
+          - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
+            name: CheckMinAirflowDependencyCompatibility.sh
 
           - script: ./ci/checks/run_gx_airflow_operator_tests.sh
             name: RunAirflowProviderTests
