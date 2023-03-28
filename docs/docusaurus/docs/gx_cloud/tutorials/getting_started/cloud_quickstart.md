@@ -34,7 +34,9 @@ With GX Cloud you can get up and running within just several minutes. The full p
 
 ```python title="Jupyter Notebook"
 # Create Data Context
- context = gx.get_context(
+import great_expectations as gx
+
+context = gx.get_context(
     cloud_access_token = "<user_token_you_generated_in_the_app>",
     cloud_organization_id = "<organization_id_from_the_app>",
 )
@@ -129,30 +131,21 @@ In the following steps we'll break down exactly what is happening here so that y
 Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate User Token. 
 These tokens are see-once and stored as a hash in Great Expectation Cloud's backend database. Once a user copies their API key, the Cloud UI will never show the token value again. 
 
-#### 1.2 Set Tokens
+#### 1.2 Create Data Context
 
 :::tip 
 Any Python Interpreter or script file will work for the remaining steps in the guide, we recommend using a Jupyter Notebook, since they are included in the OSS GX installation and give the best experience of both composing a script file and running code in a live interpreter.
 :::
-
-Set environment variables in the Jupyter Notebook (alternatively, add these as [Data Context config variables](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials))
-
-```python title="Jupyter Notebook"
-import os
-
-os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<user_token_you_just_generated_in_the_app>"
-# use Organization ID you have on the Tokens page
-os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
-```
-
-#### 1.3 Create Data Context
 
 Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTag tag="data_context" text="Data Context"/>:
 
 ```python title="Jupyter Notebook"
 import great_expectations as gx
 
-context = gx.get_context()
+ context = gx.get_context(
+    cloud_access_token = "<user_token_you_generated_in_the_app>",
+    cloud_organization_id = "<organization_id_from_the_app>",
+)
 ```
 
 ### 2. Connect to data
