@@ -11,8 +11,8 @@ from great_expectations.self_check.util import build_pandas_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
-_ = DataProfilerColumnProfileReport
-_ = DataProfilerProfileReport
+_ = DataProfilerColumnProfileReport  # registers this metric
+_ = DataProfilerProfileReport  # registers this metric
 
 
 test_root_path: str = os.path.dirname(  # noqa: PTH120

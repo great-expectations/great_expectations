@@ -27,7 +27,7 @@ test_root_path: str = os.path.dirname(  # noqa: PTH120
 )
 
 
-_ = DataProfilerProfileReport
+_ = DataProfilerProfileReport  # registers this metric
 
 
 @pytest.mark.integration

@@ -17,9 +17,10 @@ from tests.conftest import (
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 )
 
-_ = DataProfilerProfileReport
-_ = DataProfilerColumnProfileReport
-_ = set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder
+_ = DataProfilerProfileReport  # registers this metric
+_ = DataProfilerColumnProfileReport  # registers this metric
+
+_ = set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder  # avoids removal of "unused" import
 
 sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 

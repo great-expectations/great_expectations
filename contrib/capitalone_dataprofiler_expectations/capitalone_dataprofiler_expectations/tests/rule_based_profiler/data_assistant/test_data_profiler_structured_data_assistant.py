@@ -33,9 +33,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext
 
 
-_ = DataProfilerColumnProfileReport
-_ = DataProfilerProfileReport
-_ = DataProfilerStructuredDataAssistant
+_ = DataProfilerColumnProfileReport  # registers this metric
+_ = DataProfilerProfileReport  # registers this metric
+_ = DataProfilerStructuredDataAssistant  # registers this DataAssistant
 
 
 test_root_path: str = os.path.dirname(  # noqa: PTH120
