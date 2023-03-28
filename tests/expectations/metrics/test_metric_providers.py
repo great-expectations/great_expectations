@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import copy
 from typing import Any, Dict, List
+
+import pytest
 
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -33,16 +37,21 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 from great_expectations.expectations import registry
 
 
-_REGISTERED_METRICS_ORIGINAL: dict = copy.deepcopy(registry._registered_metrics)
+@pytest.fixture
+def mock_registry(monkeypatch: pytest.MonkeyPatch):
+    # ensures consistent state among test cases runs
+    monkeypatch.setattr(
+        registry,
+        "_registered_metrics",
+        copy.deepcopy(registry._registered_metrics),
+        raising=False,
+    )
+    yield registry
 
 
-def test__base_metric_provider__registration():
+def test__base_metric_provider__registration(mock_registry):
     """This tests whether the MetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
-
-    registered_metric_keys = list(registry._registered_metrics.keys())
+    registered_metric_keys = list(mock_registry._registered_metrics.keys())
     for key in registered_metric_keys:
         assert "custom_metric" not in key
 
@@ -88,18 +97,15 @@ def test__base_metric_provider__registration():
     CustomMetricProvider()
 
     assert (
-        len(registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
+        len(mock_registry._registered_metrics.keys())
+        == prev_registered_metric_key_count + 1
     )
-    assert "custom_metric" in registry._registered_metrics.keys()
+    assert "custom_metric" in mock_registry._registered_metrics.keys()
 
 
-def test__table_metric_provider__registration():
+def test__table_metric_provider__registration(mock_registry):
     """This tests whether the TableMetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
-
-    registered_metric_keys = list(registry._registered_metrics.keys())
+    registered_metric_keys = list(mock_registry._registered_metrics.keys())
     for key in registered_metric_keys:
         assert "table.custom_metric" not in key
 
@@ -144,23 +150,20 @@ def test__table_metric_provider__registration():
     CustomTableMetricProvider()
 
     assert (
-        len(registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
+        len(mock_registry._registered_metrics.keys())
+        == prev_registered_metric_key_count + 1
     )
-    assert "table.custom_metric" in registry._registered_metrics.keys()
+    assert "table.custom_metric" in mock_registry._registered_metrics.keys()
 
 
-def test__column_map_metric__registration():
+def test__column_map_metric__registration(mock_registry):
     """This tests whether the ColumnMapMetricProvider class registers the correct metrics.
 
     The actual logic for this lives in the private method: `_register_metric_functions`, which is invoked from within `__new__` for the ancestor class `MetricProvider`.
 
     Since _register_metric_functions is private, we don't want to test it directly. Instead, we declare a custom ColumnMapMetricProvider, and test that the correct metrics are registered.
     """
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
-
-    registered_metric_keys = list(registry._registered_metrics.keys())
+    registered_metric_keys = list(mock_registry._registered_metrics.keys())
     for key in registered_metric_keys:
         assert "column_values.equal_seven" not in key
 
@@ -185,7 +188,8 @@ def test__column_map_metric__registration():
     CustomColumnValuesEqualSeven()
 
     assert (
-        len(registry._registered_metrics.keys()) == prev_registered_metric_key_count + 8
+        len(mock_registry._registered_metrics.keys())
+        == prev_registered_metric_key_count + 8
     )
 
     new_keys = [
@@ -199,16 +203,12 @@ def test__column_map_metric__registration():
         "column_values.equal_seven.unexpected_count.aggregate_fn",
     ]
     for key in new_keys:
-        assert key in registry._registered_metrics.keys()
+        assert key in mock_registry._registered_metrics.keys()
 
 
-def test__column_pair_map_metric__registration():
+def test__column_pair_map_metric__registration(mock_registry):
     """This tests whether the ColumnPairMapMetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
-
-    registered_metric_keys = list(registry._registered_metrics.keys())
+    registered_metric_keys = list(mock_registry._registered_metrics.keys())
     for key in registered_metric_keys:
         assert "column_pair_values.equal_seven" not in key
 
@@ -232,10 +232,11 @@ def test__column_pair_map_metric__registration():
     CustomColumnPairValuesEqualSeven()
 
     assert (
-        len(registry._registered_metrics.keys()) == prev_registered_metric_key_count + 7
+        len(mock_registry._registered_metrics.keys())
+        == prev_registered_metric_key_count + 7
     )
 
-    for key in registry._registered_metrics.keys():
+    for key in mock_registry._registered_metrics.keys():
         if "column_pair_values.equal_seven" in key:
             print(key)
 
@@ -249,16 +250,12 @@ def test__column_pair_map_metric__registration():
         "column_pair_values.equal_seven.filtered_row_count",
     ]
     for key in new_keys:
-        assert key in registry._registered_metrics.keys()
+        assert key in mock_registry._registered_metrics.keys()
 
 
-def test__multicolumn_map_metric__registration():
+def test__multicolumn_map_metric__registration(mock_registry):
     """This tests whether the MultiColumnMapMetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
-
-    registered_metric_keys = list(registry._registered_metrics.keys())
+    registered_metric_keys = list(mock_registry._registered_metrics.keys())
     for key in registered_metric_keys:
         assert "multicolumn_values.equal_seven" not in key
 
@@ -292,7 +289,8 @@ def test__multicolumn_map_metric__registration():
     CustomMultiColumnValuesEqualSeven()
 
     assert (
-        len(registry._registered_metrics.keys()) == prev_registered_metric_key_count + 7
+        len(mock_registry._registered_metrics.keys())
+        == prev_registered_metric_key_count + 7
     )
 
     new_keys = [
@@ -305,16 +303,12 @@ def test__multicolumn_map_metric__registration():
         "multicolumn_values.equal_seven.filtered_row_count",
     ]
     for key in new_keys:
-        assert key in registry._registered_metrics.keys()
+        assert key in mock_registry._registered_metrics.keys()
 
 
-def test__query_metric_provider__registration():
+def test__query_metric_provider__registration(mock_registry):
     """This tests whether the QueryMetricProvider class registers the correct metrics."""
-    registry._registered_metrics = copy.deepcopy(
-        _REGISTERED_METRICS_ORIGINAL
-    )  # ensures consistent state among test cases runs
-
-    registered_metric_keys = list(registry._registered_metrics.keys())
+    registered_metric_keys = list(mock_registry._registered_metrics.keys())
     for key in registered_metric_keys:
         assert "query.custom_metric" not in key
 
@@ -348,6 +342,7 @@ def test__query_metric_provider__registration():
     CustomQueryMetricProvider()
 
     assert (
-        len(registry._registered_metrics.keys()) == prev_registered_metric_key_count + 1
+        len(mock_registry._registered_metrics.keys())
+        == prev_registered_metric_key_count + 1
     )
-    assert "query.custom_metric" in registry._registered_metrics.keys()
+    assert "query.custom_metric" in mock_registry._registered_metrics.keys()
