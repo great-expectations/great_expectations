@@ -1,0 +1,1 @@
+--constraints https://raw.githubusercontent.com/apache/airflow/constraints-2.2.3/constraints-3.7.txt
