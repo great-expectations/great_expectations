@@ -44,7 +44,7 @@ def mock_registry(monkeypatch: pytest.MonkeyPatch):
         registry,
         "_registered_metrics",
         copy.deepcopy(registry._registered_metrics),
-        raising=False,
+        raising=True,
     )
     yield registry
 
