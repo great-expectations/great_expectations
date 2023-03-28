@@ -84,7 +84,7 @@ class _PandasDataAsset(DataAsset):
         exclude_none: bool = ...,
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
-        **dumps_kwargs: Any
+        **dumps_kwargs: Any,
     ) -> str: ...
 
 class ClipboardAsset(_PandasDataAsset): ...
@@ -135,7 +135,7 @@ class _PandasDatasource(Datasource):
         exclude_none: bool = ...,
         encoder: Union[Callable[[Any], Any], None] = ...,
         models_as_dict: bool = ...,
-        **dumps_kwargs: Any
+        **dumps_kwargs: Any,
     ) -> str: ...
 
 _DYNAMIC_ASSET_TYPES: list[Type[_PandasDataAsset]]
@@ -149,18 +149,21 @@ class PandasDatasource(_PandasDatasource):
     def add_dataframe_asset(
         self,
         name: str,
+        *,
         dataframe: pd.DataFrame,
         batch_metadata: Optional[BatchMetadata] = ...,
     ) -> DataFrameAsset: ...
     def read_dataframe(
         self,
         dataframe: pd.DataFrame,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
     ) -> Validator: ...
     def add_clipboard_asset(
         self,
         name: str,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         sep: str = "\\s+",
         kwargs: typing.Union[dict, None] = ...,
@@ -169,6 +172,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
@@ -225,6 +229,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         io: os.PathLike | str | bytes,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         sheet_name: typing.Union[str, int, None] = 0,
         header: Union[int, Sequence[int], None] = 0,
@@ -254,6 +259,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         path: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         columns: Union[Sequence[Hashable], None] = ...,
         use_threads: bool = ...,
@@ -263,6 +269,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         query: str,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         project_id: typing.Union[str, None] = ...,
         index_col: typing.Union[str, None] = ...,
@@ -281,6 +288,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         path_or_buf: str | os.PathLike | pd.HDFStore,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         key: typing.Any = ...,
         mode: str = "r",
@@ -297,6 +305,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         io: os.PathLike | str,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         match: Union[str, typing.Pattern] = ".+",
         flavor: typing.Union[str, None] = ...,
@@ -317,6 +326,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         orient: typing.Union[str, None] = ...,
         dtype: typing.Union[dict, None] = ...,
@@ -338,6 +348,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         path: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         kwargs: typing.Union[dict, None] = ...,
@@ -346,6 +357,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         path: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         engine: str = "auto",
         columns: typing.Union[typing.List[str], None] = ...,
@@ -357,6 +369,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
@@ -365,6 +378,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         format: typing.Union[str, None] = ...,
         index: Union[Hashable, None] = ...,
@@ -377,6 +391,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         path: pydantic.FilePath,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
         convert_categoricals: bool = ...,
@@ -386,6 +401,7 @@ class PandasDatasource(_PandasDatasource):
         name: str,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
         coerce_float: bool = ...,
@@ -399,6 +415,7 @@ class PandasDatasource(_PandasDatasource):
         name: str,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
         coerce_float: bool = ...,
@@ -412,6 +429,7 @@ class PandasDatasource(_PandasDatasource):
         name: str,
         table_name: str,
         con: sqlalchemy.engine.Engine | str,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         schema: typing.Union[str, None] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -424,6 +442,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         convert_dates: bool = ...,
         convert_categoricals: bool = ...,
@@ -441,6 +460,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
@@ -498,6 +518,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
         xpath: str = "./*",
         namespaces: typing.Union[typing.Dict[str, str], None] = ...,
@@ -521,6 +542,7 @@ class PandasDatasource(_PandasDatasource):
     def read_csv(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         sep: typing.Union[str, None] = ...,
@@ -577,6 +599,7 @@ class PandasDatasource(_PandasDatasource):
     def read_excel(
         self,
         io: os.PathLike | str | bytes,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         sheet_name: typing.Union[str, int, None] = 0,
@@ -606,6 +629,7 @@ class PandasDatasource(_PandasDatasource):
     def read_feather(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         columns: Union[Sequence[Hashable], None] = ...,
@@ -615,6 +639,7 @@ class PandasDatasource(_PandasDatasource):
     def read_gbq(
         self,
         query: str,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         project_id: typing.Union[str, None] = ...,
@@ -633,6 +658,7 @@ class PandasDatasource(_PandasDatasource):
     def read_hdf(
         self,
         path_or_buf: pd.HDFStore | os.PathLike | str,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         key: typing.Any = ...,
@@ -649,7 +675,8 @@ class PandasDatasource(_PandasDatasource):
     def read_html(
         self,
         io: os.PathLike | str,
-        asset_name: Optional[str],
+        *,
+        asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         match: Union[str, typing.Pattern] = ".+",
         flavor: typing.Union[str, None] = ...,
@@ -669,6 +696,7 @@ class PandasDatasource(_PandasDatasource):
     def read_json(
         self,
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         orient: typing.Union[str, None] = ...,
@@ -690,6 +718,7 @@ class PandasDatasource(_PandasDatasource):
     def read_orc(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
@@ -698,6 +727,7 @@ class PandasDatasource(_PandasDatasource):
     def read_parquet(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         engine: str = "auto",
@@ -709,6 +739,7 @@ class PandasDatasource(_PandasDatasource):
     def read_pickle(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         compression: CompressionOptions = "infer",
@@ -717,6 +748,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sas(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         format: typing.Union[str, None] = ...,
@@ -729,7 +761,8 @@ class PandasDatasource(_PandasDatasource):
     def read_spss(
         self,
         path: pydantic.FilePath,
-        asset_name: Optional[str],
+        *,
+        asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
         convert_categoricals: bool = ...,
@@ -738,6 +771,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -751,6 +785,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -764,6 +799,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         table_name: str,
         con: sqlalchemy.engine.Engine | str,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         schema: typing.Union[str, None] = ...,
@@ -776,6 +812,7 @@ class PandasDatasource(_PandasDatasource):
     def read_stata(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         convert_dates: bool = ...,
@@ -793,6 +830,7 @@ class PandasDatasource(_PandasDatasource):
     def read_table(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         sep: typing.Union[str, None] = ...,
@@ -850,6 +888,7 @@ class PandasDatasource(_PandasDatasource):
     def read_xml(
         self,
         path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         xpath: str = "./*",
