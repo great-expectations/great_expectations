@@ -573,7 +573,8 @@ class _SQLAsset(DataAsset):
         splitter = self.splitter
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
-            batch_metadata = copy.deepcopy(request.options)
+            batch_metadata = copy.deepcopy(self.batch_metadata)
+            batch_metadata.update(copy.deepcopy(request.options))
             batch_spec_kwargs = self._create_batch_spec_kwargs()
             if splitter:
                 batch_spec_kwargs["splitter_method"] = splitter.method_name
