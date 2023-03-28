@@ -203,11 +203,18 @@ Depending on which features of Great Expectations you want to work on, you may w
 
 ## If you want to develop against local Spark:
 
-* In most cases, `pip install requirements-dev.txt` should set up pyspark for you.
-
 * If you don’t have Java installed, you will probably need to install it and set your `PATH` or `JAVA_HOME` environment variables appropriately.
 
 * You can find official installation instructions for [Spark here](https://spark.apache.org/docs/latest/index.html#downloading).
+
+* After Spark is installed, you need to install the version of pyspark that exactly matches the Spark version
+
+    ```console
+    spark-submit --version 2>&1 | grep -o "version [0-9][^ ]*$"
+    version 3.2.0
+
+    pip install "pyspark==3.2.0"
+    ```
 
 ## Run tests to confirm that everything is working
 
