@@ -1,7 +1,7 @@
 import logging
 import uuid
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Tuple
+from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -31,10 +31,6 @@ except ImportError:
     NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
     SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
     create_engine = SQLALCHEMY_NOT_IMPORTED
-
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Connection
-
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +191,7 @@ class DatabaseStoreBackend(StoreBackend):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
-    def _get_connection(self) -> Connection:
+    def _get_connection(self) -> "sa.engine.base.Connection":
         """Get a connection from an SQLAlchemy engine."""
         with self.engine.connect() as connection:
             yield connection
