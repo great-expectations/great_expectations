@@ -429,7 +429,7 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
+            Python37:  # this includes airflow constraints
               python.version: '3.7'
               min_constraints: 'ci/constraints-test/py37-min-install.txt'
             Python38:
@@ -441,9 +441,6 @@ stages:
             Python310:
               python.version: '3.10'
               min_constraints: 'ci/constraints-test/py310-min-install.txt'
-            AirflowMin:
-              python.version: '3.7'
-              min_constraints: 'ci/constraints-test/py37-min-airflow.txt'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
