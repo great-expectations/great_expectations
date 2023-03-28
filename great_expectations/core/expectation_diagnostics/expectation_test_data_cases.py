@@ -57,6 +57,7 @@ class ExpectationTestCase(SerializableDictDot):
     title: str
     input: Dict[str, Any]
     output: Dict[str, Any]
+    dataset_name: Optional[str]
     exact_match_out: bool
     suppress_test_for: List[str] = field(default_factory=list)
     include_in_gallery: bool = False
@@ -76,6 +77,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
         self,
         *,
         title,
+        dataset_name="dataset",
         exact_match_out,
         out,
         suppress_test_for=[],
@@ -86,6 +88,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
             input=kwargs["in"],
             output=out,
             exact_match_out=exact_match_out,
+            dataset_name=dataset_name,
             suppress_test_for=suppress_test_for,
             only_for=kwargs.get("only_for"),
             include_in_gallery=kwargs.get("include_in_gallery", False),
@@ -98,6 +101,7 @@ class ExpectationTestDataCases(SerializableDictDot):
 
     data: TestData
     tests: List[ExpectationTestCase]
+    dataset_name: Optional[str]
     schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
     test_backends: Optional[List[TestBackend]] = None
     data_alt: Optional[TestData] = None
