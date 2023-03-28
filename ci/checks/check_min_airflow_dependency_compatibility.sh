@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# exit early if any command fails
+set -e
+
 # Install great_expectations using the airflow constraints file for our minimum supported version
 
 AIRFLOW_VERSION=2.2.3
