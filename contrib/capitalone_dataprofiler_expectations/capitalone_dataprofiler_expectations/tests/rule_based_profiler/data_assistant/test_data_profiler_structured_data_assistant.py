@@ -11,6 +11,9 @@ from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expect
     DataProfilerColumnProfileReport,
     DataProfilerProfileReport,
 )
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (
+    DataProfilerStructuredDataAssistant,
+)
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
     DataProfilerStructuredDataAssistantResult,
 )
@@ -32,6 +35,7 @@ if TYPE_CHECKING:
 
 _ = DataProfilerColumnProfileReport
 _ = DataProfilerProfileReport
+_ = DataProfilerStructuredDataAssistant
 
 
 test_root_path: str = os.path.dirname(  # noqa: PTH120
