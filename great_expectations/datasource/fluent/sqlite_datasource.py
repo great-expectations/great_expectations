@@ -35,7 +35,7 @@ try:
 except ImportError:
     # TODO (kilo59): replace this with `typing_extensions.Self` once our min typing_extensions supports it
     # Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
-    Self = TypeVar("Self", bound="_SQLiteAssetMixin")
+    Self = TypeVar("Self", bound="_SQLiteAssetMixin")  # type: ignore[misc,assignment] # redefining
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import (
