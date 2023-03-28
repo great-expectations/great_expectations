@@ -11,7 +11,6 @@ from typing import (
     List,
     Optional,
     Type,
-    TypeVar,
     Union,
     cast,
 )
@@ -46,15 +45,10 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 )
 from great_expectations.optional_imports import sqlalchemy
 
-try:
-    from typing_extensions import Self
-except ImportError:
-    # TODO (kilo59): replace this with `typing_extensions.Self` once our min typing_extensions supports it
-    # Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
-    Self = TypeVar("Self", bound="_SQLAsset")  # type: ignore[misc,assignment] # redefining
-
 if TYPE_CHECKING:
+    # min version of typing_extension missing `Self`, so it can't be imported at runtime
     import sqlalchemy as sa
+    from typing_extensions import Self
 
 
 class SQLDatasourceError(Exception):

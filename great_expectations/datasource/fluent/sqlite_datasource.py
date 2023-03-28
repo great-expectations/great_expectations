@@ -8,7 +8,6 @@ from typing import (
     List,
     Optional,
     Type,
-    TypeVar,
     Union,
     cast,
 )
@@ -30,14 +29,10 @@ from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset as SqlTableAsset,
 )
 
-try:
-    from typing_extensions import Self
-except ImportError:
-    # TODO (kilo59): replace this with `typing_extensions.Self` once our min typing_extensions supports it
-    # Taken from this SO answer https://stackoverflow.com/a/72182814/6304433
-    Self = TypeVar("Self", bound="_SQLiteAssetMixin")  # type: ignore[misc,assignment] # redefining
-
 if TYPE_CHECKING:
+    # min version of typing_extension missing `Self`, so it can't be imported at runtime
+    from typing_extensions import Self
+
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequestOptions,
         DataAsset,
