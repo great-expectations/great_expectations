@@ -7,7 +7,6 @@ from ruamel.yaml import YAML
 
 import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
-from great_expectations.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -19,6 +18,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.util import PasswordMasker, file_relative_path
 from great_expectations.exceptions import InvalidConfigError, MissingConfigVariableError
+from great_expectations.util import get_context
 from tests.data_context.conftest import create_data_context_files
 
 yaml = YAML()
@@ -43,7 +43,7 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
         "../test_fixtures/config_variables.yml",
     )
     shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
-    return DataContext(context_root_dir=root_dir)
+    return get_context(context_root_dir=root_dir)
 
 
 def test_config_variables_on_context_without_config_variables_filepath_configured(
@@ -94,10 +94,10 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     expected_config_commented_map.pop("anonymous_usage_statistics")
 
     # instantiate data_context twice to go through cycle of loading config from file then saving
-    context = gx.data_context.DataContext(context_path)
+    context = get_context(context_root_dir=context_path)
     context._save_project_config()
     context_config_commented_map = dataContextConfigSchema.dump(
-        gx.data_context.DataContext(context_path)._project_config
+        get_context(context_root_dir=context_path)._project_config
     )
     context_config_commented_map.pop("anonymous_usage_statistics")
 
@@ -123,8 +123,8 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
         config_variables_fixture_filename="config_variables.yml",
     )
 
-    data_context = gx.data_context.DataContext(
-        context_path, runtime_environment=runtime_environment
+    data_context = get_context(
+        context_root_dir=context_path, runtime_environment=runtime_environment
     )
     config = data_context.get_config_with_variables_substituted()
 
@@ -675,16 +675,21 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
     monkeypatch.setenv("DB_HOST_FROM_ENV_VAR", "DB_HOST_FROM_ENV_VAR_VALUE")
 
     datasource_config = DatasourceConfig(
-        class_name="SqlAlchemyDatasource",
-        credentials={
-            "drivername": "postgresql",
-            "host": "$DB_HOST",
-            "port": "65432",
-            "database": "${DB_NAME}",
-            "username": "${DB_USER}",
-            "password": "${DB_PWD}",
+        class_name="Datasource",
+        execution_engine={
+            "class_name": "SqlAlchemyExecutionEngine",
+            "module_name": "great_expectations.execution_engine",
+            "credentials": {
+                "drivername": "postgresql",
+                "host": "$DB_HOST",
+                "port": "65432",
+                "database": "${DB_NAME}",
+                "username": "${DB_USER}",
+                "password": "${DB_PWD}",
+            },
         },
     )
+
     datasource_config_schema = DatasourceConfigSchema()
 
     # use context.add_datasource to test this by adding a datasource with values to substitute.
@@ -694,7 +699,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
         **datasource_config_schema.dump(datasource_config)
     )
 
-    assert context.list_datasources()[0]["credentials"] == {
+    assert context.list_datasources()[0]["execution_engine"]["credentials"] == {
         "drivername": "postgresql",
         "host": "DB_HOST_FROM_ENV_VAR_VALUE",
         "port": "65432",
@@ -712,7 +717,7 @@ def test_create_data_context_and_config_vars_in_code(tmp_path_factory, monkeypat
 
     test_datasource_credentials = context_with_variables_substituted_dict[
         "datasources"
-    ]["test_datasource"]["credentials"]
+    ]["test_datasource"]["execution_engine"]["credentials"]
 
     assert test_datasource_credentials["host"] == "DB_HOST_FROM_ENV_VAR_VALUE"
     assert test_datasource_credentials["username"] == "DB_USER"

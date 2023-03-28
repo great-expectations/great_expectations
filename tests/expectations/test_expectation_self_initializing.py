@@ -1,11 +1,11 @@
 import pytest
 
-import great_expectations.exceptions.exceptions as ge_exceptions
+import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations.expectations.expectation import Expectation
 
 
 def test_expectation_is_expectation_self_initializing(capsys):
-    with pytest.raises(ge_exceptions.ExpectationNotFoundError):
+    with pytest.raises(gx_exceptions.ExpectationNotFoundError):
         Expectation.is_expectation_self_initializing(name="I_dont_exist")
 
     assert (

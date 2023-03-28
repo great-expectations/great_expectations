@@ -1,10 +1,10 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     InvalidExpectationConfigurationError,
@@ -100,7 +100,18 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_distinct_values_to_contain_set`
+        we require that the `configuraton.kwargs` contain a `value_set` key that is either a `list`, `set`,
+        or `dict`.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -120,11 +131,11 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("ties_okay", RendererValueType.BOOLEAN),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -132,11 +143,17 @@ class ExpectColumnMostCommonValueToBeInSet(ColumnExpectation):
         template_str = ""
 
         if params.value_set:
-            renderer_configuration = cls._add_value_set_params(
-                renderer_configuration=renderer_configuration
+            array_param_name = "value_set"
+            param_prefix = "v__"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            value_set_str: str = cls._get_value_set_string(
-                renderer_configuration=renderer_configuration
+            value_set_str: str = cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
             template_str += (
                 f"most common value must belong to this set: {value_set_str}."

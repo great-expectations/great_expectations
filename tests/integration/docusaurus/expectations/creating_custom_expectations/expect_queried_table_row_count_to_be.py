@@ -18,22 +18,22 @@ from great_expectations.expectations.expectation import (
 )
 
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py ExpectQueriedTableRowCountToBe class_def">
 class ExpectQueriedTableRowCountToBe(QueryExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py docstring">
     """Expect the expect the number of rows returned from a queried table to equal a specified value."""
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py metric_dependencies">
     metric_dependencies = ("query.table",)
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py query">
     query = """
             SELECT COUNT(*)
             FROM {active_batch}
             """
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_table_row_count_to_be.py success_keys">
     success_keys = (
         "value",
         "query",

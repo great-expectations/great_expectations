@@ -1,10 +1,10 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     render_evaluation_parameter_string,
@@ -208,15 +208,15 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                                from the configuration attribute of the Expectation instance.
+
         """
         super().validate_configuration(configuration=configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
@@ -226,14 +226,14 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -254,7 +254,10 @@ class ExpectColumnMinToBeBetween(ColumnExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"minimum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+                if params.min_value == params.max_value:
+                    template_str = "minimum value must be $min_value"
+                else:
+                    template_str = f"minimum value must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif not params.min_value:
                 template_str = f"minimum value must be {at_most_str} $max_value."
             else:

@@ -20,7 +20,7 @@ class ColumnValuesJsonParseable(ColumnMapMetricProvider):
             try:
                 json.loads(val)
                 return True
-            except:
+            except Exception:
                 return False
 
         return column.map(is_json)
@@ -31,7 +31,7 @@ class ColumnValuesJsonParseable(ColumnMapMetricProvider):
             try:
                 json.loads(val)
                 return True
-            except:
+            except Exception:
                 return False
 
         is_json_udf = F.udf(is_json, sparktypes.BooleanType())

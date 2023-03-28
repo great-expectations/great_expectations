@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import hashlib
 import logging
 from typing import List, Union
 
-from great_expectations.exceptions import exceptions as ge_exceptions
+from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
@@ -18,11 +20,11 @@ try:
     import pyspark.sql.types as sparktypes
     from pyspark.sql import DataFrame
 except ImportError:
-    pyspark = None
-    F = None
-    DataFrame = None
+    pyspark = None  # type: ignore[assignment]
+    F = None  # type: ignore[assignment]
+    DataFrame = None  # type: ignore[assignment,misc]
     # noinspection SpellCheckingInspection
-    sparktypes = None
+    sparktypes = None  # type: ignore[assignment]
     logger.debug(
         "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
     )
@@ -141,7 +143,7 @@ class SparkDataSplitter(DataSplitter):
         """
         self._validate_date_parts(date_parts)
 
-        date_parts: List[DatePart] = self._convert_date_parts(date_parts)
+        date_parts = self._convert_date_parts(date_parts)
 
         column_batch_identifiers: dict = batch_identifiers[column_name]
 
@@ -161,7 +163,7 @@ class SparkDataSplitter(DataSplitter):
         return df
 
     @staticmethod
-    def _convert_date_part_to_spark_equivalent(date_part: [DatePart, str]) -> str:
+    def _convert_date_part_to_spark_equivalent(date_part: DatePart | str) -> str:
         """Convert the DatePart to a string representing the corresponding pyspark.sql.functions version.
 
         For example DatePart.DAY -> pyspark.sql.functions.dayofmonth() -> "dayofmonth"
@@ -302,7 +304,7 @@ class SparkDataSplitter(DataSplitter):
             getattr(hashlib, hash_function_name)
         except (TypeError, AttributeError):
             raise (
-                ge_exceptions.ExecutionEngineError(
+                gx_exceptions.ExecutionEngineError(
                     f"""The splitting method used with SparkDFExecutionEngine has a reference to an invalid hash_function_name.
                     Reference to {hash_function_name} cannot be found."""
                 )

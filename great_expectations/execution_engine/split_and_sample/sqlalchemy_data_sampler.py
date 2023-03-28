@@ -1,21 +1,19 @@
-from typing import Optional, Union
+from __future__ import annotations
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.id_dict import BatchSpec
+from typing import TYPE_CHECKING, Optional, Union
+
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.optional_imports import sqlalchemy as sa
 
 try:
-    import sqlalchemy as sa
-except ImportError:
-    sa = None
-
-try:
-    from sqlalchemy.engine import Dialect
-    from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList
+    from sa.engine import Dialect
+    from sa.sql import Selectable
+    from sa.sql.elements import BinaryExpression, BooleanClauseList
 except ImportError:
     Selectable = None
     BinaryExpression = None
@@ -23,12 +21,16 @@ except ImportError:
     Dialect = None
 
 
+if TYPE_CHECKING:
+    from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+
+
 class SqlAlchemyDataSampler(DataSampler):
     """Sampling methods for data stores with SQL interfaces."""
 
     def sample_using_limit(
         self,
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
         where_clause: Optional[Selectable] = None,
     ) -> Union[str, BinaryExpression, BooleanClauseList]:
@@ -122,18 +124,18 @@ class SqlAlchemyDataSampler(DataSampler):
             None
         """
         if not isinstance(n, (str, int)):
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "Please specify your sampling kwargs 'n' parameter as a string or int."
             )
         if isinstance(n, str) and not n.isdigit():
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "If specifying your sampling kwargs 'n' parameter as a string please ensure it is "
                 "parseable as an integer."
             )
 
     @staticmethod
     def sample_using_random(
-        execution_engine: "SqlAlchemyExecutionEngine",  # noqa: F821
+        execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
         where_clause: Optional[Selectable] = None,
     ) -> Selectable:
@@ -157,7 +159,7 @@ class SqlAlchemyDataSampler(DataSampler):
         table_name: str = batch_spec["table_name"]
 
         num_rows: int = execution_engine.engine.execute(
-            sa.select([sa.func.count()])
+            sa.select(sa.func.count())
             .select_from(
                 sa.table(table_name, schema=batch_spec.get("schema_name", None))
             )

@@ -1,15 +1,16 @@
 import inspect
 import logging
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 import pandas as pd
 from packaging import version
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -23,20 +24,31 @@ from great_expectations.expectations.core.expect_column_values_to_be_of_type imp
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
-    add_values_with_json_schema_from_list_in_params,
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import (
     num_to_str,
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
-from great_expectations.util import get_pyathena_potential_type
+from great_expectations.util import (
+    get_pyathena_potential_type,
+    get_trino_potential_type,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
+
+if TYPE_CHECKING:
+    from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 
@@ -127,9 +139,32 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         "type_list",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_in_type_list` it is required that:
+
+        - `type_list` has been provided.
+
+        - `type_list` is one of the following types: `list`, `dict`, or `None`
+
+        - If `type_list` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
+          dictionary keys must be `$PARAMETER`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -146,100 +181,56 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        add_param_args: AddParamArgs = (
+            ("column", RendererValueType.STRING),
+            ("type_list", RendererValueType.ARRAY),
+            ("mostly", RendererValueType.NUMBER),
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(
-            configuration.kwargs,
-            ["column", "type_list", "mostly", "row_condition", "condition_parser"],
-        )
-        params_with_json_schema = {
-            "column": {"schema": {"type": "string"}, "value": params.get("column")},
-            "type_list": {
-                "schema": {"type": "array"},
-                "value": params.get("type_list"),
-            },
-            "mostly": {"schema": {"type": "number"}, "value": params.get("mostly")},
-            "mostly_pct": {
-                "schema": {"type": "string"},
-                "value": params.get("mostly_pct"),
-            },
-            "row_condition": {
-                "schema": {"type": "string"},
-                "value": params.get("row_condition"),
-            },
-            "condition_parser": {
-                "schema": {"type": "string"},
-                "value": params.get("condition_parser"),
-            },
-        }
+        for name, param_type in add_param_args:
+            renderer_configuration.add_param(name=name, param_type=param_type)
 
-        if params["type_list"] is not None:
-            for i, v in enumerate(params["type_list"]):
-                params[f"v__{str(i)}"] = v
-            values_string = " ".join(
-                [f"$v__{str(i)}" for i, v in enumerate(params["type_list"])]
+        params = renderer_configuration.params
+
+        if params.type_list:
+            array_param_name = "type_list"
+            param_prefix = "v__"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
+            )
+            values_string: str = cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
 
-            if params["mostly"] is not None and params["mostly"] < 1.0:
-                params_with_json_schema["mostly_pct"]["value"] = num_to_str(
-                    params["mostly"] * 100, precision=15, no_scientific=True
+            if params.mostly and params.mostly.value < 1.0:
+                renderer_configuration = cls._add_mostly_pct_param(
+                    renderer_configuration=renderer_configuration
                 )
-                # params["mostly_pct"] = "{:.14f}".format(params["mostly"]*100).rstrip("0").rstrip(".")
-                if include_column_name:
-                    template_str = (
-                        "$column value types must belong to this set: "
-                        + values_string
-                        + ", at least $mostly_pct % of the time."
-                    )
-                else:
-                    template_str = (
-                        "value types must belong to this set: "
-                        + values_string
-                        + ", at least $mostly_pct % of the time."
-                    )
-            else:
-                if include_column_name:
-                    template_str = (
-                        f"$column value types must belong to this set: {values_string}."
-                    )
-                else:
-                    template_str = (
-                        f"value types must belong to this set: {values_string}."
-                    )
-        else:
-            if include_column_name:
-                template_str = "$column value types may be any value, but observed value will be reported"
-            else:
                 template_str = (
-                    "value types may be any value, but observed value will be reported"
+                    "value types must belong to this set: "
+                    + values_string
+                    + ", at least $mostly_pct % of the time."
                 )
-
-        if params["row_condition"] is not None:
-            (
-                conditional_template_str,
-                conditional_params,
-            ) = parse_row_condition_string_pandas_engine(
-                params["row_condition"], with_schema=True
+            else:
+                template_str = f"value types must belong to this set: {values_string}."
+        else:
+            template_str = (
+                "value types may be any value, but observed value will be reported"
             )
-            template_str = f"{conditional_template_str}, then {template_str}"
-            params_with_json_schema.update(conditional_params)
 
-        params_with_json_schema = add_values_with_json_schema_from_list_in_params(
-            params=params,
-            params_with_json_schema=params_with_json_schema,
-            param_key_with_list="type_list",
-        )
-        return template_str, params_with_json_schema, None, styling
+        if renderer_configuration.include_column_name:
+            template_str = f"$column {template_str}"
+
+        renderer_configuration.template_str = template_str
+
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -323,7 +314,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             )
         ]
 
-    def _validate_pandas(
+    def _validate_pandas(  # noqa: C901 - 16
         self,
         actual_column_type,
         expected_types_list,
@@ -422,6 +413,9 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
                         else:
                             real_type = potential_type
                         types.append(real_type)
+                    elif type_module.__name__ == "trino.sqlalchemy.datatype":
+                        potential_type = get_trino_potential_type(type_module, type_)
+                        types.append(type(potential_type))
                     else:
                         potential_type = getattr(type_module, type_)
                         types.append(potential_type)
@@ -488,8 +482,8 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             column_name = configuration.kwargs.get("column")
             expected_types_list = configuration.kwargs.get("type_list")
             metric_kwargs = get_metric_kwargs(
-                configuration=configuration,
                 metric_name="table.column_types",
+                configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")

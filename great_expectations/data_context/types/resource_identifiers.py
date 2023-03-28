@@ -1,14 +1,12 @@
 from __future__ import annotations
 
 import logging
-import warnings
 from typing import TYPE_CHECKING, Optional, Union
-from uuid import UUID
 
-from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey
 from great_expectations.core.id_dict import BatchKwargs, IDDict
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
@@ -23,7 +21,7 @@ class ExpectationSuiteIdentifier(DataContextKey):
     def __init__(self, expectation_suite_name: str) -> None:
         super().__init__()
         if not isinstance(expectation_suite_name, str):
-            raise ge_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 f"expectation_suite_name must be a string, not {type(expectation_suite_name).__name__}"
             )
         self._expectation_suite_name = expectation_suite_name
@@ -100,10 +98,9 @@ class BatchIdentifierSchema(Schema):
         return BatchIdentifier(**data)
 
 
+@public_api
 class ValidationResultIdentifier(DataContextKey):
-    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier
-    and run_id.
-    """
+    """A ValidationResultIdentifier identifies a validation result by the fully-qualified expectation_suite_identifier and run_id."""
 
     def __init__(self, expectation_suite_identifier, run_id, batch_identifier) -> None:
         """Constructs a ValidationResultIdentifier
@@ -115,20 +112,7 @@ class ValidationResultIdentifier(DataContextKey):
         """
         super().__init__()
         self._expectation_suite_identifier = expectation_suite_identifier
-        if isinstance(run_id, str):
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional).",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                run_time = None
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif run_id is None:
             run_id = RunIdentifier()
@@ -188,7 +172,7 @@ class ValidationResultIdentifier(DataContextKey):
         elif isinstance(batch_kwargs, dict):
             batch_identifier = IDDict(batch_kwargs).to_id()
         else:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "Unable to construct ValidationResultIdentifier from provided object."
             )
         return cls(
@@ -253,20 +237,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
                 expectation_suite_name=expectation_suite_identifier
             )
 
-        if isinstance(run_id, str):
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional).",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                run_time = None
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif run_id is None:
             run_id = RunIdentifier()
@@ -328,7 +299,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     @classmethod
     def from_tuple(cls, tuple_):
         if len(tuple_) < 6:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "ValidationMetricIdentifier tuple must have at least six components."
             )
         if tuple_[2] == "__":
@@ -349,7 +320,7 @@ class ValidationMetricIdentifier(MetricIdentifier):
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
         if len(tuple_) != 6:
-            raise ge_exceptions.GreatExpectationsError(
+            raise gx_exceptions.GreatExpectationsError(
                 "ValidationMetricIdentifier fixed length tuple must have exactly six "
                 "components."
             )
@@ -373,13 +344,13 @@ class GXCloudIdentifier(DataContextKey):
     def __init__(
         self,
         resource_type: GXCloudRESTResource,
-        cloud_id: Optional[str] = None,
+        id: Optional[str] = None,
         resource_name: Optional[str] = None,
     ) -> None:
         super().__init__()
 
         self._resource_type = resource_type
-        self._cloud_id = cloud_id or ""
+        self._id = id or ""
         self._resource_name = resource_name or ""
 
     @property
@@ -391,29 +362,19 @@ class GXCloudIdentifier(DataContextKey):
         self._resource_type = value
 
     @property
-    def cloud_id(self):
-        return self._cloud_id
+    def id(self):
+        return self._id
 
-    @cloud_id.setter
-    def cloud_id(self, value) -> None:
-        self._cloud_id = value
-
-    @property
-    def ge_cloud_id(self):
-        # <GX_RENAME> Deprecated 0.15.40
-        return self.cloud_id
-
-    @ge_cloud_id.setter
-    def ge_cloud_id(self, value) -> None:
-        # <GX_RENAME> Deprecated 0.15.40
-        self.cloud_id = value
+    @id.setter
+    def id(self, value) -> None:
+        self._id = value
 
     @property
     def resource_name(self) -> str:
         return self._resource_name
 
     def to_tuple(self):
-        return (self.resource_type, self.cloud_id, self.resource_name)
+        return (self.resource_type, self.id, self.resource_name)
 
     def to_fixed_length_tuple(self):
         return self.to_tuple()
@@ -422,17 +383,15 @@ class GXCloudIdentifier(DataContextKey):
     def from_tuple(cls, tuple_):
         # Only add resource name if it exists in the tuple_
         if len(tuple_) == 3:
-            return cls(
-                resource_type=tuple_[0], cloud_id=tuple_[1], resource_name=tuple_[2]
-            )
-        return cls(resource_type=tuple_[0], cloud_id=tuple_[1])
+            return cls(resource_type=tuple_[0], id=tuple_[1], resource_name=tuple_[2])
+        return cls(resource_type=tuple_[0], id=tuple_[1])
 
     @classmethod
     def from_fixed_length_tuple(cls, tuple_):
         return cls.from_tuple(tuple_)
 
     def __repr__(self):
-        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.cloud_id}"
+        repr = f"{self.__class__.__name__}::{self.resource_type}::{self.id}"
         if self.resource_name:
             repr += f"::{self.resource_name}"
         return repr
@@ -487,7 +446,7 @@ class SiteSectionIdentifier(DataContextKey):
                     **resource_identifier
                 )
         else:
-            raise ge_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
             )
 
@@ -518,18 +477,16 @@ class SiteSectionIdentifier(DataContextKey):
                 resource_identifier=ExpectationSuiteIdentifier.from_tuple(tuple_[1:]),
             )
         else:
-            raise ge_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 "SiteSectionIdentifier only supports 'validations' and 'expectations' as site section names"
             )
 
 
 class ConfigurationIdentifier(DataContextKey):
-    def __init__(self, configuration_key: Union[str, UUID]) -> None:
+    def __init__(self, configuration_key: str) -> None:
         super().__init__()
-        if isinstance(configuration_key, UUID):
-            configuration_key = str(configuration_key)
         if not isinstance(configuration_key, str):
-            raise ge_exceptions.InvalidDataContextKeyError(
+            raise gx_exceptions.InvalidDataContextKeyError(
                 f"configuration_key must be a string, not {type(configuration_key).__name__}"
             )
         self._configuration_key = configuration_key

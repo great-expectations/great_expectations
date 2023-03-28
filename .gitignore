@@ -107,6 +107,9 @@ celerybeat-schedule
 .venv
 venv/
 ENV/
+ge_dev/
+gx_dev/
+.gx_dev/
 
 # Spyder project settings
 .spyderproject
@@ -144,3 +147,4 @@ metastore_db
 # dependency management
 Pipfile
 Pipfile.lock
+

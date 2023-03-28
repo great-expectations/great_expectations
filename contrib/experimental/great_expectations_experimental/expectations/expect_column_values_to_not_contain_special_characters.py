@@ -5,11 +5,7 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
-from great_expectations.execution_engine import (
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
+from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     render_evaluation_parameter_string,
@@ -20,7 +16,11 @@ from great_expectations.expectations.metrics import (
 )
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
-from great_expectations.render.util import num_to_str, substitute_none_for_missing
+from great_expectations.render.util import (
+    num_to_str,
+    parse_row_condition_string_pandas_engine,
+    substitute_none_for_missing,
+)
 
 # This class defines a Metric to support your Expectation
 # The main business logic for calculation lives here.
@@ -88,7 +88,6 @@ class ExpectColumnValuesToNotContainSpecialCharacters(ColumnMapExpectation):
                         "unexpected_index_list": [0, 1, 2],
                         "unexpected_list": ["apple@", "pear$!", "%banana%"],
                     },
-                    "exact_match_out": False,
                 }
             ],
         }

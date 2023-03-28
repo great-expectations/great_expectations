@@ -48,7 +48,7 @@ def data_source_config_with_aws_glue_catalog_data_connectors():
                     database_name: db_test
         glue_inferred_connector:
             class_name: InferredAssetAWSGlueDataCatalogDataConnector
-    """
+    """  # noqa: F541
     return yaml.load(config)
 
 

@@ -20,7 +20,7 @@ assert context
 
 # First configure a new Datasource and add to DataContext
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py datasource_yaml">
 datasource_yaml = f"""
 name: getting_started_datasource
 class_name: Datasource
@@ -75,7 +75,7 @@ expectation_suite_name = "getting_started_expectation_suite_taxi.demo"
 # Getting Started Guide is being used. It can be ignored by users
 expectation_suite_name = GETTING_STARTED_EXPECTATION_SUITE_NAME
 
-context.create_expectation_suite(expectation_suite_name=expectation_suite_name)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name=expectation_suite_name
@@ -84,8 +84,8 @@ validator = context.get_validator(
 # NOTE: The following assertion is only for testing and can be ignored by users.
 assert isinstance(validator, Validator)
 
-# <snippet>
 # Profile the data with the UserConfigurableProfiler and save resulting ExpectationSuite
+# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py exclude_column_names no comment">
 exclude_column_names = [
     "vendor_id",
     "pickup_datetime",
@@ -164,7 +164,7 @@ assert checkpoint_result.run_results
 
 
 # Create second checkpoint on yellow_tripdata_sample_2019-02.csv
-# <snippet>
+# <snippet name="tests/integration/docusaurus/tutorials/getting-started/getting_started.py checkpoint_yaml_config">
 yaml_config = f"""
 name: getting_started_checkpoint
 config_version: 1.0

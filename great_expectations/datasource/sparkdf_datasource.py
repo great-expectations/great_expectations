@@ -1,7 +1,6 @@
 import datetime
 import logging
 import uuid
-import warnings
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import get_or_create_spark_application
@@ -16,8 +15,8 @@ logger = logging.getLogger(__name__)
 try:
     from pyspark.sql import DataFrame, SparkSession
 except ImportError:
-    DataFrame = None
-    SparkSession = None
+    DataFrame = None  # type: ignore[assignment,misc]
+    SparkSession = None  # type: ignore[assignment,misc]
     # TODO: review logging more detail here
     logger.debug(
         "Unable to load pyspark; install optional spark dependency for support."
@@ -194,18 +193,8 @@ class SparkDFDatasource(LegacyDatasource):
             }
         )
 
-        if "path" in batch_kwargs or "s3" in batch_kwargs:
-            if "s3" in batch_kwargs:
-                # deprecated-v0.13.0
-                warnings.warn(
-                    "Direct GX Support for the s3 BatchKwarg is deprecated as of v0.13.0 and will be removed in v0.16. "
-                    "Please use a path including the s3a:// protocol instead.",
-                    DeprecationWarning,
-                )
-
-            # If both are present, let s3 override
-            path = batch_kwargs.get("path")
-            path = batch_kwargs.get("s3", path)
+        if "path" in batch_kwargs:
+            path = batch_kwargs["path"]
             reader_method = batch_kwargs.get("reader_method")
             reader = self.spark.read
 
@@ -248,7 +237,8 @@ class SparkDFDatasource(LegacyDatasource):
         )
 
     @staticmethod
-    def guess_reader_method_from_path(path):
+    def guess_reader_method_from_path(path: str):
+        path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "csv"}
         elif (
@@ -257,7 +247,8 @@ class SparkDFDatasource(LegacyDatasource):
             return {"reader_method": "parquet"}
 
         raise BatchKwargsError(
-            f"Unable to determine reader method from path: {path}", {"path": path}
+            f"Unable to determine reader method from path: {path}",
+            {"path": path},
         )
 
     def _get_reader_fn(self, reader, reader_method=None, path=None):

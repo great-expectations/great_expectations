@@ -1,6 +1,11 @@
 import re
 from copy import deepcopy
 
+try:
+    import sqlalchemy as sa
+except ImportError:
+    sa = None
+
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit
@@ -11,12 +16,12 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -63,7 +68,7 @@ class TableChecksum(TableMetricProvider):
     #
     #     return len(columnslist)
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -102,7 +107,7 @@ class TableChecksum(TableMetricProvider):
         if DEBUG:
             logger.error("\n***********cksumquery***********\n" + cksumquery)
 
-        return int(execution_engine.engine.execute(cksumquery).scalar())
+        return int(execution_engine.engine.execute(sa.text(cksumquery)).scalar())
 
     # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(
@@ -191,7 +196,7 @@ class TableChecksumValues(TableMetricProvider):
     #
     #     return cksum_value_self, cksum_value_other
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -231,7 +236,7 @@ class TableChecksumValues(TableMetricProvider):
     ):
 
         # set ignore_columns to '' if it is not provided.
-        if "ignore_columns" in configuration.kwargs:
+        if configuration and "ignore_columns" in configuration.kwargs:
             runtime_configuration["ignore_columns"] = configuration.kwargs[
                 "ignore_columns"
             ]
@@ -242,9 +247,10 @@ class TableChecksumValues(TableMetricProvider):
         table_row_count_metric_config_other = deepcopy(metric.metric_domain_kwargs)
 
         # set table value to other_table_name in metric configuration.
-        table_row_count_metric_config_other["table"] = configuration.kwargs[
-            "other_table_name"
-        ]
+        if configuration:
+            table_row_count_metric_config_other["table"] = configuration.kwargs[
+                "other_table_name"
+            ]
 
         return {
             "table.checksum.self": MetricConfiguration(
@@ -397,7 +403,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                             "other": -7127504315667345025,
                         },
                     },
-                    "suppress_test_for": ["sqlite"],
+                    "only_for": ["bigquery"],
                 },
                 {
                     "title": "for bigquery - negative_test_with_checksum_not_equal",
@@ -415,16 +421,7 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                             "other": -2656867619187774560,
                         },
                     },
-                    "suppress_test_for": ["sqlite"],
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    # "dialects": ['sqlite', 'bigquery',],
-                    "dialects": [
-                        "sqlite",
-                    ],
+                    "only_for": ["bigquery"],
                 },
             ],
         }

@@ -1,5 +1,5 @@
 import re
-from glob import glob
+from pathlib import Path
 
 import pkg_resources
 from setuptools import find_packages, setup
@@ -34,17 +34,22 @@ def get_extras_require():
         "tools",
         "all-contrib-expectations",
     )
+
     requirements_dir = "reqs"
-    rx_fname_part = re.compile(rf"{requirements_dir}/requirements-dev-(.*).txt")
-    for fname in glob(f"{requirements_dir}/*.txt"):
-        match = rx_fname_part.match(fname)
+    rx_name_part = re.compile(r"requirements-dev-(.*).txt")
+
+    # Use Path() from pathlib so we can make this section of the code OS agnostic.
+    # Loop through each requirement file and verify they are named
+    # correctly and are in the right location.
+    for file_path in Path().glob(f"{requirements_dir}/*.txt"):
+        match = rx_name_part.match(file_path.name)
         assert (
             match is not None
         ), f"The extras requirements dir ({requirements_dir}) contains files that do not adhere to the following format: requirements-dev-*.txt"
         key = match.group(1)
         if key in ignore_keys:
             continue
-        with open(fname) as f:
+        with open(file_path) as f:
             parsed = [str(req) for req in pkg_resources.parse_requirements(f)]
             results[key] = parsed
 
@@ -82,10 +87,13 @@ config = {
     "cmdclass": versioneer.get_cmdclass(),
     "install_requires": required,
     "extras_require": get_extras_require(),
-    "packages": find_packages(exclude=["contrib*", "docs*", "tests*", "examples*"]),
+    "packages": find_packages(
+        exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
+    ),
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
+    "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,
     "license": "Apache-2.0",
@@ -104,6 +112,7 @@ config = {
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 }
 

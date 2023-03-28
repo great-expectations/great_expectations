@@ -10,8 +10,7 @@ import pytest
 from freezegun import freeze_time
 from ruamel.yaml import YAML
 
-import great_expectations as gx
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationConfiguration, expectationSuiteSchema
@@ -19,7 +18,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context import BaseDataContext, DataContext
+from great_expectations.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -53,6 +52,7 @@ from great_expectations.render.renderer.renderer import renderer
 from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
+    get_context,
     is_library_loadable,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
@@ -70,7 +70,7 @@ parameterized_expectation_suite_name = "my_dag_node.default"
 @pytest.fixture(scope="function")
 def titanic_multibatch_data_context(
     tmp_path,
-) -> DataContext:
+) -> FileDataContext:
     """
     Based on titanic_data_context, but with 2 identical batches of
     data asset "titanic"
@@ -94,7 +94,7 @@ def titanic_multibatch_data_context(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
         str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
     )
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 @pytest.fixture
@@ -120,104 +120,23 @@ def data_context_with_bad_datasource(tmp_path_factory):
         os.path.join(fixture_dir, "great_expectations_bad_datasource.yml"),
         str(os.path.join(context_path, "great_expectations.yml")),
     )
-    return gx.data_context.DataContext(context_path)
+    return get_context(context_root_dir=context_path)
 
 
 def test_create_duplicate_expectation_suite(titanic_data_context):
     # create new expectation suite
-    assert titanic_data_context.create_expectation_suite(
+    assert titanic_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     # attempt to create expectation suite with name that already exists on data asset
-    with pytest.raises(ge_exceptions.DataContextError):
-        titanic_data_context.create_expectation_suite(
+    with pytest.raises(gx_exceptions.DataContextError):
+        titanic_data_context.add_expectation_suite(
             expectation_suite_name="titanic.test_create_expectation_suite"
         )
     # create expectation suite with name that already exists on data asset, but pass overwrite_existing=True
-    assert titanic_data_context.create_expectation_suite(
+    assert titanic_data_context.add_or_update_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite",
-        overwrite_existing=True,
     )
-
-
-def test_get_available_data_asset_names_with_one_datasource_including_a_single_generator(
-    empty_data_context, filesystem_csv
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv),
-            }
-        },
-    )
-
-    available_asset_names = empty_data_context.get_available_data_asset_names()
-
-    assert set(available_asset_names["my_datasource"]["subdir_reader"]["names"]) == {
-        ("f3", "directory"),
-        ("f2", "file"),
-        ("f1", "file"),
-    }
-
-
-def test_get_available_data_asset_names_with_one_datasource_without_a_generator_returns_empty_dict(
-    empty_data_context,
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-    )
-
-    obs = empty_data_context.get_available_data_asset_names()
-    assert obs == {"my_datasource": {}}
-
-
-def test_get_available_data_asset_names_with_multiple_datasources_with_and_without_generators(
-    empty_data_context, sa
-):
-    """Test datasources with and without generators."""
-    # requires sqlalchemy because it instantiates sqlalchemydatasource
-    context = empty_data_context
-    connection_kwargs = {"credentials": {"drivername": "sqlite"}}
-
-    context.add_datasource(
-        "first",
-        class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={
-            "foo": {
-                "class_name": "TableBatchKwargsGenerator",
-            }
-        },
-        **connection_kwargs,
-    )
-    context.add_datasource(
-        "second", class_name="SqlAlchemyDatasource", **connection_kwargs
-    )
-    context.add_datasource(
-        "third",
-        class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={
-            "bar": {
-                "class_name": "TableBatchKwargsGenerator",
-            }
-        },
-        **connection_kwargs,
-    )
-
-    obs = context.get_available_data_asset_names()
-
-    assert isinstance(obs, dict)
-    assert set(obs.keys()) == {"first", "second", "third"}
-    assert obs == {
-        "first": {"foo": {"is_complete_list": True, "names": []}},
-        "second": {},
-        "third": {"bar": {"is_complete_list": True, "names": []}},
-    }
 
 
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
@@ -242,7 +161,7 @@ def test_get_existing_expectation_suite(data_context_parameterized_expectation_s
 
 def test_get_new_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_does_not_exist.default"
         )
     )
@@ -255,7 +174,7 @@ def test_get_new_expectation_suite(data_context_parameterized_expectation_suite)
 
 def test_save_expectation_suite(data_context_parameterized_expectation_suite):
     expectation_suite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
     )
@@ -280,7 +199,7 @@ def test_save_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
     expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
     )
@@ -313,7 +232,7 @@ def test_get_expectation_suite_include_rendered_content(
     data_context_parameterized_expectation_suite,
 ):
     expectation_suite: ExpectationSuite = (
-        data_context_parameterized_expectation_suite.create_expectation_suite(
+        data_context_parameterized_expectation_suite.add_expectation_suite(
             "this_data_asset_config_does_not_exist.default"
         )
     )
@@ -377,144 +296,6 @@ def test_compile_evaluation_parameter_dependencies(
     )
 
 
-@pytest.mark.v2_api
-def test_list_datasources_v2_api(data_context_parameterized_expectation_suite):
-    datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "mydatasource",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {"class_name": "PandasDataset"},
-            "batch_kwargs_generators": {
-                "mygenerator": {
-                    "base_directory": "../data",
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "reader_options": {"engine": "python", "sep": None},
-                }
-            },
-        }
-    ]
-
-    data_context_parameterized_expectation_suite.add_datasource(
-        "second_pandas_source",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-    )
-
-    datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "mydatasource",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {"class_name": "PandasDataset"},
-            "batch_kwargs_generators": {
-                "mygenerator": {
-                    "base_directory": "../data",
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "reader_options": {"engine": "python", "sep": None},
-                }
-            },
-        },
-        {
-            "name": "second_pandas_source",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-        },
-    ]
-
-    if is_library_loadable(library_name="psycopg2"):
-
-        # Make sure passwords are masked in password or url fields
-        data_context_parameterized_expectation_suite.add_datasource(
-            "postgres_source_with_password",
-            initialize=False,
-            module_name="great_expectations.datasource",
-            class_name="SqlAlchemyDatasource",
-            credentials={
-                "drivername": "postgresql",
-                "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-                "port": "65432",
-                "username": "username_str",
-                "password": "password_str",
-                "database": "database_str",
-            },
-        )
-
-        data_context_parameterized_expectation_suite.add_datasource(
-            "postgres_source_with_password_in_url",
-            initialize=False,
-            module_name="great_expectations.datasource",
-            class_name="SqlAlchemyDatasource",
-            credentials={
-                "url": "postgresql+psycopg2://username:password@host:65432/database",
-            },
-        )
-
-        datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-        assert datasources == [
-            {
-                "name": "mydatasource",
-                "class_name": "PandasDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {"class_name": "PandasDataset"},
-                "batch_kwargs_generators": {
-                    "mygenerator": {
-                        "base_directory": "../data",
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "reader_options": {"engine": "python", "sep": None},
-                    }
-                },
-            },
-            {
-                "name": "second_pandas_source",
-                "class_name": "PandasDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {
-                    "class_name": "PandasDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-            },
-            {
-                "name": "postgres_source_with_password",
-                "class_name": "SqlAlchemyDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "credentials": {
-                    "drivername": "postgresql",
-                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-                    "port": "65432",
-                    "username": "username_str",
-                    "password": PasswordMasker.MASKED_PASSWORD_STRING,
-                    "database": "database_str",
-                },
-            },
-            {
-                "name": "postgres_source_with_password_in_url",
-                "class_name": "SqlAlchemyDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "credentials": {
-                    "url": f"postgresql+psycopg2://username:{PasswordMasker.MASKED_PASSWORD_STRING}@host:65432/database",
-                },
-            },
-        ]
-
-
 @mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
 def test_update_datasource_persists_changes_with_store(
     mock_update_by_name: mock.MagicMock,
@@ -576,7 +357,7 @@ def test_data_context_get_datasource(titanic_data_context):
 
 
 def test_data_context_expectation_suite_delete(empty_data_context):
-    assert empty_data_context.create_expectation_suite(
+    assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
@@ -589,11 +370,11 @@ def test_data_context_expectation_suite_delete(empty_data_context):
 
 
 def test_data_context_expectation_nested_suite_delete(empty_data_context):
-    assert empty_data_context.create_expectation_suite(
+    assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test.create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
-    assert empty_data_context.create_expectation_suite(
+    assert empty_data_context.add_expectation_suite(
         expectation_suite_name="titanic.test.a.create_expectation_suite"
     )
     expectation_suites = empty_data_context.list_expectation_suite_names()
@@ -866,7 +647,7 @@ def test_ConfigOnlyDataContext__initialization(
     config_path = str(
         tmp_path_factory.mktemp("test_ConfigOnlyDataContext__initialization__dir")
     )
-    context = BaseDataContext(
+    context = get_context(
         basic_data_context_config,
         config_path,
     )
@@ -892,7 +673,7 @@ def test__normalize_absolute_or_relative_path(
     )
     test_dir = full_test_dir.parts[-1]
     config_path = str(full_test_dir)
-    context = BaseDataContext(
+    context = get_context(
         basic_data_context_config,
         config_path,
     )
@@ -913,9 +694,9 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
     os.makedirs(context_path, exist_ok=True)
     assert os.path.isdir(context_path)
     monkeypatch.chdir(context_path)
-    with pytest.raises(ge_exceptions.DataContextError) as err:
+    with pytest.raises(gx_exceptions.DataContextError) as err:
         FileDataContext.find_context_root_dir()
-    assert isinstance(err.value, ge_exceptions.ConfigNotFoundError)
+    assert isinstance(err.value, gx_exceptions.ConfigNotFoundError)
 
     shutil.copy(
         file_relative_path(
@@ -1057,7 +838,9 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
 ):
     ge_dir = empty_context.root_directory
     empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
-    assert FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == True
+    assert (
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == True
+    )
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_datasource_configured_in_yml_file_on_disk(
@@ -1065,7 +848,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 ):
     ge_dir = empty_context.root_directory
     assert (
-        FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
     )
 
 
@@ -1075,7 +858,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
     assert (
-        FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
     )
 
 
@@ -1085,7 +868,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir))
     assert (
-        FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
     )
 
 
@@ -1096,7 +879,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     with open(os.path.join(ge_dir, FileDataContext.GX_YML), "w") as yml:
         yml.write("this file: is not a valid ge config")
     assert (
-        FileDataContext.does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
     )
 
 
@@ -1106,7 +889,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context = empty_context
     ge_dir = context.root_directory
     context.add_datasource("arthur", class_name="PandasDatasource")
-    context.create_expectation_suite("dent")
+    context.add_expectation_suite("dent")
     assert len(context.list_expectation_suites()) == 1
 
     assert FileDataContext.is_project_initialized(ge_dir) == True
@@ -1350,7 +1133,7 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 
 def test_scaffold_directories(tmp_path_factory):
     empty_directory = str(tmp_path_factory.mktemp("test_scaffold_directories"))
-    FileDataContext.scaffold_directories(empty_directory)
+    FileDataContext._scaffold_directories(empty_directory)
 
     assert set(os.listdir(empty_directory)) == {
         "plugins",
@@ -1418,11 +1201,11 @@ def test_load_config_variables_property(
     try:
         # We should be able to load different files based on an environment variable
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "dev")
-        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
+        context = get_context(basic_data_context_config, context_root_dir=base_path)
         config_vars = context.config_variables
         assert config_vars["env"] == "dev"
         monkeypatch.setenv("TEST_CONFIG_FILE_ENV", "prod")
-        context = BaseDataContext(basic_data_context_config, context_root_dir=base_path)
+        context = get_context(basic_data_context_config, context_root_dir=base_path)
         config_vars = context.config_variables
         assert config_vars["env"] == "prod"
     except Exception:
@@ -1439,16 +1222,16 @@ def test_list_expectation_suite_with_no_suites(titanic_data_context):
 
 
 def test_list_expectation_suite_with_one_suite(titanic_data_context):
-    titanic_data_context.create_expectation_suite("warning")
+    titanic_data_context.add_expectation_suite("warning")
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
     assert observed == ["warning"]
 
 
 def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
-    titanic_data_context.create_expectation_suite("a.warning")
-    titanic_data_context.create_expectation_suite("b.warning")
-    titanic_data_context.create_expectation_suite("c.warning")
+    titanic_data_context.add_expectation_suite("a.warning")
+    titanic_data_context.add_expectation_suite("b.warning")
+    titanic_data_context.add_expectation_suite("c.warning")
 
     observed = titanic_data_context.list_expectation_suite_names()
     assert isinstance(observed, list)
@@ -1459,14 +1242,14 @@ def test_list_expectation_suite_with_multiple_suites(titanic_data_context):
 def test_get_batch_raises_error_when_passed_a_non_string_type_for_suite_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(ge_exceptions.DataContextError):
+    with pytest.raises(gx_exceptions.DataContextError):
         titanic_data_context.get_batch({}, 99)
 
 
 def test_get_batch_raises_error_when_passed_a_non_dict_or_batch_kwarg_type_for_batch_kwarg_parameter(
     titanic_data_context,
 ):
-    with pytest.raises(ge_exceptions.BatchKwargsError):
+    with pytest.raises(gx_exceptions.BatchKwargsError):
         titanic_data_context.get_batch(99, "foo")
 
 
@@ -1477,7 +1260,7 @@ def test_get_batch_when_passed_a_suite_name(titanic_data_context):
         "datasource": "mydatasource",
         "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
     }
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
     assert context.list_expectation_suite_names() == ["foo"]
     batch = context.get_batch(batch_kwargs, "foo")
     assert isinstance(batch, Dataset)
@@ -1491,7 +1274,7 @@ def test_get_batch_when_passed_a_suite(titanic_data_context):
         "datasource": "mydatasource",
         "path": os.path.join(root_dir, "..", "data", "Titanic.csv"),
     }
-    context.create_expectation_suite("foo")
+    context.add_expectation_suite("foo")
     assert context.list_expectation_suite_names() == ["foo"]
     suite = context.get_expectation_suite("foo")
 
@@ -1559,7 +1342,7 @@ def test_get_checkpoint_raises_error_on_not_found_checkpoint(
     empty_context_with_checkpoint,
 ):
     context = empty_context_with_checkpoint
-    with pytest.raises(ge_exceptions.CheckpointNotFoundError):
+    with pytest.raises(gx_exceptions.CheckpointNotFoundError):
         context.get_checkpoint("not_a_checkpoint")
 
 
@@ -1577,7 +1360,7 @@ def test_get_checkpoint_raises_error_empty_checkpoint(
     assert os.path.isfile(checkpoint_file_path)
     assert context.list_checkpoints() == ["my_checkpoint"]
 
-    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError):
+    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError):
         context.get_checkpoint("my_checkpoint")
 
 
@@ -1628,7 +1411,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
         yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(ge_exceptions.CheckpointError) as e:
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1649,7 +1432,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
         yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(ge_exceptions.InvalidCheckpointConfigError) as e:
+    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1676,7 +1459,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
         yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(ge_exceptions.CheckpointError) as e:
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1697,7 +1480,7 @@ def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context)
         yaml_obj.dump(checkpoint, f)
     assert os.path.isfile(checkpoint_file_path)
 
-    with pytest.raises(ge_exceptions.CheckpointError) as e:
+    with pytest.raises(gx_exceptions.CheckpointError) as e:
         context.get_checkpoint("foo")
 
 
@@ -1748,13 +1531,13 @@ def test_run_checkpoint_new_style(
     context.checkpoint_store.set(key=checkpoint_config_key, value=checkpoint_config)
 
     with pytest.raises(
-        ge_exceptions.DataContextError, match=r"expectation_suite .* not found"
+        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
     ):
         context.run_checkpoint(checkpoint_name=checkpoint_config.name)
 
     assert len(context.validations_store.list_keys()) == 0
 
-    context.create_expectation_suite(expectation_suite_name="my_expectation_suite")
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name=checkpoint_config.name
@@ -1980,7 +1763,7 @@ def test_get_batch_multiple_datasources_do_not_scan_all(
     """
 
     context = data_context_with_bad_datasource
-    context.create_expectation_suite(expectation_suite_name="local_test.default")
+    context.add_expectation_suite(expectation_suite_name="local_test.default")
     expectation_suite = context.get_expectation_suite("local_test.default")
     context.add_datasource("pandas_datasource", class_name="PandasDatasource")
     df = pd.DataFrame({"a": [1, 2, 3]})
@@ -1999,7 +1782,7 @@ def test_add_expectation_to_expectation_suite(
 ):
     context: DataContext = empty_data_context_stats_enabled
 
-    expectation_suite: ExpectationSuite = context.create_expectation_suite(
+    expectation_suite: ExpectationSuite = context.add_expectation_suite(
         expectation_suite_name="my_new_expectation_suite"
     )
     expectation_suite.add_expectation(
@@ -2954,7 +2737,7 @@ def test_stores_evaluation_parameters_resolve_correctly(data_context_with_query_
     """End to end test demonstrating usage of Stores evaluation parameters"""
     context = data_context_with_query_store
     suite_name = "eval_param_suite"
-    context.create_expectation_suite(expectation_suite_name=suite_name)
+    context.add_expectation_suite(expectation_suite_name=suite_name)
     batch_request = {
         "datasource_name": "my_datasource",
         "data_connector_name": "default_runtime_data_connector_name",
@@ -3128,7 +2911,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.save_expectation_suite(expectation_suite=expectation_suite)
+    context.add_expectation_suite(expectation_suite=expectation_suite)
 
     # Without include_rendered_content set, all legacy rendered_content was None.
     expectation_suite = context.get_expectation_suite(
@@ -3165,7 +2948,7 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
             ),
         ],
     )
-    context.save_expectation_suite(expectation_suite=expectation_suite)
+    context.update_expectation_suite(expectation_suite=expectation_suite)
     expectation_suite = context.get_expectation_suite(
         expectation_suite_name=expectation_suite_name
     )
@@ -3190,6 +2973,8 @@ def test_unrendered_and_failed_prescriptive_renderer_behavior(
                 }
             ),
             value_type="StringValueType",
+            exception='Renderer "atomic.prescriptive.custom_renderer_type" failed to render Expectation '
+            '"expect_sky_to_be_color with exception message: This renderer is broken!".',
         ),
         RenderedAtomicContent(
             name=AtomicPrescriptiveRendererType.SUMMARY,

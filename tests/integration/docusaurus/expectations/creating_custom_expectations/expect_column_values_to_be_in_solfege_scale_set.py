@@ -3,11 +3,13 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 )
 
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py ExpectColumnValuesToBeInSolfegeScaleSet class_def">
 class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py docstring">
     """Values in this column should be valid members of the Solfege scale: do, re, mi, etc."""
-
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py set">
     set_ = [
         "do",
         "re",
@@ -31,9 +33,13 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
         "LA",
         "TI",
     ]
-    set_camel_name = "SolfegeScale"
-    set_semantic_name = "the Solfege scale"
 
+    set_camel_name = "SolfegeScale"
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py semantic_name">
+    set_semantic_name = "the Solfege scale"
+    # </snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py examples">
     examples = [
         {
             "data": {
@@ -115,21 +121,23 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
             ],
         }
     ]
-
+    # </snippet>
     map_metric = SetBasedColumnMapExpectation.register_metric(
         set_camel_name=set_camel_name,
         set_=set_,
     )
-
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py library_metadata">
     library_metadata = {
         "tags": ["set-based"],
         "contributors": ["@joegargery"],
     }
+    # </snippet>
 
 
-# </snippet>
 if __name__ == "__main__":
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py diagnostics">
     ExpectColumnValuesToBeInSolfegeScaleSet().print_diagnostic_checklist()
+#     </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 

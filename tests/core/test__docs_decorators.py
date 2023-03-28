@@ -345,7 +345,6 @@ class TestDeprecatedArgument:
             "        \n"
             "        .. deprecated:: 1.2.3\n"
             "            some msg\n"
-            "        \n"
             "    other_arg:\n"
             "        describe other_arg"
         )
@@ -369,7 +368,6 @@ class TestDeprecatedArgument:
             "        \n"
             "        .. deprecated:: 1.2.3\n"
             "            some msg\n"
-            "        \n"
             "    other_arg:\n"
             "        describe other_arg"
         )
@@ -457,7 +455,6 @@ class TestNewArgument:
             "        \n"
             "        .. versionadded:: 1.2.3\n"
             "            some msg\n"
-            "        \n"
             "    other_arg:\n"
             "        describe other_arg"
         )
@@ -475,7 +472,6 @@ class TestNewArgument:
             "        \n"
             "        .. versionadded:: 1.2.3\n"
             "            some msg\n"
-            "        \n"
             "    other_arg:\n"
             "        describe other_arg\n"
             "        \n"
@@ -496,7 +492,6 @@ class TestNewArgument:
             "        \n"
             "        .. versionadded:: 1.2.3\n"
             "            some msg\n"
-            "        \n"
             "    other_arg:\n"
             "        describe other_arg"
         )
@@ -569,12 +564,89 @@ def test_all_decorators_full_docstring():
         "\n"
         "        .. versionadded:: 1.2.3\n"
         "            some msg\n"
-        "\n"
         "    other_arg:\n"
         "        describe other_arg\n"
         "\n"
         "        .. deprecated:: 1.2.3\n"
         "            some msg"
+    )
+
+
+@public_api
+@new_method_or_class(version="1.2.3", message="Added in version 1.2.3")
+@deprecated_method_or_class(version="1.2.3", message="This is deprecated!!")
+@new_argument(argument_name="some_arg", version="1.2.3", message="some msg")
+@deprecated_argument(argument_name="other_arg", version="1.2.3", message="some msg")
+def _func_full_docstring_all_decorators_all_sections(
+    arg_not_decorated, some_arg, other_arg, other_arg_not_decorated
+):
+    """My docstring.
+
+    Longer description.
+
+    Usage:
+        Some usage example.
+
+    Args:
+        arg_not_decorated: description.
+        some_arg: describe some_arg.
+        other_arg: describe other_arg.
+        other_arg_not_decorated: description.
+
+    Returns:
+        Some returns value.
+        Next line.
+
+    Raises:
+        SomeError: Some error text.
+    """
+    pass
+
+
+@pytest.mark.unit
+def test_all_decorators_full_docstring_all_sections():
+    """Makes sure that Returns and Raises are rendered correctly in the context of a full docstring."""
+
+    assert _func_full_docstring_all_decorators_all_sections.__doc__ == (
+        "--Public API--My docstring.\n"
+        "\n"
+        ".. versionadded:: 1.2.3\n"
+        "    Added in version 1.2.3\n"
+        "\n"
+        "\n"
+        ".. deprecated:: 1.2.3\n"
+        "    This is deprecated!!\n"
+        "\n"
+        "\n"
+        "Longer description.\n"
+        "\n"
+        "Usage:\n"
+        "    Some usage example.\n"
+        "\n"
+        "Args:\n"
+        "    arg_not_decorated:\n"
+        "        description.\n"
+        "    some_arg:\n"
+        "        describe some_arg.\n"
+        "\n"
+        "        .. versionadded:: 1.2.3\n"
+        "            some msg\n"
+        "    other_arg:\n"
+        "        describe other_arg.\n"
+        "\n"
+        "        .. deprecated:: 1.2.3\n"
+        "            some msg\n"
+        "    other_arg_not_decorated:\n"
+        "        description.\n"
+        "\n"
+        "Returns:\n"
+        "    :\n"
+        "        Some returns value.\n"
+        "        Next line.\n"
+        "\n"
+        "Raises:\n"
+        "    SomeError:\n"
+        "        Some error text."
     )
 
 
@@ -695,7 +767,6 @@ class TestClassDocstringDecorators:
             "        \n"
             "        .. deprecated:: 1.2.3\n"
             "            This is deprecated!!\n"
-            "        \n"
             "    other_arg:\n"
             "        other_arg description.\n"
             "        \n"

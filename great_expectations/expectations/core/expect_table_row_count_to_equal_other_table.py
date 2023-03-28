@@ -2,10 +2,11 @@ from copy import deepcopy
 from typing import Dict, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     TableExpectation,
     render_evaluation_parameter_string,
@@ -16,9 +17,17 @@ from great_expectations.render import (
     RenderedStringTemplateContent,
 )
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import num_to_str, substitute_none_for_missing
-from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.metric_configuration import (
+    MetricConfiguration,  # noqa: TCH001
+)
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
 
 
 class ExpectTableRowCountToEqualOtherTable(TableExpectation):
@@ -76,25 +85,17 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
     args_keys = ("other_table_name",)
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["other_table_name"])
-        template_str = "Row count must equal the row count of table $other_table_name."
-
-        params_with_json_schema = {
-            "other_table_name": {
-                "schema": {"type": "string"},
-                "value": params.get("other_table_name"),
-            },
-        }
-        return template_str, params_with_json_schema, None, styling
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        renderer_configuration.add_param(
+            name="other_table_name", param_type=RendererValueType.STRING
+        )
+        renderer_configuration.template_str = (
+            "Row count must equal the row count of table $other_table_name."
+        )
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -190,9 +191,11 @@ class ExpectTableRowCountToEqualOtherTable(TableExpectation):
         )
         return validation_dependencies
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
+        """Validates the configuration of an Expectation. This expectation has no configuration."""
         super().validate_configuration(configuration)
 
     def _validate(

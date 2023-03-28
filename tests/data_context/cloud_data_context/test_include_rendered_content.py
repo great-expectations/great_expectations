@@ -13,39 +13,23 @@ from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.validator.validator import Validator
+from great_expectations.data_context import CloudDataContext
 
 
 @pytest.mark.cloud
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "data_context_fixture_name",
-    [
-        # In order to leverage existing fixtures in parametrization, we provide
-        # their string names and dynamically retrieve them using pytest's built-in
-        # `request` fixture.
-        # Source: https://stackoverflow.com/a/64348247
-        pytest.param(
-            "empty_base_data_context_in_cloud_mode",
-            id="BaseDataContext",
-        ),
-        pytest.param("empty_data_context_in_cloud_mode", id="DataContext"),
-        pytest.param("empty_cloud_data_context", id="CloudDataContext"),
-    ],
-)
 def test_cloud_backed_data_context_save_expectation_suite_include_rendered_content(
-    data_context_fixture_name: str,
-    request,
+    empty_cloud_data_context: CloudDataContext,
 ) -> None:
     """
-    All Cloud-backed contexts (DataContext, BaseDataContext, and CloudDataContext) should save an ExpectationSuite
-    with rendered_content by default.
+    Cloud-backed contexts should save an ExpectationSuite with rendered_content by default.
     """
-    context = request.getfixturevalue(data_context_fixture_name)
+    context = empty_cloud_data_context
 
     ge_cloud_id = "d581305a-cdce-483b-84ba-5c673d2ce009"
     cloud_ref = GXCloudResourceRef(
         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-        cloud_id=ge_cloud_id,
+        id=ge_cloud_id,
         url="foo/bar/baz",
     )
 
@@ -55,7 +39,7 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._set",
         return_value=cloud_ref,
     ):
-        expectation_suite: ExpectationSuite = context.create_expectation_suite(
+        expectation_suite: ExpectationSuite = context.add_expectation_suite(
             "test_suite"
         )
     expectation_suite.expectations.append(
@@ -71,14 +55,14 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         "great_expectations.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend._update"
     ) as mock_update:
         context.save_expectation_suite(
-            expectation_suite,
+            expectation_suite=expectation_suite,
         )
 
         # remove dynamic great_expectations version
         mock_update.call_args[1]["value"].pop("meta")
 
         mock_update.assert_called_with(
-            ge_cloud_id=ge_cloud_id,
+            id=ge_cloud_id,
             value={
                 "expectations": [
                     {

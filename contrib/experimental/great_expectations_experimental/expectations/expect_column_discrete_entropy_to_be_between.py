@@ -6,12 +6,12 @@ from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
 )
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricDomainTypes
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
@@ -45,7 +45,7 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
         column_value_counts = column.value_counts()
         return scipy.stats.entropy(column_value_counts, base=base)
 
-    # @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    # @metric_value(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(
     #     cls,
     #     execution_engine: "SqlAlchemyExecutionEngine",
@@ -66,7 +66,7 @@ class ColumnDiscreteEntropy(ColumnMetricProvider):
     #     column_value_counts = metrics.get("column.value_counts")
     #     return scipy.stats.entropy(column_value_counts, base=base)
 
-    @metric_value(engine=SparkDFExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
         execution_engine: "SparkDFExecutionEngine",

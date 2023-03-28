@@ -2,8 +2,8 @@ import copy
 import json
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.domain import Domain
+from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.util import (
     convert_to_json_serializable,
     determine_progress_bar_method_by_environment,
@@ -13,9 +13,11 @@ from great_expectations.rule_based_profiler.config.base import (
     expectationConfigurationBuilderConfigSchema,
     parameterBuilderConfigSchema,
 )
-from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
+from great_expectations.rule_based_profiler.domain_builder import (
+    DomainBuilder,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
-    ExpectationConfigurationBuilder,
+    ExpectationConfigurationBuilder,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
     DEFAULT_RECONCILATION_DIRECTIVES,
@@ -25,7 +27,9 @@ from great_expectations.rule_based_profiler.helpers.configuration_reconciliation
 from great_expectations.rule_based_profiler.helpers.util import (
     convert_variables_to_dict,
 )
-from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
+from great_expectations.rule_based_profiler.parameter_builder import (
+    ParameterBuilder,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.parameter_container import (
     ParameterContainer,
     build_parameter_container_for_variables,
@@ -89,7 +93,7 @@ class Rule(SerializableDictDot):
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
         reconciliation_directives: Optional[ReconciliationDirectives] = None,
         rule_state: Optional[RuleState] = None,
     ) -> RuleState:
@@ -101,7 +105,7 @@ class Rule(SerializableDictDot):
             variables: Attribute name/value pairs, commonly-used in Builder objects
             batch_list: Explicit list of Batch objects to supply data at runtime
             batch_request: Explicit batch_request used to supply data at runtime
-            recompute_existing_parameter_values: If "True", recompute value if "fully_qualified_parameter_name" exists
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
             reconciliation_directives: directives for how each rule component should be overwritten
             rule_state: holds "Rule" execution state and responds to "execution_time_property_name" ("execution_time")
 
@@ -127,6 +131,7 @@ class Rule(SerializableDictDot):
             batch_list=batch_list,
             batch_request=batch_request,
             rule_state=rule_state,
+            runtime_configuration=runtime_configuration,
         )
 
         rule_state.rule = self
@@ -157,7 +162,7 @@ class Rule(SerializableDictDot):
                     parameter_computation_impl=None,
                     batch_list=batch_list,
                     batch_request=batch_request,
-                    recompute_existing_parameter_values=recompute_existing_parameter_values,
+                    runtime_configuration=runtime_configuration,
                 )
 
             expectation_configuration_builders: List[
@@ -173,7 +178,7 @@ class Rule(SerializableDictDot):
                     parameters=rule_state.parameters,
                     batch_list=batch_list,
                     batch_request=batch_request,
-                    recompute_existing_parameter_values=recompute_existing_parameter_values,
+                    runtime_configuration=runtime_configuration,
                 )
 
         return rule_state
@@ -324,6 +329,7 @@ class Rule(SerializableDictDot):
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
         rule_state: Optional[RuleState] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         domains: List[Domain] = (
             []
@@ -333,6 +339,7 @@ class Rule(SerializableDictDot):
                 variables=variables,
                 batch_list=batch_list,
                 batch_request=batch_request,
+                runtime_configuration=runtime_configuration,
             )
         )
         return domains

@@ -9,7 +9,6 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
 import click
 from typing_extensions import TypeAlias
 
-from great_expectations import DataContext
 from great_expectations.cli import toolkit
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
@@ -20,6 +19,7 @@ from great_expectations.datasource.types import DatasourceTypes
 from great_expectations.render.renderer.datasource_new_notebook_renderer import (
     DatasourceNewNotebookRenderer,
 )
+from great_expectations.util import get_context
 
 if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext
@@ -47,6 +47,7 @@ class SupportedDatabaseBackends(enum.Enum):
     SNOWFLAKE = "Snowflake"
     BIGQUERY = "BigQuery"
     TRINO = "Trino"
+    ATHENA = "Athena"
     OTHER = "other - Do you have a working SQLAlchemy connection string?"
     # TODO MSSQL
 
@@ -203,7 +204,7 @@ What data would you like Great Expectations to connect to?
         selected_files_backend = _prompt_for_execution_engine()
         helper = _get_files_helper(
             selected_files_backend,
-            context_root_dir=context.root_directory,  # type: ignore[arg-type] # could be None
+            context_root_dir=context.root_directory,
             datasource_name=datasource_name,
         )
     elif files_or_sql_selection == "2":
@@ -269,8 +270,8 @@ class BaseDatasourceNewYamlHelper:
     def create_notebook(self, context: FileDataContext) -> str:
         """Create a datasource_new notebook and save it to disk."""
         renderer = self.get_notebook_renderer(context)
-        notebook_path = os.path.join(
-            context.root_directory,  # type: ignore[arg-type] # could be None
+        notebook_path = os.path.join(  # noqa: PTH118
+            context.root_directory,
             context.GX_UNCOMMITTED_DIR,
             "datasource_new.ipynb",
         )
@@ -746,6 +747,43 @@ schema_name = "{self.schema_name}"
 table_name = "{self.table_name}"'''
 
 
+class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
+    def __init__(self, datasource_name: Optional[str]) -> None:
+        super().__init__(
+            datasource_name=datasource_name,
+            usage_stats_payload={
+                "type": "sqlalchemy",
+                "db": SupportedDatabaseBackends.ATHENA.value,
+                "api_version": "v3",
+            },
+        )
+
+    def verify_libraries_installed(self) -> bool:
+        # noinspection SpellCheckingInspection
+        pyathena_success: bool = verify_library_dependent_modules(
+            python_import_name="pyathena",
+            pip_library_name="pyathena[SQLAlchemy]",
+            module_names_to_reload=CLI_ONLY_SQLALCHEMY_ORDERED_DEPENDENCY_MODULE_NAMES,
+        )
+        return pyathena_success
+
+    def credentials_snippet(self) -> str:
+        return '''\
+# The SQLAlchemy url/connection string for the Athena connection
+# (reference: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/athena or https://github.com/laughingman7743/PyAthena/#sqlalchemy)"""
+
+schema_name = "YOUR_SCHEMA"  # or database name. It is optional
+table_name = "YOUR_TABLE_NAME"
+region = "YOUR_REGION"
+s3_path = "s3://YOUR_S3_BUCKET/path/to/"  # ignore partitioning
+
+connection_string = f"awsathena+rest://@athena.{region}.amazonaws.com/{schema_name}?s3_staging_dir={s3_path}"
+            '''
+
+    def _yaml_innards(self) -> str:
+        return "\n  connection_string: {connection_string}"
+
+
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
     def __init__(self, datasource_name: Optional[str]) -> None:
         super().__init__(
@@ -785,6 +823,7 @@ SQLYAMLHelpers: TypeAlias = Union[
     BigqueryCredentialYamlHelper,
     ConnectionStringCredentialYamlHelper,
     TrinoCredentialYamlHelper,
+    AthenaCredentialYamlHelper,
 ]
 
 
@@ -798,6 +837,7 @@ def _get_sql_yaml_helper_class(
         SupportedDatabaseBackends.SNOWFLAKE: SnowflakeCredentialYamlHelper,
         SupportedDatabaseBackends.BIGQUERY: BigqueryCredentialYamlHelper,
         SupportedDatabaseBackends.TRINO: TrinoCredentialYamlHelper,
+        SupportedDatabaseBackends.ATHENA: AthenaCredentialYamlHelper,
         SupportedDatabaseBackends.OTHER: ConnectionStringCredentialYamlHelper,
     }
     helper_class = helper_class_by_backend[selected_database]
@@ -931,6 +971,6 @@ def check_if_datasource_name_exists(
     # TODO: 20210324 Anthony: Note reading the context from disk is a temporary fix to allow use in a notebook
     #  after test_yaml_config(). test_yaml_config() should update a copy of the in-memory data context rather than
     #  making changes directly to the in-memory context.
-    context_on_disk = DataContext(context.root_directory)
+    context_on_disk = get_context(context_root_dir=context.root_directory)
 
     return datasource_name in [d["name"] for d in context_on_disk.list_datasources()]

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Set, Union
 
-from pyparsing import Combine
-from pyparsing import Optional as ppOptional
 from pyparsing import (
+    Combine,
     ParseException,
     ParseResults,
     Suppress,
@@ -16,11 +15,14 @@ from pyparsing import (
     oneOf,
     opAssoc,
 )
+from pyparsing import Optional as ppOptional
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.domain import Domain
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
     ExpectationConfigurationBuilder,
 )
@@ -28,7 +30,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:
@@ -54,7 +56,7 @@ expr = infixNotation(
 
 
 class ExpectationConfigurationConditionParserError(
-    ge_exceptions.GreatExpectationsError
+    gx_exceptions.GreatExpectationsError
 ):
     pass
 
@@ -67,8 +69,8 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
     ExpectationConfigurations can be optionally filtered if a supplied condition is met.
     """
 
-    exclude_field_names: Set[
-        str
+    exclude_field_names: ClassVar[
+        Set[str]
     ] = ExpectationConfigurationBuilder.exclude_field_names | {
         "kwargs",
     }
@@ -110,14 +112,14 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         self._meta = meta
 
         if not isinstance(meta, dict):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{meta}" in "{self.__class__.__name__}" must be of type "dictionary" \
 (value of type "{str(type(meta))}" was encountered).
 """
             )
 
         if condition and (not isinstance(condition, str)):
-            raise ge_exceptions.ProfilerExecutionError(
+            raise gx_exceptions.ProfilerExecutionError(
                 message=f"""Argument "{condition}" in "{self.__class__.__name__}" must be of type "string" \
 (value of type "{str(type(condition))}" was encountered).
 """
@@ -348,6 +350,7 @@ class DefaultExpectationConfigurationBuilder(ExpectationConfigurationBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Optional[ExpectationConfiguration]:
         """Returns either and ExpectationConfiguration object or None depending on evaluation of condition"""
         parameter_name: str

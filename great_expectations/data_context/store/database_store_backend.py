@@ -3,8 +3,10 @@ import uuid
 from pathlib import Path
 from typing import Dict, Tuple
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
@@ -12,16 +14,23 @@ from great_expectations.util import (
 )
 
 try:
-    import sqlalchemy as sa
-    from sqlalchemy import Column, MetaData, String, Table, and_, column, select
+    from sqlalchemy import Column, MetaData, String, Table, and_, column
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 
     make_url = import_make_url()
 except ImportError:
-    sa = None
-    create_engine = None
-
+    Column = SQLALCHEMY_NOT_IMPORTED
+    MetaData = SQLALCHEMY_NOT_IMPORTED
+    String = SQLALCHEMY_NOT_IMPORTED
+    Table = SQLALCHEMY_NOT_IMPORTED
+    and_ = SQLALCHEMY_NOT_IMPORTED
+    column = SQLALCHEMY_NOT_IMPORTED
+    URL = SQLALCHEMY_NOT_IMPORTED
+    IntegrityError = SQLALCHEMY_NOT_IMPORTED
+    NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
+    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
+    create_engine = SQLALCHEMY_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
@@ -48,12 +57,12 @@ class DatabaseStoreBackend(StoreBackend):
             store_name=store_name,
         )
         if not sa:
-            raise ge_exceptions.DataContextError(
+            raise gx_exceptions.DataContextError(
                 "ModuleNotFoundError: No module named 'sqlalchemy'"
             )
 
         if not self.fixed_length_key:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "DatabaseStoreBackend requires use of a fixed-length-key"
             )
 
@@ -78,7 +87,7 @@ class DatabaseStoreBackend(StoreBackend):
             self.drivername = parsed_url.drivername
             self.engine = sa.create_engine(url, **kwargs)
         else:
-            raise ge_exceptions.InvalidConfigError(
+            raise gx_exceptions.InvalidConfigError(
                 "Credentials, url, connection_string, or an engine are required for a DatabaseStoreBackend."
             )
 
@@ -88,7 +97,7 @@ class DatabaseStoreBackend(StoreBackend):
         cols = []
         for column_ in key_columns:
             if column_ == "value":
-                raise ge_exceptions.InvalidConfigError(
+                raise gx_exceptions.InvalidConfigError(
                     "'value' cannot be used as a key_element name"
                 )
             cols.append(Column(column_, String, primary_key=True))
@@ -99,19 +108,20 @@ class DatabaseStoreBackend(StoreBackend):
             if {str(col.name).lower() for col in table.columns} != (
                 set(key_columns) | {"value"}
             ):
-                raise ge_exceptions.StoreBackendError(
+                raise gx_exceptions.StoreBackendError(
                     f"Unable to use table {table_name}: it exists, but does not have the expected schema."
                 )
         except NoSuchTableError:
             table = Table(table_name, meta, *cols)
             try:
                 if self._schema_name:
-                    self.engine.execute(
-                        f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};"
-                    )
+                    with self.engine.begin() as connection:
+                        connection.execute(
+                            sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
+                        )
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
-                raise ge_exceptions.StoreBackendError(
+                raise gx_exceptions.StoreBackendError(
                     f"Unable to connect to table {table_name} because of an error. It is possible your table needs to be migrated to a new schema.  SqlAlchemyError: {str(e)}"
                 )
         self._table = table
@@ -213,7 +223,7 @@ class DatabaseStoreBackend(StoreBackend):
                 )
             except ValueError as e:
                 if "incorrect password" in str(e).lower():
-                    raise ge_exceptions.DatasourceKeyPairAuthBadPassphraseError(
+                    raise gx_exceptions.DatasourceKeyPairAuthBadPassphraseError(
                         datasource_name="SqlAlchemyDatasource",
                         message="Decryption of key failed, was the passphrase incorrect?",
                     ) from e
@@ -234,7 +244,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _get(self, key):
         sel = (
-            select([column("value")])
+            sa.select(column("value"))
             .select_from(self._table)
             .where(
                 and_(
@@ -249,7 +259,7 @@ class DatabaseStoreBackend(StoreBackend):
             return self.engine.execute(sel).fetchone()[0]
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error fetching value: {str(e)}")
-            raise ge_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
+            raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
 
     def _set(self, key, value, allow_update=True, **kwargs) -> None:
         cols = {k: v for (k, v) in zip(self.key_columns, key)}
@@ -268,12 +278,13 @@ class DatabaseStoreBackend(StoreBackend):
             ins = self._table.insert().values(**cols)
 
         try:
-            self.engine.execute(ins)
+            with self.engine.begin() as connection:
+                connection.execute(ins)
         except IntegrityError as e:
             if self._get(key) == value:
                 logger.info(f"Key {str(key)} already exists with the same value.")
             else:
-                raise ge_exceptions.StoreBackendError(
+                raise gx_exceptions.StoreBackendError(
                     f"Integrity error {str(e)} while trying to store key"
                 )
 
@@ -300,7 +311,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _has_key(self, key):
         sel = (
-            select([sa.func.count(column("value"))])
+            sa.select(sa.func.count(column("value")))
             .select_from(self._table)
             .where(
                 and_(
@@ -318,8 +329,9 @@ class DatabaseStoreBackend(StoreBackend):
             return False
 
     def list_keys(self, prefix=()):
+        columns = [column(col) for col in self.key_columns]
         sel = (
-            select([column(col) for col in self.key_columns])
+            sa.select(*columns)
             .select_from(self._table)
             .where(
                 and_(
@@ -345,7 +357,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             return self.engine.execute(delete_statement)
         except SQLAlchemyError as e:
-            raise ge_exceptions.StoreBackendError(
+            raise gx_exceptions.StoreBackendError(
                 f"Unable to delete key: got sqlalchemy error {str(e)}"
             )
 

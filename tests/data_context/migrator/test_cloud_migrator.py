@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import CloudMigrator
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
@@ -90,12 +90,12 @@ def mock_failed_migration(
             CloudMigrator,
             "_migrate_to_cloud",
             return_value=None,
-            side_effect=ge_exceptions.MigrationError,
+            side_effect=gx_exceptions.MigrationError,
         ), mock.patch(
             f"{CloudMigrator.__module__}.send_usage_message",
             autospec=True,
         ) as mock_send_usage_message:
-            with pytest.raises(ge_exceptions.MigrationError):
+            with pytest.raises(gx_exceptions.MigrationError):
                 CloudMigrator.migrate(
                     context=context,
                     test_migrate=test_migrate,

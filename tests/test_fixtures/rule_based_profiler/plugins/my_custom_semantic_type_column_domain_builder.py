@@ -60,6 +60,7 @@ class MyCustomSemanticTypeColumnDomainBuilder(DomainBuilder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         Find the semantic column type for each column and return all domains matching the specified type or types.

@@ -18,16 +18,16 @@ from great_expectations.expectations.expectation import (
 )
 
 
-# <snippet>
+# <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py ExpectQueriedColumnValueFrequencyToMeetThreshold class_def">
 class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py docstring">
     """Expect the frequency of occurrences of a specified value in a queried column to be at least <threshold> percent of values in that column."""
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py metric_dependencies">
     metric_dependencies = ("query.column",)
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py query">
     query = """
             SELECT {col},
             CAST(COUNT({col}) AS float) / (SELECT COUNT({col}) FROM {active_batch})
@@ -35,7 +35,7 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
             GROUP BY {col}
             """
     # </snippet>
-    # <snippet>
+    # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_queried_column_value_frequency_to_meet_threshold.py success_keys">
     success_keys = (
         "column",
         "value",

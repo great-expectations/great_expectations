@@ -1,10 +1,8 @@
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
@@ -27,7 +25,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
     # )
     # def _sqlalchemy(cls, column, _table, **kwargs):
     #     dup_query = (
-    #         sa.select([column])
+    #         sa.select(column)
     #         .select_from(_table)
     #         .group_by(column)
     #         .having(sa.func.count(column) > 1)
@@ -60,16 +58,18 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 source_table=_table,
                 column_name=column.name,
             )
-            sql_engine.execute(temp_table_stmt)
+            with sql_engine.connect() as connection:
+                with connection.begin():
+                    connection.execute(sa.text(temp_table_stmt))
             dup_query = (
-                sa.select([column])
+                sa.select(column)
                 .select_from(sa.text(temp_table_name))
                 .group_by(column)
                 .having(sa.func.count(column) > 1)
             )
         else:
             dup_query = (
-                sa.select([column])
+                sa.select(column)
                 .select_from(_table)
                 .group_by(column)
                 .having(sa.func.count(column) > 1)

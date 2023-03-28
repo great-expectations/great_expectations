@@ -165,7 +165,7 @@ def test_get_batch_definition_list_from_batch_request(
     # In this case, "date" should go inside "batch_identifiers".
     # Currently, the method ignores "date" entirely, and matches on too many partitions.
     # I don't think this is unique to ConfiguredAssetSqlDataConnector.
-    # with pytest.raises(ge_exceptions.DataConnectorError) as e:
+    # with pytest.raises(gx_exceptions.DataConnectorError) as e:
     #     batch_definition_list = my_data_connector.get_batch_definition_list_from_batch_request(
     #         batch_request=BatchRequest(
     #             datasource_name="FAKE_Datasource_NAME",
@@ -740,7 +740,9 @@ def test_get_batch_data_and_markers_sampling_method__md5(
     test_cases_for_sql_data_connector_sqlite_execution_engine,
 ):
     # noinspection PyUnusedLocal
-    execution_engine = test_cases_for_sql_data_connector_sqlite_execution_engine
+    execution_engine = (  # noqa: F841
+        test_cases_for_sql_data_connector_sqlite_execution_engine
+    )
 
     # SQlite doesn't support MD5
     # batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
@@ -2473,16 +2475,20 @@ def test_introspect_db(
 
 
 @pytest.mark.integration
-def test_include_schema_name_introspection(mysql_sqlalchemy_datasource):
+def test_include_schema_name_introspection(mysql_engine):
+    execution_engine = SqlAlchemyExecutionEngine(
+        name="test_sql_execution_engine",
+        engine=mysql_engine,
+    )
+
     my_data_connector = instantiate_class_from_config(
         config={
             "class_name": "InferredAssetSqlDataConnector",
-            "name": "my_test_data_connector",
+            "name": "inferred_data_connector",
+            "include_schema_name": True,
         },
         runtime_environment={
-            "execution_engine": SqlAlchemyExecutionEngine(
-                engine=mysql_sqlalchemy_datasource.engine
-            ),
+            "execution_engine": execution_engine,
             "datasource_name": "my_test_datasource",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},

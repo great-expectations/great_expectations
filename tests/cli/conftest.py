@@ -39,6 +39,7 @@ def v10_project_directory(tmp_path_factory):
     """
     GX 0.10.x project for testing upgrade helper
     """
+
     project_path = str(tmp_path_factory.mktemp("v10_project"))
     context_root_dir = os.path.join(project_path, "great_expectations")
     shutil.copytree(

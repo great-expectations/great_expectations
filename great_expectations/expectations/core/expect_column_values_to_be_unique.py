@@ -1,9 +1,10 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
@@ -93,9 +94,31 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
     }
     args_keys = ("column",)
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_unique` it is required that:
+
+        - `column` has been provided.
+
+        - If `mostly` was provided, it is of type `int` or `float`.
+
+        - If `mostly` was provided, it is between 0 and 1 inclusive.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -116,10 +139,10 @@ class ExpectColumnValuesToBeUnique(ColumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 

@@ -7,12 +7,12 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.util import get_dialect_regex_expression
+from great_expectations.optional_imports import sqlalchemy as sa
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class ColumnValuesNotMatchRegexList(ColumnMapMetricProvider):
         compound = None
         for regex in regex_list:
             if compound is None:
-                compound = column.rlike(regex)
+                compound = ~column.rlike(regex)
             else:
                 compound = compound & ~column.rlike(regex)
 

@@ -1,6 +1,6 @@
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.data_connector.sorter import (
@@ -21,7 +21,7 @@ def test_sorter_instantiation_base():
     # defaults
     assert my_sorter.reverse is False
     # with fake orderby
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         my_sorter = Sorter(name="base", orderby="fake")
 
 
@@ -88,14 +88,14 @@ def test_sorter_instantiation_custom_list():
             333,
         ]  # this shouldn't work. the reference list should only contain strings
     }
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
     sorter_params: dict = {"reference_list": None}
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         # noinspection PyUnusedLocal
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
     sorter_params: dict = {"reference_list": 1}  # not a list
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         # noinspection PyUnusedLocal
         my_custom = CustomListSorter(name="custom", orderby="asc", **sorter_params)
 
@@ -127,5 +127,5 @@ def test_sorter_instantiation_custom_list_with_periodic_table(
         data_asset_name="nowhere",
         batch_identifiers=IDDict({"element": "Vibranium"}),
     )
-    with pytest.raises(ge_exceptions.SorterError):
+    with pytest.raises(gx_exceptions.SorterError):
         my_custom_sorter.get_batch_key(test_batch_def)

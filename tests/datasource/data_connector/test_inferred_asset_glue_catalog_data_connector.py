@@ -3,7 +3,7 @@ import random
 import pytest
 from ruamel.yaml import YAML
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import Batch, BatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource import Datasource
@@ -96,7 +96,7 @@ def test_instantiation_from_a_config(
             - db_test.tb_titanic_without_partitions
         glue_introspection_directives:
             database_name: db_test
-        """,
+        """,  # noqa: F541
         runtime_environment={
             "execution_engine": "execution_engine",
         },
@@ -138,7 +138,7 @@ def test_instantiation_with_included_tables(glue_titanic_catalog):
 
 
 def test_instantiation_with_invalid_database_name(glue_titanic_catalog):
-    with pytest.raises(ge_exceptions.DataConnectorError):
+    with pytest.raises(gx_exceptions.DataConnectorError):
         InferredAssetAWSGlueDataCatalogDataConnector(
             name="my_data_connector",
             datasource_name="FAKE_DATASOURCE_NAME",

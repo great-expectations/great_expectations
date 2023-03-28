@@ -6,7 +6,9 @@ from collections import OrderedDict
 from functools import lru_cache
 from typing import Any, Dict, Optional
 
-import great_expectations.exceptions as ge_exceptions
+from typing_extensions import Final
+
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.types.base import BaseYamlConfig
 
 try:
@@ -26,9 +28,13 @@ except ImportError:
 try:
     from google.cloud import secretmanager
 except ImportError:
-    secretmanager = None
+    secretmanager = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
+
+TEMPLATE_STR_REGEX: Final[re.Pattern] = re.compile(
+    r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)"
+)
 
 
 class _ConfigurationSubstitutor:
@@ -125,9 +131,7 @@ class _ConfigurationSubstitutor:
 
         # 1. Make substitutions for non-escaped patterns
         try:
-            match = re.finditer(
-                r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)", template_str
-            )
+            match = re.finditer(TEMPLATE_STR_REGEX, template_str)
         except TypeError:
             # If the value is not a string (e.g., a boolean), we should return it as is
             return template_str
@@ -142,7 +146,7 @@ class _ConfigurationSubstitutor:
                     return config_variable_value
                 template_str = template_str.replace(m.group(), config_variable_value)
             else:
-                raise ge_exceptions.MissingConfigVariableError(
+                raise gx_exceptions.MissingConfigVariableError(
                     f"""\n\nUnable to find a match for config substitution variable: `{config_variable_name}`.
     Please add this missing variable to your `uncommitted/config_variables.yml` file or your environment variables.
     See https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials""",

@@ -1,11 +1,11 @@
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 import numpy as np
 import pandas as pd
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.expectation import (
@@ -122,7 +122,20 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates that a value_set has been provided."""
+        """
+        Validates the configuration of an Expectation.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                                  from the configuration attribute of the Expectation instance.
+
+        Raises:
+            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
+            Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -142,12 +155,12 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("mostly", RendererValueType.NUMBER),
             ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -155,11 +168,17 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         template_str = ""
 
         if params.value_set:
-            renderer_configuration = cls._add_value_set_params(
-                renderer_configuration=renderer_configuration
+            array_param_name = "value_set"
+            param_prefix = "v__"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            value_set_str: str = cls._get_value_set_string(
-                renderer_configuration=renderer_configuration
+            value_set_str: str = cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
             template_str += f"values must not belong to this set: {value_set_str}"
 
@@ -191,7 +210,7 @@ class ExpectColumnValuesToNotBeInSet(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
     ):
         renderer_configuration = RendererConfiguration(
-            configuraiton=configuration,
+            configuration=configuration,
             result=result,
             runtime_configuration=runtime_configuration,
         )

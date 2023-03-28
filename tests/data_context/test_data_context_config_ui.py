@@ -4,7 +4,6 @@ from typing import Dict, Optional
 
 import pytest
 
-from great_expectations.data_context import BaseDataContext
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
@@ -20,7 +19,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
     S3StoreBackendDefaults,
 )
-from great_expectations.util import filter_properties_dict
+from great_expectations.util import filter_properties_dict, get_context
 
 """
 What does this test and why?
@@ -1479,7 +1478,7 @@ def test_DataContextConfig_with_S3StoreBackendDefaults_and_simple_defaults_with_
         DataContextConfig,
     )
 
-    data_context = BaseDataContext(project_config=data_context_config)
+    data_context = get_context(project_config=data_context_config)
     assert (
         data_context.datasources["my_pandas_datasource"]
         .get_batch_kwargs_generator("subdir_reader")

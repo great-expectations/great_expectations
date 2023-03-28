@@ -13,6 +13,7 @@ from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -66,9 +67,7 @@ def get_pandas_runtime_validator(context, df):
         },
     )
 
-    expectation_suite = context.create_expectation_suite(
-        "my_suite", overwrite_existing=True
-    )
+    expectation_suite = context.add_expectation_suite("my_suite")
 
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite=expectation_suite
@@ -97,9 +96,7 @@ def get_spark_runtime_validator(context, df):
         },
     )
 
-    expectation_suite = context.create_expectation_suite(
-        "my_suite", overwrite_existing=True
-    )
+    expectation_suite = context.add_expectation_suite("my_suite")
 
     validator = context.get_validator(
         batch_request=batch_request, expectation_suite=expectation_suite
@@ -162,7 +159,8 @@ def get_sqlalchemy_runtime_validator_postgresql(
         table_name = "test_data_" + "".join(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
-    df.to_sql(
+    add_dataframe_to_db(
+        df=df,
         name=table_name,
         con=engine,
         index=False,
@@ -881,7 +879,7 @@ def test_profiled_dataset_passes_own_validation(
     )
     suite = profiler.build_suite()
 
-    context.save_expectation_suite(suite)
+    context.add_expectation_suite(expectation_suite=suite)
     results = context.run_validation_operator(
         "action_list_operator", assets_to_validate=[cardinality_validator]
     )

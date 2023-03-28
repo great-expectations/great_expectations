@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Dict, List, Optional
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
@@ -7,7 +7,6 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.execution_engine import MetricFunctionTypes
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
 from great_expectations.expectations.metrics.import_manager import sa
@@ -47,11 +46,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
     library_metadata = {"tags": ["query-based"], "contributors": ["@itaise", "@hadasm"]}
 
-    @metric_value(
-        engine=SqlAlchemyExecutionEngine,
-        metric_fn_type=MetricFunctionTypes.AGGREGATE_VALUE,
-        domain_type=MetricDomainTypes.COLUMN,
-    )
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -74,13 +69,20 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
         # get counts for dates
         query = (
-            sa.select([sa.func.Date(column), sa.func.count()])
+            sa.select(sa.func.Date(column), sa.func.count())
             .group_by(column)
             .select_from(selectable)
             .order_by(column.desc())
             .limit(30)
         )
         results = sqlalchemy_engine.execute(query).fetchall()
+
+        # Only sqlite returns as strings, so make date objects be strings
+        if results and isinstance(results[0][0], date):
+            results = [
+                (result[0].strftime("%Y-%m-%d"), result[1]) for result in results
+            ]
+
         return results
 
 
@@ -114,6 +116,7 @@ class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnExpectation):
                 ),
             },
             # "column_b": [today, yesterday, yesterday, two_days_ago]},
+            "suppress_test_for": ["mssql"],
             "tests": [
                 {
                     "title": "positive test",
@@ -136,12 +139,6 @@ class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnExpectation):
                     },
                     "out": {"success": False},
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         }
     ]

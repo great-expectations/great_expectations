@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
@@ -206,20 +207,21 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
     }
     args_keys = ("column", "min_value", "max_value", "strict_min", "strict_max")
 
-    """ A Column Map MetricProvider Decorator for the Maximum"""
-
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration for the Expectation.
+
+        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` whose value is either
+        a number or date.
 
         Args:
             configuration (OPTIONAL[ExpectationConfiguration]): \
                 An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+
+        Raises:
+            InvalidExpectationConfigurationError: if the config is not validated successfully
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
@@ -229,14 +231,14 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -257,7 +259,10 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
                 )
 
             if params.min_value and params.max_value:
-                template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
+                if params.min_value == params.max_value:
+                    template_str = "maximum value must be $min_value"
+                else:
+                    template_str = f"maximum value must be {at_least_str} $min_value and {at_most_str} $max_value."
             elif not params.min_value:
                 template_str = f"maximum value must be {at_most_str} $max_value."
             else:

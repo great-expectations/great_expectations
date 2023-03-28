@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import numpy as np
 import pytest
@@ -6,6 +6,9 @@ import pytest
 from great_expectations import DataContext
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
+)
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
@@ -110,19 +113,17 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
             data_context=data_context,
         )
     )
-    my_null_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_null_count",
-            metric_name="column_values.nonnull.unexpected_count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            single_batch_mode=False,
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            data_context=data_context,
-        )
+    my_null_count_metric_multi_batch_parameter_builder: ParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_null_count",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        single_batch_mode=False,
+        enforce_numeric_metric=False,
+        replace_nan_with_zero=False,
+        reduce_scalar_metric=True,
+        evaluation_parameter_builder_configs=None,
+        data_context=data_context,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder: ParameterBuilder = (
@@ -157,12 +158,14 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
     my_null_count_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
@@ -170,6 +173,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 0.0
@@ -224,7 +228,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_null_count",
-        metric_name="column_values.nonnull.unexpected_count",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=False,
@@ -269,6 +273,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 0.0
@@ -319,19 +324,17 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         reduce_scalar_metric=True,
         evaluation_parameter_builder_configs=None,
     )
-    my_null_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_null_count",
-            metric_name="column_values.nonnull.unexpected_count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            single_batch_mode=False,
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            data_context=data_context,
-        )
+    my_null_count_metric_multi_batch_parameter_builder: ParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_null_count",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        single_batch_mode=False,
+        enforce_numeric_metric=False,
+        replace_nan_with_zero=False,
+        reduce_scalar_metric=True,
+        evaluation_parameter_builder_configs=None,
+        data_context=data_context,
     )
 
     evaluation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]] = [
@@ -369,6 +372,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
@@ -376,6 +380,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_numeric_
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 0.0
@@ -428,19 +433,17 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
             data_context=data_context,
         )
     )
-    my_null_count_metric_multi_batch_parameter_builder: ParameterBuilder = (
-        MetricMultiBatchParameterBuilder(
-            name="my_null_count",
-            metric_name="column_values.nonnull.unexpected_count",
-            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
-            metric_value_kwargs=None,
-            single_batch_mode=False,
-            enforce_numeric_metric=False,
-            replace_nan_with_zero=False,
-            reduce_scalar_metric=True,
-            evaluation_parameter_builder_configs=None,
-            data_context=data_context,
-        )
+    my_null_count_metric_multi_batch_parameter_builder: ParameterBuilder = MetricMultiBatchParameterBuilder(
+        name="my_null_count",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
+        metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+        metric_value_kwargs=None,
+        single_batch_mode=False,
+        enforce_numeric_metric=False,
+        replace_nan_with_zero=False,
+        reduce_scalar_metric=True,
+        evaluation_parameter_builder_configs=None,
+        data_context=data_context,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder: ParameterBuilder = (
@@ -475,12 +478,14 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
     my_null_count_metric_multi_batch_parameter_builder.build_parameters(
         domain=domain,
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
@@ -488,6 +493,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 3.89e-3
@@ -542,7 +548,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_null_count",
-        metric_name="column_values.nonnull.unexpected_count",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=False,
@@ -587,6 +593,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 3.89e-3
@@ -643,7 +650,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_null_count",
-        metric_name="column_values.nonnull.unexpected_count",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=False,
@@ -687,6 +694,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     mean_unexpected_map_metric_multi_batch_parameter_builder.build_parameters(
@@ -694,6 +702,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_datetime
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     expected_parameter_value: float = 3.89e-3
@@ -778,7 +787,7 @@ def test_mean_unexpected_map_metric_multi_batch_parameter_builder_bobby_check_se
         module_name="great_expectations.rule_based_profiler.parameter_builder",
         class_name="MetricMultiBatchParameterBuilder",
         name="my_null_count",
-        metric_name="column_values.nonnull.unexpected_count",
+        metric_name=f"column_values.nonnull.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
         metric_value_kwargs=None,
         enforce_numeric_metric=False,

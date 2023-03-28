@@ -8,9 +8,9 @@ from moto import mock_glue
 
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
+    Datasource,
     PandasDatasource,
     SparkDFDatasource,
-    SqlAlchemyDatasource,
 )
 from great_expectations.execution_engine.sparkdf_execution_engine import (
     SparkDFExecutionEngine,
@@ -121,23 +121,16 @@ def basic_pandas_datasource():
     return PandasDatasource("basic_pandas_datasource")
 
 
-@pytest.fixture
-def postgresql_sqlalchemy_datasource(postgresql_engine):
-    return SqlAlchemyDatasource(
-        "postgresql_sqlalchemy_datasource", engine=postgresql_engine
-    )
-
-
-@pytest.fixture
-def mysql_sqlalchemy_datasource(mysql_engine):
-    return SqlAlchemyDatasource("mysql_sqlalchemy_datasource", engine=mysql_engine)
-
-
 @pytest.fixture(scope="module")
 def basic_sparkdf_datasource(test_backends):
     if "SparkDFDataset" not in test_backends:
         pytest.skip("Spark has not been enabled, so this test must be skipped.")
     return SparkDFDatasource("basic_sparkdf_datasource")
+
+
+@pytest.fixture
+def mysql_sqlalchemy_datasource(mysql_engine):
+    return Datasource("mysql_sqlalchemy_datasource", engine=mysql_engine)
 
 
 @pytest.fixture
@@ -147,7 +140,9 @@ def test_cases_for_sql_data_connector_sqlite_connection_url(sa):
 
     db_file_path: str = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     return get_sqlite_connection_url(db_file_path)
@@ -169,7 +164,7 @@ def test_cases_for_sql_data_connector_sqlite_execution_engine(
         "md5", 2, lambda x, d: hashlib.md5(str(x).encode("utf-8")).hexdigest()[-1 * d :]
     )
 
-    conn: sa.engine.Connection = engine.connect()
+    conn: sa.engine.Connection = engine.connect()  # noqa: F841
 
     # Build a SqlAlchemyDataset using that database
     return SqlAlchemyExecutionEngine(

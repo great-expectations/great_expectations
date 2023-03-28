@@ -59,12 +59,16 @@ class ExpectColumnValuesToBeValidIataCode(ColumnMapExpectation):
     # They will also be executed as unit tests for your Expectation.
     examples = [
         {
+            # https://www.ccra.com/airport-codes has a searchable list of codes
             "data": {
                 "valid_airport_codes": ["MCO", "SFO", "LAX", "JFK", "LGA", "EWR"],
                 "invalid_airport_codes": [
                     "XYZ",
                     "UWU",
                     "MEME",
+                    "FFF",
+                    "ZZZ",
+                    "ABC",
                 ],
             },
             "tests": [

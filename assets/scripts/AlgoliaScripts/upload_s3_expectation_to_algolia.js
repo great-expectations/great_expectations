@@ -1,7 +1,7 @@
 // load .env file (used while development) for loading env variables
 require('dotenv').config()
 const fetch = require('node-fetch')
-const expecS3URL = 'https://superconductive-public.s3.us-east-2.amazonaws.com/static/gallery/expectation_library_v2.json'
+const expecS3URL = process.env.ALGOLIA_S3_EXPECTATIONS_URL
 const algoliasearch = require('algoliasearch')
 const client = algoliasearch(process.env.ALGOLIA_ACCOUNT, process.env.ALGOLIA_WRITE_KEY)
 const expecAlgoliaIndex = process.env.ALGOLIA_EXPECTATION_INDEX
@@ -36,7 +36,7 @@ const replicaIndexAndSettings = [
 ]
 
 // Main Index setSettings
-const attributesForFaceting = ['searchable(library_metadata.tags)', 'searchable(engineSupported)', 'searchable(exp_type)']
+const attributesForFaceting = ['searchable(library_metadata.tags)', 'searchable(engineSupported)', 'searchable(exp_type)', 'searchable(package)', 'searchable(metrics)', 'searchable(contributors)']
 const maxFacetHits = 100
 const searchableAttributes = ['description.snake_name', 'description.short_description']
 const customRanking = ['asc(description.snake_name)']
@@ -92,6 +92,21 @@ function formatExpectation (ExpecData) {
     data.created_at = ExpecData[key].created_at
     data.updated_at = ExpecData[key].updated_at
     data.exp_type = ExpecData[key].exp_type
+    data.package = ExpecData[key].package
+    data.metrics = []
+    data.contributors = []
+    // Flatten the metrics array to get all the metrics
+    if (ExpecData[key].metrics) {
+      ExpecData[key].metrics.forEach((metric) => {
+        data['metrics'].push(metric.name)
+      });
+    }
+    // Flatten the contributors array to get all the contributors
+    if (ExpecData[key].library_metadata.contributors) {
+      ExpecData[key].library_metadata.contributors.forEach((contributor) => {
+        data['contributors'].push(contributor.replace(/@/g, ""))
+      });
+    }
     dataset.push(data)
   })
   return dataset

@@ -8,14 +8,15 @@ import platform
 import random
 import re
 import string
-import threading
 import time
 import traceback
 import warnings
 from functools import wraps
+from logging import Logger
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
+    Any,
     Dict,
     Iterable,
     List,
@@ -39,20 +40,14 @@ from great_expectations.core import (
     IDDict,
 )
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest
-from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestCase,
-    ExpectationTestDataCases,
-)
-from great_expectations.core.expectation_diagnostics.supporting_types import (
-    ExpectationExecutionEngineDiagnostics,
-)
 from great_expectations.core.util import (
     get_or_create_spark_application,
     get_sql_dialect_floating_point_infinity_value,
 )
-from great_expectations.dataset import PandasDataset, SparkDFDataset, SqlAlchemyDataset
+from great_expectations.dataset import PandasDataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
     MetricProviderError,
@@ -63,11 +58,14 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
 from great_expectations.profile import ColumnsExistProfiler
+from great_expectations.self_check.sqlalchemy_connection_manager import (
+    LockingConnectionCheck,
+    connection_manager,
+)
 from great_expectations.util import (
     build_in_memory_runtime_context,
     import_library_module,
@@ -75,8 +73,13 @@ from great_expectations.util import (
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Connection
-
+    from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
+        ExpectationTestCase,
+        ExpectationTestDataCases,
+    )
+    from great_expectations.core.expectation_diagnostics.supporting_types import (
+        ExpectationExecutionEngineDiagnostics,
+    )
     from great_expectations.data_context import AbstractDataContext
 
 expectationValidationResultSchema = ExpectationValidationResultSchema()
@@ -90,8 +93,6 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy as sqlalchemy
     from sqlalchemy import create_engine
-
-    # noinspection PyProtectedMember
     from sqlalchemy.engine import Engine
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
@@ -106,14 +107,14 @@ try:
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructType
 except ImportError:
-    SparkDataFrame = type(None)
-    SparkSession = None
-    StructType = None
+    SparkDataFrame = type(None)  # type: ignore[assignment,misc]
+    SparkSession = None  # type: ignore[assignment,misc]
+    StructType = None  # type: ignore[assignment,misc]
 
 try:
     from pyspark.sql import DataFrame as spark_DataFrame
 except ImportError:
-    spark_DataFrame = type(None)
+    spark_DataFrame = type(None)  # type: ignore[assignment,misc]
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes
@@ -140,8 +141,8 @@ except (ImportError, KeyError):
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
     # noinspection PyPep8Naming
-    import sqlalchemy_bigquery as sqla_bigquery
     import sqlalchemy_bigquery as BigQueryDialect
+    import sqlalchemy_bigquery as sqla_bigquery
 
     sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     # noinspection PyTypeChecker
@@ -170,8 +171,8 @@ try:
         pass
 except ImportError:
     try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
         import pybigquery.sqlalchemy_bigquery as BigQueryDialect
+        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
 
         # deprecated-v0.14.7
         warnings.warn(
@@ -350,8 +351,8 @@ except (ImportError, KeyError):
     TRINO_TYPES = {}
 
 try:
-    import sqlalchemy_redshift.dialect as redshifttypes
     import sqlalchemy_redshift.dialect as redshiftDialect
+    import sqlalchemy_redshift.dialect as redshifttypes
 
     REDSHIFT_TYPES = {
         "BIGINT": redshifttypes.BIGINT,
@@ -392,9 +393,11 @@ try:
         "BYTEINT": snowflaketypes.BYTEINT,
         "CHARACTER": snowflaketypes.CHARACTER,
         "DEC": snowflaketypes.DEC,
+        "BOOLEAN": snowflakeDialect.BOOLEAN,
         "DOUBLE": snowflaketypes.DOUBLE,
         "FIXED": snowflaketypes.FIXED,
         "NUMBER": snowflaketypes.NUMBER,
+        "INTEGER": snowflakeDialect.INTEGER,
         "OBJECT": snowflaketypes.OBJECT,
         "STRING": snowflaketypes.STRING,
         "TEXT": snowflaketypes.TEXT,
@@ -446,9 +449,9 @@ try:
         "JSON": athenatypes.String,
     }
 except ImportError:
-    pyathena = None
+    pyathena = None  # type: ignore[assignment]
     athenatypes = None
-    athenaDialect = None
+    athenaDialect = None  # type: ignore[assignment,misc]
     ATHENA_TYPES = {}
 
 # # Others from great_expectations/dataset/sqlalchemy_dataset.py
@@ -466,6 +469,14 @@ except ImportError:
 #     import teradatasqlalchemy.types as teradatatypes
 # except ImportError:
 #     teradatasqlalchemy = None
+
+try:
+    from great_expectations.dataset import SparkDFDataset
+except ImportError:
+    SparkDFDataset = None  # type: ignore[misc,assignment] # could be None
+    logger.debug(
+        "Unable to load spark dataset; install optional spark dependency for support."
+    )
 
 import tempfile
 
@@ -493,52 +504,6 @@ BACKEND_TO_ENGINE_NAME_DICT = {
 }
 
 BACKEND_TO_ENGINE_NAME_DICT.update({name: "sqlalchemy" for name in SQL_DIALECT_NAMES})
-
-
-class SqlAlchemyConnectionManager:
-    def __init__(self) -> None:
-        self.lock = threading.Lock()
-        self._connections: Dict[str, "Connection"] = {}
-
-    def get_engine(self, connection_string):
-        if sqlalchemy is not None:
-            with self.lock:
-                if connection_string not in self._connections:
-                    try:
-                        engine = create_engine(connection_string)
-                        conn = engine.connect()
-                        self._connections[connection_string] = conn
-                    except (ImportError, SQLAlchemyError):
-                        print(
-                            f"Unable to establish connection with {connection_string}"
-                        )
-                        raise
-                return self._connections[connection_string]
-        return None
-
-
-connection_manager = SqlAlchemyConnectionManager()
-
-
-class LockingConnectionCheck:
-    def __init__(self, sa, connection_string) -> None:
-        self.lock = threading.Lock()
-        self.sa = sa
-        self.connection_string = connection_string
-        self._is_valid = None
-
-    def is_valid(self):
-        with self.lock:
-            if self._is_valid is None:
-                try:
-                    engine = self.sa.create_engine(self.connection_string)
-                    conn = engine.connect()
-                    conn.close()
-                    self._is_valid = True
-                except (ImportError, self.sa.exc.SQLAlchemyError) as e:
-                    print(f"{str(e)}")
-                    self._is_valid = False
-            return self._is_valid
 
 
 def get_sqlite_connection_url(sqlite_db_path):
@@ -590,519 +555,6 @@ def get_dataset(  # noqa: C901 - 110
             # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
             df = df.astype(pandas_schema)
         return PandasDataset(df, profiler=profiler, caching=caching)
-
-    elif dataset_type == "sqlite":
-        if not create_engine or not SQLITE_TYPES:
-            return None
-
-        engine = create_engine(get_sqlite_connection_url(sqlite_db_path=sqlite_db_path))
-
-        # Add the data to the database as a new table
-
-        sql_dtypes = {}
-        if (
-            schemas
-            and "sqlite" in schemas
-            and isinstance(engine.dialect, sqlitetypes.dialect)
-        ):
-            schema = schemas["sqlite"]
-            sql_dtypes = {col: SQLITE_TYPES[dtype] for (col, dtype) in schema.items()}
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-                elif type_ in ["DATE"]:
-                    df[col] = pd.to_datetime(df[col]).dt.date
-
-        if table_name is None:
-            table_name = generate_test_table_name()
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
-        )
-
-    elif dataset_type == "postgresql":
-        if not create_engine or not POSTGRESQL_TYPES:
-            return None
-
-        # Create a new database
-        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-        engine = connection_manager.get_engine(
-            f"postgresql://postgres@{db_hostname}/test_ci"
-        )
-        sql_dtypes = {}
-        if (
-            schemas
-            and "postgresql" in schemas
-            and isinstance(engine.dialect, postgresqltypes.dialect)
-        ):
-            schema = schemas["postgresql"]
-            sql_dtypes = {
-                col: POSTGRESQL_TYPES[dtype] for (col, dtype) in schema.items()
-            }
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-                elif type_ in ["DATE"]:
-                    df[col] = pd.to_datetime(df[col]).dt.date
-
-        if table_name is None:
-            table_name = generate_test_table_name()
-
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
-        )
-
-    elif dataset_type == "mysql":
-        if not create_engine or not MYSQL_TYPES:
-            return None
-
-        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-        engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
-
-        sql_dtypes = {}
-        if (
-            schemas
-            and "mysql" in schemas
-            and isinstance(engine.dialect, mysqltypes.dialect)
-        ):
-            schema = schemas["mysql"]
-            sql_dtypes = {col: MYSQL_TYPES[dtype] for (col, dtype) in schema.items()}
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-                elif type_ in ["DATE"]:
-                    df[col] = pd.to_datetime(df[col]).dt.date
-
-        if table_name is None:
-            table_name = generate_test_table_name()
-
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Will - 20210126
-        # For mysql we want our tests to know when a temp_table is referred to more than once in the
-        # same query. This has caused problems in expectations like expect_column_values_to_be_unique().
-        # Here we instantiate a SqlAlchemyDataset with a custom_sql, which causes a temp_table to be created,
-        # rather than referring the table by name.
-        custom_sql: str = f"SELECT * FROM {table_name}"
-        return SqlAlchemyDataset(
-            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
-        )
-
-    elif dataset_type == "bigquery":
-        if not create_engine:
-            return None
-        engine = _create_bigquery_engine()
-        if schemas and dataset_type in schemas:
-            schema = schemas[dataset_type]
-
-        df.columns = df.columns.str.replace(" ", "_")
-
-        if table_name is None:
-            table_name = generate_test_table_name()
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            if_exists="replace",
-        )
-        custom_sql = f"SELECT * FROM {_bigquery_dataset()}.{table_name}"
-        return SqlAlchemyDataset(
-            custom_sql=custom_sql, engine=engine, profiler=profiler, caching=caching
-        )
-
-    elif dataset_type == "trino":
-        if not create_engine or not TRINO_TYPES:
-            return None
-
-        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-        engine = _create_trino_engine(db_hostname)
-        sql_dtypes = {}
-        if schemas and "trino" in schemas and isinstance(engine.dialect, trinoDialect):
-            schema = schemas["trino"]
-            sql_dtypes = {col: TRINO_TYPES[dtype] for (col, dtype) in schema.items()}
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-                elif type_ in ["DATE"]:
-                    df[col] = pd.to_datetime(df[col]).dt.date
-
-        if table_name is None:
-            table_name = generate_test_table_name().lower()
-
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-            method="multi",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
-        )
-
-    elif dataset_type == "mssql":
-        if not create_engine or not MSSQL_TYPES:
-            return None
-
-        db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
-        engine = create_engine(
-            f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
-            "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
-            # echo=True,
-        )
-
-        # If "autocommit" is not desired to be on by default, then use the following pattern when explicit "autocommit"
-        # is desired (e.g., for temporary tables, "autocommit" is off by default, so the override option may be useful).
-        # engine.execute(sa.text(sql_query_string).execution_options(autocommit=True))
-
-        sql_dtypes = {}
-        if (
-            schemas
-            and dataset_type in schemas
-            and isinstance(engine.dialect, mssqltypes.dialect)
-        ):
-            schema = schemas[dataset_type]
-            sql_dtypes = {col: MSSQL_TYPES[dtype] for (col, dtype) in schema.items()}
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-                elif type_ in ["DATE"]:
-                    df[col] = pd.to_datetime(df[col]).dt.date
-
-        if table_name is None:
-            table_name = generate_test_table_name()
-
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
-        )
-
-    elif dataset_type == "snowflake":
-        if not create_engine or not SNOWFLAKE_TYPES:
-            return None
-
-        engine = _create_snowflake_engine()
-        sql_dtypes = {}
-        # noinspection PyTypeChecker
-        if (
-            schemas
-            and "snowflake" in schemas
-            and isinstance(engine.dialect, snowflakeDialect)
-        ):
-            schema = schemas["snowflake"]
-            sql_dtypes = {
-                col: SNOWFLAKE_TYPES[dtype] for (col, dtype) in schema.items()
-            }
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-                elif type_ in ["DATE"]:
-                    df[col] = pd.to_datetime(df[col]).dt.date
-
-        if table_name is None:
-            table_name = generate_test_table_name().lower()
-
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
-        )
-
-    elif dataset_type == "redshift":
-        if not create_engine or not REDSHIFT_TYPES:
-            return None
-
-        engine = _create_redshift_engine()
-        sql_dtypes = {}
-        # noinspection PyTypeChecker
-        if (
-            schemas
-            and "redshift" in schemas
-            and isinstance(engine.dialect, redshiftDialect)
-        ):
-            schema = schemas["redshift"]
-            sql_dtypes = {col: REDSHIFT_TYPES[dtype] for (col, dtype) in schema.items()}
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-                elif type_ in ["DATE"]:
-                    df[col] = pd.to_datetime(df[col]).dt.date
-
-        if table_name is None:
-            table_name = generate_test_table_name().lower()
-
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
-        )
-
-    elif dataset_type == "athena":
-        if not create_engine or not ATHENA_TYPES:
-            return None
-
-        engine = _create_athena_engine()
-        sql_dtypes = {}
-        if (
-            schemas
-            and "athena" in schemas
-            and isinstance(engine.dialect, athenaDialect)
-        ):
-            schema = schemas["athena"]
-            sql_dtypes = {col: ATHENA_TYPES[dtype] for (col, dtype) in schema.items()}
-            for col in schema:
-                type_ = schema[col]
-                if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
-                    df[col] = pd.to_numeric(df[col], downcast="signed")
-                elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
-                    df[col] = pd.to_numeric(df[col])
-                    min_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=True
-                    )
-                    max_value_dbms = get_sql_dialect_floating_point_infinity_value(
-                        schema=dataset_type, negative=False
-                    )
-                    for api_schema_type in ["api_np", "api_cast"]:
-                        min_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=True
-                        )
-                        max_value_api = get_sql_dialect_floating_point_infinity_value(
-                            schema=api_schema_type, negative=False
-                        )
-                        df.replace(
-                            to_replace=[min_value_api, max_value_api],
-                            value=[min_value_dbms, max_value_dbms],
-                            inplace=True,
-                        )
-                elif type_ in ["DATETIME", "TIMESTAMP"]:
-                    df[col] = pd.to_datetime(df[col])
-                elif type_ in ["DATE"]:
-                    df[col] = pd.to_datetime(df[col]).dt.date
-
-        if table_name is None:
-            table_name = generate_test_table_name().lower()
-
-        df.to_sql(
-            name=table_name,
-            con=engine,
-            index=False,
-            dtype=sql_dtypes,
-            if_exists="replace",
-        )
-
-        # Build a SqlAlchemyDataset using that database
-        return SqlAlchemyDataset(
-            table_name, engine=engine, profiler=profiler, caching=caching
-        )
 
     elif dataset_type == "SparkDFDataset":
         import pyspark.sql.types as sparktypes
@@ -1210,213 +662,269 @@ def get_dataset(  # noqa: C901 - 110
             spark_df = spark.createDataFrame(data_reshaped, columns)
         return SparkDFDataset(spark_df, profiler=profiler, caching=caching)
     else:
-        raise ValueError(f"Unknown dataset_type {str(dataset_type)}")
+        warnings.warn(f"Unknown dataset_type {str(dataset_type)}")
 
 
 def get_test_validator_with_data(  # noqa: C901 - 31
-    execution_engine,
-    data,
-    schemas=None,
-    caching=True,
-    table_name=None,
-    sqlite_db_path=None,
-    extra_debug_info="",
-    debug_logger: Optional[logging.Logger] = None,
-    context: Optional[AbstractDataContext] = None,
+    execution_engine: str,
+    data: dict,
+    schemas: dict | None = None,
+    caching: bool = True,
+    table_name: str | None = None,
+    sqlite_db_path: str | None = None,
+    extra_debug_info: str = "",
+    debug_logger: logging.Logger | None = None,
+    context: AbstractDataContext | None = None,
+    pk_column: bool = False,
 ):
     """Utility to create datasets for json-formatted tests."""
 
+    # if pk_column is defined in our test, then we add a index column to our test set
+    if pk_column:
+        first_column: List[Any] = list(data.values())[0]
+        data["pk_index"] = list(range(len(first_column)))
+
     df = pd.DataFrame(data)
     if execution_engine == "pandas":
-        if schemas and "pandas" in schemas:
-            schema = schemas["pandas"]
-            pandas_schema = {}
-            for (key, value) in schema.items():
-                # Note, these are just names used in our internal schemas to build datasets *for internal tests*
-                # Further, some changes in pandas internal about how datetimes are created means to support pandas
-                # pre- 0.25, we need to explicitly specify when we want timezone.
-
-                # We will use timestamp for timezone-aware (UTC only) dates in our tests
-                if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
-                    df[key] = pd.to_datetime(df[key], utc=True)
-                    continue
-                elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
-                    df[key] = pd.to_datetime(df[key])
-                    continue
-                elif value.lower() in ["date"]:
-                    df[key] = pd.to_datetime(df[key]).dt.date
-                    value = "object"
-                try:
-                    type_ = np.dtype(value)
-                except TypeError:
-                    # noinspection PyUnresolvedReferences
-                    type_ = getattr(pd, value)()
-                pandas_schema[key] = type_
-            # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
-            df = df.astype(pandas_schema)
-
-        if table_name is None:
-            # noinspection PyUnusedLocal
-            table_name = generate_test_table_name()
-
-        batch_definition = BatchDefinition(
-            datasource_name="pandas_datasource",
-            data_connector_name="runtime_data_connector",
-            data_asset_name="my_asset",
-            batch_identifiers=IDDict({}),
-            batch_spec_passthrough=None,
-        )
-
-        return build_pandas_validator_with_data(
-            df=df, batch_definition=batch_definition, context=context
-        )
-
-    elif execution_engine in SQL_DIALECT_NAMES:
-        if not create_engine:
-            return None
-
-        if table_name is None:
-            table_name = generate_test_table_name().lower()
-
-        return build_sa_validator_with_data(
+        return _get_test_validator_with_data_pandas(
             df=df,
-            sa_engine_name=execution_engine,
+            schemas=schemas,
+            table_name=table_name,
+            context=context,
+            pk_column=pk_column,
+        )
+    elif execution_engine in SQL_DIALECT_NAMES:
+        return _get_test_validator_with_data_sqlalchemy(
+            df=df,
+            execution_engine=execution_engine,
             schemas=schemas,
             caching=caching,
             table_name=table_name,
             sqlite_db_path=sqlite_db_path,
             extra_debug_info=extra_debug_info,
             debug_logger=debug_logger,
-            batch_definition=None,
             context=context,
+            pk_column=pk_column,
         )
-
     elif execution_engine == "spark":
-        import pyspark.sql.types as sparktypes
-
-        spark_types: dict = {
-            "StringType": sparktypes.StringType,
-            "IntegerType": sparktypes.IntegerType,
-            "LongType": sparktypes.LongType,
-            "DateType": sparktypes.DateType,
-            "TimestampType": sparktypes.TimestampType,
-            "FloatType": sparktypes.FloatType,
-            "DoubleType": sparktypes.DoubleType,
-            "BooleanType": sparktypes.BooleanType,
-            "DataType": sparktypes.DataType,
-            "NullType": sparktypes.NullType,
-        }
-
-        spark = get_or_create_spark_application(
-            spark_config={
-                "spark.sql.catalogImplementation": "hive",
-                "spark.executor.memory": "450m",
-                # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
-            }
-        )
-        # We need to allow null values in some column types that do not support them natively, so we skip
-        # use of df in this case.
-        data_reshaped = list(
-            zip(*(v for _, v in data.items()))
-        )  # create a list of rows
-        if schemas and "spark" in schemas:
-            schema = schemas["spark"]
-            # sometimes first method causes Spark to throw a TypeError
-            try:
-                spark_schema = sparktypes.StructType(
-                    [
-                        sparktypes.StructField(
-                            column, spark_types[schema[column]](), True
-                        )
-                        for column in schema
-                    ]
-                )
-                # We create these every time, which is painful for testing
-                # However nuance around null treatment as well as the desire
-                # for real datetime support in tests makes this necessary
-                data = copy.deepcopy(data)
-                if "ts" in data:
-                    print(data)
-                    print(schema)
-                for col in schema:
-                    type_ = schema[col]
-                    if type_ in ["IntegerType", "LongType"]:
-                        # Ints cannot be None...but None can be valid in Spark (as Null)
-                        vals: List[Union[str, int, float, None]] = []
-                        for val in data[col]:
-                            if val is None:
-                                vals.append(val)
-                            else:
-                                vals.append(int(val))
-                        data[col] = vals
-                    elif type_ in ["FloatType", "DoubleType"]:
-                        vals = []
-                        for val in data[col]:
-                            if val is None:
-                                vals.append(val)
-                            else:
-                                vals.append(float(val))
-                        data[col] = vals
-                    elif type_ in ["DateType", "TimestampType"]:
-                        vals = []
-                        for val in data[col]:
-                            if val is None:
-                                vals.append(val)
-                            else:
-                                vals.append(parse(val))  # type: ignore[arg-type]
-                        data[col] = vals
-                # Do this again, now that we have done type conversion using the provided schema
-                data_reshaped = list(
-                    zip(*(v for _, v in data.items()))
-                )  # create a list of rows
-                spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
-            except TypeError:
-                string_schema = sparktypes.StructType(
-                    [
-                        sparktypes.StructField(column, sparktypes.StringType())
-                        for column in schema
-                    ]
-                )
-                spark_df = spark.createDataFrame(data_reshaped, string_schema)
-                for c in spark_df.columns:
-                    spark_df = spark_df.withColumn(
-                        c, spark_df[c].cast(spark_types[schema[c]]())
-                    )
-        elif len(data_reshaped) == 0:
-            # if we have an empty dataset and no schema, need to assign an arbitrary type
-            columns = list(data.keys())
-            spark_schema = sparktypes.StructType(
-                [
-                    sparktypes.StructField(column, sparktypes.StringType())
-                    for column in columns
-                ]
-            )
-            spark_df = spark.createDataFrame(data_reshaped, spark_schema)
-        else:
-            # if no schema provided, uses Spark's schema inference
-            columns = list(data.keys())
-            spark_df = spark.createDataFrame(data_reshaped, columns)
-
-        if table_name is None:
-            # noinspection PyUnusedLocal
-            table_name = generate_test_table_name()
-
-        batch_definition = BatchDefinition(
-            datasource_name="spark_datasource",
-            data_connector_name="runtime_data_connector",
-            data_asset_name="my_asset",
-            batch_identifiers=IDDict({}),
-            batch_spec_passthrough=None,
-        )
-        return build_spark_validator_with_data(
-            df=spark_df,
-            spark=spark,
-            batch_definition=batch_definition,
+        return _get_test_validator_with_data_spark(
+            data=data,
+            schemas=schemas,
             context=context,
+            pk_column=pk_column,
         )
-
     else:
         raise ValueError(f"Unknown dataset_type {str(execution_engine)}")
+
+
+def _get_test_validator_with_data_pandas(
+    df: pd.DataFrame,
+    schemas: dict | None,
+    table_name: str | None,
+    context: AbstractDataContext | None,
+    pk_column: bool,
+) -> Validator:
+    if schemas and "pandas" in schemas:
+        schema = schemas["pandas"]
+        if pk_column:
+            schema["pk_index"] = "int"
+        pandas_schema = {}
+        for (key, value) in schema.items():
+            # Note, these are just names used in our internal schemas to build datasets *for internal tests*
+            # Further, some changes in pandas internal about how datetimes are created means to support pandas
+            # pre- 0.25, we need to explicitly specify when we want timezone.
+
+            # We will use timestamp for timezone-aware (UTC only) dates in our tests
+            if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
+                df[key] = pd.to_datetime(df[key], utc=True)
+                continue
+            elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
+                df[key] = pd.to_datetime(df[key])
+                continue
+            elif value.lower() in ["date"]:
+                df[key] = pd.to_datetime(df[key]).dt.date
+                value = "object"
+            try:
+                type_ = np.dtype(value)
+            except TypeError:
+                # noinspection PyUnresolvedReferences
+                type_ = getattr(pd, value)()
+            pandas_schema[key] = type_
+        # pandas_schema = {key: np.dtype(value) for (key, value) in schemas["pandas"].items()}
+        df = df.astype(pandas_schema)
+
+    if table_name is None:
+        # noinspection PyUnusedLocal
+        table_name = generate_test_table_name()
+
+    batch_definition = BatchDefinition(
+        datasource_name="pandas_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+
+    return build_pandas_validator_with_data(
+        df=df, batch_definition=batch_definition, context=context
+    )
+
+
+def _get_test_validator_with_data_sqlalchemy(
+    df: pd.DataFrame,
+    execution_engine: str,
+    schemas: dict | None,
+    caching: bool,
+    table_name: str | None,
+    sqlite_db_path: str | None,
+    extra_debug_info: str,
+    debug_logger: logging.Logger | None,
+    context: AbstractDataContext | None,
+    pk_column: bool,
+) -> Validator | None:
+    if not create_engine:
+        return None
+
+    if table_name is None:
+        table_name = generate_test_table_name().lower()
+
+    return build_sa_validator_with_data(
+        df=df,
+        sa_engine_name=execution_engine,
+        schemas=schemas,
+        caching=caching,
+        table_name=table_name,
+        sqlite_db_path=sqlite_db_path,
+        extra_debug_info=extra_debug_info,
+        debug_logger=debug_logger,
+        batch_definition=None,
+        context=context,
+        pk_column=pk_column,
+    )
+
+
+def _get_test_validator_with_data_spark(  # noqa: C901 - 19
+    data: dict,
+    schemas: dict | None,
+    context: AbstractDataContext | None,
+    pk_column: bool,
+) -> Validator:
+    import pyspark.sql.types as sparktypes
+
+    spark_types: dict = {
+        "StringType": sparktypes.StringType,
+        "IntegerType": sparktypes.IntegerType,
+        "LongType": sparktypes.LongType,
+        "DateType": sparktypes.DateType,
+        "TimestampType": sparktypes.TimestampType,
+        "FloatType": sparktypes.FloatType,
+        "DoubleType": sparktypes.DoubleType,
+        "BooleanType": sparktypes.BooleanType,
+        "DataType": sparktypes.DataType,
+        "NullType": sparktypes.NullType,
+    }
+
+    spark = get_or_create_spark_application(
+        spark_config={
+            "spark.sql.catalogImplementation": "hive",
+            "spark.executor.memory": "450m",
+            # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
+        }
+    )
+    # We need to allow null values in some column types that do not support them natively, so we skip
+    # use of df in this case.
+    data_reshaped = list(zip(*(v for _, v in data.items())))  # create a list of rows
+    if schemas and "spark" in schemas:
+        schema = schemas["spark"]
+        if pk_column:
+            schema["pk_index"] = "IntegerType"
+        # sometimes first method causes Spark to throw a TypeError
+        try:
+            spark_schema = sparktypes.StructType(
+                [
+                    sparktypes.StructField(column, spark_types[schema[column]](), True)
+                    for column in schema
+                ]
+            )
+            # We create these every time, which is painful for testing
+            # However nuance around null treatment as well as the desire
+            # for real datetime support in tests makes this necessary
+            data = copy.deepcopy(data)
+            if "ts" in data:
+                print(data)
+                print(schema)
+            for col in schema:
+                type_ = schema[col]
+                if type_ in ["IntegerType", "LongType"]:
+                    # Ints cannot be None...but None can be valid in Spark (as Null)
+                    vals: List[Union[str, int, float, None]] = []
+                    for val in data[col]:
+                        if val is None:
+                            vals.append(val)
+                        else:
+                            vals.append(int(val))
+                    data[col] = vals
+                elif type_ in ["FloatType", "DoubleType"]:
+                    vals = []
+                    for val in data[col]:
+                        if val is None:
+                            vals.append(val)
+                        else:
+                            vals.append(float(val))
+                    data[col] = vals
+                elif type_ in ["DateType", "TimestampType"]:
+                    vals = []
+                    for val in data[col]:
+                        if val is None:
+                            vals.append(val)
+                        else:
+                            vals.append(parse(val))  # type: ignore[arg-type]
+                    data[col] = vals
+            # Do this again, now that we have done type conversion using the provided schema
+            data_reshaped = list(
+                zip(*(v for _, v in data.items()))
+            )  # create a list of rows
+            spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
+        except TypeError:
+            string_schema = sparktypes.StructType(
+                [
+                    sparktypes.StructField(column, sparktypes.StringType())
+                    for column in schema
+                ]
+            )
+            spark_df = spark.createDataFrame(data_reshaped, string_schema)
+            for c in spark_df.columns:
+                spark_df = spark_df.withColumn(
+                    c, spark_df[c].cast(spark_types[schema[c]]())
+                )
+    elif len(data_reshaped) == 0:
+        # if we have an empty dataset and no schema, need to assign an arbitrary type
+        columns = list(data.keys())
+        spark_schema = sparktypes.StructType(
+            [
+                sparktypes.StructField(column, sparktypes.StringType())
+                for column in columns
+            ]
+        )
+        spark_df = spark.createDataFrame(data_reshaped, spark_schema)
+    else:
+        # if no schema provided, uses Spark's schema inference
+        columns = list(data.keys())
+        spark_df = spark.createDataFrame(data_reshaped, columns)
+
+    batch_definition = BatchDefinition(
+        datasource_name="spark_datasource",
+        data_connector_name="runtime_data_connector",
+        data_asset_name="my_asset",
+        batch_identifiers=IDDict({}),
+        batch_spec_passthrough=None,
+    )
+    return build_spark_validator_with_data(
+        df=spark_df,
+        spark=spark,
+        batch_definition=batch_definition,
+        context=context,
+    )
 
 
 def build_pandas_validator_with_data(
@@ -1449,6 +957,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     batch_definition: Optional[BatchDefinition] = None,
     debug_logger: Optional[logging.Logger] = None,
     context: Optional[AbstractDataContext] = None,
+    pk_column: bool = False,
 ):
     _debug = lambda x: x  # noqa: E731
     if debug_logger:
@@ -1554,13 +1063,15 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         and isinstance(engine.dialect, dialect_classes[sa_engine_name])
     ):
         schema = schemas[sa_engine_name]
+        if pk_column:
+            schema["pk_index"] = "INTEGER"
 
         sql_dtypes = {
             col: dialect_types[sa_engine_name][dtype] for (col, dtype) in schema.items()
         }
         for col in schema:
             type_ = schema[col]
-            if type_ in ["INTEGER", "SMALLINT", "BIGINT"]:
+            if type_ in ["INTEGER", "SMALLINT", "BIGINT", "NUMBER"]:
                 df[col] = pd.to_numeric(df[col], downcast="signed")
             elif type_ in ["FLOAT", "DOUBLE", "DOUBLE_PRECISION"]:
                 df[col] = pd.to_numeric(df[col])
@@ -1582,7 +1093,14 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                         value=[min_value_dbms, max_value_dbms],
                         inplace=True,
                     )
-            elif type_ in ["DATETIME", "TIMESTAMP", "DATE"]:
+            elif type_ in [
+                "DATETIME",
+                "TIMESTAMP",
+                "DATE",
+                "TIMESTAMP_NTZ",  # the following 3 types are snowflake-specific
+                "TIMESTAMP_LTZ",
+                "TIMESTAMP_TZ",
+            ]:
                 df[col] = pd.to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
@@ -1600,7 +1118,8 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
 
     _debug("Calling df.to_sql")
     _start = time.time()
-    df.to_sql(
+    add_dataframe_to_db(
+        df=df,
         name=table_name,
         con=engine,
         index=False,
@@ -2801,8 +2320,13 @@ def evaluate_json_test_v2_api(data_asset, expectation_type, test) -> None:
     check_json_test_result(test=test, result=result, data_asset=data_asset)
 
 
-def evaluate_json_test_v3_api(
-    validator, expectation_type, test, raise_exception=True, debug_logger=None
+def evaluate_json_test_v3_api(  # noqa: C901 - 16
+    validator: Validator,
+    expectation_type: str,
+    test: Dict[str, Any],
+    raise_exception: bool = True,
+    debug_logger: Optional[Logger] = None,
+    pk_column: bool = False,
 ):
     """
     This method will evaluate the result of a test build using the Great Expectations json test format.
@@ -2810,6 +2334,7 @@ def evaluate_json_test_v3_api(
     NOTE: Tests can be suppressed for certain data types if the test contains the Key 'suppress_test_for' with a list
         of DataAsset types to suppress, such as ['SQLAlchemy', 'Pandas'].
 
+    :param validator: (Validator) reference to "Validator" (key object that resolves Metrics and validates Expectations)
     :param expectation_type: (string) the name of the expectation to be run using the test input
     :param test: (dict) a dictionary containing information for the test to be run. The dictionary must include:
         - title: (string) the name of the test
@@ -2825,6 +2350,7 @@ def evaluate_json_test_v3_api(
               - traceback_substring (if present, the string value will be expected as a substring of the exception_traceback)
     :param raise_exception: (bool) If False, capture any failed AssertionError from the call to check_json_test_result and return with validation_result
     :param debug_logger: logger instance or None
+    :param pk_column: If True, then the primary-key column has been defined in the json test data.
     :return: Tuple(ExpectationValidationResult, error_message, stack_trace). asserts correctness of results.
     """
     if debug_logger is not None:
@@ -2875,10 +2401,21 @@ def evaluate_json_test_v3_api(
             result = getattr(validator, expectation_type)(*kwargs)
         # As well as keyword arguments
         else:
-            runtime_kwargs = {
-                "result_format": "COMPLETE",
-                "include_config": False,
-            }
+            if pk_column:
+                runtime_kwargs = {
+                    "result_format": {
+                        "result_format": "COMPLETE",
+                        "unexpected_index_column_names": ["pk_index"],
+                    },
+                    "include_config": False,
+                }
+            else:
+                runtime_kwargs = {
+                    "result_format": {
+                        "result_format": "COMPLETE",
+                    },
+                    "include_config": False,
+                }
             runtime_kwargs.update(kwargs)
             result = getattr(validator, expectation_type)(**runtime_kwargs)
     except (
@@ -2897,6 +2434,7 @@ def evaluate_json_test_v3_api(
                 test=test,
                 result=result,
                 data_asset=validator.execution_engine.batch_manager.active_batch_data,
+                pk_column=pk_column,
             )
         except Exception as e:
             _debug(
@@ -2910,8 +2448,17 @@ def evaluate_json_test_v3_api(
     return (result, error_message, stack_trace)
 
 
-def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901 - 49
-    # We do not guarantee the order in which values are returned (e.g. Spark), so we sort for testing purposes
+def check_json_test_result(  # noqa: C901 - 52
+    test, result, data_asset=None, pk_column=False
+) -> None:
+
+    # check for id_pk results in cases where pk_column is true and unexpected_index_list already exists
+    # this will work for testing since result_format is COMPLETE
+    if pk_column:
+        if not result["success"]:
+            if "unexpected_index_list" in result["result"]:
+                assert "unexpected_index_query" in result["result"]
+
     if "unexpected_list" in result["result"]:
         if ("result" in test["output"]) and (
             "unexpected_list" in test["output"]["result"]
@@ -2984,8 +2531,6 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
         # representations, serializations, and objects should interact and how much of that is shown to the user.
         result = result.to_json_dict()
         for key, value in test["output"].items():
-            # Apply our great expectations-specific test logic
-
             if key == "success":
                 if isinstance(value, (np.floating, float)):
                     try:
@@ -3037,7 +2582,7 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
                     elif try_allclose:
                         assert np.allclose(
                             result["result"]["observed_value"],
-                            value,
+                            value,  # type: ignore[arg-type]
                             rtol=RTOL,
                             atol=ATOL,
                         ), f"(RTOL={RTOL}, ATOL={ATOL}) {result['result']['observed_value']} not np.allclose to {value}"
@@ -3052,14 +2597,12 @@ def check_json_test_result(test, result, data_asset=None) -> None:  # noqa: C901
                 assert result["result"]["observed_value"] in value
 
             elif key == "unexpected_index_list":
-                if isinstance(data_asset, (SqlAlchemyDataset, SparkDFDataset)):
-                    pass
-                elif isinstance(data_asset, (SqlAlchemyBatchData, SparkDFBatchData)):
-                    pass
-                else:
+                unexpected_list = result["result"].get("unexpected_index_list")
+                if pk_column and unexpected_list:
+                    # Note that consistent ordering of unexpected_list is not a guarantee by ID/PK
                     assert (
-                        result["result"]["unexpected_index_list"] == value
-                    ), f"{result['result']['unexpected_index_list']} != {value}"
+                        sorted(unexpected_list, key=lambda d: d["pk_index"]) == value
+                    ), f"{unexpected_list} != {value}"
 
             elif key == "unexpected_list":
                 try:
@@ -3366,8 +2909,8 @@ def generate_sqlite_db_path():
         str: An absolute path to the ephemeral db within the created temporary directory.
     """
     tmp_dir = str(tempfile.mkdtemp())
-    abspath = os.path.abspath(
-        os.path.join(
+    abspath = os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             tmp_dir,
             "sqlite_db"
             + "".join(

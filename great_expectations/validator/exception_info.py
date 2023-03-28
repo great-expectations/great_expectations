@@ -62,7 +62,7 @@ class ExceptionInfo(SerializableDotDict):
     def __str__(self):
         return json.dumps(self.to_json_dict(), indent=2)
 
-    def __hash__(self) -> int:
+    def __hash__(self) -> int:  # type: ignore[override] # standard Python dicts are unhashable because of mutability
         """Overrides the default implementation"""
         _result_hash: int = hash(self.id)
         return _result_hash

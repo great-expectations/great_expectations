@@ -25,6 +25,14 @@
         "z": "IntegerType",
         "a": "IntegerType",
         "b": "IntegerType"
+      },
+      "snowflake": {
+        "w": "NUMBER",
+        "x": "NUMBER",
+        "y": "STRING",
+        "z": "NUMBER",
+        "a": "NUMBER",
+        "b": "NUMBER"
       }
     },
     "tests" : [{

@@ -105,6 +105,7 @@ def test_execution_mean_table_columns_set_match_multi_batch_parameter_builder(
         variables=variables,
         parameters=parameters,
         batch_request=batch_request,
+        runtime_configuration=None,
     )
 
     parameter_node: ParameterNode = get_parameter_value_and_validate_return_type(

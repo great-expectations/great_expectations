@@ -16,6 +16,7 @@ from ruamel.yaml.comments import CommentedMap
 # To support python 3.7 we must import Protocol from typing_extensions instead of typing
 from typing_extensions import Protocol
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
@@ -319,16 +320,6 @@ def test_alice_profiler_user_workflow_single_batch(
                             {
                                 "parent_class": "DefaultExpectationConfigurationBuilder",
                                 "expectation_type": "expect_column_values_to_not_be_null",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "anonymized_expectation_type": "49e0013b377d4c7d9604d73fd672aa63",
-                                "anonymized_condition": "5191ecaeb23644e402e68b1c641b1342",
-                            },
-                            {
-                                "parent_class": "DefaultExpectationConfigurationBuilder",
-                                "anonymized_expectation_type": "5a4993ff394c8cf957dbe7964798f5a5",
-                                "anonymized_condition": "a7f49ffeced7b75c9e0d958e9d010ddd",
                             },
                         ],
                     },
@@ -989,7 +980,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
         "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
     }
 
-    with pytest.raises(AssertionError) as e:
+    with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
         # noinspection PyUnusedLocal
         result = validator.expect_column_values_to_be_between(
             column=column_name,
@@ -1169,7 +1160,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(AssertionError) as e:
+        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,
@@ -1422,7 +1413,7 @@ def test_bobby_expect_column_values_to_be_between_auto_yes_default_profiler_conf
             "batch_id": "90bb41c1fbd7c71c05dbc8695320af71",
         }
 
-        with pytest.raises(AssertionError) as e:
+        with pytest.raises(gx_exceptions.InvalidExpectationConfigurationError) as e:
             # noinspection PyUnusedLocal
             result = validator.expect_column_values_to_be_between(
                 column=column_name,

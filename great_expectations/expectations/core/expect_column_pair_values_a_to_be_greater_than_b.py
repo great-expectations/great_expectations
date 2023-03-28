@@ -1,8 +1,8 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
@@ -103,6 +103,17 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_pair_values_a_to_be_greater_than_b`
+        we require that the `configuraton.kwargs` contain both `column_A` and `column_B` keys.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -118,14 +129,14 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column_A", RendererValueType.STRING),
             ("column_B", RendererValueType.STRING),
             ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
             ("ignore_row_if", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
             ("or_equal", RendererValueType.BOOLEAN),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -167,9 +178,7 @@ class ExpectColumnPairValuesAToBeGreaterThanB(ColumnPairMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

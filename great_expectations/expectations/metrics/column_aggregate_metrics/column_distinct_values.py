@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -20,13 +20,13 @@ from great_expectations.expectations.metrics.import_manager import (
     pyspark_sql_Column,
     pyspark_sql_DataFrame,
     pyspark_sql_Row,
-    sa,
     sa_func_count,
     sa_sql_expression_ColumnClause,
     sa_sql_expression_Selectable,
     sqlalchemy_engine_Engine,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -58,16 +58,17 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         column: sa_sql_expression_ColumnClause = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
 
+        distinct_values: List[sqlalchemy_engine_Engine]
         if hasattr(column, "is_not"):
-            distinct_values: List[sqlalchemy_engine_Engine] = sqlalchemy_engine.execute(
-                sa.select([column])
+            distinct_values = sqlalchemy_engine.execute(
+                sa.select(column)
                 .where(column.is_not(None))
                 .distinct()
                 .select_from(selectable)
             ).fetchall()
         else:
-            distinct_values: List[sqlalchemy_engine_Engine] = sqlalchemy_engine.execute(
-                sa.select([column])
+            distinct_values = sqlalchemy_engine.execute(
+                sa.select(column)
                 .where(column.isnot(None))
                 .distinct()
                 .select_from(selectable)

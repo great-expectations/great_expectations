@@ -17,7 +17,7 @@ def is_valid_arxiv_id(arxiv_id: str) -> bool:
     try:
         next(search.results())
         return True
-    except:
+    except Exception:
         return False
 
 

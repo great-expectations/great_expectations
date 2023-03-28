@@ -1,6 +1,9 @@
 from typing import Optional
 
-from great_expectations.core import ExpectationConfiguration
+from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
+from great_expectations.core.metric_function_types import (
+    MetricPartialFunctionTypeSuffixes,
+)
 from great_expectations.execution_engine import (
     ExecutionEngine,
     PandasExecutionEngine,
@@ -10,7 +13,11 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
+)
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_condition_partial import (
     multicolumn_condition_partial,
+)
+from great_expectations.expectations.metrics.map_metric_provider.multicolumn_function_partial import (
     multicolumn_function_partial,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -77,7 +84,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
             sa.column(column_name) for column_name in table_columns
         ]
         original_table_clause = (
-            sa.select(table_columns_selector)
+            sa.select(*table_columns_selector)
             .select_from(table)
             .alias("original_table_clause")
         )
@@ -88,7 +95,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # Give the resulting sub-query a unique alias in order to disambiguate column names in subsequent queries.
         count_selector = column_list + [sa.func.count().label("_num_rows")]
         group_count_query = (
-            sa.select(count_selector)
+            sa.select(*count_selector)
             .group_by(*column_list)
             .select_from(original_table_clause)
             .alias("group_counts_subquery")
@@ -108,10 +115,8 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         # noinspection PyProtectedMember
         compound_columns_count_query = (
             sa.select(
-                [
-                    original_table_clause,
-                    group_count_query.c._num_rows.label("_num_rows"),
-                ]
+                original_table_clause,
+                group_count_query.c._num_rows.label("_num_rows"),
             )
             .select_from(
                 original_table_clause.join(
@@ -139,7 +144,9 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         """
 
         metrics = kwargs.get("_metrics")
-        compound_columns_count_query, _, _ = metrics["compound_columns.count.map"]
+        compound_columns_count_query, _, _ = metrics[
+            f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+        ]
 
         # noinspection PyProtectedMember
         row_wise_cond = compound_columns_count_query.c._num_rows < 2
@@ -175,9 +182,14 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
         )
 
         if isinstance(execution_engine, SqlAlchemyExecutionEngine):
-            if metric.metric_name == "compound_columns.unique.condition":
-                dependencies["compound_columns.count.map"] = MetricConfiguration(
-                    metric_name="compound_columns.count.map",
+            if (
+                metric.metric_name
+                == f"compound_columns.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
+            ):
+                dependencies[
+                    f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}"
+                ] = MetricConfiguration(
+                    metric_name=f"compound_columns.count.{MetricPartialFunctionTypeSuffixes.MAP.value}",
                     metric_domain_kwargs=metric.metric_domain_kwargs,
                     metric_value_kwargs=None,
                 )

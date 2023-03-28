@@ -1,13 +1,12 @@
-import warnings
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 import pandas as pd
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     InvalidExpectationConfigurationError,
@@ -24,6 +23,7 @@ from great_expectations.render.util import (
     parse_row_condition_string_pandas_engine,
     substitute_none_for_missing,
 )
+from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
@@ -101,7 +101,18 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validating that user has inputted a value set and that configuration has been initialized"""
+        """Validates the configuration for the Expectation.
+
+        For `expect_column_distinct_values_to_contain_set`
+        we require that the `configuraton.kwargs` contain a `value_set` key that is either a `list`, `set`,
+        or `dict`.
+
+        Args:
+            configuration: The ExpectationConfiguration to be validated.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuraton does not contain the values required by the Expectation
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -121,11 +132,11 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -133,11 +144,17 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         template_str = ""
 
         if params.value_set:
-            renderer_configuration = cls._add_value_set_params(
-                renderer_configuration=renderer_configuration
+            array_param_name = "value_set"
+            param_prefix = "v__"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            value_set_str: str = cls._get_value_set_string(
-                renderer_configuration=renderer_configuration
+            value_set_str: str = cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
             template_str = f"distinct values must contain this set: {value_set_str}."
 
@@ -233,14 +250,7 @@ class ExpectColumnDistinctValuesToContainSet(ColumnExpectation):
         value_set = self.get_success_kwargs(configuration).get("value_set")
 
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
             parsed_value_set = parse_value_set(value_set)
             observed_value_counts.index = pd.to_datetime(observed_value_counts.index)
         else:

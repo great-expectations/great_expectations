@@ -2,7 +2,7 @@ from typing import Any
 
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.rule_based_profiler.parameter_container import (
     get_parameter_value_by_fully_qualified_parameter_name,
 )
@@ -16,7 +16,7 @@ def test_get_parameter_value_by_fully_qualified_parameter_name_invalid_parameter
     rule_state_with_domains_and_parameters,
 ):
     with pytest.raises(
-        ge_exceptions.ProfilerExecutionError, match=r".+start with \$.*"
+        gx_exceptions.ProfilerExecutionError, match=r".+start with \$.*"
     ):
         # noinspection PyUnusedLocal
         parameter_value: Any = get_parameter_value_by_fully_qualified_parameter_name(

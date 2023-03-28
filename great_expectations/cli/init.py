@@ -4,7 +4,7 @@ import warnings
 
 import click
 
-from great_expectations import exceptions as ge_exceptions
+from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
     COMPLETE_ONBOARDING_PROMPT,
@@ -33,7 +33,7 @@ try:
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
-    SQLAlchemyError = ge_exceptions.ProfilerError
+    SQLAlchemyError = gx_exceptions.ProfilerError
 
 
 @click.command()
@@ -57,8 +57,8 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
         config_file_location=ctx.obj.config_file_location
     ).get("directory")
     if directory is None:
-        directory = os.getcwd()
-    target_directory = os.path.abspath(directory)
+        directory = os.getcwd()  # noqa: PTH109
+    target_directory = os.path.abspath(directory)  # noqa: PTH100
     ge_dir = _get_full_path_to_ge_dir(target_directory)
     cli_message(GREETING)
 
@@ -121,4 +121,6 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
 
 
 def _get_full_path_to_ge_dir(target_directory: str) -> str:
-    return os.path.abspath(os.path.join(target_directory, FileDataContext.GX_DIR))
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(target_directory, FileDataContext.GX_DIR)  # noqa: PTH118
+    )

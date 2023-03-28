@@ -1,13 +1,11 @@
 from typing import Any, Dict
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import (

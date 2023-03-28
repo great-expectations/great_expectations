@@ -105,6 +105,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
                     },
                 },
             ],
+            "only_for": ["sqlite", "redshift"],
             "tests": [
                 {
                     "title": "basic_negative_test",
@@ -119,7 +120,6 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
                         },
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_positive_test",
@@ -134,14 +134,7 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         },
     ]

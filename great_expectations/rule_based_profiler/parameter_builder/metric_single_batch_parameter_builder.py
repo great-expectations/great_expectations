@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
 
-from great_expectations.core.domain import Domain
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
@@ -85,7 +87,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
         domain: Domain,
         variables: Optional[ParameterContainer] = None,
         parameters: Optional[Dict[str, ParameterContainer]] = None,
-        recompute_existing_parameter_values: bool = False,
+        runtime_configuration: Optional[dict] = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -99,7 +101,7 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
             variables=variables,
             parameters=parameters,
             parameter_computation_impl=super()._build_parameters,
-            recompute_existing_parameter_values=recompute_existing_parameter_values,
+            runtime_configuration=runtime_configuration,
         )
 
         # Retrieve metric values for one Batch object (expressed as list of Batch objects).

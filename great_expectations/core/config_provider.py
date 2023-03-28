@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional, Type, cast
 
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.types.base import GXCloudConfig
+from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001
 
 yaml = YAMLHandler()
 
@@ -148,12 +148,12 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
             defined_path: str = self._substitutor.substitute_config_variable(  # type: ignore[assignment]
                 self._config_variables_file_path, env_vars
             )
-            if not os.path.isabs(defined_path):
+            if not os.path.isabs(defined_path):  # noqa: PTH117
                 root_directory: str = self._root_directory or os.curdir
             else:
                 root_directory = ""
 
-            var_path = os.path.join(root_directory, defined_path)
+            var_path = os.path.join(root_directory, defined_path)  # noqa: PTH118
             with open(var_path) as config_variables_file:
                 contents = config_variables_file.read()
 

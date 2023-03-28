@@ -7,8 +7,8 @@ from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_context import BaseDataContext
 from great_expectations.self_check.util import modify_locale
+from great_expectations.util import get_context
 from great_expectations.validation_operators.validation_operators import (
     WarningAndFailureExpectationSuitesValidationOperator,
 )
@@ -57,7 +57,7 @@ def warning_failure_validation_operator_data_context(
     # NOTE: This setup is almost identical to test_DefaultDataContextAwareValidationOperator.
     # Consider converting to a single fixture.
 
-    data_context = BaseDataContext(
+    data_context = get_context(
         basic_data_context_config_for_validation_operator,
         project_path,
     )
@@ -73,7 +73,7 @@ def warning_failure_validation_operator_data_context(
         },
     )
 
-    data_context.create_expectation_suite(expectation_suite_name="f1.failure")
+    data_context.add_expectation_suite(expectation_suite_name="f1.failure")
     df = data_context.get_batch(
         expectation_suite_name="f1.failure",
         batch_kwargs=data_context.build_batch_kwargs(
@@ -82,11 +82,11 @@ def warning_failure_validation_operator_data_context(
     )
     df.expect_column_values_to_be_between(column="x", min_value=1, max_value=9)
     failure_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-    data_context.save_expectation_suite(
-        failure_expectations, expectation_suite_name="f1.failure"
-    )
 
-    data_context.create_expectation_suite(expectation_suite_name="f1.warning")
+    failure_expectations.expectation_suite_name = "f1.failure"
+    data_context.update_expectation_suite(expectation_suite=failure_expectations)
+
+    data_context.add_expectation_suite(expectation_suite_name="f1.warning")
     df = data_context.get_batch(
         expectation_suite_name="f1.warning",
         batch_kwargs=data_context.build_batch_kwargs(
@@ -98,22 +98,22 @@ def warning_failure_validation_operator_data_context(
     )
     df.expect_column_values_to_not_be_null(column="y")
     warning_expectations = df.get_expectation_suite(discard_failed_expectations=False)
-    data_context.save_expectation_suite(
-        warning_expectations, expectation_suite_name="f1.warning"
-    )
 
-    data_context.save_expectation_suite(
-        failure_expectations, expectation_suite_name="f2.failure"
-    )
-    data_context.save_expectation_suite(
-        failure_expectations, expectation_suite_name="f3.failure"
-    )
-    data_context.save_expectation_suite(
-        warning_expectations, expectation_suite_name="f2.warning"
-    )
-    data_context.save_expectation_suite(
-        warning_expectations, expectation_suite_name="f3.warning"
-    )
+    warning_expectations.expectation_suite_name = "f1.warning"
+    data_context.update_expectation_suite(expectation_suite=warning_expectations)
+
+    failure_expectations.expectation_suite_name = "f2.failure"
+    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+
+    failure_expectations.expectation_suite_name = "f3.failure"
+    data_context.add_expectation_suite(expectation_suite=failure_expectations)
+
+    warning_expectations.expectation_suite_name = "f2.warning"
+    data_context.add_expectation_suite(expectation_suite=warning_expectations)
+
+    warning_expectations.expectation_suite_name = "f3.warning"
+    data_context.add_expectation_suite(expectation_suite=warning_expectations)
+
     return data_context
 
 

@@ -58,7 +58,7 @@ class ExpectColumnValuesToBeValidGithubUsername(ColumnMapExpectation):
     examples = [
         {
             "data": {
-                "valid_users": ["github", "git"],
+                "valid_users": ["github", "git", "great-expectations"],
                 "invalid_users": [
                     "RANDOM_123",
                     "memememememe",

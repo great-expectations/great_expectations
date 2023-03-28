@@ -1,16 +1,13 @@
 import logging
-import warnings
 from collections import OrderedDict
 from typing import Optional, Union
 
-from dateutil.parser import parse
-
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
-from great_expectations.core.batch import Batch
+from great_expectations.core.batch import Batch  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_asset import DataAsset
+from great_expectations.data_asset import DataAsset  # noqa: TCH001
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.resource_identifiers import (
@@ -228,7 +225,7 @@ class ActionListValidationOperator(ValidationOperator):
                 config_defaults={"module_name": module_name},
             )
             if not new_action:
-                raise ge_exceptions.ClassInstantiationError(
+                raise gx_exceptions.ClassInstantiationError(
                     module_name=module_name,
                     package_name=None,
                     class_name=config["class_name"],
@@ -303,21 +300,7 @@ class ActionListValidationOperator(ValidationOperator):
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif not isinstance(run_id, RunIdentifier):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)
@@ -383,7 +366,7 @@ class ActionListValidationOperator(ValidationOperator):
                 if self._using_cloud_context:
                     expectation_suite_identifier = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-                        cloud_id=batch._expectation_suite.ge_cloud_id,
+                        id=batch._expectation_suite.ge_cloud_id,
                     )
                     validation_result_id = GXCloudIdentifier(
                         resource_type=GXCloudRESTResource.VALIDATION_RESULT
@@ -401,7 +384,7 @@ class ActionListValidationOperator(ValidationOperator):
                 validation_result = async_batch_validation_result.result()
                 validation_result.meta["validation_id"] = validation_id
                 validation_result.meta["checkpoint_id"] = (
-                    checkpoint_identifier.cloud_id if checkpoint_identifier else None
+                    checkpoint_identifier.id if checkpoint_identifier else None
                 )
 
                 batch_actions_results = self._run_actions(
@@ -790,21 +773,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif not isinstance(run_id, RunIdentifier):
             run_id = RunIdentifier(run_name=run_name, run_time=run_time)

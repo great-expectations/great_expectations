@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     TableExpectation,
     render_evaluation_parameter_string,
@@ -173,20 +174,22 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         "max_value",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
 
+        Raises:
+            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
+                                                    Expectation.
+        """
         # Setting up a configuration
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
@@ -195,12 +198,12 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -242,9 +245,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,  # type: ignore[union-attr]
@@ -270,7 +271,7 @@ class ExpectTableRowCountToBeBetween(TableExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,

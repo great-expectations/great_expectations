@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING, Dict, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     ColumnExpectation,
     render_evaluation_parameter_string,
@@ -191,18 +192,19 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
 
     """ A Column Map Metric Decorator for the Sum"""
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        """Validates the configuration of an Expectation.
+
+        The configuration will be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
         """
         super().validate_configuration(configuration)
         self.validate_metric_value_between_configuration(configuration=configuration)
@@ -211,13 +213,13 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
     def _prescriptive_template(
         cls, renderer_configuration: RendererConfiguration
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("min_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("max_value", [RendererValueType.NUMBER, RendererValueType.DATETIME]),
             ("strict_min", RendererValueType.BOOLEAN),
             ("strict_max", RendererValueType.BOOLEAN),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -261,13 +263,13 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration = RendererConfiguration(
+            configuration=configuration,
+            result=result,
+            runtime_configuration=runtime_configuration,
         )
-        styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
-            configuration.kwargs,
+            renderer_configuration.kwargs,
             [
                 "column",
                 "min_value",
@@ -291,7 +293,7 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
             elif params["max_value"] is None:
                 template_str = f"sum must be {at_least_str} $min_value."
 
-        if include_column_name:
+        if renderer_configuration.include_column_name:
             template_str = f"$column {template_str}"
 
         if params["row_condition"] is not None:
@@ -304,12 +306,12 @@ class ExpectColumnSumToBeBetween(ColumnExpectation):
 
         return [
             RenderedStringTemplateContent(
-                **{
+                **{  # type: ignore[arg-type]
                     "content_block_type": "string_template",
                     "string_template": {
                         "template": template_str,
                         "params": params,
-                        "styling": styling,
+                        "styling": runtime_configuration.get("styling"),
                     },
                 }
             )

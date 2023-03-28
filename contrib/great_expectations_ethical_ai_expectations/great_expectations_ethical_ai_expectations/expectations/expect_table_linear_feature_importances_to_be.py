@@ -1,5 +1,3 @@
-import json
-
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit
@@ -10,15 +8,12 @@ from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LinearRegression
 
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import (
-    ExpectationConfiguration,
-    TableExpectation,
-)
+from great_expectations.expectations.expectation import TableExpectation
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
-    MetricDomainTypes,
     metric_value,
 )
 from great_expectations.expectations.metrics.table_metric_provider import (

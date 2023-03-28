@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
@@ -192,12 +193,12 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column", RendererValueType.STRING),
             ("value_set", RendererValueType.ARRAY),
             ("mostly", RendererValueType.NUMBER),
             ("parse_strings_as_datetimes", RendererValueType.BOOLEAN),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -205,11 +206,17 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
         template_str = ""
 
         if params.value_set:
-            renderer_configuration = cls._add_value_set_params(
-                renderer_configuration=renderer_configuration
+            array_param_name = "value_set"
+            param_prefix = "v__"
+            renderer_configuration = cls._add_array_params(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
-            value_set_str: str = cls._get_value_set_string(
-                renderer_configuration=renderer_configuration
+            value_set_str: str = cls._get_array_string(
+                array_param_name=array_param_name,
+                param_prefix=param_prefix,
+                renderer_configuration=renderer_configuration,
             )
             template_str += f"values must belong to this set: {value_set_str}"
 
@@ -374,13 +381,36 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         return new_block
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates that a value_set has been provided."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_in_set` it is required that:
+
+        - `value_set` has been provided.
+
+        - `value_set` is one of the following types: `list`, `set`, or `dict`
+
+        - If `value_set` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
+          dictionary keys must be `$PARAMETER`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
-        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
+        # supports extensibility by allowing value_set to not be provided in config but captured via child-class
+        # default_kwarg_values, e.g. parameterized expectations
         value_set = configuration.kwargs.get(
             "value_set"
         ) or self.default_kwarg_values.get("value_set")

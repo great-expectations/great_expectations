@@ -1,9 +1,10 @@
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     InvalidExpectationConfigurationError,
@@ -91,10 +92,26 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "column_B",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Ensures both column_A and column_B have been provided."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_pair_values_to_be_equal` it is required that the `configuration.kwargs` contain both
+        `column_A` and `column_B` keys.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -110,12 +127,12 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         cls,
         renderer_configuration: RendererConfiguration,
     ) -> RendererConfiguration:
-        add_param_args: List[AddParamArgs] = [
+        add_param_args: AddParamArgs = (
             ("column_A", RendererValueType.STRING),
             ("column_B", RendererValueType.STRING),
             ("mostly", RendererValueType.NUMBER),
             ("ignore_row_if", RendererValueType.STRING),
-        ]
+        )
         for name, param_type in add_param_args:
             renderer_configuration.add_param(name=name, param_type=param_type)
 
@@ -148,9 +165,7 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(
             configuration.kwargs,

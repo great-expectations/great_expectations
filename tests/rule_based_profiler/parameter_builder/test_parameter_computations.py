@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import great_expectations.exceptions as ge_exceptions
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import IDDict
 from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
     AttributedResolvedMetrics,
@@ -268,7 +268,7 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
         )
     )
     if metric_name == "my_metric_6":
-        with pytest.raises(ge_exceptions.ProfilerExecutionError) as excinfo:
+        with pytest.raises(gx_exceptions.ProfilerExecutionError) as excinfo:
             metric_multi_batch_parameter_builder._sanitize_metric_computation(
                 parameter_builder=metric_multi_batch_parameter_builder,
                 metric_name=metric_name,
@@ -296,5 +296,5 @@ def test_sanitize_metric_computation(metric_name: str, metric_values_by_batch_id
                 variables=None,
                 parameters=None,
             )
-        except ge_exceptions.ProfilerExecutionError:
+        except gx_exceptions.ProfilerExecutionError:
             pytest.fail()

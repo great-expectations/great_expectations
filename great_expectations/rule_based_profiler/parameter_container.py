@@ -15,8 +15,8 @@ from pyparsing import (
 )
 from typing_extensions import Final
 
-import great_expectations.exceptions as ge_exceptions
-from great_expectations.core.domain import Domain
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot, SerializableDotDict
 
@@ -75,7 +75,9 @@ attribute_naming_pattern = Word(alphas, alphanums + "_.") + ZeroOrMore(
     )
     ^ (
         Suppress(Literal("["))
-        + Word(nums + "-").setParseAction(lambda s, l, t: [int(t[0])])
+        + Word(nums + "-").setParseAction(
+            lambda s, l, t: [int(t[0])]  # noqa: E741 # ambiguous var name
+        )
         + Suppress(Literal("]"))
     )
 )
@@ -84,7 +86,7 @@ attribute_naming_pattern = Word(alphas, alphanums + "_.") + ZeroOrMore(
 T = TypeVar("T")
 
 
-class ParameterAttributeNameParserError(ge_exceptions.GreatExpectationsError):
+class ParameterAttributeNameParserError(gx_exceptions.GreatExpectationsError):
     pass
 
 
@@ -121,7 +123,7 @@ def validate_fully_qualified_parameter_name(
     if not is_fully_qualified_parameter_name_literal_string_format(
         fully_qualified_parameter_name=fully_qualified_parameter_name
     ):
-        raise ge_exceptions.ProfilerExecutionError(
+        raise gx_exceptions.ProfilerExecutionError(
             message=f"""Unable to get value for parameter name "{fully_qualified_parameter_name}" -- parameter \
 names must start with {FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER} (e.g., "{FULLY_QUALIFIED_PARAMETER_NAME_DELIMITER_CHARACTER}{fully_qualified_parameter_name}").
 """

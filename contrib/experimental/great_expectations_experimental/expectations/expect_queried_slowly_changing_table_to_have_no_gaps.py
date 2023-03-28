@@ -177,6 +177,13 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                     },
                 },
             ],
+            "suppress_test_for": [
+                "mysql",
+                "mssql",
+                "postgresql",
+                "bigquery",
+                "snowflake",
+            ],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -190,7 +197,6 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                         }
                     },
                     "out": {"success": True},
-                    "only_for": ["sqlite"],
                 },
                 {
                     "title": "basic_negative_test",
@@ -205,14 +211,7 @@ class ExpectQueriedSlowlyChangingTableToHaveNoGaps(QueryExpectation):
                         "threshold": 0.1,
                     },
                     "out": {"success": False},
-                    "only_for": ["sqlite"],
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         },
     ]

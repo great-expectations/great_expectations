@@ -5,8 +5,9 @@ from typing import TYPE_CHECKING, Optional, Tuple, overload
 
 from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import deprecated_argument
 from great_expectations.data_context.data_context.abstract_data_context import (
-    AbstractDataContext,
+    AbstractDataContext,  # noqa: TCH001
 )
 from great_expectations.data_context.data_context.base_data_context import (
     BaseDataContext,
@@ -20,7 +21,7 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
-from great_expectations.data_context.types.base import GXCloudConfig
+from great_expectations.data_context.types.base import GXCloudConfig  # noqa: TCH001
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -40,10 +41,7 @@ def DataContext(
     ge_cloud_access_token: None = ...,
     ge_cloud_organization_id: None = ...,
 ) -> FileDataContext:
-    """
-    If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False`
-    a `FileDataContext` will always be returned.
-    """
+    # If `context_root_dir` is provided and `cloud_mode`/`ge_cloud_mode` are `False` a `FileDataContext` will always be returned.
     ...
 
 
@@ -67,6 +65,10 @@ def DataContext(
 # TODO: add additional overloads
 
 
+@deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_base_url", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_access_token", version="0.15.37")
+@deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
 def DataContext(
     context_root_dir: Optional[PathStr] = None,
     runtime_environment: Optional[dict] = None,
@@ -80,22 +82,20 @@ def DataContext(
     ge_cloud_access_token: Optional[str] = None,
     ge_cloud_organization_id: Optional[str] = None,
 ) -> AbstractDataContext:
-    """A DataContext represents a Great Expectations project. It is the primary entry point for a Great Expectations
-    deployment, with configurations and methods for all supporting components.
+    """A DataContext represents a Great Expectations project.
 
-    The DataContext is configured via a yml file stored in a directory called great_expectations; this configuration
-    file as well as managed Expectation Suites should be stored in version control. There are other ways to create a
-    Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by GX Cloud
-    (coming soon). Please refer to our documentation for more details.
+    It is the primary entry point for a Great Expectations deployment, with configurations and methods for all
+    supporting components. The DataContext is configured via a yml file stored in a directory called great_expectations;
+    this configuration file as well as managed Expectation Suites should be stored in version control. There are other
+    ways to create a Data Context that may be better suited for your particular deployment e.g. ephemerally or backed by
+    GX Cloud (coming soon). Please refer to our documentation for more details.
 
     You can Validate data or generate Expectations using Execution Engines including:
-
      * SQL (multiple dialects supported)
      * Spark
      * Pandas
 
     Your data can be stored in common locations including:
-
      * databases / data warehouses
      * files in s3, GCS, Azure, local storage
      * dataframes (spark and pandas) loaded into memory
@@ -112,6 +112,24 @@ def DataContext(
     --Documentation--
         - https://docs.greatexpectations.io/docs/terms/data_context
 
+    Args:
+        context_root_dir: Path to directory that contains your data context related files
+        runtime_environment: A dictionary containing relevant runtime information (like class_name and module_name)
+        cloud_mode: Whether to run GX in Cloud mode (default is None).
+            If None, cloud mode is assumed if Cloud credentials are set up. Set to False to override.
+        cloud_base_url: Your cloud base url. Optional, you may provide this alternatively via
+                environment variable GX_CLOUD_BASE_URL or within a config file.
+        cloud_access_token: Your cloud access token. Optional, you may provide this alternatively
+                via environment variable GX_CLOUD_ACCESS_TOKEN or within a config file.
+        cloud_organization_id: Your cloud organization ID. Optional, you may provide this alternatively
+                via environment variable GX_CLOUD_ORGANIZATION_ID or within a config file.
+        ge_cloud_mode: The deprecated cloud mode
+        ge_cloud_base_url: Your deprecated cloud base url
+        ge_cloud_access_token: Your deprecated cloud access token
+        ge_cloud_organization_id: Your deprecated cloud organization ID
+
+    Returns:
+        context
     """
     # Chetan - 20221208 - not formally deprecating these values until a future date
     (
@@ -223,4 +241,4 @@ def _init_context_root_directory(
             else context_root_dir
         )
 
-    return os.path.abspath(os.path.expanduser(context_root_dir))
+    return os.path.abspath(os.path.expanduser(context_root_dir))  # noqa: PTH111, PTH100

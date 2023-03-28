@@ -3,15 +3,17 @@ from typing import Any, Callable, TypeVar
 
 try:
     import docstring_parser
+    from docstring_parser import DocstringStyle
 except ImportError:
     docstring_parser = None
+    DocstringStyle = None
 
 WHITELISTED_TAG = "--Public API--"
 
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-def public_api(func) -> Callable:
+def public_api(func: F) -> F:
     """Add the public API tag for processing by the auto documentation generator.
 
     Used as a decorator:
@@ -263,9 +265,13 @@ def _add_text_below_string_docstring_argument(
     Returns:
         Modified docstring.
     """
-    parsed_docstring = docstring_parser.parse(docstring)
+    parsed_docstring = docstring_parser.parse(
+        text=docstring,
+        style=DocstringStyle.GOOGLE,
+    )
 
-    if argument_name not in (param.arg_name for param in parsed_docstring.params):
+    arg_list = list(param.arg_name for param in parsed_docstring.params)
+    if argument_name not in arg_list:
         raise ValueError(
             f"Please specify an existing argument, you specified {argument_name}."
         )
@@ -275,11 +281,20 @@ def _add_text_below_string_docstring_argument(
             if param.description is None:
                 param.description = text
             else:
-                param.description += "\n\n" + text + "\n\n"
+                param.description += "\n\n" + text + "\n"
+
+    # Returns: includes an additional ":\n" that we need to strip out.
+    if parsed_docstring.returns:
+        parsed_docstring.returns.description = (
+            parsed_docstring.returns.description.strip(":\n")
+        )
 
     # RenderingStyle.EXPANDED used to make sure any line breaks before and
     # after the added text are included (for Sphinx html rendering).
-    return docstring_parser.compose(
+    composed_docstring = docstring_parser.compose(
         docstring=parsed_docstring,
+        style=DocstringStyle.GOOGLE,
         rendering_style=docstring_parser.RenderingStyle.EXPANDED,
     )
+
+    return composed_docstring

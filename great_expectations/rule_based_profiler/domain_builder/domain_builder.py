@@ -3,9 +3,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
 
-from great_expectations.core.batch import Batch, BatchRequestBase
-from great_expectations.core.domain import Domain
-from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_domain_types import (
+    MetricDomainTypes,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.builder import Builder
 from great_expectations.rule_based_profiler.helpers.util import (
     get_batch_ids as get_batch_ids_from_batch_list_or_batch_request,
@@ -17,9 +19,9 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_validator as get_validator_using_batch_list_or_batch_request,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
-    ParameterContainer,
+    ParameterContainer,  # noqa: TCH001
 )
-from great_expectations.validator.computed_metric import MetricValue
+from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 if TYPE_CHECKING:
@@ -50,6 +52,7 @@ class DomainBuilder(ABC, Builder):
         variables: Optional[ParameterContainer] = None,
         batch_list: Optional[List[Batch]] = None,
         batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         Args:
@@ -57,6 +60,7 @@ class DomainBuilder(ABC, Builder):
             variables: attribute name/value pairs
             batch_list: Explicit list of Batch objects to supply data at runtime.
             batch_request: Explicit batch_request used to supply data at runtime.
+            runtime_configuration: Additional run-time settings (see "Validator.DEFAULT_RUNTIME_CONFIGURATION").
 
         Returns:
             List of Domain objects.
@@ -69,7 +73,11 @@ class DomainBuilder(ABC, Builder):
             batch_request=batch_request,
         )
 
-        return self._get_domains(rule_name=rule_name, variables=variables)
+        return self._get_domains(
+            rule_name=rule_name,
+            variables=variables,
+            runtime_configuration=runtime_configuration,
+        )
 
     @property
     @abstractmethod
@@ -81,6 +89,7 @@ class DomainBuilder(ABC, Builder):
         self,
         rule_name: str,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> List[Domain]:
         """
         _get_domains is the primary workhorse for the DomainBuilder
@@ -93,6 +102,7 @@ class DomainBuilder(ABC, Builder):
         validator: Optional[Validator] = None,
         batch_ids: Optional[List[str]] = None,
         variables: Optional[ParameterContainer] = None,
+        runtime_configuration: Optional[dict] = None,
     ) -> Dict[str, int]:
         if validator is None:
             validator = self.get_validator(variables=variables)
@@ -122,6 +132,7 @@ class DomainBuilder(ABC, Builder):
         ] = get_resolved_metrics_by_key(
             validator=validator,  # type: ignore[arg-type] # could be None
             metric_configurations_by_key=metric_configurations_by_batch_id,
+            runtime_configuration=runtime_configuration,
         )
 
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]

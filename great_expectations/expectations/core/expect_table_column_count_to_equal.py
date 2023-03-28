@@ -1,10 +1,11 @@
 from typing import Dict, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
-from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.core._docs_decorators import public_api
+from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
     InvalidExpectationConfigurationError,
     TableExpectation,
@@ -12,6 +13,10 @@ from great_expectations.expectations.expectation import (
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
+from great_expectations.render.renderer_configuration import (
+    RendererConfiguration,
+    RendererValueType,
+)
 from great_expectations.render.util import substitute_none_for_missing
 
 
@@ -69,22 +74,23 @@ class ExpectTableColumnCountToEqual(TableExpectation):
     }
     args_keys = ("value",)
 
-    """ A Metric Decorator for the Column Count"""
-
+    @public_api
     def validate_configuration(
-        self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
         """
-        Validates that a configuration has been set, and sets a configuration if it has yet to be set. Ensures that
-        necessary configuration arguments have been provided for the validation of the expectation.
+        Validates the configuration for the Expectation.
+
+        For this expectation, `configuraton.kwargs` may contain `min_value` and `max_value` as a number.
 
         Args:
-            configuration (OPTIONAL[ExpectationConfiguration]): \
-                An optional Expectation Configuration entry that will be used to configure the expectation
-        Returns:
-            None. Raises InvalidExpectationConfigurationError if the config is not validated successfully
-        """
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided,
+                it will be pulled from the configuration attribute of the Expectation instance.
 
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required
+                by the Expectation.
+        """
         # Setting up a configuration
         super().validate_configuration(configuration)
 
@@ -105,24 +111,15 @@ class ExpectTableColumnCountToEqual(TableExpectation):
             raise InvalidExpectationConfigurationError(str(e))
 
     @classmethod
-    def _atomic_prescriptive_template(
+    def _prescriptive_template(
         cls,
-        configuration: Optional[ExpectationConfiguration] = None,
-        result: Optional[ExpectationValidationResult] = None,
-        runtime_configuration: Optional[dict] = None,
-        **kwargs,
-    ):
-        runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
+        renderer_configuration: RendererConfiguration,
+    ) -> RendererConfiguration:
+        renderer_configuration.add_param(
+            name="value", param_type=RendererValueType.NUMBER
         )
-        styling = runtime_configuration.get("styling")
-        params = substitute_none_for_missing(configuration.kwargs, ["value"])
-        template_str = "Must have exactly $value columns."
-        params_with_json_schema = {
-            "value": {"schema": {"type": "number"}, "value": params.get("value")},
-        }
-        return template_str, params_with_json_schema, None, styling
+        renderer_configuration.template_str = "Must have exactly $value columns."
+        return renderer_configuration
 
     @classmethod
     @renderer(renderer_type=LegacyRendererType.PRESCRIPTIVE)
@@ -135,9 +132,7 @@ class ExpectTableColumnCountToEqual(TableExpectation):
         **kwargs,
     ):
         runtime_configuration = runtime_configuration or {}
-        include_column_name = (
-            False if runtime_configuration.get("include_column_name") is False else True
-        )
+        _ = False if runtime_configuration.get("include_column_name") is False else True
         styling = runtime_configuration.get("styling")
         params = substitute_none_for_missing(configuration.kwargs, ["value"])
         template_str = "Must have exactly $value columns."

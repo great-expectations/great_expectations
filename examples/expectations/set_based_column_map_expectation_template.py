@@ -9,7 +9,6 @@ from great_expectations.expectations.set_based_column_map_expectation import (
 )
 
 
-# <snippet>
 # This class defines the Expectation itself
 class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     """TODO: Add a docstring here"""
@@ -39,6 +38,5 @@ class ExpectColumnValuesToBeInSomeSet(SetBasedColumnMapExpectation):
     }
 
 
-# </snippet>
 if __name__ == "__main__":
     ExpectColumnValuesToBeInSomeSet().print_diagnostic_checklist()

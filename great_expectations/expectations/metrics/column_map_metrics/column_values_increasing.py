@@ -1,17 +1,14 @@
 import datetime
-import warnings
 from typing import Any, Dict
 
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
-)
-from great_expectations.execution_engine.execution_engine import (
-    MetricDomainTypes,
-    MetricPartialFunctionTypes,
 )
 from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
@@ -19,6 +16,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_partial
+from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 
 class ColumnValuesIncreasing(ColumnMapMetricProvider):
@@ -42,14 +40,7 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
             kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
             try:
                 temp_column = column.map(parse)
@@ -93,14 +84,7 @@ please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for
             metric_value_kwargs.get("parse_strings_as_datetimes") or False
         )
         if parse_strings_as_datetimes:
-            # deprecated-v0.13.41
-            warnings.warn(
-                """The parameter "parse_strings_as_datetimes" is deprecated as of v0.13.41 in \
-v0.16. As part of the V3 API transition, we've moved away from input transformation. For more information, \
-please see: https://greatexpectations.io/blog/why_we_dont_do_transformations_for_expectations/
-""",
-                DeprecationWarning,
-            )
+            warn_deprecated_parse_strings_as_datetimes()
 
         # check if column is any type that could have na (numeric types)
         column_name = metric_domain_kwargs["column"]
