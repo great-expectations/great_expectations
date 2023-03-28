@@ -9,6 +9,7 @@ import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_
 import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/_setup_and_install_for_filesystem_data.md'
 import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
 import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
+import Prerequisites from '/docs/components/_prerequisites.jsx'
 
 ## Introduction
 
@@ -18,12 +19,14 @@ Once you have completed this guide you will have a foundation in the basics of u
 
 ## Prerequisites
 
-:::note Prerequisites
-This tutorial assumes you have:
+<Prerequisites>
+
 - Installed Great Expectations OSS on your machine.
 - Followed invitation email instructions from GX team after signing up for Early Access.
 - Successfully logged in to GX Cloud at [https://app.greatexpectations.io](https://app.greatexpectations.io).
-:::
+- A passion for data quality.
+
+</Prerequisites> 
 
 ## Overview
 
