@@ -33,17 +33,11 @@ Once you have completed this guide you will have a foundation in the basics of u
 With GX Cloud you can get up and running within just several minutes. The full process you'll be using will look like:
 
 ```python title="Jupyter Notebook"
-# Set environment variables
-import os
-
-os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<user_token_you_generated_in_the_app>"
-# use Organization ID you have on the Tokens page
-os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
-
-
 # Create Data Context
-import great_expectations as gx
-context = gx.get_context()
+ context = gx.get_context(
+    cloud_access_token = "<user_token_you_generated_in_the_app>",
+    cloud_organization_id = "<organization_id_from_the_app>",
+)
 
 
 # Connect to data
