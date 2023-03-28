@@ -19,8 +19,8 @@ Once you have completed this guide you will have a foundation in the basics of u
 ## Prerequisites
 
 :::note Prerequisites
-This tutorial assumes:
-- You have Great Expectations OSS installed on your machine.
+This tutorial assumes you have:
+- Installed Great Expectations OSS on your machine.
 - Followed invitation email instructions from GX team after signing up for Early Access.
 - Successfully logged in to GX Cloud at [https://app.greatexpectations.io](https://app.greatexpectations.io).
 :::
@@ -82,7 +82,7 @@ print(expectation_suite)
 context.save_expectation_suite(expectation_suite)
 
 
-# Create Checkpoint
+# Validate data
 checkpoint_name = "my_quickstart_checkpoint"
 checkpoint_config = {
   "name": checkpoint_name,
@@ -104,7 +104,7 @@ checkpoint = context.get_checkpoint(checkpoint_name)
 print(checkpoint)
 
 
-# Run Checkpoint
+# View results
 import pandas as pd
 
 df = pd.DataFrame({'name': ["apple", "banana", "cherry"], 'quant': [40, 50, 60]}) 
@@ -287,7 +287,9 @@ print(result)
 
 #### 4.3 Review your results
 
-Once you ran the <TechnicalTag tag="checkpoint" text="Checkpoint"/> you should see a link that takes you directly to GX Cloud, so you can see your <TechnicalTag tag="expectation" text="Expectations"/> and <TechnicalTag tag="validation_result" text="Validation Results"/> in the GX Cloud UI.
+Once you ran the <TechnicalTag tag="checkpoint" text="Checkpoint"/> you should see a link that takes you directly to GX Cloud, so you can see your <TechnicalTag tag="expectation" text="Expectations"/> and <TechnicalTag tag="validation_result" text="Validation Results"/> in the GX Cloud UI. 
+
+Alternatively, check [Checkpoints page](https://app.greatexpectations.io/checkpoints) and click on Expectation Suite you want to see the results for.
 
 
 ## Next Steps 
