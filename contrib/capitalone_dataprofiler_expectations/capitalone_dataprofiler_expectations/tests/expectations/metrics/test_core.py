@@ -3,10 +3,17 @@ import os
 import dataprofiler as dp
 import pandas as pd
 
-# noinspection PyUnresolvedReferences
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (
+    DataProfilerColumnProfileReport,
+    DataProfilerProfileReport,
+)
 from great_expectations.self_check.util import build_pandas_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
+
+_ = DataProfilerColumnProfileReport
+_ = DataProfilerProfileReport
+
 
 test_root_path: str = os.path.dirname(  # noqa: PTH120
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120

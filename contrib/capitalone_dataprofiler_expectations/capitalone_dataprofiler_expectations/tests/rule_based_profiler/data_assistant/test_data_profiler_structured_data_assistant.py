@@ -7,9 +7,10 @@ from unittest import mock
 
 import pytest
 
-# noinspection PyUnresolvedReferences
-# noinspection PyUnresolvedReferences
-# noinspection PyUnresolvedReferences
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (
+    DataProfilerColumnProfileReport,
+    DataProfilerProfileReport,
+)
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
     DataProfilerStructuredDataAssistantResult,
 )
@@ -27,6 +28,10 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext
+
+
+_ = DataProfilerColumnProfileReport
+_ = DataProfilerProfileReport
 
 
 test_root_path: str = os.path.dirname(  # noqa: PTH120

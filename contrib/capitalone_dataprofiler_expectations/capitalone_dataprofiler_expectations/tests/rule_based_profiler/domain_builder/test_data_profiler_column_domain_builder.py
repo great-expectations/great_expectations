@@ -3,7 +3,9 @@ from typing import List
 
 import pytest
 
-# noinspection PyUnresolvedReferences
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (
+    DataProfilerProfileReport,
+)
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.domain_builder.data_profiler_column_domain_builder import (
     DataProfilerColumnDomainBuilder,
 )
@@ -23,6 +25,9 @@ from great_expectations.rule_based_profiler.parameter_container import (
 test_root_path: str = os.path.dirname(  # noqa: PTH120
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
+
+
+_ = DataProfilerProfileReport
 
 
 # TODO: <Alex>ALEX</Alex>
@@ -215,7 +220,6 @@ def test_data_profiler_column_domain_builder(
         batch_request=batch_request,
         # TODO: <Alex>ALEX</Alex>
     )
-    print(f"\n[ALEX_TEST] [WOUTPUT] WOUTPUT:\n{domains} ; TYPE: {str(type(domains))}")
 
     assert len(domains) == 18
     # TODO: <Alex>ALEX</Alex>

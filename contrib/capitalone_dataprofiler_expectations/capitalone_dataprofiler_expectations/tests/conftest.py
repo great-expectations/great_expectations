@@ -1,16 +1,29 @@
 import os
 import shutil
 import sys
+from typing import TYPE_CHECKING
 
 import pytest
 
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (
+    DataProfilerColumnProfileReport,
+    DataProfilerProfileReport,
+)
 from great_expectations import get_context
-from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.self_check.util import build_test_backends_list
+from tests.conftest import (
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+)
 
-# noinspection PyUnresolvedReferences
+if TYPE_CHECKING:
+    from great_expectations.data_context import FileDataContext
+
+
+_ = DataProfilerProfileReport
+_ = DataProfilerColumnProfileReport
+_ = set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder
 
 sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 
