@@ -1312,7 +1312,7 @@ def _get_test_validator_with_data_sqlalchemy(
 
     if table_name is None:
         raise ExecutionEngineError(
-            "Creating Validator in Sql tests requires `table_name` to be defined. Please check your configuration"
+            "Initializing a Validator for SqlAlchemyExecutionEngine in tests requires `table_name` to be defined. Please check your configuration"
         )
     return build_sa_validator_with_data(
         df=df,
@@ -2542,9 +2542,9 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     for dataset in d["data"]:
                         datasets.append(
                             get_test_validator_with_data(
-                                c,
-                                dataset["data"],
-                                dataset.get("schemas"),
+                                execution_engine=c,
+                                data=dataset["data"],
+                                schemas=dataset.get("schemas"),
                                 table_name=dataset.get("dataset_name"),
                                 sqlite_db_path=sqlite_db_path,
                                 extra_debug_info=expectation_type,
@@ -2555,9 +2555,10 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     validator_with_data = datasets[0]
                 else:
                     validator_with_data = get_test_validator_with_data(
-                        c,
-                        d["data"],
-                        d["schemas"],
+                        execution_engine=c,
+                        data=d["data"],
+                        schemas=d["schemas"],
+                        table_name=d["dataset_name"],
                         extra_debug_info=expectation_type,
                         debug_logger=debug_logger,
                         context=context,
@@ -2582,9 +2583,9 @@ def generate_expectation_tests(  # noqa: C901 - 43
                             for dataset in d["data_alt"]:
                                 datasets.append(
                                     get_test_validator_with_data(
-                                        c,
-                                        dataset["data_alt"],
-                                        dataset.get("schemas"),
+                                        execution_engine=c,
+                                        data=dataset["data_alt"],
+                                        schemas=dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
                                         extra_debug_info=expectation_type,
@@ -2595,9 +2596,10 @@ def generate_expectation_tests(  # noqa: C901 - 43
                             validator_with_data = datasets[0]
                         else:
                             validator_with_data = get_test_validator_with_data(
-                                c,
-                                d["data_alt"],
-                                d["schemas"],
+                                execution_engine=c,
+                                data=d["data_alt"],
+                                schemas=d["schemas"],
+                                table_name=d["dataset_name"],
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
                                 context=context,
