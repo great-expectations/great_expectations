@@ -35,7 +35,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.expectations import registry
-import great_expectations as gx
 
 
 _REGISTERED_METRICS_ORIGINAL: dict = copy.deepcopy(registry._registered_metrics)
@@ -45,7 +44,7 @@ def test__base_metric_provider__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the MetricProvider class registers the correct metrics."""
     # ensures consistent state among test cases runs
     monkeypatch.setattr(
-        gx.expectations.registry,
+        registry,
         "_registered_metrics",
         _REGISTERED_METRICS_ORIGINAL,
         raising=False,
@@ -106,7 +105,7 @@ def test__table_metric_provider__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the TableMetricProvider class registers the correct metrics."""
     # ensures consistent state among test cases runs
     monkeypatch.setattr(
-        gx.expectations.registry,
+        registry,
         "_registered_metrics",
         _REGISTERED_METRICS_ORIGINAL,
         raising=False,
@@ -171,7 +170,7 @@ def test__column_map_metric__registration(monkeypatch: pytest.MonkeyPatch):
     """
     # ensures consistent state among test cases runs
     monkeypatch.setattr(
-        gx.expectations.registry,
+        registry,
         "_registered_metrics",
         _REGISTERED_METRICS_ORIGINAL,
         raising=False,
@@ -223,7 +222,7 @@ def test__column_pair_map_metric__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the ColumnPairMapMetricProvider class registers the correct metrics."""
     # ensures consistent state among test cases runs
     monkeypatch.setattr(
-        gx.expectations.registry,
+        registry,
         "_registered_metrics",
         _REGISTERED_METRICS_ORIGINAL,
         raising=False,
@@ -277,7 +276,7 @@ def test__multicolumn_map_metric__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the MultiColumnMapMetricProvider class registers the correct metrics."""
     # ensures consistent state among test cases runs
     monkeypatch.setattr(
-        gx.expectations.registry,
+        registry,
         "_registered_metrics",
         _REGISTERED_METRICS_ORIGINAL,
         raising=False,
@@ -337,7 +336,7 @@ def test__query_metric_provider__registration(monkeypatch: pytest.MonkeyPatch):
     """This tests whether the QueryMetricProvider class registers the correct metrics."""
     # ensures consistent state among test cases runs
     monkeypatch.setattr(
-        gx.expectations.registry,
+        registry,
         "_registered_metrics",
         _REGISTERED_METRICS_ORIGINAL,
         raising=False,
