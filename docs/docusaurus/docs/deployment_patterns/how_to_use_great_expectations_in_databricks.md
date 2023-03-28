@@ -344,7 +344,7 @@ Now let's keep going to create an Expectation Suite and validate our data.
 
 ### 5. Create Expectations
 
-Here we will use a <TechnicalTag tag="validation" text="Validator" /> to interact with our batch of data and generate an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />.
+Here we will use a <TechnicalTag tag="validator" text="Validator" /> to interact with our batch of data and generate an <TechnicalTag tag="expectation_suite" text="Expectation Suite" />.
 
 Each time we evaluate an Expectation (e.g. via `validator.expect_*`), it will immediately be Validated against your data. This instant feedback helps you zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration. Also, the Expectation configuration will be stored in the Validator. When you have run all of the Expectations you want for this dataset, you can call `validator.save_expectation_suite()` to save all of your Expectation configurations into an Expectation Suite for later use in a checkpoint.
 
