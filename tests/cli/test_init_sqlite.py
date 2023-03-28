@@ -13,7 +13,6 @@ from great_expectations.data_context.data_context.file_data_context import (
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.util import gen_directory_tree_str, get_context
 from tests.cli.test_cli import yaml
-from tests.cli.test_datasource_sqlite import _add_datasource_and_credentials_to_context
 from tests.cli.test_init_pandas import _delete_and_recreate_dir
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
@@ -474,56 +473,6 @@ def initialized_sqlite_project(
         }
     ]
     return project_dir
-
-
-@pytest.mark.xfail(
-    reason="This command is not yet implemented for the modern API",
-    run=True,
-    strict=True,
-)
-@mock.patch("webbrowser.open", return_value=True, side_effect=None)
-def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
-    mock_webbrowser,
-    caplog,
-    monkeypatch,
-    initialized_sqlite_project,
-    titanic_sqlite_db,
-    empty_sqlite_db,
-):
-    project_dir = initialized_sqlite_project
-    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
-
-    context = get_context(context_root_dir=ge_dir)
-    datasource_name = "wow_a_datasource"
-    context = _add_datasource_and_credentials_to_context(
-        context, datasource_name, empty_sqlite_db
-    )
-    assert len(context.list_datasources()) == 2
-
-    runner = CliRunner(mix_stderr=False)
-    monkeypatch.chdir(project_dir)
-    with pytest.warns(
-        UserWarning, match="Warning. An existing `great_expectations.yml` was found"
-    ):
-        result = runner.invoke(
-            cli,
-            ["init"],
-            input="n\n",
-            catch_exceptions=False,
-        )
-    stdout = result.stdout
-
-    assert result.exit_code == 0
-    assert mock_webbrowser.call_count == 0
-
-    assert "Error: invalid input" not in stdout
-
-    assert "Always know what to expect from your data" in stdout
-    assert "This looks like an existing project that" in stdout
-    assert "appears complete" in stdout
-    assert "Would you like to build & view this project's Data Docs" in stdout
-
-    assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
 @pytest.mark.xfail(

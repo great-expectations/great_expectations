@@ -51,10 +51,6 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
         str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sqlalchemy_dataset.py")),
-    )
-    shutil.copy(
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
         str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
     )
