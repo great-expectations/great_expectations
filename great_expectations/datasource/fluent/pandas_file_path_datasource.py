@@ -79,4 +79,4 @@ class _PandasFilePathDatasource(_PandasDatasource):
     )
 
     # instance attributes
-    assets: Dict[str, _FilePathDataAsset] = {}
+    assets: Dict[str, _FilePathDataAsset] = {}  # type: ignore[assignment]
