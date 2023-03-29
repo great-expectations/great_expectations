@@ -4,7 +4,6 @@ import datetime
 import hashlib
 import logging
 import pickle
-import warnings
 from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
@@ -13,6 +12,9 @@ import pandas as pd
 from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy_and_pandas import (
+    execute_pandas_reader_fn,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
@@ -38,9 +40,6 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_sampler im
 )
 from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
     PandasDataSplitter,
-)
-from great_expectations.compatibility.sqlalchemy_and_pandas import (
-    execute_pandas_reader_fn,
 )
 
 logger = logging.getLogger(__name__)

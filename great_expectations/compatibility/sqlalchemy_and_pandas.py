@@ -9,6 +9,8 @@ from great_expectations.optional_imports import (
     SQLALCHEMY_NOT_IMPORTED,
     sqlalchemy_version_check,
     is_version_greater_or_equal,
+    is_version_greater,
+    is_version_less_than_or_equal,
 )
 from great_expectations.warnings import (
     warn_pandas_less_than_1_4_and_sqlalchemy_greater_than_or_equal_2_0,
@@ -26,12 +28,9 @@ except ImportError:
 
 
 def execute_pandas_reader_fn(reader_fn: Callable, reader_options):
-    """If pandas version is in a certain range and sqlalchemy installed then suppress sqlalchemy2.0 warning and raise warning."""
-    if is_version_greater_or_equal(pd.__version__, "1.4.0"):
-        reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
-            **reader_options
-        )
-    else:
+    """If pandas version is in a certain range and sqlalchemy installed then suppress
+    the sqlalchemy 2.0 warning and raise our own warning."""
+    if is_version_less_than_or_equal(pd.__version__, "1.5.3"):
         if sa != SQLALCHEMY_NOT_IMPORTED and is_version_greater_or_equal(
             sa.__version__, "2.0.0"
         ):
@@ -41,4 +40,8 @@ def execute_pandas_reader_fn(reader_fn: Callable, reader_options):
             reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
                 **reader_options
             )
+    else:
+        reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
+            **reader_options
+        )
     return reader_fn_result
