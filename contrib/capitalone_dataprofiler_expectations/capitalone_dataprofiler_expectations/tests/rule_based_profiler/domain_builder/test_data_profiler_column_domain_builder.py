@@ -763,6 +763,11 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ):
     class BaseProfiler:
+        """
+        This class should ideally be named "MockBaseProfiler"; however, it has to be called "BaseProfiler", because its
+        "load()" method returns "BaseProfiler" type, which is type of class itself (using "fluent" programming style).
+        """
+
         # noinspection PyMethodMayBeStatic,PyMethodParameters
         def load(cls, filepath: str) -> BaseProfiler:
             return cls
