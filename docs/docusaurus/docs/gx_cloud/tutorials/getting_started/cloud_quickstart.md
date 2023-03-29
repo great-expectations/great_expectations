@@ -22,7 +22,7 @@ Once you have completed this guide you will have a foundation in the basics of u
 <Prerequisites>
 
 - Installed Great Expectations OSS on your machine.
-- Followed invitation email instructions from GX team after signing up for Early Access.
+- Followed invitation email instructions from the GX team after signing up for Early Access.
 - Successfully logged in to GX Cloud at [https://app.greatexpectations.io](https://app.greatexpectations.io).
 - A passion for data quality.
 
@@ -30,12 +30,15 @@ Once you have completed this guide you will have a foundation in the basics of u
 
 ## Overview
 
-With GX Cloud you can get up and running within just several minutes. The full process you'll be using will look like:
+With GX Cloud you can get up and running within just a few minutes. The data we're going to use for this overview is the [NYC taxi data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). This is an open data set which is updated every month. Each record in the data corresponds to one taxi ride. Use individual steps instructions in order to connect to your data.
+The full process you'll be using will look like:
 
 ```python title="Jupyter Notebook"
-# Create Data Context
 import great_expectations as gx
+import pandas as pd
 
+
+# Create Data Context
 context = gx.get_context(
     cloud_access_token = "<user_token_you_generated_in_the_app>",
     cloud_organization_id = "<organization_id_from_the_app>",
@@ -43,16 +46,20 @@ context = gx.get_context(
 
 
 # Connect to data
+datasource_name = "my_quickstart_datasource"
+data_connector_name = "default_runtime_data_connector"
+batch_id = "batch_id"
+
 datasource_yaml = f"""
-  name: my_quickstart_datasource
+  name: {datasource_name}
   class_name: Datasource
   execution_engine:
       class_name: PandasExecutionEngine
   data_connectors:
-      default_runtime_data_connector:
+      {data_connector_name}:
           class_name: RuntimeDataConnector
           batch_identifiers:
-          - my_quickstart_identifier
+          - {batch_id}
   """
 
 datasource = context.test_yaml_config(datasource_yaml)
@@ -69,7 +76,7 @@ expectation_suite = context.create_expectation_suite(
 expectation_configuration = gx.core.ExpectationConfiguration(**{
   "expectation_type": "expect_column_values_to_not_be_null",
   "kwargs": {
-    "column": "name",
+    "column": "trip_distance",
   },
   "meta":{}
 })
@@ -89,9 +96,9 @@ checkpoint_config = {
       "expectation_suite_name": expectation_suite.expectation_suite_name,
       "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
       "batch_request": {
-          "datasource_name": datasource.name,
-          "data_connector_name": "default_runtime_data_connector",
-          "data_asset_name": "my_quickstart_data_asset",
+          "datasource_name": datasource_name,
+          "data_connector_name": data_connector_name,
+          "data_asset_name": "my_quickstart_table",
       },
   }],
   "config_version": 1,
@@ -104,15 +111,15 @@ print(checkpoint)
 
 
 # View results
-import pandas as pd
+path_to_data = "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+df = pd.read_csv(path_to_data)
 
-df = pd.DataFrame({'name': ["apple", "banana", "cherry"], 'quant': [40, 50, 60]}) 
 batch_request = {
     "runtime_parameters": {
         "batch_data": df
     },
     "batch_identifiers": {
-        "my_quickstart_identifier": "test"
+        batch_id: "jan_2019"
     }
 }
 
@@ -128,44 +135,67 @@ In the following steps we'll break down exactly what is happening here so that y
 
 #### 1.1 Generate User Token
 
-Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate User Token. 
-These tokens are see-once and stored as a hash in Great Expectation Cloud's backend database. Once a user copies their API key, the Cloud UI will never show the token value again. 
+Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate a User Token. 
+These tokens are see-once and stored as a hash in Great Expectation Cloud's backend database. Once you copy API key and close the dialog, the Cloud UI will never show the token value again. 
 
-#### 1.2 Create Data Context
+#### 1.2 Import modules
 
 :::tip 
 Any Python Interpreter or script file will work for the remaining steps in the guide, we recommend using a Jupyter Notebook, since they are included in the OSS GX installation and give the best experience of both composing a script file and running code in a live interpreter.
 :::
 
-Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTag tag="data_context" text="Data Context"/>:
+Switch to Jupyter Notebook and import modules we're going to use in this tutorial.
 
 ```python title="Jupyter Notebook"
 import great_expectations as gx
+import pandas as pd
+import os
+```
 
- context = gx.get_context(
-    cloud_access_token = "<user_token_you_generated_in_the_app>",
-    cloud_organization_id = "<organization_id_from_the_app>",
-)
+#### 1.3 Create Data Context
+
+Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTag tag="data_context" text="Data Context"/>. 
+
+:::caution
+Please note that `cloud_access_token` is sensitive information and should not be committed to version control software. Alternatively, add these as [Data Context config variables](docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+:::
+
+```python title="Jupyter Notebook"
+os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
+os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<user_token_you_generated_in_the_app>"
+
+context = gx.get_context()
 ```
 
 ### 2. Connect to data
 
-Modify the following yaml code to connect to your datasource. Otherwise, for the purpose of this guide, you can use this simple Pandas <TechnicalTag tag="datasource" text="Datasource"/> configuration to connect to:
+Modify the following yaml code to connect to your <TechnicalTag tag="datasource" text="Datasource"/>
+
+:::caution
+Please note you should not include sensitive info/credentials directly in the config while connecting to your Datasource, since this would be persisted in plain text in the database and presented in Cloud UI. If credentials/full connection string is required, you should use [config variables file](https://docs.greatexpectations.io/docs/0.15.50/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
+:::
 
 ```python title="Jupyter Notebook"
+datasource_name = None
+assert datasource_name is not None, "Please set datasource_name."
+batch_id = None # batch_id is intended to help identify batches of data passed in directly through dataframes
+assert batch_id is not None, "Please set batch_id."
+data_connector_name = None
+assert data_connector_name is not None, "Please set data_connector_name."
+
 datasource_yaml = f"""
-  name: <NAME_OF_YOUR_DATASOURCE>
+  name: {datasource_name}
   class_name: Datasource
   execution_engine:
       class_name: PandasExecutionEngine
   data_connectors:
-      <NAME_OF_YOUR_DATA_CONNECTOR>:
+      {data_connector_name}:
           class_name: RuntimeDataConnector
           batch_identifiers:
-          - <NAME_OF_YOUR_YOUR_BATCH_IDENTIFIER>
+          - {batch_id}
   """
 
-# Test your configuration (Optional):
+# Test your configuration:
 datasource = context.test_yaml_config(datasource_yaml)
 
 # Save your datasource:
@@ -182,17 +212,20 @@ In case you need more details on how to connect to your specific data system, we
 
 #### 3.1 Create Expectation Suite
 
-An <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is a collection of verifiable assertions about data. Paste this snippet into Jupyter Notebook to create it:
+An <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is a collection of verifiable assertions about data. Run this snippet to create a new, empty <TechnicalTag tag="expectation_suite" text="Expectation Suite"/>:
 
 ```python title="Jupyter Notebook"
+expectation_suite_name = None
+assert expectation_suite_name is not None, "Please set expectation_suite_name."
+
 expectation_suite = context.create_expectation_suite(
-    expectation_suite_name=None # Enter your expectation suite name here
+    expectation_suite_name=expectation_suite_name
 )
 ```
 
 #### 3.2 Add Expectation
 
-Modify and run this snippet to add an <TechnicalTag tag="expectation" text="Expectation"/> to <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> you just created:
+Modify and run this snippet to add an <TechnicalTag tag="expectation" text="Expectation"/> to the <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> you just created:
 
 ```python title="Jupyter Notebook"
 # Get an existing Expectation Suite
@@ -224,7 +257,7 @@ With the Expectation defined above, we are stating that we _expect_ the column o
 
 #### 4.1 Create Checkpoint
 
-Now that we have connected to data and defined <TechnicalTag tag="expectation" text="Expectation"/>, it is time to validate whether our data meets the expectation. To do this, we define a <TechnicalTag tag="checkpoint" text="Checkpoint"/> (which will allow us to repeat the <TechnicalTag tag="validation" text="Validation"/> in the future).
+Now that we have connected to data and defined an <TechnicalTag tag="expectation" text="Expectation"/>, it is time to validate whether our data meets the Expectation. To do this, we define a <TechnicalTag tag="checkpoint" text="Checkpoint"/>, which will allow us to repeat the <TechnicalTag tag="validation" text="Validation"/> in the future.
 
 ```python title="Jupyter Notebook"
 checkpoint_name = None  # name your checkpoint here
@@ -237,11 +270,11 @@ checkpoint_config = {
   # "id": checkpoint_id,  # uncomment after successfully creating your Checkpoint
   "name": checkpoint_name,
   "validations": [{
-      "expectation_suite_name": expectation_suite.expectation_suite_name,
+      "expectation_suite_name": expectation_suite_name,
       "expectation_suite_ge_cloud_id": expectation_suite.ge_cloud_id,
       "batch_request": {
-          "datasource_name": "YOUR DATASOURCE NAME HERE YOU WANT TO CONNECT TO",
-          "data_connector_name": "YOUR DATA CONNECTOR NAME HERE YOU WANT TO CONNECT TO",
+          "datasource_name": datasource_name,
+          "data_connector_name": data_connector_name,
           "data_asset_name": "SET YOUR DATA ASSET NAME HERE",
       },
   }],
@@ -259,15 +292,18 @@ print(checkpoint)
 Once we have created the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, we will run it and get back the results from our <TechnicalTag tag="validation" text="Validation"/>.
 
 ```python title="Jupyter Notebook"
-import pandas as pd
+path_to_data = None
+assert path_to_data is not None, "Please set path_to_data. This can be a local filepath or a remote URL."
+df = pd.read_csv(path_to_data)
+batch_identifier = None
+assert batch_identifier is not None, "Please set batch_identifier."
 
-df = pd.DataFrame(columns=range(8)) # replace this placeholder Pandas dataframe with yours
 batch_request = {
     "runtime_parameters": {
         "batch_data": df
     },
     "batch_identifiers": {
-        "my_identifier": "test"
+        batch_id: batch_identifier
     }
 }
 
@@ -277,16 +313,16 @@ print(result)
 
 #### 4.3 Review your results
 
-Once you ran the <TechnicalTag tag="checkpoint" text="Checkpoint"/> you should see a link that takes you directly to GX Cloud, so you can see your <TechnicalTag tag="expectation" text="Expectations"/> and <TechnicalTag tag="validation_result" text="Validation Results"/> in the GX Cloud UI. 
+After you run the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, you should see a link that takes you directly to GX Cloud, so you can see your <TechnicalTag tag="expectation" text="Expectations"/> and <TechnicalTag tag="validation_result" text="Validation Results"/> in the GX Cloud UI. 
 
-Alternatively, check [Checkpoints page](https://app.greatexpectations.io/checkpoints) and click on Expectation Suite you want to see the results for.
+Alternatively, you can visit the [Checkpoints page](https://app.greatexpectations.io/checkpoints) and filter by the Checkpoint, Expectation Suite, or Data Asset you want to see the results for.
 
 
 ## Next Steps 
 
-Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases! To help with this we have prepared some more detailed installation and setting up guides tailored to specific environments and resources.
+Now that you've seen how to implement the GX workflow, it is time to customize the workflow to suit your specific use cases! To help with this we have prepared more detailed guides tailored to specific environments and resources.
 
-For inviting your team members to the app visit [“Settings” > “Users”](https://app.greatexpectations.io/users).
+To invite additional team members to the app visit [“Settings” > “Users”](https://app.greatexpectations.io/users).
 
 For more details on installing GX for use with local filesystems, please see:
 
