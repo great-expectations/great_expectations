@@ -21,7 +21,7 @@ import ConfirmThatExpectationsCanBeAccessedFromAmazonSByRunningGreatExpectations
 ### 2. Verify your AWS credentials are properly configured
 <VerifyAwsCredentials />
 
-### 2. Identify your Data Context Expectations Store
+### 3. Identify your Data Context Expectations Store
 <IdentifyYourDataContextExpectationsStore />
 
 ### 3. Update your configuration file to include a new Store for Expectations on S3

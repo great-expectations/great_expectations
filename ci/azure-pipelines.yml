@@ -93,6 +93,8 @@ stages:
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
+          # initial run doesn't check `.pyi` source files
+          invoke type-check --ci --pretty --check-stub-sources
         name: StaticTypeCheck
 
     - job: docstring_linter
@@ -429,7 +431,7 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
+            Python37:  # this includes airflow constraints
               python.version: '3.7'
               min_constraints: 'ci/constraints-test/py37-min-install.txt'
             Python38:

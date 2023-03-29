@@ -135,7 +135,6 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
             metric_value_kwargs={
                 "include_nested": True,
             },
-            metric_dependencies=None,
         )
 
         return dependencies
