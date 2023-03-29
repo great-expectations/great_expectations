@@ -257,9 +257,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
 
-_PandasDataAssetT = TypeVar("_PandasDataAssetT", bound=_PandasDataAsset)
-
-
 _PANDAS_READER_METHOD_UNSUPPORTED_LIST = (
     # "read_csv",
     # "read_json",
@@ -399,14 +396,14 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         ]
 
 
-class _PandasDatasource(Datasource, Generic[_PandasDataAssetT]):
+class _PandasDatasource(Datasource):
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
 
     # instance attributes
     assets: MutableMapping[
         str,
-        _PandasDataAssetT,
+        _PandasDataAsset,
     ] = {}
 
     # Abstract Methods
@@ -496,10 +493,10 @@ class _PandasDatasource(Datasource, Generic[_PandasDataAssetT]):
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
 
-class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
+class PandasDatasource(_PandasDatasource):
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
-        Type[DataFrameAsset]
+        DataFrameAsset
     ]
 
     # instance attributes
@@ -519,7 +516,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
             asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
         return asset_name
 
-    def _get_validator(self, asset: _PandasDataAssetT) -> Validator:
+    def _get_validator(self, asset: _PandasDataAsset) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
         return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # got BatchRequest expected BatchRequestBase
 
