@@ -55,6 +55,7 @@ if TYPE_CHECKING:
         IndexLabel,
         StorageOptions,
     )
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.datasource.fluent.pandas_file_path_datasource import (
         CSVAsset,
         ExcelAsset,
@@ -90,6 +91,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         batching_regex: Optional[Union[str, re.Pattern]] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
         header: Union[int, Sequence[int], None, Literal["infer"]] = "infer",
@@ -147,6 +149,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         batching_regex: Optional[Union[str, re.Pattern]] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         sheet_name: typing.Union[str, int, None] = 0,
         header: Union[int, Sequence[int], None] = 0,
         names: typing.Union[typing.List[str], None] = ...,
@@ -174,8 +177,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_feather_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         columns: Union[Sequence[Hashable], None] = ...,
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
@@ -183,8 +187,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_hdf_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         key: typing.Any = ...,
         mode: str = "r",
         errors: str = "strict",
@@ -199,8 +204,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_html_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         match: Union[str, typing.Pattern] = ".+",
         flavor: typing.Union[str, None] = ...,
         header: Union[int, Sequence[int], None] = ...,
@@ -222,6 +228,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         batching_regex: Optional[Union[str, re.Pattern]] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         orient: typing.Union[str, None] = ...,
         dtype: typing.Union[dict, None] = ...,
         convert_axes: typing.Any = ...,
@@ -241,8 +248,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_orc_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         columns: typing.Union[typing.List[str], None] = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> ORCAsset: ...
@@ -252,6 +260,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         batching_regex: Optional[Union[str, re.Pattern]] = ...,
         glob_directive: str = ...,
         order_by: Optional[SortersDefinition] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         engine: str = "auto",
         columns: typing.Union[typing.List[str], None] = ...,
         storage_options: StorageOptions = ...,
@@ -261,16 +270,18 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_pickle_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
     ) -> PickleAsset: ...
     def add_sas_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         format: typing.Union[str, None] = ...,
         index: Union[Hashable, None] = ...,
         encoding: typing.Union[str, None] = ...,
@@ -281,16 +292,18 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_spss_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
         convert_categoricals: bool = ...,
     ) -> SPSSAsset: ...
     def add_stata_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         convert_dates: bool = ...,
         convert_categoricals: bool = ...,
         index_col: typing.Union[str, None] = ...,
@@ -306,8 +319,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_xml_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
         batching_regex: typing.Pattern = ...,
+        order_by: typing.List[Sorter] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
         xpath: str = "./*",
         namespaces: typing.Union[typing.Dict[str, str], None] = ...,
         elems_only: bool = ...,
