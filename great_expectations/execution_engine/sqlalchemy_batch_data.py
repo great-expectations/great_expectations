@@ -10,11 +10,13 @@ try:
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.exc import DatabaseError
     from sqlalchemy.sql.elements import quoted_name
+    from sqlalchemy.engine import Engine
 except ImportError:
     sa = None
     quoted_name = None
     DefaultDialect = None
     DatabaseError = None
+    Engine = None
 
 logger = logging.getLogger(__name__)
 
@@ -294,7 +296,15 @@ class SqlAlchemyBatchData(BatchData):
                     except DatabaseError:
                         connection.execute(sa.text(stmt_2))
         else:
-            with self._engine.connect() as connection:
-                with connection.begin():
-                    connection.execute(sa.text(stmt))
+            # Since currently self._engine can also be a connection we need to
+            # check first that it is an engine before creating a connection from it.
+            # Otherwise, we use the connection.
+            if isinstance(self._engine, Engine):
+                with self._engine.connect() as connection:
+                    with connection.begin():
+                        connection.execute(sa.text(stmt))
+            else:
+                # self._engine is already a connection
+                with self._engine.begin():
+                    self._engine.execute(sa.text(stmt))
         return stmt
