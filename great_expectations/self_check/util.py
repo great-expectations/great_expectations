@@ -2535,13 +2535,21 @@ def generate_expectation_tests(  # noqa: C901 - 43
             try:
                 if isinstance(d["data"], list):
                     sqlite_db_path = generate_sqlite_db_path()
+                    sub_index: int = 1  # additional index needed when dataset is a list
                     for dataset in d["data"]:
+                        dataset_name = generate_test_table_name_with_expectation_name(
+                            dataset=dataset,
+                            expectation_type=expectation_type,
+                            index=i,
+                            sub_index=sub_index,
+                        )
+                        sub_index += 1
                         datasets.append(
                             get_test_validator_with_data(
                                 execution_engine=c,
                                 data=dataset["data"],
                                 schemas=dataset.get("schemas"),
-                                table_name=dataset.get("dataset_name"),
+                                table_name=dataset_name,
                                 sqlite_db_path=sqlite_db_path,
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
@@ -2550,11 +2558,19 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         )
                     validator_with_data = datasets[0]
                 else:
+                    dataset_name = generate_test_table_name_with_expectation_name(
+                        dataset=d,
+                        expectation_type=expectation_type,
+                        index=i,
+                    )
+                    dataset_name = d.get(
+                        "dataset_name", f"{expectation_type}_dataset_{i}"
+                    )
                     validator_with_data = get_test_validator_with_data(
                         execution_engine=c,
                         data=d["data"],
                         schemas=d["schemas"],
-                        table_name=d["dataset_name"],
+                        table_name=dataset_name,
                         extra_debug_info=expectation_type,
                         debug_logger=debug_logger,
                         context=context,
@@ -3252,6 +3268,22 @@ def generate_test_table_name(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
     return table_name
+
+
+def generate_test_table_name_with_expectation_name(
+    dataset: dict, expectation_type: str, index: int, sub_index: int | None = None
+) -> str:
+
+    dataset_name: str
+    if not sub_index:
+        dataset_name: str = dataset.get(
+            "dataset_name", f"{expectation_type}_dataset_{index}"
+        )
+    else:
+        dataset_name: str = dataset.get(
+            "dataset_name", f"{expectation_type}_dataset_{index}_{sub_index}"
+        )
+    return dataset_name
 
 
 def _create_bigquery_engine() -> Engine:
