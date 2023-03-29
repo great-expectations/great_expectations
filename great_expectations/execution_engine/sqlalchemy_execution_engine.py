@@ -98,7 +98,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import Dialect, Row
+    from sqlalchemy.engine import Dialect, Engine, Row
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import (
@@ -109,6 +109,7 @@ try:
     )
     from sqlalchemy.sql.selectable import Select, TextualSelect
 except ImportError:
+    Engine = None
     BooleanClauseList = None
     DefaultDialect = None
     Dialect = None
@@ -446,7 +447,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 _add_sqlite_functions(self.engine.raw_connection())
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
-            self.engine = self.engine.connect()
+            # but only do this if self.engine is an Engine and isn't a Connection
+            if isinstance(self.engine, Engine):
+                self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
