@@ -58,8 +58,6 @@ _PandasDataFrameT = TypeVar("_PandasDataFrameT")
 class PandasDatasourceError(Exception): ...
 
 class _PandasDataAsset(DataAsset):
-    batch_metadata: Optional[BatchMetadata]
-
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]]
 
     def _get_reader_method(self) -> str: ...
