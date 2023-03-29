@@ -19,6 +19,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import import_library_module
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -271,13 +272,13 @@ def test_sqlite_sample_using_limit(sa):
 
     # Right number of rows?
     num_rows: int = batch_data.execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+        sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
     rows: sa.Row = batch_data.execution_engine.engine.execute(
-        sa.select([sa.text("*")]).select_from(batch_data.selectable)
+        sa.select(sa.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
@@ -301,7 +302,9 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # First, make sure that degenerative case never passes.
 
     test_df_0: pd.DataFrame = test_df.iloc[:1]
-    test_df_0.to_sql("test_table_0", con=my_execution_engine.engine)
+    add_dataframe_to_db(
+        df=test_df_0, name="test_table_0", con=my_execution_engine.engine
+    )
 
     p = 1.0
     batch_spec = SqlAlchemyDatasourceBatchSpec(
@@ -313,22 +316,22 @@ def test_sample_using_random(sqlite_view_engine, test_df):
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
     rows_0: List[tuple] = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_0.shape[0])
 
     rows_1: List[tuple] = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     assert len(rows_0) == len(rows_1) == 1
@@ -338,7 +341,9 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     # Second, verify that realistic case always returns different random sample of rows.
 
     test_df_1: pd.DataFrame = test_df
-    test_df_1.to_sql("test_table_1", con=my_execution_engine.engine)
+    add_dataframe_to_db(
+        df=test_df_1, name="test_table_1", con=my_execution_engine.engine
+    )
 
     p = 2.0e-1
     batch_spec = SqlAlchemyDatasourceBatchSpec(
@@ -350,22 +355,22 @@ def test_sample_using_random(sqlite_view_engine, test_df):
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
     rows_0 = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
     num_rows = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.func.count()]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == round(p * test_df_1.shape[0])
 
     rows_1 = batch_data.execution_engine.engine.execute(
-        sqlalchemy.select([sqlalchemy.text("*")]).select_from(batch_data.selectable)
+        sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
     ).fetchall()
 
     assert len(rows_0) == len(rows_1)

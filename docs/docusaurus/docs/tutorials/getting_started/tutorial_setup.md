@@ -79,8 +79,6 @@ great_expectations init
 
 You should see this:
 ```console
-Using v3 (Batch Request) API
-
   ___              _     ___                  _        _   _
  / __|_ _ ___ __ _| |_  | __|_ ___ __  ___ __| |_ __ _| |_(_)___ _ _  ___
 | (_ | '_/ -_) _` |  _| | _|\ \ / '_ \/ -_) _|  _/ _` |  _| / _ \ ' \(_-<

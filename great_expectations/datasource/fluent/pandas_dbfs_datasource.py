@@ -28,7 +28,8 @@ class PandasDBFSDatasource(PandasFilesystemDatasource):
     data_connector_type: ClassVar[Type[DBFSDataConnector]] = DBFSDataConnector
 
     # instance attributes
-    type: Literal["pandas_dbfs"] = "pandas_dbfs"
+    # overridden from base `Literal['pandas_filesystem']`
+    type: Literal["pandas_dbfs"] = "pandas_dbfs"  # type: ignore[assignment] # base class has different type
 
     def _build_data_connector(
         self, data_asset: _FilePathDataAsset, glob_directive: str = "**/*", **kwargs

@@ -124,6 +124,8 @@ stages:
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
+          # initial run doesn't check `.pyi` source files
+          invoke type-check --ci --pretty --check-stub-sources
         name: StaticTypeCheck
 
     - job: docstring_linter
@@ -560,19 +562,3 @@ stages:
 
           - script: ./ci/checks/run_gx_airflow_operator_tests.sh
             name: RunAirflowProviderTests
-
-  - stage: test_build_docs
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
-    pool:
-      vmImage: 'ubuntu-latest'
-
-    jobs:
-      - job: test_build_docs
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
-
-          - script: cd docs/docusaurus && yarn install && bash ../build_docs
-            name: TestBuildDocs

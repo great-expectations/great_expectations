@@ -31,7 +31,8 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
     data_connector_type: ClassVar[Type[DBFSDataConnector]] = DBFSDataConnector
 
     # instance attributes
-    type: Literal["spark_dbfs"] = "spark_dbfs"
+    # overridden from base `Literal['spark_filesystem']`
+    type: Literal["spark_dbfs"] = "spark_dbfs"  # type: ignore[assignment] # base class has different type
 
     def _build_data_connector(
         self, data_asset: _FilePathDataAsset, glob_directive: str = "**/*", **kwargs

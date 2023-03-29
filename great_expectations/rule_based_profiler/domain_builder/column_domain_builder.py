@@ -37,6 +37,10 @@ if TYPE_CHECKING:
 
 
 class ColumnDomainBuilder(DomainBuilder):
+    """
+    This DomainBuilder emits "Domain" object for every column in table and can serve as parent of other column-focused DomainBuilder implementations.
+    """
+
     exclude_field_names: ClassVar[Set[str]] = DomainBuilder.exclude_field_names | {
         "semantic_type_filter",
     }
@@ -403,7 +407,6 @@ class ColumnDomainBuilder(DomainBuilder):
             variables=variables,
         )
 
-        column_name: str
         domains: List[Domain] = build_domains_from_column_names(
             rule_name=rule_name,
             column_names=effective_column_names,
