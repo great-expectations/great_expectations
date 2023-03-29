@@ -30,6 +30,7 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
+    BatchMetadata,
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
@@ -905,6 +906,7 @@ class SQLDatasource(Datasource):
         table_name: str,
         schema_name: Optional[str] = None,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
 
@@ -913,6 +915,7 @@ class SQLDatasource(Datasource):
             table_name: The table where the data resides.
             schema_name: The schema that holds the table.
             order_by: A list of Sorters or Sorter strings.
+            batch_metadata: BatchMetaData we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
             The table asset that is added to the datasource.
@@ -925,6 +928,7 @@ class SQLDatasource(Datasource):
             table_name=table_name,
             schema_name=schema_name,
             order_by=order_by_sorters,
+            batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)
 
@@ -934,6 +938,7 @@ class SQLDatasource(Datasource):
         name: str,
         query: str,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> QueryAsset:
         """Adds a query asset to this datasource.
 
@@ -941,6 +946,7 @@ class SQLDatasource(Datasource):
             name: The name of this table asset.
             query: The SELECT query to selects the data to validate. It must begin with the "SELECT".
             order_by: A list of Sorters or Sorter strings.
+            batch_metadata: BatchMetaData we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
             The query asset that is added to the datasource.
