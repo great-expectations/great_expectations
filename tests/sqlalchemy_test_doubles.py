@@ -45,3 +45,11 @@ class MockSaEngine:
     def connect(self):
         """A contextmanager that yields a _MockConnection"""
         yield _MockConnection(self.dialect)
+
+    def execute(self, *args, **kwargs):
+        """This method is needed because currently we sometimes use a
+        connection in place of an engine.
+
+        When this is cleaned up we should remove this method.
+        """
+        pass
