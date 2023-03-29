@@ -49,6 +49,7 @@ from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.exceptions.exceptions import (
+    ExecutionEngineError,
     InvalidExpectationConfigurationError,
     MetricProviderError,
     MetricResolutionError,
@@ -668,9 +669,9 @@ def get_dataset(  # noqa: C901 - 110
 def get_test_validator_with_data(  # noqa: C901 - 31
     execution_engine: str,
     data: dict,
+    table_name: str | None = None,
     schemas: dict | None = None,
     caching: bool = True,
-    table_name: str | None = None,
     sqlite_db_path: str | None = None,
     extra_debug_info: str = "",
     debug_logger: logging.Logger | None = None,
@@ -786,8 +787,9 @@ def _get_test_validator_with_data_sqlalchemy(
         return None
 
     if table_name is None:
-        table_name = generate_test_table_name().lower()
-
+        raise ExecutionEngineError(
+            "Initializing a Validator for SqlAlchemyExecutionEngine in tests requires `table_name` to be defined. Please check your configuration"
+        )
     return build_sa_validator_with_data(
         df=df,
         sa_engine_name=execution_engine,
@@ -949,9 +951,9 @@ def build_pandas_validator_with_data(
 def build_sa_validator_with_data(  # noqa: C901 - 39
     df,
     sa_engine_name,
+    table_name,
     schemas=None,
     caching=True,
-    table_name=None,
     sqlite_db_path=None,
     extra_debug_info="",
     batch_definition: Optional[BatchDefinition] = None,
@@ -1104,9 +1106,6 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                 df[col] = pd.to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
-
-    if table_name is None:
-        table_name = generate_test_table_name()
 
     if sa_engine_name in [
         "trino",
@@ -1273,7 +1272,8 @@ def build_sa_engine(
 
     # noinspection PyUnresolvedReferences
     sqlalchemy_engine: Engine = sa.create_engine("sqlite://", echo=False)
-    df.to_sql(
+    add_dataframe_to_db(
+        df=df,
         name=table_name,
         con=sqlalchemy_engine,
         schema=schema,
@@ -2012,13 +2012,21 @@ def generate_expectation_tests(  # noqa: C901 - 43
             try:
                 if isinstance(d["data"], list):
                     sqlite_db_path = generate_sqlite_db_path()
+                    sub_index: int = 1  # additional index needed when dataset is a list
                     for dataset in d["data"]:
+                        dataset_name = generate_dataset_name_from_expectation_name(
+                            dataset=dataset,
+                            expectation_type=expectation_type,
+                            index=i,
+                            sub_index=sub_index,
+                        )
+                        sub_index += 1
                         datasets.append(
                             get_test_validator_with_data(
-                                c,
-                                dataset["data"],
-                                dataset.get("schemas"),
-                                table_name=dataset.get("dataset_name"),
+                                execution_engine=c,
+                                data=dataset["data"],
+                                schemas=dataset.get("schemas"),
+                                table_name=dataset_name,
                                 sqlite_db_path=sqlite_db_path,
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
@@ -2027,10 +2035,19 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         )
                     validator_with_data = datasets[0]
                 else:
+                    dataset_name = generate_dataset_name_from_expectation_name(
+                        dataset=d,
+                        expectation_type=expectation_type,
+                        index=i,
+                    )
+                    dataset_name = d.get(
+                        "dataset_name", f"{expectation_type}_dataset_{i}"
+                    )
                     validator_with_data = get_test_validator_with_data(
-                        c,
-                        d["data"],
-                        d["schemas"],
+                        execution_engine=c,
+                        data=d["data"],
+                        schemas=d["schemas"],
+                        table_name=dataset_name,
                         extra_debug_info=expectation_type,
                         debug_logger=debug_logger,
                         context=context,
@@ -2055,9 +2072,9 @@ def generate_expectation_tests(  # noqa: C901 - 43
                             for dataset in d["data_alt"]:
                                 datasets.append(
                                     get_test_validator_with_data(
-                                        c,
-                                        dataset["data_alt"],
-                                        dataset.get("schemas"),
+                                        execution_engine=c,
+                                        data=dataset["data_alt"],
+                                        schemas=dataset.get("schemas"),
                                         table_name=dataset.get("dataset_name"),
                                         sqlite_db_path=sqlite_db_path,
                                         extra_debug_info=expectation_type,
@@ -2068,9 +2085,10 @@ def generate_expectation_tests(  # noqa: C901 - 43
                             validator_with_data = datasets[0]
                         else:
                             validator_with_data = get_test_validator_with_data(
-                                c,
-                                d["data_alt"],
-                                d["schemas"],
+                                execution_engine=c,
+                                data=d["data_alt"],
+                                schemas=d["schemas"],
+                                table_name=d["dataset_name"],
                                 extra_debug_info=expectation_type,
                                 debug_logger=debug_logger,
                                 context=context,
@@ -2727,6 +2745,34 @@ def generate_test_table_name(
         [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
     )
     return table_name
+
+
+def generate_dataset_name_from_expectation_name(
+    dataset: dict, expectation_type: str, index: int, sub_index: int | None = None
+) -> str:
+    """Method to generate datset_name for tests. Will either use the name defined in the test
+    configuration ("dataset_name"), or generate one using the Expectation name and index. In cases where
+    the dataset is a list, then an additional index will be used.
+
+    Args:
+        dataset (dict): definition of data and (possibly) dataset-name
+        expectation_type (str): Expectation that the test_data is being generated for.
+        index (int): index used to number the dataset, so that we can insert a pre-defined list of tables into our db.
+        sub_index (Optional int): In cases where dataset is a list, the additional index is used.
+
+    Returns: dataset_name
+    """
+
+    dataset_name: str
+    if not sub_index:
+        dataset_name: str = dataset.get(
+            "dataset_name", f"{expectation_type}_dataset_{index}"
+        )
+    else:
+        dataset_name: str = dataset.get(
+            "dataset_name", f"{expectation_type}_dataset_{index}_{sub_index}"
+        )
+    return dataset_name
 
 
 def _create_bigquery_engine() -> Engine:
