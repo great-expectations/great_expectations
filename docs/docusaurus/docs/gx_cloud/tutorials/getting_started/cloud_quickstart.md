@@ -172,7 +172,7 @@ context = gx.get_context()
 Modify the following yaml code to connect to your <TechnicalTag tag="datasource" text="Datasource"/>
 
 :::caution
-Please note you should not include sensitive info/credentials directly in the config while connecting to your Datasource, since this would be persisted in plain text in the database and presented in Cloud UI. If credentials/full connection string is required, you should use [config variables file](https://docs.greatexpectations.io/docs/0.15.50/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
+Please note you should not include sensitive info/credentials directly in the config while connecting to your Datasource, since this would be persisted in plain text in the database and presented in Cloud UI. If credentials/full connection string is required, you should use [config variables file](docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md).
 :::
 
 ```python title="Jupyter Notebook"
