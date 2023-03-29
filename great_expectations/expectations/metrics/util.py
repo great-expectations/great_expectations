@@ -501,6 +501,8 @@ def column_reflection_fallback(
                 columns_table_query.c.column_id.asc(),
             )
         )
+        if isinstance(sqlalchemy_engine, Engine):
+            sqlalchemy_engine = sqlalchemy_engine.connect()
         col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
             col_info_query
         ).fetchall()
@@ -586,6 +588,9 @@ def column_reflection_fallback(
             )
             .alias("column_info")
         )
+        # to fix also
+        if isinstance(sqlalchemy_engine, Engine):
+            sqlalchemy_engine = sqlalchemy_engine.connect()
         col_info_tuples_list = sqlalchemy_engine.execute(col_info_query).fetchall()
         # type_module = _get_dialect_type_module(dialect=dialect)
         col_info_dict_list = [
@@ -608,6 +613,9 @@ def column_reflection_fallback(
                 )
             else:
                 query = sa.select(sa.text("*")).select_from(selectable).limit(1)
+
+        if isinstance(sqlalchemy_engine, Engine):
+            sqlalchemy_engine = sqlalchemy_engine.connect()
         result_object = sqlalchemy_engine.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys
