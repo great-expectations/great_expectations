@@ -43,6 +43,7 @@ from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
+    _DataAssetT,
 )
 from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.sources import (
@@ -396,14 +397,14 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
         ]
 
 
-class _PandasDatasource(Datasource):
+class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
 
     # instance attributes
     assets: MutableMapping[
         str,
-        _PandasDataAsset,
+        _DataAssetT,
     ] = {}
 
     # Abstract Methods
