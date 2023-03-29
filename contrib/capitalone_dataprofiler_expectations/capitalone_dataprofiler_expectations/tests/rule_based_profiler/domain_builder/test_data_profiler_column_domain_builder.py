@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import os
 from typing import List
+from unittest import mock
 
 import pytest
 
@@ -748,6 +751,132 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
             "details": {
                 INFERRED_SEMANTIC_TYPE_KEY: {
                     "total_amount": SemanticDomainTypes.NUMERIC.value,
+                },
+            },
+        },
+    ]
+
+
+@pytest.mark.integration
+@pytest.mark.slow  # 1.21s
+def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with_partial_column_list_in_profiler_report(
+    bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
+):
+    class BaseProfiler:
+        # noinspection PyMethodMayBeStatic,PyMethodParameters
+        def load(cls, filepath: str) -> BaseProfiler:
+            return cls
+
+        # noinspection PyMethodMayBeStatic
+        def report(self, report_options: dict = None) -> dict:
+            return {
+                "global_stats": {
+                    "profile_schema": {},
+                },
+                "data_stats": [
+                    {
+                        "column_name": "vendor_id",
+                    },
+                    {
+                        "column_name": "passenger_count",
+                    },
+                    {
+                        "column_name": "total_amount",
+                    },
+                    {
+                        "column_name": "congestion_surcharge",
+                    },
+                ],
+            }
+
+    data_context: FileDataContext = (
+        bobby_columnar_table_multi_batch_deterministic_data_context
+    )
+
+    profile_path = os.path.join(  # noqa: PTH118
+        test_root_path,
+        "data_profiler_files",
+        "profile.pkl",
+    )
+
+    variables_configs: dict = {
+        "profile_path": profile_path,
+        "estimator": "quantiles",
+        "false_positive_rate": 1.0e-2,
+        "mostly": 1.0,
+    }
+    variables: ParameterContainer = build_parameter_container_for_variables(
+        variables_configs=variables_configs
+    )
+
+    batch_request: dict = {
+        "datasource_name": "taxi_pandas",
+        "data_connector_name": "monthly",
+        "data_asset_name": "my_reports",
+        "data_connector_query": {"index": -1},
+    }
+
+    domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder(
+        profile_path=f"{VARIABLES_KEY}profile_path",
+        data_context=data_context,
+    )
+    with mock.patch(
+        "dataprofiler.profilers.profile_builder.BaseProfiler.load",
+        return_value=BaseProfiler(),
+    ):
+        domains: List[Domain] = domain_builder.get_domains(
+            rule_name="my_rule",
+            variables=variables,
+            batch_request=batch_request,
+        )
+
+    assert len(domains) == 4
+    assert domains == [
+        {
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
+            "domain_kwargs": {
+                "column": "vendor_id",
+            },
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "vendor_id": SemanticDomainTypes.NUMERIC.value,
+                },
+            },
+        },
+        {
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
+            "domain_kwargs": {
+                "column": "passenger_count",
+            },
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "passenger_count": SemanticDomainTypes.NUMERIC.value,
+                },
+            },
+        },
+        {
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
+            "domain_kwargs": {
+                "column": "total_amount",
+            },
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "total_amount": SemanticDomainTypes.NUMERIC.value,
+                },
+            },
+        },
+        {
+            "rule_name": "my_rule",
+            "domain_type": MetricDomainTypes.COLUMN.value,
+            "domain_kwargs": {
+                "column": "congestion_surcharge",
+            },
+            "details": {
+                INFERRED_SEMANTIC_TYPE_KEY: {
+                    "congestion_surcharge": SemanticDomainTypes.NUMERIC.value,
                 },
             },
         },
