@@ -135,3 +135,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 delimiter=s3_delimiter,
             )
         )
+
+        logger.info(
+            f"{self.data_connector_type.__name__} created for '{data_asset.name}'"
+        )
