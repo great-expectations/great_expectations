@@ -499,7 +499,7 @@ _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
-        DataFrameAsset
+        Type[DataFrameAsset]
     ]
 
     # instance attributes
