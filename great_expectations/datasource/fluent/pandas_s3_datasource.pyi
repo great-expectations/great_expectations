@@ -66,7 +66,7 @@ if TYPE_CHECKING:
         PickleAsset,
         SASAsset,
         SPSSAsset,
-        STATAAsset,
+        StataAsset,
         XMLAsset,
     )
 
@@ -298,7 +298,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
-    ) -> STATAAsset: ...
+    ) -> StataAsset: ...
     def add_xml_asset(
         self,
         name: str,
