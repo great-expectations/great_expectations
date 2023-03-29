@@ -16,3 +16,11 @@ please see: https://greatexpectations.io/blog/why-we-dont-do-transformations-for
 """,
         DeprecationWarning,
     )
+
+
+def warn_pandas_less_than_1_4_and_sqlalchemy_greater_than_or_equal_2_0() -> None:
+    """Warning to emit when using pandas less than v1.4.0 with sqlalchemy greater than or equal to 2.0.0."""
+    warnings.warn(
+        """Please be aware that pandas versions below v1.4.0 may have issues when paired with SQLAlchemy 2.0 and above.""",
+        UserWarning,
+    )

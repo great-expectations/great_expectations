@@ -1273,7 +1273,8 @@ def build_sa_engine(
 
     # noinspection PyUnresolvedReferences
     sqlalchemy_engine: Engine = sa.create_engine("sqlite://", echo=False)
-    df.to_sql(
+    add_dataframe_to_db(
+        df=df,
         name=table_name,
         con=sqlalchemy_engine,
         schema=schema,

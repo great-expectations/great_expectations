@@ -4,6 +4,7 @@ import datetime
 import hashlib
 import logging
 import pickle
+import warnings
 from functools import partial
 from io import BytesIO
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
@@ -37,6 +38,9 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_sampler im
 )
 from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
     PandasDataSplitter,
+)
+from great_expectations.compatibility.sqlalchemy_and_pandas import (
+    execute_pandas_reader_fn,
 )
 
 logger = logging.getLogger(__name__)
@@ -344,9 +348,9 @@ Bucket: {error}"""
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
             reader_fn = self._get_reader_fn(reader_method)
-            reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
-                **reader_options
-            )
+            reader_fn_result: pd.DataFrame | list[
+                pd.DataFrame
+            ] = execute_pandas_reader_fn(reader_fn, reader_options)
             if isinstance(reader_fn_result, list):
                 if len(reader_fn_result) > 1:
                     raise gx_exceptions.ExecutionEngineError(
