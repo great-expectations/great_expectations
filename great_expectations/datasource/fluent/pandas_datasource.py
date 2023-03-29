@@ -542,9 +542,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         asset_name: Optional[str] = None,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
-            name=asset_name,
+            name=name,
             dataframe=dataframe,
             batch_metadata=batch_metadata,
         )
@@ -569,9 +569,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ClipboardAsset = self.add_clipboard_asset(
-            name=asset_name,
+            name=name,
             batch_metadata=batch_metadata,
             **kwargs,
         )  # type: ignore[valid-type]
@@ -599,9 +599,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: CSVAsset = self.add_csv_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -630,9 +630,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ExcelAsset = self.add_excel_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             io=io,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -661,9 +661,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: FeatherAsset = self.add_feather_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -692,9 +692,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: GBQAsset = self.add_gbq_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             query=query,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -723,9 +723,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: HDFAsset = self.add_hdf_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path_or_buf=path_or_buf,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -754,9 +754,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: HTMLAsset = self.add_html_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             io=io,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -785,9 +785,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: JSONAsset = self.add_json_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path_or_buf=path_or_buf,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -816,9 +816,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ORCAsset = self.add_orc_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -847,9 +847,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ParquetAsset = self.add_parquet_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -878,9 +878,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: PickleAsset = self.add_pickle_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -909,9 +909,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SASAsset = self.add_sas_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -940,9 +940,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SPSSAsset = self.add_parquet_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -974,9 +974,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLAsset = self.add_sql_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             sql=sql,
             con=con,
             batch_metadata=batch_metadata,
@@ -1009,9 +1009,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLQueryAsset = self.add_sql_query_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             sql=sql,
             con=con,
             batch_metadata=batch_metadata,
@@ -1044,9 +1044,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLTableAsset = self.add_sql_table_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             table_name=table_name,
             con=con,
             batch_metadata=batch_metadata,
@@ -1076,9 +1076,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: StataAsset = self.add_stata_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -1107,9 +1107,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: TableAsset = self.add_table_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
             batch_metadata=batch_metadata,
             **kwargs,
@@ -1138,9 +1138,9 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
         batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        asset_name: str = self._validate_asset_name(asset_name=asset_name)
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: XMLAsset = self.add_xml_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path_or_buffer=path_or_buffer,
             batch_metadata=batch_metadata,
             **kwargs,
