@@ -567,11 +567,11 @@ class PandasDatasource(_PandasDatasource):
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
-        asset: ClipboardAsset = self.add_clipboard_asset(
+        asset: ClipboardAsset = self.add_clipboard_asset(  # type: ignore[valid-type]
             name=name,
             batch_metadata=batch_metadata,
             **kwargs,
-        )  # type: ignore[valid-type]
+        )
         return self._get_validator(asset=asset)
 
     def add_csv_asset(
