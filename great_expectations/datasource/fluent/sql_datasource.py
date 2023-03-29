@@ -16,7 +16,7 @@ from typing import (
 )
 
 import pydantic
-from typing_extensions import Literal, Protocol, Self
+from typing_extensions import Literal, Protocol
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
@@ -46,7 +46,9 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 from great_expectations.optional_imports import sqlalchemy
 
 if TYPE_CHECKING:
+    # min version of typing_extension missing `Self`, so it can't be imported at runtime
     import sqlalchemy as sa
+    from typing_extensions import Self
 
 
 class SQLDatasourceError(Exception):

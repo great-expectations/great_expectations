@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
 
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import TypedDict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
@@ -19,6 +19,11 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 if TYPE_CHECKING:
+    # min version of typing_extension missing `NotRequired`, so it can't be imported at runtime
+    from typing_extensions import (
+        NotRequired,
+    )
+
     from great_expectations.core.configuration import AbstractConfig
 
 logger = logging.getLogger(__name__)
