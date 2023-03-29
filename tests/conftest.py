@@ -1761,7 +1761,8 @@ def empty_sqlite_db(sa):
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
-        assert engine.execute(sa.text("select 1")).fetchall()[0] == (1,)
+        with engine.begin() as connection:
+            assert connection.execute(sa.text("select 1")).fetchall()[0] == (1,)
         return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
