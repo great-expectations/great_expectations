@@ -472,9 +472,6 @@ filterwarnings = [
     # code will be deleted soon.
     'ignore: The Connection.connect\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:DeprecationWarning',
     # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
-    # sqlalchemy.exc.RemovedIn20Warning: The Row.keys() method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. Use the namedtuple standard accessor Row._fields, or for full mapping behavior use  row._mapping.keys()  (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: The Row.keys\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:DeprecationWarning',
-    # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
     # sqlalchemy.exc.RemovedIn20Warning: Using non-integer/slice indices on Row is deprecated and will be removed in version 2.0; please use row._mapping[<key>], or the mappings() accessor on the Result object. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     'ignore: Using non-integer\/slice indices on Row is deprecated and will be removed in version 2.0:DeprecationWarning',
     # Example Actual Warning: Found by running setup of test_validate_dataset[sqlite]
