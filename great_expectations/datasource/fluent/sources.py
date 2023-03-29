@@ -261,7 +261,7 @@ class _SourceFactories:
         asset_type_name: str,
     ):
         add_asset_factory_method_name = f"add_{asset_type_name}_asset"
-        asset_factory_defined: bool = add_asset_factory_method_name in ds_type.__dict__
+        asset_factory_defined: bool = hasattr(ds_type, add_asset_factory_method_name)
 
         if not asset_factory_defined:
             logger.debug(
