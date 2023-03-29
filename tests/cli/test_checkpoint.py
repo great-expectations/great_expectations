@@ -57,10 +57,10 @@ def titanic_data_context_with_sql_datasource(
             __file__, os.path.join("..", "test_sets", "Titanic.csv")
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
-        df.to_sql(name="titanic", con=sqlite_engine)
+        df.to_sql(name="titanic", con=conn)
         df = df.sample(frac=0.5, replace=True, random_state=1)
-        df.to_sql(name="incomplete", con=sqlite_engine)
-        test_df.to_sql(name="wrong", con=sqlite_engine)
+        df.to_sql(name="incomplete", con=conn)
+        test_df.to_sql(name="wrong", con=conn)
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
 

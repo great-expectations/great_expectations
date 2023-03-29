@@ -23,7 +23,7 @@ class SqlAlchemyConnectionManager:
         self.lock = threading.Lock()
         self._connections: Dict[str, Connection] = {}
 
-    def get_engine(self, connection_string):
+    def get_connection(self, connection_string):
         if sqlalchemy is not None:
             with self.lock:
                 if connection_string not in self._connections:

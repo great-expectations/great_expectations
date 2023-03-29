@@ -112,7 +112,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     # noinspection PyUnresolvedReferences
     try:
-        engine = connection_manager.get_engine(
+        engine = connection_manager.get_connection(
             f"postgresql://postgres@{db_hostname}/test_ci"
         )
     except (sqlalchemy.exc.OperationalError, ModuleNotFoundError):
