@@ -101,12 +101,13 @@ class PandasS3Datasource(_PandasFilePathDatasource):
     def _build_data_connector(
         self,
         data_asset: _FilePathDataAsset,
-        prefix: str = "",
-        delimiter: str = "/",  # TODO: delimiter conflicts with csv asset args
-        max_keys: int = 1000,
+        s3_prefix: str = "",
+        s3_delimiter: str = "/",  # TODO: delimiter conflicts with csv asset args
+        s3_max_keys: int = 1000,
         **kwargs,
     ) -> None:
         """Builds and attaches the `S3DataConnector` to the asset."""
+        # TODO: use the `asset_options_type` for validation and defaults
         if kwargs:
             raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
@@ -118,9 +119,9 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             s3_client=self._get_s3_client(),
             batching_regex=data_asset.batching_regex,
             bucket=self.bucket,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_keys=max_keys,
+            prefix=s3_prefix,
+            delimiter=s3_delimiter,
+            max_keys=s3_max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
 
@@ -130,7 +131,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
                 data_asset_name=data_asset.name,
                 batching_regex=data_asset.batching_regex,
                 bucket=self.bucket,
-                prefix=prefix,
-                delimiter=delimiter,
+                prefix=s3_prefix,
+                delimiter=s3_delimiter,
             )
         )
