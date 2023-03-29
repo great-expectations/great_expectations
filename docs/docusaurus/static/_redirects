@@ -229,3 +229,6 @@
 /docs/api_docs/classes/great_expectations-data_context-data_context-data_context-datacontext /docs/reference/api/abstract_data_context
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-test_yaml_config /docs/reference/api/abstract_data_context
 /docs/api_docs/methods/great_expectations-data_context-data_context-data_context-datacontext-create /docs/reference/api/great_expectations.util
+
+# Redirects for renamed reference docs
+/docs/reference/anonymous_usage_statistics /docs/reference/usage_statistics
