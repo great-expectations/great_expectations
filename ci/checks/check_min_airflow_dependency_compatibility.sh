@@ -13,13 +13,15 @@ CONSTRAINT_URL="https://raw.githubusercontent.com/apache/airflow/constraints-${A
 # https://raw.githubusercontent.com/apache/airflow/constraints-2.2.3/constraints-3.7.txt
 
 echo "Install gx dependencies using airflow constraint file"
-echo "Python:${PYTHON_VERSION}\nAirflow:${AIRFLOW_VERSION}\n${CONSTRAINT_URL}\n"
+echo "Python:${PYTHON_VERSION}"
+echo "Airflow:${AIRFLOW_VERSION}"
+echo "${CONSTRAINT_URL}"
 
 # Some issues may require uninstalling existing dependencies
 # pip freeze | xargs pip uninstall -y
 pip install . --constraint "${CONSTRAINT_URL}"
 
-echo "\nCall 'get_context()' to check for show-stopping errors\n"
+echo "Call 'get_context()' to check for show-stopping errors"
 
 echo "python ci/checks/get_context.py"
 python ci/checks/get_context.py
