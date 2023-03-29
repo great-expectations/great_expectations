@@ -12,6 +12,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
+    BatchMetadata,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
@@ -60,6 +61,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: BatchMetadata | None = None,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkFilesystemDatasource" object.
 
@@ -81,6 +83,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
+            batch_metadata=batch_metadata or {},
         )
         asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,

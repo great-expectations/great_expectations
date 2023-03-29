@@ -42,6 +42,10 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[SortersDefinition] = None,
+        # Allowed kwargs are defined in .pyi file.
+        # This is a pydantic/mypy workaround to allow to us to remove Optional from
+        # the batch_metadata DataAsset attribute.
+        **kwargs,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkDBFSDatasource" object.
 
@@ -63,6 +67,9 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
+            batch_metadata=kwargs["batch_metadata"]
+            if "batch_metadata" in kwargs
+            else {},
         )
         asset._data_connector = DBFSDataConnector.build_data_connector(
             datasource_name=self.name,

@@ -21,6 +21,7 @@ from great_expectations.datasource.fluent.constants import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
+    BatchMetadata,
     BatchRequest,
     DataAsset,
     Datasource,
@@ -165,9 +166,15 @@ class SparkDatasource(_SparkDatasource):
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
-    def add_dataframe_asset(self, name: str, dataframe: DataFrame) -> DataFrameAsset:
+    def add_dataframe_asset(
+        self,
+        name: str,
+        dataframe: DataFrame,
+        batch_metadata: BatchMetadata | None = None,
+    ) -> DataFrameAsset:
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
+            batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset=asset)

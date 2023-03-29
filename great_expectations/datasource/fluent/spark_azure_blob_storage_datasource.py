@@ -12,7 +12,10 @@ from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.interfaces import (
+    BatchMetadata,
+    TestConnectionError,
+)
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
@@ -128,6 +131,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         name_starts_with: str = "",
         delimiter: str = "/",
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: BatchMetadata | None = None,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkAzureBlobStorageDatasource" object.
 
@@ -151,6 +155,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
+            batch_metadata=batch_metadata or {},
         )
         asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
             datasource_name=self.name,

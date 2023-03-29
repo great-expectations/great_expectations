@@ -56,6 +56,7 @@ class _FilePathDataAsset(DataAsset):
         "type",
         "name",
         "order_by",
+        "batch_metadata",
         "batching_regex",  # file_path argument
         "kwargs",  # kwargs need to be unpacked and passed separately
     }
