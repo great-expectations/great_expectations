@@ -1511,7 +1511,6 @@ class Expectation(metaclass=MetaExpectation):
 
         if diagnostics is None:
             diagnostics = self.run_diagnostics()
-
         if show_failed_tests:
             for test in diagnostics.tests:
                 if test.test_passed is False:
