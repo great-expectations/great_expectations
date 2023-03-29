@@ -4,7 +4,12 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sa
+from great_expectations.expectations.metrics.import_manager import (
+    F,
+    Window,
+    sa,
+    sqlalchemy_engine_Engine,
+)
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -58,9 +63,14 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 source_table=_table,
                 column_name=column.name,
             )
-            with sql_engine.connect() as connection:
-                with connection.begin():
-                    connection.execute(sa.text(temp_table_stmt))
+            if isinstance(sql_engine, sqlalchemy_engine_Engine):
+                with sql_engine.connect() as connection:
+                    with connection.begin():
+                        connection.execute(sa.text(temp_table_stmt))
+            else:
+                # sql_engine is a connection
+                with sql_engine.begin():
+                    sql_engine.execute(sa.text(temp_table_stmt))
             dup_query = (
                 sa.select(column)
                 .select_from(sa.text(temp_table_name))
