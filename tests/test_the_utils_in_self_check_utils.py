@@ -27,6 +27,14 @@ def test_generate_table_name_with_expectation(
     index: int,
     sub_index: int | None,
 ):
+    """Test for helper method that automatically generates table name for tests
+    Args:
+        dataset (dict): dictionary of test configuration.
+        expectation_name (str): name of Expectation under test.
+        expected_output (str): what should the generated table name be?
+        index (int): index of current dataset
+        sub_index (int): optional sub_index if there dataset is part of a list.
+    """
     assert (
         generate_test_table_name_with_expectation_name(
             dataset=dataset,
