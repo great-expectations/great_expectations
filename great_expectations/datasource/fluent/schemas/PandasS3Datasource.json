@@ -99,6 +99,10 @@
                         "$ref": "#/definitions/Sorter"
                     }
                 },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
                 "batching_regex": {
                     "title": "Batching Regex",
                     "default": ".*",
