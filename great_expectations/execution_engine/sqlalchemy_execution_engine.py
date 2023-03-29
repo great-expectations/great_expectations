@@ -1058,7 +1058,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
-                # TO FIX
+
+                if isinstance(self.engine, Engine):
+                    self.engine = self.engine.connect()
                 res = self.engine.execute(sa_query_object).fetchall()
 
                 logger.debug(
