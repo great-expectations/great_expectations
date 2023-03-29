@@ -3,22 +3,37 @@ from __future__ import annotations
 import pytest
 
 from great_expectations.self_check.util import (
-    generate_test_table_name_with_expectation_name,
+    generate_dataset_name_from_expectation_name,
 )
 
 
 @pytest.mark.parametrize(
     "dataset,expectation_name,index,sub_index,expected_output",
     [
-        (
+        pytest.param(
             {"dataset_name": "i_am_a_dataset"},
             "expect_things",
             1,
             None,
             "i_am_a_dataset",
+            id="defined_in_dataset_dict",
         ),
-        ({}, "expect_things", 1, None, "expect_things_dataset_1"),
-        ({}, "expect_things", 1, 2, "expect_things_dataset_1_2"),
+        pytest.param(
+            {},
+            "expect_things",
+            1,
+            None,
+            "expect_things_dataset_1",
+            id="expectation_name_and_index",
+        ),
+        pytest.param(
+            {},
+            "expect_things",
+            1,
+            2,
+            "expect_things_dataset_1_2",
+            id="expectation_name_and_sub_index",
+        ),
     ],
 )
 def test_generate_table_name_with_expectation(
@@ -37,7 +52,7 @@ def test_generate_table_name_with_expectation(
         sub_index (int): optional sub_index if there dataset is part of a list.
     """
     assert (
-        generate_test_table_name_with_expectation_name(
+        generate_dataset_name_from_expectation_name(
             dataset=dataset,
             expectation_type=expectation_name,
             index=index,

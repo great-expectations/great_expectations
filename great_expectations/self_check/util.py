@@ -2013,7 +2013,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     sqlite_db_path = generate_sqlite_db_path()
                     sub_index: int = 1  # additional index needed when dataset is a list
                     for dataset in d["data"]:
-                        dataset_name = generate_test_table_name_with_expectation_name(
+                        dataset_name = generate_dataset_name_from_expectation_name(
                             dataset=dataset,
                             expectation_type=expectation_type,
                             index=i,
@@ -2034,7 +2034,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         )
                     validator_with_data = datasets[0]
                 else:
-                    dataset_name = generate_test_table_name_with_expectation_name(
+                    dataset_name = generate_dataset_name_from_expectation_name(
                         dataset=d,
                         expectation_type=expectation_type,
                         index=i,
@@ -2746,9 +2746,21 @@ def generate_test_table_name(
     return table_name
 
 
-def generate_test_table_name_with_expectation_name(
+def generate_dataset_name_from_expectation_name(
     dataset: dict, expectation_type: str, index: int, sub_index: int | None = None
 ) -> str:
+    """Method to generate datset_name for tests. Will either use the name defined in the test
+    configuration ("dataset_name"), or generate one using the Expectation name and index. In cases where
+    the dataset is a list, then an additional index will be used.
+
+    Args:
+        dataset (dict): definition of data and (possibly) dataset-name
+        expectation_type (str): Expectation that the test_data is being generated for.
+        index (int): index used to number the dataset, so that we can insert a pre-defined list of tables into our db.
+        sub_index (Optional int): In cases where dataset is a list, the additional index is used.
+
+    Returns: dataset_name
+    """
 
     dataset_name: str
     if not sub_index:
