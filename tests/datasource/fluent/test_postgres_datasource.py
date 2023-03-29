@@ -1208,11 +1208,11 @@ def test_create_temp_table(create_source):
 
 
 @pytest.mark.unit
-def test_add_postgres_asset_with_batch_metadata(
+def test_add_postgres_query_asset_with_batch_metadata(
     create_source: CreateSourceFixture,
 ):
     years = [2021, 2022]
-    asset_metadata = {"pipeline_name": "my_pipeline"}
+    asset_specified_metadata = {"pipeline_name": "my_pipeline"}
 
     with create_source(
         validate_batch_spec=lambda _: None,
@@ -1222,12 +1222,39 @@ def test_add_postgres_asset_with_batch_metadata(
         asset = source.add_query_asset(
             name="query_asset",
             query="SELECT * FROM my_table",
-            batch_metadata=asset_metadata,
+            batch_metadata=asset_specified_metadata,
             order_by=["year"],
         )
-        assert asset.batch_metadata == asset_metadata
-
+        assert asset.batch_metadata == asset_specified_metadata
         asset.add_splitter_year(column_name="col")
+        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        assert len(batches) == len(years)
+        for i, year in enumerate(years):
+            assert batches[i].metadata == {"pipeline_name": "my_pipeline", "year": year}
+
+
+@pytest.mark.unit
+def test_add_postgres_table_asset_with_batch_metadata(
+    create_source: CreateSourceFixture, monkeypatch
+):
+    monkeypatch.setattr(TableAsset, "test_connection", lambda _: None)
+    monkeypatch.setattr(TableAsset, "test_splitter_connection", lambda _: None)
+    years = [2021, 2022]
+    asset_specified_metadata = {"pipeline_name": "my_pipeline"}
+
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        splitter_query_response=[{"year": year} for year in years],
+    ) as source:
+        asset = source.add_table_asset(
+            name="query_asset",
+            table_name="my_table",
+            batch_metadata=asset_specified_metadata,
+            order_by=["year"],
+        )
+        assert asset.batch_metadata == asset_specified_metadata
+        asset.add_splitter_year(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
         assert len(batches) == len(years)
         for i, year in enumerate(years):

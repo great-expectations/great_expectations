@@ -958,5 +958,6 @@ class SQLDatasource(Datasource):
             name=name,
             query=query,
             order_by=order_by_sorters,
+            batch_metadata=batch_metadata,
         )
         return self._add_asset(asset)
