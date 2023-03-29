@@ -7,10 +7,10 @@ from great_expectations.util import generate_temporary_table_name
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy.engine import Engine
     from sqlalchemy.engine.default import DefaultDialect
     from sqlalchemy.exc import DatabaseError
     from sqlalchemy.sql.elements import quoted_name
-    from sqlalchemy.engine import Engine
 except ImportError:
     sa = None
     quoted_name = None
