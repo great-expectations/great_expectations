@@ -71,24 +71,24 @@ def is_version_greater_or_equal(
     return version >= compare_version
 
 
-def is_version_less_than_or_equal(
+def is_version_less_than(
     version: str | Version, compare_version: str | Version
 ) -> bool:
-    """Check if the version is less than or equal to the compare_version.
+    """Check if the version is less than the compare_version.
 
     Args:
         version: Current version.
         compare_version: Version to compare to.
 
     Returns:
-        Boolean indicating if the version is less than or equal to the compare version.
+        Boolean indicating if the version is less than the compare version.
     """
     if isinstance(version, str):
         version = Version(version)
     if isinstance(compare_version, str):
         compare_version = Version(compare_version)
 
-    return version <= compare_version
+    return version < compare_version
 
 
 # GX optional imports
