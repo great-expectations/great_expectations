@@ -34,7 +34,7 @@ jsonpatch==1.26
 jsonpointer==2.0
 jsonschema==3.2.0
 jupyter-client==6.1.6
-jupyter-core==4.6.3
+jupyter-core==4.11.2
 lazy-object-proxy==1.4.3
 MarkupSafe==1.1.1
 mistune==0.8.4
