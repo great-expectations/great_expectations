@@ -288,7 +288,7 @@ class _SourceFactories:
                     connect_options = {
                         k: v
                         for (k, v) in kwargs.items()
-                        if k in self.data_connector_type.asset_level_option_keys and v
+                        if k in self.data_connector_type.asset_level_option_keys
                     }
                     if connect_options:
                         logger.info(
