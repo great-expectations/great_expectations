@@ -431,7 +431,7 @@ stages:
         condition: succeeded()
         strategy:
           matrix:
-            Python37:
+            Python37:  # this includes airflow constraints
               python.version: '3.7'
               min_constraints: 'ci/constraints-test/py37-min-install.txt'
             Python38:
