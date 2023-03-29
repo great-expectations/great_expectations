@@ -17,7 +17,7 @@ While some source data systems provide their own means of configuring credential
 
 </summary>
 
-- [How to configure an Expectation Store to use Amazon S3](/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3)
+- [How to configure an Expectation Store to use Amazon S3](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_amazon_s3.md)
 - [How to configure an Expectation Store to use Azure Blob Storage](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_azure_blob_storage.md)
 - [How to configure an Expectation Store to use GCS](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md)
 - [How to configure an Expectation Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)
