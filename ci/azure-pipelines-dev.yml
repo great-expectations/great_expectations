@@ -559,7 +559,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
-            name: CheckMinAirflowDependencyCompatibility.sh
+            name: CheckMinAirflowDependencyCompatibility
 
           - script: ./ci/checks/run_gx_airflow_operator_tests.sh
             name: RunAirflowProviderTests
