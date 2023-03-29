@@ -1,2 +1,3 @@
 numpy==1.18.5
 pandas==1.1.0
+--constraints https://raw.githubusercontent.com/apache/airflow/constraints-2.2.0/constraints-3.7.txt
