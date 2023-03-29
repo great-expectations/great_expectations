@@ -4,7 +4,6 @@ import enum
 import functools
 import inspect
 import logging
-import re
 import warnings
 from collections import defaultdict
 from pprint import pformat as pf
@@ -18,6 +17,7 @@ from typing import (
     List,
     NamedTuple,
     Optional,
+    Pattern,  # must use typing.Pattern for pydantic < v1.10
     Sequence,
     Set,
     Tuple,
@@ -204,7 +204,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
     "Iterable": Iterable,
     "FilePath": FilePath,
     "FilePathOrBuffer": FilePath,
-    "Pattern": re.Pattern,
+    "Pattern": Pattern,
     "CSVEngine": CSVEngine,
     "IndexLabel": IndexLabel,
     "CompressionOptions": CompressionOptions,

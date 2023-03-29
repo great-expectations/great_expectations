@@ -124,6 +124,8 @@ stages:
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
+          # initial run doesn't check `.pyi` source files
+          invoke type-check --ci --pretty --check-stub-sources
         name: StaticTypeCheck
 
     - job: docstring_linter
@@ -557,6 +559,9 @@ stages:
             inputs:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
+
+          - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
+            name: CheckMinAirflowDependencyCompatibility
 
           - script: ./ci/checks/run_gx_airflow_operator_tests.sh
             name: RunAirflowProviderTests
