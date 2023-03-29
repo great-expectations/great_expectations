@@ -23,7 +23,6 @@ class MetricConfiguration:
         metric_value_kwargs (optional[dict]): Optional kwargs that define values specific to each Metric.  For instance,
             a Metric that partitions a column can define the method of partitioning (`uniform` bins) and the number of
             bins (`n_bins`) as `metric_value_kwargs`.
-        metric_dependencies (optional[dict]): This is a dict consisting of all Metrics necessary to evaluate the Expectation.
     """
 
     def __init__(
@@ -31,7 +30,6 @@ class MetricConfiguration:
         metric_name: str,
         metric_domain_kwargs: dict,
         metric_value_kwargs: Optional[dict] = None,
-        metric_dependencies: Optional[dict] = None,
     ) -> None:
         self._metric_name = metric_name
 
@@ -48,8 +46,6 @@ class MetricConfiguration:
         self._metric_value_kwargs: IDDict = metric_value_kwargs
 
         self._metric_dependencies: IDDict = IDDict({})
-        if metric_dependencies is not None:
-            self._metric_dependencies = IDDict(metric_dependencies)
 
     def __repr__(self):
         return json.dumps(self.to_json_dict(), indent=2)
@@ -82,7 +78,13 @@ class MetricConfiguration:
         return self._metric_dependencies
 
     @metric_dependencies.setter
-    def metric_dependencies(self, metric_dependencies) -> None:
+    def metric_dependencies(self, metric_dependencies: dict) -> None:
+        if metric_dependencies is None:
+            metric_dependencies = IDDict({})
+
+        if not isinstance(metric_dependencies, IDDict):
+            metric_dependencies = IDDict(metric_dependencies)
+
         self._metric_dependencies = metric_dependencies
 
     def get_domain(self) -> Domain:
