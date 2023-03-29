@@ -39,6 +39,7 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
+    BatchMetadata,
     BatchRequest,
     DataAsset,
     Datasource,
@@ -81,6 +82,7 @@ class PandasDatasourceError(Exception):
 
 class _PandasDataAsset(DataAsset):
     _EXCLUDE_FROM_READER_OPTIONS: ClassVar[Set[str]] = {
+        "batch_metadata",
         "name",
         "order_by",
         "type",
@@ -145,7 +147,8 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(batch_request.options)
+        batch_metadata = copy.deepcopy(self.batch_metadata) or {}
+        batch_metadata.update(copy.deepcopy(batch_request.options))
 
         # Some pydantic annotations are postponed due to circular imports.
         # Batch.update_forward_refs() will set the annotations before we
@@ -372,7 +375,8 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(batch_request.options)
+        batch_metadata = copy.deepcopy(self.batch_metadata) or {}
+        batch_metadata.update(copy.deepcopy(batch_request.options))
 
         # Some pydantic annotations are postponed due to circular imports.
         # Batch.update_forward_refs() will set the annotations before we
@@ -503,49 +507,85 @@ class PandasDatasource(_PandasDatasource):
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
+    @staticmethod
+    def _validate_asset_name(asset_name: Optional[str] = None) -> str:
+        if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
+            raise PandasDatasourceError(
+                f"""An asset_name of {DEFAULT_PANDAS_DATA_ASSET_NAME} cannot be passed because it is a reserved name."""
+            )
+        if not asset_name:
+            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        return asset_name
+
     def _get_validator(self, asset: _PandasDataAsset) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
         return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # got BatchRequest expected BatchRequestBase
 
-    def add_dataframe_asset(self, name: str, dataframe: pd.DataFrame) -> DataFrameAsset:
+    def add_dataframe_asset(
+        self,
+        name: str,
+        dataframe: pd.DataFrame,
+        batch_metadata: Optional[BatchMetadata] = None,
+    ) -> DataFrameAsset:
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
+            batch_metadata=batch_metadata,
         )
         return self._add_asset(asset=asset)
 
     def read_dataframe(
-        self, dataframe: pd.DataFrame, asset_name: Optional[str] = None
+        self,
+        dataframe: pd.DataFrame,
+        asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
-            name=asset_name, dataframe=dataframe
+            name=name,
+            dataframe=dataframe,
+            batch_metadata=batch_metadata,
         )
         return self._get_validator(asset=asset)
 
-    def add_clipboard_asset(self, name: str, **kwargs) -> ClipboardAsset:  # type: ignore[valid-type]
+    def add_clipboard_asset(
+        self,
+        name: str,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
+    ) -> ClipboardAsset:  # type: ignore[valid-type]
         asset = ClipboardAsset(
             name=name,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
 
-    def read_clipboard(self, asset_name: Optional[str] = None, **kwargs) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
-        asset: ClipboardAsset = self.add_clipboard_asset(name=asset_name, **kwargs)  # type: ignore[valid-type]
+    def read_clipboard(
+        self,
+        asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
+    ) -> Validator:
+        name: str = self._validate_asset_name(asset_name=asset_name)
+        asset: ClipboardAsset = self.add_clipboard_asset(  # type: ignore[valid-type]
+            name=name,
+            batch_metadata=batch_metadata,
+            **kwargs,
+        )
         return self._get_validator(asset=asset)
 
     def add_csv_asset(
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> CSVAsset:  # type: ignore[valid-type]
         asset = CSVAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -554,23 +594,29 @@ class PandasDatasource(_PandasDatasource):
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: CSVAsset = self.add_csv_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_excel_asset(
-        self, name: str, io: os.PathLike | str | bytes, **kwargs
+        self,
+        name: str,
+        io: os.PathLike | str | bytes,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> ExcelAsset:  # type: ignore[valid-type]
         asset = ExcelAsset(
             name=name,
             io=io,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -579,23 +625,29 @@ class PandasDatasource(_PandasDatasource):
         self,
         io: os.PathLike | str | bytes,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ExcelAsset = self.add_excel_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             io=io,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_feather_asset(
-        self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
+        self,
+        name: str,
+        path: pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> FeatherAsset:  # type: ignore[valid-type]
         asset = FeatherAsset(
             name=name,
             path=path,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -604,23 +656,29 @@ class PandasDatasource(_PandasDatasource):
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: FeatherAsset = self.add_feather_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_gbq_asset(
-        self, name: str, query: str, **kwargs
+        self,
+        name: str,
+        query: str,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> GBQAsset:  # type: ignore[valid-type]
         asset = GBQAsset(
             name=name,
             query=query,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -629,23 +687,29 @@ class PandasDatasource(_PandasDatasource):
         self,
         query: str,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: GBQAsset = self.add_gbq_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             query=query,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_hdf_asset(
-        self, name: str, path_or_buf: pd.HDFStore | os.PathLike | str, **kwargs
+        self,
+        name: str,
+        path_or_buf: pd.HDFStore | os.PathLike | str,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> HDFAsset:  # type: ignore[valid-type]
         asset = HDFAsset(
             name=name,
             path_or_buf=path_or_buf,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -654,23 +718,29 @@ class PandasDatasource(_PandasDatasource):
         self,
         path_or_buf: pd.HDFStore | os.PathLike | str,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: HDFAsset = self.add_hdf_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path_or_buf=path_or_buf,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_html_asset(
-        self, name: str, io: os.PathLike | str, **kwargs
+        self,
+        name: str,
+        io: os.PathLike | str,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> HTMLAsset:  # type: ignore[valid-type]
         asset = HTMLAsset(
             name=name,
             io=io,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -679,13 +749,14 @@ class PandasDatasource(_PandasDatasource):
         self,
         io: os.PathLike | str,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: HTMLAsset = self.add_html_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             io=io,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
@@ -694,11 +765,13 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> JSONAsset:  # type: ignore[valid-type]
         asset = JSONAsset(
             name=name,
             path_or_buf=path_or_buf,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -707,23 +780,29 @@ class PandasDatasource(_PandasDatasource):
         self,
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: JSONAsset = self.add_json_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path_or_buf=path_or_buf,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_orc_asset(
-        self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
+        self,
+        name: str,
+        path: pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> ORCAsset:  # type: ignore[valid-type]
         asset = ORCAsset(
             name=name,
             path=path,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -732,23 +811,29 @@ class PandasDatasource(_PandasDatasource):
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ORCAsset = self.add_orc_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_parquet_asset(
-        self, name: str, path: pydantic.FilePath | pydantic.AnyUrl, **kwargs
+        self,
+        name: str,
+        path: pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> ParquetAsset:  # type: ignore[valid-type]
         asset = ParquetAsset(
             name=name,
             path=path,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -757,13 +842,14 @@ class PandasDatasource(_PandasDatasource):
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: ParquetAsset = self.add_parquet_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
@@ -772,11 +858,13 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> PickleAsset:  # type: ignore[valid-type]
         asset = PickleAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -785,13 +873,14 @@ class PandasDatasource(_PandasDatasource):
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: PickleAsset = self.add_pickle_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
@@ -800,11 +889,13 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> SASAsset:  # type: ignore[valid-type]
         asset = SASAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -813,23 +904,29 @@ class PandasDatasource(_PandasDatasource):
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SASAsset = self.add_sas_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_spss_asset(
-        self, name: str, path: pydantic.FilePath, **kwargs
+        self,
+        name: str,
+        path: pydantic.FilePath,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> SPSSAsset:  # type: ignore[valid-type]
         asset = SPSSAsset(
             name=name,
             path=path,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -838,13 +935,14 @@ class PandasDatasource(_PandasDatasource):
         self,
         path: pydantic.FilePath,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SPSSAsset = self.add_parquet_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path=path,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
@@ -854,12 +952,14 @@ class PandasDatasource(_PandasDatasource):
         name: str,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
         asset = SQLAsset(
             name=name,
             sql=sql,
             con=con,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -869,14 +969,15 @@ class PandasDatasource(_PandasDatasource):
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLAsset = self.add_sql_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             sql=sql,
             con=con,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
@@ -886,12 +987,14 @@ class PandasDatasource(_PandasDatasource):
         name: str,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
         asset = SQLQueryAsset(
             name=name,
             sql=sql,
             con=con,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -901,25 +1004,32 @@ class PandasDatasource(_PandasDatasource):
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLQueryAsset = self.add_sql_query_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             sql=sql,
             con=con,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_sql_table_asset(
-        self, name: str, table_name: str, con: sqlalchemy.engine.Engine | str, **kwargs
+        self,
+        name: str,
+        table_name: str,
+        con: sqlalchemy.engine.Engine | str,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> SQLTableAsset:  # type: ignore[valid-type]
         asset = SQLTableAsset(
             name=name,
             table_name=table_name,
             con=con,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -929,14 +1039,15 @@ class PandasDatasource(_PandasDatasource):
         table_name: str,
         con: sqlalchemy.engine.Engine | str,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: SQLTableAsset = self.add_sql_table_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             table_name=table_name,
             con=con,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
@@ -945,11 +1056,13 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> StataAsset:  # type: ignore[valid-type]
         asset = StataAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -958,13 +1071,14 @@ class PandasDatasource(_PandasDatasource):
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: StataAsset = self.add_stata_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
@@ -973,11 +1087,13 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> TableAsset:  # type: ignore[valid-type]
         asset = TableAsset(
             name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -986,23 +1102,29 @@ class PandasDatasource(_PandasDatasource):
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: TableAsset = self.add_table_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             filepath_or_buffer=filepath_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)
 
     def add_xml_asset(
-        self, name: str, path_or_buffer: pydantic.FilePath | pydantic.AnyUrl, **kwargs
+        self,
+        name: str,
+        path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
+        batch_metadata: Optional[BatchMetadata] = None,
+        **kwargs,
     ) -> XMLAsset:  # type: ignore[valid-type]
         asset = XMLAsset(
             name=name,
             path_or_buffer=path_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._add_asset(asset=asset)
@@ -1011,13 +1133,14 @@ class PandasDatasource(_PandasDatasource):
         self,
         path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
         asset_name: Optional[str] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
         **kwargs,
     ) -> Validator:
-        if not asset_name:
-            asset_name = DEFAULT_PANDAS_DATA_ASSET_NAME
+        name: str = self._validate_asset_name(asset_name=asset_name)
         asset: XMLAsset = self.add_xml_asset(  # type: ignore[valid-type]
-            name=asset_name,
+            name=name,
             path_or_buffer=path_or_buffer,
+            batch_metadata=batch_metadata,
             **kwargs,
         )
         return self._get_validator(asset=asset)

@@ -471,3 +471,24 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
             for asset in empty_data_context.sources.pandas_default.assets.values()
         ]
     )
+
+
+def test_dynamic_pandas_batch_metadata(
+    empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
+):
+    pandas_datasource = empty_data_context.sources.pandas_default
+
+    batch_metadata = {
+        "pipeline_filename": "my_data_pipeline.ipynb",
+        "pipeline_step": "transform_3",
+    }
+
+    csv_asset_name = "my_csv_asset"
+
+    csv_asset = pandas_datasource.add_csv_asset(
+        name=csv_asset_name,
+        filepath_or_buffer=valid_file_path,
+        batch_metadata=batch_metadata,
+    )
+    assert csv_asset
+    assert csv_asset.batch_metadata == batch_metadata

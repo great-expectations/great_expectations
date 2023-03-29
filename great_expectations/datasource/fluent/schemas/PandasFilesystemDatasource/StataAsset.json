@@ -1,5 +1,5 @@
 {
-    "title": "STATAAsset",
+    "title": "StataAsset",
     "description": "Read Stata file into DataFrame.",
     "type": "object",
     "properties": {
@@ -27,6 +27,10 @@
             "items": {
                 "$ref": "#/definitions/Sorter"
             }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
         },
         "batching_regex": {
             "title": "Batching Regex",
