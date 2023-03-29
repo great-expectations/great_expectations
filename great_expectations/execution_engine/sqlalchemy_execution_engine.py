@@ -1055,6 +1055,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
+                # TO FIX
                 res = self.engine.execute(sa_query_object).fetchall()
 
                 logger.debug(
@@ -1141,7 +1142,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
             split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        return self.engine.execute(split_query).fetchall()
+        with self.engine.connect() as connection:
+            query_result: List[Row] = connection.execute(split_query).fetchall()
+        return query_result
 
     def get_data_for_batch_identifiers(
         self, selectable: Selectable, splitter_method_name: str, splitter_kwargs: dict

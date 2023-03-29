@@ -427,6 +427,13 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
 
+    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
+        # this is handled manually
+        return str(data)
+    if sqlalchemy is not None and isinstance(data, sqlalchemy.engine.base.Connection):
+        # this is handled manually too
+        return "sqlalchemy.engine.base.Connection"
+
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
     )
@@ -534,7 +541,11 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
         return
 
     if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
-        return str(data)
+        # this is handled manually
+        return
+    if sqlalchemy is not None and isinstance(data, sqlalchemy.engine.base.Connection):
+        # this is handled manually too
+        return
 
     else:
         raise InvalidExpectationConfigurationError(

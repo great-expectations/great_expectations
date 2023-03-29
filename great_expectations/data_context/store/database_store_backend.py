@@ -1,7 +1,7 @@
 import logging
 import uuid
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
@@ -15,6 +15,7 @@ from great_expectations.util import (
 
 try:
     from sqlalchemy import Column, MetaData, String, Table, and_, column
+    from sqlalchemy.engine.row import Row
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 
@@ -27,6 +28,7 @@ except ImportError:
     and_ = SQLALCHEMY_NOT_IMPORTED
     column = SQLALCHEMY_NOT_IMPORTED
     URL = SQLALCHEMY_NOT_IMPORTED
+    Row = SQLALCHEMY_NOT_IMPORTED
     IntegrityError = SQLALCHEMY_NOT_IMPORTED
     NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
     SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
@@ -191,10 +193,10 @@ class DatabaseStoreBackend(StoreBackend):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
-    def _get_connection(self) -> "sa.engine.base.Connection":
-        """Get a connection from an SQLAlchemy engine."""
-        with self.engine.connect() as connection:
-            yield connection
+    # def _get_connection(self) -> "sa.engine.base.Connection":
+    #     """Get a connection from an SQLAlchemy engine."""
+    #     with self.engine.connect() as connection:
+    #         yield connection
 
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
@@ -261,7 +263,9 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self._get_connection().execute(sel).fetchone()[0]
+            with self.engine.begin() as connection:
+                row = connection.execute(sel).fetchone()[0]
+            return row
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error fetching value: {str(e)}")
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
@@ -328,7 +332,8 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self._get_connection().execute(sel).fetchone()[0] == 1
+            with self.engine.begin() as connection:
+                return connection.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error checking for value: {str(e)}")
             return False
@@ -348,7 +353,9 @@ class DatabaseStoreBackend(StoreBackend):
                 )
             )
         )
-        return [tuple(row) for row in self._get_connection().execute(sel).fetchall()]
+        with self.engine.begin() as connection:
+            row_list: List[Row] = connection.execute(sel).fetchall()
+        return [tuple(row) for row in row_list]
 
     def remove_key(self, key):
         delete_statement = self._table.delete().where(

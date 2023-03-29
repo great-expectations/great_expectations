@@ -1703,10 +1703,11 @@ def titanic_sqlite_db(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:///{titanic_db_path}")
-        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
-            0
-        ] == (1313,)
-        return engine
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
+            return connection
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 
@@ -1719,9 +1720,10 @@ def titanic_sqlite_db_connection_string(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:////{titanic_db_path}")
-        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
-            0
-        ] == (1313,)
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
         return f"sqlite:///{titanic_db_path}"
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
