@@ -193,7 +193,6 @@ _METHOD_TO_CLASS_NAME_MAPPINGS: Final[Dict[str, str]] = {
     "spss": "SPSSAsset",
     "sql_query": "SQLQueryAsset",
     "sql_table": "SQLTableAsset",
-    "stata": "STATAAsset",
     "xml": "XMLAsset",
 }
 
