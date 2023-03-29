@@ -3,12 +3,19 @@ import os
 import dataprofiler as dp
 import pandas as pd
 
-# noinspection PyUnresolvedReferences
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (  # registers these metrics
+    DataProfilerColumnProfileReport,
+    DataProfilerProfileReport,
+)
 from great_expectations.self_check.util import build_pandas_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
-test_root_path = os.path.dirname(  # noqa: PTH120
+_ = DataProfilerColumnProfileReport  # prevents removal of "unused" import
+_ = DataProfilerProfileReport  # prevents removal of "unused" import
+
+
+test_root_path: str = os.path.dirname(  # noqa: PTH120
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
 
@@ -17,7 +24,7 @@ def test_data_profiler_column_profile_report_metric_pd():
     engine = build_pandas_engine(
         pd.DataFrame(
             {
-                "VendorID": [
+                "vendor_id": [
                     "Ada Lovelace",
                     "Alan Kay",
                     "Donald Knuth",
@@ -44,16 +51,30 @@ def test_data_profiler_column_profile_report_metric_pd():
 
     table_columns_metric, results = get_table_columns_metric(engine=engine)
     metrics.update(results)
-    desired_metric = MetricConfiguration(
-        metric_name="data_profiler.column_profile_report",
-        metric_domain_kwargs={"column": "VendorID"},
+
+    data_profiler_profile_report_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="data_profiler.profile_report",
+        metric_domain_kwargs={},
         metric_value_kwargs={
             "profile_path": profile_path,
         },
-        metric_dependencies={
-            "table.columns": table_columns_metric,
+    )
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(data_profiler_profile_report_metric,), metrics=metrics
+    )
+    metrics.update(results)
+
+    desired_metric = MetricConfiguration(
+        metric_name="data_profiler.column_profile_report",
+        metric_domain_kwargs={"column": "vendor_id"},
+        metric_value_kwargs={
+            "profile_path": profile_path,
         },
     )
+    desired_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+        "data_profiler.profile_report": data_profiler_profile_report_metric,
+    }
     results = engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
