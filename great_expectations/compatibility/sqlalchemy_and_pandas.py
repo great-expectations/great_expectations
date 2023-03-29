@@ -7,10 +7,9 @@ import pandas as pd
 
 from great_expectations.optional_imports import (
     SQLALCHEMY_NOT_IMPORTED,
-    sqlalchemy_version_check,
     is_version_greater_or_equal,
-    is_version_greater,
     is_version_less_than_or_equal,
+    sqlalchemy_version_check,
 )
 from great_expectations.warnings import (
     warn_pandas_less_than_1_4_and_sqlalchemy_greater_than_or_equal_2_0,
