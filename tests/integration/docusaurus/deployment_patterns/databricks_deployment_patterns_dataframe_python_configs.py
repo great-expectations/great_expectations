@@ -5,7 +5,6 @@ import os
 import datetime
 
 import pandas as pd
-from ruamel import yaml
 
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.util import get_context
@@ -17,7 +16,9 @@ from great_expectations.data_context.types.base import (
 # </snippet>
 
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 spark = get_or_create_spark_application()
 
 ##################

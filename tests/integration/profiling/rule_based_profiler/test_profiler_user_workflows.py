@@ -10,7 +10,6 @@ import pandas as pd
 import pytest
 from freezegun import freeze_time
 from packaging import version
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 # To support python 3.7 we must import Protocol from typing_extensions instead of typing
@@ -31,6 +30,7 @@ from great_expectations.core.domain import (
 )
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource import DataConnector, Datasource
 from great_expectations.expectations.core import (
     expect_column_quantile_values_to_be_between,
@@ -55,7 +55,7 @@ from tests.core.usage_statistics.util import (
 )
 from tests.rule_based_profiler.conftest import ATOL, RTOL
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 TIMESTAMP: str = "09/26/2019 13:42:41"
 

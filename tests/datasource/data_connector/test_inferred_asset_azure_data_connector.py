@@ -1,7 +1,6 @@
 from unittest import mock
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -11,6 +10,7 @@ from great_expectations.core.batch import (
     BatchRequest,
     BatchRequestBase,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetAzureDataConnector
 from great_expectations.execution_engine import (
@@ -18,7 +18,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture

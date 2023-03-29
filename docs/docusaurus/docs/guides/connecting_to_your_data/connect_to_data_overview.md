@@ -158,10 +158,11 @@ context.test_yaml_config(datasource_yaml)
 
 ```python
 import great_expectations as gx
-from ruamel import yaml
+from great_expectations.core.yaml_handler import YAMLHandler
 
 datasource_config = {}  # Replace this with the Python dictionary you want to check for errors.
 
+yaml = YAMLHandler()
 context = gx.get_context()
 context.test_yaml_config(yaml.dump(datasource_config))
 ```
@@ -188,10 +189,12 @@ What is the point of configuring a Datasource if you can't easily use it in the 
 
 The function `add_datasource()` takes in a series of named arguments corresponding to the keys in your `datasource_yaml` string.  Fortunately, python and the `yaml` module provide a convenient way to unpack yaml strings into named arguements so you don't have to. 
 
-First, you will want to import the yaml module with the command:
+First, you will want to import and initialize the YAMLHandler object:
 
 ```python
-from ruamel import yaml
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
 ```
 
 After that, the following code snippet will unpack your yaml string and save your Datasource configuration to the Data Context:
