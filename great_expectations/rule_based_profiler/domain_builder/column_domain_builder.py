@@ -407,7 +407,6 @@ class ColumnDomainBuilder(DomainBuilder):
             variables=variables,
         )
 
-        column_name: str
         domains: List[Domain] = build_domains_from_column_names(
             rule_name=rule_name,
             column_names=effective_column_names,

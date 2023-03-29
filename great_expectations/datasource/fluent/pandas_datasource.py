@@ -521,7 +521,7 @@ class PandasDatasource(_PandasDatasource, Generic[_PandasDataAssetT]):
 
     def _get_validator(self, asset: _PandasDataAssetT) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
-        return self._data_context.get_validator(batch_request=batch_request)
+        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # got BatchRequest expected BatchRequestBase
 
     def add_dataframe_asset(
         self,
