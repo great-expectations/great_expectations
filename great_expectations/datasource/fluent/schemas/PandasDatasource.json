@@ -78,6 +78,10 @@
                     "items": {
                         "$ref": "#/definitions/Sorter"
                     }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
                 }
             },
             "required": [
