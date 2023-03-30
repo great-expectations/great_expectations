@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from contextlib import contextmanager
 from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
 
 import pytest
@@ -21,42 +20,12 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
 PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 
 logger = logging.getLogger(__name__)
-
-
-class MockSaInspector:
-    def get_columns(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]
-        ...
-
-    def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
-        ...
-
-    def has_table(self, table_name: str, schema: str) -> bool:  # type: ignore[empty-body]
-        ...
-
-
-class Dialect:
-    def __init__(self, dialect: str):
-        self.name = dialect
-
-
-class _MockConnection:
-    def __init__(self, dialect: Dialect):
-        self.dialect = dialect
-
-
-class MockSaEngine:
-    def __init__(self, dialect: Dialect):
-        self.dialect = dialect
-
-    @contextmanager
-    def connect(self):
-        """A contextmanager that yields a _MockConnection"""
-        yield _MockConnection(self.dialect)
 
 
 def sqlachemy_execution_engine_mock_cls(

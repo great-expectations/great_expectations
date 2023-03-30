@@ -23,7 +23,11 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_string(sa):
     from pyathena import sqlalchemy_athena
 
     df = pd.DataFrame({"col": ["test_val1", "test_val2"]})
-    validator = build_sa_validator_with_data(df, "sqlite")
+    validator = build_sa_validator_with_data(
+        df=df,
+        sa_engine_name="sqlite",
+        table_name="expect_column_values_to_be_in_type_list_dialect_pyathena_string_1",
+    )
 
     # Monkey-patch dialect for testing purposes.
     validator.execution_engine.dialect_module = sqlalchemy_athena
@@ -69,7 +73,11 @@ def test_expect_column_values_to_be_in_type_list_dialect_pyathena_boolean(sa):
     from pyathena import sqlalchemy_athena
 
     df = pd.DataFrame({"col": [True, False]})
-    validator = build_sa_validator_with_data(df, "sqlite")
+    validator = build_sa_validator_with_data(
+        df=df,
+        sa_engine_name="sqlite",
+        table_name="expect_column_values_to_be_in_type_list_dialect_pyathena_boolean_1",
+    )
 
     # Monkey-patch dialect for testing purposes.
     validator.execution_engine.dialect_module = sqlalchemy_athena

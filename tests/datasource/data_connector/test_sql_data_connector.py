@@ -2475,16 +2475,20 @@ def test_introspect_db(
 
 
 @pytest.mark.integration
-def test_include_schema_name_introspection(mysql_sqlalchemy_datasource):
+def test_include_schema_name_introspection(mysql_engine):
+    execution_engine = SqlAlchemyExecutionEngine(
+        name="test_sql_execution_engine",
+        engine=mysql_engine,
+    )
+
     my_data_connector = instantiate_class_from_config(
         config={
             "class_name": "InferredAssetSqlDataConnector",
-            "name": "my_test_data_connector",
+            "name": "inferred_data_connector",
+            "include_schema_name": True,
         },
         runtime_environment={
-            "execution_engine": SqlAlchemyExecutionEngine(
-                engine=mysql_sqlalchemy_datasource.engine
-            ),
+            "execution_engine": execution_engine,
             "datasource_name": "my_test_datasource",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},

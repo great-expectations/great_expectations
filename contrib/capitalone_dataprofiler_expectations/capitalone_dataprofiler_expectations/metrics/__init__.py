@@ -1,4 +1,7 @@
 # Make sure to include any Metrics your want exported below!
+from .data_profiler_metrics.data_profiler_column_profiler_report import (
+    DataProfilerColumnProfileReport,
+)
 from .data_profiler_metrics.data_profiler_profile_diff import DataProfilerProfileDiff
 from .data_profiler_metrics.data_profiler_profile_metric_provider import (
     DataProfilerProfileMetricProvider,

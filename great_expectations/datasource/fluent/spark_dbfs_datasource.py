@@ -30,7 +30,8 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
     """Spark based Datasource for DataBricks File System (DBFS) based data assets."""
 
     # instance attributes
-    type: Literal["spark_dbfs"] = "spark_dbfs"
+    # overridden from base `Literal['spark_filesystem']`
+    type: Literal["spark_dbfs"] = "spark_dbfs"  # type: ignore[assignment] # base class has different type
 
     @public_api
     def add_csv_asset(
