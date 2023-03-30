@@ -4,7 +4,7 @@ import logging
 import os
 import re
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, List, Type, cast
+from typing import TYPE_CHECKING, List, cast
 
 import pandas as pd
 import pydantic
