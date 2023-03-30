@@ -51,7 +51,7 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
         with engine.begin() as connection:
             connection.execute(sa.text("CREATE SCHEMA connection_test;"))
 
-            table_check_results = engine.execute(
+            table_check_results = connection.execute(
                 sa.text(
                     """
 SELECT EXISTS (
