@@ -1,11 +1,12 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports yaml">
-from ruamel import yaml
-
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector.py imports python">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 
 # </snippet>
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
 # </snippet>
 
 context = gx.get_context()

@@ -12,13 +12,13 @@ import pytest
 from click.testing import CliRunner, Result
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
-from ruamel.yaml import YAML
 
 from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
@@ -29,9 +29,7 @@ from great_expectations.datasource import (
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
@@ -3939,6 +3937,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
 
 
 def _write_checkpoint_dict_to_file(config, checkpoint_file_path):
-    yaml_obj = YAML()
+    yaml_obj = YAMLHandler()
     with open(checkpoint_file_path, "w") as f:
         yaml_obj.dump(config, f)
