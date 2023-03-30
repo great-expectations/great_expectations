@@ -3,11 +3,10 @@ import os
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py imports">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
-
-# </snippet>
 from great_expectations.core.yaml_handler import YAMLHandler
 
 yaml = YAMLHandler()
+# </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py get_context">
 context = gx.get_context()

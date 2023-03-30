@@ -3,10 +3,10 @@ import shutil
 from collections import OrderedDict
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
@@ -21,9 +21,7 @@ from great_expectations.exceptions import InvalidConfigError, MissingConfigVaria
 from great_expectations.util import get_context
 from tests.data_context.conftest import create_data_context_files
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 dataContextConfigSchema = DataContextConfigSchema()
 
