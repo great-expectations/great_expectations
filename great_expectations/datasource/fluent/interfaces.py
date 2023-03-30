@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import dataclasses
 import functools
 import logging
@@ -240,6 +241,13 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError(
             """One must implement "_validate_batch_request" on a DataAsset subclass."""
         )
+
+    def _get_batch_metadata_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> BatchMetadata:
+        batch_metadata = copy.deepcopy(self.batch_metadata)
+        batch_metadata.update(copy.deepcopy(batch_request.options))
+        return batch_metadata
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
