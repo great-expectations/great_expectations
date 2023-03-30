@@ -1,7 +1,6 @@
 from typing import List
 
 import pytest
-from ruamel import yaml
 
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.domain import (
@@ -10,6 +9,7 @@ from great_expectations.core.domain import (
 )
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -25,6 +25,8 @@ from great_expectations.rule_based_profiler.parameter_builder import (
 )
 from great_expectations.rule_based_profiler.rule.rule import Rule
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+
+yaml = YAMLHandler()
 
 
 @pytest.fixture

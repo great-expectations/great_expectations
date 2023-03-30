@@ -1,15 +1,15 @@
 import os
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py imports">
-from ruamel import yaml
-
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     FilesystemStoreBackendDefaults,
 )
 from great_expectations.util import get_context
 
+yaml = YAMLHandler()
 # </snippet>
 
 # 1. Install Great Expectations
