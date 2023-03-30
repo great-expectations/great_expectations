@@ -7,6 +7,7 @@ keywords: [Great Expectations, Ephemeral Data Context]
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import IfYouStillNeedToSetupGx from '/docs/components/prerequisites/_if_you_still_need_to_setup_gx.md'
 import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
+import AdmonitionConvertToFileContext from '/docs/components/setup/data_context/_admonition_convert_to_file_context.md'
 
 ## Introduction
 
@@ -70,6 +71,12 @@ context = EphemeralDataContext(project_config=project_config)
 ```
 
 We now have an Ephemeral Data Context to use for the rest of this Python session.
+
+:::info Saving the contents of an Ephemeral Data Context for future use
+
+<AdmonitionConvertToFileContext />
+
+:::
 
 ## Next steps
 
