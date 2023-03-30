@@ -37,7 +37,7 @@ import LinksAfterInstallingGx from '/docs/components/setup/next_steps/_links_aft
 
 ## Introduction
 
-This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with data stored in Amazon Web Services S3 storage.
+This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with data stored on Google Cloud Storage.
 
 ## Prerequisites
 
