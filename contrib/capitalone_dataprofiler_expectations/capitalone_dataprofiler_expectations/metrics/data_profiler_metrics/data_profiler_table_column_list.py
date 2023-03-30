@@ -1,10 +1,9 @@
-from typing import Optional
+from typing import List, Optional
 
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
     DataProfilerProfileMetricProvider,
 )
 from great_expectations.core import ExpectationConfiguration
-from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import (
@@ -13,8 +12,8 @@ from great_expectations.expectations.metrics.util import (
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
-class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
-    metric_name = "data_profiler.column_profile_report"
+class DataProfilerTableColumnList(DataProfilerProfileMetricProvider):
+    metric_name = "data_profiler.table_column_list"
 
     value_keys = ("profile_path",)
 
@@ -27,21 +26,17 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
         metrics,
         runtime_configuration,
     ):
-        _, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
-            domain_kwargs=metric_domain_kwargs, domain_type=MetricDomainTypes.COLUMN
-        )
-
-        column_name = accessor_domain_kwargs["column"]
-
-        column_name = get_dbms_compatible_column_names(
-            column_names=column_name,
-            batch_columns_list=metrics["table.columns"],
-        )
-
         profile_report_column_data_stats: dict = metrics[
             "data_profiler.table_column_infos"
         ]
-        return profile_report_column_data_stats[column_name]
+        profile_report_column_names: List[str] = list(
+            profile_report_column_data_stats.keys()
+        )
+        profile_report_column_names = get_dbms_compatible_column_names(
+            column_names=profile_report_column_names,
+            batch_columns_list=metrics["table.columns"],
+        )
+        return profile_report_column_names
 
     @classmethod
     def _get_evaluation_dependencies(
