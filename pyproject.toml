@@ -488,6 +488,9 @@ filterwarnings = [
     # Example Actual Warning: Found in setup of test_validate_dataset[sqlite]
     # sqlalchemy.exc.RemovedIn20Warning: The ``bind`` argument for schema methods that invoke SQL against an engine or connection will be required in SQLAlchemy 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     'ignore: The ``bind`` argument for schema methods that invoke SQL against an engine or connection will be required in SQLAlchemy 2.0.:DeprecationWarning',
+    # Example Actual Warning: sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+    # Found so far in test_cli_datasource_list
+    'ignore: Deprecated API features detected!:DeprecationWarning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
