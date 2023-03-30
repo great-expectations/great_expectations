@@ -12,6 +12,9 @@ import pandas as pd
 from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy_and_pandas import (
+    execute_pandas_reader_fn,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchMarkers
 from great_expectations.core.batch_spec import (
@@ -344,9 +347,9 @@ Bucket: {error}"""
             reader_method = batch_spec.reader_method
             reader_options = batch_spec.reader_options
             reader_fn = self._get_reader_fn(reader_method)
-            reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
-                **reader_options
-            )
+            reader_fn_result: pd.DataFrame | list[
+                pd.DataFrame
+            ] = execute_pandas_reader_fn(reader_fn, reader_options)
             if isinstance(reader_fn_result, list):
                 if len(reader_fn_result) > 1:
                     raise gx_exceptions.ExecutionEngineError(
