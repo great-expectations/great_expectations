@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_values_to_be_unique",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_be_unique_1",
     "data" : {
       "a" : ["2", "2", "2", null],
       "b" : [1, "2", 2, null],
@@ -205,6 +206,7 @@
     ]
   },
    {
+    "dataset_name": "expect_column_values_to_be_unique_2",
     "data" : {
       "0": [1, 2, 3, 4],
       "_c0": [1, 2, 3, 4]
