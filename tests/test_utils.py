@@ -33,7 +33,9 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
+    from sqlalchemy.engine.base import Engine
     from sqlalchemy.exc import SQLAlchemyError
+
 
 except ImportError:
     logger.debug(
@@ -151,6 +153,9 @@ def validate_uuid4(uuid_string: str) -> bool:
 
 
 def get_sqlite_temp_table_names(engine):
+    if isinstance(engine, Engine):
+        engine = engine.connect()
+
     result = engine.execute(
         sa.text(
             """
@@ -162,6 +167,7 @@ FROM
         )
     )
     rows = result.fetchall()
+
     return {row[0] for row in rows}
 
 

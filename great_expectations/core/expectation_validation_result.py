@@ -518,11 +518,7 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         if meta is None:
             meta = {}
 
-        # can be module level parameter for reader_methods
-        meta = convert_to_json_serializable(meta)
-        ensure_json_serializable(
-            meta
-        )  # We require meta information to be serializable.
+        ensure_json_serializable(meta)
         self.meta = meta
         self._metrics: dict = {}
 
@@ -554,8 +550,6 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         Returns:
             A JSON-serializable dict representation of this ExpectationSuiteValidationResult.
         """
-        # breakpoint()
-        # self["meta"] = convert_to_json_serializable[self["meta"]]
         myself = deepcopy(self)
         # NOTE - JPC - 20191031: migrate to expectation-specific schemas that subclass result with properly-typed
         # schemas to get serialization all-the-way down via dump
