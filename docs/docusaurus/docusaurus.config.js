@@ -19,9 +19,9 @@ module.exports = {
     [
       require.resolve('docusaurus-gtm-plugin'),
       {
-        id: 'GTM-K63L45F', // GTM Container ID
+        id: 'GTM-K63L45F' // GTM Container ID
       }
-    ],
+    ]
   ],
 
   themeConfig: {
@@ -36,7 +36,7 @@ module.exports = {
 
       searchPagePath: 'search',
       // schedule is in UTC
-      schedule: 'every 1 day at 5:00 pm',
+      schedule: 'every 1 day at 5:00 pm'
 
       // Optional: see doc section below
       // contextualSearch: true,
@@ -68,7 +68,7 @@ module.exports = {
     //   textColor: '#ffffff', // Defaults to `#000`.
     //   isCloseable: false // Defaults to `true`.
     // },
-    image:'img/gx-preview.png',
+    image: 'img/gx-preview.png',
     navbar: {
       logo: {
         alt: 'Great Expectations',
@@ -89,7 +89,7 @@ module.exports = {
               label: '0.13.x and earlier'
             }
           ],
-          dropdownActiveClassDisabled: true,
+          dropdownActiveClassDisabled: true
         },
         {
           label: 'Product',
@@ -182,8 +182,8 @@ module.exports = {
         alt: 'Great Expectations',
         src: 'img/gx-logo-dark.svg',
         href: 'https://greatexpectations.io',
-        width: "100%",
-        height: "auto",
+        width: '100%',
+        height: 'auto'
       },
       links: [
         {
@@ -204,23 +204,27 @@ module.exports = {
           items: [
             {
               label: 'Careers',
-              to: 'https://jobs.superconductive.com/'
+              to: 'https://jobs.greatexpectations.io/'
             },
-                        {
+            {
               label: 'DPA',
-              to: 'https://greatexpectations.io/dpa'
+              to: 'https://greatexpectations.io/pdf/dpa'
             },
-                        {
-              label: 'Terms of Service',
-              to: 'https://greatexpectations.io/terms'
+            {
+              label: 'Master Subscription Agreement',
+              to: 'https://greatexpectations.io/pdf/msa'
             },
+            {
+              label: 'Privacy Policy',
+              to: 'https://greatexpectations.io/privacy-policy'
+            }
           ]
         },
         {
           title: 'Check Us Out',
           items: [
             {
-            html: `
+              html: `
                 <a class="footer__icon" href="https://greatexpectations.io/slack" target="_blank" rel="noreferrer noopener" aria-label="check out or Slack community">
                   <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" height="18px" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M409.4 128c-42.4 0-76.7 34.4-76.7 76.8 0 20.3 8.1 39.9 22.4 54.3 14.4 14.4 33.9 22.5 54.3 22.5h76.7v-76.8c0-42.3-34.3-76.7-76.7-76.8zm0 204.8H204.7c-42.4 0-76.7 34.4-76.7 76.8s34.4 76.8 76.7 76.8h204.6c42.4 0 76.7-34.4 76.7-76.8.1-42.4-34.3-76.8-76.6-76.8zM614 486.4c42.4 0 76.8-34.4 76.7-76.8V204.8c0-42.4-34.3-76.8-76.7-76.8-42.4 0-76.7 34.4-76.7 76.8v204.8c0 42.5 34.3 76.8 76.7 76.8zm281.4-76.8c0-42.4-34.4-76.8-76.7-76.8S742 367.2 742 409.6v76.8h76.7c42.3 0 76.7-34.4 76.7-76.8zm-76.8 128H614c-42.4 0-76.7 34.4-76.7 76.8 0 20.3 8.1 39.9 22.4 54.3 14.4 14.4 33.9 22.5 54.3 22.5h204.6c42.4 0 76.7-34.4 76.7-76.8.1-42.4-34.3-76.7-76.7-76.8zM614 742.4h-76.7v76.8c0 42.4 34.4 76.8 76.7 76.8 42.4 0 76.8-34.4 76.7-76.8.1-42.4-34.3-76.7-76.7-76.8zM409.4 537.6c-42.4 0-76.7 34.4-76.7 76.8v204.8c0 42.4 34.4 76.8 76.7 76.8 42.4 0 76.8-34.4 76.7-76.8V614.4c0-20.3-8.1-39.9-22.4-54.3-14.4-14.4-34-22.5-54.3-22.5zM128 614.4c0 20.3 8.1 39.9 22.4 54.3 14.4 14.4 33.9 22.5 54.3 22.5 42.4 0 76.8-34.4 76.7-76.8v-76.8h-76.7c-42.3 0-76.7 34.4-76.7 76.8z"></path></svg>
                 </a>
@@ -233,10 +237,10 @@ module.exports = {
                 <a class="footer__icon" href="https://www.linkedin.com/company/superconductive-data" target="_blank" rel="noreferrer noopener" aria-label="check out or Slack community">
                   <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" height="18px" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M847.7 112H176.3c-35.5 0-64.3 28.8-64.3 64.3v671.4c0 35.5 28.8 64.3 64.3 64.3h671.4c35.5 0 64.3-28.8 64.3-64.3V176.3c0-35.5-28.8-64.3-64.3-64.3zm0 736c-447.8-.1-671.7-.2-671.7-.3.1-447.8.2-671.7.3-671.7 447.8.1 671.7.2 671.7.3-.1 447.8-.2 671.7-.3 671.7zM230.6 411.9h118.7v381.8H230.6zm59.4-52.2c37.9 0 68.8-30.8 68.8-68.8a68.8 68.8 0 1 0-137.6 0c-.1 38 30.7 68.8 68.8 68.8zm252.3 245.1c0-49.8 9.5-98 71.2-98 60.8 0 61.7 56.9 61.7 101.2v185.7h118.6V584.3c0-102.8-22.2-181.9-142.3-181.9-57.7 0-96.4 31.7-112.3 61.7h-1.6v-52.2H423.7v381.8h118.6V604.8z"></path></svg>
                 </a>
-              `,
-            },
+              `
+            }
           ]
-        },
+        }
       ],
       copyright: `Copyright © ${new Date().getFullYear()} Great Expectations. All Rights Reserved.`
     }
