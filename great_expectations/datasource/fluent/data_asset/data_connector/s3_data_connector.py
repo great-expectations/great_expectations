@@ -5,7 +5,6 @@ import re
 from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 import pydantic
-from pydantic import Field
 
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector.util import (
@@ -26,9 +25,9 @@ logger = logging.getLogger(__name__)
 
 
 class S3Options(pydantic.BaseModel):
-    prefix: str = Field("", alias="s3_prefix")
-    delimiter: str = Field("/", alias="s3_delimiter")
-    max_keys: int = Field(1000, alias="s3_max_keys")
+    s3_prefix: str = ""
+    s3_delimiter: str = "/"
+    s3_max_keys: int = 1000
 
 
 class S3DataConnector(FilePathDataConnector):
