@@ -20,7 +20,7 @@ defusedxml==0.6.0
 docutils==0.16
 entrypoints==0.3
 gitdb==4.0.5
-GitPython==3.1.7
+GitPython==3.1.30
 idna==2.10
 imagesize==1.2.0
 importlib-metadata==1.7.0
