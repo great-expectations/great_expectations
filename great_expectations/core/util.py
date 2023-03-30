@@ -428,10 +428,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return dict(data.jsonValue())
 
     if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
-        # this is handled manually
+        # TextClause is converted to str manually
         return str(data)
     if sqlalchemy is not None and isinstance(data, sqlalchemy.engine.base.Connection):
-        # this is handled manually too
+        # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
     raise TypeError(

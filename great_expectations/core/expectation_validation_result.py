@@ -515,11 +515,11 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
         if statistics is None:
             statistics = {}
         self.statistics = statistics
-
         if meta is None:
             meta = {}
-
-        ensure_json_serializable(meta)  # We require meta information to be serializable
+        ensure_json_serializable(
+            meta
+        )  # We require meta information to be serializable.
         self.meta = meta
         self._metrics: dict = {}
 
