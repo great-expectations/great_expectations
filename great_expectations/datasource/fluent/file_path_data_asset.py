@@ -257,8 +257,13 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if not self._data_connector.test_connection():
-            raise TestConnectionError(self._test_connection_error_message)
+        try:
+            if not self._data_connector.test_connection():
+                raise TestConnectionError(self._test_connection_error_message)
+        except Exception as e:
+            raise TestConnectionError(
+                f"Could not connect to asset using {type(self._data_connector).__name__}: Got {type(e).__name__}"
+            ) from e
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
