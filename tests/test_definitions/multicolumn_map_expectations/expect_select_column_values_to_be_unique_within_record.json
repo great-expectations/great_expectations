@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_select_column_values_to_be_unique_within_record",
   "datasets" : [{
+    "dataset_name": "expect_select_column_values_to_be_unique_within_record_1",
     "data": {
         "a": [1,2,3,4],
         "b": [5,6,7,8],
@@ -75,6 +76,7 @@
         }
       ]
     }, {
+    "dataset_name": "expect_select_column_values_to_be_unique_within_record_2",
     "data" : {
       "w" : [2, 3, 4, 5, 6, 7, 8, 9, 10, null],
       "x" : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
