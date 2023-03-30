@@ -110,6 +110,7 @@ def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataC
             dc_datasources[datasource.type].append(datasource.name)
 
             for asset in datasource.assets.values():
+                assert isinstance(asset._data_connector, datasource.data_connector_type)
                 asset.test_connection()
                 print(f"✅ '{asset.name}' connected with {type(asset._data_connector)}")
             print()
