@@ -193,11 +193,6 @@ class DatabaseStoreBackend(StoreBackend):
         engine = sa.create_engine(options, **create_engine_kwargs)
         return engine
 
-    # def _get_connection(self) -> "sa.engine.base.Connection":
-    #     """Get a connection from an SQLAlchemy engine."""
-    #     with self.engine.connect() as connection:
-    #         yield connection
-
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str, credentials: dict

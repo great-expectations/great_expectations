@@ -588,7 +588,6 @@ def column_reflection_fallback(
             )
             .alias("column_info")
         )
-        # to fix also
         if isinstance(sqlalchemy_engine, Engine):
             sqlalchemy_engine = sqlalchemy_engine.connect()
         col_info_tuples_list = sqlalchemy_engine.execute(col_info_query).fetchall()

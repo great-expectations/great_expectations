@@ -81,7 +81,6 @@ try:
     import sqlalchemy as sa
     from sqlalchemy import Table
     from sqlalchemy.engine import reflection
-    from sqlalchemy.exc import RemovedIn20Warning
     from sqlalchemy.sql import Select
 
 except ImportError:
@@ -92,7 +91,6 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
-    RemovedIn20Warning = None
 
 
 if TYPE_CHECKING:

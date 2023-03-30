@@ -36,13 +36,13 @@ try:
     from sqlalchemy.engine.base import Engine
     from sqlalchemy.exc import SQLAlchemyError
 
-
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
     )
     sa = None
     reflection = None
+    Engine = None
     Table = None
     Select = None
     SQLAlchemyError = None
@@ -167,7 +167,6 @@ FROM
         )
     )
     rows = result.fetchall()
-
     return {row[0] for row in rows}
 
 
