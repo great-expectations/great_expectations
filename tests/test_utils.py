@@ -154,9 +154,9 @@ def validate_uuid4(uuid_string: str) -> bool:
 
 def get_sqlite_temp_table_names(engine):
     if isinstance(engine, Engine):
-        engine = engine.connect()
+        connection = engine.connect()
 
-    result = engine.execute(
+    result = connection.execute(
         sa.text(
             """
 SELECT
