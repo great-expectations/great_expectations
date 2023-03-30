@@ -189,7 +189,11 @@ class SqliteDatasource(SQLDatasource):
         return cast(
             SqliteTableAsset,
             super().add_table_asset(
-                name, table_name, schema_name, order_by, batch_metadata
+                name=name,
+                table_name=table_name,
+                schema_name=schema_name,
+                order_by=order_by,
+                batch_metadata=batch_metadata,
             ),
         )
 
@@ -205,7 +209,9 @@ class SqliteDatasource(SQLDatasource):
     ) -> SqliteQueryAsset:
         return cast(
             SqliteQueryAsset,
-            super().add_query_asset(name, query, order_by, batch_metadata),
+            super().add_query_asset(
+                name=name, query=query, order_by=order_by, batch_metadata=batch_metadata
+            ),
         )
 
     add_query_asset.__doc__ = SQLDatasource.add_query_asset.__doc__

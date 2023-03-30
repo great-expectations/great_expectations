@@ -917,7 +917,7 @@ class SQLDatasource(Datasource):
             table_name: The table where the data resides.
             schema_name: The schema that holds the table.
             order_by: A list of Sorters or Sorter strings.
-            batch_metadata: BatchMetaData we want to associate with this DataAsset and all batches derived from it.
+            batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
             The table asset that is added to the datasource.
@@ -948,7 +948,7 @@ class SQLDatasource(Datasource):
             name: The name of this table asset.
             query: The SELECT query to selects the data to validate. It must begin with the "SELECT".
             order_by: A list of Sorters or Sorter strings.
-            batch_metadata: BatchMetaData we want to associate with this DataAsset and all batches derived from it.
+            batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
             The query asset that is added to the datasource.
