@@ -30,6 +30,7 @@ from pydantic import Field, StrictBool, StrictInt, root_validator, validate_argu
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
+from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.datasource.fluent.constants import (
     MATCH_ALL_PATTERN,
@@ -245,7 +246,14 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     def _get_batch_metadata_from_batch_request(
         self, batch_request: BatchRequest
     ) -> BatchMetadata:
+        """Performs config variable substitution and populates batch request options for
+        Batch.metadata at runtime.
+        """
         batch_metadata = copy.deepcopy(self.batch_metadata)
+        config_variables = self._datasource._data_context.config_variables
+        batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
+            data=batch_metadata, replace_variables_dict=config_variables
+        )
         batch_metadata.update(copy.deepcopy(batch_request.options))
         return batch_metadata
 

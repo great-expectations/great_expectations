@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import inspect
 import logging
 import pathlib
@@ -499,4 +500,7 @@ def test_dynamic_pandas_batch_metadata(
     batch_list = csv_asset.get_batch_list_from_batch_request(
         csv_asset.build_batch_request()
     )
-    assert batch_list[0].metadata != batch_metadata
+    assert len(batch_list) == 1
+    substituted_batch_metadata = copy.deepcopy(batch_metadata)
+    substituted_batch_metadata.update(my_config_variables)
+    assert batch_list[0].metadata == substituted_batch_metadata
