@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import sqlalchemy as sa
-    from sqlalchemy.engine.base import Engine
+    from sqlalchemy.engine.base import Connection, Engine
     from sqlalchemy.exc import SQLAlchemyError
 
 except ImportError:
@@ -42,6 +42,7 @@ except ImportError:
     )
     sa = None
     reflection = None
+    Connection = None
     Engine = None
     Table = None
     Select = None
@@ -154,9 +155,9 @@ def validate_uuid4(uuid_string: str) -> bool:
 
 def get_sqlite_temp_table_names(engine):
     if isinstance(engine, Engine):
-        connection = engine.connect()
+        connection: Connection = engine.connect()
     else:
-        connection = engine
+        connection: Connection = engine
 
     result = connection.execute(
         sa.text(
