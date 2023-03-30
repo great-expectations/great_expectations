@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_value_z_scores_to_be_less_than",
   "datasets" : [{
+    "dataset_name": "expect_column_value_z_scores_to_be_less_than_1",
     "data" : {
       "dist1": [1, 1, 1, 3, 3],
       "dist2": [-100000000000, -1, 0, 1,  1],

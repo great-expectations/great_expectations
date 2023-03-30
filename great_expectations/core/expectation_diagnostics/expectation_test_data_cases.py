@@ -97,6 +97,7 @@ class ExpectationTestDataCases(SerializableDictDot):
     """Pairs a test dataset and a list of test cases to execute against that data."""
 
     data: TestData
+    dataset_name: str
     tests: List[ExpectationTestCase]
     schemas: Dict[Backend, Dict[str, str]] = field(default_factory=dict)
     test_backends: Optional[List[TestBackend]] = None
