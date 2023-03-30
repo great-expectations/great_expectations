@@ -362,7 +362,8 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self._get_connection().execute(delete_statement)
+            with self.engine.begin() as connection:
+                return connection.execute(delete_statement)
         except SQLAlchemyError as e:
             raise gx_exceptions.StoreBackendError(
                 f"Unable to delete key: got sqlalchemy error {str(e)}"

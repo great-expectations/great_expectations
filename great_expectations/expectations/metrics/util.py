@@ -405,6 +405,12 @@ def column_reflection_fallback(
     selectable: Select, dialect: Dialect, sqlalchemy_engine: Engine
 ) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
+
+    if isinstance(sqlalchemy_engine, Engine):
+        connection: Connection = sqlalchemy_engine.connect()
+    else:
+        connection: Connection = sqlalchemy_engine
+
     col_info_dict_list: List[Dict[str, str]]
     # noinspection PyUnresolvedReferences
     if dialect.name.lower() == "mssql":
@@ -501,9 +507,7 @@ def column_reflection_fallback(
                 columns_table_query.c.column_id.asc(),
             )
         )
-        if isinstance(sqlalchemy_engine, Engine):
-            sqlalchemy_engine = sqlalchemy_engine.connect()
-        col_info_tuples_list: List[tuple] = sqlalchemy_engine.execute(
+        col_info_tuples_list: List[tuple] = connection.execute(
             col_info_query
         ).fetchall()
         # type_module = _get_dialect_type_module(dialect=dialect)
@@ -588,9 +592,7 @@ def column_reflection_fallback(
             )
             .alias("column_info")
         )
-        if isinstance(sqlalchemy_engine, Engine):
-            sqlalchemy_engine = sqlalchemy_engine.connect()
-        col_info_tuples_list = sqlalchemy_engine.execute(col_info_query).fetchall()
+        col_info_tuples_list = connection.execute(col_info_query).fetchall()
         # type_module = _get_dialect_type_module(dialect=dialect)
         col_info_dict_list = [
             {
@@ -613,9 +615,7 @@ def column_reflection_fallback(
             else:
                 query = sa.select(sa.text("*")).select_from(selectable).limit(1)
 
-        if isinstance(sqlalchemy_engine, Engine):
-            sqlalchemy_engine = sqlalchemy_engine.connect()
-        result_object = sqlalchemy_engine.execute(query)
+        result_object = connection.execute(query)
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]
