@@ -33,14 +33,14 @@ Import these necessary packages and modules:
 
 <TabItem value="yaml">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py imports"
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py yaml imports"
 ```
 
 </TabItem>
 
 <TabItem value="python">
 
-```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py imports"
+```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_configure_a_runtimedataconnector.py python imports"
 ```
 
 </TabItem>
