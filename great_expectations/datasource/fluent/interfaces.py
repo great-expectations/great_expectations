@@ -209,8 +209,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> List[Batch]:
         raise NotImplementedError
 
-    # End Abstract Methods
-
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
@@ -229,9 +227,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
-    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(set(self.batch_request_options))
-
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
 
@@ -241,6 +236,11 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError(
             """One must implement "_validate_batch_request" on a DataAsset subclass."""
         )
+
+    # End Abstract Methods
+
+    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
+        return set(options.keys()).issubset(set(self.batch_request_options))
 
     def _get_batch_metadata_from_batch_request(
         self, batch_request: BatchRequest
