@@ -21,9 +21,8 @@ To validate the snippets in this file, use the following console command:
 yarn snippet-check ./tests/integration/docusaurus/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.py
 ```
 """
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 from tests.integration.docusaurus.connecting_to_your_data.datasource_configuration.datasource_configuration_test_utilities import (
     is_subset,
 )
@@ -35,6 +34,7 @@ from tests.integration.docusaurus.connecting_to_your_data.datasource_configurati
     get_partial_config_universal_datasource_config_elements,
 )
 
+yaml = YAMLHandler()
 CONNECTION_STRING = "sqlite:///data/yellow_tripdata_sample_2020_all_months_combined.db"
 data_context: gx.DataContext = gx.get_context()
 

@@ -1,13 +1,13 @@
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py imports">
 import os
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/bigquery_yaml_example.py imports">
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 # </snippet>
 
-yaml = YAMLHandler()
 # NOTE: The following code is only for testing and depends on an environment
 # variable to set the gcp_project. You can replace the value with your own
 # GCP project information

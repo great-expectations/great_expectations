@@ -5,7 +5,6 @@ from typing import Any, Dict, List, Union
 from unittest.mock import MagicMock
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -16,6 +15,7 @@ from great_expectations.core.expectation_suite import (
     expectationSuiteSchema,
 )
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.util import filter_properties_dict
@@ -716,7 +716,8 @@ def profiler_config():
            meta:
              profiler_details: $parameter.row_count_range.details
     """
-    yaml = YAML()
+
+    yaml = YAMLHandler()
     return yaml.load(yaml_config)
 
 

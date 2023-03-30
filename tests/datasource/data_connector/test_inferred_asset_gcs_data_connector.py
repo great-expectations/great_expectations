@@ -1,11 +1,11 @@
 from unittest import mock
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetGCSDataConnector
 from great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector import (
@@ -13,7 +13,7 @@ from great_expectations.datasource.data_connector.inferred_asset_gcs_data_connec
 )
 from great_expectations.execution_engine import PandasExecutionEngine
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture

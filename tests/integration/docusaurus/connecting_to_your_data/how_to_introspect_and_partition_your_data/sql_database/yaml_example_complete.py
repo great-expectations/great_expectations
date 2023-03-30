@@ -1,10 +1,11 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py imports">
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 # </snippet>
+
 from great_expectations.expectations.metrics.import_manager import sa
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py get_context">
