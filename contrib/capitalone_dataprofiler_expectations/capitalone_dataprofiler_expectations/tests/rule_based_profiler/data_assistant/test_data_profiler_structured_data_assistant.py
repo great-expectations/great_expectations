@@ -8,7 +8,7 @@ from unittest import mock
 import pytest
 
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # registers this DataAssistant
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # noqa: F401,F403  # registers this DataAssistant and prevents removal of "unused" import
     DataProfilerStructuredDataAssistant,
 )
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
@@ -28,9 +28,6 @@ from great_expectations.rule_based_profiler.parameter_container import (
 
 if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext
-
-
-_ = DataProfilerStructuredDataAssistant  # prevents removal of "unused" import
 
 
 test_root_path: str = os.path.dirname(  # noqa: PTH120
