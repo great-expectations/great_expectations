@@ -174,7 +174,9 @@ def checkpoint_new_notebook_assets():
             "cell_type": "code",
             "metadata": {},
             "execution_count": None,
-            "source": "import great_expectations as gx\nfrom great_expectations.core.yaml_handler import YAMLHandler\nfrom pprint import pprint\n\nyaml = YAMLHandler()\ncontext = gx.get_context()",
+            "source": "from ruamel.yaml import YAML\nimport great_expectations as gx\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = gx.get_context()",
+            # Use this commented version once YAMLHandler is in place everywhere (not just tests and docs)
+            # "source": "import great_expectations as gx\nfrom great_expectations.core.yaml_handler import YAMLHandler\nfrom pprint import pprint\n\nyaml = YAMLHandler()\ncontext = gx.get_context()",
             "outputs": [],
         },
     ]
