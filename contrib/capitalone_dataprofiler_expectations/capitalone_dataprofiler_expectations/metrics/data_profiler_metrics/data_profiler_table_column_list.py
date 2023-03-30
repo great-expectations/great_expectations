@@ -60,20 +60,8 @@ class DataProfilerTableColumnList(DataProfilerProfileMetricProvider):
             metric_domain_kwargs={},
             metric_value_kwargs=metric.metric_value_kwargs,
         )
-        dependencies["table.column_types"] = MetricConfiguration(
-            metric_name="table.column_types",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs={
-                "include_nested": True,
-            },
-        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs=None,
-        )
-        dependencies["table.row_count"] = MetricConfiguration(
-            metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
         )

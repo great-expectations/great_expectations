@@ -43,29 +43,9 @@ class DataProfilerTableColumnInfos(DataProfilerProfileMetricProvider):
             execution_engine=execution_engine,
             runtime_configuration=runtime_configuration,
         )
-        table_domain_kwargs: dict = {
-            k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
-        }
         dependencies["data_profiler.profile_report"] = MetricConfiguration(
-            metric_name="data_profiler.column_profile_report",
+            metric_name="data_profiler.profile_report",
             metric_domain_kwargs={},
             metric_value_kwargs=metric.metric_value_kwargs,
-        )
-        dependencies["table.column_types"] = MetricConfiguration(
-            metric_name="table.column_types",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs={
-                "include_nested": True,
-            },
-        )
-        dependencies["table.columns"] = MetricConfiguration(
-            metric_name="table.columns",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs=None,
-        )
-        dependencies["table.row_count"] = MetricConfiguration(
-            metric_name="table.row_count",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs=None,
         )
         return dependencies

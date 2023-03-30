@@ -7,10 +7,6 @@ from unittest import mock
 
 import pytest
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (  # registers these metrics
-    DataProfilerColumnProfileReport,
-    DataProfilerProfileReport,
-)
 from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # registers this DataAssistant
     DataProfilerStructuredDataAssistant,
 )
@@ -33,8 +29,6 @@ if TYPE_CHECKING:
     from great_expectations.data_context import FileDataContext
 
 
-_ = DataProfilerColumnProfileReport  # prevents removal of "unused" import
-_ = DataProfilerProfileReport  # prevents removal of "unused" import
 _ = DataProfilerStructuredDataAssistant  # prevents removal of "unused" import
 
 

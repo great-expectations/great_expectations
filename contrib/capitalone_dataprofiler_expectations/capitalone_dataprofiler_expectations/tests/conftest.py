@@ -4,10 +4,6 @@ import sys
 
 import pytest
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (  # registers these metrics
-    DataProfilerColumnProfileReport,
-    DataProfilerProfileReport,
-)
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
@@ -16,9 +12,6 @@ from great_expectations.self_check.util import build_test_backends_list
 from tests.conftest import (
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,  # implicitly used fixture
 )
-
-_ = DataProfilerProfileReport  # prevents removal of "unused" import
-_ = DataProfilerColumnProfileReport  # prevents removal of "unused" import
 
 _ = set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder  # prevents removal of "unused" import
 
