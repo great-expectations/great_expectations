@@ -31,16 +31,24 @@ echo -e "${ORANGE}Installing api docs dependencies.${NC}"
 echo -e "${ORANGE}Building API docs.${NC}"
 (cd ../../; invoke docs)
 
-if [ "$PULL_REQUEST" == "false" ]
-then
-  echo -e "${ORANGE}Not in a pull request. Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs.${NC}"
-  git checkout "$CURRENT_COMMIT"
-  git pull
-fi
-
-echo -e "${ORANGE}Copying previous versions${NC}"
+echo -e "${ORANGE}Copying previous versioned docs${NC}"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
+
+echo -e "${ORANGE}Copying code referenced from previous versions${NC}"
+# Copy code referenced in docs from version 0.14.13
+git checkout 0.14.13
+git pull
+cp tests versioned_docs/version-0.14.13
+# Copy code referenced in docs from version 0.15.50
+git checkout 0.15.50
+git pull
+cp tests versioned_docs/version-0.15.50
+# ADD MORE VERSIONS HERE
+
+echo -e "${ORANGE}Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs.${NC}"
+git checkout "$CURRENT_COMMIT"
+git pull
 
 echo -e "${ORANGE}Building docusaurus docs.${NC}"
 yarn build
