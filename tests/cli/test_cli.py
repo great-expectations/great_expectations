@@ -4,15 +4,14 @@ from unittest import mock
 
 import pytest
 from click.testing import CliRunner, Result
-from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations import __version__ as ge_version
 from great_expectations.cli import cli
+from great_expectations.core.yaml_handler import YAMLHandler
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-yaml = YAML()
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 
 @pytest.mark.parametrize("invocation", [None, "--help"])

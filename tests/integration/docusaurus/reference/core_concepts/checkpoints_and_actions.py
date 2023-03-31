@@ -1,20 +1,18 @@
 import os
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 
-yaml = yaml.YAML(typ="safe")
-
+yaml = YAMLHandler()
 context = gx.get_context()
 
 # Add datasource for all tests

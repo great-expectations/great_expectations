@@ -4,7 +4,6 @@ from typing import List
 from unittest import mock
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -14,6 +13,7 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     IDDict,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import (
@@ -22,7 +22,7 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 def test_basic_instantiation(tmp_path_factory):

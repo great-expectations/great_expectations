@@ -13,9 +13,9 @@ from typing import TYPE_CHECKING, Callable, List
 
 import pydantic
 import pytest
-from ruamel.yaml import YAML
 from typing_extensions import Final
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import _ASSETS_KEY
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent import SqliteDatasource
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
 LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
