@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import shutil
 import sys
@@ -18,6 +20,39 @@ sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 test_root_path: str = os.path.dirname(  # noqa: PTH120
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
+
+
+class BaseProfiler:
+    """
+    This class should ideally be named "MockBaseProfiler"; however, it has to be called "BaseProfiler", because its
+    "load()" method returns "BaseProfiler" type, which is type of class itself (using "fluent" programming style).
+    """
+
+    # noinspection PyMethodMayBeStatic,PyMethodParameters
+    def load(cls, filepath: str) -> BaseProfiler:
+        return cls
+
+    # noinspection PyMethodMayBeStatic
+    def report(self, report_options: dict = None) -> dict:
+        return {
+            "global_stats": {
+                "profile_schema": {},
+            },
+            "data_stats": [
+                {
+                    "column_name": "vendor_id",
+                },
+                {
+                    "column_name": "passenger_count",
+                },
+                {
+                    "column_name": "total_amount",
+                },
+                {
+                    "column_name": "congestion_surcharge",
+                },
+            ],
+        }
 
 
 def pytest_addoption(parser):
@@ -117,6 +152,11 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("test_backend", test_backends, scope="module")
     if "test_backends" in metafunc.fixturenames:
         metafunc.parametrize("test_backends", [test_backends], scope="module")
+
+
+@pytest.fixture(scope="function")
+def mock_base_data_profiler() -> BaseProfiler:
+    return BaseProfiler()
 
 
 @pytest.fixture(scope="function")

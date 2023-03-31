@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import List
+from typing import TYPE_CHECKING, List
 from unittest import mock
 
 import pytest
@@ -24,6 +24,12 @@ from great_expectations.rule_based_profiler.parameter_container import (
     build_parameter_container_for_variables,
 )
 
+if TYPE_CHECKING:
+    from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.tests.conftest import (
+        BaseProfiler,
+    )
+
+
 test_root_path: str = os.path.dirname(  # noqa: PTH120
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
@@ -34,6 +40,10 @@ test_root_path: str = os.path.dirname(  # noqa: PTH120
 def test_data_profiler_column_domain_builder_with_profile_path_as_value(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ):
+    """
+    This test verifies that "Domain" objects corresponding to full list of columns in Profiler Report (same as in Batch)
+    are emitted when path to "profile.pkl" is specified explicitly.
+    """
     data_context: FileDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
@@ -296,6 +306,10 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_value(
 def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ):
+    """
+    This test verifies that "Domain" objects corresponding to full list of columns in Profiler Report (same as in Batch)
+    are emitted when path to "profile.pkl" is specified as Rule variable (implicitly).
+    """
     data_context: FileDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
@@ -559,6 +573,10 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
 def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with_exclude_column_names_with_exclude_column_name_suffixes(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
 ):
+    """
+    This test verifies that "Domain" objects corresponding to partial list of columns in Profiler Report under exclusion
+    directives (as subset of columns in Batch) are emitted when path to "profile.pkl" is specified as Rule variable (implicitly).
+    """
     data_context: FileDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
@@ -756,39 +774,12 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
 @pytest.mark.slow  # 1.21s
 def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with_partial_column_list_in_profiler_report(
     bobby_columnar_table_multi_batch_deterministic_data_context: FileDataContext,
+    mock_base_data_profiler: BaseProfiler,
 ):
-    class BaseProfiler:
-        """
-        This class should ideally be named "MockBaseProfiler"; however, it has to be called "BaseProfiler", because its
-        "load()" method returns "BaseProfiler" type, which is type of class itself (using "fluent" programming style).
-        """
-
-        # noinspection PyMethodMayBeStatic,PyMethodParameters
-        def load(cls, filepath: str) -> BaseProfiler:
-            return cls
-
-        # noinspection PyMethodMayBeStatic
-        def report(self, report_options: dict = None) -> dict:
-            return {
-                "global_stats": {
-                    "profile_schema": {},
-                },
-                "data_stats": [
-                    {
-                        "column_name": "vendor_id",
-                    },
-                    {
-                        "column_name": "passenger_count",
-                    },
-                    {
-                        "column_name": "total_amount",
-                    },
-                    {
-                        "column_name": "congestion_surcharge",
-                    },
-                ],
-            }
-
+    """
+    This test verifies that "Domain" objects corresponding to partial list of columns in Profiler Report (as subset of
+    columns in Batch) are emitted when path to "profile.pkl" is specified as Rule variable (implicitly).
+    """
     data_context: FileDataContext = (
         bobby_columnar_table_multi_batch_deterministic_data_context
     )
@@ -822,7 +813,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     )
     with mock.patch(
         "dataprofiler.profilers.profile_builder.BaseProfiler.load",
-        return_value=BaseProfiler(),
+        return_value=mock_base_data_profiler,
     ):
         domains: List[Domain] = domain_builder.get_domains(
             rule_name="my_rule",
