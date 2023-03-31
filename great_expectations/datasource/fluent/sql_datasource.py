@@ -50,6 +50,8 @@ if TYPE_CHECKING:
     import sqlalchemy as sa
     from typing_extensions import Self
 
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
+
 
 class SQLDatasourceError(Exception):
     pass
@@ -575,7 +577,7 @@ class _SQLAsset(DataAsset):
         splitter = self.splitter
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
-            batch_metadata = self._get_batch_metadata_from_batch_request(
+            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
                 batch_request=request
             )
             batch_spec_kwargs = self._create_batch_spec_kwargs()
