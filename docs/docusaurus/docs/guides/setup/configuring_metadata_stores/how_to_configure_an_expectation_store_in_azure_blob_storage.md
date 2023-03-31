@@ -117,8 +117,4 @@ If you followed Step 4, the output should include the Expectation we copied to A
 
 ```bash
 great_expectations suite list
-
-Using v2 (Batch Kwargs) API
-1 Expectation Suite found:
-- exp1
 ```

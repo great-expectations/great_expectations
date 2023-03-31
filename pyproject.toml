@@ -468,8 +468,6 @@ filterwarnings = [
     # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
     'ignore: The Engine.execute\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. All statement execution in SQLAlchemy 2.0 is performed by the Connection.execute\(\) method of Connection, or in the ORM by the Session.execute\(\) method of Session.:DeprecationWarning',
     # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
-    # sqlalchemy.exc.RemovedIn20Warning: The Row.keys() method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. Use the namedtuple standard accessor Row._fields, or for full mapping behavior use  row._mapping.keys()  (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: The Row.keys\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0.:DeprecationWarning',
     # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
     # sqlalchemy.exc.RemovedIn20Warning: Using non-integer/slice indices on Row is deprecated and will be removed in version 2.0; please use row._mapping[<key>], or the mappings() accessor on the Result object. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     'ignore: Using non-integer\/slice indices on Row is deprecated and will be removed in version 2.0:DeprecationWarning',
