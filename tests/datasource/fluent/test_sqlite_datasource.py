@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import pathlib
 from contextlib import _GeneratorContextManager, contextmanager
-from typing import Any, Callable, Generator, Optional
+from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
 
 import pytest
 from pydantic import ValidationError
 
 from great_expectations.datasource.fluent import SqliteDatasource
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 
 @pytest.fixture
@@ -34,12 +37,10 @@ def sqlite_datasource(
     empty_data_context, sqlite_database_path, sqlite_datasource_name
 ) -> SqliteDatasource:
     connection_string = f"sqlite:///{sqlite_database_path}"
-    datasource = SqliteDatasource(
+    return SqliteDatasource(
         name=sqlite_datasource_name,
         connection_string=connection_string,  # type: ignore[arg-type]  # pydantic will coerce
     )
-    datasource._data_context = empty_data_context
-    return datasource
 
 
 @pytest.mark.unit
@@ -82,6 +83,7 @@ def test_non_select_query_asset(sqlite_datasource):
 # Test double used to return canned responses for splitter queries.
 @contextmanager
 def _create_sqlite_source(
+    data_context: Optional[AbstractDataContext] = None,
     splitter_query_response: Optional[list[tuple[str]]] = None,
     create_temp_table: bool = True,
 ) -> Generator[Any, Any, Any]:
@@ -96,11 +98,14 @@ def _create_sqlite_source(
     original_override = SqliteDatasource.execution_engine_override  # type: ignore[misc]
     try:
         SqliteDatasource.execution_engine_override = execution_eng_cls  # type: ignore[misc]
-        yield SqliteDatasource(
+        sqlite_datasource = SqliteDatasource(
             name="sqlite_datasource",
             connection_string="sqlite://",  # type: ignore[arg-type]  # pydantic will coerce
             create_temp_table=create_temp_table,
         )
+        if data_context:
+            sqlite_datasource._data_context = data_context
+        yield sqlite_datasource
     finally:
         SqliteDatasource.execution_engine_override = original_override  # type: ignore[misc]
 
