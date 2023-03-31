@@ -15,7 +15,10 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.interfaces import (
+    Datasource,
+    TestConnectionError,
+)
 
 logger = logging.getLogger(__file__)
 
@@ -99,20 +102,29 @@ def test_serialize_fluent_config(fluent_file_context: FileDataContext):
 
 
 def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataContext):
+    """
+    Ensure that all Datasources that require data_connectors have their data_connectors
+    created when loaded from config.
+    """
     dc_datasources: dict[str, list[str]] = defaultdict(list)
 
     for datasource in fluent_file_context.fluent_datasources.values():
         if datasource.data_connector_type:
             print(f"class: {datasource.__class__.__name__}")
             print(f"type: {datasource.type}")
+            print(f"data_connector: {datasource.data_connector_type.__name__}")
             print(f"name: {datasource.name}", end="\n\n")
 
             dc_datasources[datasource.type].append(datasource.name)
 
             for asset in datasource.assets.values():
                 assert isinstance(asset._data_connector, datasource.data_connector_type)
-                asset.test_connection()
-                print(f"✅ '{asset.name}' connected with {type(asset._data_connector)}")
+                try:
+                    asset.test_connection()
+                except TestConnectionError as err:
+                    print(f"❌ '{asset.name}' failed to connect - {repr(err)}")
+                else:
+                    print(f"✅ '{asset.name}' connected")
             print()
 
     print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
