@@ -128,9 +128,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def _build_data_connector(
         self,
         data_asset: _FilePathDataAsset,
-        prefix: str = "",
-        delimiter: str = "/",
-        max_results: int = 1000,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         **kwargs,
     ) -> None:
         """Builds and attaches the `GoogleCloudStorageDataConnector` to the asset."""
@@ -144,9 +144,9 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
             gcs_client=self._get_gcs_client(),
             batching_regex=data_asset.batching_regex,
             bucket_or_name=self.bucket_or_name,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_results=max_results,
+            prefix=gcs_prefix,
+            delimiter=gcs_delimiter,
+            max_results=gcs_max_results,
             file_path_template_map_fn=GCSUrl.OBJECT_URL_TEMPLATE.format,
         )
 
@@ -156,7 +156,7 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                 data_asset_name=data_asset.name,
                 batching_regex=data_asset.batching_regex,
                 bucket_or_name=self.bucket_or_name,
-                prefix=prefix,
-                delimiter=delimiter,
+                prefix=gcs_prefix,
+                delimiter=gcs_delimiter,
             )
         )
