@@ -1461,6 +1461,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ] = self._instantiate_datasource_from_config(
             raw_config=raw_config, substituted_config=substituted_config
         )
+        datasource._data_context = self
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
