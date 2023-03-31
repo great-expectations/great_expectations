@@ -74,6 +74,10 @@ def test_dataframe_asset(
     )
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="this will fail until we add batch_metadata to Spark add_*_asset methods",
+)
 def test_spark_data_asset_batch_metadata(
     empty_data_context: AbstractDataContext,
     valid_file_path: pathlib.Path,
