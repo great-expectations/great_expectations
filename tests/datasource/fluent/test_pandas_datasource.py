@@ -483,7 +483,8 @@ def test_dynamic_pandas_batch_metadata(
     pandas_datasource = empty_data_context.sources.pandas_default
 
     batch_metadata = {
-        "pipeline_filename": "$pipeline_filename",
+        "no_curly_pipeline_filename": "$pipeline_filename",
+        "curly_pipeline_filename": "${pipeline_filename}",
         "pipeline_step": "transform_3",
     }
 
@@ -499,5 +500,10 @@ def test_dynamic_pandas_batch_metadata(
     )
     assert len(batch_list) == 1
     substituted_batch_metadata = copy.deepcopy(batch_metadata)
-    substituted_batch_metadata.update(my_config_variables)
+    substituted_batch_metadata.update(
+        {
+            "no_curly_pipeline_filename": __file__,
+            "curly_pipeline_filename": __file__,
+        }
+    )
     assert batch_list[0].metadata == substituted_batch_metadata
