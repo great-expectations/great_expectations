@@ -21,9 +21,15 @@ Named snippets are defined with the following syntax:
 const visit = require('unist-util-visit')
 const constructSnippetMap = require('./snippet')
 
+function getDirs () {
+  return ['../../great_expectations', '../../tests']
+}
+
+// TODO: check file location of markdown file and if it is in versioned_docs then use snippet in versioned_code
+
 function codeImport () {
   // Instantiated within the import so it can be hot-reloaded
-  const snippetMap = constructSnippetMap(['../../great_expectations', '../../tests'])
+  const snippetMap = constructSnippetMap(getDirs())
 
   return function transformer (tree, file) {
     const codes = []
