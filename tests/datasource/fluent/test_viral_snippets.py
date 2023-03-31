@@ -119,12 +119,6 @@ def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataC
 
             for asset in datasource.assets.values():
                 assert isinstance(asset._data_connector, datasource.data_connector_type)
-                try:
-                    asset.test_connection()
-                except TestConnectionError as err:
-                    print(f"❌ '{asset.name}' failed to connect - {repr(err)}")
-                else:
-                    print(f"✅ '{asset.name}' connected")
             print()
 
     print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
