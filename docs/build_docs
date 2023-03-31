@@ -35,15 +35,21 @@ echo -e "${ORANGE}Copying previous versioned docs${NC}"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 
+echo -e "${ORANGE}Updating links in versioned docs${NC}"
+# TODO: Update links in versioned docs if they are using the old linenumber style of file=<filepath>L<lineno>
+
 echo -e "${ORANGE}Copying code referenced from previous versions${NC}"
+# TODO: Load versions from versions.json and loop through instead of manual process here:
 # Copy code referenced in docs from version 0.14.13
 git checkout 0.14.13
 git pull
-cp tests versioned_docs/version-0.14.13
+mkdir -p versioned_code/version-0.14.13
+cp ../../tests versioned_code/version-0.14.13
 # Copy code referenced in docs from version 0.15.50
 git checkout 0.15.50
 git pull
-cp tests versioned_docs/version-0.15.50
+mkdir -p versioned_code/version-0.15.50
+cp ../../tests versioned_code/version-0.15.50
 # ADD MORE VERSIONS HERE
 
 echo -e "${ORANGE}Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs.${NC}"
