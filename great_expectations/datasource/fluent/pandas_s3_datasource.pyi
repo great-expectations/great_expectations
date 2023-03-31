@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 import typing
 from logging import Logger
@@ -18,6 +20,7 @@ from typing_extensions import Literal
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import S3Url as S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector as FilesystemDataConnector,
 )
@@ -78,7 +81,7 @@ class PandasS3DatasourceError(PandasDatasourceError): ...
 class PandasS3Datasource(_PandasFilePathDatasource):
     type: Literal["pandas_s3"]
     bucket: str
-    boto3_options: Dict[str, Any]
+    boto3_options: Dict[str, ConfigStr | Any]
     def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_csv_asset(
         self,
