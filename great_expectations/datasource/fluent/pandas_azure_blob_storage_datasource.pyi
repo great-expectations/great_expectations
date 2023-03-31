@@ -86,7 +86,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -147,7 +147,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -181,7 +181,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -195,7 +195,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -216,7 +216,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -241,7 +241,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -267,7 +267,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -280,7 +280,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -296,7 +296,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -309,7 +309,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -326,7 +326,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -339,7 +339,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
@@ -361,7 +361,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         self,
         name: str,
         *,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
         order_by: Optional[SortersDefinition] = ...,
         abs_container: str = ...,  # TODO: deal with this required arg
