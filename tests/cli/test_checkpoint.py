@@ -12,13 +12,13 @@ import pytest
 from click.testing import CliRunner, Result
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
-from ruamel.yaml import YAML
 
 from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
@@ -29,9 +29,7 @@ from great_expectations.datasource import (
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
@@ -57,10 +55,10 @@ def titanic_data_context_with_sql_datasource(
             __file__, os.path.join("..", "test_sets", "Titanic.csv")
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
-        df.to_sql(name="titanic", con=sqlite_engine)
+        df.to_sql(name="titanic", con=conn)
         df = df.sample(frac=0.5, replace=True, random_state=1)
-        df.to_sql(name="incomplete", con=sqlite_engine)
-        test_df.to_sql(name="wrong", con=sqlite_engine)
+        df.to_sql(name="incomplete", con=conn)
+        test_df.to_sql(name="wrong", con=conn)
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
 
@@ -223,7 +221,7 @@ def test_checkpoint_delete_with_non_existent_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint delete my_checkpoint",
+        "checkpoint delete my_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -281,7 +279,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint delete my_v1_checkpoint",
+        "checkpoint delete my_v1_checkpoint",
         input="\n",
         catch_exceptions=False,
     )
@@ -325,7 +323,7 @@ def test_checkpoint_delete_with_single_checkpoint_confirm_success(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -350,7 +348,7 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        f"--v3-api --assume-yes checkpoint delete {checkpoint_name}",
+        f"--assume-yes checkpoint delete {checkpoint_name}",
         catch_exceptions=False,
     )
     stdout: str = result.stdout
@@ -400,7 +398,7 @@ def test_checkpoint_delete_with_single_checkpoint_assume_yes_flag(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     stdout = result.stdout
@@ -425,7 +423,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint delete my_v1_checkpoint",
+        "checkpoint delete my_v1_checkpoint",
         input="n\n",
         catch_exceptions=False,
     )
@@ -469,7 +467,7 @@ def test_checkpoint_delete_with_single_checkpoint_cancel_success(
     # noinspection PyTypeChecker
     result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -493,7 +491,7 @@ def test_checkpoint_list_with_no_checkpoints(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -549,7 +547,7 @@ def test_checkpoint_list_with_single_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -608,7 +606,7 @@ def test_checkpoint_list_with_eight_checkpoints(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint list",
+        "checkpoint list",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -682,7 +680,7 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint new my_minimal_simple_checkpoint",
+        "checkpoint new my_minimal_simple_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -763,7 +761,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint new passengers",
+        "checkpoint new passengers",
         input="1\n1\n",
         catch_exceptions=False,
     )
@@ -880,7 +878,7 @@ def test_checkpoint_run_raises_error_if_checkpoint_is_not_found(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_checkpoint",
+        "checkpoint run my_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -946,7 +944,7 @@ def test_checkpoint_run_on_checkpoint_with_not_found_suite_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_nested_checkpoint_template_1",
+        "checkpoint run my_nested_checkpoint_template_1",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1124,7 +1122,7 @@ def test_checkpoint_run_on_checkpoint_with_batch_load_problem_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run bad_batch",
+        "checkpoint run bad_batch",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1324,7 +1322,7 @@ def test_checkpoint_run_on_checkpoint_with_empty_suite_list_raises_error(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run no_suite",
+        "checkpoint run no_suite",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1432,7 +1430,7 @@ def test_checkpoint_run_on_non_existent_validations(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run no_validations",
+        "checkpoint run no_validations",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -1553,7 +1551,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1769,7 +1767,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_sql(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -1982,7 +1980,7 @@ def test_checkpoint_run_happy_path_with_successful_validation_spark(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -2210,7 +2208,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2416,7 +2414,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_sql(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2620,7 +2618,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_spark(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -2843,7 +2841,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_pandas
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3045,7 +3043,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_sql(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3251,7 +3249,7 @@ def test_checkpoint_run_happy_path_with_failed_validation_due_to_bad_data_spark(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint run my_fancy_checkpoint",
+        "checkpoint run my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3405,7 +3403,7 @@ def test_checkpoint_script_raises_error_if_checkpoint_not_found(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint script not_a_checkpoint",
+        "checkpoint script not_a_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3466,7 +3464,7 @@ def test_checkpoint_script_raises_error_if_python_file_exists(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint script my_v1_checkpoint",
+        "checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 1
@@ -3523,7 +3521,7 @@ def test_checkpoint_script_happy_path_generates_script_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint script my_v1_checkpoint",
+        "checkpoint script my_v1_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3649,7 +3647,7 @@ def test_checkpoint_script_happy_path_executable_successful_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint script my_fancy_checkpoint",
+        "checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3774,7 +3772,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_pandas(
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint script my_fancy_checkpoint",
+        "checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3897,7 +3895,7 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
     # noinspection PyTypeChecker
     result: Result = runner.invoke(
         cli,
-        "--v3-api checkpoint script my_fancy_checkpoint",
+        "checkpoint script my_fancy_checkpoint",
         catch_exceptions=False,
     )
     assert result.exit_code == 0
@@ -3939,6 +3937,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
 
 
 def _write_checkpoint_dict_to_file(config, checkpoint_file_path):
-    yaml_obj = YAML()
+    yaml_obj = YAMLHandler()
     with open(checkpoint_file_path, "w") as f:
         yaml_obj.dump(config, f)

@@ -8,7 +8,9 @@ from typing import (
     Generator,
     List,
     NamedTuple,
+    Optional,
     Type,
+    Union,
 )
 
 from typing_extensions import Final, TypeAlias
@@ -22,22 +24,25 @@ if TYPE_CHECKING:
     from logging import Logger
 
     import pydantic
-    from pydantic.networks import PostgresDsn
 
     from great_expectations.datasource.fluent import (
         PandasAzureBlobStorageDatasource,
         PandasDatasource,
+        PandasDBFSDatasource,
         PandasFilesystemDatasource,
         PandasGoogleCloudStorageDatasource,
         PandasS3Datasource,
         PostgresDatasource,
         SparkAzureBlobStorageDatasource,
+        SparkDatasource,
+        SparkDBFSDatasource,
         SparkFilesystemDatasource,
         SparkGoogleCloudStorageDatasource,
         SparkS3Datasource,
         SQLDatasource,
         SqliteDatasource,
     )
+    from great_expectations.datasource.fluent.config_str import ConfigStr
     from great_expectations.datasource.fluent.interfaces import (
         DataAsset,
         Datasource,
@@ -74,54 +79,431 @@ class _SourceFactories:
     def factories(self) -> List[str]: ...
     def __getattr__(self, attr_name: str): ...
     def __dir__(self) -> List[str]: ...
-    def add_pandas(self, name: str) -> PandasDatasource: ...
-    def add_pandas_abs(
-        self, name: str, *, azure_options: dict[str, Any] | None = None
-    ) -> PandasAzureBlobStorageDatasource: ...
+    def add_pandas(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+    ) -> PandasDatasource: ...
+    def update_pandas(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+    ) -> PandasDatasource: ...
+    def add_or_update_pandas(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+    ) -> PandasDatasource: ...
+    def delete_pandas(
+        self,
+        name: str,
+    ) -> None: ...
     def add_pandas_filesystem(
         self,
-        name: str,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
         *,
-        base_directory: pathlib.Path,
-        data_context_root_directory: pathlib.Path | None = None,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> PandasFilesystemDatasource: ...
+    def update_pandas_filesystem(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasFilesystemDatasource: ...
+    def add_or_update_pandas_filesystem(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasFilesystemDatasource: ...
+    def delete_pandas_filesystem(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_pandas_dbfs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasDBFSDatasource: ...
+    def update_pandas_dbfs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasDBFSDatasource: ...
+    def add_or_update_pandas_dbfs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> PandasDBFSDatasource: ...
+    def delete_pandas_dbfs(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_pandas_s3(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket: str = ...,
+        boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> PandasS3Datasource: ...
+    def update_pandas_s3(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket: str = ...,
+        boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> PandasS3Datasource: ...
+    def add_or_update_pandas_s3(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket: str = ...,
+        boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> PandasS3Datasource: ...
+    def delete_pandas_s3(
+        self,
+        name: str,
+    ) -> None: ...
     def add_pandas_gcs(
         self,
-        name: str,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
         *,
-        bucket_or_name: str,
-        gcs_options: dict[str, Any] | None = None,
+        bucket_or_name: str = ...,
+        gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> PandasGoogleCloudStorageDatasource: ...
-    def add_pandas_s3(
-        self, name: str, *, bucket: str, boto3_options: dict[str, Any] | None = None
-    ) -> PandasS3Datasource: ...
+    def update_pandas_gcs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket_or_name: str = ...,
+        gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> PandasGoogleCloudStorageDatasource: ...
+    def add_or_update_pandas_gcs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        bucket_or_name: str = ...,
+        gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> PandasGoogleCloudStorageDatasource: ...
+    def delete_pandas_gcs(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_pandas_abs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        azure_options: dict[str, Any] = ...,
+    ) -> PandasAzureBlobStorageDatasource: ...
+    def update_pandas_abs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        azure_options: dict[str, Any] = ...,
+    ) -> PandasAzureBlobStorageDatasource: ...
+    def add_or_update_pandas_abs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        azure_options: dict[str, Any] = ...,
+    ) -> PandasAzureBlobStorageDatasource: ...
+    def delete_pandas_abs(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_sql(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, str] = ...,
+    ) -> SQLDatasource: ...
+    def update_sql(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, str] = ...,
+    ) -> SQLDatasource: ...
+    def add_or_update_sql(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, str] = ...,
+    ) -> SQLDatasource: ...
+    def delete_sql(
+        self,
+        name: str,
+    ) -> None: ...
     def add_postgres(
-        self, name: str, *, connection_string: PostgresDsn | str
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
     ) -> PostgresDatasource: ...
-    def add_spark_abs(
-        self, name: str, *, azure_options: dict[str, Any] | None = None
-    ) -> SparkAzureBlobStorageDatasource: ...
+    def update_postgres(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+    ) -> PostgresDatasource: ...
+    def add_or_update_postgres(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+    ) -> PostgresDatasource: ...
+    def delete_postgres(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_spark(
+        self,
+        name: str,
+    ) -> SparkDatasource: ...
+    def update_spark(
+        self,
+        name: str,
+    ) -> SparkDatasource: ...
+    def add_or_update_spark(
+        self,
+        name: str,
+    ) -> SparkDatasource: ...
+    def delete_spark(
+        self,
+        name: str,
+    ) -> None: ...
     def add_spark_filesystem(
         self,
-        name: str,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
         *,
-        base_directory: pathlib.Path,
-        data_context_root_directory: pathlib.Path | None = None,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
     ) -> SparkFilesystemDatasource: ...
-    def add_spark_gcs(
+    def update_spark_filesystem(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> SparkFilesystemDatasource: ...
+    def add_or_update_spark_filesystem(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> SparkFilesystemDatasource: ...
+    def delete_spark_filesystem(
         self,
         name: str,
+    ) -> None: ...
+    def add_spark_dbfs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
         *,
-        bucket_or_name: str,
-        gcs_options: dict[str, Any] | None = None,
-    ) -> SparkGoogleCloudStorageDatasource: ...
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> SparkDBFSDatasource: ...
+    def update_spark_dbfs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> SparkDBFSDatasource: ...
+    def add_or_update_spark_dbfs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        base_directory: pathlib.Path = ...,
+        data_context_root_directory: Union[pathlib.Path, None] = ...,
+    ) -> SparkDBFSDatasource: ...
+    def delete_spark_dbfs(
+        self,
+        name: str,
+    ) -> None: ...
     def add_spark_s3(
-        self, name: str, *, bucket: str, boto3_options: dict[str, Any] | None = None
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket: str = ...,
+        boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
     ) -> SparkS3Datasource: ...
-    def add_sql(self, name: str, *, connection_string: str) -> SQLDatasource: ...
+    def update_spark_s3(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket: str = ...,
+        boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> SparkS3Datasource: ...
+    def add_or_update_spark_s3(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket: str = ...,
+        boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> SparkS3Datasource: ...
+    def delete_spark_s3(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_spark_gcs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket_or_name: str = ...,
+        gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> SparkGoogleCloudStorageDatasource: ...
+    def update_spark_gcs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket_or_name: str = ...,
+        gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> SparkGoogleCloudStorageDatasource: ...
+    def add_or_update_spark_gcs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        bucket_or_name: str = ...,
+        gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
+    ) -> SparkGoogleCloudStorageDatasource: ...
+    def delete_spark_gcs(
+        self,
+        name: str,
+    ) -> None: ...
+    def add_spark_abs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        azure_options: dict[str, Any] = ...,
+    ) -> SparkAzureBlobStorageDatasource: ...
+    def update_spark_abs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        azure_options: dict[str, Any] = ...,
+    ) -> SparkAzureBlobStorageDatasource: ...
+    def add_or_update_spark_abs(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        azure_options: dict[str, Any] = ...,
+    ) -> SparkAzureBlobStorageDatasource: ...
+    def delete_spark_abs(
+        self,
+        name: str,
+    ) -> None: ...
     def add_sqlite(
-        self, name: str, *, connection_string: SqliteDsn | str
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
     ) -> SqliteDatasource: ...
+    def update_sqlite(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
+    ) -> SqliteDatasource: ...
+    def add_or_update_sqlite(
+        self,
+        name_or_datasource: Optional[Union[str, Datasource]] = None,
+        name: Optional[str] = None,
+        datasource: Optional[Datasource] = None,
+        *,
+        connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
+    ) -> SqliteDatasource: ...
+    def delete_sqlite(
+        self,
+        name: str,
+    ) -> None: ...
 
 def _iter_all_registered_types() -> Generator[
     tuple[str, Type[Datasource] | Type[DataAsset]], None, None

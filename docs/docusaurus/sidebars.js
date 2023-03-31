@@ -2,38 +2,100 @@ module.exports = {
   docs: [
     'intro',
     {
-      type: 'category',
-      label: 'Getting Started (A Tutorial)',
-      link: { type: 'doc', id: 'tutorials/getting_started/tutorial_overview' },
-      items: [
-        { type: 'doc', id: 'tutorials/getting_started/tutorial_setup', label: '1. Setup' },
-        { type: 'doc', id: 'tutorials/getting_started/tutorial_connect_to_data', label: '2. Connect to Data' },
-        { type: 'doc', id: 'tutorials/getting_started/tutorial_create_expectations', label: '3. Create Expectations' },
-        { type: 'doc', id: 'tutorials/getting_started/tutorial_validate_data', label: '4. Validate Data' },
-        { type: 'doc', id: 'tutorials/getting_started/tutorial_review', label: 'Review and next steps' }
-      ]
+      type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
     },
     {
       type: 'category',
-      label: 'Step 1: Setup',
+      label: 'Setting up a GX environment',
       link: { type: 'doc', id: 'guides/setup/setup_overview' },
       items: [
         {
           type: 'category',
-          label: 'Installation',
+          label: 'Installation and dependencies',
           items: [
+            {
+              type: 'html',
+              value: '<h4>For use with local filesystems</h4>',
+              defaultStyle: true
+            },
             'guides/setup/installation/local',
-            'guides/setup/installation/hosted_environment'
+            {
+              type: 'html',
+              value: '<h4>For use in hosted environments</h4>',
+              defaultStyle: true
+            },
+            'guides/setup/installation/hosted_environment',
+            {
+              type: 'html',
+              value: '<h4>For use with cloud storage</h4>',
+              defaultStyle: true
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3'
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs'
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs'
+            },
+            {
+              type: 'html',
+              value: '<h4>For use with SQL Databases</h4>',
+              defaultStyle: true
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases'
+            }
           ]
         },
         {
           type: 'category',
           label: 'Data Contexts',
           items: [
+            {
+              type: 'html',
+              value: '<h4>Quickstart Data Context</h4>',
+              defaultStyle: true
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context',
+              label: 'How to quickly instantiate a Data Context'
+            },
+            {
+              type: 'html',
+              value: '<h4>Filesystem Data Contexts</h4>',
+              defaultStyle: true
+            },
             'guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli',
+            {
+              type: 'doc',
+              id: 'guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python',
+              label: 'How to initialize a Filesystem Data Context in Python'
+            },
+            {
+              type: 'doc',
+              id: 'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context',
+              label: 'How to instantiate a specific Filesystem Data Context'
+            },
+            {
+              type: 'html',
+              value: '<h4>In-memory Data Contexts</h4>',
+              defaultStyle: true
+            },
+            'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file',
+            {
+              type: 'html',
+              value: '<h4>Data Context Configuration</h4>',
+              defaultStyle: true
+            },
             'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
-            'guides/setup/configuring_data_contexts/how_to_configure_credentials',
-            'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'
+            'guides/setup/configuring_data_contexts/how_to_configure_credentials'
           ]
         },
         {
@@ -86,76 +148,152 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Step 2: Connect to data',
+      label: 'Connecting to data',
       link: { type: 'doc', id: 'guides/connecting_to_your_data/connect_to_data_overview' },
       items: [
         {
           type: 'category',
-          label: 'Core skills',
+          label: 'Filesystem Datasources',
           items: [
-            'guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use',
-            'guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data',
-            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
-            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource',
-            'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource',
-            'guides/connecting_to_your_data/how_to_configure_an_inferredassetdataconnector',
-            'guides/connecting_to_your_data/how_to_configure_a_configuredassetdataconnector',
-            'guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector',
-            'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_a_file_system_or_blob_store',
-            'guides/connecting_to_your_data/how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql',
-            'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe',
-            'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource'
+            {
+              type: 'html',
+              value: '<h4>Local Filesystems</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/filesystem/how_to_quickly_connect_to_a_single_file_with_pandas',
+            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas',
+            'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark',
+            {
+              type: 'html',
+              value: '<h4>Google Cloud Server</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark',
+            {
+              type: 'html',
+              value: '<h4>Azure Blob Storage</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark',
+            {
+              type: 'html',
+              value: '<h4>Amazon Web Services S3</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas',
+            'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark'
           ]
         },
         {
           type: 'category',
-          label: 'In memory',
+          label: 'In-memory Datasources',
           items: [
-            'guides/connecting_to_your_data/in_memory/pandas',
-            'guides/connecting_to_your_data/in_memory/spark'
+            'guides/connecting_to_your_data/fluent/in_memory/how_to_connect_to_in_memory_data_using_pandas'
           ]
         },
         {
           type: 'category',
-          label: 'Database',
+          label: 'SQL Datasources',
           items: [
-            'guides/connecting_to_your_data/database/athena',
-            'guides/connecting_to_your_data/database/bigquery',
-            'guides/connecting_to_your_data/database/mssql',
-            'guides/connecting_to_your_data/database/mysql',
-            'guides/connecting_to_your_data/database/postgres',
-            'guides/connecting_to_your_data/database/redshift',
-            'guides/connecting_to_your_data/database/snowflake',
-            'guides/connecting_to_your_data/database/sqlite',
-            'guides/connecting_to_your_data/database/trino'
+            {
+              type: 'html',
+              value: '<h4>General SQL Datasources</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data',
+            {
+              type: 'html',
+              value: '<h4>Specific SQL dialects</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_postgresql_data',
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sqlite_data'
           ]
         },
         {
           type: 'category',
-          label: 'Filesystem',
+          label: 'Working with Data Assets',
           items: [
-            'guides/connecting_to_your_data/filesystem/pandas',
-            'guides/connecting_to_your_data/filesystem/spark'
+            {
+              type: 'html',
+              value: '<h4>All Data Assets</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset',
+            {
+              type: 'html',
+              value: '<h4>Filesystem Data Assets</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset',
+            {
+              type: 'html',
+              value: '<h4>SQL Data Assets</h4>',
+              defaultStyle: true
+            },
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table',
+            'guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query',
+            'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset'
           ]
         },
         {
           type: 'category',
-          label: 'Cloud',
+          label: 'Advanced Datasource configuration',
           items: [
-            'guides/connecting_to_your_data/cloud/s3/pandas',
-            'guides/connecting_to_your_data/cloud/s3/spark',
-            'guides/connecting_to_your_data/cloud/gcs/pandas',
-            'guides/connecting_to_your_data/cloud/gcs/spark',
-            'guides/connecting_to_your_data/cloud/azure/pandas',
-            'guides/connecting_to_your_data/cloud/azure/spark'
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Advanced',
-          items: [
-            'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_a_file_system_or_blob_store',
-            'guides/connecting_to_your_data/advanced/how_to_configure_a_dataconnector_for_splitting_and_sampling_tables_in_sql'
+            {
+              type: 'category',
+              label: 'Filesystem block-configuration',
+              items: [
+                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
+                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'In-memory block-configuration',
+              items: [
+                'guides/connecting_to_your_data/in_memory/pandas',
+                'guides/connecting_to_your_data/in_memory/spark'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Cloud block-configuration',
+              items: [
+                'guides/connecting_to_your_data/cloud/s3/pandas',
+                'guides/connecting_to_your_data/cloud/s3/spark',
+                'guides/connecting_to_your_data/cloud/gcs/pandas',
+                'guides/connecting_to_your_data/cloud/gcs/spark',
+                'guides/connecting_to_your_data/cloud/azure/pandas',
+                'guides/connecting_to_your_data/cloud/azure/spark'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'SQL database block-configuration',
+              items: [
+                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource',
+                'guides/connecting_to_your_data/database/athena',
+                'guides/connecting_to_your_data/database/bigquery',
+                'guides/connecting_to_your_data/database/mssql',
+                'guides/connecting_to_your_data/database/mysql',
+                'guides/connecting_to_your_data/database/postgres',
+                'guides/connecting_to_your_data/database/redshift',
+                'guides/connecting_to_your_data/database/snowflake',
+                'guides/connecting_to_your_data/database/sqlite',
+                'guides/connecting_to_your_data/database/trino'
+              ]
+            },
+            {
+              type: 'category',
+              label: 'Block-configuration compatible Batch Requests',
+              items: [
+                'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource',
+                'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe'
+              ]
+            }
           ]
         },
         { type: 'doc', id: 'guides/connecting_to_your_data/index', label: 'Index' }
@@ -163,7 +301,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Step 3: Create Expectations',
+      label: 'Creating Expectations',
       link: { type: 'doc', id: 'guides/expectations/create_expectations_overview' },
       items: [
         {
@@ -229,7 +367,7 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Step 4: Validate data',
+      label: 'Validating data',
       link: { type: 'doc', id: 'guides/validation/validate_data_overview' },
       items: [
         {
@@ -371,7 +509,7 @@ module.exports = {
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
             { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
             { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/anonymous_usage_statistics' }
+            { type: 'doc', id: 'reference/usage_statistics' }
           ]
         },
         {

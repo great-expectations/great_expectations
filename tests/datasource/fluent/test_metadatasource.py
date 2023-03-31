@@ -8,9 +8,9 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
-import ruamel.yaml
 from pydantic import DirectoryPath, validate_arguments
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
@@ -26,6 +26,8 @@ from great_expectations.datasource.fluent.sources import (
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.util import get_context as get_gx_context
+
+yaml = YAMLHandler()
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
@@ -388,7 +390,7 @@ def context_config_data(
 def assert_fluent_datasource_content(
     config_file_path: str, fluent_datasource_config: dict
 ):
-    config = ruamel.yaml.safe_load(config_file_path.read_text())
+    config = yaml.load(config_file_path.read_text())
     assert "fluent_datasources" in config
     assert config["fluent_datasources"] == fluent_datasource_config
 
@@ -409,7 +411,6 @@ def context_with_fluent_datasource(
         config_file_path,
         {
             DEFAULT_CRUD_DATASOURCE_NAME: {
-                "assets": {},
                 "base_directory": str(data_dir),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,
@@ -426,20 +427,59 @@ def test_add_datasource(context_with_fluent_datasource):
 
 
 @pytest.mark.unit
-def test_update_datasource(context_with_fluent_datasource):
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_add_datasource_with_datasource_object(
+    context_with_fluent_datasource, use_positional_arg
+):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    new_datasource = copy.deepcopy(context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME))
+    new_datasource.name = "new_datasource"
+    if use_positional_arg:
+        context.sources.add_pandas_filesystem(new_datasource)
+    else:
+        context.sources.add_pandas_filesystem(datasource=new_datasource)
+    assert len(context.datasources) == 2
+    assert_fluent_datasource_content(
+        config_file_path,
+        {
+            "new_datasource": {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "name": "new_datasource",
+                "type": "pandas_filesystem",
+            },
+            "pandas_datasource": {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "name": "pandas_datasource",
+                "type": "pandas_filesystem",
+            },
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_update_datasource(context_with_fluent_datasource, use_positional_arg):
     context, config_file_path, data_dir = context_with_fluent_datasource
     data_dir_2 = data_dir.parent / "data2"
     data_dir_2.mkdir()
-    context.sources.update_pandas_filesystem(
-        name=DEFAULT_CRUD_DATASOURCE_NAME,
-        base_directory=data_dir_2,
-        data_context_root_directory=config_file_path.parent,
-    )
+    if use_positional_arg:
+        context.sources.update_pandas_filesystem(
+            DEFAULT_CRUD_DATASOURCE_NAME,
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    else:
+        context.sources.update_pandas_filesystem(
+            name=DEFAULT_CRUD_DATASOURCE_NAME,
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
     assert_fluent_datasource_content(
         config_file_path,
         {
             DEFAULT_CRUD_DATASOURCE_NAME: {
-                "assets": {},
                 "base_directory": str(data_dir_2),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,
@@ -450,27 +490,84 @@ def test_update_datasource(context_with_fluent_datasource):
 
 
 @pytest.mark.unit
-def test_add_or_update_datasource_using_add(context_with_fluent_datasource):
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_update_datasource_with_datasource_object(
+    context_with_fluent_datasource, use_positional_arg
+):
     context, config_file_path, data_dir = context_with_fluent_datasource
-    data_dir_2 = data_dir.parent / "data2"
-    data_dir_2.mkdir()
-    context.sources.add_or_update_pandas_filesystem(
-        name=f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
-        base_directory=data_dir_2,
-        data_context_root_directory=config_file_path.parent,
-    )
+    datasource = context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME)
     assert_fluent_datasource_content(
         config_file_path,
         {
             DEFAULT_CRUD_DATASOURCE_NAME: {
-                "assets": {},
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "name": DEFAULT_CRUD_DATASOURCE_NAME,
+                "type": "pandas_filesystem",
+            }
+        },
+    )
+
+    # Add an asset and update datasource
+    (data_dir / "1.csv").touch()
+    if use_positional_arg:
+        datasource.add_csv_asset("csv_asset", batching_regex=r"(?P<file_name>.*).csv")
+    else:
+        datasource.add_csv_asset(
+            name="csv_asset", batching_regex=r"(?P<file_name>.*).csv"
+        )
+
+    context.sources.update_pandas_filesystem(datasource=datasource)
+    assert_fluent_datasource_content(
+        config_file_path,
+        {
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
+                "name": DEFAULT_CRUD_DATASOURCE_NAME,
+                "type": "pandas_filesystem",
+                "assets": {
+                    "csv_asset": {
+                        "batching_regex": "(?P<file_name>.*).csv",
+                        "name": "csv_asset",
+                        "type": "csv",
+                    }
+                },
+            }
+        },
+    )
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_add_or_update_datasource_using_add(
+    context_with_fluent_datasource, use_positional_arg
+):
+    context, config_file_path, data_dir = context_with_fluent_datasource
+    data_dir_2 = data_dir.parent / "data2"
+    data_dir_2.mkdir()
+    if use_positional_arg:
+        context.sources.add_or_update_pandas_filesystem(
+            f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    else:
+        context.sources.add_or_update_pandas_filesystem(
+            name=f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    assert_fluent_datasource_content(
+        config_file_path,
+        {
+            DEFAULT_CRUD_DATASOURCE_NAME: {
                 "base_directory": str(data_dir),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,
                 "type": "pandas_filesystem",
             },
             f"{DEFAULT_CRUD_DATASOURCE_NAME}_2": {
-                "assets": {},
                 "base_directory": str(data_dir_2),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
@@ -481,20 +578,29 @@ def test_add_or_update_datasource_using_add(context_with_fluent_datasource):
 
 
 @pytest.mark.unit
-def test_add_or_update_datasource_using_update(context_with_fluent_datasource):
+@pytest.mark.parametrize("use_positional_arg", [True, False])
+def test_add_or_update_datasource_using_update(
+    context_with_fluent_datasource, use_positional_arg
+):
     context, config_file_path, data_dir = context_with_fluent_datasource
     data_dir_2 = data_dir.parent / "data2"
     data_dir_2.mkdir()
-    context.sources.add_or_update_pandas_filesystem(
-        name=DEFAULT_CRUD_DATASOURCE_NAME,
-        base_directory=data_dir_2,
-        data_context_root_directory=config_file_path.parent,
-    )
+    if use_positional_arg:
+        context.sources.add_or_update_pandas_filesystem(
+            DEFAULT_CRUD_DATASOURCE_NAME,
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
+    else:
+        context.sources.add_or_update_pandas_filesystem(
+            name=DEFAULT_CRUD_DATASOURCE_NAME,
+            base_directory=data_dir_2,
+            data_context_root_directory=config_file_path.parent,
+        )
     assert_fluent_datasource_content(
         config_file_path,
         {
             DEFAULT_CRUD_DATASOURCE_NAME: {
-                "assets": {},
                 "base_directory": str(data_dir_2),
                 "data_context_root_directory": str(config_file_path.parent),
                 "name": DEFAULT_CRUD_DATASOURCE_NAME,

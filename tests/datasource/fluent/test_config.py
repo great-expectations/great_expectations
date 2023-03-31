@@ -1,19 +1,24 @@
+from __future__ import annotations
+
 import copy
 import functools
 import json
 import logging
 import pathlib
 import re
+import uuid
 from pprint import pformat as pf
 from pprint import pprint as pp
 from typing import TYPE_CHECKING, Callable, List
 
 import pydantic
 import pytest
-from ruamel.yaml import YAML
+from typing_extensions import Final
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
+from great_expectations.datasource.fluent.constants import _ASSETS_KEY
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
@@ -26,9 +31,11 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
+    from pytest import FixtureRequest
+
     from great_expectations.datasource.fluent import SqliteDatasource
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
 LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
@@ -39,16 +46,19 @@ CSV_PATH = EXPERIMENTAL_DATASOURCE_TEST_DIR.joinpath(
 )
 
 PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
-PG_CONFIG_YAML_STR = PG_CONFIG_YAML_FILE.read_text()
+PG_CONFIG_YAML_STR: Final[str] = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
-COMPLEX_CONFIG_DICT = {
+COMPLEX_CONFIG_DICT: Final[dict] = {
     "fluent_datasources": {
         "my_pg_ds": {
             "connection_string": "postgresql://userName:@hostname/dbName",
+            "kwargs": {"echo": True},
+            "name": "my_pg_ds",
             "type": "postgres",
             "assets": {
                 "my_table_asset_wo_splitters": {
+                    "name": "my_table_asset_wo_splitters",
                     "table_name": "my_table",
                     "type": "table",
                 },
@@ -58,6 +68,7 @@ COMPLEX_CONFIG_DICT = {
                         "method_name": "split_on_year_and_month",
                     },
                     "table_name": "another_table",
+                    "name": "with_splitter",
                     "type": "table",
                 },
                 "with_sorters": {
@@ -66,41 +77,75 @@ COMPLEX_CONFIG_DICT = {
                         {"key": "month", "reverse": True},
                     ],
                     "table_name": "yet_another_table",
+                    "name": "with_sorters",
                     "type": "table",
                 },
                 "with_dslish_sorters": {
                     "order_by": ["year", "-month"],
                     "table_name": "yet_another_table",
+                    "name": "with_dslish_sorters",
                     "type": "table",
                 },
             },
         },
         "my_pandas_filesystem_ds": {
             "type": "pandas_filesystem",
+            "name": "my_pandas_filesystem_ds",
             "base_directory": __file__,
             "assets": {
                 "my_csv_asset": {
                     "type": "csv",
+                    "name": "my_csv_asset",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
                 "my_json_asset": {
                     "type": "json",
+                    "name": "my_json_asset",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "connect_options": {"glob_directive": "**/*.json"},
                     "orient": "records",
                 },
             },
         },
     }
 }
-COMPLEX_CONFIG_JSON = json.dumps(COMPLEX_CONFIG_DICT)
+COMPLEX_CONFIG_JSON: Final[str] = json.dumps(COMPLEX_CONFIG_DICT)
 
-SIMPLE_DS_DICT = {
+SIMPLE_DS_DICT: Final[dict] = {
     "fluent_datasources": {
         "my_ds": {
             "type": "sql",
+            "name": "my_ds",
             "connection_string": "sqlite://",
+        }
+    }
+}
+
+SIMPLE_DS_DICT_WITH_DS_NAME_ERROR = {
+    "fluent_datasources": {
+        "my_ds": {
+            "type": "sql",
+            "name": "my_incorrect_ds",
+            "connection_string": "sqlite://",
+        }
+    }
+}
+
+SIMPLE_DS_DICT_WITH_ASSET_NAME_ERROR = {
+    "fluent_datasources": {
+        "my_ds": {
+            "type": "sql",
+            "name": "my_ds",
+            "connection_string": "sqlite://",
+            "assets": {
+                "my_csv_asset": {
+                    "type": "csv",
+                    "name": "my_incorrect_csv_asset",
+                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+                },
+            },
         }
     }
 }
@@ -109,6 +154,7 @@ COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
     "fluent_datasources": {
         "my_ds": {
             "type": "sql",
+            "name": "my_ds",
             "connection_string": "sqlite://",
         }
     },
@@ -137,12 +183,14 @@ COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
     },
 }
 
-DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
+DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
     "fluent_datasources": {
         DEFAULT_PANDAS_DATASOURCE_NAME: {
             "type": "pandas",
+            "name": DEFAULT_PANDAS_DATASOURCE_NAME,
             "assets": {
                 DEFAULT_PANDAS_DATA_ASSET_NAME: {
+                    "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
                     / "yellow_tripdata_sample_2018-04.csv",
@@ -150,6 +198,7 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
                     "names": ["col1", "col2"],
                 },
                 "my_csv_asset": {
+                    "name": "my_csv_asset",
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
                     / "yellow_tripdata_sample_2018-04.csv",
@@ -160,6 +209,11 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT = {
         },
     }
 }
+
+
+@pytest.fixture
+def ds_dict_config() -> dict:
+    return copy.deepcopy(COMPLEX_CONFIG_DICT)
 
 
 @pytest.fixture
@@ -219,6 +273,7 @@ class TestExcludeUnsetAssetFields:
         # fill in required args
         asset_dict.update(
             {
+                "name": "my_asset",
                 "batching_regex": re.compile(
                     r"sample_(?P<year>\d{4})-(?P<month>\d{2}).csv"
                 ),
@@ -239,6 +294,48 @@ class TestExcludeUnsetAssetFields:
             asset_dict
             == gx_config_dict["fluent_datasources"]["my_ds"]["assets"]["my_asset"]
         )
+
+
+def test_id_only_serialized_if_present(ds_dict_config: dict):
+    print(f"\tInput:\n\n{pf(ds_dict_config, depth=3)}")
+    all_ids: list[str] = []
+    with_ids: dict = {}
+    no_ids: dict = {}
+
+    # remove or add ids
+    for ds_name, ds in ds_dict_config["fluent_datasources"].items():
+
+        with_ids[ds_name] = copy.deepcopy(ds)
+        no_ids[ds_name] = copy.deepcopy(ds)
+
+        ds_id = uuid.uuid4()
+        all_ids.append(str(ds_id))
+        with_ids[ds_name]["id"] = ds_id
+
+        no_ids[ds_name].pop("id", None)
+
+        for asset_name in ds["assets"].keys():
+
+            asset_id = uuid.uuid4()
+            all_ids.append(str(asset_id))
+            with_ids[ds_name]["assets"][asset_name]["id"] = asset_id
+
+            no_ids[ds_name]["assets"][asset_name].pop("id", None)
+
+    gx_config_no_ids = GxConfig.parse_obj({"fluent_datasources": no_ids})
+    gx_config_with_ids = GxConfig.parse_obj({"fluent_datasources": with_ids})
+
+    assert "id" not in str(gx_config_no_ids.dict())
+    assert "id" not in gx_config_no_ids.json()
+    assert "id" not in gx_config_no_ids.yaml()
+
+    for serialized_str in [
+        str(gx_config_with_ids.dict()),
+        gx_config_with_ids.json(),
+        gx_config_with_ids.yaml(),
+    ]:
+        for id_ in all_ids:
+            assert id_ in serialized_str
 
 
 @pytest.mark.parametrize(
@@ -265,6 +362,60 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
     assert loaded.datasources
     for datasource in loaded.datasources.values():
         assert isinstance(datasource, Datasource)
+
+
+@pytest.mark.parametrize(
+    ["load_method", "input_"],
+    [
+        p(
+            GxConfig.parse_obj,
+            SIMPLE_DS_DICT_WITH_DS_NAME_ERROR,
+            id="simple pg config dict with ds name error",
+        ),
+        p(
+            GxConfig.parse_raw,
+            json.dumps(SIMPLE_DS_DICT_WITH_DS_NAME_ERROR),
+            id="simple pg json with ds name error",
+        ),
+    ],
+)
+def test_load_incorrect_ds_config_raises_error(
+    inject_engine_lookup_double, load_method: Callable, input_
+):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        _ = load_method(input_)
+
+    assert (
+        str(exc_info.value)
+        == '1 validation error for GxConfig\nfluent_datasources\n  Datasource key "my_ds" is different from name "my_incorrect_ds" in its configuration. (type=value_error)'
+    )
+
+
+@pytest.mark.parametrize(
+    ["load_method", "input_"],
+    [
+        p(
+            GxConfig.parse_obj,
+            SIMPLE_DS_DICT_WITH_ASSET_NAME_ERROR,
+            id="simple pg config dict with asset name error",
+        ),
+        p(
+            GxConfig.parse_raw,
+            json.dumps(SIMPLE_DS_DICT_WITH_ASSET_NAME_ERROR),
+            id="simple pg json with asset name error",
+        ),
+    ],
+)
+def test_load_incorrect_asset_config_raises_error(
+    inject_engine_lookup_double, load_method: Callable, input_
+):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        _ = load_method(input_)
+
+    assert (
+        str(exc_info.value)
+        == '1 validation error for GxConfig\nfluent_datasources\n  DataAsset key "my_csv_asset" is different from name "my_incorrect_csv_asset" in its configuration. (type=value_error)'
+    )
 
 
 @pytest.mark.unit
@@ -412,7 +563,6 @@ def from_dict_gx_config() -> GxConfig:
 @functools.lru_cache(maxsize=1)
 def from_json_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_raw(COMPLEX_CONFIG_JSON)
-    assert gx_config
     return gx_config
 
 
@@ -420,8 +570,18 @@ def from_json_gx_config() -> GxConfig:
 @functools.lru_cache(maxsize=1)
 def from_yaml_gx_config() -> GxConfig:
     gx_config = GxConfig.parse_yaml(PG_CONFIG_YAML_STR)
-    assert gx_config
     return gx_config
+
+
+@pytest.fixture(params=[from_dict_gx_config, from_json_gx_config, from_yaml_gx_config])
+def from_all_config(request: FixtureRequest) -> GxConfig:
+    """
+    This fixture parametrizes all our config fixtures.
+    This will in-turn parametrize any test that uses it, creating a test case for each
+    `from_*_config` fixture
+    """
+    fixture_name = request.param.__name__
+    return request.getfixturevalue(fixture_name)
 
 
 def test_dict_config_round_trip(
@@ -429,11 +589,6 @@ def test_dict_config_round_trip(
 ):
     dumped: dict = from_dict_gx_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
-
-    assert "name" not in dumped["fluent_datasources"].keys()
-    for datasource in dumped["fluent_datasources"].values():
-        for asset in datasource["assets"].values():
-            assert "name" not in asset.keys()
 
     re_loaded: GxConfig = GxConfig.parse_obj(dumped)
     pp(re_loaded)
@@ -488,10 +643,32 @@ def test_yaml_file_config_round_trip(
     assert from_yaml_gx_config == re_loaded
 
 
-def test_splitters_deserialization(
-    inject_engine_lookup_double, from_json_gx_config: GxConfig
+def test_assets_key_presence(
+    inject_engine_lookup_double, from_yaml_gx_config: GxConfig
 ):
-    table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
+    ds_wo_assets = None
+    ds_with_assets = None
+    for ds in from_yaml_gx_config.datasources.values():
+        if ds.assets:
+            ds_with_assets = ds
+        else:
+            ds_wo_assets = ds
+    assert ds_with_assets, "Need at least one Datasource with assets for this test"
+    assert ds_wo_assets, "Need at least one Datasource without assets for this test"
+
+    dumped_as_dict: dict = yaml.load(from_yaml_gx_config.yaml())
+    print(
+        f"  dict from dumped yaml ->\n\n{pf(dumped_as_dict['fluent_datasources'], depth=2)}"
+    )
+
+    assert _ASSETS_KEY in dumped_as_dict["fluent_datasources"][ds_with_assets.name]
+    assert _ASSETS_KEY not in dumped_as_dict["fluent_datasources"][ds_wo_assets.name]
+
+
+def test_splitters_deserialization(
+    inject_engine_lookup_double, from_all_config: GxConfig
+):
+    table_asset: TableAsset = from_all_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
     assert isinstance(table_asset.splitter, SplitterYearAndMonth)
@@ -517,15 +694,9 @@ def test_custom_sorter_serialization(
     dumped: str = from_json_gx_config.json(indent=2)
     print(f"  Dumped JSON ->\n\n{dumped}\n")
 
-    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT["fluent_datasources"][  # type: ignore[index]
+    expected_sorter_strings: List[str] = COMPLEX_CONFIG_DICT["fluent_datasources"][
         "my_pg_ds"
-    ][
-        "assets"
-    ][
-        "with_dslish_sorters"
-    ][
-        "order_by"
-    ]
+    ]["assets"]["with_dslish_sorters"]["order_by"]
 
     assert '"reverse": True' not in dumped
     assert '{"key":' not in dumped
@@ -648,8 +819,7 @@ def test_config_substitution_retains_original_value_on_save(
         "fluent_datasources"
     ]["my_sqlite_ds_w_subs"]
 
-    # FIXME: serialized items should not have name or assets
-    round_tripped.pop("assets")
+    # FIXME: serialized items should not have name
     round_tripped.pop("name")
 
     assert round_tripped == original

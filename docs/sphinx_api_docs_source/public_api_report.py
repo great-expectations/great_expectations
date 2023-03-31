@@ -860,14 +860,6 @@ class CodeReferenceFilter:
         ),
         IncludeExcludeDefinition(
             reason="Exclude code from v2 API",
-            filepath=pathlib.Path("great_expectations/cli/v012/datasource.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="Exclude code from v2 API",
-            filepath=pathlib.Path("great_expectations/cli/v012/toolkit.py"),
-        ),
-        IncludeExcludeDefinition(
-            reason="Exclude code from v2 API",
             filepath=pathlib.Path(
                 "great_expectations/datasource/batch_kwargs_generator/batch_kwargs_generator.py"
             ),
@@ -1477,6 +1469,30 @@ class CodeReferenceFilter:
             name="get_available_data_asset_names",
             filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="LegacyDatasource is not included in the public API",
+            name="get_batch",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/sqlalchemy_datasource.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="LegacyDatasource is not included in the public API",
+            name="get_batch",
+            filepath=pathlib.Path(
+                "great_expectations/datasource/sparkdf_datasource.py"
+            ),
+        ),
+        IncludeExcludeDefinition(
+            reason="LegacyDatasource is not included in the public API",
+            name="get_batch",
+            filepath=pathlib.Path("great_expectations/datasource/pandas_datasource.py"),
+        ),
+        IncludeExcludeDefinition(
+            reason="LegacyDatasource is not included in the public API",
+            name="get_batch",
+            filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
+        ),
     ]
 
     def __init__(
@@ -1843,7 +1859,7 @@ def main():
     # any methods or classes you are adding to documentation with the @public_api
     # decorator and any relevant "new" or "deprecated" public api decorators.
     # If the actual is lower than the threshold, please reduce the threshold.
-    PUBLIC_API_MISSING_THRESHOLD = 99  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
+    PUBLIC_API_MISSING_THRESHOLD = 96  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
     if len(printable_definitions) != PUBLIC_API_MISSING_THRESHOLD:
         error_msg_prefix = f"There are {len(printable_definitions)} items missing from the public API, we currently allow {PUBLIC_API_MISSING_THRESHOLD}."
         if len(printable_definitions) > PUBLIC_API_MISSING_THRESHOLD:

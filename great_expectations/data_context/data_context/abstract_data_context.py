@@ -29,7 +29,6 @@ from typing import (
     overload,
 )
 
-from dateutil.parser import parse
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Literal
@@ -325,7 +324,9 @@ class AbstractDataContext(ConfigPeer, ABC):
                     validation_operator_config,
                 )
 
-        self._attach_fluent_config_datasources(self.fluent_config)
+        self._attach_fluent_config_datasources_and_build_data_connectors(
+            self.fluent_config
+        )
 
     def _init_config_provider(self) -> _ConfigurationProvider:
         config_provider = _ConfigurationProvider()
@@ -1026,16 +1027,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             config = self._project_config
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
+    @public_api
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
     ) -> Union[Batch, DataAsset]:
         """Get exactly one batch, based on a variety of flexible input types.
+
         The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
         Legacy (V2) Datasource schemas.  The version-specific implementations are contained in "_get_batch_v2()" and
         "_get_batch_v3()", respectively, both of which are in the present module.
 
         For the V3 API parameters, please refer to the signature and parameter description of method "_get_batch_v3()".
         For the Legacy usage, please refer to the signature and parameter description of the method "_get_batch_v2()".
+
+        Processing Steps:
+            1. Determine the version (possible values are "v3" or "v2").
+            2. Convert the positional arguments to the appropriate named arguments, based on the version.
+            3. Package the remaining arguments as variable keyword arguments (applies only to V3).
+            4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
 
         Args:
             arg1: the first positional argument (can take on various types)
@@ -1046,12 +1055,6 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         Returns:
             Batch (V3) or DataAsset (V2) -- the requested batch
-
-        Processing Steps:
-        1. Determine the version (possible values are "v3" or "v2").
-        2. Convert the positional arguments to the appropriate named arguments, based on the version.
-        3. Package the remaining arguments as variable keyword arguments (applies only to V3).
-        4. Call the version-specific method ("_get_batch_v3()" or "_get_batch_v2()") with the appropriate arguments.
         """
 
         api_version: Optional[str] = self._get_data_context_version(arg1=arg1, **kwargs)
@@ -1405,7 +1408,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         response = self.profiler_store.set(key=key, value=profiler.config)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            ge_cloud_id = response.cloud_id
+            ge_cloud_id = response.id
 
         # If an id is present, we want to prioritize that as our key for object retrieval
         if ge_cloud_id:
@@ -3630,21 +3633,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         assert not (run_id and run_name) and not (
             run_id and run_time
         ), "Please provide either a run_id or run_name and/or run_time."
-        if isinstance(run_id, str) and not run_name:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "String run_ids are deprecated as of v0.11.0 and support will be removed in v0.16. Please provide a run_id of type "
-                "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                "run_name and run_time separately.",
-                DeprecationWarning,
-            )
-            try:
-                run_time = parse(run_id)
-            except (ValueError, TypeError):
-                pass
-            run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-        elif isinstance(run_id, dict):
+        if isinstance(run_id, dict):
             run_id = RunIdentifier(**run_id)
         elif not isinstance(run_id, RunIdentifier):
             run_name = run_name or "profiling"
@@ -3904,17 +3893,6 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             BatchKwargs
 
         """
-        if kwargs.get("name"):
-            if data_asset_name:
-                raise ValueError(
-                    "Cannot provide both 'name' and 'data_asset_name'. Please use 'data_asset_name' only."
-                )
-            # deprecated-v0.11.2
-            warnings.warn(
-                "name is deprecated as a batch_parameter as of v0.11.2 and will be removed in v0.16. Please use data_asset_name instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = kwargs.pop("name")
         datasource_obj = self.get_datasource(datasource)
         batch_kwargs = datasource_obj.build_batch_kwargs(
             batch_kwargs_generator=batch_kwargs_generator,
@@ -4818,7 +4796,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def store_validation_result_metrics(
         self, requested_metrics, validation_results, target_store_name
     ) -> None:
-        self._store_metrics(requested_metrics, validation_results, target_store_name)
+        self._store_metrics(
+            requested_metrics=requested_metrics,
+            validation_results=validation_results,
+            target_store_name=target_store_name,
+        )
 
     def _store_metrics(
         self, requested_metrics, validation_results, target_store_name
@@ -4838,9 +4820,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         expectation_suite_name = validation_results.meta["expectation_suite_name"]
         run_id = validation_results.meta["run_id"]
-        data_asset_name = validation_results.meta.get("batch_kwargs", {}).get(
-            "data_asset_name"
-        )
+        data_asset_name = validation_results.meta.get(
+            "active_batch_definition", {}
+        ).get("data_asset_name")
 
         for expectation_suite_dependency, metrics_list in requested_metrics.items():
             if (expectation_suite_dependency != "*") and (
@@ -4874,7 +4856,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                                 ),
                                 metric_name=metric_name,
                                 metric_kwargs_id=get_metric_kwargs_id(
-                                    metric_name, metric_kwargs
+                                    metric_kwargs=metric_kwargs
                                 ),
                             ),
                             metric_value,
@@ -5448,10 +5430,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         return GxConfig(fluent_datasources={})
 
-    def _attach_fluent_config_datasources(self, config: GxConfig):
+    def _attach_fluent_config_datasources_and_build_data_connectors(
+        self, config: GxConfig
+    ):
         """Called at end of __init__"""
         for ds_name, datasource in config.datasources.items():
             logger.info(f"Loaded '{ds_name}' from fluent config")
+
+            # if Datasource required a data_connector we need to build the data_connector for each asset
+            if datasource.data_connector_type:
+                for data_asset in datasource.assets.values():
+                    connect_options = getattr(data_asset, "connect_options", {})
+                    datasource._build_data_connector(data_asset, **connect_options)
+
             self._add_fluent_datasource(datasource)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:

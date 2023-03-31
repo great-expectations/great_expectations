@@ -4,10 +4,10 @@ from typing import List, Set
 from unittest import mock
 
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest, IDDict
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
@@ -24,7 +24,7 @@ except ImportError:
     sqlalchemy = None
 from great_expectations.validator.validator import Validator
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
 
 
 # TODO: <Alex>Some methods in this module are misplaced and/or provide no action; this must be repaired.</Alex>
@@ -2475,16 +2475,20 @@ def test_introspect_db(
 
 
 @pytest.mark.integration
-def test_include_schema_name_introspection(mysql_sqlalchemy_datasource):
+def test_include_schema_name_introspection(mysql_engine):
+    execution_engine = SqlAlchemyExecutionEngine(
+        name="test_sql_execution_engine",
+        engine=mysql_engine,
+    )
+
     my_data_connector = instantiate_class_from_config(
         config={
             "class_name": "InferredAssetSqlDataConnector",
-            "name": "my_test_data_connector",
+            "name": "inferred_data_connector",
+            "include_schema_name": True,
         },
         runtime_environment={
-            "execution_engine": SqlAlchemyExecutionEngine(
-                engine=mysql_sqlalchemy_datasource.engine
-            ),
+            "execution_engine": execution_engine,
             "datasource_name": "my_test_datasource",
         },
         config_defaults={"module_name": "great_expectations.datasource.data_connector"},

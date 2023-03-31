@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_values_to_not_be_in_set",
   "datasets" : [{
+    "dataset_name": "expect_column_values_to_not_be_in_set_1",
     "data" : {
       "x" : [1,2,4],
       "z" : ["hello", "jello", "mello"],

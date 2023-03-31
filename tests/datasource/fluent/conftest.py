@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from contextlib import contextmanager
-from typing import Any, Callable, Dict, Generator, List, Type, Union
+from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
 
 import pytest
 from pytest import MonkeyPatch
+from typing_extensions import Final
 
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
@@ -20,45 +20,18 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
+
+EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
+PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 
 logger = logging.getLogger(__name__)
-
-
-class MockSaInspector:
-    def get_columns(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]
-        ...
-
-    def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
-        ...
-
-    def has_table(self, table_name: str, schema: str) -> bool:  # type: ignore[empty-body]
-        ...
-
-
-class Dialect:
-    def __init__(self, dialect: str):
-        self.name = dialect
-
-
-class _MockConnection:
-    def __init__(self, dialect: Dialect):
-        self.dialect = dialect
-
-
-class MockSaEngine:
-    def __init__(self, dialect: Dialect):
-        self.dialect = dialect
-
-    @contextmanager
-    def connect(self):
-        """A contextmanager that yields a _MockConnection"""
-        yield _MockConnection(self.dialect)
 
 
 def sqlachemy_execution_engine_mock_cls(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
-    splitter_query_response: Union[List[Dict[str, Any]], List[Any]],
+    splitter_query_response: Optional[Union[List[Dict[str, Any]], List[Any]]] = None,
 ):
     """Creates a mock gx sql alchemy engine class
 
@@ -66,20 +39,18 @@ def sqlachemy_execution_engine_mock_cls(
         validate_batch_spec: A hook that can be used to validate the generated the batch spec
             passed into get_batch_data_and_markers
         dialect: A string representing the SQL Engine dialect. Examples include: postgresql, sqlite
-        splitter_query_response: A list of dictionaries. Each dictionary is a row returned back from
-            the splitter query. The keys are the column names and the value is the column values, eg:
-            [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
+        splitter_query_response: An optional list of dictionaries. Each dictionary is a row returned
+            from the splitter query. The keys are the column names and the value is the column values,
+            eg: [{'year': 2021, 'month': 1}, {'year': 2021, 'month': 2}]
     """
 
-    if not splitter_query_response:
-        raise ValueError("splitter_query_response must be a non-empty list.")
-
     class MockSqlAlchemyExecutionEngine(SqlAlchemyExecutionEngine):
-        def __init__(self, *args, **kwargs):
+        def __init__(self, create_temp_table: bool = True, *args, **kwargs):
             # We should likely let the user pass in an engine. In a SqlAlchemyExecutionEngine used in
             # non-mocked code the engine property is of the type:
             # from sqlalchemy.engine import Engine as SaEngine
             self.engine = MockSaEngine(dialect=Dialect(dialect))
+            self._create_temp_table = create_temp_table
 
         def get_batch_data_and_markers(  # type: ignore[override]
             self, batch_spec: SqlAlchemyDatasourceBatchSpec
@@ -150,3 +121,14 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     tmp_gx_dir = gx_yml.parent.absolute()
     logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
     return tmp_gx_dir
+
+
+@pytest.fixture(scope="session")
+def fluent_gx_config_yml() -> pathlib.Path:
+    assert PG_CONFIG_YAML_FILE.exists()
+    return PG_CONFIG_YAML_FILE
+
+
+@pytest.fixture(scope="session")
+def fluent_gx_config_yml_str(fluent_gx_config_yml: pathlib.Path) -> str:
+    return fluent_gx_config_yml.read_text()

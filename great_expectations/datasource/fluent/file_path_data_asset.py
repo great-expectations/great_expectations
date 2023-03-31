@@ -11,6 +11,7 @@ from typing import (
     ClassVar,
     Dict,
     List,
+    Mapping,
     Optional,
     Pattern,
     Set,
@@ -20,6 +21,7 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
 )
@@ -59,7 +61,13 @@ class _FilePathDataAsset(DataAsset):
     }
 
     # General file-path DataAsset pertaining attributes.
-    batching_regex: Pattern
+    batching_regex: Pattern = (  # must use typing.Pattern for pydantic < v1.10
+        MATCH_ALL_PATTERN
+    )
+    connect_options: Mapping = pydantic.Field(
+        default_factory=dict,
+        description="Optional filesystem specific advanced parameters for connecting to data assets",
+    )
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -70,8 +78,12 @@ class _FilePathDataAsset(DataAsset):
     _all_group_index_to_group_name_mapping: Dict[int, str] = pydantic.PrivateAttr()
     _all_group_names: List[str] = pydantic.PrivateAttr()
 
+    # `_data_connector`` should be set inside `_build_data_connector()`
     _data_connector: DataConnector = pydantic.PrivateAttr()
-    _test_connection_error_message: str = pydantic.PrivateAttr()
+    # more specific `_test_connection_error_message` can be set inside `_build_data_connector()`
+    _test_connection_error_message: str = pydantic.PrivateAttr(
+        "Could not connect to your asset"
+    )
 
     class Config:
         """
@@ -105,12 +117,24 @@ class _FilePathDataAsset(DataAsset):
     ) -> re.Pattern:
         return Datasource.parse_batching_regex_string(batching_regex=batching_regex)
 
-    def batch_request_options_template(
+    @property
+    def batch_request_options(
         self,
-    ) -> BatchRequestOptions:
-        options: set[str] = {FILE_PATH_BATCH_SPEC_KEY}
-        options.update(set(self._all_group_names))
-        return {option: None for option in options}
+    ) -> tuple[str, ...]:
+        """The potential keys for BatchRequestOptions.
+
+        Example:
+        ```python
+        >>> print(asset.batch_request_options)
+        ("day", "month", "year", "path")
+        >>> options = {"year": "2023"}
+        >>> batch_request = asset.build_batch_request(options=options)
+        ```
+
+        Returns:
+            A tuple of keys that can be used in a BatchRequestOptions dictionary.
+        """
+        return tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
 
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
@@ -119,6 +143,7 @@ class _FilePathDataAsset(DataAsset):
             for option, value in options.items():
                 if (
                     option in self._all_group_name_to_group_index_mapping
+                    and value
                     and not isinstance(value, str)
                 ):
                     raise gx_exceptions.InvalidBatchRequestError(
@@ -127,7 +152,7 @@ class _FilePathDataAsset(DataAsset):
                     )
 
         if options is not None and not self._valid_batch_request_options(options):
-            allowed_keys = set(self.batch_request_options_template().keys())
+            allowed_keys = set(self.batch_request_options)
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
                 "Batch request options should only contain keys from the following set:\n"
@@ -152,10 +177,11 @@ class _FilePathDataAsset(DataAsset):
             and batch_request.data_asset_name == self.name
             and self._valid_batch_request_options(batch_request.options)
         ):
+            options = {option: None for option in self.batch_request_options}
             expect_batch_request_form = BatchRequest(
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
-                options=self.batch_request_options_template(),
+                options=options,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"

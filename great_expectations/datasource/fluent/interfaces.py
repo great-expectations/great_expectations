@@ -4,6 +4,7 @@ import dataclasses
 import functools
 import logging
 import re
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -29,7 +30,9 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
-from great_expectations.datasource.fluent.constants import _FIELDS_ALWAYS_SET
+from great_expectations.datasource.fluent.constants import (
+    MATCH_ALL_PATTERN,
+)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -47,6 +50,7 @@ if TYPE_CHECKING:
         BatchMarkers,
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
+    from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -73,6 +77,9 @@ class TestConnectionError(Exception):
 # would look like:
 #   options = { "year": 2020 }
 BatchRequestOptions: TypeAlias = Dict[str, Any]
+
+
+BatchMetadata: TypeAlias = Dict[str, Any]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -152,8 +159,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
+    id: Optional[uuid.UUID] = Field(default=None, description="DataAsset id")
 
     order_by: List[Sorter] = Field(default_factory=list)
+    batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
@@ -175,16 +184,24 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     # Abstract Methods
-    def batch_request_options_template(
-        self,
-    ) -> BatchRequestOptions:
-        """A BatchRequestOptions template for build_batch_request.
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        """The potential keys for BatchRequestOptions.
+
+        Example:
+        ```python
+        >>> print(asset.batch_request_options)
+        ("day", "month", "year")
+        >>> options = {"year": "2023"}
+        >>> batch_request = asset.build_batch_request(options=options)
+        ```
 
         Returns:
-            A BatchRequestOptions dictionary with the correct shape that build_batch_request
-            will understand. All the option values are defaulted to None.
+            A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
-        raise NotImplementedError
+        raise NotImplementedError(
+            """One needs to implement "batch_request_options" on a DataAsset subclass."""
+        )
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -200,8 +217,8 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
         Args:
             options: A dict that can be used to limit the number of batches returned from the asset.
-                The dict structure depends on the asset type. A template of the dict can be obtained by
-                calling batch_request_options_template.
+                The dict structure depends on the asset type. The available keys for dict can be obtained by
+                calling batch_request_options.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -212,9 +229,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
 
     def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(
-            set(self.batch_request_options_template().keys())
-        )
+        return set(options.keys()).issubset(set(self.batch_request_options))
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
@@ -343,10 +358,13 @@ class Datasource(
 
     # class attrs
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
+    # Not all Datasources require a DataConnector
+    data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
     _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
         "type",
+        "id",
         "execution_engine",
         "assets",
         "base_directory",  # filesystem argument
@@ -371,10 +389,11 @@ class Datasource(
     # instance attrs
     type: str
     name: str
+    id: Optional[uuid.UUID] = Field(default=None, description="Datasource id")
     assets: MutableMapping[str, _DataAssetT] = {}
 
     # private attrs
-    _data_context = pydantic.PrivateAttr()
+    _data_context: GXDataContext = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
@@ -449,7 +468,9 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def _add_asset(
+        self, asset: _DataAssetT, connect_options: dict | None = None
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
@@ -459,13 +480,13 @@ class Datasource(
         # See the comment in DataAsset for more information.
         asset._datasource = self
 
+        if not connect_options:
+            connect_options = {}
+        self._build_data_connector(asset, **connect_options)
+
         asset.test_connection()
 
         self.assets[asset.name] = asset
-
-        # pydantic needs to know that an asset has been set so that it doesn't get excluded
-        # when dumping to dict, json, yaml etc.
-        self.__fields_set__.update(_FIELDS_ALWAYS_SET)
 
         return asset
 
@@ -503,7 +524,7 @@ class Datasource(
     ) -> re.Pattern:
         pattern: re.Pattern
         if not batching_regex:
-            pattern = re.compile(".*")
+            pattern = MATCH_ALL_PATTERN
         elif isinstance(batching_regex, str):
             pattern = re.compile(batching_regex)
         elif isinstance(batching_regex, re.Pattern):
@@ -533,27 +554,14 @@ class Datasource(
             """One needs to implement "test_connection" on a Datasource subclass."""
         )
 
-    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
+    def _build_data_connector(self, data_asset: _DataAssetT, **kwargs) -> None:
         """Any Datasource subclass that utilizes DataConnector should overwrite this method.
 
         Specific implementations instantiate appropriate DataConnector class and set "self._data_connector" to it.
 
         Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
+            data_asset: DataAsset using this DataConnector instance
             kwargs: Extra keyword arguments allow specification of arguments used by particular DataConnector subclasses
-        """
-        pass
-
-    def _build_test_connection_error_message(
-        self, data_asset_name: str, **kwargs
-    ) -> None:
-        """Any Datasource subclass can overwrite this method.
-
-        Specific implementations create appropriate error message and set "self._test_connection_error_message" to it.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
-            kwargs: Extra keyword arguments allow specification of arguments used by particular subclass' error message
         """
         pass
 

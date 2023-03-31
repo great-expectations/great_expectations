@@ -82,6 +82,7 @@ try:
     from sqlalchemy import Table
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql import Select
+
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
@@ -90,6 +91,8 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
+    RemovedIn20Warning = None
+
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
@@ -2011,7 +2014,7 @@ def delete_blank_lines(text: str) -> str:
 
 
 def generate_temporary_table_name(
-    default_table_name_prefix: str = "ge_temp_",
+    default_table_name_prefix: str = "gx_temp_",
     num_digits: int = 8,
 ) -> str:
     table_name: str = f"{default_table_name_prefix}{str(uuid.uuid4())[:num_digits]}"
@@ -2072,7 +2075,7 @@ def get_sqlalchemy_domain_data(domain_data):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
         # select(query).subquery() should be used instead
-        domain_data = sa.select(["*"]).select_from(domain_data)
+        domain_data = sa.select(sa.text("*")).select_from(domain_data)
     # engine.get_domain_records returns a valid select object;
     # calling fetchall at execution is equivalent to a SELECT *
     return domain_data
@@ -2152,20 +2155,3 @@ def numpy_quantile(
         )
 
     return quantile
-
-
-class NotImported:
-    def __init__(self, message: str):
-        self.__dict__["gx_error_message"] = message
-
-    def __getattr__(self, attr: str) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __setattr__(self, key: str, value: Any) -> None:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __call__(self, *args, **kwargs) -> Any:
-        raise ModuleNotFoundError(self.__dict__["gx_error_message"])
-
-    def __str__(self) -> str:
-        return self.__dict__["gx_error_message"]

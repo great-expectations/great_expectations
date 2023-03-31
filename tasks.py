@@ -215,6 +215,10 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         " The daemon will be started and re-used for subsequent calls."
         " For detailed usage see `dmypy --help`.",
         "clear-cache": "Clear the local mypy cache directory.",
+        "check-stub-sources": "Check the implementation `.py` files for any `.pyi`"
+        " stub files in `great_expectations`."
+        " By default `mypy` will not check implementation files if a `.pyi` stub file exists."
+        " This should be run in CI in addition to the normal type-checking step.",
     },
 )
 def type_check(
@@ -226,6 +230,7 @@ def type_check(
     daemon: bool = False,
     clear_cache: bool = False,
     report: bool = False,
+    check_stub_sources: bool = False,
     ci: bool = False,
 ):
     """Run mypy static type-checking on select packages."""
@@ -244,6 +249,7 @@ def type_check(
             daemon=daemon,
             clear_cache=clear_cache,
             report=report,
+            check_stub_sources=check_stub_sources,
             ci=False,
         )
         return  # don't run twice
@@ -262,6 +268,16 @@ def type_check(
         bin = "mypy"
 
     ge_pkgs = [f"great_expectations.{p}" for p in packages]
+
+    if check_stub_sources:
+        # see --help docs for explanation of this flag
+        for stub_file in GX_ROOT_DIR.glob("**/*.pyi"):
+            source_file = stub_file.with_name(  # TODO:py3.9 .with_stem()
+                f"{stub_file.name[:-1]}"
+            )
+            relative_path = source_file.relative_to(GX_ROOT_DIR.parent)
+            ge_pkgs.append(str(relative_path))
+
     cmds = [
         bin,
         *ge_pkgs,
@@ -509,8 +525,10 @@ def type_schema(
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    for name, model in _iter_all_registered_types():
-
+    for name, model in [
+        (Datasource.__name__, Datasource),
+        *_iter_all_registered_types(),
+    ]:
         if issubclass(model, Datasource):
             datasource_dir = schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)

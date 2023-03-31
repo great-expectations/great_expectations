@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, ClassVar, List, Type
 
 from great_expectations.core.id_dict import BatchSpec
 
@@ -39,6 +39,10 @@ class DataConnector(ABC):
         datasource_name: The name of the Datasource associated with this DataConnector instance
         data_asset_name: The name of the DataAsset using this DataConnector instance
     """
+
+    # needed to select the asset level kwargs needed to build the DataConnector
+    asset_level_option_keys: ClassVar[tuple[str, ...]] = ()
+    asset_options_type: ClassVar[Type] = dict
 
     def __init__(
         self,
@@ -185,8 +189,8 @@ class DataConnector(ABC):
             return False
 
         if batch_request.options:
-            for key in batch_request.options.keys():
-                if not (
+            for key, value in batch_request.options.items():
+                if value is not None and not (
                     (key in batch_definition.batch_identifiers)
                     and (
                         batch_definition.batch_identifiers[key]

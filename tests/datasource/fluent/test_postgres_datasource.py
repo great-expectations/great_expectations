@@ -25,12 +25,8 @@ from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from tests.datasource.fluent.conftest import (
-    Dialect,
-    MockSaEngine,
-    MockSaInspector,
-    sqlachemy_execution_engine_mock_cls,
-)
+from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
+from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
@@ -43,6 +39,7 @@ def _source(
     dialect: str,
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
     splitter_query_response: Optional[List[Dict[str, Any]]] = None,
+    create_temp_table: bool = True,
 ) -> Generator[PostgresDatasource, None, None]:
     splitter_response = splitter_query_response or (
         [
@@ -63,6 +60,7 @@ def _source(
         yield PostgresDatasource(
             name="my_datasource",
             connection_string=connection_string,  # type: ignore[arg-type] # coerced
+            create_temp_table=create_temp_table,
         )
     finally:
         PostgresDatasource.execution_engine_override = original_override  # type: ignore[misc]
@@ -93,12 +91,12 @@ def assert_table_asset(
     name: str,
     table_name: str,
     source: PostgresDatasource,
-    batch_request_template: BatchRequestOptions,
+    batch_request_options: tuple[str, ...],
 ):
     assert asset.name == name
     assert asset.table_name == table_name
     assert asset.datasource == source
-    assert asset.batch_request_options_template() == batch_request_template
+    assert asset.batch_request_options == batch_request_options
 
 
 def assert_batch_request(
@@ -119,11 +117,11 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         inspect = mocker.patch("sqlalchemy.inspect")
         inspect.return_value = MockSaInspector()
         get_column_names = mocker.patch(
-            "tests.datasource.fluent.conftest.MockSaInspector.get_columns"
+            "tests.sqlalchemy_test_doubles.MockSaInspector.get_columns"
         )
         get_column_names.return_value = [{"name": "my_col"}]
         has_table = mocker.patch(
-            "tests.datasource.fluent.conftest.MockSaInspector.has_table"
+            "tests.sqlalchemy_test_doubles.MockSaInspector.has_table"
         )
         has_table.return_value = True
 
@@ -136,7 +134,7 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_template={"year": None, "month": None},
+            batch_request_options=("year", "month"),
         )
         assert_batch_request(
             batch_request=asset.build_batch_request({"year": 2021, "month": 10}),
@@ -163,7 +161,7 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
             name="my_asset",
             table_name="my_table",
             source=source,
-            batch_request_template={},
+            batch_request_options=tuple(),
         )
         assert_batch_request(
             batch_request=asset.build_batch_request(),
@@ -231,7 +229,7 @@ def test_construct_table_asset_directly_with_splitter(create_source):
             "my_asset",
             "my_table",
             source,
-            {"year": None, "month": None},
+            ("year", "month"),
         )
         batch_request_options = {"year": 2022, "month": 10}
         assert_batch_request(
@@ -329,8 +327,9 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
             source=source, name="my_asset", table_name="my_table"
         )
         asset.splitter = year_month_splitter(column_name="my_col")
+        assert asset.batch_request_options == ("year", "month")
         batch_request_with_none = asset.build_batch_request(
-            asset.batch_request_options_template()
+            {"year": None, "month": None}
         )
         assert batch_request_with_none.options == {"year": None, "month": None}
         batches = source.get_batch_list_from_batch_request(batch_request_with_none)
@@ -863,12 +862,10 @@ def test_test_connection_failures(
     inspect = mocker.patch("sqlalchemy.inspect")
     inspect.return_value = MockSaInspector()
     get_schema_names = mocker.patch(
-        "tests.datasource.fluent.conftest.MockSaInspector.get_schema_names"
+        "tests.sqlalchemy_test_doubles.MockSaInspector.get_schema_names"
     )
     get_schema_names.return_value = ["good_schema"]
-    has_table = mocker.patch(
-        "tests.datasource.fluent.conftest.MockSaInspector.has_table"
-    )
+    has_table = mocker.patch("tests.sqlalchemy_test_doubles.MockSaInspector.has_table")
     has_table.return_value = False
 
     with pytest.raises(TestConnectionError):
@@ -1196,3 +1193,16 @@ def test_sorting_none_in_metadata(
         batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
         assert len(batches) == len(years)
         assert batches[-1].metadata["year"] is None
+
+
+@pytest.mark.unit
+def test_create_temp_table(create_source):
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        create_temp_table=False,
+    ) as source:
+        assert source.create_temp_table is False
+        asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
+        _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+        assert source._execution_engine._create_temp_table is False

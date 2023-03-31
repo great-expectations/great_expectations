@@ -80,24 +80,15 @@ Because your Data Context contains the entirety of your Great Expectations proje
 
 As a Great Expectations user, once you have created a Data Context, you will almost always start future work either by using <TechnicalTag relative="../" tag="cli" text="CLI" /> commands from your Data Context's root folder, or by instantiating a `DataContext` in Python:
 
-```python title="Python code"
-import great_expectations as gx
-context = gx.get_context()
+```python title="Import Great Expectations" name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import gx"
 ```
 
-Alternatively, you might call:
-
-```python title="Python code"
-import great_expectations as gx
-context = gx.get_context(filepath=”something”)
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_context"
 ```
 
-If you’re using Great Expectations Cloud, you’d call:
+Alternatively, you can use the `context_root_dir` parameter if you want to specify a specific directory
 
-```python title="Python code"
-import great_expectations as gx
-context = gx.get_context(API_KEY=”something”)
-```
+If you’re using Great Expectations Cloud, you’d set up cloud environment variables before calling `get_context`.
 
 That’s it! You now have access to all the goodness of a DataContext.
 
@@ -113,26 +104,10 @@ Expectations) are the only ones you'll need.
 
 Here's a typical example:
 
-```python title="Python code"
-config = """
-class_name: Datasource
-execution_engine:
-    class_name: PandasExecutionEngine
-data_connectors:
-    my_data_connector:
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: {data_base_directory}
-        glob_directive: "*/*.csv"
-        default_regex:
-            pattern: (.+)/(.+)\\.csv
-            group_names:
-                - data_asset_name
-                - partition
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py yaml"
+```
 
-"""
-my_context.test_yaml_config(
-    config=config
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py test_yaml_config"
 ```
 
 Running `test_yaml_config()` will show some feedback on the configuration. The helpful output can include any result 
@@ -146,30 +121,21 @@ For more detailed guidance on using the `test_yaml_config()` method, please see 
 
 #### Untyped inputs
 
-The code standards for Great Expectations strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you would call:
+The code standards for Great Expectations strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you could follow these steps:
 
-```python title="Python code"
-from great_expectations.core.batch import BatchRequest
 
-batch_request = BatchRequest(
-    datasource_name="my_azure_datasource",
-    data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="<YOUR_DATA_ASSET_NAME>",
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import BatchRequest"
+```
 
-context.get_batch(
-    batch_request=batch_request
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with batch request"
 ```
 
 However, we can take some of the friction out of that process by allowing untyped inputs:
 
-```python title="Python code"
-context.get_batch(
-    datasource_name="my_azure_datasource",
-    data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="<YOUR_DATA_ASSET_NAME>",
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters data_asset_name"
+```
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters"
 ```
 
 In this example, the `get_batch()` method takes on the responsibility for inferring your intended types, and passing it through to the correct internal methods.

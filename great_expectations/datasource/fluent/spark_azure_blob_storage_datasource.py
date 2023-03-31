@@ -129,7 +129,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         delimiter: str = "/",
         order_by: Optional[SortersDefinition] = None,
     ) -> CSVAsset:
-        """Adds a CSV DataAsst to the present "SparkAzureBlobStorageDatasource" object.
+        """Adds a CSV DataAsset to the present "SparkAzureBlobStorageDatasource" object.
 
         Args:
             name: The name of the CSV asset
@@ -173,4 +173,4 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 delimiter=delimiter,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)

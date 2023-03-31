@@ -111,7 +111,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         max_keys: int = 1000,
         order_by: Optional[SortersDefinition] = None,
     ) -> CSVAsset:
-        """Adds a CSV DataAsst to the present "SparkS3Datasource" object.
+        """Adds a CSV DataAsset to the present "SparkS3Datasource" object.
 
         Args:
             name: The name of the CSV asset
@@ -154,4 +154,4 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 delimiter=delimiter,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)

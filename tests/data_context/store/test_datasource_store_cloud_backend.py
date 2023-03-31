@@ -87,7 +87,7 @@ def test_datasource_store_get_by_id(
 
     id: str = "example_id_normally_uuid"
 
-    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, cloud_id=id)
+    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
 
     def mocked_response(*args, **kwargs):
 
@@ -174,7 +174,7 @@ def test_datasource_store_delete_by_id(
     """
     id: str = "example_id_normally_uuid"
 
-    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, cloud_id=id)
+    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
 
     with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
         type(mock_delete.return_value).status_code = mock.PropertyMock(return_value=200)
@@ -219,7 +219,7 @@ def test_datasource_http_error_handling(
 ):
     id: str = "example_id_normally_uuid"
 
-    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, cloud_id=id)
+    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.DATASOURCE, id=id)
     with pytest.raises(
         StoreBackendError, match=r"Unable to \w+ object in GX Cloud Store Backend: .*"
     ) as exc_info:

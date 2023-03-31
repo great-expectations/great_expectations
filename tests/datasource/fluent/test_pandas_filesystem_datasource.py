@@ -6,7 +6,7 @@ import pathlib
 import re
 from dataclasses import dataclass
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any, Optional, Type
 
 import pydantic
 import pytest
@@ -359,6 +359,91 @@ def test_construct_csv_asset_directly():
 
 
 @pytest.mark.unit
+def test_invalid_connect_options(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        pandas_filesystem_datasource.add_csv_asset(  # type: ignore[call-arg]
+            name="csv_asset",
+            batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
+            glob_foobar="invalid",
+        )
+
+    error_dicts = exc_info.value.errors()
+    print(pf(error_dicts))
+    assert [
+        {
+            "loc": ("glob_foobar",),
+            "msg": "extra fields not permitted",
+            "type": "value_error.extra",
+        }
+    ] == error_dicts
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["glob_directive", "expected_error"],
+    [
+        ({"invalid", "type"}, pydantic.ValidationError),
+        ("not_a_dir/*.csv", TestConnectionError),
+    ],
+)
+def test_invalid_connect_options_value(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+    glob_directive,
+    expected_error: Type[Exception],
+):
+    with pytest.raises(expected_error) as exc_info:
+        pandas_filesystem_datasource.add_csv_asset(
+            name="csv_asset",
+            batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
+            glob_directive=glob_directive,
+        )
+
+    print(f"Exception raised:\n\t{repr(exc_info.value)}")
+
+    if isinstance(exc_info.value, pydantic.ValidationError):
+        error_dicts = exc_info.value.errors()
+        print(pf(error_dicts))
+        assert [
+            {
+                "loc": ("glob_directive",),
+                "msg": "str type expected",
+                "type": "type_error.str",
+            }
+        ] == error_dicts
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "connect_options",
+    [
+        param({"glob_directive": "**/*"}, id="glob **/*"),
+        param({"glob_directive": "**/*.csv"}, id="glob **/*.csv"),
+        param({}, id="default connect options"),
+    ],
+)
+def test_asset_connect_options_in_repr(
+    pandas_filesystem_datasource: PandasFilesystemDatasource, connect_options: dict
+):
+    asset = pandas_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
+        **connect_options,
+    )
+    asset_repr = repr(asset)
+    print(asset_repr)
+
+    if connect_options:
+        assert "glob_directive" in asset_repr
+        assert connect_options["glob_directive"] in asset_repr
+    else:
+        # if no connect options are provided the defaults should be used and should not
+        # be part of any serialization. repr == asset.yaml()
+        assert "glob_directive" not in asset_repr
+
+
+@pytest.mark.unit
 def test_csv_asset_with_batching_regex_unnamed_parameters(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
@@ -366,12 +451,12 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(\d{2})\.csv",
     )
-    options = asset.batch_request_options_template()
-    assert options == {
-        "path": None,
-        "batch_request_param_1": None,
-        "batch_request_param_2": None,
-    }
+    options = asset.batch_request_options
+    assert options == (
+        "batch_request_param_1",
+        "batch_request_param_2",
+        "path",
+    )
 
 
 @pytest.mark.unit
@@ -382,8 +467,8 @@ def test_csv_asset_with_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
     )
-    options = asset.batch_request_options_template()
-    assert options == {"path": None, "year": None, "month": None}
+    options = asset.batch_request_options
+    assert options == ("year", "month", "path")
 
 
 @pytest.mark.unit
@@ -394,8 +479,8 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(\d{4})-(?P<month>\d{2})\.csv",
     )
-    options = asset.batch_request_options_template()
-    assert options == {"path": None, "batch_request_param_1": None, "month": None}
+    options = asset.batch_request_options
+    assert options == ("batch_request_param_1", "month", "path")
 
 
 @pytest.mark.unit
@@ -431,6 +516,32 @@ def test_get_batch_list_from_fully_specified_batch_request(
     assert batch.metadata == {"path": path, "year": "2018", "month": "04"}
 
     assert batch.id == "pandas_filesystem_datasource-csv_asset-year_2018-month_04"
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "year,month,path,batch_count",
+    [
+        ("2018", "04", "yellow_tripdata_sample_2018-04.csv", 1),
+        ("2018", None, None, 12),
+        (None, "04", None, 3),
+        (None, "03", "yellow_tripdata_sample_2018-04.csv", 0),
+    ],
+)
+def test_get_batch_list_batch_count(
+    year: Optional[str],
+    month: Optional[str],
+    path: Optional[str],
+    batch_count: int,
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+):
+    asset = pandas_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+    )
+    request = asset.build_batch_request({"year": year, "month": month, "path": path})
+    batches = asset.get_batch_list_from_batch_request(request)
+    assert len(batches) == batch_count
 
 
 @pytest.mark.unit

@@ -5,7 +5,8 @@ from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.optional_imports import sqlalchemy_version_check
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
@@ -13,19 +14,23 @@ from great_expectations.util import (
 )
 
 try:
-    import sqlalchemy as sa
-
-    sqlalchemy_version_check(sa.__version__)
-
-    from sqlalchemy import Column, MetaData, String, Table, and_, column, select
+    from sqlalchemy import Column, MetaData, String, Table, and_, column
     from sqlalchemy.engine.url import URL
     from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
 
     make_url = import_make_url()
 except ImportError:
-    sa = None
-    create_engine = None
-
+    Column = SQLALCHEMY_NOT_IMPORTED
+    MetaData = SQLALCHEMY_NOT_IMPORTED
+    String = SQLALCHEMY_NOT_IMPORTED
+    Table = SQLALCHEMY_NOT_IMPORTED
+    and_ = SQLALCHEMY_NOT_IMPORTED
+    column = SQLALCHEMY_NOT_IMPORTED
+    URL = SQLALCHEMY_NOT_IMPORTED
+    IntegrityError = SQLALCHEMY_NOT_IMPORTED
+    NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
+    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
+    create_engine = SQLALCHEMY_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
@@ -110,9 +115,10 @@ class DatabaseStoreBackend(StoreBackend):
             table = Table(table_name, meta, *cols)
             try:
                 if self._schema_name:
-                    self.engine.execute(
-                        f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};"
-                    )
+                    with self.engine.begin() as connection:
+                        connection.execute(
+                            sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
+                        )
                 meta.create_all(self.engine)
             except SQLAlchemyError as e:
                 raise gx_exceptions.StoreBackendError(
@@ -238,7 +244,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _get(self, key):
         sel = (
-            select([column("value")])
+            sa.select(column("value"))
             .select_from(self._table)
             .where(
                 and_(
@@ -272,7 +278,8 @@ class DatabaseStoreBackend(StoreBackend):
             ins = self._table.insert().values(**cols)
 
         try:
-            self.engine.execute(ins)
+            with self.engine.begin() as connection:
+                connection.execute(ins)
         except IntegrityError as e:
             if self._get(key) == value:
                 logger.info(f"Key {str(key)} already exists with the same value.")
@@ -304,7 +311,7 @@ class DatabaseStoreBackend(StoreBackend):
 
     def _has_key(self, key):
         sel = (
-            select([sa.func.count(column("value"))])
+            sa.select(sa.func.count(column("value")))
             .select_from(self._table)
             .where(
                 and_(
@@ -322,8 +329,9 @@ class DatabaseStoreBackend(StoreBackend):
             return False
 
     def list_keys(self, prefix=()):
+        columns = [column(col) for col in self.key_columns]
         sel = (
-            select([column(col) for col in self.key_columns])
+            sa.select(*columns)
             .select_from(self._table)
             .where(
                 and_(

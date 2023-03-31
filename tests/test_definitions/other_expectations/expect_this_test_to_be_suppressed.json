@@ -2,6 +2,7 @@
   "expectation_type": "expect_column_to_exist",
   "datasets": [
     {
+      "dataset_name": "expect_test_to_be_suppressed_1",
       "data": { "b": [1, 2, 3, 4] },
       "tests": [
         {

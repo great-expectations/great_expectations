@@ -17,7 +17,6 @@ import numpy as np
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-from ruamel.yaml import YAML
 
 import great_expectations as gx
 from great_expectations.core import ExpectationConfiguration
@@ -36,6 +35,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
     BaseDataContext,
@@ -73,11 +73,11 @@ from great_expectations.data_context.util import (
     instantiate_class_from_config,
 )
 from great_expectations.dataset.pandas_dataset import PandasDataset
-from great_expectations.datasource import SqlAlchemyDatasource
 from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
@@ -109,7 +109,7 @@ if TYPE_CHECKING:
     import pyspark.sql
     from pyspark.sql import SparkSession
 
-yaml = YAML()
+yaml = YAMLHandler()
 ###
 #
 # NOTE: THESE TESTS ARE WRITTEN WITH THE en_US.UTF-8 LOCALE AS DEFAULT FOR STRING FORMATTING
@@ -1703,7 +1703,9 @@ def titanic_sqlite_db(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:///{titanic_db_path}")
-        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
+            0
+        ] == (1313,)
         return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1717,7 +1719,9 @@ def titanic_sqlite_db_connection_string(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:////{titanic_db_path}")
-        assert engine.execute("select count(*) from titanic").fetchall()[0] == (1313,)
+        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
+            0
+        ] == (1313,)
         return f"sqlite:///{titanic_db_path}"
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1755,7 +1759,7 @@ def empty_sqlite_db(sa):
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
-        assert engine.execute("select 1").fetchall()[0] == (1,)
+        assert engine.execute(sa.text("select 1")).fetchall()[0] == (1,)
         return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1980,14 +1984,6 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
         ),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sqlalchemy_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
         str(
             os.path.join(  # noqa: PTH118
@@ -2035,14 +2031,6 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
         ),
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sqlalchemy_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
         str(
             os.path.join(  # noqa: PTH118
@@ -2086,14 +2074,6 @@ def data_context_simple_expectation_suite(tmp_path_factory):
         str(
             os.path.join(  # noqa: PTH118
                 context_path, "plugins", "custom_pandas_dataset.py"
-            )
-        ),
-    )
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_sqlalchemy_dataset.py"),  # noqa: PTH118
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "plugins", "custom_sqlalchemy_dataset.py"
             )
         ),
     )
@@ -2293,13 +2273,24 @@ def sqlite_view_engine(test_backends):
 
             sqlite_engine = sa.create_engine("sqlite://")
             df = pd.DataFrame({"a": [1, 2, 3, 4, 5]})
-            df.to_sql(name="test_table", con=sqlite_engine, index=True)
-            sqlite_engine.execute(
-                "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+            add_dataframe_to_db(
+                df=df,
+                name="test_table",
+                con=sqlite_engine,
+                index=True,
             )
-            sqlite_engine.execute(
-                "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-            )
+            with sqlite_engine.connect() as connection:
+                with connection.begin():
+                    connection.execute(
+                        sa.text(
+                            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
+                        )
+                    )
+                    connection.execute(
+                        sa.text(
+                            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
+                        )
+                    )
             return sqlite_engine
         except ImportError:
             sa = None
@@ -2310,11 +2301,6 @@ def sqlite_view_engine(test_backends):
 @pytest.fixture
 def expectation_suite_identifier():
     return ExpectationSuiteIdentifier("my.expectation.suite.name")
-
-
-@pytest.fixture
-def basic_sqlalchemy_datasource(sqlitedb_engine):
-    return SqlAlchemyDatasource("basic_sqlalchemy_datasource", engine=sqlitedb_engine)
 
 
 @pytest.fixture
@@ -3077,16 +3063,6 @@ def alice_columnar_table_single_batch(empty_data_context):
             },
             meta={},
         ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_less_than",
-            meta={},
-            kwargs={"value": 9488404, "column": "user_id"},
-        ),
-        ExpectationConfiguration(
-            expectation_type="expect_column_values_to_be_greater_than",
-            meta={},
-            kwargs={"value": 397433, "column": "user_id"},
-        ),
     ]
 
     event_ts_column_data: Dict[str, str] = {
@@ -3365,26 +3341,6 @@ def alice_columnar_table_single_batch(empty_data_context):
                         "expectation_type": "expect_column_values_to_not_be_null",
                         "condition": None,
                         "class_name": "DefaultExpectationConfigurationBuilder",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "validation_parameter_builder_configs": None,
-                    },
-                    {
-                        "column": "$domain.domain_kwargs.column",
-                        "meta": {},
-                        "expectation_type": "expect_column_values_to_be_less_than",
-                        "condition": "$parameter.my_max_user_id.value < $variables.very_large_user_id",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_max_user_id.value",
-                        "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
-                        "validation_parameter_builder_configs": None,
-                    },
-                    {
-                        "column": "$domain.domain_kwargs.column",
-                        "meta": {},
-                        "expectation_type": "expect_column_values_to_be_greater_than",
-                        "condition": "$parameter.my_min_user_id.value > 0 & $parameter.my_min_user_id.value > $variables.very_small_user_id",
-                        "class_name": "DefaultExpectationConfigurationBuilder",
-                        "value": "$parameter.my_min_user_id.value",
                         "module_name": "great_expectations.rule_based_profiler.expectation_configuration_builder.default_expectation_configuration_builder",
                         "validation_parameter_builder_configs": None,
                     },
@@ -7357,6 +7313,35 @@ def taxi_test_file_directory():
 def test_df_pandas():
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     return test_df
+
+
+@pytest.fixture
+def spark_df_from_pandas_df():
+    """
+    Construct a spark dataframe from pandas dataframe.
+    Returns:
+        Function that can be used in your test e.g.:
+        spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+    """
+
+    def _construct_spark_df_from_pandas(
+        spark_session,
+        pandas_df,
+    ):
+
+        spark_df = spark_session.createDataFrame(
+            [
+                tuple(
+                    None if isinstance(x, (float, int)) and np.isnan(x) else x
+                    for x in record.tolist()
+                )
+                for record in pandas_df.to_records(index=False)
+            ],
+            pandas_df.columns.tolist(),
+        )
+        return spark_df
+
+    return _construct_spark_df_from_pandas
 
 
 @pytest.fixture
