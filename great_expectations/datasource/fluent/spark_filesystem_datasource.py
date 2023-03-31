@@ -72,6 +72,8 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex
