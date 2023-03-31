@@ -1,26 +1,23 @@
-# Required imports for this script's purpose:
-# Import and setup for working with YAML strings:
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py imports">
-from ruamel import yaml
-
-# </snippet>
+# Most of these imports (aside from gx, Checkpoint, and YAMLHandler) can be left out of typical scripts
 import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
-
-# Imports used for testing purposes (and can be left out of typical scripts):
 from great_expectations.core.expectation_validation_result import (
     ExpectationSuiteValidationResult,
 )
 from great_expectations.core.run_identifier import RunIdentifier
+
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py imports">
+from great_expectations.core.yaml_handler import YAMLHandler
+
+# </snippet>
 from great_expectations.data_context.types.base import CheckpointConfig
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py yaml">
-yaml = yaml.YAML(typ="safe")
+yaml = YAMLHandler()
 # </snippet>
-
 
 # Initialize your data context.
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py get_context">

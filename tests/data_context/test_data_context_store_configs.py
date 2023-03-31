@@ -1,12 +1,11 @@
 import os
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
-yaml = YAML()
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 
 @pytest.fixture(scope="function")

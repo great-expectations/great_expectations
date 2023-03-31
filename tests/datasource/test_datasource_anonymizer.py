@@ -1,14 +1,14 @@
 import pytest
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 from great_expectations.core.usage_statistics.anonymizers.anonymizer import Anonymizer
 from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer import (
     DatasourceAnonymizer,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource import Datasource
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture

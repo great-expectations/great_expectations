@@ -3,12 +3,12 @@ import os
 import re
 
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     dataContextConfigSchema,
@@ -26,7 +26,7 @@ from tests.integration.usage_statistics.test_integration_usage_statistics import
 )
 from tests.test_utils import create_files_in_directory, get_sqlite_temp_table_names
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture
