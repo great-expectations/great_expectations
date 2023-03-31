@@ -69,7 +69,10 @@ def fluent_yaml_config_file(
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def fluent_file_context(fluent_yaml_config_file: pathlib.Path) -> FileDataContext:
+def fluent_file_context(
+    cloud_storage_get_client_doubles,
+    fluent_yaml_config_file: pathlib.Path,
+) -> FileDataContext:
     context = get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
     )
@@ -78,7 +81,9 @@ def fluent_file_context(fluent_yaml_config_file: pathlib.Path) -> FileDataContex
 
 
 def test_load_an_existing_config(
-    fluent_yaml_config_file: pathlib.Path, fluent_only_config: GxConfig
+    cloud_storage_get_client_doubles,
+    fluent_yaml_config_file: pathlib.Path,
+    fluent_only_config: GxConfig,
 ):
     context = get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
@@ -87,7 +92,10 @@ def test_load_an_existing_config(
     assert context.fluent_config == fluent_only_config
 
 
-def test_serialize_fluent_config(fluent_file_context: FileDataContext):
+def test_serialize_fluent_config(
+    cloud_storage_get_client_doubles,
+    fluent_file_context: FileDataContext,
+):
     dumped_yaml: str = fluent_file_context.fluent_config.yaml()
     print(f"  Dumped Config\n\n{dumped_yaml}\n")
 
