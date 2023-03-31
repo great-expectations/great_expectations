@@ -96,7 +96,7 @@ class QueryTemplateValues(QueryMetricProvider):
                 e._query_id = None
             raise e
 
-        return [dict(element) for element in result]
+        return [element._asdict() for element in result]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(
