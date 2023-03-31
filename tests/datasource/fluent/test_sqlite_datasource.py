@@ -155,6 +155,7 @@ def create_sqlite_source() -> Callable[
     ],
 )
 def test_sqlite_specific_splitter(
+    empty_data_context,
     create_sqlite_source,
     add_splitter_method_name,
     splitter_kwargs,
@@ -166,6 +167,7 @@ def test_sqlite_specific_splitter(
     last_specified_batch_metadata,
 ):
     with create_sqlite_source(
+        data_context=empty_data_context,
         splitter_query_response=[response for response in splitter_query_responses],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
@@ -185,8 +187,10 @@ def test_sqlite_specific_splitter(
 
 
 @pytest.mark.unit
-def test_create_temp_table(create_sqlite_source):
-    with create_sqlite_source(create_temp_table=False) as source:
+def test_create_temp_table(empty_data_context, create_sqlite_source):
+    with create_sqlite_source(
+        data_context=empty_data_context, create_temp_table=False
+    ) as source:
         assert source.create_temp_table is False
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
