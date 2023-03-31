@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import warnings
 from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
@@ -17,6 +16,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.optional_imports import sqlalchemy as sa
+from great_expectations.sqlalchemy_compatibility_wrappers import read_sql_table_as_df
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
@@ -109,27 +109,19 @@ class TableHead(TableMetricProvider):
         else:
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    with warnings.catch_warnings():
-                        warnings.filterwarnings(
-                            action="ignore", category=RemovedIn20Warning
-                        )
-                        df = pd.read_sql_table(
-                            table_name=getattr(selectable, "name", None),
-                            schema=getattr(selectable, "schema", None),
-                            con=execution_engine.engine,
-                        )
+                    df = read_sql_table_as_df(
+                        table_name=getattr(selectable, "name", None),
+                        schema=getattr(selectable, "schema", None),
+                        con=execution_engine.engine,
+                    )
                 else:
-                    with warnings.catch_warnings():
-                        warnings.filterwarnings(
-                            action="ignore", category=RemovedIn20Warning
-                        )
-                        # passing chunksize causes the Iterator to be returned
-                        df_chunk_iterator = pd.read_sql_table(
-                            table_name=getattr(selectable, "name", None),
-                            schema=getattr(selectable, "schema", None),
-                            con=execution_engine.engine,
-                            chunksize=abs(n_rows),
-                        )
+                    # passing chunksize causes the Iterator to be returned
+                    df_chunk_iterator = read_sql_table_as_df(
+                        table_name=getattr(selectable, "name", None),
+                        schema=getattr(selectable, "schema", None),
+                        con=execution_engine.engine,
+                        chunksize=abs(n_rows),
+                    )
                     df = TableHead._get_head_df_from_df_iterator(
                         df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                     )
