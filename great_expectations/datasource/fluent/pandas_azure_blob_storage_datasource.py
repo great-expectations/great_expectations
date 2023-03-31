@@ -120,11 +120,11 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
-    def _build_data_connector(  # type: ignore[override] # required positional arg `container`
+    def _build_data_connector(
         self,
         data_asset: _FilePathDataAsset,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
-        abs_name_starts_with: str = "",  # TODO: delimiter conflicts with csv asset args
+        abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         **kwargs,
     ) -> None:
