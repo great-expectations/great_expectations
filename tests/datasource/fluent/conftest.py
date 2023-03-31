@@ -20,6 +20,11 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from pprint import pformat as pf
+from great_expectations.datasource.fluent import (
+    PandasGoogleCloudStorageDatasource,
+    PandasAzureBlobStorageDatasource,
+)
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
@@ -132,3 +137,54 @@ def fluent_gx_config_yml() -> pathlib.Path:
 @pytest.fixture(scope="session")
 def fluent_gx_config_yml_str(fluent_gx_config_yml: pathlib.Path) -> str:
     return fluent_gx_config_yml.read_text()
+
+
+class _TestClientDummy:
+    pass
+
+
+_CLIENT_DUMMY = _TestClientDummy()
+
+
+def _get_test_client_dummy(*args, **kwargs) -> _TestClientDummy:
+    logger.debug(
+        f"_get_test_client_dummy() called with \nargs: {pf(args)}\nkwargs: {pf(kwargs)}"
+    )
+    return _CLIENT_DUMMY
+
+
+@pytest.fixture
+def gcs_get_client_dummy(monkeypatch: MonkeyPatch):
+    monkeypatch.setattr(
+        PandasGoogleCloudStorageDatasource,
+        "_get_gcs_client",
+        _get_test_client_dummy,
+        raising=True,
+    )
+
+
+@pytest.fixture
+def azure_get_client_dummy(monkeypatch: MonkeyPatch):
+    monkeypatch.setattr(
+        PandasAzureBlobStorageDatasource,
+        "_get_azure_client",
+        _get_test_client_dummy,
+        raising=True,
+    )
+
+
+@pytest.fixture
+def cloud_storage_get_client_doubles(
+    gcs_get_client_dummy,
+    azure_get_client_dummy,
+):
+    """
+    Patches Datasources that rely on a private _get_*_client() method to return test doubles instead.
+
+    gcs
+    azure
+    """
+    # TODO: patch Spark datasources as needed
+    logger.warning(
+        "Patching cloud storage _get_*_client() methods to return client test doubles"
+    )
