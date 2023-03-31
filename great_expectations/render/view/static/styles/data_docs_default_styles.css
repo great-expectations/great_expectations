@@ -127,6 +127,27 @@ td .show-scrollbars {
     top: 0;
 }
 
+footer {
+  position: fixed;
+  border-top: 1px solid #ffffff61;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  padding: 4px;
+  font-size: 14px;
+  text-align: right;
+  width: 100%;
+  /* margin-bottom: 12px; */
+  background: black;
+  z-index: 100000;
+}
+footer a {
+  padding-right: 8px;
+  color: #ff6210;
+  font-weight: 600;
+}
+
 /* some css overrides for dark mode*/
 @media (prefers-color-scheme: dark) {
   .table {
