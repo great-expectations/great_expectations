@@ -43,6 +43,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -208,7 +209,7 @@ class _FilePathDataAsset(DataAsset):
         batch_spec_options: dict
         batch_data: Any
         batch_markers: BatchMarkers
-        batch_metadata: BatchRequestOptions
+        batch_metadata: BatchMetadata
         batch: Batch
         for batch_definition in batch_definition_list:
             batch_spec = self._data_connector.build_batch_spec(
@@ -235,7 +236,9 @@ class _FilePathDataAsset(DataAsset):
                 batch_definition.batch_identifiers
             )
 
-            batch_metadata = copy.deepcopy(fully_specified_batch_request.options)
+            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+                batch_request=fully_specified_batch_request
+            )
 
             # Some pydantic annotations are postponed due to circular imports.
             # Batch.update_forward_refs() will set the annotations before we
