@@ -182,6 +182,7 @@ def column_condition_partial(  # noqa: C901 - 23
                     _table=selectable,
                     _sqlalchemy_engine=sqlalchemy_engine,
                     _metrics=metrics,
+                    runtime_configuration=runtime_configuration,
                 )
 
                 filter_column_isnull = kwargs.get(

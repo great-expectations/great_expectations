@@ -42,7 +42,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         engine=SqlAlchemyExecutionEngine,
         partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
     )
-    def _sqlalchemy_window(cls, column, _table, **kwargs):
+    def _sqlalchemy_window(cls, column, _table, runtime_configuration, **kwargs):
         # Will - 20210126
         # This is a special case that needs to be handled for mysql, where you cannot refer to a temp_table
         # more than once in the same query. So instead of passing dup_query as-is, a second temp_table is created with
@@ -56,7 +56,14 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 dialect_name = dialect.name
             except AttributeError:
                 dialect_name = ""
+
+        # get temp_table config
         if sql_engine and dialect and dialect_name == "mysql":
+            if runtime_configuration:
+                """
+                runtime_configuration = {'include_config': False, 'catch_exceptions': False, 'result_format': {'result_format': 'COMPLETE', 'unexpected_index_column_names': ['pk_index'], 'partial_unexpected_count': 20, 'include_unexpected_rows': False}}
+                """
+                breakpoint()
             temp_table_name = generate_temporary_table_name()
             temp_table_stmt = "CREATE TEMPORARY TABLE {new_temp_table} AS SELECT tmp.{column_name} FROM {source_table} tmp".format(
                 new_temp_table=temp_table_name,

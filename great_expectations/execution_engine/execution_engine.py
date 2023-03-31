@@ -287,6 +287,8 @@ class ExecutionEngine(ABC):
             metrics=metrics,
             runtime_configuration=runtime_configuration,
         )
+        # do we need to add runtime_configuration here?
+        # we need to pass it in
         return self._process_direct_and_bundled_metric_computation_configurations(
             metric_fn_direct_configurations=metric_fn_direct_configurations,
             metric_fn_bundle_configurations=metric_fn_bundle_configurations,
