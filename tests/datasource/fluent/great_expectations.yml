@@ -96,3 +96,5 @@ fluent_datasources:
       my_csv_asset_with_default_connect_options:
         type: csv
         delimiter: ","
+        connect_options:
+          abs_container: "this_is_always_required"

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Final, Type, Union
 
 import pydantic
 from typing_extensions import Literal
@@ -34,6 +34,8 @@ try:
     ABS_IMPORTED = True
 except ImportError:
     pass
+
+_MISSING: Final = object()
 
 
 class PandasAzureBlobStorageDatasourceError(PandasDatasourceError):
@@ -121,7 +123,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     def _build_data_connector(  # type: ignore[override] # required positional arg `container`
         self,
         data_asset: _FilePathDataAsset,
-        abs_container: str,  # TODO: deal with this required arg
+        abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",  # TODO: delimiter conflicts with csv asset args
         abs_delimiter: str = "/",
         **kwargs,
@@ -131,6 +133,11 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
+        if abs_container is _MISSING:
+            raise TypeError(
+                f"'{data_asset.name}' is missing required argument 'abs_container'"
+            )
+
         data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
             data_asset_name=data_asset.name,
