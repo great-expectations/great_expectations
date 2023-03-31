@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class S3Options(pydantic.BaseModel):
+class _S3Options(pydantic.BaseModel):
     s3_prefix: str = ""
     s3_delimiter: str = "/"
     s3_max_keys: int = 1000
@@ -55,7 +55,7 @@ class S3DataConnector(FilePathDataConnector):
         "s3_delimiter",
         "s3_max_keys",
     )
-    asset_options_type: ClassVar[Type[S3Options]] = S3Options
+    asset_options_type: ClassVar[Type[_S3Options]] = _S3Options
 
     def __init__(
         self,
