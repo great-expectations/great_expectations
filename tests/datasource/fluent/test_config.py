@@ -100,7 +100,7 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "sep": "|",
                     "names": ["col1", "col2"],
                     "batch_metadata": {
-                        "pipeline_file": "${pipeline_file}",
+                        "pipeline_filename": "${pipeline_filename}",
                     },
                 },
                 "my_json_asset": {
