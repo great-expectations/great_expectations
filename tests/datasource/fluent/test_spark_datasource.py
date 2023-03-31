@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import logging
 import pathlib
 from typing import TYPE_CHECKING

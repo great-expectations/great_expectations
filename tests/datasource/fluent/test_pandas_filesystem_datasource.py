@@ -45,7 +45,7 @@ pytestmark = [
 
 
 @pytest.fixture
-def pandas_filesystem_datasource() -> PandasFilesystemDatasource:
+def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasource:
     base_directory_rel_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
@@ -54,10 +54,12 @@ def pandas_filesystem_datasource() -> PandasFilesystemDatasource:
         .parent.joinpath(base_directory_rel_path)
         .resolve(strict=True)
     )
-    return PandasFilesystemDatasource(  # type: ignore[call-arg]
+    pandas_filesystem_datasource = PandasFilesystemDatasource(  # type: ignore[call-arg]
         name="pandas_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
+    pandas_filesystem_datasource._data_context = empty_data_context
+    return pandas_filesystem_datasource
 
 
 @pytest.fixture
