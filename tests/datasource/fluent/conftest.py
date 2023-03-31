@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
+from pprint import pformat as pf
 from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
 
 import pytest
@@ -14,16 +15,15 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import FileDataContext
+from great_expectations.datasource.fluent import (
+    PandasAzureBlobStorageDatasource,
+    PandasGoogleCloudStorageDatasource,
+)
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from pprint import pformat as pf
-from great_expectations.datasource.fluent import (
-    PandasGoogleCloudStorageDatasource,
-    PandasAzureBlobStorageDatasource,
 )
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
