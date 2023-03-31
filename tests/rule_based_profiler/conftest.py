@@ -1,10 +1,10 @@
 from typing import Any, Dict
 
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.rule_based_profiler import RuleBasedProfiler
 from great_expectations.rule_based_profiler.config.base import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.domain_builder import ColumnDomainBuilder
@@ -20,7 +20,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 from great_expectations.rule_based_profiler.rule import Rule, RuleOutput
 from great_expectations.rule_based_profiler.rule.rule_state import RuleState
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 # Measure of "closeness" between "actual" and "desired" is computed as: atol + rtol * abs(desired)

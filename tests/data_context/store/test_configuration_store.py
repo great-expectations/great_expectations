@@ -5,11 +5,11 @@ from typing import List, Optional
 
 import pytest
 from marshmallow import INCLUDE, Schema, fields, validates_schema
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import DataContextKey
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
 from great_expectations.data_context.types.base import BaseYamlConfig
@@ -25,7 +25,7 @@ from tests.test_utils import (
     save_config_to_filesystem,
 )
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
