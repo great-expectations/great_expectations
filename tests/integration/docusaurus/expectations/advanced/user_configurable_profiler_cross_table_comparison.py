@@ -1,12 +1,12 @@
 # <snippet name="tests/integration/docusaurus/expectations/advanced/user_configurable_profiler_cross_table_comparison.py imports">
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.profile.user_configurable_profiler import (
     UserConfigurableProfiler,
 )
 
+yaml = YAMLHandler()
 context = gx.get_context()
 # </snippet>
 

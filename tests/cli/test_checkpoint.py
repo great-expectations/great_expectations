@@ -12,13 +12,13 @@ import pytest
 from click.testing import CliRunner, Result
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
-from ruamel.yaml import YAML
 
 from great_expectations.cli import cli
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import DataContextConfigDefaults
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.datasource import (
@@ -29,9 +29,7 @@ from great_expectations.datasource import (
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks
 
-yaml = YAML()
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
@@ -57,10 +55,10 @@ def titanic_data_context_with_sql_datasource(
             __file__, os.path.join("..", "test_sets", "Titanic.csv")
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
-        df.to_sql(name="titanic", con=sqlite_engine)
+        df.to_sql(name="titanic", con=conn)
         df = df.sample(frac=0.5, replace=True, random_state=1)
-        df.to_sql(name="incomplete", con=sqlite_engine)
-        test_df.to_sql(name="wrong", con=sqlite_engine)
+        df.to_sql(name="incomplete", con=conn)
+        test_df.to_sql(name="wrong", con=conn)
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
 
@@ -3939,6 +3937,6 @@ def test_checkpoint_script_happy_path_executable_failed_validation_due_to_bad_da
 
 
 def _write_checkpoint_dict_to_file(config, checkpoint_file_path):
-    yaml_obj = YAML()
+    yaml_obj = YAMLHandler()
     with open(checkpoint_file_path, "w") as f:
         yaml_obj.dump(config, f)

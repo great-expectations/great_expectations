@@ -15,8 +15,6 @@ except ImportError:
     pyspark = None
     Row = None
 
-from ruamel.yaml import YAML
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
@@ -25,6 +23,7 @@ from great_expectations.core.batch import (
     IDDict,
     RuntimeBatchRequest,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -35,7 +34,7 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.datasource.new_datasource import Datasource
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture

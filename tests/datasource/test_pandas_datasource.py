@@ -7,11 +7,11 @@ import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
     DatasourceConfig,
@@ -27,7 +27,7 @@ from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import BridgeValidator
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 def test_standalone_pandas_datasource(test_folder_connection_path_csv):

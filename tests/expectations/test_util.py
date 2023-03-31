@@ -463,6 +463,7 @@ def test__generate_expectation_tests__with_test_backends():
     ]
     test_data_cases = [
         ExpectationTestDataCases(
+            dataset_name="generate_expectation_tests_dataset_1",
             data=data,
             tests=[test_case],
             test_backends=test_backends,
@@ -512,6 +513,7 @@ def test__generate_expectation_tests__with_test_backends2():
     ]
     test_data_cases = [
         ExpectationTestDataCases(
+            dataset_name="generate_expectation_tests_dataset_2",
             data=data,
             tests=[test_case],
             test_backends=test_backends,

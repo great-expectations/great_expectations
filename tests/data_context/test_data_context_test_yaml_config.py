@@ -15,6 +15,7 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
 )
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import get_sqlalchemy_url, load_class
 from tests.core.usage_statistics.util import (
@@ -62,7 +63,9 @@ SELECT EXISTS (
         )
     ).fetchall()
     if table_check_results != [(True,)]:
-        test_df.to_sql(name="test_df", con=engine, index=True, schema="connection_test")
+        add_dataframe_to_db(
+            df=test_df, name="test_df", con=engine, index=True, schema="connection_test"
+        )
 
     # Return a connection string to this newly-created db
     return engine
