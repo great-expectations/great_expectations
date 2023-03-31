@@ -474,7 +474,7 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     )
 
 
-def test_dynamic_pandas_batch_metadata(
+def test_pandas_data_asset_batch_metadata(
     empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
 ):
     my_config_variables = {"pipeline_filename": __file__}
