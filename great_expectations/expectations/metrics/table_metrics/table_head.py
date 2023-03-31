@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
@@ -18,6 +19,11 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
+
+try:
+    from sqlalchemy.exc import RemovedIn20Warning
+except ImportError:
+    RemovedIn20Warning = None
 
 if TYPE_CHECKING:
     from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
@@ -103,19 +109,27 @@ class TableHead(TableMetricProvider):
         else:
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = pd.read_sql_table(
-                        table_name=getattr(selectable, "name", None),
-                        schema=getattr(selectable, "schema", None),
-                        con=execution_engine.engine,
-                    )
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings(
+                            action="ignore", category=RemovedIn20Warning
+                        )
+                        df = pd.read_sql_table(
+                            table_name=getattr(selectable, "name", None),
+                            schema=getattr(selectable, "schema", None),
+                            con=execution_engine.engine,
+                        )
                 else:
-                    # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = pd.read_sql_table(
-                        table_name=getattr(selectable, "name", None),
-                        schema=getattr(selectable, "schema", None),
-                        con=execution_engine.engine,
-                        chunksize=abs(n_rows),
-                    )
+                    with warnings.catch_warnings():
+                        warnings.filterwarnings(
+                            action="ignore", category=RemovedIn20Warning
+                        )
+                        # passing chunksize causes the Iterator to be returned
+                        df_chunk_iterator = pd.read_sql_table(
+                            table_name=getattr(selectable, "name", None),
+                            schema=getattr(selectable, "schema", None),
+                            con=execution_engine.engine,
+                            chunksize=abs(n_rows),
+                        )
                     df = TableHead._get_head_df_from_df_iterator(
                         df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                     )
