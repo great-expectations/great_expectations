@@ -10,6 +10,7 @@ from great_expectations.datasource.fluent import (
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
 )
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     DataAsset,
@@ -168,7 +169,7 @@ def test_sql_query_data_asset(empty_data_context):
                     "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
                 )
             ),
-            r".*",
+            MATCH_ALL_PATTERN,
             False,
             id="default regex",
         ),
