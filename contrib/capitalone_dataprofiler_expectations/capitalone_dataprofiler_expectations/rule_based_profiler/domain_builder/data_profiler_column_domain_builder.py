@@ -115,19 +115,15 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             parameters=None,
         )
 
-        profile_report: dict = validator.get_metric(  # type: ignore[assignment] # could be None
+        profile_report_column_names: List[str] = validator.get_metric(  # type: ignore[assignment] # could be None
             metric=MetricConfiguration(
-                metric_name="data_profiler.profile_report",
+                metric_name="data_profiler.table_column_list",
                 metric_domain_kwargs={},
                 metric_value_kwargs={
                     "profile_path": profile_path,
                 },
             )
         )
-
-        profile_report_column_names: List[str] = [
-            element["column_name"] for element in profile_report["data_stats"]
-        ]
 
         if not (profile_report_column_names and table_column_names):
             raise gx_exceptions.ProfilerExecutionError(
