@@ -20,11 +20,6 @@ from great_expectations.sqlalchemy_compatibility_wrappers import read_sql_table_
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
-try:
-    from sqlalchemy.exc import RemovedIn20Warning
-except ImportError:
-    RemovedIn20Warning = None
-
 if TYPE_CHECKING:
     from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
 
