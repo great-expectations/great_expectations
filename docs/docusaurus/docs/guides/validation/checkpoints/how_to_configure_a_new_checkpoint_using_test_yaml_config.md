@@ -11,7 +11,7 @@ This how-to guide demonstrates advanced examples for configuring a <TechnicalTag
 <Prerequisites>
 
 - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
-- [Configured a Datasource using the v3 API](../../../tutorials/getting_started/tutorial_connect_to_data.md)
+- [Configured a Datasource](../../../tutorials/getting_started/tutorial_connect_to_data.md)
 - [Created an Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md)
 
 </Prerequisites>
@@ -57,7 +57,7 @@ From here you can continue to edit your Checkpoint. After each change you should
 
 ### 5. Save your edited Checkpoint
 
-Once you have made all of the changes you planned to implement and your last `test_yaml_config()` check passed, you are ready to save the Checkpoint you've created.  At this point, run the remaining cells in your Jupyter Notebook.  
+Once you have made all the changes you planned to implement and your last `test_yaml_config()` check passed, you are ready to save the Checkpoint you've created.  At this point, run the remaining cells in your Jupyter Notebook.  
 
 Your checkpoint will be saved by the cell that contains the command:
 
