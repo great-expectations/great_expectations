@@ -30,12 +30,15 @@ def sqlite_database_path() -> pathlib.Path:
 
 
 @pytest.fixture
-def sqlite_datasource(sqlite_database_path, sqlite_datasource_name) -> SqliteDatasource:
+def sqlite_datasource(
+    empty_data_context, sqlite_database_path, sqlite_datasource_name
+) -> SqliteDatasource:
     connection_string = f"sqlite:///{sqlite_database_path}"
     datasource = SqliteDatasource(
         name=sqlite_datasource_name,
         connection_string=connection_string,  # type: ignore[arg-type]  # pydantic will coerce
     )
+    datasource._data_context = empty_data_context
     return datasource
 
 
