@@ -62,4 +62,4 @@ out the missing implementations!
 |`expect_column_pair_cramers_phi_value_to_be_less_than` *                        | Y          | N       | N         |
 |`expect_multicolumn_sum_to_equal`                                               | Y          | Y       | Y         |
 
-`*` This Expectation has not yet been migrated to the v3 (Batch Request) API.
+`*` This Expectation has not yet been migrated versions above GX v 0.13.x.
