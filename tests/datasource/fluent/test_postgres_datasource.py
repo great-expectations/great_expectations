@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from contextlib import contextmanager
 from pprint import pprint
 from typing import (
@@ -1260,3 +1261,41 @@ def test_create_temp_table(empty_data_context, create_source):
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
         assert source._execution_engine._create_temp_table is False
+
+
+def test_postgres_data_asset_batch_metadata(
+    empty_data_context: AbstractDataContext,
+    create_source: CreateSourceFixture,
+):
+    my_config_variables = {"pipeline_filename": __file__}
+    empty_data_context.config_variables.update(my_config_variables)
+
+    batch_metadata = {
+        "no_curly_pipeline_filename": "$pipeline_filename",
+        "curly_pipeline_filename": "${pipeline_filename}",
+        "pipeline_step": "transform_3",
+    }
+
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        data_context=empty_data_context,
+    ) as source:
+        query_asset = source.add_query_asset(
+            name="my_asset",
+            query="select * from table",
+            batch_metadata=batch_metadata,
+        )
+        assert query_asset.batch_metadata == batch_metadata
+        batch_list = source.get_batch_list_from_batch_request(
+            query_asset.build_batch_request()
+        )
+        assert len(batch_list) == 1
+        substituted_batch_metadata = copy.deepcopy(batch_metadata)
+        substituted_batch_metadata.update(
+            {
+                "no_curly_pipeline_filename": __file__,
+                "curly_pipeline_filename": __file__,
+            }
+        )
+        assert batch_list[0].metadata == substituted_batch_metadata
