@@ -64,6 +64,22 @@ fluent_datasources:
         delimiter: ","
         connect_options:
           s3_delimiter: "/"
+          s3_prefix: ""
+          s3_max_keys: 99
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        delimiter: ","
+  my_pandas_gcs_ds:
+    type: pandas_gcs
+    bucket_or_name: "test_bucket"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          gcs_delimiter: "/"
+          gcs_prefix: ""
+          gcs_max_results: 99
       my_csv_asset_with_default_connect_options:
         type: csv
         delimiter: ","
