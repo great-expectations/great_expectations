@@ -83,3 +83,16 @@ fluent_datasources:
       my_csv_asset_with_default_connect_options:
         type: csv
         delimiter: ","
+  my_pandas_abs_ds:
+    type: pandas_abs
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          abs_container: "test"
+          abs_name_starts_with: ""
+          abs_delimiter: "/"
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        delimiter: ","

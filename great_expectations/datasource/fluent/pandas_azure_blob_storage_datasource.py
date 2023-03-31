@@ -121,9 +121,9 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     def _build_data_connector(  # type: ignore[override] # required positional arg `container`
         self,
         data_asset: _FilePathDataAsset,
-        container: str,  # TODO: deal with this required arg
-        name_starts_with: str = "",  # TODO: delimiter conflicts with csv asset args
-        delimiter: str = "/",
+        abs_container: str,  # TODO: deal with this required arg
+        abs_name_starts_with: str = "",  # TODO: delimiter conflicts with csv asset args
+        abs_delimiter: str = "/",
         **kwargs,
     ) -> None:
         """Builds and attaches the `AzureBlobStorageDataConnector` to the asset."""
@@ -137,9 +137,9 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             azure_client=self._get_azure_client(),
             batching_regex=data_asset.batching_regex,
             account_name=self._account_name,
-            container=container,
-            name_starts_with=name_starts_with,
-            delimiter=delimiter,
+            container=abs_container,
+            name_starts_with=abs_name_starts_with,
+            delimiter=abs_delimiter,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
         )
 
@@ -149,8 +149,8 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 data_asset_name=data_asset.name,
                 batching_regex=data_asset.batching_regex,
                 account_name=self._account_name,
-                container=container,
-                name_starts_with=name_starts_with,
-                delimiter=delimiter,
+                container=abs_container,
+                name_starts_with=abs_name_starts_with,
+                delimiter=abs_delimiter,
             )
         )
