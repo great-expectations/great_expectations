@@ -399,3 +399,26 @@ def test_get_batch_list_from_batch_request_does_not_modify_input_batch_request(
     assert request == request_before_call
     # We get all 12 batches, one for each month of 2018.
     assert len(batches) == 12
+
+
+@pytest.mark.unit
+def test_add_csv_asset_with_batch_metadata(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+):
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
+    asset = spark_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        header=True,
+        infer_schema=True,
+        batch_metadata=asset_specified_metadata,
+    )
+    batch_options = {"year": "2018", "month": "05"}
+    request = asset.build_batch_request(batch_options)
+    batches = asset.get_batch_list_from_batch_request(request)
+    assert len(batches) == 1
+    assert batches[0].metadata == {
+        "path": "yellow_tripdata_sample_2018-05.csv",
+        **batch_options,
+        **asset_specified_metadata,
+    }

@@ -236,7 +236,8 @@ class _FilePathDataAsset(DataAsset):
                 batch_definition.batch_identifiers
             )
 
-            batch_metadata = copy.deepcopy(fully_specified_batch_request.options)
+            batch_metadata = copy.deepcopy(self.batch_metadata)
+            batch_metadata.update(copy.deepcopy(fully_specified_batch_request.options))
 
             # Some pydantic annotations are postponed due to circular imports.
             # Batch.update_forward_refs() will set the annotations before we
