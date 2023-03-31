@@ -65,12 +65,10 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
             )
             if isinstance(sql_engine, sqlalchemy_engine_Engine):
                 with sql_engine.connect() as connection:
-                    with connection.begin():
-                        connection.execute(sa.text(temp_table_stmt))
+                    connection.execute(sa.text(temp_table_stmt))
             else:
                 # sql_engine is a connection
-                with sql_engine.begin():
-                    sql_engine.execute(sa.text(temp_table_stmt))
+                sql_engine.execute(sa.text(temp_table_stmt))
             dup_query = (
                 sa.select(column)
                 .select_from(sa.text(temp_table_name))

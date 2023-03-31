@@ -117,7 +117,7 @@ class DatabaseStoreBackend(StoreBackend):
             table = Table(table_name, meta, *cols)
             try:
                 if self._schema_name:
-                    with self.engine.begin() as connection:
+                    with self.engine.connect() as connection:
                         connection.execute(
                             sa.text(f"CREATE SCHEMA IF NOT EXISTS {self._schema_name};")
                         )
@@ -258,7 +258,7 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            with self.engine.begin() as connection:
+            with self.engine.connect() as connection:
                 row = connection.execute(sel).fetchone()[0]
             return row
         except (IndexError, SQLAlchemyError) as e:
@@ -282,7 +282,7 @@ class DatabaseStoreBackend(StoreBackend):
             ins = self._table.insert().values(**cols)
 
         try:
-            with self.engine.begin() as connection:
+            with self.engine.connect() as connection:
                 connection.execute(ins)
         except IntegrityError as e:
             if self._get(key) == value:
@@ -327,7 +327,7 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            with self.engine.begin() as connection:
+            with self.engine.connect() as connection:
                 return connection.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error checking for value: {str(e)}")
@@ -348,7 +348,7 @@ class DatabaseStoreBackend(StoreBackend):
                 )
             )
         )
-        with self.engine.begin() as connection:
+        with self.engine.connect() as connection:
             row_list: List[Row] = connection.execute(sel).fetchall()
         return [tuple(row) for row in row_list]
 
@@ -362,7 +362,7 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            with self.engine.begin() as connection:
+            with self.engine.connect() as connection:
                 return connection.execute(delete_statement)
         except SQLAlchemyError as e:
             raise gx_exceptions.StoreBackendError(

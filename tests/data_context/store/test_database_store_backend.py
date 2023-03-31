@@ -35,7 +35,7 @@ def test_database_store_backend_schema_spec(caplog, sa, test_backends):
     assert "hello" == store_backend.get(key)
 
     # clean up values
-    with store_backend.engine.begin() as connection:
+    with store_backend.engine.connect() as connection:
         connection.execute(sa.text(f"DROP TABLE {store_backend._table};"))
 
 
