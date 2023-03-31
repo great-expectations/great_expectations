@@ -405,7 +405,7 @@ class Datasource(
         If a more specific subtype is needed the `data_asset` will be converted to a
         more specific `DataAsset`.
         """
-        logger.info(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
+        logger.debug(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
         asset_type: Type[_DataAssetT] = cls._type_lookup[asset_type_name]
 
