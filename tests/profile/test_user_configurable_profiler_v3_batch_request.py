@@ -13,7 +13,6 @@ from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.sqlalchemy_compatibility_wrappers import df_to_database_loader
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
@@ -29,6 +28,7 @@ from great_expectations.self_check.util import (
     connection_manager,
     get_sql_dialect_floating_point_infinity_value,
 )
+from great_expectations.sqlalchemy_compatibility_wrappers import add_dataframe_to_db
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
