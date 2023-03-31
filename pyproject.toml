@@ -480,8 +480,6 @@ filterwarnings = [
     # sqlalchemy.exc.RemovedIn20Warning: The autoload parameter is deprecated and will be removed in version 2.0.  Please use the autoload_with parameter, passing an engine or connection. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     'ignore: The autoload parameter is deprecated and will be removed in version 2.0.:DeprecationWarning',
     # Example Actual Warning: Found in test_sample_using_limit_builds_correct_query_where_clause_none[test_backends0-hive]
-    # sqlalchemy.exc.RemovedIn20Warning: The `database` package is deprecated and will be removed in v2.0 of sqlalchemy. Use the `dialects` package instead. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: The `database` package is deprecated and will be removed in v2.0 of sqlalchemy. Use the `dialects` package instead.:DeprecationWarning',
     # Example Actual Warning: Found in mysql test_table_column_reflection_fallback[test_backends0]
     # sqlalchemy.exc.RemovedIn20Warning: The .close() method on a so-called 'branched' connection is deprecated as of 1.4, as are 'branched' connections overall, and will be removed in a future release.  If this is a default-handling function, don't close the connection. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     'ignore: The .close\(\) method on a so-called:DeprecationWarning',
