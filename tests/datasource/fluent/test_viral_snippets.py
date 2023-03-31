@@ -17,7 +17,6 @@ from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
     Datasource,
-    TestConnectionError,
 )
 
 logger = logging.getLogger(__file__)
