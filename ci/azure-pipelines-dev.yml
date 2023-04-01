@@ -152,9 +152,11 @@ stages:
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
+        name: StaticTypeCheck
+      - script: |
           # initial run doesn't check `.pyi` source files
           invoke type-check --ci --pretty --check-stub-sources
-        name: StaticTypeCheck
+        name: TypeCheckStubSourceFiles
 
     - job: docstring_linter
       steps:
