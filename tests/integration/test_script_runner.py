@@ -240,9 +240,17 @@ local_tests = [
     ),
 ]
 
+quickstart = [
+    IntegrationTestFixture(
+        name="quickstart",
+        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/quickstart.py",
+    ),
+]
+
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
+docs_test_matrix += quickstart
 docs_test_matrix += spark_integration_tests
 docs_test_matrix += sqlite_integration_tests
 docs_test_matrix += mysql_integration_tests
