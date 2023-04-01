@@ -2036,7 +2036,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     validator_with_data = datasets[0]
                 else:
                     dataset_name = generate_dataset_name_from_expectation_name(
-                        dataset=d,  # type: ignore[arg-type] # Will?
+                        dataset=d,  # type: ignore[arg-type] # should be dict but got ExpectationTestDataCases
                         expectation_type=expectation_type,
                         index=i,
                     )
