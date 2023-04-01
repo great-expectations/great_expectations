@@ -189,7 +189,7 @@ class MetricProvider(metaclass=MetaMetricProvider):
                 To instruct "ExecutionEngine" accordingly, original metric is registered with its "declared" name, but
                 with "metric_provider" function omitted (set to "None"), and additional "AGGREGATE_FN" metric, with its
                 "metric_provider" set to (decorated) implementation function, defined in metric class, is registered.
-                Then "AGGREGATE_FN" metric can specified with key "metric_partial_fn" as evaluation metric dependency.
+                Then "AGGREGATE_FN" metric is specified with key "metric_partial_fn" as evaluation metric dependency.
                 By convention, aggregate partial metric implementation functions return three-valued tuple, containing
                 deferred execution metric implementation function of corresponding "ExecutionEngine" backend (called
                 "metric_aggregate") as well as "compute_domain_kwargs" and "accessor_domain_kwargs", which are relevant

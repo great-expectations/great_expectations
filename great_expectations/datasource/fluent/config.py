@@ -91,6 +91,7 @@ class GxConfig(FluentBaseModel):
         logger.info(f"Loading 'datasources' ->\n{pf(v, depth=2)}")
         loaded_datasources: Dict[str, Datasource] = {}
 
+        # TODO: <Alex>ALEX</Alex>
         for ds_key, config in v.items():
             ds_type_name: str = config.get("type", "")
             if not ds_type_name:
@@ -106,6 +107,7 @@ class GxConfig(FluentBaseModel):
                     f"'{ds_key}' has unsupported 'type' - {type_lookup_err}"
                 ) from type_lookup_err
 
+            # TODO: <Alex>ALEX</Alex>
             if "name" in config:
                 ds_name: str = config["name"]
                 if ds_name != ds_key:
@@ -118,7 +120,9 @@ class GxConfig(FluentBaseModel):
             if "assets" not in config:
                 config["assets"] = {}
 
+            # TODO: <Alex>ALEX</Alex>
             for asset_key, asset_config in config["assets"].items():
+                # TODO: <Alex>ALEX</Alex>
                 if "name" in asset_config:
                     asset_name: str = asset_config["name"]
                     if asset_name != asset_key:

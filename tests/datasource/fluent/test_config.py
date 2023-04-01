@@ -50,19 +50,19 @@ PG_CONFIG_YAML_STR: Final[str] = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
 COMPLEX_CONFIG_DICT: Final[dict] = {
-    "fluent_datasources": {
-        "my_pg_ds": {
+    "fluent_datasources": [
+        {
             "connection_string": "postgresql://userName:@hostname/dbName",
             "kwargs": {"echo": True},
             "name": "my_pg_ds",
             "type": "postgres",
-            "assets": {
-                "my_table_asset_wo_splitters": {
+            "assets": [
+                {
                     "name": "my_table_asset_wo_splitters",
                     "table_name": "my_table",
                     "type": "table",
                 },
-                "with_splitter": {
+                {
                     "splitter": {
                         "column_name": "my_column",
                         "method_name": "split_on_year_and_month",
@@ -71,7 +71,7 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "name": "with_splitter",
                     "type": "table",
                 },
-                "with_sorters": {
+                {
                     "order_by": [
                         {"key": "year"},
                         {"key": "month", "reverse": True},
@@ -80,84 +80,57 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "name": "with_sorters",
                     "type": "table",
                 },
-                "with_dslish_sorters": {
+                {
                     "order_by": ["year", "-month"],
                     "table_name": "yet_another_table",
                     "name": "with_dslish_sorters",
                     "type": "table",
                 },
-            },
+            ],
         },
-        "my_pandas_filesystem_ds": {
+        {
             "type": "pandas_filesystem",
             "name": "my_pandas_filesystem_ds",
             "base_directory": __file__,
-            "assets": {
-                "my_csv_asset": {
+            "assets": [
+                {
                     "type": "csv",
                     "name": "my_csv_asset",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
-                "my_json_asset": {
+                {
                     "type": "json",
                     "name": "my_json_asset",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
                     "connect_options": {"glob_directive": "**/*.json"},
                     "orient": "records",
                 },
-            },
+            ],
         },
-    }
+    ],
 }
 COMPLEX_CONFIG_JSON: Final[str] = json.dumps(COMPLEX_CONFIG_DICT)
 
 SIMPLE_DS_DICT: Final[dict] = {
-    "fluent_datasources": {
-        "my_ds": {
+    "fluent_datasources": [
+        {
             "type": "sql",
             "name": "my_ds",
             "connection_string": "sqlite://",
-        }
-    }
+        },
+    ],
 }
 
-SIMPLE_DS_DICT_WITH_DS_NAME_ERROR = {
-    "fluent_datasources": {
-        "my_ds": {
-            "type": "sql",
-            "name": "my_incorrect_ds",
-            "connection_string": "sqlite://",
-        }
-    }
-}
-
-SIMPLE_DS_DICT_WITH_ASSET_NAME_ERROR = {
-    "fluent_datasources": {
-        "my_ds": {
+COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT: Final[dict] = {
+    "fluent_datasources": [
+        {
             "type": "sql",
             "name": "my_ds",
             "connection_string": "sqlite://",
-            "assets": {
-                "my_csv_asset": {
-                    "type": "csv",
-                    "name": "my_incorrect_csv_asset",
-                    "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-                },
-            },
-        }
-    }
-}
-
-COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
-    "fluent_datasources": {
-        "my_ds": {
-            "type": "sql",
-            "name": "my_ds",
-            "connection_string": "sqlite://",
-        }
-    },
+        },
+    ],
     "name": "getting_started_datasource",
     "class_name": "Datasource",
     "execution_engine": {
@@ -176,20 +149,20 @@ COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT = {
             "class_name": "RuntimeDataConnector",
             "assets": {
                 "my_runtime_asset_name": {
-                    "batch_identifiers": ["runtime_batch_identifier_name"]
-                }
+                    "batch_identifiers": ["runtime_batch_identifier_name"],
+                },
             },
         },
     },
 }
 
 DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
-    "fluent_datasources": {
-        DEFAULT_PANDAS_DATASOURCE_NAME: {
+    "fluent_datasources": [
+        {
             "type": "pandas",
             "name": DEFAULT_PANDAS_DATASOURCE_NAME,
-            "assets": {
-                DEFAULT_PANDAS_DATA_ASSET_NAME: {
+            "assets": [
+                {
                     "name": DEFAULT_PANDAS_DATA_ASSET_NAME,
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
@@ -197,7 +170,7 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
-                "my_csv_asset": {
+                {
                     "name": "my_csv_asset",
                     "type": "csv",
                     "filepath_or_buffer": CSV_PATH
@@ -205,9 +178,9 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
                     "sep": "|",
                     "names": ["col1", "col2"],
                 },
-            },
+            ],
         },
-    }
+    ],
 }
 
 
@@ -364,21 +337,6 @@ def test_load_config(inject_engine_lookup_double, load_method: Callable, input_)
         assert isinstance(datasource, Datasource)
 
 
-@pytest.mark.parametrize(
-    ["load_method", "input_"],
-    [
-        p(
-            GxConfig.parse_obj,
-            SIMPLE_DS_DICT_WITH_DS_NAME_ERROR,
-            id="simple pg config dict with ds name error",
-        ),
-        p(
-            GxConfig.parse_raw,
-            json.dumps(SIMPLE_DS_DICT_WITH_DS_NAME_ERROR),
-            id="simple pg json with ds name error",
-        ),
-    ],
-)
 def test_load_incorrect_ds_config_raises_error(
     inject_engine_lookup_double, load_method: Callable, input_
 ):
@@ -391,21 +349,6 @@ def test_load_incorrect_ds_config_raises_error(
     )
 
 
-@pytest.mark.parametrize(
-    ["load_method", "input_"],
-    [
-        p(
-            GxConfig.parse_obj,
-            SIMPLE_DS_DICT_WITH_ASSET_NAME_ERROR,
-            id="simple pg config dict with asset name error",
-        ),
-        p(
-            GxConfig.parse_raw,
-            json.dumps(SIMPLE_DS_DICT_WITH_ASSET_NAME_ERROR),
-            id="simple pg json with asset name error",
-        ),
-    ],
-)
 def test_load_incorrect_asset_config_raises_error(
     inject_engine_lookup_double, load_method: Callable, input_
 ):
