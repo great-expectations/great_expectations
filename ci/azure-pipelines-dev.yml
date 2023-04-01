@@ -239,8 +239,8 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install .
-              pip install pytest
+              pip install --constraint constraints-dev.txt ".[test]"
+              pip uninstall sqlalchemy
             displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
           - script: |
