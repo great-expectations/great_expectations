@@ -240,7 +240,7 @@ stages:
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test]"
-              pip uninstall sqlalchemy
+              pip uninstall -y sqlalchemy
             displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
           - script: |
