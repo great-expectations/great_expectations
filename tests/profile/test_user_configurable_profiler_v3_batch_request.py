@@ -9,6 +9,9 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
@@ -27,9 +30,6 @@ from great_expectations.profile.user_configurable_profiler import (
 from great_expectations.self_check.util import (
     connection_manager,
     get_sql_dialect_floating_point_infinity_value,
-)
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
-    add_dataframe_to_db,
 )
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import Validator
