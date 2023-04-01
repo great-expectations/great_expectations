@@ -93,7 +93,9 @@ from great_expectations.self_check.util import (
     expectationSuiteValidationResultSchema,
     get_dataset,
 )
-from great_expectations.sqlalchemy_compatibility_wrappers import add_dataframe_to_db
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.util import (
     build_in_memory_runtime_context,
     get_context,

@@ -31,6 +31,9 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import (
     ExpectationConfigurationSchema,
     ExpectationSuite,
@@ -66,7 +69,6 @@ from great_expectations.self_check.sqlalchemy_connection_manager import (
     LockingConnectionCheck,
     connection_manager,
 )
-from great_expectations.sqlalchemy_compatibility_wrappers import add_dataframe_to_db
 from great_expectations.util import (
     build_in_memory_runtime_context,
     import_library_module,
