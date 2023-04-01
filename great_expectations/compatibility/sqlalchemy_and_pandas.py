@@ -6,7 +6,6 @@ from typing import Callable
 import pandas as pd
 
 from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
     is_version_greater_or_equal,
     is_version_less_than,
     sqlalchemy,
