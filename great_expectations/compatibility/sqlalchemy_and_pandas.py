@@ -15,12 +15,6 @@ from great_expectations.warnings import (
     warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0,
 )
 
-try:
-    from sqlalchemy.exc import RemovedIn20Warning
-
-except ImportError:
-    RemovedIn20Warning = SQLALCHEMY_NOT_IMPORTED
-
 
 def execute_pandas_reader_fn(
     reader_fn: Callable, reader_options: dict
@@ -44,7 +38,10 @@ def execute_pandas_reader_fn(
         ):
             warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
-            warnings.filterwarnings(action="ignore", category=RemovedIn20Warning)
+            # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+            # but using the base class here since sqlalchemy is an optional dependency and this
+            # warning type only exists in sqlalchemy < 2.0.
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
             reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
                 **reader_options
             )
