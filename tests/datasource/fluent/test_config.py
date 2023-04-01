@@ -9,7 +9,7 @@ import re
 import uuid
 from pprint import pformat as pf
 from pprint import pprint as pp
-from typing import TYPE_CHECKING, Callable, List
+from typing import TYPE_CHECKING, Callable, List, cast  # TODO: revert use of cast
 
 import pydantic
 import pytest
@@ -728,9 +728,9 @@ def test_config_substitution_retains_original_value_on_save(
     file_dc_config_file_with_substitutions: pathlib.Path,
     sqlite_database_path: pathlib.Path,
 ):
-    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
-        "fluent_datasources"
-    ]["my_sqlite_ds_w_subs"]
+    original: dict = cast(
+        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
+    )["fluent_datasources"]["my_sqlite_ds_w_subs"]
 
     from great_expectations import get_context
 
@@ -758,9 +758,9 @@ def test_config_substitution_retains_original_value_on_save(
 
     context._save_project_config()
 
-    round_tripped = yaml.load(file_dc_config_file_with_substitutions.read_text())[
-        "fluent_datasources"
-    ]["my_sqlite_ds_w_subs"]
+    round_tripped = cast(
+        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
+    )["fluent_datasources"]["my_sqlite_ds_w_subs"]
 
     # FIXME: serialized items should not have name
     round_tripped.pop("name")
@@ -778,9 +778,9 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     my_conn_str = f"sqlite:///{sqlite_database_path}"
     monkeypatch.setenv("MY_CONN_STR", my_conn_str)
 
-    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
-        "fluent_datasources"
-    ]
+    original: dict = cast(
+        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
+    )["fluent_datasources"]
     assert original.get("my_sqlite_ds_w_subs")  # will be modified
     assert original.get("my_pg_ds")  # will be deleted
     assert not original.get("my_sqlite")  # will be added
@@ -811,8 +811,8 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
 
     context._save_project_config()
 
-    round_tripped_datasources = yaml.load(
-        file_dc_config_file_with_substitutions.read_text()
+    round_tripped_datasources = cast(
+        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
     )["fluent_datasources"]
 
     assert round_tripped_datasources["my_new_one"]
