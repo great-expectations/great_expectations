@@ -18,6 +18,7 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
         Sorter,
         SortersDefinition,
     )
@@ -42,11 +43,7 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[SortersDefinition] = None,
-        # Allowed args, kwargs are defined in .pyi file.
-        # This is a pydantic/mypy workaround to allow to us to remove Optional from
-        # the batch_metadata DataAsset attribute.
-        *args,
-        **kwargs,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkDBFSDatasource" object.
 
@@ -64,20 +61,13 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
             batching_regex=batching_regex
         )
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-        batch_metadata = (
-            args[0]
-            if len(args) > 0
-            else kwargs["batch_metadata"]
-            if "batch_metadata" in kwargs
-            else {}
-        )
         asset = CSVAsset(
             name=name,
             batching_regex=batching_regex_pattern,
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
-            batch_metadata=batch_metadata,
+            batch_metadata=batch_metadata or {},
         )
         asset._data_connector = DBFSDataConnector.build_data_connector(
             datasource_name=self.name,
