@@ -6,7 +6,6 @@ from typing import Callable
 import pandas as pd
 
 from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
     is_version_greater_or_equal,
     is_version_less_than,
     sqlalchemy,
@@ -14,12 +13,6 @@ from great_expectations.optional_imports import (
 from great_expectations.warnings import (
     warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0,
 )
-
-try:
-    from sqlalchemy.exc import RemovedIn20Warning
-
-except ImportError:
-    RemovedIn20Warning = SQLALCHEMY_NOT_IMPORTED
 
 
 def execute_pandas_reader_fn(
@@ -39,12 +32,13 @@ def execute_pandas_reader_fn(
         dataframe or list of dataframes
     """
     if is_version_less_than(pd.__version__, "2.0.0"):
-        if sqlalchemy != SQLALCHEMY_NOT_IMPORTED and is_version_greater_or_equal(
-            sqlalchemy.__version__, "2.0.0"
-        ):
+        if sqlalchemy and is_version_greater_or_equal(sqlalchemy.__version__, "2.0.0"):
             warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
-            warnings.filterwarnings(action="ignore", category=RemovedIn20Warning)
+            # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+            # but using the base class here since sqlalchemy is an optional dependency and this
+            # warning type only exists in sqlalchemy < 2.0.
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
             reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
                 **reader_options
             )
