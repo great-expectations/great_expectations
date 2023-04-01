@@ -237,7 +237,8 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install  .
+              pip install .
+              pip install pytest
             displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
           - script: |
