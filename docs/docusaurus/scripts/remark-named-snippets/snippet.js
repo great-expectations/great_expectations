@@ -74,6 +74,8 @@ function parseFile (file) {
         return
       }
 
+      // TODO: If the snippet starts in one of the versioned directories then
+      //  prepend the snippet name with the directory e.g. if in versioned_code then snippet name is name="version-0.15.50<original_snippet_name>"
       const snippetName = attrs.name
       stack.push({ name: snippetName, file: file, contents: '' })
     },

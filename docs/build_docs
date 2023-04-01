@@ -36,10 +36,21 @@ curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_version
 unzip -oq oss_docs_versions.zip -d .
 
 echo -e "${ORANGE}Updating links in versioned docs${NC}"
-# TODO: Update links in versioned docs if they are using the old linenumber style of file=<filepath>L<lineno>
+# TODO: Update links in versioned docs, use @site (first double check this works)
+# TODO: This should also be checked for links to static assets as well.
+
+echo -e "${ORANGE}Updating filepath in versioned docs${NC}"
+# TODO: Update filepath in versioned docs if they are using the old linenumber style of file=<filepath>L<lineno>
+# TODO: By adding the correct versioned_code filepath e.g. versioned_code/version-0.14.13/
+# TODO: Use the file path of the doc in versioned_docs/version-<version_number>/ to determine what version number it is
+
+echo -e "${ORANGE}Updating snippet names in versioned docs${NC}"
+# TODO: Update snippet names in versioned docs if they are using the style of name="<snippet_name>"
+# TODO: By prepending the version e.g. name="version-0.15.50<original_snippet_name>"
 
 echo -e "${ORANGE}Copying code referenced from previous versions${NC}"
 # TODO: Load versions from versions.json and loop through instead of manual process here:
+# TODO: What else needs to be copied? Static assets like images and css?
 # Copy code referenced in docs from version 0.14.13
 git checkout 0.14.13
 git pull
