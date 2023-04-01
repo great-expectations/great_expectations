@@ -244,7 +244,7 @@ stages:
             displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
           - script: |
-              pytest -v --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
+              pytest -v --no-sqlalchemy --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
             displayName: 'Run Quickstart'
 
 
