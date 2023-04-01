@@ -6,7 +6,6 @@ from typing import Callable
 import pandas as pd
 
 from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
     is_version_greater_or_equal,
     is_version_less_than,
     sqlalchemy,
@@ -19,7 +18,7 @@ try:
     from sqlalchemy.exc import RemovedIn20Warning
 
 except ImportError:
-    RemovedIn20Warning = SQLALCHEMY_NOT_IMPORTED
+    pass
 
 
 def execute_pandas_reader_fn(
@@ -38,10 +37,8 @@ def execute_pandas_reader_fn(
     Returns:
         dataframe or list of dataframes
     """
-    if is_version_less_than(pd.__version__, "2.0.0"):
-        if sqlalchemy != SQLALCHEMY_NOT_IMPORTED and is_version_greater_or_equal(
-            sqlalchemy.__version__, "2.0.0"
-        ):
+    if sqlalchemy and is_version_less_than(pd.__version__, "2.0.0"):
+        if is_version_greater_or_equal(sqlalchemy.__version__, "2.0.0"):
             warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
             warnings.filterwarnings(action="ignore", category=RemovedIn20Warning)
