@@ -78,6 +78,9 @@ def datetime_dataset(test_backend):
     is_library_loadable(library_name="trino"),
     reason="datetime doesnt exist in Trino",
 )
+@pytest.mark.xfail(
+    reason='Utility methods "get_dataset()" is part of deprecated GX-V2 functionality (it must no longer be used).'
+)
 def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset):
     columns = datetime_dataset.get_table_columns()
     column_cache = {}
@@ -112,6 +115,9 @@ def test__find_next_datetime_column(datetime_dataset, numeric_high_card_dataset)
 @pytest.mark.skipif(
     is_library_loadable(library_name="trino"),
     reason="datetime doesnt exist in Trino",
+)
+@pytest.mark.xfail(
+    reason='Utility methods "get_dataset()" is part of deprecated GX-V2 functionality (it must no longer be used).'
 )
 def test__create_expectations_for_datetime_column(datetime_dataset):
     column = "datetime"

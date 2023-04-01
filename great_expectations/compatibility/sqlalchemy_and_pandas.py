@@ -43,7 +43,5 @@ def execute_pandas_reader_fn(
                 **reader_options
             )
     else:
-        reader_fn_result: pd.DataFrame | list[pd.DataFrame] = reader_fn(
-            **reader_options
-        )
+        reader_fn_result = reader_fn(**reader_options)
     return reader_fn_result
