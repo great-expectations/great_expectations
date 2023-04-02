@@ -12,7 +12,7 @@ title: Changelog
 * [MAINTENANCE] SqlAlchemy2 Compatibility - `Row.keys()` ([#7520](https://github.com/great-expectations/great_expectations/pull/7520))
 * [MAINTENANCE] Refactoring of CapitalOne Metrics and Profiler-Based DataAssistant for Enhanced Code Elegance ([#7522](https://github.com/great-expectations/great_expectations/pull/7522))
 * [MAINTENANCE] SqlAlchemy 2 Compatibility - Autoload Parameter deprecation ([#7526](https://github.com/great-expectations/great_expectations/pull/7526))
-* [MAINTENANCE] Bump notebook from 6.4.1 to 6.4.12 in /docs_rtd ([#7511](https://github.com/great-expectations/great_expectations/pull/7511)) (thanks @dependabot[bot])
+* [MAINTENANCE] Bump notebook from 6.4.1 to 6.4.12 in /docs_rtd ([#7511](https://github.com/great-expectations/great_expectations/pull/7511))
 * [MAINTENANCE] Break out unit tests to own stage. ([#7530](https://github.com/great-expectations/great_expectations/pull/7530))
 * [MAINTENANCE] Bump wheel from 0.37.1 to 0.38.1 in /contrib/cli ([#7493](https://github.com/great-expectations/great_expectations/pull/7493))
 * [MAINTENANCE] Simplifying CapitalOne DataProfilerColumnDomainBuilder Using Default "profile_path" Argument ([#7535](https://github.com/great-expectations/great_expectations/pull/7535))
