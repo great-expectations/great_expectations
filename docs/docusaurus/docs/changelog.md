@@ -14,7 +14,7 @@ title: Changelog
 * [MAINTENANCE] SqlAlchemy 2 Compatibility - Autoload Parameter deprecation ([#7526](https://github.com/great-expectations/great_expectations/pull/7526))
 * [MAINTENANCE] Bump notebook from 6.4.1 to 6.4.12 in /docs_rtd ([#7511](https://github.com/great-expectations/great_expectations/pull/7511)) (thanks @dependabot[bot])
 * [MAINTENANCE] Break out unit tests to own stage. ([#7530](https://github.com/great-expectations/great_expectations/pull/7530))
-* [MAINTENANCE] Bump wheel from 0.37.1 to 0.38.1 in /contrib/cli ([#7493](https://github.com/great-expectations/great_expectations/pull/7493)) (thanks @dependabot[bot])
+* [MAINTENANCE] Bump wheel from 0.37.1 to 0.38.1 in /contrib/cli ([#7493](https://github.com/great-expectations/great_expectations/pull/7493))
 * [MAINTENANCE] Simplifying CapitalOne DataProfilerColumnDomainBuilder Using Default "profile_path" Argument ([#7535](https://github.com/great-expectations/great_expectations/pull/7535))
 * [MAINTENANCE] : Clean up ununsed imports ([#7537](https://github.com/great-expectations/great_expectations/pull/7537))
 * [MAINTENANCE] Fix Type-Checking steps ([#7536](https://github.com/great-expectations/great_expectations/pull/7536))
