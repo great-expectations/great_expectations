@@ -112,7 +112,7 @@ def _create_sqlite_source(
 
 @pytest.fixture
 def create_sqlite_source() -> Callable[
-    [list[tuple[str]]], _GeneratorContextManager[Any]
+    [Optional[AbstractDataContext], list[tuple[str]]], _GeneratorContextManager[Any]
 ]:
     return _create_sqlite_source
 
