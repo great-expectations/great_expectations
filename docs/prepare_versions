@@ -27,7 +27,6 @@ echo -e "${ORANGE}Building API docs for v0.14.13.${NC}"
 (cd ../../; invoke docs)
 
 yarn install
-yarn build
 yarn docusaurus docs: version 0.14.13
 cd ../..
 
@@ -51,7 +50,6 @@ echo -e "${ORANGE}Building API docs for v0.15.50.${NC}"
 (cd ../../; invoke docs)
 
 yarn install
-yarn build
 yarn docusaurus docs: version 0.15.50
 cd ../..
 
