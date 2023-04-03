@@ -3,7 +3,6 @@ from __future__ import annotations
 import copy
 import dataclasses
 import logging
-import re
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -15,7 +14,6 @@ from typing import (
     Optional,
     Pattern,
     Set,
-    Union,
 )
 
 import pydantic
@@ -33,7 +31,6 @@ from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
-    Datasource,
     TestConnectionError,
 )
 
@@ -110,12 +107,6 @@ class _FilePathDataAsset(DataAsset):
             self._regex_parser.get_all_group_index_to_group_name_mapping()
         )
         self._all_group_names = self._regex_parser.get_all_group_names()
-
-    @pydantic.validator("batching_regex", pre=True)
-    def _parse_batching_regex_string(
-        cls, batching_regex: Optional[Union[re.Pattern, str]] = None
-    ) -> re.Pattern:
-        return Datasource.parse_batching_regex_string(batching_regex=batching_regex)
 
     @property
     def batch_request_options(
@@ -266,8 +257,14 @@ class _FilePathDataAsset(DataAsset):
         Raises:
             TestConnectionError: If the connection test fails.
         """
-        if not self._data_connector.test_connection():
-            raise TestConnectionError(self._test_connection_error_message)
+        try:
+            if self._data_connector.test_connection():
+                return None
+        except Exception as e:
+            raise TestConnectionError(
+                f"Could not connect to asset using {type(self._data_connector).__name__}: Got {type(e).__name__}"
+            ) from e
+        raise TestConnectionError(self._test_connection_error_message)
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(

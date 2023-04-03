@@ -15,7 +15,9 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.interfaces import (
+    Datasource,
+)
 
 logger = logging.getLogger(__file__)
 
@@ -67,7 +69,10 @@ def fluent_yaml_config_file(
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def fluent_file_context(fluent_yaml_config_file: pathlib.Path) -> FileDataContext:
+def fluent_file_context(
+    cloud_storage_get_client_doubles,
+    fluent_yaml_config_file: pathlib.Path,
+) -> FileDataContext:
     context = get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
     )
@@ -76,7 +81,9 @@ def fluent_file_context(fluent_yaml_config_file: pathlib.Path) -> FileDataContex
 
 
 def test_load_an_existing_config(
-    fluent_yaml_config_file: pathlib.Path, fluent_only_config: GxConfig
+    cloud_storage_get_client_doubles,
+    fluent_yaml_config_file: pathlib.Path,
+    fluent_only_config: GxConfig,
 ):
     context = get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
@@ -85,7 +92,10 @@ def test_load_an_existing_config(
     assert context.fluent_config == fluent_only_config
 
 
-def test_serialize_fluent_config(fluent_file_context: FileDataContext):
+def test_serialize_fluent_config(
+    cloud_storage_get_client_doubles,
+    fluent_file_context: FileDataContext,
+):
     dumped_yaml: str = fluent_file_context.fluent_config.yaml()
     print(f"  Dumped Config\n\n{dumped_yaml}\n")
 
@@ -99,19 +109,23 @@ def test_serialize_fluent_config(fluent_file_context: FileDataContext):
 
 
 def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataContext):
+    """
+    Ensure that all Datasources that require data_connectors have their data_connectors
+    created when loaded from config.
+    """
     dc_datasources: dict[str, list[str]] = defaultdict(list)
 
     for datasource in fluent_file_context.fluent_datasources.values():
         if datasource.data_connector_type:
             print(f"class: {datasource.__class__.__name__}")
             print(f"type: {datasource.type}")
+            print(f"data_connector: {datasource.data_connector_type.__name__}")
             print(f"name: {datasource.name}", end="\n\n")
 
             dc_datasources[datasource.type].append(datasource.name)
 
             for asset in datasource.assets.values():
-                asset.test_connection()
-                print(f"✅ '{asset.name}' connected with {type(asset._data_connector)}")
+                assert isinstance(asset._data_connector, datasource.data_connector_type)
             print()
 
     print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")

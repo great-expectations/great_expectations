@@ -8,7 +8,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
@@ -36,7 +36,7 @@ def matchFirstDigit(value, digit):
         return 0.0
 
 
-class ColumnDistributionMatchesBenfordsLaw(ColumnMetricProvider):
+class ColumnDistributionMatchesBenfordsLaw(ColumnAggregateMetricProvider):
     """
     MetricProvider tests whether data matches Benford's Law Fraud Detection
     Algorithm.
