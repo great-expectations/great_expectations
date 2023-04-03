@@ -478,6 +478,7 @@ class Datasource(
         """Returns the DataAsset referred to by name"""
         # This default implementation will be used if protocol is inherited
         try:
+            self.assets[asset_name]._datasource = self
             return self.assets[asset_name]
         except KeyError as exc:
             raise LookupError(

@@ -1443,6 +1443,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
         if datasource_name in self._cached_datasources:
+            self._cached_datasources[datasource_name]._data_context = self
             return self._cached_datasources[datasource_name]
 
         datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
@@ -1455,7 +1456,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource_config = datasourceConfigSchema.load(substituted_config)
         datasource: Union[
             LegacyDatasource, BaseDatasource
         ] = self._instantiate_datasource_from_config(

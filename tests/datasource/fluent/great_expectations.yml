@@ -29,7 +29,7 @@ fluent_datasources:
           - -month
   sqlite_taxi:
     type: sql
-    connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+    connection_string: "sqlite:///../../test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
     assets:
       my_asset:
         type: table
