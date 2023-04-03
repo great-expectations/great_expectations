@@ -1,7 +1,9 @@
-"""Prepare prior docs versions of GX for inclusion into the latest docs under the version dropdown. 
+"""Prepare prior docs versions of GX for inclusion into the latest docs under the version dropdown.
 
 There are changes to paths that need to be made to prior versions of docs.
 """
+from __future__ import annotations
+
 import glob
 import pathlib
 import re
@@ -36,5 +38,37 @@ def change_paths_for_docs_file_references():
         print(f"processed {file_path}")
 
 
+def _paths_to_versioned_docs() -> list[pathlib.Path]:
+    data_path = _repo_root() / "docs/docusaurus/versioned_docs"
+    return [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
+
+
+def _paths_to_versioned_code() -> list[pathlib.Path]:
+    data_path = _repo_root() / "docs/docusaurus/versioned_code"
+    return [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
+
+
+def prepend_version_info_to_name_for_snippet_by_name_references_markdown():
+    """Prepend version info e.g. name="snippet_name" -> name="version-0.15.50 snippet_name" """
+
+    pattern = re.compile(r"((.*)(name=\"))(.*)")
+    paths = _paths_to_versioned_docs() + _paths_to_versioned_code()
+
+    for path in paths:
+        version = path.name
+        files = []
+        for extension in (".md", ".mdx", ".py"):
+            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                contents = re.sub(pattern, rf"\1{version}\4", contents)
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            print(f"processed {file_path}")
+
+
 if __name__ == "__main__":
     change_paths_for_docs_file_references()
+    prepend_version_info_to_name_for_snippet_by_name_references_markdown()
