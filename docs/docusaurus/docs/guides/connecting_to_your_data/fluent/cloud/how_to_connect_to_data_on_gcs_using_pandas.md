@@ -62,9 +62,9 @@ datasource = context.sources.add_pandas_gcs(
 
 ```python title = "Python code"
 batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-prefix = "data/taxi_yellow_tripdata_samples/"
+gcs_prefix = "data/taxi_yellow_tripdata_samples/"
 data_asset = datasource.add_csv_asset(
-    name="my_taxi_data_asset", batching_regex=batching_regex, prefix=prefix
+    name="my_taxi_data_asset", batching_regex=batching_regex, gcs_prefix=gcs_prefix
 )
 ```
 
