@@ -61,7 +61,7 @@ def execute_pandas_to_datetime(
     cache: bool = True,
 ):
     if is_version_less_than(pd.__version__, "2.0.0"):
-        pd.to_datetime(
+        return pd.to_datetime(
             arg=arg,
             errors=errors,
             dayfirst=dayfirst,
@@ -76,7 +76,7 @@ def execute_pandas_to_datetime(
     else:
         if not format:
             format = "ISO8601"
-        pd.to_datetime(
+        return pd.to_datetime(
             arg=arg,
             errors=errors,
             dayfirst=dayfirst,
