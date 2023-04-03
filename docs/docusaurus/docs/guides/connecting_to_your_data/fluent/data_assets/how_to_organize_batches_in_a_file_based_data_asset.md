@@ -2,7 +2,7 @@
 title: How to organize Batches in a file-based Data Asset
 tag: [how-to, connect to data]
 description: A technical guide demonstrating how to organize Batches of data in a file-based Data Asset.
-keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, GCS, Google Cloud Server, AWS S3, Amazon Web Services S3, Azure Blob Storage, Local Filesystem]
+keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, GCS, Google Cloud Storage, AWS S3, Amazon Web Services S3, Azure Blob Storage, Local Filesystem]
 ---
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
@@ -65,7 +65,7 @@ Please reference the appropriate one of these guides:
 - [How to connect to one or more files using Pandas](docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.md)
 - [How to connect to one or more files using Spark](docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.md)
 
-#### Google Cloud Server
+#### Google Cloud Storage
 - [How to connect to data on GCS using Pandas](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas.md)
 - [How to connect to data on GCS using Spark](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark.md)
 
