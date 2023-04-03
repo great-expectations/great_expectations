@@ -33,13 +33,13 @@ echo -e "${ORANGE}Copying code referenced from previous versions${NC}"
 git checkout 0.14.13
 git pull
 mkdir -p versioned_code/version-0.14.13
-cp ../../tests versioned_code/version-0.14.13
+cp -r ../../tests versioned_code/version-0.14.13
 
 # Copy code referenced in docs from version 0.15.50
 git checkout 0.15.50
 git pull
 mkdir -p versioned_code/version-0.15.50
-cp ../../tests versioned_code/version-0.15.50
+cp -r ../../tests versioned_code/version-0.15.50
 # ADD MORE VERSIONS HERE
 
 # Update versioned code and docs
