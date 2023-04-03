@@ -96,18 +96,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         column name in profiler report; GreatExpectations "table.columns" metric is used to validate column existence.
         """
         data_profiler_column_domain_builder: DomainBuilder = (
-            DataProfilerColumnDomainBuilder(
-                profile_path=f"{VARIABLES_KEY}profile_path",
-                include_column_names=None,
-                exclude_column_names=None,
-                include_column_name_suffixes=None,
-                exclude_column_name_suffixes=None,
-                semantic_type_filter_module_name=None,
-                semantic_type_filter_class_name=None,
-                include_semantic_types=None,
-                exclude_semantic_types=None,
-                data_context=None,
-            )
+            DataProfilerColumnDomainBuilder()
         )
 
         data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
