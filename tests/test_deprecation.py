@@ -20,7 +20,7 @@ def regex_for_deprecation_comments() -> Pattern:
 def files_with_deprecation_warnings() -> List[str]:
     files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
     files_to_exclude = [
-        "great_expectations/df_to_database_loader.py",
+        "great_expectations/compatibility/sqlalchemy_compatibility_wrappers.py",
         "great_expectations/compatibility/sqlalchemy_and_pandas.py",
     ]
     for file_to_exclude in files_to_exclude:
