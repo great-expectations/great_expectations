@@ -25,12 +25,8 @@ from great_expectations.datasource.fluent.sql_datasource import (
     TableAsset,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from tests.datasource.fluent.conftest import (
-    Dialect,
-    MockSaEngine,
-    MockSaInspector,
-    sqlachemy_execution_engine_mock_cls,
-)
+from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
+from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
@@ -121,11 +117,11 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         inspect = mocker.patch("sqlalchemy.inspect")
         inspect.return_value = MockSaInspector()
         get_column_names = mocker.patch(
-            "tests.datasource.fluent.conftest.MockSaInspector.get_columns"
+            "tests.sqlalchemy_test_doubles.MockSaInspector.get_columns"
         )
         get_column_names.return_value = [{"name": "my_col"}]
         has_table = mocker.patch(
-            "tests.datasource.fluent.conftest.MockSaInspector.has_table"
+            "tests.sqlalchemy_test_doubles.MockSaInspector.has_table"
         )
         has_table.return_value = True
 
@@ -866,12 +862,10 @@ def test_test_connection_failures(
     inspect = mocker.patch("sqlalchemy.inspect")
     inspect.return_value = MockSaInspector()
     get_schema_names = mocker.patch(
-        "tests.datasource.fluent.conftest.MockSaInspector.get_schema_names"
+        "tests.sqlalchemy_test_doubles.MockSaInspector.get_schema_names"
     )
     get_schema_names.return_value = ["good_schema"]
-    has_table = mocker.patch(
-        "tests.datasource.fluent.conftest.MockSaInspector.has_table"
-    )
+    has_table = mocker.patch("tests.sqlalchemy_test_doubles.MockSaInspector.has_table")
     has_table.return_value = False
 
     with pytest.raises(TestConnectionError):
@@ -1192,10 +1186,9 @@ def test_sorting_none_in_metadata(
         # We use a query asset because then we don't have to mock out db connection tests
         # in this unit test.
         asset = source.add_query_asset(
-            name="my_asset", query="select * from table", order_by=["year"]
+            name="my_asset", query="select * from table", order_by=["-year"]
         )
         asset.add_splitter_year(column_name="my_col")
-        asset.add_sorters(["-year"])
         batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
         assert len(batches) == len(years)
         assert batches[-1].metadata["year"] is None
@@ -1212,3 +1205,57 @@ def test_create_temp_table(create_source):
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
         _ = asset.get_batch_list_from_batch_request(asset.build_batch_request())
         assert source._execution_engine._create_temp_table is False
+
+
+@pytest.mark.unit
+def test_add_postgres_query_asset_with_batch_metadata(
+    create_source: CreateSourceFixture,
+):
+    years = [2021, 2022]
+    asset_specified_metadata = {"pipeline_name": "my_pipeline"}
+
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        splitter_query_response=[{"year": year} for year in years],
+    ) as source:
+        asset = source.add_query_asset(
+            name="query_asset",
+            query="SELECT * FROM my_table",
+            batch_metadata=asset_specified_metadata,
+            order_by=["year"],
+        )
+        assert asset.batch_metadata == asset_specified_metadata
+        asset.add_splitter_year(column_name="col")
+        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        assert len(batches) == len(years)
+        for i, year in enumerate(years):
+            assert batches[i].metadata == {"pipeline_name": "my_pipeline", "year": year}
+
+
+@pytest.mark.unit
+def test_add_postgres_table_asset_with_batch_metadata(
+    create_source: CreateSourceFixture, monkeypatch
+):
+    monkeypatch.setattr(TableAsset, "test_connection", lambda _: None)
+    monkeypatch.setattr(TableAsset, "test_splitter_connection", lambda _: None)
+    years = [2021, 2022]
+    asset_specified_metadata = {"pipeline_name": "my_pipeline"}
+
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        splitter_query_response=[{"year": year} for year in years],
+    ) as source:
+        asset = source.add_table_asset(
+            name="query_asset",
+            table_name="my_table",
+            batch_metadata=asset_specified_metadata,
+            order_by=["year"],
+        )
+        assert asset.batch_metadata == asset_specified_metadata
+        asset.add_splitter_year(column_name="my_col")
+        batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
+        assert len(batches) == len(years)
+        for i, year in enumerate(years):
+            assert batches[i].metadata == {"pipeline_name": "my_pipeline", "year": year}

@@ -3,19 +3,17 @@ import re
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations import DataContext
 from great_expectations.core.batch import Batch
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.dataset import SparkDFDataset
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource import SparkDFDatasource
-from great_expectations.datasource.types import InMemoryBatchKwargs
 from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import BridgeValidator
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture(scope="module")
@@ -337,51 +335,6 @@ def test_standalone_spark_csv_datasource(
     assert isinstance(batch, Batch)
     # NOTE: below is a great example of CSV vs. Parquet typing: pandas reads content as string, spark as int
     assert batch.data.head()["col_1"] == "1"
-
-
-def test_standalone_spark_passthrough_datasource(
-    data_context_parameterized_expectation_suite, dataset, test_backends
-):
-    if "SparkDFDataset" not in test_backends:
-        pytest.skip("Spark has not been enabled, so this test must be skipped.")
-    datasource = (  # noqa: F841
-        data_context_parameterized_expectation_suite.add_datasource(
-            "spark_source",
-            module_name="great_expectations.datasource",
-            class_name="SparkDFDatasource",
-        )
-    )
-
-    # We want to ensure that an externally-created spark DataFrame can be successfully instantiated using the
-    # datasource built in a data context
-    # Our dataset fixture is parameterized by all backends. The spark source should only accept a spark dataset
-    data_context_parameterized_expectation_suite.add_expectation_suite("new_suite")
-    batch_kwargs = InMemoryBatchKwargs(datasource="spark_source", dataset=dataset)
-
-    if isinstance(dataset, SparkDFDataset):
-        # We should be smart enough to figure out this is a batch:
-        batch = data_context_parameterized_expectation_suite.get_batch(
-            batch_kwargs=batch_kwargs, expectation_suite_name="new_suite"
-        )
-        res = batch.expect_column_to_exist("infinities")
-        assert res.success is True
-        res = batch.expect_column_to_exist("not_a_column")
-        assert res.success is False
-        batch.save_expectation_suite()
-        assert os.path.isfile(  # noqa: PTH113
-            os.path.join(  # noqa: PTH118
-                data_context_parameterized_expectation_suite.root_directory,
-                "expectations/new_suite.json",
-            )
-        )
-
-    else:
-        with pytest.raises(BatchKwargsError) as exc:
-            # noinspection PyUnusedLocal
-            batch = data_context_parameterized_expectation_suite.get_batch(
-                batch_kwargs=batch_kwargs, expectation_suite_name="new_suite"
-            )
-            assert "Unrecognized batch_kwargs for spark_source" in exc.value.message
 
 
 def test_invalid_reader_sparkdf_datasource(tmp_path_factory, test_backends):

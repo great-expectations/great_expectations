@@ -9,13 +9,13 @@ import re
 import uuid
 from pprint import pformat as pf
 from pprint import pprint as pp
-from typing import TYPE_CHECKING, Callable, List
+from typing import TYPE_CHECKING, Callable, List, cast  # TODO: revert use of cast
 
 import pydantic
 import pytest
-from ruamel.yaml import YAML
 from typing_extensions import Final
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import _ASSETS_KEY
@@ -31,9 +31,11 @@ from great_expectations.datasource.fluent.sql_datasource import (
 )
 
 if TYPE_CHECKING:
+    from pytest import FixtureRequest
+
     from great_expectations.datasource.fluent import SqliteDatasource
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
 LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
@@ -102,6 +104,7 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "type": "json",
                     "name": "my_json_asset",
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).json",
+                    "connect_options": {"glob_directive": "**/*.json"},
                     "orient": "records",
                 },
             },
@@ -570,6 +573,17 @@ def from_yaml_gx_config() -> GxConfig:
     return gx_config
 
 
+@pytest.fixture(params=[from_dict_gx_config, from_json_gx_config, from_yaml_gx_config])
+def from_all_config(request: FixtureRequest) -> GxConfig:
+    """
+    This fixture parametrizes all our config fixtures.
+    This will in-turn parametrize any test that uses it, creating a test case for each
+    `from_*_config` fixture
+    """
+    fixture_name = request.param.__name__
+    return request.getfixturevalue(fixture_name)
+
+
 def test_dict_config_round_trip(
     inject_engine_lookup_double, from_dict_gx_config: GxConfig
 ):
@@ -652,9 +666,9 @@ def test_assets_key_presence(
 
 
 def test_splitters_deserialization(
-    inject_engine_lookup_double, from_json_gx_config: GxConfig
+    inject_engine_lookup_double, from_all_config: GxConfig
 ):
-    table_asset: TableAsset = from_json_gx_config.datasources["my_pg_ds"].assets[
+    table_asset: TableAsset = from_all_config.datasources["my_pg_ds"].assets[
         "with_splitter"
     ]
     assert isinstance(table_asset.splitter, SplitterYearAndMonth)
@@ -770,10 +784,11 @@ def test_config_substitution_retains_original_value_on_save(
     monkeypatch: pytest.MonkeyPatch,
     file_dc_config_file_with_substitutions: pathlib.Path,
     sqlite_database_path: pathlib.Path,
+    cloud_storage_get_client_doubles,
 ):
-    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
-        "fluent_datasources"
-    ]["my_sqlite_ds_w_subs"]
+    original: dict = cast(
+        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
+    )["fluent_datasources"]["my_sqlite_ds_w_subs"]
 
     from great_expectations import get_context
 
@@ -801,9 +816,9 @@ def test_config_substitution_retains_original_value_on_save(
 
     context._save_project_config()
 
-    round_tripped = yaml.load(file_dc_config_file_with_substitutions.read_text())[
-        "fluent_datasources"
-    ]["my_sqlite_ds_w_subs"]
+    round_tripped = cast(
+        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
+    )["fluent_datasources"]["my_sqlite_ds_w_subs"]
 
     # FIXME: serialized items should not have name
     round_tripped.pop("name")
@@ -816,14 +831,15 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     monkeypatch: pytest.MonkeyPatch,
     sqlite_database_path: pathlib.Path,
     file_dc_config_file_with_substitutions: pathlib.Path,
+    cloud_storage_get_client_doubles,
 ):
     # inject env variable
     my_conn_str = f"sqlite:///{sqlite_database_path}"
     monkeypatch.setenv("MY_CONN_STR", my_conn_str)
 
-    original: dict = yaml.load(file_dc_config_file_with_substitutions.read_text())[
-        "fluent_datasources"
-    ]
+    original: dict = cast(
+        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
+    )["fluent_datasources"]
     assert original.get("my_sqlite_ds_w_subs")  # will be modified
     assert original.get("my_pg_ds")  # will be deleted
     assert not original.get("my_sqlite")  # will be added
@@ -854,8 +870,8 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
 
     context._save_project_config()
 
-    round_tripped_datasources = yaml.load(
-        file_dc_config_file_with_substitutions.read_text()
+    round_tripped_datasources = cast(
+        dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
     )["fluent_datasources"]
 
     assert round_tripped_datasources["my_new_one"]

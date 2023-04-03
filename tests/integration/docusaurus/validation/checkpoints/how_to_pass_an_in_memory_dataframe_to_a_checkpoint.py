@@ -1,10 +1,11 @@
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py imports">
 import pandas as pd
-from ruamel import yaml
 
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py get_context">
@@ -25,7 +26,7 @@ data_connectors:
     batch_identifiers:
       - default_identifier_name
 """
-context.add_datasource(**yaml.safe_load(datasource_yaml))
+context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(datasource_yaml, return_mode="report_object")
@@ -80,7 +81,7 @@ validations:
       data_asset_name: taxi_data
     expectation_suite_name: my_expectation_suite
 """
-context.add_or_update_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_or_update_checkpoint(**yaml.load(checkpoint_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")
@@ -136,7 +137,7 @@ config_version: 1
 class_name: SimpleCheckpoint
 expectation_suite_name: my_expectation_suite
 """
-context.add_or_update_checkpoint(**yaml.safe_load(checkpoint_yaml))
+context.add_or_update_checkpoint(**yaml.load(checkpoint_yaml))
 # </snippet>
 
 test_yaml = context.test_yaml_config(checkpoint_yaml, return_mode="report_object")

@@ -8,7 +8,6 @@ from typing import Dict, List, Union
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
@@ -18,6 +17,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -62,7 +62,7 @@ try:
 except ImportError:
     from unittest import mock
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 parameterized_expectation_suite_name = "my_dag_node.default"
 
@@ -137,86 +137,6 @@ def test_create_duplicate_expectation_suite(titanic_data_context):
     assert titanic_data_context.add_or_update_expectation_suite(
         expectation_suite_name="titanic.test_create_expectation_suite",
     )
-
-
-def test_get_available_data_asset_names_with_one_datasource_including_a_single_generator(
-    empty_data_context, filesystem_csv
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-        batch_kwargs_generators={
-            "subdir_reader": {
-                "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": str(filesystem_csv),
-            }
-        },
-    )
-
-    available_asset_names = empty_data_context.get_available_data_asset_names()
-
-    assert set(available_asset_names["my_datasource"]["subdir_reader"]["names"]) == {
-        ("f3", "directory"),
-        ("f2", "file"),
-        ("f1", "file"),
-    }
-
-
-def test_get_available_data_asset_names_with_one_datasource_without_a_generator_returns_empty_dict(
-    empty_data_context,
-):
-    empty_data_context.add_datasource(
-        "my_datasource",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-    )
-
-    obs = empty_data_context.get_available_data_asset_names()
-    assert obs == {"my_datasource": {}}
-
-
-def test_get_available_data_asset_names_with_multiple_datasources_with_and_without_generators(
-    empty_data_context, sa
-):
-    """Test datasources with and without generators."""
-    # requires sqlalchemy because it instantiates sqlalchemydatasource
-    context = empty_data_context
-    connection_kwargs = {"credentials": {"drivername": "sqlite"}}
-
-    context.add_datasource(
-        "first",
-        class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={
-            "foo": {
-                "class_name": "TableBatchKwargsGenerator",
-            }
-        },
-        **connection_kwargs,
-    )
-    context.add_datasource(
-        "second", class_name="SqlAlchemyDatasource", **connection_kwargs
-    )
-    context.add_datasource(
-        "third",
-        class_name="SqlAlchemyDatasource",
-        batch_kwargs_generators={
-            "bar": {
-                "class_name": "TableBatchKwargsGenerator",
-            }
-        },
-        **connection_kwargs,
-    )
-
-    obs = context.get_available_data_asset_names()
-
-    assert isinstance(obs, dict)
-    assert set(obs.keys()) == {"first", "second", "third"}
-    assert obs == {
-        "first": {"foo": {"is_complete_list": True, "names": []}},
-        "second": {},
-        "third": {"bar": {"is_complete_list": True, "names": []}},
-    }
 
 
 def test_list_expectation_suite_keys(data_context_parameterized_expectation_suite):
@@ -374,144 +294,6 @@ def test_compile_evaluation_parameter_dependencies(
             ],
         }
     )
-
-
-@pytest.mark.v2_api
-def test_list_datasources_v2_api(data_context_parameterized_expectation_suite):
-    datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "mydatasource",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {"class_name": "PandasDataset"},
-            "batch_kwargs_generators": {
-                "mygenerator": {
-                    "base_directory": "../data",
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "reader_options": {"engine": "python", "sep": None},
-                }
-            },
-        }
-    ]
-
-    data_context_parameterized_expectation_suite.add_datasource(
-        "second_pandas_source",
-        module_name="great_expectations.datasource",
-        class_name="PandasDatasource",
-    )
-
-    datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-    assert datasources == [
-        {
-            "name": "mydatasource",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {"class_name": "PandasDataset"},
-            "batch_kwargs_generators": {
-                "mygenerator": {
-                    "base_directory": "../data",
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "reader_options": {"engine": "python", "sep": None},
-                }
-            },
-        },
-        {
-            "name": "second_pandas_source",
-            "class_name": "PandasDatasource",
-            "module_name": "great_expectations.datasource",
-            "data_asset_type": {
-                "class_name": "PandasDataset",
-                "module_name": "great_expectations.dataset",
-            },
-        },
-    ]
-
-    if is_library_loadable(library_name="psycopg2"):
-
-        # Make sure passwords are masked in password or url fields
-        data_context_parameterized_expectation_suite.add_datasource(
-            "postgres_source_with_password",
-            initialize=False,
-            module_name="great_expectations.datasource",
-            class_name="SqlAlchemyDatasource",
-            credentials={
-                "drivername": "postgresql",
-                "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-                "port": "65432",
-                "username": "username_str",
-                "password": "password_str",
-                "database": "database_str",
-            },
-        )
-
-        data_context_parameterized_expectation_suite.add_datasource(
-            "postgres_source_with_password_in_url",
-            initialize=False,
-            module_name="great_expectations.datasource",
-            class_name="SqlAlchemyDatasource",
-            credentials={
-                "url": "postgresql+psycopg2://username:password@host:65432/database",
-            },
-        )
-
-        datasources = data_context_parameterized_expectation_suite.list_datasources()
-
-        assert datasources == [
-            {
-                "name": "mydatasource",
-                "class_name": "PandasDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {"class_name": "PandasDataset"},
-                "batch_kwargs_generators": {
-                    "mygenerator": {
-                        "base_directory": "../data",
-                        "class_name": "SubdirReaderBatchKwargsGenerator",
-                        "reader_options": {"engine": "python", "sep": None},
-                    }
-                },
-            },
-            {
-                "name": "second_pandas_source",
-                "class_name": "PandasDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {
-                    "class_name": "PandasDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-            },
-            {
-                "name": "postgres_source_with_password",
-                "class_name": "SqlAlchemyDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "credentials": {
-                    "drivername": "postgresql",
-                    "host": os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost"),
-                    "port": "65432",
-                    "username": "username_str",
-                    "password": PasswordMasker.MASKED_PASSWORD_STRING,
-                    "database": "database_str",
-                },
-            },
-            {
-                "name": "postgres_source_with_password_in_url",
-                "class_name": "SqlAlchemyDatasource",
-                "module_name": "great_expectations.datasource",
-                "data_asset_type": {
-                    "class_name": "SqlAlchemyDataset",
-                    "module_name": "great_expectations.dataset",
-                },
-                "credentials": {
-                    "url": f"postgresql+psycopg2://username:{PasswordMasker.MASKED_PASSWORD_STRING}@host:65432/database",
-                },
-            },
-        ]
 
 
 @mock.patch("great_expectations.data_context.store.DatasourceStore.update_by_name")
@@ -1614,7 +1396,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
-    yaml_obj = YAML(typ="safe")
+    yaml_obj = YAMLHandler()
     context = empty_data_context
 
     checkpoint = {
@@ -1634,7 +1416,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
 
 
 def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
-    yaml_obj = YAML(typ="safe")
+    yaml_obj = YAMLHandler()
     context = empty_data_context
 
     checkpoint = {
@@ -1657,7 +1439,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
 def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
     empty_data_context,
 ):
-    yaml_obj = YAML(typ="safe")
+    yaml_obj = YAMLHandler()
     context = empty_data_context
 
     checkpoint = {
@@ -1682,7 +1464,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
 
 
 def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context):
-    yaml_obj = YAML(typ="safe")
+    yaml_obj = YAMLHandler()
     context = empty_data_context
 
     checkpoint = {

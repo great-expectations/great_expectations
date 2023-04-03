@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from contextlib import contextmanager
+from pprint import pformat as pf
 from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
 
 import pytest
 from pytest import MonkeyPatch
+from typing_extensions import Final
 
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
@@ -14,45 +15,22 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import FileDataContext
+from great_expectations.datasource.fluent import (
+    PandasAzureBlobStorageDatasource,
+    PandasGoogleCloudStorageDatasource,
+)
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
+
+EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
+PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 
 logger = logging.getLogger(__name__)
-
-
-class MockSaInspector:
-    def get_columns(self) -> list[dict[str, Any]]:  # type: ignore[empty-body]
-        ...
-
-    def get_schema_names(self) -> list[str]:  # type: ignore[empty-body]
-        ...
-
-    def has_table(self, table_name: str, schema: str) -> bool:  # type: ignore[empty-body]
-        ...
-
-
-class Dialect:
-    def __init__(self, dialect: str):
-        self.name = dialect
-
-
-class _MockConnection:
-    def __init__(self, dialect: Dialect):
-        self.dialect = dialect
-
-
-class MockSaEngine:
-    def __init__(self, dialect: Dialect):
-        self.dialect = dialect
-
-    @contextmanager
-    def connect(self):
-        """A contextmanager that yields a _MockConnection"""
-        yield _MockConnection(self.dialect)
 
 
 def sqlachemy_execution_engine_mock_cls(
@@ -148,3 +126,65 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     tmp_gx_dir = gx_yml.parent.absolute()
     logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
     return tmp_gx_dir
+
+
+@pytest.fixture(scope="session")
+def fluent_gx_config_yml() -> pathlib.Path:
+    assert PG_CONFIG_YAML_FILE.exists()
+    return PG_CONFIG_YAML_FILE
+
+
+@pytest.fixture(scope="session")
+def fluent_gx_config_yml_str(fluent_gx_config_yml: pathlib.Path) -> str:
+    return fluent_gx_config_yml.read_text()
+
+
+class _TestClientDummy:
+    pass
+
+
+_CLIENT_DUMMY = _TestClientDummy()
+
+
+def _get_test_client_dummy(*args, **kwargs) -> _TestClientDummy:
+    logger.debug(
+        f"_get_test_client_dummy() called with \nargs: {pf(args)}\nkwargs: {pf(kwargs)}"
+    )
+    return _CLIENT_DUMMY
+
+
+@pytest.fixture
+def gcs_get_client_dummy(monkeypatch: MonkeyPatch):
+    monkeypatch.setattr(
+        PandasGoogleCloudStorageDatasource,
+        "_get_gcs_client",
+        _get_test_client_dummy,
+        raising=True,
+    )
+
+
+@pytest.fixture
+def azure_get_client_dummy(monkeypatch: MonkeyPatch):
+    monkeypatch.setattr(
+        PandasAzureBlobStorageDatasource,
+        "_get_azure_client",
+        _get_test_client_dummy,
+        raising=True,
+    )
+
+
+@pytest.fixture
+def cloud_storage_get_client_doubles(
+    gcs_get_client_dummy,
+    azure_get_client_dummy,
+):
+    """
+    Patches Datasources that rely on a private _get_*_client() method to return test doubles instead.
+
+    gcs
+    azure
+    """
+    # TODO: patch Spark datasources as needed
+    logger.warning(
+        "Patching cloud storage _get_*_client() methods to return client test doubles"
+    )

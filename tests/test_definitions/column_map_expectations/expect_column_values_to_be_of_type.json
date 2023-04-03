@@ -2,6 +2,7 @@
   "expectation_type": "expect_column_values_to_be_of_type",
   "datasets": [
     {
+      "dataset_name": "expect_column_values_to_be_of_type_1",
       "data": {
         "x" : [1,2,4],
         "y" : [1.0,2.2,5.3],
@@ -378,6 +379,7 @@
       ]
     },
     {
+      "dataset_name": "expect_column_values_to_be_of_type_2",
       "data": {
         "datetime" : ["2016-01-01T12:34:56", "2016-01-02T11:59:58", "2016-02-02T10:48:36", "2016-02-02T09:33:21", "2016-03-01T08:56:45", "2017-02-01T00:01:02", null, null, null, null],
         "datetime_tz" : ["2016-01-01T12:34:56Z", "2016-01-02T11:59:58Z", "2016-02-02T10:48:36Z", "2016-02-02T09:33:21Z", "2016-03-01T08:56:45Z", "2017-02-01T00:01:02Z", null, null, null, null]

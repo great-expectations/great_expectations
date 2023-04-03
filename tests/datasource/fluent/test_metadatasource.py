@@ -8,9 +8,9 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
 
 import pytest
-import ruamel.yaml
 from pydantic import DirectoryPath, validate_arguments
 
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
@@ -26,6 +26,8 @@ from great_expectations.datasource.fluent.sources import (
 )
 from great_expectations.execution_engine import ExecutionEngine
 from great_expectations.util import get_context as get_gx_context
+
+yaml = YAMLHandler()
 
 if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
@@ -388,7 +390,7 @@ def context_config_data(
 def assert_fluent_datasource_content(
     config_file_path: str, fluent_datasource_config: dict
 ):
-    config = ruamel.yaml.safe_load(config_file_path.read_text())
+    config = yaml.load(config_file_path.read_text())
     assert "fluent_datasources" in config
     assert config["fluent_datasources"] == fluent_datasource_config
 
@@ -528,7 +530,6 @@ def test_update_datasource_with_datasource_object(
                     "csv_asset": {
                         "batching_regex": "(?P<file_name>.*).csv",
                         "name": "csv_asset",
-                        "order_by": [],
                         "type": "csv",
                     }
                 },

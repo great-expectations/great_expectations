@@ -3,7 +3,6 @@ from __future__ import annotations
 import dataclasses
 import functools
 import logging
-import re
 import uuid
 from pprint import pformat as pf
 from typing import (
@@ -30,9 +29,6 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
-from great_expectations.datasource.fluent.constants import (
-    MATCH_ALL_PATTERN,
-)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -77,6 +73,9 @@ class TestConnectionError(Exception):
 # would look like:
 #   options = { "year": 2020 }
 BatchRequestOptions: TypeAlias = Dict[str, Any]
+
+
+BatchMetadata: TypeAlias = Dict[str, Any]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -159,6 +158,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     id: Optional[uuid.UUID] = Field(default=None, description="DataAsset id")
 
     order_by: List[Sorter] = Field(default_factory=list)
+    batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
@@ -354,6 +354,8 @@ class Datasource(
 
     # class attrs
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
+    # Not all Datasources require a DataConnector
+    data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
     _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
@@ -403,7 +405,7 @@ class Datasource(
         If a more specific subtype is needed the `data_asset` will be converted to a
         more specific `DataAsset`.
         """
-        logger.info(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
+        logger.debug(f"Loading '{data_asset.name}' asset ->\n{pf(data_asset, depth=4)}")
         asset_type_name: str = data_asset.type
         asset_type: Type[_DataAssetT] = cls._type_lookup[asset_type_name]
 
@@ -462,7 +464,9 @@ class Datasource(
                 f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
             ) from exc
 
-    def add_asset(self, asset: _DataAssetT) -> _DataAssetT:
+    def _add_asset(
+        self, asset: _DataAssetT, connect_options: dict | None = None
+    ) -> _DataAssetT:
         """Adds an asset to a datasource
 
         Args:
@@ -471,6 +475,10 @@ class Datasource(
         # The setter for datasource is non-functional, so we access _datasource directly.
         # See the comment in DataAsset for more information.
         asset._datasource = self
+
+        if not connect_options:
+            connect_options = {}
+        self._build_data_connector(asset, **connect_options)
 
         asset.test_connection()
 
@@ -506,21 +514,6 @@ class Datasource(
                     order_by_sorters.append(sorter)
         return order_by_sorters
 
-    @staticmethod
-    def parse_batching_regex_string(
-        batching_regex: Optional[Union[re.Pattern, str]] = None
-    ) -> re.Pattern:
-        pattern: re.Pattern
-        if not batching_regex:
-            pattern = MATCH_ALL_PATTERN
-        elif isinstance(batching_regex, str):
-            pattern = re.compile(batching_regex)
-        elif isinstance(batching_regex, re.Pattern):
-            pattern = batching_regex
-        else:
-            raise ValueError('"batching_regex" must be either re.Pattern, str, or None')
-        return pattern
-
     # Abstract Methods
     @property
     def execution_engine_type(self) -> Type[_ExecutionEngineT]:
@@ -542,27 +535,14 @@ class Datasource(
             """One needs to implement "test_connection" on a Datasource subclass."""
         )
 
-    def _build_data_connector(self, data_asset_name: str, **kwargs) -> None:
+    def _build_data_connector(self, data_asset: _DataAssetT, **kwargs) -> None:
         """Any Datasource subclass that utilizes DataConnector should overwrite this method.
 
         Specific implementations instantiate appropriate DataConnector class and set "self._data_connector" to it.
 
         Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
+            data_asset: DataAsset using this DataConnector instance
             kwargs: Extra keyword arguments allow specification of arguments used by particular DataConnector subclasses
-        """
-        pass
-
-    def _build_test_connection_error_message(
-        self, data_asset_name: str, **kwargs
-    ) -> None:
-        """Any Datasource subclass can overwrite this method.
-
-        Specific implementations create appropriate error message and set "self._test_connection_error_message" to it.
-
-        Args:
-            data_asset_name: The name of the DataAsset using this DataConnector instance
-            kwargs: Extra keyword arguments allow specification of arguments used by particular subclass' error message
         """
         pass
 

@@ -30,7 +30,8 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
     """Spark based Datasource for DataBricks File System (DBFS) based data assets."""
 
     # instance attributes
-    type: Literal["spark_dbfs"] = "spark_dbfs"
+    # overridden from base `Literal['spark_filesystem']`
+    type: Literal["spark_dbfs"] = "spark_dbfs"  # type: ignore[assignment] # base class has different type
 
     @public_api
     def add_csv_asset(
@@ -52,13 +53,10 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
         """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = CSVAsset(
             name=name,
-            batching_regex=batching_regex_pattern,
+            batching_regex=batching_regex,  # type: ignore[arg-type] # pydantic will compile regex str to Pattern
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
@@ -66,7 +64,7 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         asset._data_connector = DBFSDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            batching_regex=batching_regex_pattern,
+            batching_regex=asset.batching_regex,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
@@ -75,9 +73,9 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         asset._test_connection_error_message = (
             DBFSDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
-                batching_regex=batching_regex_pattern,
+                batching_regex=asset.batching_regex,
                 glob_directive=glob_directive,
                 base_directory=self.base_directory,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)

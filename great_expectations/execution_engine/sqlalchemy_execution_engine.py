@@ -98,7 +98,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import Dialect, Row
+    from sqlalchemy.engine import Dialect, Engine, Row
     from sqlalchemy.exc import OperationalError
     from sqlalchemy.sql import Selectable
     from sqlalchemy.sql.elements import (
@@ -109,6 +109,7 @@ try:
     )
     from sqlalchemy.sql.selectable import Select, TextualSelect
 except ImportError:
+    Engine = None
     BooleanClauseList = None
     DefaultDialect = None
     Dialect = None
@@ -446,7 +447,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 _add_sqlite_functions(self.engine.raw_connection())
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
-            self.engine = self.engine.connect()
+            # but only do this if self.engine is an Engine and isn't a Connection
+            if isinstance(self.engine, Engine):
+                self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -663,7 +666,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     domain_kwargs["row_condition"]
                 )
                 selectable = (
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(selectable)
                     .where(parsed_condition)
                 )
@@ -684,7 +687,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ), "filter_condition must be of type GX for SqlAlchemyExecutionEngine"
 
             selectable = (
-                sa.select([sa.text("*")])
+                sa.select(sa.text("*"))
                 .select_from(selectable)
                 .where(parse_condition_to_sqlalchemy(filter_condition.condition))
             )
@@ -719,7 +722,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "both_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -732,7 +735,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             elif ignore_row_if == "either_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -766,7 +769,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             ignore_row_if = domain_kwargs["ignore_row_if"]
             if ignore_row_if == "all_values_are_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -781,7 +784,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 )
             elif ignore_row_if == "any_value_is_missing":
                 selectable = get_sqlalchemy_selectable(
-                    sa.select([sa.text("*")])
+                    sa.select(sa.text("*"))
                     .select_from(get_sqlalchemy_selectable(selectable))
                     .where(
                         sa.not_(
@@ -1040,17 +1043,19 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 to TextualSelect using sa.columns() before it can be converted to type Subquery
                 """
                 if TextClause and isinstance(selectable, TextClause):
-                    sa_query_object = sa.select(query["select"]).select_from(
+                    sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.columns().subquery()
                     )
                 elif (Select and isinstance(selectable, Select)) or (
                     TextualSelect and isinstance(selectable, TextualSelect)
                 ):
-                    sa_query_object = sa.select(query["select"]).select_from(
+                    sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.subquery()
                     )
                 else:
-                    sa_query_object = sa.select(query["select"]).select_from(selectable)
+                    sa_query_object = sa.select(*query["select"]).select_from(
+                        selectable
+                    )
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
                 res = self.engine.execute(sa_query_object).fetchall()

@@ -149,13 +149,10 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             max_results (int): Google Cloud Storage max_results (default is 1000)
             order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
         """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = CSVAsset(
             name=name,
-            batching_regex=batching_regex_pattern,
+            batching_regex=batching_regex,  # type: ignore[arg-type] # pydantic will compile regex str to Pattern
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
@@ -164,7 +161,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             datasource_name=self.name,
             data_asset_name=name,
             gcs_client=self._get_gcs_client(),
-            batching_regex=batching_regex_pattern,
+            batching_regex=asset.batching_regex,
             bucket_or_name=self.bucket_or_name,
             prefix=prefix,
             delimiter=delimiter,
@@ -174,10 +171,10 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         asset._test_connection_error_message = (
             GoogleCloudStorageDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
-                batching_regex=batching_regex_pattern,
+                batching_regex=asset.batching_regex,
                 bucket_or_name=self.bucket_or_name,
                 prefix=prefix,
                 delimiter=delimiter,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)

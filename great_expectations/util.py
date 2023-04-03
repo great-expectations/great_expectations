@@ -52,7 +52,6 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
-from pkg_resources import Distribution
 from typing_extensions import Literal, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
@@ -82,6 +81,7 @@ try:
     from sqlalchemy import Table
     from sqlalchemy.engine import reflection
     from sqlalchemy.sql import Select
+
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
@@ -91,9 +91,11 @@ except ImportError:
     Table = None
     Select = None
 
+
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
+    from pkg_resources import Distribution
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import FileDataContext
@@ -2072,7 +2074,7 @@ def get_sqlalchemy_domain_data(domain_data):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Implicit coercion of SELECT and SELECT constructs is deprecated since 1.4
         # select(query).subquery() should be used instead
-        domain_data = sa.select(["*"]).select_from(domain_data)
+        domain_data = sa.select(sa.text("*")).select_from(domain_data)
     # engine.get_domain_records returns a valid select object;
     # calling fetchall at execution is equivalent to a SELECT *
     return domain_data

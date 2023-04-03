@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Optional, Union
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
@@ -55,7 +56,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
     def add_csv_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[re.Pattern, str]] = None,
+        batching_regex: Union[str, re.Pattern] = MATCH_ALL_PATTERN,
         glob_directive: str = "**/*",
         header: bool = False,
         infer_schema: bool = False,
@@ -71,13 +72,10 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
         """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = CSVAsset(
             name=name,
-            batching_regex=batching_regex_pattern,
+            batching_regex=batching_regex,  # type: ignore[arg-type] # pydantic will compile regex str to Pattern
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
@@ -85,7 +83,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            batching_regex=batching_regex_pattern,
+            batching_regex=asset.batching_regex,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
@@ -93,9 +91,9 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         asset._test_connection_error_message = (
             FilesystemDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
-                batching_regex=batching_regex_pattern,
+                batching_regex=asset.batching_regex,
                 glob_directive=glob_directive,
                 base_directory=self.base_directory,
             )
         )
-        return self.add_asset(asset=asset)
+        return self._add_asset(asset=asset)
