@@ -26,7 +26,7 @@ def change_paths_for_docs_file_references():
     pattern = re.compile(r"((.*)(file=)((../)*))(.*)")
     path_to_insert = "versioned_code/version-0.14.13/"
 
-    # TODO: Make this idempotent
+    # TODO: Make this idempotent for development
 
     for file_path in files:
         with open(file_path, "r+") as f:
@@ -53,6 +53,8 @@ def prepend_version_info_to_name_for_snippet_by_name_references_markdown():
 
     pattern = re.compile(r"((.*)(name=\"))(.*)")
     paths = _paths_to_versioned_docs() + _paths_to_versioned_code()
+
+    # TODO: Make this idempotent for development
 
     for path in paths:
         version = path.name
