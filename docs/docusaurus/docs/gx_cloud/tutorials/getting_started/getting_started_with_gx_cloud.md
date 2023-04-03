@@ -10,7 +10,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 Welcome to Great Expectations Cloud! This tutorial will help you onboard with GX Cloud and get ready to connect to your data.
 
 :::note Prerequisites
-- This tutorial assumes you have Great Expectations OSS installed on your machine. If that's not the case please complete [Step 1: OSS Setup](docs/tutorials/getting_started/tutorial_setup.md) first.
+- This tutorial assumes you have Great Expectations OSS installed on your machine. If that's not the case please complete [OSS Setup](/docs/guides/setup/installation/local) first.
 :::
 
 ## Steps

@@ -249,7 +249,7 @@ This guide will explain how to configure your ``great_expectations.yml`` project
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
 - Configured a secret manager and secrets in the cloud with [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview)
 
 </Prerequisites>
