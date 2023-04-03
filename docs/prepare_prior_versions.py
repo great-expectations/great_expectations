@@ -21,7 +21,7 @@ def change_paths_for_docs_file_references():
     """
     path = _repo_root() / "docs/docusaurus/versioned_docs/version-0.14.13/"
     files = glob.glob(f"{path}/**/*.md", recursive=True)
-    pattern = re.compile(r"((.*)(file=)((../)*))(.*)(#.*)")
+    pattern = re.compile(r"((.*)(file=)((../)*))(.*)")
     path_to_insert = "versioned_code/version-0.14.13/"
 
     # TODO: Make this idempotent
@@ -29,7 +29,7 @@ def change_paths_for_docs_file_references():
     for file_path in files:
         with open(file_path, "r+") as f:
             contents = f.read()
-            contents = re.sub(pattern, rf"\1{path_to_insert}\6\7", contents)
+            contents = re.sub(pattern, rf"\1{path_to_insert}\6", contents)
             f.seek(0)
             f.truncate()
             f.write(contents)
