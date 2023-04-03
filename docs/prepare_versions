@@ -23,7 +23,7 @@ cp tests "$CURRENT_DIR"/versioned_code/version-0.14.13
 echo -e "${ORANGE}Skipping building API docs for v0.14.13, they are included in the md files.${NC}"
 
 yarn install
-yarn docusaurus docs: version 0.14.13
+yarn docusaurus docs:version 0.14.13
 cd ../..
 
 # Copy code referenced in docs from version 0.15.50
@@ -47,7 +47,7 @@ echo -e "${ORANGE}Building API docs for v0.15.50.${NC}"
 (cd docs/sphinx_api_docs_source; invoke docs)
 
 yarn install
-yarn docusaurus docs: version 0.15.50
+yarn docusaurus docs:version 0.15.50
 cd ../..
 
 # ADD MORE VERSIONS HERE
