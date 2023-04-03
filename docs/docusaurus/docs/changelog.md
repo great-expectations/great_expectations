@@ -2,6 +2,26 @@
 title: Changelog
 ---
 
+### 0.16.5
+* [FEATURE] Add batch metadata to sql datasources. ([#7499](https://github.com/great-expectations/great_expectations/pull/7499))
+* [BUGFIX] Fix issue running quickstart ([#7539](https://github.com/great-expectations/great_expectations/pull/7539))
+* [DOCS] doc 508 Updates footer links on docs pages ([#7521](https://github.com/great-expectations/great_expectations/pull/7521))
+* [DOCS] DSB-64 removes outdated v2/v3 references from the docs ([#7519](https://github.com/great-expectations/great_expectations/pull/7519))
+* [DOCS] Update CODEOWNERS ([#7528](https://github.com/great-expectations/great_expectations/pull/7528))
+* [DOCS] Quickstart code under test ([#7542](https://github.com/great-expectations/great_expectations/pull/7542))
+* [MAINTENANCE] SqlAlchemy2 Compatibility - `Row.keys()` ([#7520](https://github.com/great-expectations/great_expectations/pull/7520))
+* [MAINTENANCE] Refactoring of CapitalOne Metrics and Profiler-Based DataAssistant for Enhanced Code Elegance ([#7522](https://github.com/great-expectations/great_expectations/pull/7522))
+* [MAINTENANCE] SqlAlchemy 2 Compatibility - Autoload Parameter deprecation ([#7526](https://github.com/great-expectations/great_expectations/pull/7526))
+* [MAINTENANCE] Bump notebook from 6.4.1 to 6.4.12 in /docs_rtd ([#7511](https://github.com/great-expectations/great_expectations/pull/7511))
+* [MAINTENANCE] Break out unit tests to own stage. ([#7530](https://github.com/great-expectations/great_expectations/pull/7530))
+* [MAINTENANCE] Bump wheel from 0.37.1 to 0.38.1 in /contrib/cli ([#7493](https://github.com/great-expectations/great_expectations/pull/7493))
+* [MAINTENANCE] Simplifying CapitalOne DataProfilerColumnDomainBuilder Using Default "profile_path" Argument ([#7535](https://github.com/great-expectations/great_expectations/pull/7535))
+* [MAINTENANCE] : Clean up ununsed imports ([#7537](https://github.com/great-expectations/great_expectations/pull/7537))
+* [MAINTENANCE] Fix Type-Checking steps ([#7536](https://github.com/great-expectations/great_expectations/pull/7536))
+* [MAINTENANCE] Disable UserConfigurableProfiler tests relying on deprecated V2 functionality ([#7541](https://github.com/great-expectations/great_expectations/pull/7541))
+* [MAINTENANCE] : replace ColumnMetricProvider with ColumnAggregateMetricProvider ([#7538](https://github.com/great-expectations/great_expectations/pull/7538))
+* [MAINTENANCE] Exclude files from deprecation warning check ([#7544](https://github.com/great-expectations/great_expectations/pull/7544))
+
 ### 0.16.4
 * [FEATURE] Add package, contributors and metrics filter in Algolia script for expectation ([#7000](https://github.com/great-expectations/great_expectations/pull/7000)) (thanks @kod-er)
 * [FEATURE] `BatchMetadata` for all fluent `DataAsset`s ([#7392](https://github.com/great-expectations/great_expectations/pull/7392))

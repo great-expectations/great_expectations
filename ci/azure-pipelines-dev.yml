@@ -152,9 +152,11 @@ stages:
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
+        name: StaticTypeCheck
+      - script: |
           # initial run doesn't check `.pyi` source files
           invoke type-check --ci --pretty --check-stub-sources
-        name: StaticTypeCheck
+        name: TypeCheckStubSourceFiles
 
     - job: docstring_linter
       steps:
@@ -222,8 +224,33 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
+  - stage: quickstart
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+
+    jobs:
+      - job: quickstart
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
+
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test]"
+              pip uninstall -y sqlalchemy
+            displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+
+          - script: |
+              pytest -v --no-sqlalchemy --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
+            displayName: 'Run Quickstart'
+
+
+
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, quickstart]
     pool:
       vmImage: 'ubuntu-20.04'
 
