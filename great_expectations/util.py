@@ -90,7 +90,6 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
-    RemovedIn20Warning = None
 
 
 if TYPE_CHECKING:
