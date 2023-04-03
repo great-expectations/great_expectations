@@ -5,10 +5,8 @@ tag: [tutorial, getting started]
 # Quickstart with Great Expectations
 
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
-import SetupAndInstallForFilesystemData from '/docs/components/setup/link_lists/_setup_and_install_for_filesystem_data.md'
-import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_setup_and_install_for_hosted_data.md'
-import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
+import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
+import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 
 ## Introduction
 
@@ -35,37 +33,6 @@ pip install great_expectations
 ```
 
 ```python name="tutorials/quickstart/quickstart.py all"
-```
-
-```python title="Python code"
-import great_expectations as gx
-
-# Set up
-context = gx.get_context()
-
-# Connect to data
-validator = context.sources.pandas_default.read_csv(
-    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-)
-
-# Create Expectations
-validator.expect_column_values_to_not_be_null("pickup_datetime")
-validator.expect_column_values_to_be_between("passenger_count", auto=True)
-
-# Validate data
-checkpoint = gx.checkpoint.SimpleCheckpoint( 
-    name="my_quickstart_checkpoint",
-    data_context=context,
-    validator=validator,
-)
-checkpoint_result = checkpoint.run()
-
-# View results
-validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
-context.open_data_docs(resource_identifier=validation_result_identifier)
-
-# Save the Data Context for future use
-context.convert_to_file_context()
 ```
 
 In the following steps we'll break down exactly what is happening here so that you can follow along and perform a Validation yourself.
@@ -158,6 +125,7 @@ Because we did not previously initialize a Filesystem Data Context or specify a 
 
 You can provide the path to a specific folder when you convert your Ephemeral Data Context to a Filesystem Data Context.  If you do, your Filesystem Data Context will be initialized at that location.  If you do not, your new Filesystem Data Context will be initialized in the folder that your script is executed in.
 
+
 ### 5. (Optional) Great Expectations Cloud
 
 By completing the Quickstart guide, you now have the opportunity to join the Cloud Early Access program and explore how Great Expectations Cloud visualizes and creates shareable links for anyone on your team. The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
@@ -168,20 +136,12 @@ To access GX Cloud, you need to join our Cloud Early Access program. During this
 
 ## Next Steps 
 
-Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases! To help with this we have prepared some more detailed installation and setting up guides tailored to specific environments and resources.
+Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases! To help with this we have prepared some more detailed guides on setting up and installing GX and getting an initial Data Context that are tailored to specific environments and resources.
 
-For more details on installing GX for use with local filesystems, please see:
+### Installing GX for specific environments and source data systems
 
-<SetupAndInstallForFilesystemData />
+<SetupAndInstallGx />
 
-For guides on installing GX for use with cloud storage systems, please reference:
+### Initializing, instantiating, and saving a Data Context
 
-<SetupAndInstallForCloudData />
-
-For information on installing GX for use with SQL databases, see:
-
-<SetupAndInstallForSqlData />
-
-And for instructions on installing GX for use with hosted data systems, read:
-
-<SetupAndInstallForHostedData />
+<DataContextInitializeInstantiateSave />
