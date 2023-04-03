@@ -4,7 +4,6 @@ import random
 from typing import Optional, Union
 
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations.datasource import (
     BaseDatasource,
@@ -29,6 +28,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -48,7 +48,7 @@ except ImportError:
     except ImportError:
         sqla_bigquery = None
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture

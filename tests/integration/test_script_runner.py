@@ -1,7 +1,7 @@
 """Run integration and docs tests.
 
 Individual tests can be run by setting the '-k' flag and referencing the name of test, like the following example:
-    pytest -v --docs-tests -m integration -k "test_docs[migration_guide_spark_v2_api]" tests/integration/test_script_runner.py
+    pytest -v --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
 """
 
 import importlib.machinery
@@ -240,9 +240,17 @@ local_tests = [
     ),
 ]
 
+quickstart = [
+    IntegrationTestFixture(
+        name="quickstart",
+        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/quickstart.py",
+    ),
+]
+
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
+docs_test_matrix += quickstart
 docs_test_matrix += spark_integration_tests
 docs_test_matrix += sqlite_integration_tests
 docs_test_matrix += mysql_integration_tests

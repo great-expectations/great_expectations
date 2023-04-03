@@ -2036,7 +2036,7 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     validator_with_data = datasets[0]
                 else:
                     dataset_name = generate_dataset_name_from_expectation_name(
-                        dataset=d,
+                        dataset=d,  # type: ignore[arg-type] # should be dict but got ExpectationTestDataCases
                         expectation_type=expectation_type,
                         index=i,
                     )
@@ -2765,11 +2765,11 @@ def generate_dataset_name_from_expectation_name(
 
     dataset_name: str
     if not sub_index:
-        dataset_name: str = dataset.get(
+        dataset_name = dataset.get(
             "dataset_name", f"{expectation_type}_dataset_{index}"
         )
     else:
-        dataset_name: str = dataset.get(
+        dataset_name = dataset.get(
             "dataset_name", f"{expectation_type}_dataset_{index}_{sub_index}"
         )
     return dataset_name

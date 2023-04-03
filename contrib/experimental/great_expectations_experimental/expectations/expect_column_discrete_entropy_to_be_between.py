@@ -20,7 +20,7 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
@@ -34,7 +34,7 @@ from great_expectations.render.util import (
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
-class ColumnDiscreteEntropy(ColumnMetricProvider):
+class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
     """MetricProvider Class for Discrete Entropy MetricProvider"""
 
     metric_name = "column.discrete.entropy"

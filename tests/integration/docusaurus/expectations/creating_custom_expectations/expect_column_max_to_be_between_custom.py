@@ -99,6 +99,7 @@ class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py examples">
     examples = [
         {
+            "dataset_name": "expect_column_max_to_be_between_custom_1",
             "data": {"x": [1, 2, 3, 4, 5], "y": [0, -1, -2, 4, None]},
             "tests": [
                 {
