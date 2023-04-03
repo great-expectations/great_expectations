@@ -1457,11 +1457,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
         datasource: Union[
-            LegacyDatasource, BaseDatasource
+            LegacyDatasource, BaseDatasource, FluentDatasource
         ] = self._instantiate_datasource_from_config(
             raw_config=raw_config, substituted_config=substituted_config
         )
-        datasource._data_context = self
+        if isinstance(datasource, FluentDatasource):
+            datasource._data_context = self
         self._cached_datasources[datasource_name] = datasource
         return datasource
 

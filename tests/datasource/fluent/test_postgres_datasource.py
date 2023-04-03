@@ -41,6 +41,7 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
 
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
@@ -1293,7 +1294,9 @@ def test_add_postgres_query_asset_with_batch_metadata(
         asset.add_splitter_year(column_name="col")
         batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
         assert len(batches) == len(years)
-        substituted_batch_metadata = copy.deepcopy(asset_specified_metadata)
+        substituted_batch_metadata: BatchMetadata = copy.deepcopy(
+            asset_specified_metadata
+        )
         substituted_batch_metadata.update(
             {
                 "no_curly_pipeline_filename": __file__,
@@ -1337,7 +1340,9 @@ def test_add_postgres_table_asset_with_batch_metadata(
         asset.add_splitter_year(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
         assert len(batches) == len(years)
-        substituted_batch_metadata = copy.deepcopy(asset_specified_metadata)
+        substituted_batch_metadata: BatchMetadata = copy.deepcopy(
+            asset_specified_metadata
+        )
         substituted_batch_metadata.update(
             {
                 "no_curly_pipeline_filename": __file__,
