@@ -3,7 +3,10 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_suite import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+)
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -607,3 +610,49 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
     mock_update.assert_called_once()
+
+
+@pytest.mark.integration
+def test_get_expectation_suite_include_rendered_content_prescriptive(
+    yellow_trip_pandas_data_context,
+):
+    context = yellow_trip_pandas_data_context
+
+    expectation_suite_name = "validating_taxi_data"
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "passenger_count",
+            "min_value": {"$PARAMETER": "upstream_column_min"},
+            "max_value": {"$PARAMETER": "upstream_column_max"},
+        },
+    )
+
+    context.add_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+        expectations=[expectation_configuration],
+    )
+
+    expectation_suite_exclude_rendered_content: ExpectationSuite = (
+        context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+        )
+    )
+    assert (
+        expectation_suite_exclude_rendered_content.expectations[0].rendered_content
+        is None
+    )
+
+    expected_expectation_configuration_prescriptive_rendered_content = None
+
+    expectation_suite_exclude_rendered_content: ExpectationSuite = (
+        context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            include_rendered_content=True,
+        )
+    )
+    assert (
+        expectation_suite_exclude_rendered_content.expectations[0].rendered_content
+        == expected_expectation_configuration_prescriptive_rendered_content
+    )

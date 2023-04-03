@@ -942,7 +942,7 @@ def test_validator_docstrings(multi_batch_taxi_validator):
 
 
 @pytest.mark.integration
-def test_validator_include_rendered_content(
+def test_validator_include_rendered_content_diagnostic(
     yellow_trip_pandas_data_context,
 ):
     context = yellow_trip_pandas_data_context
@@ -1007,22 +1007,24 @@ def test_validator_include_rendered_content(
         )
     )
 
-    expected_expectation_validation_result_rendered_content = RenderedAtomicContent(
-        name="atomic.diagnostic.observed_value",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={},
-            template="6",
-        ),
-        value_type="StringValueType",
+    expected_expectation_validation_result_diagnostic_rendered_content = (
+        RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=RenderedAtomicValue(
+                schema={"type": "com.superconductive.rendered.string"},
+                params={},
+                template="6",
+            ),
+            value_type="StringValueType",
+        )
     )
 
     assert (
-        expected_expectation_validation_result_rendered_content
+        expected_expectation_validation_result_diagnostic_rendered_content
         in validation_result.rendered_content
     )
 
-    expected_expectation_configuration_rendered_content = RenderedAtomicContent(
+    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
         name="atomic.prescriptive.summary",
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
@@ -1045,7 +1047,7 @@ def test_validator_include_rendered_content(
     )
 
     assert (
-        expected_expectation_configuration_rendered_content
+        expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
 
@@ -1060,22 +1062,24 @@ def test_validator_include_rendered_content(
         )
     )
 
-    expected_expectation_validation_result_rendered_content = RenderedAtomicContent(
-        name="atomic.diagnostic.observed_value",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={},
-            template="0",
-        ),
-        value_type="StringValueType",
+    expected_expectation_validation_result_diagnostic_rendered_content = (
+        RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=RenderedAtomicValue(
+                schema={"type": "com.superconductive.rendered.string"},
+                params={},
+                template="0",
+            ),
+            value_type="StringValueType",
+        )
     )
 
     assert (
-        expected_expectation_validation_result_rendered_content
+        expected_expectation_validation_result_diagnostic_rendered_content
         in validation_result.rendered_content
     )
 
-    expected_expectation_configuration_rendered_content = RenderedAtomicContent(
+    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
         name="atomic.prescriptive.summary",
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
@@ -1094,7 +1098,7 @@ def test_validator_include_rendered_content(
     )
 
     assert (
-        expected_expectation_configuration_rendered_content
+        expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
 
