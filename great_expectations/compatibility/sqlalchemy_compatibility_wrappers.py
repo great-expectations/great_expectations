@@ -25,7 +25,7 @@ except ImportError:
 
 
 def read_sql_table_as_df(
-    table_name: str,
+    table_name: str | None,
     con,
     schema=None,
     index_col: str | Sequence[str] | None = None,
@@ -63,7 +63,7 @@ def read_sql_table_as_df(
     if isinstance(con, sa.engine.Engine):
         con = con.connect()
     with warnings.catch_warnings():
-        warnings.filterwarnings(action="ignore", category=RemovedIn20Warning)
+        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         return pd.read_sql_table(
             table_name=table_name,
             con=con,
