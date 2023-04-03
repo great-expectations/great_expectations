@@ -237,7 +237,7 @@ class _FilePathDataAsset(DataAsset):
                 batch_definition.batch_identifiers
             )
 
-            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+            batch_metadata = self._get_batch_metadata_from_batch_request(
                 batch_request=fully_specified_batch_request
             )
 

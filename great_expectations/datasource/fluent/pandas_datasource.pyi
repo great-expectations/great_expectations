@@ -143,9 +143,6 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"]
     assets: Dict[str, _PandasDataAsset]
     def test_connection(self, test_assets: bool = ...) -> None: ...
-    @staticmethod
-    def _validate_asset_name(self, asset_name: Optional[str] = ...) -> str: ...
-    def _get_validator(self, asset: _PandasDataAsset) -> Validator: ...
     def add_dataframe_asset(
         self,
         name: str,
