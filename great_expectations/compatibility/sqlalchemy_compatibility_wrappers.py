@@ -25,7 +25,7 @@ except ImportError:
 
 
 def read_sql_table_as_df(
-    table_name: str,
+    table_name,
     con,
     schema=None,
     index_col: str | Sequence[str] | None = None,
