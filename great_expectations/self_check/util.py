@@ -737,13 +737,13 @@ def _get_test_validator_with_data_pandas(
 
             # We will use timestamp for timezone-aware (UTC only) dates in our tests
             if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
-                df[key] = pd.to_datetime(df[key], utc=True, format="ISO8601")
+                df[key] = pd.to_datetime(df[key], utc=True)
                 continue
             elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
-                df[key] = pd.to_datetime(df[key], format="ISO8601")
+                df[key] = pd.to_datetime(df[key])
                 continue
             elif value.lower() in ["date"]:
-                df[key] = pd.to_datetime(df[key], format="ISO8601").dt.date
+                df[key] = pd.to_datetime(df[key]).dt.date
                 value = "object"
             try:
                 type_ = np.dtype(value)
