@@ -40,9 +40,4 @@ checkpoint_result = checkpoint.run()
 validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
 context.open_data_docs(resource_identifier=validation_result_identifier)
 # </snippet>
-
-# Save the Data Context for future use
-# <snippet name="tutorials/quickstart/quickstart.py save_context">
-context.convert_to_file_context()
-# </snippet>
 # </snippet>

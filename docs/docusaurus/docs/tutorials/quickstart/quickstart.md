@@ -116,14 +116,6 @@ Great Expectations provides a friendly, human-readable way to view the results o
 ```python name="tutorials/quickstart/quickstart.py view_results"
 ```
 
-#### 4.3 Save the Data Context for future use
-Because we did not previously initialize a Filesystem Data Context or specify a path at which to create one, the Data Context we recieved from `gx.get_context()` was a temporary, in-memory Ephemeral Data Context.  To save this Data Context for future use, we will convert it to a Filesystem Data Context:
-
-```python name="tutorials/quickstart/quickstart.py save_context"
-```
-
-You can provide the path to a specific folder when you convert your Ephemeral Data Context to a Filesystem Data Context.  If you do, your Filesystem Data Context will be initialized at that location.  If you do not, your new Filesystem Data Context will be initialized in the folder that your script is executed in.
-
 
 ### 5. (Optional) Great Expectations Cloud
 
