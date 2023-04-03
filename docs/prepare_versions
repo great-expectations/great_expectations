@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Prepare earlier library versions for use in documentation.
+# Run this after creating a new major or minor version after adding the missing
+# version to this script and any version specific steps.
+
+echo -e "${ORANGE}Copying code referenced from previous versions${NC}"
+# TODO: Load versions from versions.json and loop through instead of manual process here:
+# TODO: What else needs to be copied? Static assets like images and css?
+# Copy code referenced in docs from version 0.14.13
+git checkout 0.14.13
+git pull
+mkdir -p versioned_code/version-0.14.13
+cp ../../tests versioned_code/version-0.14.13
+
+echo -e "${ORANGE}Installing Great Expectations library dev dependencies for v0.14.13.${NC}"
+(cd ../../; pip install -c constraints-dev.txt -e ".[test]")
+
+echo -e "${ORANGE}Installing api docs dependencies for v0.14.13.${NC}"
+(cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
+
+echo -e "${ORANGE}Building API docs for v0.14.13.${NC}"
+(cd ../../; invoke docs)
+
+yarn install
+yarn build
+yarn docusaurus docs: version 0.14.13
+
+
+# Copy code referenced in docs from version 0.15.50
+git checkout 0.15.50
+git pull
+mkdir -p versioned_code/version-0.15.50
+cp ../../tests versioned_code/version-0.15.50
+
+echo -e "${ORANGE}Installing Great Expectations library dev dependencies for v0.15.50.${NC}"
+(cd ../../; pip install -c constraints-dev.txt -e ".[test]")
+
+echo -e "${ORANGE}Installing api docs dependencies for v0.15.50.${NC}"
+(cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
+
+echo -e "${ORANGE}Building API docs for v0.15.50.${NC}"
+(cd ../../; invoke docs)
+
+yarn install
+yarn build
+yarn docusaurus docs: version 0.15.50
+
+# ADD MORE VERSIONS HERE
+
+# Update versioned code and docs
+echo -e "${ORANGE}Updating links in versioned docs${NC}"
+# TODO: Update links in versioned docs, use @site (first double check this works)
+# TODO: This should also be checked for links to static assets as well.
+
+echo -e "${ORANGE}Updating filepath in versioned docs${NC}"
+# TODO: Update filepath in versioned docs if they are using the old linenumber style of file=<filepath>L<lineno>
+# TODO: By adding the correct versioned_code filepath e.g. versioned_code/version-0.14.13/
+# TODO: Use the file path of the doc in versioned_docs/version-<version_number>/ to determine what version number it is
+
+echo -e "${ORANGE}Updating snippet names in versioned docs${NC}"
+# TODO: Update snippet names in versioned docs if they are using the style of name="<snippet_name>"
+# TODO: By prepending the version e.g. name="version-0.15.50<original_snippet_name>"
+python prepare_prior_versions.py
