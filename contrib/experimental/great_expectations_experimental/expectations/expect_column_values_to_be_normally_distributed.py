@@ -6,12 +6,12 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
 
 
-class ColumnNormallyDistributed(ColumnMetricProvider):
+class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.custom.normally_distributed"

@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
         BatchRequestOptions,
         DataAsset,
         SortersDefinition,
@@ -183,10 +184,17 @@ class SqliteDatasource(SQLDatasource):
         table_name: str,
         schema_name: Optional[str] = None,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> SqliteTableAsset:
         return cast(
             SqliteTableAsset,
-            super().add_table_asset(name, table_name, schema_name, order_by),
+            super().add_table_asset(
+                name=name,
+                table_name=table_name,
+                schema_name=schema_name,
+                order_by=order_by,
+                batch_metadata=batch_metadata,
+            ),
         )
 
     add_table_asset.__doc__ = SQLDatasource.add_table_asset.__doc__
@@ -197,8 +205,14 @@ class SqliteDatasource(SQLDatasource):
         name: str,
         query: str,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> SqliteQueryAsset:
-        return cast(SqliteQueryAsset, super().add_query_asset(name, query, order_by))
+        return cast(
+            SqliteQueryAsset,
+            super().add_query_asset(
+                name=name, query=query, order_by=order_by, batch_metadata=batch_metadata
+            ),
+        )
 
     add_query_asset.__doc__ = SQLDatasource.add_query_asset.__doc__
 

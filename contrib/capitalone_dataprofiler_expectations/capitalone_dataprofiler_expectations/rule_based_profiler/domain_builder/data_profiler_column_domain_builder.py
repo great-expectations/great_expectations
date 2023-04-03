@@ -13,6 +13,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.parameter_container import (
+    VARIABLES_KEY,  # noqa: TCH001
     ParameterContainer,  # noqa: TCH001
 )
 from great_expectations.util import is_candidate_subset_of_target
@@ -32,7 +33,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
 
     def __init__(
         self,
-        profile_path: str,
+        profile_path: str = f"{VARIABLES_KEY}profile_path",
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -49,7 +50,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
     ) -> None:
         """
         Args:
-            profile_path: path to output (in ".pkl" format) of CapitalOne DataProfiler
+            profile_path: path to output (in ".pkl" format) of CapitalOne DataProfiler (default references "variables").
             include_column_names: Explicitly specified desired columns (if None, it is computed based on active Batch).
             exclude_column_names: If provided, these columns are pre-filtered and excluded from consideration.
             include_column_name_suffixes: Explicitly specified desired suffixes for corresponding columns to match.
