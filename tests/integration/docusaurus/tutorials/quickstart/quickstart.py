@@ -1,3 +1,4 @@
+# <snippet name="tutorials/quickstart/quickstart.py all">
 # <snippet name="tutorials/quickstart/quickstart.py import_gx">
 import great_expectations as gx
 
@@ -42,4 +43,5 @@ context.open_data_docs(resource_identifier=validation_result_identifier)
 # Save the Data Context for future use
 # <snippet name="tutorials/quickstart/quickstart.py save_context">
 context.convert_to_file_context()
+# </snippet>
 # </snippet>

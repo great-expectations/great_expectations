@@ -34,6 +34,9 @@ With GX you can get up and running with just a few lines of code.  The full proc
 pip install great_expectations
 ```
 
+```python name="tutorials/quickstart/quickstart.py all"
+```
+
 ```python title="Python code"
 import great_expectations as gx
 
@@ -137,14 +140,14 @@ Now that we have defined our Expectations it is time for GX to introspect our da
 ```
 Once we have created the Checkpoint, we will run it and get back the results from our Validation.
 
-```python title="tutorials/quickstart/quickstart.py run_checkpoint"
+```python name="tutorials/quickstart/quickstart.py run_checkpoint"
 ```
 
 #### 4.2 Review your results
 
 Great Expectations provides a friendly, human-readable way to view the results of Validations: Data Docs.  Our Checkpoint will have automatically compiled new Data Docs to include the results of the Validation we ran, so we can view them immediately:
 
-```python title="tutorials/quickstart/quickstart.py view_results"
+```python name="tutorials/quickstart/quickstart.py view_results"
 ```
 
 #### 4.3 Save the Data Context for future use
