@@ -784,6 +784,7 @@ def test_config_substitution_retains_original_value_on_save(
     monkeypatch: pytest.MonkeyPatch,
     file_dc_config_file_with_substitutions: pathlib.Path,
     sqlite_database_path: pathlib.Path,
+    cloud_storage_get_client_doubles,
 ):
     original: dict = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
@@ -830,6 +831,7 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
     monkeypatch: pytest.MonkeyPatch,
     sqlite_database_path: pathlib.Path,
     file_dc_config_file_with_substitutions: pathlib.Path,
+    cloud_storage_get_client_doubles,
 ):
     # inject env variable
     my_conn_str = f"sqlite:///{sqlite_database_path}"

@@ -282,12 +282,18 @@ class _SourceFactories:
                 # asset level attributes needed by the data_connector
                 # push them to `connect_options` field
                 if self.data_connector_type:
+                    logger.info(
+                        f"'{self.name}' {type(self).__name__} uses {self.data_connector_type.__name__}"
+                    )
                     connect_options = {
                         k: v
                         for (k, v) in kwargs.items()
-                        if k in self.data_connector_type.asset_level_option_keys and v
+                        if k in self.data_connector_type.asset_level_option_keys
                     }
                     if connect_options:
+                        logger.info(
+                            f"{self.data_connector_type.__name__} connect_options provided -> {list(connect_options.keys())}"
+                        )
                         for k in connect_options:  # TODO: avoid this extra loop
                             kwargs.pop(k)
                         kwargs["connect_options"] = connect_options
