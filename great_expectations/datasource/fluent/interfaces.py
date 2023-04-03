@@ -145,7 +145,7 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
-_DatasourceT = TypeVar("_DatasourceT")
+_DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
 
 
 class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
