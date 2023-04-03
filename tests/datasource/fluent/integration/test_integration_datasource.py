@@ -10,6 +10,7 @@ from great_expectations.datasource.fluent import (
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
 )
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     DataAsset,
@@ -168,7 +169,7 @@ def test_sql_query_data_asset(empty_data_context):
                     "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
                 )
             ),
-            None,
+            MATCH_ALL_PATTERN,
             False,
             id="default regex",
         ),
@@ -177,7 +178,7 @@ def test_sql_query_data_asset(empty_data_context):
 def test_filesystem_data_asset_batching_regex(
     filesystem_datasource: PandasFilesystemDatasource | SparkFilesystemDatasource,
     base_directory: pathlib.Path,
-    batching_regex: str | None,
+    batching_regex: str,
     raises_test_connection_error: bool,
 ):
     filesystem_datasource.base_directory = base_directory
@@ -418,3 +419,39 @@ def test_checkpoint_run_with_nonstring_path_option(empty_data_context):
     result = checkpoint.run()
     assert result["success"]
     assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+
+
+@pytest.mark.parametrize(
+    ["add_asset_method", "add_asset_kwarg"],
+    [
+        pytest.param(
+            "add_table_asset",
+            {"table_name": "yellow_tripdata_sample_2019_02"},
+            id="table_asset",
+        ),
+        pytest.param(
+            "add_query_asset",
+            {"query": "select * from yellow_tripdata_sample_2019_02"},
+            id="query_asset",
+        ),
+    ],
+)
+@pytest.mark.integration
+def test_asset_specified_metadata(
+    empty_data_context, add_asset_method, add_asset_kwarg
+):
+    context = empty_data_context
+    datasource = sqlite_datasource(context, "yellow_tripdata.db")
+    asset_specified_metadata = {"pipeline_name": "my_pipeline"}
+    asset = getattr(datasource, add_asset_method)(
+        name="asset",
+        batch_metadata=asset_specified_metadata,
+        **add_asset_kwarg,
+    )
+    asset.add_splitter_year_and_month(column_name="pickup_datetime")
+    asset.add_sorters(["year", "month"])
+    # Test getting all batches
+    batches = asset.get_batch_list_from_batch_request(asset.build_batch_request())
+    assert len(batches) == 1
+    # Update the batch_metadata from the request with the metadata inherited from the asset
+    assert batches[0].metadata == {**asset_specified_metadata, "year": 2019, "month": 2}
