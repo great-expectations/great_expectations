@@ -61,7 +61,6 @@ The code to import the `great_expectations` module is:
 ```python name="tutorials/quickstart/quickstart.py import_gx"
 ```
 
-
 #### 1.3 Instantiate a Data Context
 
 We will get a `DataContext` object with the following code:

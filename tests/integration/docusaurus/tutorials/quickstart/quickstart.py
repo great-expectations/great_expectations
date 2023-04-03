@@ -4,6 +4,7 @@ import great_expectations as gx
 
 # </snippet>
 
+# Set up
 # <snippet name="tutorials/quickstart/quickstart.py get_context">
 context = gx.get_context()
 # </snippet>
