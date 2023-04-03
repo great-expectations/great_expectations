@@ -14,6 +14,8 @@ import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
 <!--- ### 3. Verify the content of the Data Context -->
 import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
 
+import AdmonitionConvertToFileContext from '/docs/components/setup/data_context/_admonition_convert_to_file_context.md'
+
 ## Introduction
 
 A <TechnicalTag tag="data_context" text="Data Context" /> contains the configurations for <TechnicalTag tag="expectation" text="Expectations" />, <TechnicalTag tag="store" text="Metadata Stores" />, <TechnicalTag tag="data_docs" text="Data Docs" />, <TechnicalTag tag="checkpoint" text="Checkpoints" />, and all things related to working with Great Expectations.  This guide will demonstrate how to instantiate an existing Filesystem Data Context so that you can continue working with previously defined GX configurations.
@@ -44,6 +46,12 @@ This functions as a convenience method for initializing, instantiating, and retu
 
 If you have GX Cloud configured on your system, `get_context()` will instantiate and return a Cloud Data Context. Otherwise, `get_context()` will attempt to instantiate and return the last accessed Filesystem Data Context. Finally, if a previously initialized Filesystem Data Context cannot be found, `get_context()` will initialize, instantiate, and return a temporary in-memory Ephemeral Data Context.
 
+
+:::info Saving the contents of an Ephemeral Data Context for future use
+
+<AdmonitionConvertToFileContext />
+
+:::
 
 ### 3. Verify the content of the returned Data Context
 
