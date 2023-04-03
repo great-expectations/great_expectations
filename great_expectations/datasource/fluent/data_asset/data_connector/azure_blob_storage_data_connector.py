@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class _AzureOptions(pydantic.BaseModel):
-    abs_container: str = ...  # TODO: deal with this required arg
+    abs_container: str
     abs_name_starts_with: str = ""
     abs_delimiter: str = "/"
 
