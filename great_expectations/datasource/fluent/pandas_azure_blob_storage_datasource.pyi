@@ -89,7 +89,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         sep: typing.Union[str, None] = ...,
@@ -150,7 +150,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         sheet_name: typing.Union[str, int, None] = 0,
@@ -184,7 +184,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         columns: Union[Sequence[Hashable], None] = ...,
@@ -198,7 +198,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         key: typing.Any = ...,
@@ -219,7 +219,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         match: Union[str, typing.Pattern] = ".+",
@@ -244,7 +244,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         orient: typing.Union[str, None] = ...,
@@ -270,7 +270,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         columns: typing.Union[typing.List[str], None] = ...,
@@ -283,7 +283,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         engine: str = "auto",
@@ -299,7 +299,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         compression: CompressionOptions = "infer",
@@ -312,7 +312,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         format: typing.Union[str, None] = ...,
@@ -329,7 +329,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
@@ -342,7 +342,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         convert_dates: bool = ...,
@@ -364,7 +364,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
-        abs_container: str = ...,  # TODO: deal with this required arg
+        abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         xpath: str = "./*",
