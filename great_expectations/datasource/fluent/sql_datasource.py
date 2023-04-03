@@ -30,7 +30,6 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchMetadata,
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
