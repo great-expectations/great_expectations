@@ -8,6 +8,10 @@ echo -e "${ORANGE}Copying code referenced from previous versions${NC}"
 # TODO: Load versions from versions.json and loop through instead of manual process here:
 # TODO: What else needs to be copied? Static assets like images and css?
 # Copy code referenced in docs from version 0.14.13
+mkdir 0.14.13
+cd 0.14.13
+git clone https://github.com/great-expectations/great_expectations.git
+cd great_expectations
 git checkout 0.14.13
 git pull
 mkdir -p versioned_code/version-0.14.13
@@ -25,9 +29,13 @@ echo -e "${ORANGE}Building API docs for v0.14.13.${NC}"
 yarn install
 yarn build
 yarn docusaurus docs: version 0.14.13
-
+cd ../..
 
 # Copy code referenced in docs from version 0.15.50
+mkdir 0.15.50
+cd 0.15.50
+git clone https://github.com/great-expectations/great_expectations.git
+cd great_expectations
 git checkout 0.15.50
 git pull
 mkdir -p versioned_code/version-0.15.50
@@ -45,6 +53,7 @@ echo -e "${ORANGE}Building API docs for v0.15.50.${NC}"
 yarn install
 yarn build
 yarn docusaurus docs: version 0.15.50
+cd ../..
 
 # ADD MORE VERSIONS HERE
 
