@@ -246,7 +246,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Batch.metadata at runtime.
         """
         batch_metadata = copy.deepcopy(self.batch_metadata)
-        config_variables = self._datasource._data_context.config_variables
+        config_variables = self._datasource._data_context.config_variables  # type: ignore[attr-defined]
         batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
             data=batch_metadata, replace_variables_dict=config_variables
         )
