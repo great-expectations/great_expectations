@@ -31,6 +31,9 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.compatibility.sqlalchemy_and_pandas import (
+    execute_pandas_to_datetime,
+)
 from great_expectations.core import (
     ExpectationConfigurationSchema,
     ExpectationSuite,
@@ -737,13 +740,13 @@ def _get_test_validator_with_data_pandas(
 
             # We will use timestamp for timezone-aware (UTC only) dates in our tests
             if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
-                df[key] = pd.to_datetime(df[key], utc=True)
+                df[key] = execute_pandas_to_datetime(df[key], utc=True)
                 continue
             elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
-                df[key] = pd.to_datetime(df[key])
+                df[key] = execute_pandas_to_datetime(df[key])
                 continue
             elif value.lower() in ["date"]:
-                df[key] = pd.to_datetime(df[key]).dt.date
+                df[key] = execute_pandas_to_datetime(df[key]).dt.date
                 value = "object"
             try:
                 type_ = np.dtype(value)

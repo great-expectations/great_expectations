@@ -45,3 +45,46 @@ def execute_pandas_reader_fn(
     else:
         reader_fn_result = reader_fn(**reader_options)
     return reader_fn_result
+
+
+def execute_pandas_to_datetime(
+    arg,
+    errors: str = "raise",
+    dayfirst: bool = False,
+    yearfirst: bool = False,
+    utc: bool | None = None,
+    format: str | None = None,
+    exact: bool = True,
+    unit: str | None = None,
+    infer_datetime_format: bool = False,
+    origin="unix",
+    cache: bool = True,
+):
+    if is_version_less_than(pd.__version__, "2.0.0"):
+        pd.to_datetime(
+            arg=arg,
+            errors=errors,
+            dayfirst=dayfirst,
+            utc=utc,
+            format=format,
+            exact=exact,
+            unit=unit,
+            infer_datetime_format=infer_datetime_format,
+            origin=origin,
+            cache=cache,
+        )
+    else:
+        if not format:
+            format = "ISO8601"
+        pd.to_datetime(
+            arg=arg,
+            errors=errors,
+            dayfirst=dayfirst,
+            utc=utc,
+            format=format,
+            exact=exact,
+            unit=unit,
+            infer_datetime_format=infer_datetime_format,
+            origin=origin,
+            cache=cache,
+        )
