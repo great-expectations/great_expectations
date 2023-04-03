@@ -475,6 +475,9 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         param_types: List[RendererValueType], value: Any
     ) -> RendererValueType:
         for param_type in param_types:
+            if isinstance(value, dict) and "$PARAMETER" in value:
+                return RendererValueType.STRING
+
             try:
                 renderer_param: Type[
                     BaseModel
@@ -487,7 +490,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 pass
 
         raise RendererConfigurationError(
-            f"None of the param_types: {param_types} match the value: {value}"
+            f"None of the param_types: {[param_type.value for param_type in param_types]} match the value: {value}"
         )
 
     def add_param(
