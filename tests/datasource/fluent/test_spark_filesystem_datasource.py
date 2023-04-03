@@ -5,7 +5,7 @@ import logging
 import pathlib
 import re
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, List
+from typing import List
 
 import pytest
 
@@ -15,6 +15,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
+    SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
@@ -23,9 +24,6 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.datasource import SortersDefinition
 
 logger = logging.getLogger(__name__)
 

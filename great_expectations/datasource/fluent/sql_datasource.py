@@ -25,11 +25,6 @@ from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed for pydantic
 )
 from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
-from great_expectations.datasource.fluent.datasource import (
-    Datasource,
-    Sorter,
-    SortersDefinition,
-)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -38,6 +33,9 @@ from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
+    Datasource,
+    Sorter,
+    SortersDefinition,
     TestConnectionError,
 )
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine

@@ -19,7 +19,7 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.constants import _ASSETS_KEY
-from great_expectations.datasource.fluent.datasource import Datasource
+from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
     DEFAULT_PANDAS_DATASOURCE_NAME,
