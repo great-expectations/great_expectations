@@ -658,11 +658,11 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
                     },
                     "min_value": {
                         "schema": {"type": "string"},
-                        "value": {"$PARAMETER": "upstream_column_min"},
+                        "value": "upstream_column_min",
                     },
                     "max_value": {
                         "schema": {"type": "string"},
-                        "value": {"$PARAMETER": "upstream_column_max"},
+                        "value": "upstream_column_max",
                     },
                 },
             ),
