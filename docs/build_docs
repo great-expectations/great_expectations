@@ -35,39 +35,11 @@ git pull
 mkdir -p versioned_code/version-0.14.13
 cp ../../tests versioned_code/version-0.14.13
 
-echo -e "${ORANGE}Installing Great Expectations library dev dependencies for v0.14.13.${NC}"
-(cd ../../; pip install -c constraints-dev.txt -e ".[test]")
-
-echo -e "${ORANGE}Installing api docs dependencies for v0.14.13.${NC}"
-(cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
-
-echo -e "${ORANGE}Building API docs for v0.14.13.${NC}"
-(cd ../../; invoke docs)
-
-yarn install
-yarn build
-yarn docusaurus docs: version 0.14.13
-
-
 # Copy code referenced in docs from version 0.15.50
 git checkout 0.15.50
 git pull
 mkdir -p versioned_code/version-0.15.50
 cp ../../tests versioned_code/version-0.15.50
-
-echo -e "${ORANGE}Installing Great Expectations library dev dependencies for v0.15.50.${NC}"
-(cd ../../; pip install -c constraints-dev.txt -e ".[test]")
-
-echo -e "${ORANGE}Installing api docs dependencies for v0.15.50.${NC}"
-(cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
-
-echo -e "${ORANGE}Building API docs for v0.15.50.${NC}"
-(cd ../../; invoke docs)
-
-yarn install
-yarn build
-yarn docusaurus docs: version 0.15.50
-
 # ADD MORE VERSIONS HERE
 
 # Update versioned code and docs
