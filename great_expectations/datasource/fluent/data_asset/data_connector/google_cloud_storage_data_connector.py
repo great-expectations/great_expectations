@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+
+import pydantic
 
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
@@ -19,6 +21,12 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+class _GCSOptions(pydantic.BaseModel):
+    gcs_prefix: str = ""
+    gcs_delimiter: str = "/"
+    gcs_max_results: int = 1000
 
 
 class GoogleCloudStorageDataConnector(FilePathDataConnector):
@@ -39,6 +47,13 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on GCS
     """
+
+    asset_level_option_keys: ClassVar[tuple[str, ...]] = (
+        "gcs_prefix",
+        "gcs_delimiter",
+        "gcs_max_results",
+    )
+    asset_options_type: ClassVar[Type[_GCSOptions]] = _GCSOptions
 
     def __init__(
         self,
