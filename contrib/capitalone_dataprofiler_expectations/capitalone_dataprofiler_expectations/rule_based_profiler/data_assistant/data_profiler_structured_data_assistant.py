@@ -304,3 +304,13 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             expect_column_mean_to_be_between_expectation_configuration_builder,
             expect_column_stddev_to_be_between_expectation_configuration_builder,
         ]
+
+        rule = Rule(
+            name="float_rule",
+            variables=variables,
+            domain_builder=column_domain_builder,
+            parameter_builders=parameter_builders,
+            expectation_configuration_builders=expectation_configuration_builders,
+        )
+
+        return rule
