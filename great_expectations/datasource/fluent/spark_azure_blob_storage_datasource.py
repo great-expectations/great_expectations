@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 
 import pydantic
-from typing_extensions import Literal
+from typing_extensions import Final, Literal
 
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed at runtime
+)
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
@@ -16,14 +19,10 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
-from great_expectations.datasource.fluent.spark_file_path_datasource import (
-    CSVAsset,
-)
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import (
-        Sorter,
-        SortersDefinition,
+    from great_expectations.datasource.fluent.file_path_data_asset import (
+        _FilePathDataAsset,
     )
 
 
@@ -40,17 +39,24 @@ try:
 except ImportError:
     pass
 
+_MISSING: Final = object()
+
 
 class SparkAzureBlobStorageDatasourceError(SparkDatasourceError):
     pass
 
 
 class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
+    # class attributes
+    data_connector_type: ClassVar[
+        Type[AzureBlobStorageDataConnector]
+    ] = AzureBlobStorageDataConnector
+
     # instance attributes
     type: Literal["spark_abs"] = "spark_abs"
 
     # Azure Blob Storage specific attributes
-    azure_options: Dict[str, Any] = {}
+    azure_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _account_name: str = pydantic.PrivateAttr(default="")
     _azure_client: Union[BlobServiceClient, None] = pydantic.PrivateAttr(default=None)
@@ -118,56 +124,44 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
-    def add_csv_asset(
+    def _build_data_connector(
         self,
-        name: str,
-        batching_regex: Union[re.Pattern, str],
-        container: str,
-        header: bool = False,
-        infer_schema: bool = False,
-        name_starts_with: str = "",
-        delimiter: str = "/",
-        order_by: Optional[SortersDefinition] = None,
-    ) -> CSVAsset:
-        """Adds a CSV DataAsset to the present "SparkAzureBlobStorageDatasource" object.
+        data_asset: _FilePathDataAsset,
+        abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
+        abs_name_starts_with: str = "",
+        abs_delimiter: str = "/",
+        **kwargs,
+    ) -> None:
+        """Builds and attaches the `AzureBlobStorageDataConnector` to the asset."""
+        if kwargs:
+            raise TypeError(
+                f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
+            )
+        if abs_container is _MISSING:
+            raise TypeError(
+                f"'{data_asset.name}' is missing required argument 'abs_container'"
+            )
 
-        Args:
-            name: The name of the CSV asset
-            batching_regex: regex pattern that matches csv filenames that is used to label the batches
-            container: container name for Microsoft Azure Blob Storage
-            header: boolean (default False) indicating whether or not first line of CSV file is header line
-            infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
-            name_starts_with: Microsoft Azure Blob Storage object name prefix
-            delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
-        """
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-        asset = CSVAsset(
-            name=name,
-            batching_regex=batching_regex,  # type: ignore[arg-type] # pydantic will compile regex str to Pattern
-            header=header,
-            inferSchema=infer_schema,
-            order_by=order_by_sorters,
-        )
-        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
+        data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
-            data_asset_name=name,
+            data_asset_name=data_asset.name,
             azure_client=self._get_azure_client(),
-            batching_regex=asset.batching_regex,
+            batching_regex=data_asset.batching_regex,
             account_name=self._account_name,
-            container=container,
-            name_starts_with=name_starts_with,
-            delimiter=delimiter,
-            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
+            container=abs_container,
+            name_starts_with=abs_name_starts_with,
+            delimiter=abs_delimiter,
+            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
         )
-        asset._test_connection_error_message = (
-            AzureBlobStorageDataConnector.build_test_connection_error_message(
-                data_asset_name=name,
-                batching_regex=asset.batching_regex,
+
+        # build a more specific `_test_connection_error_message`
+        data_asset._test_connection_error_message = (
+            self.data_connector_type.build_test_connection_error_message(
+                data_asset_name=data_asset.name,
+                batching_regex=data_asset.batching_regex,
                 account_name=self._account_name,
-                container=container,
-                name_starts_with=name_starts_with,
-                delimiter=delimiter,
+                container=abs_container,
+                name_starts_with=abs_name_starts_with,
+                delimiter=abs_delimiter,
             )
         )
-        return self._add_asset(asset=asset)
