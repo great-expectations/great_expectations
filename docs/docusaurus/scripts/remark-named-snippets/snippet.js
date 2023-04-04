@@ -174,7 +174,6 @@ function getDirs () {
 }
 
 function main () {
-
   const snippets = parseSourceDirectories(getDirs())
   const targetFiles = process.argv.slice(2)
 
