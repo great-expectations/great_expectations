@@ -49,7 +49,7 @@ def execute_pandas_reader_fn(
 
 def execute_pandas_to_datetime(
     arg,
-    errors: str = "raise",
+    errors: Literal["raise", "coerce", "ignore"] = "raise",
     dayfirst: bool = False,
     yearfirst: bool = False,
     utc: bool | None = None,
