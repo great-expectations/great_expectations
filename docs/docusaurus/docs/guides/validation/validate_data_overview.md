@@ -11,7 +11,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
 :::note Prerequisites
-- Completing the [Quickstart guide](/docs/tutorials/quickstart/quickstart) is recommended.
+- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
 :::
 
 ## The Validate Data process
