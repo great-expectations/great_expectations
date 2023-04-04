@@ -23,7 +23,7 @@ else
 fi
 
 echo -e "${ORANGE}Copying previous versioned docs${NC}"
-curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
+curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230404.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 
 echo -e "${ORANGE}DEBUG${NC}"
@@ -44,12 +44,14 @@ git checkout 0.14.13
 git pull
 mkdir -p versioned_code/version-0.14.13
 cp -r ../../tests versioned_code/version-0.14.13
+cp -r ../../examples versioned_code/version-0.14.13
 
 # Copy code referenced in docs from version 0.15.50
 git checkout 0.15.50
 git pull
 mkdir -p versioned_code/version-0.15.50
 cp -r ../../tests versioned_code/version-0.15.50
+cp -r ../../examples versioned_code/version-0.15.50
 # ADD MORE VERSIONS HERE
 
 echo -e "${ORANGE}DEBUG${NC}"
