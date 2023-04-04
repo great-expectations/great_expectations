@@ -93,8 +93,9 @@ echo -e "${ORANGE}Updating filepath in versioned docs${NC}"
 echo -e "${ORANGE}Updating snippet names in versioned docs${NC}"
 # TODO: Update snippet names in versioned docs if they are using the style of name="<snippet_name>"
 # TODO: By prepending the version e.g. name="version-0.15.50<original_snippet_name>"
-(cd ../; python prepare_prior_versions.py)
-
+cd ../
+python prepare_prior_versions.py
+cd docusaurus
 
 # Build current docs
 echo -e "${ORANGE}Installing Great Expectations library dev dependencies.${NC}"
