@@ -198,3 +198,22 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
 
     @staticmethod
     def _build_float_rule() -> Rule:
+        """
+        This method builds "Rule" object configured to emit "ExpectationConfiguration" objects for column "Domain" type.
+
+        This rule holds expectations which are associated with the float metrics in the data profiler report. There
+        are additional rules which are planned to be created, such as timestamp_rule, text_rule, categorical_rule, etc.
+        Currently, the float_rule uses ColumnDomainBuilder, so it doesn't discriminate by data type when applying the
+        rule.
+        """
+        column_domain_builder: DomainBuilder = ColumnDomainBuilder(
+            include_column_names=None,
+            exclude_column_names=None,
+            include_column_name_suffixes=None,
+            exclude_column_name_suffixes=None,
+            semantic_type_filter_module_name=None,
+            semantic_type_filter_class_name=None,
+            include_semantic_types=None,
+            exclude_semantic_types=None,
+            data_context=None,
+        )
