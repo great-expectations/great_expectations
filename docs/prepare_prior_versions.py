@@ -10,47 +10,23 @@ import re
 
 
 def _docs_dir() -> pathlib.Path:
-    print("pathlib.Path().absolute()")
-    print(pathlib.Path().absolute())
+    """Base directory for docs (contains docusaurus folder)."""
     return pathlib.Path().absolute()
 
 
-def _repo_root() -> pathlib.Path:
-    """Get the path from the repo root for this file."""
-    print("print(__file__)")
-    print(__file__)
-    print("print(pathlib.Path(__file__).parents)")
-    print(pathlib.Path(__file__).parents)
-    print("print(list(pathlib.Path(__file__).parents))")
-    print(list(pathlib.Path(__file__).parents))
-
-    print("pathlib.Path().absolute()")
-    print(pathlib.Path().absolute())
-    print("pathlib.Path().absolute()")
-
-    all_dirs = [p for p in pathlib.Path(__file__).parent.glob("**/*") if p.is_dir()]
-    print("all_dirs")
-    print(all_dirs)
-    print("all_dirs")
-
-    repo_root_path = list(pathlib.Path(__file__).parents)[1]
-    print(repo_root_path)
-    return repo_root_path
-
-
 def change_paths_for_docs_file_references():
-    """Change file= style references to use versioned_docs.
+    """Change file= style references to use versioned_docs paths.
 
     This is used in v0.14 docs like v0.14.13 since we moved to using named
     snippets only for v0.15.50 and later.
     """
-    # path = _repo_root() / "docs/docusaurus/versioned_docs/version-0.14.13/"
     path = _docs_dir() / "docusaurus/versioned_docs/version-0.14.13/"
     files = glob.glob(f"{path}/**/*.md", recursive=True)
     pattern = re.compile(r"((.*)(file=)((../)*))(.*)")
     path_to_insert = "versioned_code/version-0.14.13/"
 
     # TODO: Make this idempotent for development
+    # TODO: Fix paths with `deleted_code_snippets` in them
 
     for file_path in files:
         with open(file_path, "r+") as f:
@@ -63,18 +39,20 @@ def change_paths_for_docs_file_references():
 
 
 def _paths_to_versioned_docs() -> list[pathlib.Path]:
-    # data_path = _repo_root() / "docs/docusaurus/versioned_docs"
     data_path = _docs_dir() / "docusaurus/versioned_docs"
-    return [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
+    paths = [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
+    print("DEBUG DEBUG DEBUG versioned_docs_paths", paths)
+    return paths
 
 
 def _paths_to_versioned_code() -> list[pathlib.Path]:
-    # data_path = _repo_root() / "docs/docusaurus/versioned_code"
     data_path = _docs_dir() / "docusaurus/versioned_code"
-    return [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
+    paths = [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
+    print("DEBUG DEBUG DEBUG versioned_code_paths", paths)
+    return paths
 
 
-def prepend_version_info_to_name_for_snippet_by_name_references_markdown():
+def prepend_version_info_to_name_for_snippet_by_name_references():
     """Prepend version info e.g. name="snippet_name" -> name="version-0.15.50 snippet_name" """
 
     pattern = re.compile(r"((.*)(name=\"))(.*)")
@@ -90,7 +68,7 @@ def prepend_version_info_to_name_for_snippet_by_name_references_markdown():
         for file_path in files:
             with open(file_path, "r+") as f:
                 contents = f.read()
-                contents = re.sub(pattern, rf"\1{version}\4", contents)
+                contents = re.sub(pattern, rf"\1{version} \4", contents)
                 f.seek(0)
                 f.truncate()
                 f.write(contents)
@@ -99,4 +77,4 @@ def prepend_version_info_to_name_for_snippet_by_name_references_markdown():
 
 if __name__ == "__main__":
     change_paths_for_docs_file_references()
-    prepend_version_info_to_name_for_snippet_by_name_references_markdown()
+    prepend_version_info_to_name_for_snippet_by_name_references()
