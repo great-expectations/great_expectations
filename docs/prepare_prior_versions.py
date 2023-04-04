@@ -17,6 +17,12 @@ def _repo_root() -> pathlib.Path:
     print(pathlib.Path(__file__).parents)
     print("print(list(pathlib.Path(__file__).parents))")
     print(list(pathlib.Path(__file__).parents))
+
+    all_files = pathlib.Path(__file__).parent.glob("**/*")
+    print("all_files")
+    print(all_files)
+    print("all_files")
+
     repo_root_path = list(pathlib.Path(__file__).parents)[1]
     print(repo_root_path)
     return repo_root_path
