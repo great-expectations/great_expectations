@@ -288,4 +288,19 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             },
         )
 
-        
+        variables: dict = {
+            "strict_min": False,
+            "strict_max": False,
+            "profile_path": "default_profiler_path",
+        }
+
+        parameter_builders: List[ParameterBuilder] = [
+            data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics,
+        ]
+
+        expectation_configuration_builders: List[ExpectationConfigurationBuilder] = [
+            expect_column_min_to_be_between_expectation_configuration_builder,
+            expect_column_max_to_be_between_expectation_configuration_builder,
+            expect_column_mean_to_be_between_expectation_configuration_builder,
+            expect_column_stddev_to_be_between_expectation_configuration_builder,
+        ]
