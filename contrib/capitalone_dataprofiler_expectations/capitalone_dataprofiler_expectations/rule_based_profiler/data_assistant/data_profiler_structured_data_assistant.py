@@ -244,4 +244,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             max_value=None,
             strict_min=f"{VARIABLES_KEY}strict_min",
             strict_max=None,
-            
+            meta={
+                "profiler_details": f"{data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_METADATA_KEY}",
+            },
+        )
