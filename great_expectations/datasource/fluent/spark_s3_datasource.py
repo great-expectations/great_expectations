@@ -23,8 +23,8 @@ from great_expectations.datasource.fluent.spark_datasource import (
 if TYPE_CHECKING:
     from botocore.client import BaseClient
 
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
+    from great_expectations.datasource.fluent.spark_file_path_datasource import (
+        CSVAsset,
     )
 
 
@@ -102,7 +102,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
 
     def _build_data_connector(
         self,
-        data_asset: _FilePathDataAsset,
+        data_asset: CSVAsset,
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,

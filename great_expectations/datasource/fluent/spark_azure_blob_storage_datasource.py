@@ -21,12 +21,6 @@ from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
 
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
-    )
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -41,6 +35,11 @@ except ImportError:
     pass
 
 _MISSING: Final = object()
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.spark_file_path_datasource import (
+        CSVAsset,
+    )
 
 
 class SparkAzureBlobStorageDatasourceError(SparkDatasourceError):
@@ -128,7 +127,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
 
     def _build_data_connector(
         self,
-        data_asset: _FilePathDataAsset,
+        data_asset: CSVAsset,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",

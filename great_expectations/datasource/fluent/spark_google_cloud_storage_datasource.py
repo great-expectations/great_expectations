@@ -28,8 +28,8 @@ if TYPE_CHECKING:
         Credentials as GoogleServiceAccountCredentials,
     )
 
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
+    from great_expectations.datasource.fluent.spark_file_path_datasource import (
+        CSVAsset,
     )
 
 
@@ -132,7 +132,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
 
     def _build_data_connector(
         self,
-        data_asset: _FilePathDataAsset,
+        data_asset: CSVAsset,
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,
