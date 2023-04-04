@@ -535,8 +535,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             value = self.kwargs.get(name)
 
         if isinstance(value, dict) and "$PARAMETER" in value:
-            param_type = RendererValueType.STRING
-            value = value["$PARAMETER"]
+            param_type = RendererValueType.OBJECT
         elif isinstance(param_type, list) and value is not None:
             param_type = RendererConfiguration._choose_param_type_for_value(
                 param_types=param_type, value=value

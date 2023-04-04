@@ -657,12 +657,12 @@ def test_get_expectation_suite_include_rendered_content_prescriptive(
                         "value": "passenger_count",
                     },
                     "min_value": {
-                        "schema": {"type": "string"},
-                        "value": "upstream_column_min",
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_min"},
                     },
                     "max_value": {
-                        "schema": {"type": "string"},
-                        "value": "upstream_column_max",
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_max"},
                     },
                 },
             ),
