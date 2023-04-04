@@ -11,6 +11,10 @@ import re
 
 def _repo_root() -> pathlib.Path:
     """Get the path from the repo root for this file."""
+    print("print(__file__)")
+    print(__file__)
+    print("print(pathlib.Path(__file__).parents)")
+    print(pathlib.Path(__file__).parents)
     repo_root_path = pathlib.Path(__file__).parents[1]
     return repo_root_path
 
