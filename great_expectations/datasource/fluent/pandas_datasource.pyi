@@ -23,7 +23,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-import sqlalchemy
+import sqlalchemy  # noqa: TID251
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent.interfaces import (

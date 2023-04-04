@@ -9,10 +9,10 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
-    import sqlalchemy as sa
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.engine.reflection import Inspector
-    from sqlalchemy.exc import OperationalError
+    import sqlalchemy as sa  # noqa: TID251
+    from sqlalchemy.engine import Engine  # noqa: TID251
+    from sqlalchemy.engine.reflection import Inspector  # noqa: TID251
+    from sqlalchemy.exc import OperationalError  # noqa: TID251
 except ImportError:
     sa = None
     Engine = None
