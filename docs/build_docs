@@ -26,6 +26,16 @@ echo -e "${ORANGE}Copying previous versioned docs${NC}"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 
+echo -e "${ORANGE}DEBUG${NC}"
+echo -e "${ORANGE}pwd${NC}"
+pwd
+echo -e "${ORANGE}DEBUG${NC}"
+
+echo -e "${ORANGE}DEBUG${NC}"
+echo -e "${ORANGE}ls${NC}"
+ls
+echo -e "${ORANGE}DEBUG${NC}"
+
 echo -e "${ORANGE}Copying code referenced from previous versions${NC}"
 # TODO: Load versions from versions.json and loop through instead of manual process here:
 # TODO: What else needs to be copied? Static assets like images and css?
@@ -41,6 +51,22 @@ git pull
 mkdir -p versioned_code/version-0.15.50
 cp -r ../../tests versioned_code/version-0.15.50
 # ADD MORE VERSIONS HERE
+
+echo -e "${ORANGE}DEBUG${NC}"
+echo -e "${ORANGE}pwd${NC}"
+pwd
+echo -e "${ORANGE}DEBUG${NC}"
+
+echo -e "${ORANGE}DEBUG${NC}"
+echo -e "${ORANGE}ls${NC}"
+ls
+ls versioned_code
+ls versioned_docs
+echo -e "${ORANGE}DEBUG${NC}"
+
+echo -e "${ORANGE}Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs.${NC}"
+git checkout "$CURRENT_COMMIT"
+git pull
 
 # Update versioned code and docs
 echo -e "${ORANGE}Updating links in versioned docs${NC}"
@@ -59,10 +85,6 @@ python prepare_prior_versions.py
 
 
 # Build current docs
-echo -e "${ORANGE}Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs.${NC}"
-git checkout "$CURRENT_COMMIT"
-git pull
-
 echo -e "${ORANGE}Installing Great Expectations library dev dependencies.${NC}"
 (cd ../../; pip install -c constraints-dev.txt -e ".[test]")
 
