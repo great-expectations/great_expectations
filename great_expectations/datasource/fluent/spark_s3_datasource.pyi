@@ -37,6 +37,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     def add_csv_asset(
         self,
         name: str,
+        *,
         batching_regex: re.Pattern | str = r".*",
         s3_prefix: str = "",
         s3_delimiter: str = "/",

@@ -39,6 +39,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     def add_csv_asset(
         self,
         name: str,
+        *,
         batching_regex: re.Pattern | str = r".*",
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
