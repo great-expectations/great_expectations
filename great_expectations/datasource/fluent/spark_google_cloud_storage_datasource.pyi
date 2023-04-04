@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 logger: Logger
 
-class SparkS3Datasource(_SparkFilePathDatasource):
+class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[
         Type[GoogleCloudStorageDataConnector]
