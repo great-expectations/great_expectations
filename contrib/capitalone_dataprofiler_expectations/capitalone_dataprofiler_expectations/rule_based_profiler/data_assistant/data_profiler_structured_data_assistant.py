@@ -195,3 +195,6 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         )
 
         return rule
+
+    @staticmethod
+    def _build_float_rule() -> Rule:
