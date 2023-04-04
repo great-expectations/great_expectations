@@ -101,9 +101,9 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     def _build_data_connector(
         self,
         data_asset: _FilePathDataAsset,
-        prefix: str = "",
-        delimiter: str = "/",  # TODO: delimiter conflicts with csv asset args
-        max_keys: int = 1000,
+        s3_prefix: str = "",
+        s3_delimiter: str = "/",
+        s3_max_keys: int = 1000,
         **kwargs,
     ) -> None:
         """Builds and attaches the `S3DataConnector` to the asset."""
@@ -118,9 +118,9 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             s3_client=self._get_s3_client(),
             batching_regex=data_asset.batching_regex,
             bucket=self.bucket,
-            prefix=prefix,
-            delimiter=delimiter,
-            max_keys=max_keys,
+            prefix=s3_prefix,
+            delimiter=s3_delimiter,
+            max_keys=s3_max_keys,
             file_path_template_map_fn=S3Url.OBJECT_URL_TEMPLATE.format,
         )
 
@@ -130,7 +130,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
                 data_asset_name=data_asset.name,
                 batching_regex=data_asset.batching_regex,
                 bucket=self.bucket,
-                prefix=prefix,
-                delimiter=delimiter,
+                prefix=s3_prefix,
+                delimiter=s3_delimiter,
             )
         )
