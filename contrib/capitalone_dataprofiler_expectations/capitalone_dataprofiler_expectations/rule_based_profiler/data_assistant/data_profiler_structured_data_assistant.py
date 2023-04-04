@@ -217,3 +217,22 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             exclude_semantic_types=None,
             data_context=None,
         )
+
+        data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
+            metric_name="data_profiler.column_profile_report",
+            suffix=None,
+            metric_domain_kwargs=DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME,
+            metric_value_kwargs={
+                "profile_path": f"{VARIABLES_KEY}profile_path",
+            },
+        )
+
+        data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations: ParameterBuilder = data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics
+
+        validation_parameter_builder_configs: Optional[List[ParameterBuilderConfig]]
+
+        validation_parameter_builder_configs = [
+            ParameterBuilderConfig(
+                **data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations.to_json_dict(),
+            ),
+        ]
