@@ -22,7 +22,7 @@ def change_paths_for_docs_file_references():
     """
     path = _docs_dir() / "docusaurus/versioned_docs/version-0.14.13/"
     files = glob.glob(f"{path}/**/*.md", recursive=True)
-    pattern = re.compile(r"((.*)(file=)((../)*))(.*)")
+    pattern = re.compile(r"((.*)(file *= *)((../)*))(.*)")
     path_to_insert = "versioned_code/version-0.14.13/"
 
     # TODO: Make this idempotent for development
@@ -55,7 +55,7 @@ def _paths_to_versioned_code() -> list[pathlib.Path]:
 def prepend_version_info_to_name_for_snippet_by_name_references():
     """Prepend version info e.g. name="snippet_name" -> name="version-0.15.50 snippet_name" """
 
-    pattern = re.compile(r"((.*)(name=\"))(.*)")
+    pattern = re.compile(r"((.*)(name *= *\"))(.*)")
     paths = _paths_to_versioned_docs() + _paths_to_versioned_code()
 
     # TODO: Make this idempotent for development
