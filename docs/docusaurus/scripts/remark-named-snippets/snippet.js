@@ -74,8 +74,6 @@ function parseFile (file) {
         return
       }
 
-      // TODO: If the snippet starts in one of the versioned directories then
-      //  prepend the snippet name with the directory e.g. if in versioned_code then snippet name is name="version-0.15.50<original_snippet_name>"
       const snippetName = attrs.name
       stack.push({ name: snippetName, file: file, contents: '' })
     },
@@ -163,11 +161,19 @@ function sanitizeText (text) {
  * Note that this is what is run if this file is invoked by Node.
  * An alias `yarn snippet-check` is defined in `package.json` for convenience.
  */
-function main () {
-  function getDirs () {
-    // TODO: Programatically get all versioned code folders
-    return ['../../great_expectations', '../../tests', 'versioned_code/version-0.15.50']
+function getDirs () {
+  // Get all directories that should be processed
+  const manualDirs = ['../../great_expectations', '../../tests']
+  const versionDirs = glob.sync('versioned_code/*/')
+  // remove v0.14.13 from processing since it does not use named snippets
+  const index = versionDirs.indexOf('versioned_code/version-0.14.13/')
+  if (index !== -1) {
+    versionDirs.splice(index, 1)
   }
+  return manualDirs.concat(versionDirs)
+}
+
+function main () {
 
   const snippets = parseSourceDirectories(getDirs())
   const targetFiles = process.argv.slice(2)
