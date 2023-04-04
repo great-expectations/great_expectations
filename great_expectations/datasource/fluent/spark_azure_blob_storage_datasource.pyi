@@ -7,6 +7,9 @@ from typing import TYPE_CHECKING, Any, ClassVar, Optional, Type
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
+from great_expectations.datasource.fluent.config_str import (
+    ConfigStr,  # noqa: TCH001 # needed at runtime
+)
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
@@ -36,7 +39,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     type: Literal["spark_abs"] = "spark_abs"
 
     # Azure Blob Storage specific attributes
-    azure_options: dict[str, Any] = {}
+    azure_options: dict[str, ConfigStr | Any] = {}
     # private
     _azure_client: BlobServiceClient | None
     def add_csv_asset(
