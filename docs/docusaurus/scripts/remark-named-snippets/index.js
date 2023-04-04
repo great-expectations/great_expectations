@@ -22,10 +22,9 @@ const visit = require('unist-util-visit')
 const constructSnippetMap = require('./snippet')
 
 function getDirs () {
-  return ['../../great_expectations', '../../tests']
+  // TODO: Programatically get all versioned code folders
+  return ['../../great_expectations', '../../tests', 'versioned_code/version-0.15.50']
 }
-
-// TODO: check file location of markdown file and if it is in versioned_docs then use snippet in versioned_code
 
 function codeImport () {
   // Instantiated within the import so it can be hot-reloaded

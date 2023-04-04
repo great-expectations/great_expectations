@@ -86,13 +86,16 @@ echo -e "${ORANGE}Updating links in versioned docs${NC}"
 # TODO: This should also be checked for links to static assets as well.
 
 echo -e "${ORANGE}Updating filepath in versioned docs${NC}"
-# TODO: Update filepath in versioned docs if they are using the old linenumber style of file=<filepath>L<lineno>
-# TODO: By adding the correct versioned_code filepath e.g. versioned_code/version-0.14.13/
-# TODO: Use the file path of the doc in versioned_docs/version-<version_number>/ to determine what version number it is
+# This is done in prepare_prior_versions.py
+# Update filepath in versioned docs if they are using the old linenumber style of file=<filepath>L<lineno>
+# by adding the correct versioned_code filepath e.g. versioned_code/version-0.14.13/<filepath>
 
-echo -e "${ORANGE}Updating snippet names in versioned docs${NC}"
-# TODO: Update snippet names in versioned docs if they are using the style of name="<snippet_name>"
-# TODO: By prepending the version e.g. name="version-0.15.50<original_snippet_name>"
+echo -e "${ORANGE}Updating snippet names in versioned docs and code${NC}"
+# This is done in prepare_prior_versions.py
+# Update snippet names in versioned docs if they are using the style of name="<snippet_name>"
+# by prepending the version e.g. name="version-0.15.50 <original_snippet_name>"
+# This is done in the docs and code so that the snippet processing tool can match up the correct snippet
+# based on the version of the code file that existed when the document was released.
 cd ../
 python prepare_prior_versions.py
 cd docusaurus

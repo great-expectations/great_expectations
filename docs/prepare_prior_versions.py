@@ -63,7 +63,7 @@ def prepend_version_info_to_name_for_snippet_by_name_references():
     for path in paths:
         version = path.name
         files = []
-        for extension in (".md", ".mdx", ".py"):
+        for extension in (".md", ".mdx", ".py", ".yml", ".yaml"):
             files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
         for file_path in files:
             with open(file_path, "r+") as f:
