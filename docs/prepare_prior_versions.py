@@ -15,7 +15,10 @@ def _repo_root() -> pathlib.Path:
     print(__file__)
     print("print(pathlib.Path(__file__).parents)")
     print(pathlib.Path(__file__).parents)
-    repo_root_path = pathlib.Path(__file__).parents[1]
+    print("print(list(pathlib.Path(__file__).parents))")
+    print(list(pathlib.Path(__file__).parents))
+    repo_root_path = list(pathlib.Path(__file__).parents)[1]
+    print(repo_root_path)
     return repo_root_path
 
 
@@ -76,5 +79,6 @@ def prepend_version_info_to_name_for_snippet_by_name_references_markdown():
 
 
 if __name__ == "__main__":
-    change_paths_for_docs_file_references()
-    prepend_version_info_to_name_for_snippet_by_name_references_markdown()
+    # change_paths_for_docs_file_references()
+    # prepend_version_info_to_name_for_snippet_by_name_references_markdown()
+    _repo_root()
