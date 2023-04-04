@@ -26,37 +26,17 @@ echo -e "${ORANGE}Copying previous versioned docs${NC}"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230404.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 
-echo -e "${ORANGE}DEBUG${NC}"
-echo -e "${ORANGE}pwd${NC}"
-pwd
-echo -e "${ORANGE}DEBUG${NC}"
+for version in $(jq -r '.[]' docusaurus/versions.json); do
+  echo -e "${ORANGE}Copying code referenced in docs from $version and writing to versioned_code/version-$version${NC}"
 
-echo -e "${ORANGE}DEBUG${NC}"
-echo -e "${ORANGE}ls${NC}"
-ls
-echo -e "${ORANGE}ls versioned_docs${NC}"
-ls versioned_docs
-echo -e "${ORANGE}DEBUG${NC}"
+  git checkout "$version"
+  git pull
+  mkdir -p versioned_code/version-"$version"
+  cp -r ../../tests versioned_code/version-"$version"
+  cp -r ../../examples versioned_code/version-"$version"
+  cp -r ../../great_expectations versioned_code/version-"$version"
 
-echo -e "${ORANGE}Copying code referenced from previous versions${NC}"
-# TODO: Load versions from versions.json and loop through instead of manual process here:
-# TODO: What else needs to be copied? Static assets like images and css?
-# Copy code referenced in docs from version 0.14.13
-git checkout 0.14.13
-git pull
-mkdir -p versioned_code/version-0.14.13
-cp -r ../../tests versioned_code/version-0.14.13
-cp -r ../../examples versioned_code/version-0.14.13
-cp -r ../../great_expectations versioned_code/version-0.14.13
-
-# Copy code referenced in docs from version 0.15.50
-git checkout 0.15.50
-git pull
-mkdir -p versioned_code/version-0.15.50
-cp -r ../../tests versioned_code/version-0.15.50
-cp -r ../../examples versioned_code/version-0.15.50
-cp -r ../../great_expectations versioned_code/version-0.15.50
-# ADD MORE VERSIONS HERE
+done
 
 echo -e "${ORANGE}DEBUG${NC}"
 echo -e "${ORANGE}pwd${NC}"
@@ -77,9 +57,6 @@ git checkout "$CURRENT_COMMIT"
 git pull
 
 # Update versioned code and docs
-echo -e "${ORANGE}Updating links in versioned docs${NC}"
-# TODO: Update links in versioned docs, use @site (first double check this works)
-# TODO: This should also be checked for links to static assets as well.
 
 echo -e "${ORANGE}Updating filepath in versioned docs${NC}"
 # This is done in prepare_prior_versions.py
