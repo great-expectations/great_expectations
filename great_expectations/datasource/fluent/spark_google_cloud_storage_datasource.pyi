@@ -18,6 +18,8 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
+    from google.cloud.storage.client import Client as GoogleCloudStorageClient
+
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
@@ -36,6 +38,8 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     # GCS specific attributes
     bucket_or_name: str
     gcs_options: dict[str, ConfigStr | Any] = {}
+
+    _gcs_client: GoogleCloudStorageClient | None
     def add_csv_asset(
         self,
         name: str,
