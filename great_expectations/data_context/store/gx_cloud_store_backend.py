@@ -503,17 +503,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
-        # Due to list_keys being inconsistently sized (due to the possible of resource names),
-        # we remove any resource names and assert against key ids.
-
-        def _shorten_key(key) -> Tuple[str, str]:
-            if len(key) > 2:
-                key = key[:2]
-            return key
-
-        key = _shorten_key(key)
-        all_keys = set(map(_shorten_key, self.list_keys()))
-        return key in all_keys
+        try:
+            self._get(key)
+        except StoreBackendError as e:
+            logger.debug(f"Could not find object associated with key {key}: {e}")
+            return False
+        return True
 
     @property
     def config(self) -> dict:
