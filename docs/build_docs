@@ -60,13 +60,25 @@ echo -e "${ORANGE}DEBUG${NC}"
 echo -e "${ORANGE}DEBUG${NC}"
 echo -e "${ORANGE}ls${NC}"
 ls
+echo -e "${ORANGE}ls versioned_code${NC}"
 ls versioned_code
+echo -e "${ORANGE}ls versioned_docs${NC}"
 ls versioned_docs
 echo -e "${ORANGE}DEBUG${NC}"
 
 echo -e "${ORANGE}Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs.${NC}"
 git checkout "$CURRENT_COMMIT"
 git pull
+
+echo -e "${ORANGE}DEBUG${NC}"
+echo -e "${ORANGE}pwd${NC}"
+pwd
+echo -e "${ORANGE}DEBUG${NC}"
+
+echo -e "${ORANGE}DEBUG${NC}"
+echo -e "${ORANGE}ls${NC}"
+ls
+echo -e "${ORANGE}DEBUG${NC}"
 
 # Update versioned code and docs
 echo -e "${ORANGE}Updating links in versioned docs${NC}"
@@ -81,7 +93,7 @@ echo -e "${ORANGE}Updating filepath in versioned docs${NC}"
 echo -e "${ORANGE}Updating snippet names in versioned docs${NC}"
 # TODO: Update snippet names in versioned docs if they are using the style of name="<snippet_name>"
 # TODO: By prepending the version e.g. name="version-0.15.50<original_snippet_name>"
-python prepare_prior_versions.py
+(cd ../; python prepare_prior_versions.py)
 
 
 # Build current docs
