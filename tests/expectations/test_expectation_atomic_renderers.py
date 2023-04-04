@@ -2,11 +2,13 @@ import re
 from pprint import pprint
 from typing import Callable, Dict, Union
 
+import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.registry import get_renderer_impl
+from great_expectations.optional_imports import is_version_greater_or_equal
 from great_expectations.render import RenderedAtomicContent
 
 
@@ -160,6 +162,10 @@ def test_atomic_prescriptive_summary_expect_column_distinct_values_to_equal_set(
     snapshot.assert_match(res)
 
 
+@pytest.mark.skipif(
+    is_version_greater_or_equal(pd.__version__, "2.0.0"),
+    reason="Altair is currently not compatible with pandas 2.0.0",
+)
 def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than(
     snapshot,
     get_prescriptive_rendered_content,
@@ -188,6 +194,10 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
     snapshot.assert_match(res)
 
 
+@pytest.mark.skipif(
+    is_version_greater_or_equal(pd.__version__, "2.0.0"),
+    reason="Altair is currently not compatible with pandas 2.0.0",
+)
 def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less_than(
     snapshot, get_diagnostic_rendered_content
 ):
@@ -234,7 +244,11 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
     snapshot.assert_match(res)
 
 
-def test_atomic_diagnostic_observed_value_with_boolean_columun_expect_column_kl_divergence_to_be_less_than(
+@pytest.mark.skipif(
+    is_version_greater_or_equal(pd.__version__, "2.0.0"),
+    reason="Altair is currently not compatible with pandas 2.0.0",
+)
+def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than(
     snapshot, get_diagnostic_rendered_content
 ):
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
