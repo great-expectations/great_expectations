@@ -1106,7 +1106,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                 "TIMESTAMP_LTZ",
                 "TIMESTAMP_TZ",
             ]:
-                df[col] = pd.to_datetime(df[col])
+                df[col] = execute_pandas_to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
 
