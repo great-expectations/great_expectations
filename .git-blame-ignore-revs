@@ -9,3 +9,9 @@ f5e7df1846102d9a62cc9b9110387925ffae60cc
 # Apply noqa markes for all PTH (use-pathlib) violations
 # https://github.com/great-expectations/great_expectations/pull/7290
 597b2b625569b6f5f110f8230ac26ab405167da6
+# [MAINTENANCE] Move some scripts into ci folder #7271
+# https://github.com/great-expectations/great_expectations/pull/7271
+035d479a56484a0b8f4475f57dc6814b4757daee
+# [MAINTENANCE] Repo Cleanup: Move docs related files under docs dir #7227
+https://github.com/great-expectations/great_expectations/pull/7227
+0c9e4502e7dfd4984a21ca4c8da0d0fcfff37aed
