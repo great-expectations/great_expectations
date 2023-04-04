@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 import pydantic
 from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
@@ -43,6 +44,7 @@ class SparkS3DatasourceError(SparkDatasourceError):
     pass
 
 
+@public_api
 class SparkS3Datasource(_SparkFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector

@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 import pydantic
 from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import (
     _SparkFilePathDatasource,
@@ -49,6 +50,7 @@ class SparkGoogleCloudStorageDatasourceError(SparkDatasourceError):
     pass
 
 
+@public_api
 class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[

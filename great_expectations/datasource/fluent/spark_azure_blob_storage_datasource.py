@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 import pydantic
 from typing_extensions import Final, Literal
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
@@ -46,6 +47,7 @@ class SparkAzureBlobStorageDatasourceError(SparkDatasourceError):
     pass
 
 
+@public_api
 class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[

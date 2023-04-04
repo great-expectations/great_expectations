@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Type
 
 from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class SparkFilesystemDatasource(_SparkFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[
