@@ -463,11 +463,6 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             )
             v = f"{row_condition_str}, then {v}"
 
-        if "_raw_kwargs" in values and values["_raw_kwargs"]:
-            v += "  "
-            for evaluation_parameter_count in range(len(values["_raw_kwargs"])):
-                v += f" $eval_param__{evaluation_parameter_count},"
-            v = v[:-1]
         return v
 
     @staticmethod

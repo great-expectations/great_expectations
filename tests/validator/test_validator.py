@@ -1041,7 +1041,7 @@ def test_validator_include_rendered_content_diagnostic(
                     "value": "max_value: upstream_column_max",
                 },
             },
-            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.   $eval_param__0, $eval_param__1",
+            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
         ),
         value_type="StringValueType",
     )
