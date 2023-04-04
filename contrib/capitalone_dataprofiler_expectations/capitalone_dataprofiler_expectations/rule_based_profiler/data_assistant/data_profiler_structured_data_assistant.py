@@ -240,4 +240,8 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             expectation_type="expect_column_min_to_be_between",
             validation_parameter_builder_configs=validation_parameter_builder_configs,
             column=f"{DOMAIN_KWARGS_PARAMETER_FULLY_QUALIFIED_NAME}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}column",
+            min_value=f"{data_profiler_profile_report_metric_single_batch_parameter_builder_for_validations.json_serialized_fully_qualified_parameter_name}{FULLY_QUALIFIED_PARAMETER_NAME_SEPARATOR_CHARACTER}{FULLY_QUALIFIED_PARAMETER_NAME_VALUE_KEY}.statistics.precision.min",
+            max_value=None,
+            strict_min=f"{VARIABLES_KEY}strict_min",
+            strict_max=None,
             
