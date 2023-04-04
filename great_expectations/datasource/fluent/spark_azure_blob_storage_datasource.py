@@ -79,19 +79,19 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             if ABS_IMPORTED:
                 try:
                     if conn_str is not None:
-                        self._account_name = re.search(
+                        self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
                             r".*?AccountName=(.+?);.*?", str(conn_str)
-                        ).group(  # type: ignore[union-attr] # re.search could return None
+                        ).group(
                             1
                         )
                         azure_client = BlobServiceClient.from_connection_string(
                             **self.azure_options
                         )
                     elif account_url is not None:
-                        self._account_name = re.search(
+                        self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
                             r"(?:https?://)?(.+?).blob.core.windows.net",
                             str(account_url),
-                        ).group(  # type: ignore[union-attr] # re.search could return None
+                        ).group(
                             1
                         )
                         azure_client = BlobServiceClient(**self.azure_options)
