@@ -53,7 +53,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             for asset in self.assets.values():
                 asset.test_connection()
 
-    # TODO: this can probably be defined on the parent class
     def _build_data_connector(
         self, data_asset: _FilePathDataAsset, glob_directive: str = "**/*", **kwargs
     ) -> None:
