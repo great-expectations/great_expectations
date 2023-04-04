@@ -42,26 +42,12 @@ for version in $(jq -r '.[]' $VERSIONS_JSON_PATH); do
 
 done
 
-# Move versions.json back from outside of the repo
-mv $VERSIONS_JSON_PATH versions.json
-
-echo -e "${ORANGE}DEBUG${NC}"
-echo -e "${ORANGE}pwd${NC}"
-pwd
-echo -e "${ORANGE}DEBUG${NC}"
-
-echo -e "${ORANGE}DEBUG${NC}"
-echo -e "${ORANGE}ls${NC}"
-ls
-echo -e "${ORANGE}ls versioned_code${NC}"
-ls versioned_code
-echo -e "${ORANGE}ls versioned_docs${NC}"
-ls versioned_docs
-echo -e "${ORANGE}DEBUG${NC}"
-
 echo -e "${ORANGE}Checking back out current commit ${CURRENT_COMMIT} to build the rest of the docs.${NC}"
 git checkout "$CURRENT_COMMIT"
 git pull
+
+# Move versions.json back from outside of the repo
+mv $VERSIONS_JSON_PATH versions.json
 
 # Update versioned code and docs
 
