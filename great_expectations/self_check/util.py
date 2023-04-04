@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
-from great_expectations.compatibility.sqlalchemy_and_pandas import (
+from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
 )
 from great_expectations.core import (
