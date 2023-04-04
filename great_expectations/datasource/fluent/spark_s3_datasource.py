@@ -11,7 +11,6 @@ from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed at runtime
 )
-from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
