@@ -68,8 +68,8 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
             # use in authentication (but not both). If the format or content of the provided keys is invalid,
             # the assignment of `self._account_name` and `self._azure_client` will fail and an error will be raised.
-            conn_str: str | None = self.azure_options.get("conn_str")
-            account_url: str | None = self.azure_options.get("account_url")
+            conn_str: ConfigStr | str | None = self.azure_options.get("conn_str")
+            account_url: ConfigStr | str | None = self.azure_options.get("account_url")
             if not bool(conn_str) ^ bool(account_url):
                 raise SparkAzureBlobStorageDatasourceError(
                     "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
@@ -79,16 +79,21 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             if ABS_IMPORTED:
                 try:
                     if conn_str is not None:
-                        self._account_name = re.search(  # type: ignore[union-attr]
-                            r".*?AccountName=(.+?);.*?", conn_str
-                        ).group(1)
+                        self._account_name = re.search(
+                            r".*?AccountName=(.+?);.*?", str(conn_str)
+                        ).group(  # type: ignore[union-attr] # re.search could return None
+                            1
+                        )
                         azure_client = BlobServiceClient.from_connection_string(
                             **self.azure_options
                         )
                     elif account_url is not None:
-                        self._account_name = re.search(  # type: ignore[union-attr]
-                            r"(?:https?://)?(.+?).blob.core.windows.net", account_url
-                        ).group(1)
+                        self._account_name = re.search(
+                            r"(?:https?://)?(.+?).blob.core.windows.net",
+                            str(account_url),
+                        ).group(  # type: ignore[union-attr] # re.search could return None
+                            1
+                        )
                         azure_client = BlobServiceClient(**self.azure_options)
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
