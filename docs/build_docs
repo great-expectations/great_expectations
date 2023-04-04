@@ -26,7 +26,11 @@ echo -e "${ORANGE}Copying previous versioned docs${NC}"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230404.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
 
-for version in $(jq -r '.[]' versions.json); do
+# Move versions.json outside of the repo so there are no conflicts when checking out earlier versions
+VERSIONS_JSON_PATH=../../../versions.json
+mv versions.json $VERSIONS_JSON_PATH
+
+for version in $(jq -r '.[]' $VERSIONS_JSON_PATH); do
   echo -e "${ORANGE}Copying code referenced in docs from $version and writing to versioned_code/version-$version${NC}"
 
   git checkout "$version"
@@ -37,6 +41,9 @@ for version in $(jq -r '.[]' versions.json); do
   cp -r ../../great_expectations versioned_code/version-"$version"
 
 done
+
+# Move versions.json back from outside of the repo
+mv $VERSIONS_JSON_PATH versions.json
 
 echo -e "${ORANGE}DEBUG${NC}"
 echo -e "${ORANGE}pwd${NC}"
