@@ -139,7 +139,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         delimiter: str = "/",
         max_results: int = 1000,
         order_by: Optional[SortersDefinition] = None,
-        batch_metadata: BatchMetadata | None = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkGoogleCloudStorageDatasource" object.
 
@@ -152,6 +152,8 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             delimiter (str): Google Cloud Storage object name delimiter
             max_results (int): Google Cloud Storage max_results (default is 1000)
             order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex

@@ -131,7 +131,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         name_starts_with: str = "",
         delimiter: str = "/",
         order_by: Optional[SortersDefinition] = None,
-        batch_metadata: BatchMetadata | None = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkAzureBlobStorageDatasource" object.
 
@@ -144,6 +144,8 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             name_starts_with: Microsoft Azure Blob Storage object name prefix
             delimiter: Microsoft Azure Blob Storage object name delimiter
             order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
         """
         batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
             batching_regex=batching_regex

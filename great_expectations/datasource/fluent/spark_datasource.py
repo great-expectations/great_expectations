@@ -8,6 +8,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Optional,
     Type,
     TypeVar,
 )
@@ -171,8 +172,19 @@ class SparkDatasource(_SparkDatasource):
         self,
         name: str,
         dataframe: DataFrame,
-        batch_metadata: BatchMetadata | None = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
+        """Adds a Dataframe DataAsset to this SparkDatasource object.
+
+        Args:
+            name: The name of the Dataframe asset. This can be any arbitrary string.
+            dataframe: The Dataframe containing the data for this data asset.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            The DataFameAsset that has been added to this datasource.
+        """
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,

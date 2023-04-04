@@ -61,7 +61,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[SortersDefinition] = None,
-        batch_metadata: BatchMetadata | None = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkFilesystemDatasource" object.
 
