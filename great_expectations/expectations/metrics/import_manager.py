@@ -8,15 +8,15 @@ sa_import_warning_required = False
 spark_import_warning_required = False
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 except ImportError:
     logger.debug("No SqlAlchemy module available.")
     sa = None
 
 try:
-    from sqlalchemy.engine import Engine as sqlalchemy_engine_Engine
-    from sqlalchemy.engine import Row as sqlalchemy_engine_Row
-    from sqlalchemy.engine import reflection
+    from sqlalchemy.engine import Engine as sqlalchemy_engine_Engine  # noqa: TID251
+    from sqlalchemy.engine import Row as sqlalchemy_engine_Row  # noqa: TID251
+    from sqlalchemy.engine import reflection  # noqa: TID251
 except ImportError:
     logger.debug("No SqlAlchemy.engine module available.")
     reflection = None
@@ -24,15 +24,15 @@ except ImportError:
     sqlalchemy_engine_Row = None
 
 try:
-    import sqlalchemy.func.count as sa_func_count
+    import sqlalchemy.func.count as sa_func_count  # noqa: TID251
 except ImportError:
     logger.debug("No SqlAlchemy.func module available.")
     sa_func_count = None
 
 try:
-    import sqlalchemy.sql.expression.ColumnClause as sa_sql_expression_ColumnClause
-    import sqlalchemy.sql.expression.Select as sa_sql_expression_Select
-    import sqlalchemy.sql.expression.Selectable as sa_sql_expression_Selectable
+    import sqlalchemy.sql.expression.ColumnClause as sa_sql_expression_ColumnClause  # noqa: TID251
+    import sqlalchemy.sql.expression.Select as sa_sql_expression_Select  # noqa: TID251
+    import sqlalchemy.sql.expression.Selectable as sa_sql_expression_Selectable  # noqa: TID251
 except ImportError:
     logger.debug("No SqlAlchemy.sql.expression module available.")
     sa_sql_expression_ColumnClause = None
@@ -40,7 +40,7 @@ except ImportError:
     sa_sql_expression_Selectable = None
 
 try:
-    from sqlalchemy.sql.elements import quoted_name
+    from sqlalchemy.sql.elements import quoted_name  # noqa: TID251
 except ImportError:
     logger.debug("No SqlAlchemy.sql.elements module available.")
     quoted_name = None
