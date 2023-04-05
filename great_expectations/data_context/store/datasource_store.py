@@ -14,6 +14,7 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
+from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -62,10 +63,14 @@ class DatasourceStore(Store):
         """
         return self._store_backend.remove_key(key.to_tuple())
 
-    def serialize(self, value: DatasourceConfig) -> Union[str, dict, DatasourceConfig]:
+    def serialize(
+        self, value: DatasourceConfig | FluentBaseModel
+    ) -> Union[str, dict, DatasourceConfig]:
         """
         See parent 'Store.serialize()' for more information
         """
+        if isinstance(value, FluentBaseModel):  # TODO: this is gross, do something else
+            return value._json_dict()
         return self._serializer.serialize(value)
 
     def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
