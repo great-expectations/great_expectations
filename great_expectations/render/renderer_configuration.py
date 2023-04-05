@@ -30,7 +30,7 @@ from pydantic import (
     validator,
 )
 from pydantic.generics import GenericModel
-from typing_extensions import NotRequired, TypeAlias, TypedDict
+from typing_extensions import TypeAlias, TypedDict
 
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
@@ -173,12 +173,16 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         values["params"] = _RendererValueBase()
         super().__init__(**values)
 
-    class _RendererParamArgs(TypedDict):
+    class _RequiredRendererParamArgs(TypedDict):
         """Used for building up a dictionary that is unpacked into RendererParams upon initialization."""
 
         schema: RendererSchema
         value: Any
-        evaluation_parameter: NotRequired[Dict[str, Any]]
+
+    class _RendererParamArgs(_RequiredRendererParamArgs, total=False):
+        """Used for building up a dictionary that is unpacked into RendererParams upon initialization."""
+
+        evaluation_parameter: Dict[str, Any]
 
     class _RendererParamBase(_RendererValueBase):
         """
