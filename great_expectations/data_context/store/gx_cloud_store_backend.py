@@ -506,7 +506,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         try:
             self._get(key)
         except StoreBackendError as e:
-            logger.debug(f"Could not find object associated with key {key}: {e}")
+            logger.info(f"Could not find object associated with key {key}: {e}")
             return False
         return True
 
