@@ -8,8 +8,8 @@ By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
-- [Configured an Expectation Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [Configured an Expectation Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - Determined a new storage location where you would like to store Expectations. This can either be a local path, or a path to a network filesystem.
     
 </Prerequisites>

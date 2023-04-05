@@ -89,7 +89,7 @@ from great_expectations.validator.metric_configuration import (
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 
     sqlalchemy_version_check(sa.__version__)
 
@@ -98,16 +98,16 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import Dialect, Engine, Row
-    from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import (
+    from sqlalchemy.engine import Dialect, Engine, Row  # noqa: TID251
+    from sqlalchemy.exc import OperationalError  # noqa: TID251
+    from sqlalchemy.sql import Selectable  # noqa: TID251
+    from sqlalchemy.sql.elements import (  # noqa: TID251
         BooleanClauseList,
         Label,
         TextClause,
         quoted_name,
     )
-    from sqlalchemy.sql.selectable import Select, TextualSelect
+    from sqlalchemy.sql.selectable import Select, TextualSelect  # noqa: TID251
 except ImportError:
     Engine = None
     BooleanClauseList = None
@@ -126,7 +126,7 @@ except ImportError:
 
 try:
     import psycopg2  # noqa: F401
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: F401, TID251
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
@@ -214,7 +214,7 @@ except ImportError:
     trinotypes = None
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine as SaEngine
+    from sqlalchemy.engine import Engine as SaEngine  # noqa: TID251
 
 
 def _get_dialect_type_module(dialect):

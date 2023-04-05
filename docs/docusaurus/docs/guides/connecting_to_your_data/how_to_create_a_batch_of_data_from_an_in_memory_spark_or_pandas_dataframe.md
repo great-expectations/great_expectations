@@ -25,8 +25,8 @@ What used to be called a “Batch” in the old API was replaced with <Technical
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../tutorials/getting_started/tutorial_overview.md)
-- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- [Initialized a Data Context](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python)
 - Configured a [Spark Datasource](../../guides/connecting_to_your_data/filesystem/spark.md)
 - Identified an in-memory Spark DataFrame that you would like to use as the data to validate **OR**
 - Identified a filesystem or S3 path to a file that contains the data you would like to use to validate.
@@ -122,8 +122,8 @@ What used to be called a “Batch” in the old API was replaced with <Technical
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../tutorials/getting_started/tutorial_overview.md)
-- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- [Created a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
 - Configured a [Pandas/filesystem Datasource](../../guides/connecting_to_your_data/filesystem/pandas.md)
 - Identified a Pandas DataFrame that you would like to use as the data to validate.
   

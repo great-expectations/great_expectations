@@ -295,8 +295,7 @@ convention = "google"
 
 [tool.ruff.flake8-tidy-imports]
 [tool.ruff.flake8-tidy-imports.banned-api]
-# Uncomment this to prevent importing sqlalchemy everywhere but optional_imports.py
-# "sqlalchemy".msg = "Don't import sqlalchemy directly, please use the great_expectations.import_manager."
+"sqlalchemy".msg = "Don't import sqlalchemy directly, please use the great_expectations.optional_imports."
 
 [tool.pytest.ini_options]
 filterwarnings = [

@@ -24,7 +24,7 @@ from great_expectations.util import get_sqlalchemy_inspector
 
 try:
     import psycopg2  # noqa: F401
-    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2
+    import sqlalchemy.dialects.postgresql.psycopg2 as sqlalchemy_psycopg2  # noqa: TID251
 except (ImportError, KeyError):
     sqlalchemy_psycopg2 = None
 
@@ -34,13 +34,13 @@ except ImportError:
     snowflake = None
 
 try:
-    import sqlalchemy as sa
-    from sqlalchemy.dialects import registry
-    from sqlalchemy.engine import Connection, Engine, reflection
-    from sqlalchemy.engine.interfaces import Dialect
-    from sqlalchemy.exc import OperationalError
-    from sqlalchemy.sql import Insert, Select, TableClause
-    from sqlalchemy.sql.elements import (
+    import sqlalchemy as sa  # noqa: TID251
+    from sqlalchemy.dialects import registry  # noqa: TID251
+    from sqlalchemy.engine import Connection, Engine, reflection  # noqa: TID251
+    from sqlalchemy.engine.interfaces import Dialect  # noqa: TID251
+    from sqlalchemy.exc import OperationalError  # noqa: TID251
+    from sqlalchemy.sql import Insert, Select, TableClause  # noqa: TID251
+    from sqlalchemy.sql.elements import (  # noqa: TID251
         BinaryExpression,
         ColumnElement,
         Label,
@@ -48,7 +48,7 @@ try:
         literal,
         quoted_name,
     )
-    from sqlalchemy.sql.operators import custom_op
+    from sqlalchemy.sql.operators import custom_op  # noqa: TID251
 except ImportError:
     sa = None
     registry = None
@@ -133,7 +133,7 @@ except ImportError:
     teradatatypes = None
 
 if TYPE_CHECKING:
-    import sqlalchemy
+    import sqlalchemy  # noqa: TID251
 
 
 def get_dialect_regex_expression(  # noqa: C901 - 36

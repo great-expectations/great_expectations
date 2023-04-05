@@ -85,11 +85,13 @@ def pandas_filesystem_datasource(
 def pandas_data(
     context: AbstractDataContext,
 ) -> tuple[AbstractDataContext, PandasFilesystemDatasource, DataAsset, BatchRequest]:
+    context.config_variables.update({"pipeline_filename": __file__})
     pandas_ds = pandas_filesystem_datasource(context=context)
     asset = pandas_ds.add_csv_asset(
         name="csv_asset",
         batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         order_by=["year", "month"],
+        batch_metadata={"my_pipeline": "${pipeline_filename}"},
     )
     batch_request = asset.build_batch_request({"year": "2019", "month": "01"})
     return context, pandas_ds, asset, batch_request

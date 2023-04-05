@@ -11,14 +11,12 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 <UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
 :::note Prerequisites
-- Completing [Step 3: Create Expectations](../../tutorials/getting_started/tutorial_create_expectations.md) of the Getting Started tutorial is recommended.
+- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
 :::
-
-Creating <TechnicalTag tag="expectation" text="Expectations" /> is an integral part of Great Expectations.  By the end of this step, you will have created an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> containing one or more Expectations which you will use when you <TechnicalTag tag="validation" text="Validate" /> data.
 
 ## The Create Expectations process
 
-There are a few workflows you can potentially follow when creating Expectations.  These workflows represent various ways of creating Expectations, although they converge in the end when you will save and test those Expectations.
+Although creating <TechnicalTag tag="expectation" text="Expectations" /> is an integral part of Great Expectations, there are a few workflows you can potentially follow to do so.  These workflows represent various ways of creating Expectations, although they converge in the end when you will save and test those Expectations.
 
 ![Where do Expectations come from?](../../images/universal_map/overviews/where_expectations_come_from.png)
 
