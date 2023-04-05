@@ -6,11 +6,11 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import generate_temporary_table_name
 
 try:
-    import sqlalchemy as sa
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.exc import DatabaseError
-    from sqlalchemy.sql.elements import quoted_name
+    import sqlalchemy as sa  # noqa: TID251
+    from sqlalchemy.engine import Engine  # noqa: TID251
+    from sqlalchemy.engine.default import DefaultDialect  # noqa: TID251
+    from sqlalchemy.exc import DatabaseError  # noqa: TID251
+    from sqlalchemy.sql.elements import quoted_name  # noqa: TID251
 except ImportError:
     sa = None
     quoted_name = None

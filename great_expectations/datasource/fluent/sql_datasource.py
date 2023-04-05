@@ -48,7 +48,7 @@ from great_expectations.optional_imports import sqlalchemy
 
 if TYPE_CHECKING:
     # min version of typing_extension missing `Self`, so it can't be imported at runtime
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
     from typing_extensions import Self
 
 

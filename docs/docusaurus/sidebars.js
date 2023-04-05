@@ -88,6 +88,8 @@ module.exports = {
               value: '<h4>In-memory Data Contexts</h4>',
               defaultStyle: true
             },
+            'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context',
+            'guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context',
             'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file',
             {
               type: 'html',
@@ -165,7 +167,7 @@ module.exports = {
             'guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark',
             {
               type: 'html',
-              value: '<h4>Google Cloud Server</h4>',
+              value: '<h4>Google Cloud Storage</h4>',
               defaultStyle: true
             },
             'guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas',
