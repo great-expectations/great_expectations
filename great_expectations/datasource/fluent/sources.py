@@ -97,7 +97,6 @@ class _SourceFactories:
 
     @classmethod
     def register_datasource(cls, ds_type: Type[Datasource]) -> None:
-        # print(f'\n[ALEX_TEST] [_SourceFactories.register_datasource()] DS_TYPE:\n{ds_type} ; TYPE: {str(type(ds_type))}')
         """
         Add/Register a datasource. This registers all the crud datasource methods:
         add_<datasource>, delete_<datasource>, update_<datasource>, add_or_update_<datasource>
@@ -230,8 +229,6 @@ class _SourceFactories:
 
     @classmethod
     def _register_assets(cls, ds_type: Type[Datasource], asset_type_lookup: TypeLookup):
-        # print(f'\n[ALEX_TEST] [_SourceFactories._register_assets()] DS_TYPE:\n{ds_type} ; TYPE: {str(type(ds_type))}')
-        # print(f'\n[ALEX_TEST] [_SourceFactories._register_assets()] ASSET_TYPE_LOOKUP:\n{asset_type_lookup} ; TYPE: {str(type(asset_type_lookup))}')
         asset_types: Sequence[Type[DataAsset]] = ds_type.asset_types
 
         if not asset_types:
@@ -624,15 +621,10 @@ def _iter_all_registered_types() -> Generator[
     Iterate through all registered Datasource and DataAsset types.
     Returns tuples of the registered type name and the actual type/class.
     """
-    # TODO: <Alex>ALEX</Alex>
-    # a = _SourceFactories.type_lookup.type_names()
-    # TODO: <Alex>ALEX</Alex>
-    # print(f'\n[ALEX_TEST] [_SourceFactories._iter_all_registered_types()] _SourceFactories.type_lookup.type_names():\n{a} ; TYPE: {str(type(a))}')
     for ds_name in _SourceFactories.type_lookup.type_names():
         ds_type: Type[Datasource] = _SourceFactories.type_lookup[ds_name]
         yield ds_name, ds_type
 
-        # print(f'\n[ALEX_TEST] [_SourceFactories._iter_all_registered_types()] ds_type:\n{ds_type} ; TYPE: {str(type(ds_type))}')
         for asset_name in ds_type._type_lookup.type_names():
             asset_type: Type[DataAsset] = ds_type._type_lookup[asset_name]
             yield asset_name, asset_type

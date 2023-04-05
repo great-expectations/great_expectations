@@ -61,13 +61,7 @@ class TableHead(TableMetricProvider):
         selectable, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        print(
-            f"\n[ALEX_TEST] [TableHead._sqlalchemy()] SELECTABLE-0:\n{selectable} ; TYPE: {str(type(selectable))}"
-        )
         table_name = getattr(selectable, "name", None)
-        print(
-            f"\n[ALEX_TEST] [TableHead._sqlalchemy()] TABLE_NAME-0:\n{table_name} ; TYPE: {str(type(table_name))}"
-        )
         n_rows: int = (
             metric_value_kwargs.get("n_rows")
             if metric_value_kwargs.get("n_rows") is not None
@@ -115,24 +109,6 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                     )
                 else:
-                    # TODO: <Alex>ALEX</Alex>
-                    a = getattr(selectable, "name", None)
-                    print(
-                        f"\n[ALEX_TEST] [TableHead._sqlalchemy()] TABLE_NAME-1:\n{a} ; TYPE: {str(type(a))}"
-                    )
-                    b = getattr(selectable, "schema", None)
-                    print(
-                        f"\n[ALEX_TEST] [TableHead._sqlalchemy()] SCHEMA-1:\n{b} ; TYPE: {str(type(b))}"
-                    )
-                    c = execution_engine.engine
-                    print(
-                        f"\n[ALEX_TEST] [TableHead._sqlalchemy()] CONN-1:\n{c} ; TYPE: {str(type(c))}"
-                    )
-                    d = abs(n_rows)
-                    print(
-                        f"\n[ALEX_TEST] [TableHead._sqlalchemy()] CHUNK_SIZE-1:\n{d} ; TYPE: {str(type(d))}"
-                    )
-                    # TODO: <Alex>ALEX</Alex>
                     # passing chunksize causes the Iterator to be returned
                     df_chunk_iterator = pd.read_sql_table(
                         table_name=getattr(selectable, "name", None),
@@ -140,14 +116,8 @@ class TableHead(TableMetricProvider):
                         con=execution_engine.engine,
                         chunksize=abs(n_rows),
                     )
-                    print(
-                        f"\n[ALEX_TEST] [TableHead._sqlalchemy()] DF_CHUNK_ITERATOR:\n{df_chunk_iterator} ; TYPE: {str(type(df_chunk_iterator))}"
-                    )
                     df = TableHead._get_head_df_from_df_iterator(
                         df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
-                    )
-                    print(
-                        f"\n[ALEX_TEST] [TableHead._sqlalchemy()] DF:\n{df} ; TYPE: {str(type(df))}"
                     )
 
             except (ValueError, NotImplementedError):

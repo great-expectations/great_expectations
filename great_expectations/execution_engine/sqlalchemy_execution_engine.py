@@ -358,7 +358,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
                 )
 
-        # These are some backends where temp_table_creation is not working; we set the default value to False.
+        # these are two backends where temp_table_creation is not supported we set the default value to False.
         if self.dialect_name in [
             GXSqlDialect.TRINO,
             GXSqlDialect.AWSATHENA,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.

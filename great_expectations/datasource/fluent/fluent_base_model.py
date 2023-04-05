@@ -62,31 +62,10 @@ class FluentBaseModel(pydantic.BaseModel):
     class Config:
         extra = pydantic.Extra.forbid
 
-    # TODO: <Alex>ALEX</Alex>
-    # @classmethod
-    # def load_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> Dict[str, Any]:
-    #     loaded = yaml.load(f)
-    #     print(f'\n[ALEX_TEST] [FluentBaseModel.load_yaml()] CLS:; TYPE: {str(type(cls))}')
-    #     print(f'\n[ALEX_TEST] [FluentBaseModel.load_yaml()] LOADED:\n{loaded} ; TYPE: {str(type(loaded))}')
-    #     logger.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
-    #     return loaded
-    # TODO: <Alex>ALEX</Alex>
-
     @classmethod
     def parse_yaml(cls: Type[_Self], f: Union[pathlib.Path, str]) -> _Self:
-        # TODO: <Alex>ALEX</Alex>
         loaded = yaml.load(f)
-        print(
-            f"\n[ALEX_TEST] [FluentBaseModel.parse_yaml()] CLS:; TYPE: {str(type(cls))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [FluentBaseModel.parse_yaml()] LOADED:\n{loaded} ; TYPE: {str(type(loaded))}"
-        )
         logger.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # loaded = cls.load_yaml(f=f)
-        # TODO: <Alex>ALEX</Alex>
         # noinspection PyArgumentList
         config = cls(**loaded)
         return config

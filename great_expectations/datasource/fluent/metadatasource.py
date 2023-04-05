@@ -29,7 +29,6 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
 
         Also binds asset adding methods according to the declared `asset_types`.
         """
-        # print(f'\n[ALEX_TEST] [MetaDatasource.__new__()] CLS_NAME:\n{cls_name} ; TYPE: {str(type(cls_name))}')
         logger.debug(f"1a. {meta_cls.__name__}.__new__() for `{cls_name}`")
 
         cls = super().__new__(meta_cls, cls_name, bases, cls_dict)
@@ -50,6 +49,5 @@ class MetaDatasource(pydantic.main.ModelMetaclass):
             )
         # instantiate new TypeLookup to prevent child classes conflicts with parent class asset types
         cls._type_lookup = TypeLookup()
-        # print(f'\n[ALEX_TEST] [MetaDatasource.__new__()] CLS._TYPE_LOOKUP:\n{cls._type_lookup} ; TYPE: {str(type(cls._type_lookup))}')
         _SourceFactories.register_datasource(cls)
         return cls
