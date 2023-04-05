@@ -37,7 +37,7 @@ from great_expectations.validator.metric_configuration import (
 if TYPE_CHECKING:
     # noinspection PyPep8Naming
     import pyspark.sql.functions as F
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 
     from great_expectations.core.batch import (
         BatchData,
