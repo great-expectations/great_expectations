@@ -6,6 +6,10 @@ from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
+
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
@@ -43,7 +47,7 @@ def test_instantiation_with_table_name(sqlite_view_engine):
 
 
 def test_instantiation_with_query(sqlite_view_engine, test_df):
-    test_df.to_sql("test_table_0", con=sqlite_view_engine)
+    add_dataframe_to_db(df=test_df, name="test_table_0", con=sqlite_view_engine)
 
     query: str = "SELECT * FROM test_table_0"
     # If create_temp_table=False, a new temp table should NOT be created

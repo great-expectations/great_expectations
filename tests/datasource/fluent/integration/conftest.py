@@ -8,6 +8,9 @@ import pandas as pd
 import pytest
 import sqlalchemy
 
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import (
     PandasFilesystemDatasource,
@@ -54,7 +57,7 @@ def pandas_sql_data(
         }
     )
     con = sqlalchemy.create_engine("sqlite://")
-    df.to_sql("my_table", con=con)
+    add_dataframe_to_db(df=df, name="my_table", con=con)
     pandas_ds = context.sources.add_pandas("my_pandas")
     pandas_ds.read_sql(
         sql=sqlalchemy.sql.text("SELECT * FROM my_table"),

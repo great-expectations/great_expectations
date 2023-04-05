@@ -4,6 +4,9 @@ from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
 
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    read_sql_table_as_df,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -103,14 +106,14 @@ class TableHead(TableMetricProvider):
         else:
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = pd.read_sql_table(
+                    df = read_sql_table_as_df(
                         table_name=getattr(selectable, "name", None),
                         schema=getattr(selectable, "schema", None),
                         con=execution_engine.engine,
                     )
                 else:
                     # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = pd.read_sql_table(
+                    df_chunk_iterator = read_sql_table_as_df(
                         table_name=getattr(selectable, "name", None),
                         schema=getattr(selectable, "schema", None),
                         con=execution_engine.engine,
