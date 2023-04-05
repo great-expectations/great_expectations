@@ -547,11 +547,27 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             }
         else:
             assert isinstance(param_type, RendererValueType)
-            renderer_params_args = {
-                **self.params.dict(exclude_none=False),
-                name: renderer_param(
-                    schema=RendererSchema(type=param_type), value=value
-                ),
-            }
+            renderer_params_args = self.params.dict(exclude_none=False)
+            if (
+                name in renderer_params_args
+                and renderer_params_args[name]["evaluation_parameter"]
+            ):
+                new_args = {
+                    name: renderer_param(
+                        schema=RendererSchema(type=param_type),
+                        value=value,
+                        evaluation_parameter=renderer_params_args[name][
+                            "evaluation_parameter"
+                        ],
+                    )
+                }
+            else:
+                new_args = {
+                    name: renderer_param(
+                        schema=RendererSchema(type=param_type),
+                        value=value,
+                    )
+                }
+            renderer_params_args.update(new_args)
 
         self.params = cast(RendererParams, renderer_params(**renderer_params_args))
