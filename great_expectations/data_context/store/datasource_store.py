@@ -15,6 +15,7 @@ from great_expectations.data_context.types.base import (
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.datasource.fluent import Datasource as FluentDatasource
+from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
@@ -75,14 +76,22 @@ class DatasourceStore(Store):
             return value._json_dict()
         return self._serializer.serialize(value)
 
-    def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
+    # TODO: overloads
+    def deserialize(
+        self, value: dict | DatasourceConfig | FluentDatasource
+    ) -> DatasourceConfig | FluentDatasource:
         """
         See parent 'Store.deserialize()' for more information
         """
         # When using the InlineStoreBackend, objects are already converted to their respective config types.
-        if isinstance(value, DatasourceConfig):
+        if isinstance(value, (DatasourceConfig, FluentDatasource)):
             return value
         elif isinstance(value, dict):
+            # TODO: do this better... or elsewhere
+            type_ = value.get("type")
+            if type_:
+                datasource_model = _SourceFactories.type_lookup[type_]
+                return datasource_model(**value)
             return self._schema.load(value)
         else:
             return self._schema.loads(value)
