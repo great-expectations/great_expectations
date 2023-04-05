@@ -232,6 +232,7 @@ except ImportError:
 
 try:
     import sqlalchemy.dialects.postgresql as postgresqltypes  # noqa: TID251
+
     # noinspection PyPep8Naming
     from sqlalchemy.dialects.postgresql import dialect as pgDialect  # noqa: TID251
 
