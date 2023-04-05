@@ -55,8 +55,8 @@ except ImportError as e:
     )
 
 try:
-    import sqlalchemy as sa
-    from sqlalchemy.dialects import registry
+    import sqlalchemy as sa  # noqa: TID251
+    from sqlalchemy.dialects import registry  # noqa: TID251
 
 except ImportError:
     logger.debug(
