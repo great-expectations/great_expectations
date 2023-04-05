@@ -505,7 +505,11 @@ class Datasource(
         # This default implementation will be used if protocol is inherited
         try:
             asset: _DataAssetT
-            return list(filter(lambda asset: asset.name == asset_name, self.assets))[0]
+            found_asset: _DataAssetT = list(
+                filter(lambda asset: asset.name == asset_name, self.assets)
+            )[0]
+            found_asset._datasource = self
+            return found_asset
         except IndexError as exc:
             raise LookupError(
                 f"'{asset_name}' not found. Available assets are {self.get_asset_names()}"
