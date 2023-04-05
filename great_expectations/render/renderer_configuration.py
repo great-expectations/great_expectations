@@ -30,7 +30,7 @@ from pydantic import (
     validator,
 )
 from pydantic.generics import GenericModel
-from typing_extensions import TypeAlias, TypedDict
+from typing_extensions import NotRequired, TypeAlias, TypedDict
 
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
@@ -178,7 +178,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         schema: RendererSchema
         value: Any
-        evaluation_parameter: Optional[dict]
+        evaluation_parameter: NotRequired[Dict[str, Any]]
 
     class _RendererParamBase(_RendererValueBase):
         """
@@ -188,7 +188,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         renderer_schema: RendererSchema = Field(alias="schema")
         value: Any
-        evaluation_parameter: Optional[dict]
+        evaluation_parameter: Optional[Dict[str, Any]]
 
         class Config:
             validate_assignment = True
@@ -260,15 +260,13 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     ) -> Dict[str, RendererConfiguration._RendererParamArgs]:
         renderer_params_args = {}
         for kwarg_name, value in raw_kwargs.items():
-            renderer_params_args[kwarg_name] = {
-                "schema": {"type": RendererValueType.OBJECT},
-                "value": None,
-            }
-            renderer_params_args[kwarg_name][
-                "evaluation_parameter"
-            ] = RendererConfiguration._RendererParamArgs(
+            renderer_params_args[kwarg_name] = RendererConfiguration._RendererParamArgs(
                 schema=RendererSchema(type=RendererValueType.OBJECT),
-                value=value,
+                value=None,
+                evaluation_parameter={
+                    "schema": RendererSchema(type=RendererValueType.OBJECT),
+                    "value": value,
+                },
             )
         return renderer_params_args
 
