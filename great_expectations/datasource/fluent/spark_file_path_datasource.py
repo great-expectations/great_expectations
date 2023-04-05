@@ -1,8 +1,14 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Type
 
+# TODO: <Alex>ALEX</Alex>
+# from typing import TYPE_CHECKING, ClassVar, Dict, List, Type
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+from typing import TYPE_CHECKING, ClassVar, List, Type
+
+# TODO: <Alex>ALEX</Alex>
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent import _SparkDatasource
@@ -33,4 +39,9 @@ class _SparkFilePathDatasource(_SparkDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]
 
     # instance attributes
-    assets: Dict[str, _FilePathDataAsset] = {}  # type: ignore[assignment]
+    # TODO: <Alex>ALEX</Alex>
+    # assets: Dict[str, _FilePathDataAsset] = {}  # type: ignore[assignment]
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    assets: List[_FilePathDataAsset] = []  # type: ignore[assignment]
+    # TODO: <Alex>ALEX</Alex>

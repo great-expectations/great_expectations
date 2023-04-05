@@ -607,8 +607,25 @@ def column_reflection_fallback(
                     sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
                 )
             else:
+                print(
+                    "\n[ALEX_TEST] [WOUTPUT] WOUTPUT:BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+                )
+                print(
+                    f"\n[ALEX_TEST] [WOUTPUT] SELECTABLE:\n{selectable} ; TYPE: {str(type(selectable))}"
+                )
+                # TODO: <Alex>ALEX</Alex>
                 query = sa.select(sa.text("*")).select_from(selectable).limit(1)
+                # TODO: <Alex>ALEX</Alex>
+                # TODO: <Alex>ALEX</Alex>
+                # query = sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
+                # TODO: <Alex>ALEX</Alex>
+                print(
+                    "\n[ALEX_TEST] [WOUTPUT] WOUTPUT:VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"
+                )
         result_object = sqlalchemy_engine.execute(query)
+        print(
+            "\n[ALEX_TEST] [WOUTPUT] WOUTPUT:GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
+        )
         # noinspection PyProtectedMember
         col_names: List[str] = result_object._metadata.keys
         col_info_dict_list = [{"name": col_name} for col_name in col_names]

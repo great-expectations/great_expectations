@@ -1,6 +1,12 @@
 from logging import Logger
-from typing import ClassVar, Dict, List, Type
 
+# TODO: <Alex>ALEX</Alex>
+# from typing import ClassVar, Dict, List, Type
+# TODO: <Alex>ALEX</Alex>
+# TODO: <Alex>ALEX</Alex>
+from typing import ClassVar, List, Type
+
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 from great_expectations.datasource.fluent.interfaces import DataAsset as DataAsset
 from great_expectations.datasource.fluent.pandas_datasource import _PandasDatasource
@@ -23,4 +29,9 @@ class XMLAsset(_FilePathDataAsset): ...
 
 class _PandasFilePathDatasource(_PandasDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]]
-    assets: Dict[str, _FilePathDataAsset]
+    # TODO: <Alex>ALEX</Alex>
+    # assets: Dict[str, _FilePathDataAsset]
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    assets: List[_FilePathDataAsset]
+    # TODO: <Alex>ALEX</Alex>

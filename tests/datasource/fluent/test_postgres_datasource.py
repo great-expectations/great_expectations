@@ -83,7 +83,7 @@ def test_construct_postgres_datasource(create_source: CreateSourceFixture):
     ) as source:
         assert source.name == "my_datasource"
         assert source.execution_engine_type is SqlAlchemyExecutionEngine
-        assert source.assets == {}
+        assert source.assets == []
 
 
 def assert_table_asset(
@@ -128,7 +128,9 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_splitter_year_and_month(column_name="my_col")
         assert len(source.assets) == 1
-        assert asset == list(source.assets.values())[0]
+        # TODO: <Alex>ALEX</Alex>
+        assert asset == list(source.get_assets().values())[0]
+        # TODO: <Alex>ALEX</Alex>
         assert_table_asset(
             asset=asset,
             name="my_asset",
@@ -155,7 +157,9 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
 
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         assert len(source.assets) == 1
-        assert asset == list(source.assets.values())[0]
+        # TODO: <Alex>ALEX</Alex>
+        assert asset == list(source.get_assets().values())[0]
+        # TODO: <Alex>ALEX</Alex>
         assert_table_asset(
             asset=asset,
             name="my_asset",
@@ -202,7 +206,12 @@ def create_and_add_table_asset_without_testing_connection(
     )
     # TODO: asset custom init
     table_asset._datasource = source
-    source.assets[table_asset.name] = table_asset
+    # TODO: <Alex>ALEX</Alex>
+    # source._add_asset(asset=table_asset)
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    source.assets.append(table_asset)
+    # TODO: <Alex>ALEX</Alex>
     return source, table_asset
 
 
@@ -737,9 +746,35 @@ def test_datasource_dict_has_properties(create_source):
         asset.add_sorters(["year", "month"])
         source_dict = source.dict()
         pprint(source_dict)
-        assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)
+        # TODO: <Alex>ALEX</Alex>
+        # assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        assert isinstance(
+            list(
+                filter(
+                    lambda element: element["name"] == "my_asset",
+                    source_dict["assets"],
+                )
+            )[0]["order_by"],
+            list,
+        )
+        # TODO: <Alex>ALEX</Alex>
         # type should be in dumped dict even if not explicitly set
-        assert "type" in source_dict["assets"]["my_asset"]
+        # TODO: <Alex>ALEX</Alex>
+        # assert "type" in source_dict["assets"]["my_asset"]
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        assert (
+            "type"
+            in list(
+                filter(
+                    lambda element: element["name"] == "my_asset",
+                    source_dict["assets"],
+                )
+            )[0]
+        )
+        # TODO: <Alex>ALEX</Alex>
 
 
 @pytest.mark.unit
@@ -846,7 +881,9 @@ def bad_configuration_datasource(
     return PostgresDatasource(
         name="postgres_datasource",
         connection_string=connection_string,
-        assets={"table_asset": table_asset},
+        assets=[
+            table_asset,
+        ],
     )
 
 

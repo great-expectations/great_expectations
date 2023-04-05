@@ -4,7 +4,9 @@ import logging
 from typing import (
     TYPE_CHECKING,
     ClassVar,
-    Dict,
+    # TODO: <Alex>ALEX</Alex>
+    # Dict,
+    # TODO: <Alex>ALEX</Alex>
     List,
     Type,
 )
@@ -79,4 +81,9 @@ class _PandasFilePathDatasource(_PandasDatasource):
     )
 
     # instance attributes
-    assets: Dict[str, _FilePathDataAsset] = {}
+    # TODO: <Alex>ALEX</Alex>
+    # assets: Dict[str, _FilePathDataAsset] = {}
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    assets: List[_FilePathDataAsset] = []
+    # TODO: <Alex>ALEX</Alex>

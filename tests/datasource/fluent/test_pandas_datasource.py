@@ -373,10 +373,12 @@ class TestDynamicPandasAssets:
             "great_expectations.data_context.data_context.abstract_data_context.AbstractDataContext.get_validator"
         )
         _ = read_method(*positional_args.values())
+        # TODO: <Alex>ALEX</Alex>
         # read_* returns a validator, but we just want to inspect the asset
-        asset = empty_data_context.sources.pandas_default.assets[
+        asset = empty_data_context.sources.pandas_default.get_assets()[
             DEFAULT_PANDAS_DATA_ASSET_NAME
         ]
+        # TODO: <Alex>ALEX</Alex>
         for positional_arg_name, positional_arg in positional_args.items():
             assert getattr(asset, positional_arg_name) == positional_arg
 
@@ -393,7 +395,9 @@ def test_default_pandas_datasource_get_and_set(
         filepath_or_buffer=valid_file_path,
     )
     assert isinstance(validator, Validator)
-    csv_data_asset_1 = pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    # TODO: <Alex>ALEX</Alex>
+    csv_data_asset_1 = pandas_datasource.get_assets()[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    # TODO: <Alex>ALEX</Alex>
     assert isinstance(csv_data_asset_1, _PandasDataAsset)
     assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
     assert len(pandas_datasource.assets) == 1
@@ -402,11 +406,19 @@ def test_default_pandas_datasource_get_and_set(
     pandas_datasource = empty_data_context.sources.pandas_default
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
     assert len(pandas_datasource.assets) == 1
-    assert pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    # TODO: <Alex>ALEX</Alex>
+    assert pandas_datasource.get_assets()[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    # TODO: <Alex>ALEX</Alex>
 
     # ensure we overwrite the ephemeral data asset if no name is passed
     _ = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
     assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
+    print(
+        f"\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_default_pandas_datasource_get_and_set()] PANDAS_DATASOURCE.ASSETS:\n{pandas_datasource.assets} ; TYPE: {str(type(pandas_datasource.assets))} ; NUM: {len(pandas_datasource.assets)}"
+    )
+    print(
+        f"\n[ALEX_TEST] [TEST_PANDAS_DATASOURCE.test_default_pandas_datasource_get_and_set()] PANDAS_DATASOURCE.GET_ASSETS():\n{pandas_datasource.get_assets()} ; TYPE: {str(type(pandas_datasource.get_assets()))} ; NUM: {len(pandas_datasource.get_assets())}"
+    )
     assert len(pandas_datasource.assets) == 1
 
     # ensure we get an additional named asset when one is passed
@@ -415,7 +427,9 @@ def test_default_pandas_datasource_get_and_set(
         asset_name=expected_csv_data_asset_name,
         filepath_or_buffer=valid_file_path,
     )
-    csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name]
+    # TODO: <Alex>ALEX</Alex>
+    csv_data_asset_2 = pandas_datasource.get_assets()[expected_csv_data_asset_name]
+    # TODO: <Alex>ALEX</Alex>
     assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2
 
@@ -450,12 +464,14 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
         dataframe=test_df_pandas
     )
     assert isinstance(validator, Validator)
+    # TODO: <Alex>ALEX</Alex>
     assert isinstance(
-        empty_data_context.sources.pandas_default.assets[
+        empty_data_context.sources.pandas_default.get_assets()[
             DEFAULT_PANDAS_DATA_ASSET_NAME
         ],
         DataFrameAsset,
     )
+    # TODO: <Alex>ALEX</Alex>
 
     # correct working behavior with add method
     dataframe_asset_name = "my_dataframe_asset"
@@ -465,12 +481,14 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.sources.pandas_default.assets) == 2
+    # TODO: <Alex>ALEX</Alex>
     assert all(
         [
             asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-            for asset in empty_data_context.sources.pandas_default.assets.values()
+            for asset in empty_data_context.sources.pandas_default.get_assets().values()
         ]
     )
+    # TODO: <Alex>ALEX</Alex>
 
 
 def test_dynamic_pandas_batch_metadata(

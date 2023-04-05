@@ -11,11 +11,15 @@ from typing import (
     Any,
     Callable,
     ClassVar,
-    Dict,
     Generic,
     List,
     Mapping,
-    MutableMapping,
+    # TODO: <Alex>ALEX</Alex>
+    # MutableMapping,
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    MutableSequence,
+    # TODO: <Alex>ALEX</Alex>
     Optional,
     Sequence,
     Set,
@@ -401,10 +405,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
 
     # instance attributes
-    assets: MutableMapping[
-        str,
-        _DataAssetT,
-    ] = {}
+    assets: MutableSequence[_DataAssetT] = []
 
     # Abstract Methods
     @property
@@ -461,9 +462,26 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         exclude_fields: dict[int | str, Any] = self._include_exclude_to_dict(
             include_exclude=exclude
         )
+        # TODO: <Alex>ALEX</Alex>
+        # if "assets" in self.__fields_set__:
+        #     exclude_assets = {}
+        #     for asset_name, asset in self.assets.items():
+        #         # don't check fields that should always be set
+        #         check_fields: set[str] = asset.__fields_set__.copy().difference(
+        #             _FIELDS_ALWAYS_SET
+        #         )
+        #         for field in check_fields:
+        #             if isinstance(
+        #                 getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
+        #             ):
+        #                 exclude_assets[asset_name] = {field: True}
+        #     if exclude_assets:
+        #         exclude_fields["assets"] = exclude_assets
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
         if "assets" in self.__fields_set__:
             exclude_assets = {}
-            for asset_name, asset in self.assets.items():
+            for asset in self.assets:
                 # don't check fields that should always be set
                 check_fields: set[str] = asset.__fields_set__.copy().difference(
                     _FIELDS_ALWAYS_SET
@@ -472,9 +490,10 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
                     if isinstance(
                         getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
                     ):
-                        exclude_assets[asset_name] = {field: True}
+                        exclude_assets[asset.name] = {field: True}
             if exclude_assets:
                 exclude_fields["assets"] = exclude_assets
+        # TODO: <Alex>ALEX</Alex>
 
         return super().json(
             include=include,
@@ -501,7 +520,12 @@ class PandasDatasource(_PandasDatasource):
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
-    assets: Dict[str, _PandasDataAsset] = {}
+    # TODO: <Alex>ALEX</Alex>
+    # assets: Dict[str, _PandasDataAsset] = {}
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    assets: List[_PandasDataAsset] = []
+    # TODO: <Alex>ALEX</Alex>
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...

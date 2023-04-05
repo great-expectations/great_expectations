@@ -161,6 +161,12 @@ class MetricsCalculator:
             runtime_configuration=runtime_configuration,
             min_graph_edges_pbar_enable=min_graph_edges_pbar_enable,
         )
+        print(
+            f"\n[ALEX_TEST] [MetricsCalculator.compute_metrics()] RESOLVED_METRICS:\n{resolved_metrics} ; TYPE: {str(type(resolved_metrics))}"
+        )
+        print(
+            f"\n[ALEX_TEST] [MetricsCalculator.compute_metrics()] ABORTED_METRICS_INFO:\n{aborted_metrics_info} ; TYPE: {str(type(aborted_metrics_info))}"
+        )
         return resolved_metrics
 
     def build_metric_dependency_graph(

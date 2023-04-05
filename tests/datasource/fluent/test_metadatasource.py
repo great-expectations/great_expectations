@@ -10,6 +10,14 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, U
 import pytest
 from pydantic import DirectoryPath, validate_arguments
 
+# TODO: <Alex>ALEX</Alex>
+from great_expectations.datasource.fluent.constants import (
+    _DATASOURCE_NAME_KEY,
+    _DATA_ASSET_NAME_KEY,
+    _FLUENT_DATASOURCES_KEY,
+)
+
+# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
@@ -338,8 +346,14 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     class RedAsset(DataAsset):
         type = "red"
 
+        def test_connection(self):
+            ...
+
     class BlueAsset(DataAsset):
         type = "blue"
+
+        def test_connection(self):
+            ...
 
     class PurpleDatasource(Datasource):
         asset_types = [RedAsset, BlueAsset]
@@ -354,7 +368,7 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
 
         def add_red_asset(self, asset_name: str) -> RedAsset:
             asset = RedAsset(name=asset_name)
-            self.assets[asset_name] = asset
+            self._add_asset(asset=asset)
             return asset
 
     # 2. Get context
@@ -366,6 +380,9 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 4. Add a DataAsset
     red_asset: DataAsset = purple_ds.add_red_asset("my_asset_name")
     assert isinstance(red_asset, RedAsset)
+    print(
+        f"\n[ALEX_TEST] [TEST_METADATASOURCE.test_minimal_ds_to_asset_flow()] RED_ASSET:\n{red_asset} ; TYPE: {str(type(red_asset))}"
+    )
 
     # 5. Get an asset by name - (method defined in parent `Datasource`)
     assert red_asset is purple_ds.get_asset("my_asset_name")
@@ -388,11 +405,22 @@ def context_config_data(
 
 
 def assert_fluent_datasource_content(
-    config_file_path: str, fluent_datasource_config: dict
+    config_file_path: pathlib.Path, fluent_datasource_config: dict
 ):
     config = yaml.load(config_file_path.read_text())
-    assert "fluent_datasources" in config
-    assert config["fluent_datasources"] == fluent_datasource_config
+    assert _FLUENT_DATASOURCES_KEY in config
+    # TODO: <Alex>ALEX</Alex>
+    # assert sorted(
+    #     config[_FLUENT_DATASOURCES_KEY],
+    #     key=lambda element: element["name"],
+    # ) == sorted(
+    #     fluent_datasource_config,
+    #     key=lambda element: element["name"],
+    # )
+    # TODO: <Alex>ALEX</Alex>
+    # TODO: <Alex>ALEX</Alex>
+    assert config[_FLUENT_DATASOURCES_KEY] == fluent_datasource_config
+    # TODO: <Alex>ALEX</Alex>
 
 
 @pytest.fixture
@@ -408,14 +436,13 @@ def context_with_fluent_datasource(
     )
     assert 1 == len(context.datasources)
     assert_fluent_datasource_content(
-        config_file_path,
-        {
+        config_file_path=config_file_path,
+        fluent_datasource_config={
             DEFAULT_CRUD_DATASOURCE_NAME: {
                 "base_directory": str(data_dir),
                 "data_context_root_directory": str(config_file_path.parent),
-                "name": DEFAULT_CRUD_DATASOURCE_NAME,
                 "type": "pandas_filesystem",
-            }
+            },
         },
     )
     return context, config_file_path, data_dir
@@ -440,18 +467,16 @@ def test_add_datasource_with_datasource_object(
         context.sources.add_pandas_filesystem(datasource=new_datasource)
     assert len(context.datasources) == 2
     assert_fluent_datasource_content(
-        config_file_path,
-        {
-            "new_datasource": {
-                "base_directory": str(data_dir),
-                "data_context_root_directory": str(config_file_path.parent),
-                "name": "new_datasource",
-                "type": "pandas_filesystem",
-            },
+        config_file_path=config_file_path,
+        fluent_datasource_config={
             "pandas_datasource": {
                 "base_directory": str(data_dir),
                 "data_context_root_directory": str(config_file_path.parent),
-                "name": "pandas_datasource",
+                "type": "pandas_filesystem",
+            },
+            "new_datasource": {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
                 "type": "pandas_filesystem",
             },
         },
@@ -477,14 +502,13 @@ def test_update_datasource(context_with_fluent_datasource, use_positional_arg):
             data_context_root_directory=config_file_path.parent,
         )
     assert_fluent_datasource_content(
-        config_file_path,
-        {
+        config_file_path=config_file_path,
+        fluent_datasource_config={
             DEFAULT_CRUD_DATASOURCE_NAME: {
                 "base_directory": str(data_dir_2),
                 "data_context_root_directory": str(config_file_path.parent),
-                "name": DEFAULT_CRUD_DATASOURCE_NAME,
                 "type": "pandas_filesystem",
-            }
+            },
         },
     )
 
@@ -497,14 +521,13 @@ def test_update_datasource_with_datasource_object(
     context, config_file_path, data_dir = context_with_fluent_datasource
     datasource = context.get_datasource(DEFAULT_CRUD_DATASOURCE_NAME)
     assert_fluent_datasource_content(
-        config_file_path,
-        {
+        config_file_path=config_file_path,
+        fluent_datasource_config={
             DEFAULT_CRUD_DATASOURCE_NAME: {
                 "base_directory": str(data_dir),
                 "data_context_root_directory": str(config_file_path.parent),
-                "name": DEFAULT_CRUD_DATASOURCE_NAME,
                 "type": "pandas_filesystem",
-            }
+            },
         },
     )
 
@@ -519,21 +542,19 @@ def test_update_datasource_with_datasource_object(
 
     context.sources.update_pandas_filesystem(datasource=datasource)
     assert_fluent_datasource_content(
-        config_file_path,
-        {
+        config_file_path=config_file_path,
+        fluent_datasource_config={
             DEFAULT_CRUD_DATASOURCE_NAME: {
                 "base_directory": str(data_dir),
                 "data_context_root_directory": str(config_file_path.parent),
-                "name": DEFAULT_CRUD_DATASOURCE_NAME,
                 "type": "pandas_filesystem",
                 "assets": {
                     "csv_asset": {
                         "batching_regex": "(?P<file_name>.*).csv",
-                        "name": "csv_asset",
                         "type": "csv",
-                    }
+                    },
                 },
-            }
+            },
         },
     )
 
@@ -559,18 +580,16 @@ def test_add_or_update_datasource_using_add(
             data_context_root_directory=config_file_path.parent,
         )
     assert_fluent_datasource_content(
-        config_file_path,
-        {
-            DEFAULT_CRUD_DATASOURCE_NAME: {
-                "base_directory": str(data_dir),
-                "data_context_root_directory": str(config_file_path.parent),
-                "name": DEFAULT_CRUD_DATASOURCE_NAME,
-                "type": "pandas_filesystem",
-            },
+        config_file_path=config_file_path,
+        fluent_datasource_config={
             f"{DEFAULT_CRUD_DATASOURCE_NAME}_2": {
                 "base_directory": str(data_dir_2),
                 "data_context_root_directory": str(config_file_path.parent),
-                "name": f"{DEFAULT_CRUD_DATASOURCE_NAME}_2",
+                "type": "pandas_filesystem",
+            },
+            DEFAULT_CRUD_DATASOURCE_NAME: {
+                "base_directory": str(data_dir),
+                "data_context_root_directory": str(config_file_path.parent),
                 "type": "pandas_filesystem",
             },
         },
@@ -598,14 +617,13 @@ def test_add_or_update_datasource_using_update(
             data_context_root_directory=config_file_path.parent,
         )
     assert_fluent_datasource_content(
-        config_file_path,
-        {
+        config_file_path=config_file_path,
+        fluent_datasource_config={
             DEFAULT_CRUD_DATASOURCE_NAME: {
                 "base_directory": str(data_dir_2),
                 "data_context_root_directory": str(config_file_path.parent),
-                "name": DEFAULT_CRUD_DATASOURCE_NAME,
                 "type": "pandas_filesystem",
-            }
+            },
         },
     )
 

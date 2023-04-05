@@ -5428,23 +5428,28 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         logger.info(
             f"{self.__class__.__name__} has not implemented `_load_fluent_config()` returning empty `GxConfig`"
         )
-        return GxConfig(fluent_datasources={})
+        return GxConfig(fluent_datasources=[])
 
+    # TODO: <Alex>ALEX</Alex>
     def _attach_fluent_config_datasources_and_build_data_connectors(
         self, config: GxConfig
     ):
         """Called at end of __init__"""
-        for ds_name, datasource in config.datasources.items():
+        for datasource in config.datasources:
+            ds_name = datasource.name
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
             # if Datasource required a data_connector we need to build the data_connector for each asset
             if datasource.data_connector_type:
-                for data_asset in datasource.assets.values():
+                for data_asset in datasource.assets:
                     connect_options = getattr(data_asset, "connect_options", {})
                     datasource._build_data_connector(data_asset, **connect_options)
 
             self._add_fluent_datasource(datasource)
 
+    # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX</Alex>
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
         Update `self.fluent_config.fluent_datasources` with any newly added datasources.
@@ -5452,8 +5457,18 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         fluent_datasources = self.fluent_datasources
         if fluent_datasources:
-            self.fluent_config.fluent_datasources.update(fluent_datasources)
-        return self.fluent_config.fluent_datasources
+            # TODO: <Alex>ALEX</Alex>
+            self.fluent_config.update_datasources(datasources=fluent_datasources)
+            # TODO: <Alex>ALEX</Alex>
+
+        # TODO: <Alex>ALEX</Alex>
+        # return self.fluent_config.fluent_datasources
+        # TODO: <Alex>ALEX</Alex>
+        # TODO: <Alex>ALEX</Alex>
+        return self.fluent_config.get_datasources()
+        # TODO: <Alex>ALEX</Alex>
+
+    # TODO: <Alex>ALEX</Alex>
 
     @staticmethod
     def _resolve_id_and_ge_cloud_id(
