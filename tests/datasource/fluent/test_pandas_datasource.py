@@ -499,11 +499,16 @@ def test_pandas_data_asset_batch_metadata(
         csv_asset.build_batch_request()
     )
     assert len(batch_list) == 1
+
+    # allow mutation of this attribute
+    batch_list[0].metadata["also_this_one"] = "other_batch-level_value"
+
     substituted_batch_metadata = copy.deepcopy(batch_metadata)
     substituted_batch_metadata.update(
         {
             "no_curly_pipeline_filename": __file__,
             "curly_pipeline_filename": __file__,
+            "also_this_one": "other_batch-level_value",
         }
     )
     assert batch_list[0].metadata == substituted_batch_metadata
