@@ -54,6 +54,7 @@ class _FilePathDataAsset(DataAsset):
         "type",
         "name",
         "order_by",
+        "batch_metadata",
         "batching_regex",  # file_path argument
         "kwargs",  # kwargs need to be unpacked and passed separately
         "batch_metadata",
@@ -227,7 +228,6 @@ class _FilePathDataAsset(DataAsset):
             fully_specified_batch_request.options.update(
                 batch_definition.batch_identifiers
             )
-
             batch_metadata = self._get_batch_metadata_from_batch_request(
                 batch_request=fully_specified_batch_request
             )
