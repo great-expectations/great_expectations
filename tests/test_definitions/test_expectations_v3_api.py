@@ -20,7 +20,7 @@ from great_expectations.self_check.util import (
     get_test_validator_with_data,
     mssqlDialect,
     mysqlDialect,
-    postgresqlDialect,
+    pgDialect,
     snowflakeDialect,
     sqliteDialect,
     trinoDialect,
@@ -144,10 +144,10 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     generate_test = True
                                 elif (
                                     "postgresql" in only_for
-                                    and postgresqlDialect is not None
+                                    and pgDialect is not None
                                     and isinstance(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
-                                        postgresqlDialect,
+                                        pgDialect,
                                     )
                                 ):
                                     generate_test = True
@@ -279,7 +279,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 )
                                 or (
                                     "postgresql" in suppress_test_for
-                                    and postgresqlDialect is not None
+                                    and pgDialect is not None
                                     and validator_with_data
                                     and isinstance(
                                         validator_with_data.active_batch_data,
@@ -287,7 +287,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     )
                                     and isinstance(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
-                                        postgresqlDialect,
+                                        pgDialect,
                                     )
                                 )
                                 or (
