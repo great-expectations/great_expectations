@@ -23,7 +23,7 @@ from great_expectations.dataset.util import (
 logger = logging.getLogger(__name__)
 
 try:
-    from sqlalchemy.sql import quoted_name
+    from sqlalchemy.sql import quoted_name  # noqa: TID251
 
 except:
     logger.debug(
