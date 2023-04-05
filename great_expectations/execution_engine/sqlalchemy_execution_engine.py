@@ -360,7 +360,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # These are some backends where temp_table_creation is not working; we set the default value to False.
         if self.dialect_name in [
-            GXSqlDialect.SQLITE,  # <Alex>04042023: As of Pandas-2.0.0, temp_table reflection raises exceptions.</Alex>
+            # TODO: <Alex>ALEX</Alex>
+            # GXSqlDialect.SQLITE,  # <Alex>04042023: As of Pandas-2.0.0, temp_table reflection raises exceptions.</Alex>
+            # TODO: <Alex>ALEX</Alex>
             GXSqlDialect.TRINO,
             GXSqlDialect.AWSATHENA,  # WKS 202201 - AWS Athena currently doesn't support temp_tables.
         ]:
