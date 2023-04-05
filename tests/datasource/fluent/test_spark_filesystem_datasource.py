@@ -29,7 +29,9 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
-def spark_filesystem_datasource(test_backends) -> SparkFilesystemDatasource:
+def spark_filesystem_datasource(
+    empty_data_context, test_backends
+) -> SparkFilesystemDatasource:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
@@ -41,10 +43,12 @@ def spark_filesystem_datasource(test_backends) -> SparkFilesystemDatasource:
         .parent.joinpath(base_directory_rel_path)
         .resolve(strict=True)
     )
-    return SparkFilesystemDatasource(
+    spark_filesystem_datasource = SparkFilesystemDatasource(
         name="spark_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
+    spark_filesystem_datasource._data_context = empty_data_context
+    return spark_filesystem_datasource
 
 
 @pytest.fixture
