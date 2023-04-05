@@ -18,7 +18,7 @@ File-based introspection and partitioning are useful for:
 
 <Prerequisites>
 
-- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
+- [Configured and loaded a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
 - [Configured a Datasource and Data Connector](../../terms/datasource.md)
   
 </Prerequisites>
