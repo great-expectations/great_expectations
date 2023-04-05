@@ -97,6 +97,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_table_columns_to_be_unique.py examples">
     examples = [
         {
+            "dataset_name": "expect_table_columns_to_be_unique_1",
             "data": {
                 "col1": [1, 2, 3, 4, 5],
                 "col2": [2, 3, 4, 5, 6],
@@ -113,6 +114,7 @@ class ExpectTableColumnsToBeUnique(TableExpectation):
             ],
         },
         {
+            "dataset_name": "expect_table_columns_to_be_unique_2",
             "data": {
                 "col1": [1, 2, 3, 4, 5],
                 "col2": [1, 2, 3, 4, 5],

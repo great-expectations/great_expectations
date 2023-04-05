@@ -1,12 +1,13 @@
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.util import get_context
+
+yaml = YAMLHandler()
 
 # Set up a basic spark session
 spark = gx.core.util.get_or_create_spark_application()

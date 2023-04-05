@@ -11,7 +11,7 @@ autoapi==2.0.1
 Babel==2.9.1
 backcall==0.2.0
 bleach==3.3.0
-certifi==2020.6.20
+certifi==2022.12.7
 cffi==1.14.1
 chardet==3.0.4
 click==7.1.2
@@ -20,7 +20,7 @@ defusedxml==0.6.0
 docutils==0.16
 entrypoints==0.3
 gitdb==4.0.5
-GitPython==3.1.7
+GitPython==3.1.30
 idna==2.10
 imagesize==1.2.0
 importlib-metadata==1.7.0
@@ -34,14 +34,14 @@ jsonpatch==1.26
 jsonpointer==2.0
 jsonschema==3.2.0
 jupyter-client==6.1.6
-jupyter-core==4.6.3
+jupyter-core==4.11.2
 lazy-object-proxy==1.4.3
 MarkupSafe==1.1.1
 mistune==0.8.4
-nbconvert==5.6.1
+nbconvert==6.5.1
 nbformat==5.0.7
-notebook==6.4.1
-numpy==1.21.0
+notebook==6.4.12
+numpy==1.22.0
 packaging==20.4
 pandas==1.0.5
 pandocfilters==1.4.2

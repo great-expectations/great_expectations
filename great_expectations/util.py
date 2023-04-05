@@ -52,7 +52,6 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
-from pkg_resources import Distribution
 from typing_extensions import Literal, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
@@ -78,10 +77,10 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa
-    from sqlalchemy import Table
-    from sqlalchemy.engine import reflection
-    from sqlalchemy.sql import Select
+    import sqlalchemy as sa  # noqa: TID251
+    from sqlalchemy import Table  # noqa: TID251
+    from sqlalchemy.engine import reflection  # noqa: TID251
+    from sqlalchemy.sql import Select  # noqa: TID251
 
 except ImportError:
     logger.debug(
@@ -91,12 +90,12 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
-    RemovedIn20Warning = None
 
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
+    from pkg_resources import Distribution
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import FileDataContext
@@ -2087,9 +2086,9 @@ def import_make_url():
     still be accessed from sqlalchemy.engine.url to avoid import errors.
     """
     if version.parse(sa.__version__) < version.parse("1.4"):
-        from sqlalchemy.engine.url import make_url
+        from sqlalchemy.engine.url import make_url  # noqa: TID251
     else:
-        from sqlalchemy.engine import make_url
+        from sqlalchemy.engine import make_url  # noqa: TID251
 
     return make_url
 

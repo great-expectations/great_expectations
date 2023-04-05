@@ -4,10 +4,10 @@ from typing import List, Set
 from unittest import mock
 
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchDefinition, BatchRequest, IDDict
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
@@ -24,7 +24,7 @@ except ImportError:
     sqlalchemy = None
 from great_expectations.validator.validator import Validator
 
-yaml = YAML(typ="safe")
+yaml = YAMLHandler()
 
 
 # TODO: <Alex>Some methods in this module are misplaced and/or provide no action; this must be repaired.</Alex>

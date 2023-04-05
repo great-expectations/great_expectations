@@ -56,7 +56,7 @@ datasource = context.sources.add_pandas_abs(
 ```
 
 :::tip Where did that connection string come from?
-In the above example, the value for `account_url` will be substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependancies](docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md).
+In the above example, the value for `account_url` will be substituted for the contents of the `AZURE_STORAGE_CONNECTION_STRING` key you configured when you [installed GX and set up your Azure Blob Storage dependancies](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs).
 :::
 
 ### 3. Add ABS data to the Datasource as a Data Asset
@@ -69,8 +69,8 @@ Once these values have been defined, we will define our Data Asset with the code
 data_asset = datasource.add_csv_asset(
     name=asset_name,
     batching_regex=batching_regex,
-    container=container,
-    name_starts_with=name_starts_with,
+    abs_container=abs_container,
+    abs_name_starts_with=abs_name_starts_with,
 )
 ```
 
@@ -84,4 +84,4 @@ data_asset = datasource.add_csv_asset(
 
 ### Related reading
 
-For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials](docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)

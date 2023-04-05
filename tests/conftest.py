@@ -17,7 +17,6 @@ import numpy as np
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-from ruamel.yaml import YAML
 
 import great_expectations as gx
 from great_expectations.core import ExpectationConfiguration
@@ -36,6 +35,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
     BaseDataContext,
@@ -109,7 +109,7 @@ if TYPE_CHECKING:
     import pyspark.sql
     from pyspark.sql import SparkSession
 
-yaml = YAML()
+yaml = YAMLHandler()
 ###
 #
 # NOTE: THESE TESTS ARE WRITTEN WITH THE en_US.UTF-8 LOCALE AS DEFAULT FOR STRING FORMATTING

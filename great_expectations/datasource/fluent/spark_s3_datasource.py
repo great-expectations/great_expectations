@@ -12,10 +12,14 @@ from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed at runtime
 )
+from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.interfaces import (
+    BatchMetadata,
+    TestConnectionError,
+)
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
@@ -103,13 +107,14 @@ class SparkS3Datasource(_SparkFilePathDatasource):
     def add_csv_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = None,
+        batching_regex: Union[str, re.Pattern] = MATCH_ALL_PATTERN,
         header: bool = False,
         infer_schema: bool = False,
         prefix: str = "",
         delimiter: str = "/",
         max_keys: int = 1000,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkS3Datasource" object.
 
@@ -122,23 +127,23 @@ class SparkS3Datasource(_SparkFilePathDatasource):
             delimiter: S3 delimiter
             max_keys: S3 max_keys (default is 1000)
             order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
         """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = CSVAsset(
             name=name,
-            batching_regex=batching_regex_pattern,
+            batching_regex=batching_regex,  # type: ignore[arg-type] # pydantic will compile regex str to Pattern
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
+            batch_metadata=batch_metadata or {},
         )
         asset._data_connector = S3DataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
             s3_client=self._get_s3_client(),
-            batching_regex=batching_regex_pattern,
+            batching_regex=asset.batching_regex,
             bucket=self.bucket,
             prefix=prefix,
             delimiter=delimiter,
@@ -148,7 +153,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         asset._test_connection_error_message = (
             S3DataConnector.build_test_connection_error_message(
                 data_asset_name=name,
-                batching_regex=batching_regex_pattern,
+                batching_regex=asset.batching_regex,
                 bucket=self.bucket,
                 prefix=prefix,
                 delimiter=delimiter,
