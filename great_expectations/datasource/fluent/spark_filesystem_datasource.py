@@ -13,6 +13,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
+    BatchMetadata,
     TestConnectionError,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
@@ -61,6 +62,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkFilesystemDatasource" object.
 
@@ -71,6 +73,8 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
         """
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = CSVAsset(
@@ -79,6 +83,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
+            batch_metadata=batch_metadata or {},
         )
         asset._data_connector = FilesystemDataConnector.build_data_connector(
             datasource_name=self.name,
