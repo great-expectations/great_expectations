@@ -1991,9 +1991,7 @@ def test_map_column_values_increasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [4], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([4], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-02-21"]
 
 
@@ -2180,9 +2178,7 @@ def test_map_column_values_decreasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [3], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([3], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-03-20"]
 
 
