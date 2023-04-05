@@ -129,7 +129,7 @@ td .show-scrollbars {
 
 footer {
   position: fixed;
-  border-top: 1px solid #ffffff61;
+  border-top: 1px solid #98989861;
   bottom: 0;
   left: 0;
   right: 0;
@@ -138,14 +138,18 @@ footer {
   font-size: 14px;
   text-align: right;
   width: 100%;
-  /* margin-bottom: 12px; */
-  background: black;
+  background: white;
   z-index: 100000;
 }
 footer a {
   padding-right: 8px;
   color: #ff6210;
   font-weight: 600;
+}
+
+footer a:hover {
+    color: #bc490d;
+    text-decoration: underline;
 }
 
 /* some css overrides for dark mode*/
@@ -190,5 +194,17 @@ footer a {
   }
   .navbar-brand a img {
     visibility:hidden
+  }
+  footer {
+    border-top: 1px solid #ffffff61;
+    background: black;
+    z-index: 100000;
+  }
+  footer a {
+    color: #ff6210;
+  }
+
+  footer a:hover {
+    color: #ff6210;
   }
 }
