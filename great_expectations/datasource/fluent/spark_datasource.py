@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import copy
 import logging
 from typing import (
     TYPE_CHECKING,
@@ -28,6 +27,7 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.optional_imports import SPARK_NOT_IMPORTED, pyspark
 
 if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
 
@@ -132,7 +132,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(batch_request.options)
+        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+            batch_request=batch_request
+        )
 
         # Some pydantic annotations are postponed due to circular imports.
         # Batch.update_forward_refs() will set the annotations before we
