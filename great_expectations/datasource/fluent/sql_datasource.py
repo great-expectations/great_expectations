@@ -30,7 +30,6 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchMetadata,
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
@@ -48,8 +47,10 @@ from great_expectations.optional_imports import sqlalchemy
 
 if TYPE_CHECKING:
     # min version of typing_extension missing `Self`, so it can't be imported at runtime
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
     from typing_extensions import Self
+
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
 
 
 class SQLDatasourceError(Exception):
@@ -576,8 +577,9 @@ class _SQLAsset(DataAsset):
         splitter = self.splitter
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
-            batch_metadata = copy.deepcopy(self.batch_metadata)
-            batch_metadata.update(copy.deepcopy(request.options))
+            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+                batch_request=request
+            )
             batch_spec_kwargs = self._create_batch_spec_kwargs()
             if splitter:
                 batch_spec_kwargs["splitter_method"] = splitter.method_name

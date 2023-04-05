@@ -31,10 +31,10 @@ except ImportError:
     TrinoUserError = None
 
 try:
-    from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql import Select
-    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup
-    from sqlalchemy.sql.selectable import CTE
+    from sqlalchemy.exc import ProgrammingError  # noqa: TID251
+    from sqlalchemy.sql import Select  # noqa: TID251
+    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup  # noqa: TID251
+    from sqlalchemy.sql.selectable import CTE  # noqa: TID251
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
@@ -47,10 +47,10 @@ except ImportError:
     CTE = None
 
 try:
-    from sqlalchemy.engine.row import Row
+    from sqlalchemy.engine.row import Row  # noqa: TID251
 except ImportError:
     try:
-        from sqlalchemy.engine.row import RowProxy
+        from sqlalchemy.engine.row import RowProxy  # noqa: TID251
 
         Row = RowProxy
     except ImportError:
