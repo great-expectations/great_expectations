@@ -232,6 +232,7 @@ except ImportError:
 
 try:
     import sqlalchemy.dialects.postgresql as postgresqltypes  # noqa: TID251
+    import sqlalchemy.dialects.postgresql.dialect as pgDialect  # noqa: TID251
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -247,7 +248,7 @@ try:
     }
 except (ImportError, KeyError):
     postgresqltypes = None
-    postgresqlDialect = None
+    pgDialect = None
     POSTGRESQL_TYPES = {}
 
 try:
