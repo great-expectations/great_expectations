@@ -36,12 +36,7 @@ class SqlAlchemyBatchData(BatchData):
         query: Optional[str] = None,
         # Option 3
         selectable=None,
-        # TODO: <Alex>ALEX</Alex>
         create_temp_table: bool = True,
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
-        # create_temp_table: bool = False,
-        # TODO: <Alex>ALEX</Alex>
         temp_table_schema_name: Optional[str] = None,
         use_quoted_name: bool = False,
         source_schema_name: Optional[str] = None,
@@ -96,11 +91,7 @@ class SqlAlchemyBatchData(BatchData):
         super().__init__(execution_engine=execution_engine)
         engine = execution_engine.engine
         self._engine = engine
-
-        # TODO: <Alex>ALEX</Alex>
         self._record_set_name = record_set_name or "great_expectations_sub_selection"
-        # TODO: <Alex>ALEX</Alex>
-
         if not isinstance(self._record_set_name, str):
             raise TypeError(
                 f"record_set_name should be of type str, not {type(record_set_name)}"
@@ -129,15 +120,6 @@ class SqlAlchemyBatchData(BatchData):
 
         self._dialect = dialect
 
-        # TODO: <Alex>ALEX</Alex>
-        # create_temp_table = False
-        # TODO: <Alex>ALEX</Alex>
-        print(
-            f"\n[ALEX_TEST] [SqlAlchemyBatchData.__init__] TABLE_NAME:\n{table_name} ; TYPE: {str(type(table_name))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [SqlAlchemyBatchData.__init__] CREATE_TEMP_TABLE:\n{create_temp_table} ; TYPE: {str(type(create_temp_table))}"
-        )
         if table_name:
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
@@ -183,42 +165,16 @@ class SqlAlchemyBatchData(BatchData):
                 query=query,
                 temp_table_schema_name=temp_table_schema_name,
             )
-            print(
-                f"\n[ALEX_TEST] [SqlAlchemyBatchData.__init__] TEMP_TABLE_NAME:\n{generated_table_name} ; TYPE: {str(type(generated_table_name))}"
-            )
-            print(
-                f"\n[ALEX_TEST] [SqlAlchemyBatchData.__init__] QUERY:\n{query} ; TYPE: {str(type(query))}"
-            )
-            print(
-                f"\n[ALEX_TEST] [SqlAlchemyBatchData.__init__] TEMP_TABLE_SCHEMA_NAME:\n{temp_table_schema_name} ; TYPE: {str(type(temp_table_schema_name))}"
-            )
             self._selectable = sa.Table(
                 generated_table_name,
                 sa.MetaData(),
                 schema=temp_table_schema_name,
             )
-            print(
-                f"\n[ALEX_TEST] [SqlAlchemyBatchData.__init__] SELF._SELECTABLE-0:\n{self._selectable} ; TYPE: {str(type(self._selectable))}"
-            )
         else:
             if query:
-                print(
-                    f"\n[ALEX_TEST] [SqlAlchemyBatchData.__init__] QUERY:\n{query} ; TYPE: {str(type(query))}"
-                )
                 self._selectable = sa.text(query)
             else:
-                # TODO: <Alex>ALEX</Alex>
-                print(
-                    f"\n[ALEX_TEST] [SqlAlchemyBatchData.__init__] SELF._SELECTABLE-1:\n{selectable} ; TYPE: {str(type(selectable))}"
-                )
                 self._selectable = selectable.alias(self._record_set_name)
-                # TODO: <Alex>ALEX</Alex>
-                # TODO: <Alex>ALEX</Alex>
-                # self._selectable = sa.text(selectable).alias(sa.text(self._record_set_name))
-                # TODO: <Alex>ALEX</Alex>
-                print(
-                    f"\n[ALEX_TEST] [SqlAlchemyBatchData.__init__] SELF._SELECTABLE-2:\n{self._selectable} ; TYPE: {str(type(self._selectable))}"
-                )
 
     @property
     def dialect(self) -> GXSqlDialect:
@@ -340,9 +296,6 @@ class SqlAlchemyBatchData(BatchData):
                     except DatabaseError:
                         connection.execute(sa.text(stmt_2))
         else:
-            print(
-                f"\n[ALEX_TEST] [SqlAlchemyBatchData._create_temporary_table] DIALECT:\n{dialect} ; TYPE: {str(type(dialect))}"
-            )
             # Since currently self._engine can also be a connection we need to
             # check first that it is an engine before creating a connection from it.
             # Otherwise, we use the connection.
@@ -350,14 +303,8 @@ class SqlAlchemyBatchData(BatchData):
                 with self._engine.connect() as connection:
                     with connection.begin():
                         connection.execute(sa.text(stmt))
-                        print(
-                            f"\n[ALEX_TEST] [SqlAlchemyBatchData._create_temporary_table] STMT-0:\n{stmt} ; TYPE: {str(type(stmt))}"
-                        )
             else:
                 # self._engine is already a connection
                 with self._engine.begin():
                     self._engine.execute(sa.text(stmt))
-                    print(
-                        f"\n[ALEX_TEST] [SqlAlchemyBatchData._create_temporary_table] STMT-1:\n{stmt} ; TYPE: {str(type(stmt))}"
-                    )
         return stmt

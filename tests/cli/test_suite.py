@@ -1823,9 +1823,6 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
         uncommitted_dir, f"edit_{expectation_suite_name}.ipynb"
     )
     assert os.path.isfile(expected_notebook_path)
-    print(
-        f"\n[ALEX_TEST] [TEST_SUITE::test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_without_citations_runs_notebook_opens_jupyter()] EXPECTED_NOTEBOOK_PATH:\n{expected_notebook_path} ; TYPE: {str(type(expected_notebook_path))}"
-    )
 
     expected_suite_path: str = os.path.join(
         project_dir, "expectations", f"{expectation_suite_name}.json"
