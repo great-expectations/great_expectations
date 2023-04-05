@@ -151,7 +151,10 @@ class DatasourceStore(Store):
         )
 
     def set(  # type: ignore[override]
-        self, key: Union[DataContextKey, None], value: DatasourceConfig, **kwargs
+        self,
+        key: Union[DataContextKey, None],
+        value: DatasourceConfig | FluentDatasource,
+        **kwargs,
     ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key.
         Args:
@@ -162,8 +165,8 @@ class DatasourceStore(Store):
             DatasourceConfig retrieved from the DatasourceStore.
         """
         if not key:
-            key = self._build_key_from_config(value)
-        return self._persist_datasource(key=key, config=value)
+            key = self._build_key_from_config(value)  # type: ignore[arg-type]
+        return self._persist_datasource(key=key, config=value)  # type: ignore[arg-type]
 
     def _persist_datasource(
         self, key: DataContextKey, config: DatasourceConfig
