@@ -393,8 +393,8 @@ class FileDataContextVariables(DataContextVariables):
                     f"Replacing {len(config_fluent_datasources_stash)} stashed `FluentDatasource`s"
                 )
                 self.data_context.datasources.update(config_fluent_datasources_stash)
-                self.data_context.fluent_config.fluent_datasources = (
-                    config_fluent_datasources_stash
+                self.data_context.fluent_config.fluent_datasources = list(
+                    config_fluent_datasources_stash.values()
                 )
 
 

@@ -8,9 +8,9 @@ from typing import (
     Any,
     Callable,
     ClassVar,
-    Dict,
     Hashable,
     Iterable,
+    List,
     Mapping,
     MutableSequence,
     Optional,
@@ -141,7 +141,7 @@ _DYNAMIC_ASSET_TYPES: list[Type[_PandasDataAsset]]
 class PandasDatasource(_PandasDatasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
     type: Literal["pandas"]
-    assets: Dict[str, _PandasDataAsset]
+    assets: List[_PandasDataAsset]
     def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_dataframe_asset(
         self,
