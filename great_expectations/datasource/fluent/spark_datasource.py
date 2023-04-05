@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-import copy
+import dataclasses
 import logging
+from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     ClassVar,
     Generic,
     List,
+    Optional,
     Type,
     TypeVar,
 )
@@ -14,6 +16,7 @@ from typing import (
 import pydantic
 from typing_extensions import Literal
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
@@ -21,12 +24,14 @@ from great_expectations.datasource.fluent.constants import (
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchRequest,
+    BatchRequestOptions,
     DataAsset,
     Datasource,
 )
 from great_expectations.optional_imports import SPARK_NOT_IMPORTED, pyspark
 
 if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
 
@@ -103,6 +108,45 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
 
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
+        if options:
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(
+                "Data Assets associated with SparkDatasource can only contain a single batch,\n"
+                "therefore BatchRequest options cannot be supplied. BatchRequest options with keys:\n"
+                f"{actual_keys}\nwere passed.\n"
+            )
+
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options={},
+        )
+
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and not batch_request.options
+        ):
+            expect_batch_request_form = BatchRequest(
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options={},
+            )
+            raise gx_exceptions.InvalidBatchRequestError(
+                "BatchRequest should have form:\n"
+                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
+                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+            )
+
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
@@ -131,7 +175,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             batch_spec_passthrough=None,
         )
 
-        batch_metadata = copy.deepcopy(batch_request.options)
+        batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+            batch_request=batch_request
+        )
 
         # Some pydantic annotations are postponed due to circular imports.
         # Batch.update_forward_refs() will set the annotations before we
@@ -164,9 +210,26 @@ class SparkDatasource(_SparkDatasource):
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
-    def add_dataframe_asset(self, name: str, dataframe: DataFrame) -> DataFrameAsset:
+    def add_dataframe_asset(
+        self,
+        name: str,
+        dataframe: DataFrame,
+        batch_metadata: Optional[BatchMetadata] = None,
+    ) -> DataFrameAsset:
+        """Adds a Dataframe DataAsset to this SparkDatasource object.
+
+        Args:
+            name: The name of the Dataframe asset. This can be any arbitrary string.
+            dataframe: The Dataframe containing the data for this data asset.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            The DataFameAsset that has been added to this datasource.
+        """
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
+            batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset=asset)

@@ -107,6 +107,9 @@ COMPLEX_CONFIG_DICT: Final[dict] = {
                     "batching_regex": r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
                     "sep": "|",
                     "names": ["col1", "col2"],
+                    "batch_metadata": {
+                        "pipeline_filename": "${pipeline_filename}",
+                    },
                 },
                 {
                     "type": "json",

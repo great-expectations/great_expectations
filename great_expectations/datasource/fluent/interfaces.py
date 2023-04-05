@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import dataclasses
 import functools
 import logging
@@ -29,6 +30,7 @@ from pydantic import Field, StrictBool, StrictInt, root_validator, validate_argu
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
+from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
@@ -144,7 +146,7 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
-_DatasourceT = TypeVar("_DatasourceT")
+_DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
 
 
 class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
@@ -205,8 +207,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> List[Batch]:
         raise NotImplementedError
 
-    # End Abstract Methods
-
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
@@ -225,9 +225,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
-    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(set(self.batch_request_options))
-
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
 
@@ -237,6 +234,25 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError(
             """One must implement "_validate_batch_request" on a DataAsset subclass."""
         )
+
+    # End Abstract Methods
+
+    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
+        return set(options.keys()).issubset(set(self.batch_request_options))
+
+    def _get_batch_metadata_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> BatchMetadata:
+        """Performs config variable substitution and populates batch request options for
+        Batch.metadata at runtime.
+        """
+        batch_metadata = copy.deepcopy(self.batch_metadata)
+        config_variables = self._datasource._data_context.config_variables  # type: ignore[attr-defined]
+        batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
+            data=batch_metadata, replace_variables_dict=config_variables
+        )
+        batch_metadata.update(copy.deepcopy(batch_request.options))
+        return batch_metadata
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
@@ -607,7 +623,7 @@ class Batch(FluentBaseModel):
     id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any] = {}
+    metadata: Dict[str, Any] = Field(default_factory=dict, allow_mutation=True)
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.
