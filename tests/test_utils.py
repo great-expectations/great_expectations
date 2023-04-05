@@ -13,6 +13,9 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
@@ -701,7 +704,8 @@ def load_data_into_test_database(
                     f"Adding to existing table {table_name} and adding data from {csv_paths}"
                 )
 
-            all_dfs_concatenated.to_sql(
+            add_dataframe_to_db(
+                df=all_dfs_concatenated,
                 name=table_name,
                 con=engine,
                 schema=schema_name,

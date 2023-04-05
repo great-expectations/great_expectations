@@ -8,6 +8,9 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import DataContext
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -420,7 +423,8 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
         df["test_bool"] = df.apply(
             lambda row: True if row["test_bool"] == "t" else False, axis=1
         )
-        df.to_sql(
+        add_dataframe_to_db(
+            df=df,
             name=table_name,
             con=postgresql_engine,
             schema="public",

@@ -19,6 +19,9 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -77,7 +80,6 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
@@ -2327,8 +2329,10 @@ def test_db_connection_string(tmp_path_factory, test_backends):
         basepath = str(tmp_path_factory.mktemp("db_context"))
         path = os.path.join(basepath, "test.db")  # noqa: PTH118
         engine = sa.create_engine("sqlite:///" + str(path))
-        df1.to_sql(name="table_1", con=engine, index=True)
-        df2.to_sql(name="table_2", con=engine, index=True, schema="main")
+        add_dataframe_to_db(df=df1, name="table_1", con=engine, index=True)
+        add_dataframe_to_db(
+            df=df2, name="table_2", con=engine, index=True, schema="main"
+        )
 
         # Return a connection string to this newly-created db
         return "sqlite:///" + str(path)

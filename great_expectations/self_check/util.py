@@ -34,6 +34,9 @@ from dateutil.parser import parse
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
 )
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import (
     ExpectationConfigurationSchema,
     ExpectationSuite,
@@ -50,7 +53,6 @@ from great_expectations.core.util import (
 from great_expectations.dataset import PandasDataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.exceptions.exceptions import (
     ExecutionEngineError,
     InvalidExpectationConfigurationError,
