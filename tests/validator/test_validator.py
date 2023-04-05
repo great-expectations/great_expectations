@@ -1030,15 +1030,21 @@ def test_validator_include_rendered_content_diagnostic(
             schema={"type": "com.superconductive.rendered.string"},
             params={
                 "column": {"schema": {"type": "string"}, "value": "passenger_count"},
-                "min_value": {"schema": {"type": "number"}, "value": 1},
-                "max_value": {"schema": {"type": "number"}, "value": 8},
-                "eval_param__0": {
-                    "schema": {"type": "string"},
-                    "value": "min_value: upstream_column_min",
+                "min_value": {
+                    "schema": {"type": "number"},
+                    "value": 1,
+                    "evaluation_parameter": {
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_min"},
+                    },
                 },
-                "eval_param__1": {
-                    "schema": {"type": "string"},
-                    "value": "max_value: upstream_column_max",
+                "max_value": {
+                    "schema": {"type": "number"},
+                    "value": 8,
+                    "evaluation_parameter": {
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_max"},
+                    },
                 },
             },
             template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",

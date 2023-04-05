@@ -178,6 +178,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         schema: RendererSchema
         value: Any
+        evaluation_parameter: Optional[dict]
 
     class _RendererParamBase(_RendererValueBase):
         """
@@ -187,6 +188,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         renderer_schema: RendererSchema = Field(alias="schema")
         value: Any
+        evaluation_parameter: Optional[dict]
 
         class Config:
             validate_assignment = True
@@ -256,17 +258,18 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     def _get_evaluation_parameter_params_from_raw_kwargs(
         raw_kwargs: Dict[str, Any]
     ) -> Dict[str, RendererConfiguration._RendererParamArgs]:
-        evaluation_parameter_count = 0
         renderer_params_args = {}
-        for key, value in raw_kwargs.items():
-            evaluation_parameter_name = f"eval_param__{evaluation_parameter_count}"
-            renderer_params_args[
-                evaluation_parameter_name
+        for kwarg_name, value in raw_kwargs.items():
+            renderer_params_args[kwarg_name] = {
+                "schema": {"type": RendererValueType.OBJECT},
+                "value": None,
+            }
+            renderer_params_args[kwarg_name][
+                "evaluation_parameter"
             ] = RendererConfiguration._RendererParamArgs(
-                schema=RendererSchema(type=RendererValueType.STRING),
-                value=f'{key}: {value["$PARAMETER"]}',
+                schema=RendererSchema(type=RendererValueType.OBJECT),
+                value=value,
             )
-            evaluation_parameter_count += 1
         return renderer_params_args
 
     @root_validator()
