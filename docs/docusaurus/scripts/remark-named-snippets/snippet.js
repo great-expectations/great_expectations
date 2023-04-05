@@ -161,8 +161,20 @@ function sanitizeText (text) {
  * Note that this is what is run if this file is invoked by Node.
  * An alias `yarn snippet-check` is defined in `package.json` for convenience.
  */
+function getDirs () {
+  // Get all directories that should be processed
+  const manualDirs = ['../../great_expectations', '../../tests']
+  const versionDirs = glob.sync('versioned_code/*/')
+  // remove v0.14.13 from processing since it does not use named snippets
+  const index = versionDirs.indexOf('versioned_code/version-0.14.13/')
+  if (index !== -1) {
+    versionDirs.splice(index, 1)
+  }
+  return manualDirs.concat(versionDirs)
+}
+
 function main () {
-  const snippets = parseSourceDirectories(['../../great_expectations', '../../tests'])
+  const snippets = parseSourceDirectories(getDirs())
   const targetFiles = process.argv.slice(2)
 
   const out = {}

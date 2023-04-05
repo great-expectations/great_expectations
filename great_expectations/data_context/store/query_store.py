@@ -8,9 +8,9 @@ from great_expectations.optional_imports import is_version_greater_or_equal
 from great_expectations.util import filter_properties_dict
 
 try:
-    import sqlalchemy as sa
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine.url import URL
+    import sqlalchemy as sa  # noqa: TID251
+    from sqlalchemy import create_engine  # noqa: TID251
+    from sqlalchemy.engine.url import URL  # noqa: TID251
 
     if is_version_greater_or_equal(sa.__version__, "1.4.0"):
         url_create_fn = URL.create

@@ -13,7 +13,7 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 In this guide we will demonstrate the process of requesting data from a Datasource that has been defined using the `context.sources.add_*` method.
 
 If you are using a Datasource that was created by using the block-config method of directly building the Datasource's yaml or Python dictionary configuration, please see:
-- [How to request data from a block-config style Datasource](docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
+- [How to request data from a block-config style Datasource](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)
 
 ## Prerequisites
 
@@ -80,7 +80,7 @@ for batch in batches:
 ## Next steps
 
 Now that you have a retrieved data from a Data Asset, you may be interested in creating Expectations about your data:
-- [How to create Expectations while interactively evaluating a set of data](docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-- [How to use the Onboarding Data Assistant to evaluate data](docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
+- [How to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [How to use the Onboarding Data Assistant to evaluate data](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
 
 

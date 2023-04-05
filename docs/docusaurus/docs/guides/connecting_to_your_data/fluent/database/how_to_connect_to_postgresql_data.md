@@ -18,7 +18,7 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- [An installation of GX set up to work with PostgreSQL](docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md)
+- [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
 - Source data stored in a PostgreSQL database
 - A passion for data quality
 
@@ -114,14 +114,14 @@ If you wish to connect to additional tables or queries in the same PostgreSQL Da
 Now that you have connected to a PostgreSQL database and created a Data Asset, you may want to look into:
 
 ### Configuring SQL Data Assets further
-- [How to organize Batches in a SQL based Data Asset](docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
+- [How to organize Batches in a SQL based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
 
 ### Requesting Data from a Data Asset
-- [How to request data from a Data Asset](docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
 
 ### Using Data Assets to create Expectations
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
 
 
 
