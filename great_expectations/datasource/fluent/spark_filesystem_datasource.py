@@ -50,7 +50,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             )
 
         if self.assets and test_assets:
-            for asset in self.assets:
+            for asset in self.get_assets().values():
                 asset.test_connection()
 
     def add_csv_asset(

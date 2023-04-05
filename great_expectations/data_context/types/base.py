@@ -133,12 +133,6 @@ class BaseYamlConfig(SerializableDictDot):
     ) -> BYC:
         try:
             schema_instance: Schema = cls._get_schema_instance()
-            print(
-                f"\n[ALEX_TEST] [BaseYamlConfig.from_commented_map()] COMMENTED_MAP-0:\n{commented_map} ; TYPE: {str(type(commented_map))}"
-            )
-            print(
-                f"\n[ALEX_TEST] [BaseYamlConfig.from_commented_map()] COMMENTED_MAP-1:\n{dict(commented_map)} ; TYPE: {str(type(dict(commented_map)))}"
-            )
             config: Union[dict, BYC] = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
@@ -1634,22 +1628,12 @@ class DataContextConfigSchema(Schema):
         required=False,
         allow_none=True,
     )
-    # TODO: <Alex>ALEX</Alex>
     fluent_datasources = fields.Dict(
         keys=fields.Str(),
         required=False,
         allow_none=True,
         load_only=True,
     )
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # fluent_datasources = fields.List(
-    #     cls_or_instance=fields.Dict(),
-    #     required=False,
-    #     allow_none=True,
-    #     load_only=True,
-    # )
-    # TODO: <Alex>ALEX</Alex>
     expectations_store_name = fields.Str()
     validations_store_name = fields.Str()
     evaluation_parameter_store_name = fields.Str()

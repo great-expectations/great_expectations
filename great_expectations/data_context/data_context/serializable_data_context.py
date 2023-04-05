@@ -94,7 +94,6 @@ class SerializableDataContext(AbstractDataContext):
         try:
             with open(config_filepath, "w") as outfile:
 
-                # TODO: <Alex>ALEX</Alex>
                 fluent_datasources = self._synchronize_fluent_datasources()
                 if fluent_datasources:
                     self.fluent_config.update_datasources(
@@ -103,22 +102,15 @@ class SerializableDataContext(AbstractDataContext):
                     logger.info(
                         f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
                     )
-                    print(
-                        f"\n[ALEX_TEST] [SerializableDataContext._save_project_config()] SELF.FLUENT_CONFIG:\n{self.fluent_config} ; TYPE: {str(type(self.fluent_config))}"
-                    )
                     fluent_json_dict: dict[
                         str, JSONValues
                     ] = self.fluent_config._json_dict()
-                    print(
-                        f"\n[ALEX_TEST] [SerializableDataContext._save_project_config()] FLUENT_JSON_DICT:\n{fluent_json_dict} ; TYPE: {str(type(fluent_json_dict))}"
-                    )
                     fluent_json_dict = (
                         self.fluent_config._exclude_name_fields_from_fluent_datasources(
                             config=fluent_json_dict
                         )
                     )
                     self.config._commented_map.update(fluent_json_dict)
-                # TODO: <Alex>ALEX</Alex>
 
                 self.config.to_yaml(outfile)
         except PermissionError as e:

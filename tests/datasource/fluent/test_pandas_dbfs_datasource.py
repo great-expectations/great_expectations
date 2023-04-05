@@ -86,7 +86,6 @@ def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> _FilePathDataAsse
     return asset
 
 
-# TODO: <Alex>ALEX</Alex>
 def bad_batching_regex_config(
     csv_path: pathlib.Path,
 ) -> tuple[re.Pattern, TestConnectionError]:
@@ -100,9 +99,6 @@ def bad_batching_regex_config(
         'DataAsset "csv_asset".'
     )
     return batching_regex, test_connection_error
-
-
-# TODO: <Alex>ALEX</Alex>
 
 
 @pytest.fixture
@@ -199,9 +195,11 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = pandas_dbfs_datasource
+    # TODO: <Alex>ALEX-SHOULD_WE_USE_SOME_KIND_OF_APPEND_ASSET?</Alex>
     pandas_dbfs_datasource.assets = [
         csv_asset,
     ]
+    # TODO: <Alex>ALEX</Alex>
     csv_asset._data_connector = DBFSDataConnector(
         datasource_name=pandas_dbfs_datasource.name,
         data_asset_name=csv_asset.name,

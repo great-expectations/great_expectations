@@ -129,9 +129,6 @@ class FileMigrator:
         target_context.build_data_docs()
 
     def _migrate_fluent_datasources(self, target_context: FileDataContext) -> None:
-        print(
-            f"\n[ALEX_TEST] [FileMigrator._migrate_fluent_datasources()] SELF._FLUENT_CONFIG:\n{self._fluent_config} ; TYPE: {str(type(self._fluent_config))}"
-        )
         target_context.fluent_config = self._fluent_config
         target_context._save_project_config()
 

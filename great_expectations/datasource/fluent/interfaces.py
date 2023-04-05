@@ -13,12 +13,8 @@ from typing import (
     Dict,
     Generic,
     List,
-    # TODO: <Alex>ALEX</Alex>
     MutableMapping,
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     MutableSequence,
-    # TODO: <Alex>ALEX</Alex>
     Optional,
     Sequence,
     Set,
@@ -391,14 +387,12 @@ class Datasource(
     type: str
     name: str
     id: Optional[uuid.UUID] = Field(default=None, description="Datasource id")
-    # TODO: <Alex>ALEX</Alex>
-    # assets: MutableMapping[str, _DataAssetT] = {}
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     assets: MutableSequence[_DataAssetT] = []
-    # TODO: <Alex>ALEX</Alex>
 
     # private attrs
+    # TODO: <Alex>ALEX</Alex>
+    # _data_assets: MutableMapping[str, _DataAssetT] = pydantic.PrivateAttr({})
+    # TODO: <Alex>ALEX</Alex>
     _data_context: GXDataContext = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
@@ -464,58 +458,29 @@ class Datasource(
         data_asset = self.get_asset(batch_request.data_asset_name)
         return data_asset.get_batch_list_from_batch_request(batch_request)
 
-    # TODO: <Alex>ALEX</Alex>
     def get_assets(self) -> MutableMapping[str, _DataAssetT]:
         asset: _DataAssetT
         return {asset.name: asset for asset in self.assets}
-
-    # TODO: <Alex>ALEX</Alex>
 
     def get_asset(self, asset_name: str) -> _DataAssetT:
         """Returns the DataAsset referred to by name"""
         # This default implementation will be used if protocol is inherited
         try:
-            # TODO: <Alex>ALEX</Alex>
-            # return self.assets[asset_name]
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
             return self.get_assets()[asset_name]
-            # TODO: <Alex>ALEX</Alex>
         except KeyError as exc:
-            # TODO: <Alex>ALEX</Alex>
-            # raise LookupError(
-            #     f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
-            # ) from exc
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
             raise LookupError(
                 f"'{asset_name}' not found. Available assets are {list(self.get_assets().keys())}"
             ) from exc
-            # TODO: <Alex>ALEX</Alex>
 
     def delete_asset(self, asset_name: str) -> None:
         """
-        # TODO: <Alex>ALEX-ADD_DOCStRING_TO_ALL_NEW_PUBLIC_METHODS</Alex>
-
         Args:
             asset_name:
 
         """
-        print(
-            f"\n[ALEX_TEST] [Datasource.delete_asset()] ASSET_NAME:\n{asset_name} ; TYPE: {str(type(asset_name))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [Datasource.delete_asset()] SELF.ASSETS-0:\n{self.assets} ; TYPE: {str(type(self.assets))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [Datasource.delete_asset()] SELF.ASSETS-1:\n{self.assets} ; TYPE: {str(type(self.assets))}"
-        )
         asset: _DataAssetT
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
         self.assets = list(self.get_assets().values())
-        print(
-            f"\n[ALEX_TEST] [Datasource.delete_asset()] SELF.ASSETS-2:\n{self.assets} ; TYPE: {str(type(self.assets))}"
-        )
 
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
@@ -535,13 +500,8 @@ class Datasource(
 
         asset.test_connection()
 
-        # TODO: <Alex>ALEX</Alex>
-        # self.assets[asset.name] = asset
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         self.assets.append(asset)
         self.assets = list(self.get_assets().values())
-        # TODO: <Alex>ALEX</Alex>
 
         return asset
 

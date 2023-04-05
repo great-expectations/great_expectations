@@ -15,14 +15,12 @@ import pydantic
 import pytest
 from typing_extensions import Final
 
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.datasource.fluent.constants import (
     _DATASOURCE_NAME_KEY,
     _DATA_ASSET_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
 )
 
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import (
@@ -250,10 +248,6 @@ class TestExcludeUnsetAssetFields:
             ],
         }
         datasource: Datasource = ds_class.parse_obj(ds_dict)
-        # TODO: <Alex>ALEX</Alex>
-        # assert asset_dict_config == datasource.dict()["assets"][asset_name]
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         assert (
             asset_dict_config
             == list(
@@ -263,7 +257,6 @@ class TestExcludeUnsetAssetFields:
                 )
             )[0]
         )
-        # TODO: <Alex>ALEX</Alex>
 
     def test_from_gx_config(self, asset_dict: dict):
         """
@@ -298,13 +291,6 @@ class TestExcludeUnsetAssetFields:
 
         gx_config_dict = gx_config.dict()
         print(f"gx_config_dict\n{pf(gx_config_dict)}")
-        # TODO: <Alex>ALEX</Alex>
-        # assert (
-        #     asset_dict
-        #     == gx_config_dict[_FLUENT_DATASOURCES_KEY]["my_ds"]["assets"]["my_asset"]
-        # )
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         my_datasoure_config_dict = list(
             filter(
                 lambda element: element["name"] == "my_ds",
@@ -318,7 +304,6 @@ class TestExcludeUnsetAssetFields:
             )
         )[0]
         assert asset_dict == my_asset_config_dict
-        # TODO: <Alex>ALEX</Alex>
 
 
 def test_id_only_serialized_if_present(ds_dict_config: dict):
@@ -333,12 +318,6 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
 
         with_ids[ds_name] = copy.deepcopy(ds)
         no_ids[ds_name] = copy.deepcopy(ds)
-        print(
-            f'\n[ALEX_TEST] [TEST_CONFIG::test_id_only_serialized_if_present()] WITH_IDS-0["{ds_name}"]:\n{with_ids[ds_name]} ; TYPE: {str(type(with_ids[ds_name]))}'
-        )
-        print(
-            f'\n[ALEX_TEST] [TEST_CONFIG::test_id_only_serialized_if_present()] NO_IDS-0["{ds_name}"]:\n{no_ids[ds_name]} ; TYPE: {str(type(with_ids[ds_name]))}'
-        )
 
         ds_id = uuid.uuid4()
         all_ids.append(str(ds_id))
@@ -364,13 +343,6 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
             with_ids[ds_name]["assets"][asset_name]["id"] = asset_id
             no_ids[ds_name]["assets"][asset_name].pop("id", None)
 
-    # TODO: <Alex>ALEX</Alex>
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_id_only_serialized_if_present()] WITH_IDS-1:\n{with_ids} ; TYPE: {str(type(with_ids))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_id_only_serialized_if_present()] NO_IDS-1:\n{no_ids} ; TYPE: {str(type(with_ids))}"
-    )
     no_ids = (
         _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
             config={
@@ -385,22 +357,9 @@ def test_id_only_serialized_if_present(ds_dict_config: dict):
             }
         )
     )
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_id_only_serialized_if_present()] WITH_IDS-2:\n{with_ids} ; TYPE: {str(type(with_ids))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_id_only_serialized_if_present()] NO_IDS-2:\n{no_ids} ; TYPE: {str(type(with_ids))}"
-    )
-    # TODO: <Alex>ALEX</Alex>
 
-    # TODO: <Alex>ALEX</Alex>
-    # gx_config_no_ids = GxConfig.parse_obj({_FLUENT_DATASOURCES_KEY: no_ids})
-    # gx_config_with_ids = GxConfig.parse_obj({_FLUENT_DATASOURCES_KEY: with_ids})
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     gx_config_no_ids = GxConfig.parse_obj(no_ids)
     gx_config_with_ids = GxConfig.parse_obj(with_ids)
-    # TODO: <Alex>ALEX</Alex>
 
     assert "id" not in str(gx_config_no_ids.dict())
     assert "id" not in gx_config_no_ids.json()
@@ -484,7 +443,6 @@ def test_catch_bad_top_level_config(
 @pytest.mark.parametrize(
     ["bad_asset_config", "expected_error_loc", "expected_msg"],
     [
-        # TODO: <Alex>ALEX</Alex>
         p(
             {
                 "name": "missing `table_name`",
@@ -499,8 +457,6 @@ def test_catch_bad_top_level_config(
             "field required",
             id="missing `table_name`",
         ),
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         p(
             {
                 "name": "unknown splitter",
@@ -521,7 +477,6 @@ def test_catch_bad_top_level_config(
             "unexpected value; permitted:",
             id="unknown splitter method",
         ),
-        # TODO: <Alex>ALEX</Alex>
     ],
 )
 def test_catch_bad_asset_configs(
@@ -552,26 +507,11 @@ def test_catch_bad_asset_configs(
     print(f"\n{exc_info.typename}:{exc_info.value}")
 
     all_errors = exc_info.value.errors()
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_catch_bad_asset_configs()] ALL_ERRORS:\n{all_errors} ; TYPE: {str(type(all_errors))}"
-    )
     assert len(all_errors) >= 1, "Expected at least 1 error"
     test_msg = ""
     for error in all_errors:
-        print(
-            f"\n[ALEX_TEST] [TEST_CONFIG::test_catch_bad_asset_configs()] ERROR:\n{error} ; TYPE: {str(type(error))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [TEST_CONFIG::test_catch_bad_asset_configs()] EXPECTED_ERROR_LOC:\n{expected_error_loc} ; TYPE: {str(type(expected_error_loc))}"
-        )
-        print(
-            f'\n[ALEX_TEST] [TEST_CONFIG::test_catch_bad_asset_configs()] ALL_ERRORS[0]["LOC"]:\n{all_errors[0]["loc"]} ; TYPE: {str(type(all_errors[0]["loc"]))}'
-        )
         if expected_error_loc == all_errors[0]["loc"]:
             test_msg = error["msg"]
-            print(
-                f"\n[ALEX_TEST] [TEST_CONFIG::test_catch_bad_asset_configs()] TEST_MSG:\n{test_msg} ; TYPE: {str(type(test_msg))}"
-            )
             break
     assert test_msg.startswith(expected_msg)
 
@@ -696,20 +636,7 @@ def test_yaml_file_config_round_trip(
     pp(re_loaded)
     assert re_loaded
 
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_yaml_file_config_round_trip()] FROM_YAML_GX_CONFIG:\n{from_yaml_gx_config} ; TYPE: {str(type(from_yaml_gx_config))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_yaml_file_config_round_trip()] RE_LOADED:\n{re_loaded} ; TYPE: {str(type(re_loaded))}"
-    )
-    # TODO: <Alex>ALEX</Alex>
-    # assert from_yaml_gx_config == re_loaded
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # assert GxConfig.parse_obj(sorted(from_yaml_gx_config.dict())) == GxConfig.parse_obj(sorted(re_loaded.dict()))
     assert sorted(from_yaml_gx_config.dict()) == sorted(re_loaded.dict())
-    # assert sorted(from_yaml_gx_config) == sorted(re_loaded)
-    # TODO: <Alex>ALEX</Alex>
 
 
 def test_assets_key_presence(
@@ -723,68 +650,23 @@ def test_assets_key_presence(
         else:
             ds_wo_assets = ds
     assert ds_with_assets, "Need at least one Datasource with assets for this test"
-    # TODO: <Alex>ALEX</Alex>
     assert ds_wo_assets, "Need at least one Datasource without assets for this test"
-    # TODO: <Alex>ALEX</Alex>
 
     dumped_as_dict: dict = yaml.load(from_yaml_gx_config.yaml())
     print(
         f"  dict from dumped yaml ->\n\n{pf(dumped_as_dict['fluent_datasources'], depth=2)}"
     )
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_assets_key_presence()] DUMPED_AS_DICT:\n{dumped_as_dict} ; TYPE: {str(type(dumped_as_dict))}"
-    )
 
-    # TODO: <Alex>ALEX</Alex>
-    # assert _ASSETS_KEY in list(
-    #     filter(
-    #         lambda element: element["name"] == ds_with_assets.name,
-    #         dumped_as_dict[_FLUENT_DATASOURCES_KEY],
-    #     )
-    # )[0]
-    # assert _ASSETS_KEY not in list(
-    #     filter(
-    #         lambda element: element["name"] == ds_wo_assets.name,
-    #         dumped_as_dict[_FLUENT_DATASOURCES_KEY],
-    #     )
-    # )[0]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     assert _ASSETS_KEY in dumped_as_dict[_FLUENT_DATASOURCES_KEY][ds_with_assets.name]
     assert _ASSETS_KEY not in dumped_as_dict[_FLUENT_DATASOURCES_KEY][ds_wo_assets.name]
-    # TODO: <Alex>ALEX</Alex>
 
 
 def test_splitters_deserialization(
     inject_engine_lookup_double, from_all_config: GxConfig
 ):
-    # # TODO: <Alex>ALEX</Alex>
-    # # table_asset: TableAsset = from_all_config.datasources["my_pg_ds"].assets[
-    # #     "with_splitter"
-    # # ]
-    # # TODO: <Alex>ALEX</Alex>
-    # # TODO: <Alex>ALEX</Alex>
-    # assets: List[TableAsset] = list(
-    #     filter(
-    #         lambda element: element.name == "my_pg_ds",
-    #         from_all_config.datasources,
-    #     )
-    # )[0].assets
-    # table_asset: TableAsset = list(
-    #     filter(
-    #         lambda element: element.name == "with_splitter",
-    #         assets,
-    #     )
-    # )[0]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     table_asset: TableAsset = from_all_config.get_datasources()[
         "my_pg_ds"
     ].get_assets()["with_splitter"]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     assert isinstance(table_asset.splitter, SplitterYearAndMonth)
     assert table_asset.splitter.method_name == "split_on_year_and_month"
 
@@ -828,35 +710,16 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     from_dict_default_pandas_config = GxConfig.parse_obj(
         DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
     )
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_dict_default_pandas_config_round_trip()] FROM_DICT_DEFAULT_PANDAS_CONFIG:\n{from_dict_default_pandas_config} ; TYPE: {str(type(from_dict_default_pandas_config))}"
-    )
-    # TODO: <Alex>ALEX</Alex>
-    # assert (
-    #     DEFAULT_PANDAS_DATA_ASSET_NAME
-    #     not in from_dict_default_pandas_config.fluent_datasources[
-    #         DEFAULT_PANDAS_DATASOURCE_NAME
-    #     ].assets
-    # )
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     assert (
         DEFAULT_PANDAS_DATA_ASSET_NAME
         not in from_dict_default_pandas_config.get_datasources()[
             DEFAULT_PANDAS_DATASOURCE_NAME
         ].get_assets()
     )
-    # TODO: <Alex>ALEX</Alex>
 
     dumped: dict = from_dict_default_pandas_config.dict()
     print(f"  Dumped Dict ->\n\n{pf(dumped)}\n")
 
-    # TODO: <Alex>ALEX</Alex>
-    # datasource_without_default_pandas_data_asset_config_dict[_FLUENT_DATASOURCES_KEY][
-    #     DEFAULT_PANDAS_DATASOURCE_NAME
-    # ]["assets"].pop(DEFAULT_PANDAS_DATA_ASSET_NAME)
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     default_pandas_datasoure_config_dict = list(
         filter(
             lambda element: element["name"] == DEFAULT_PANDAS_DATASOURCE_NAME,
@@ -865,21 +728,11 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
             ],
         )
     )[0]
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_dict_default_pandas_config_round_trip()] DEFAULT_PANDAS_DATASOURE_CONFIG_DICT:\n{default_pandas_datasoure_config_dict} ; TYPE: {str(type(default_pandas_datasoure_config_dict))}"
-    )
     default_pandas_datasoure_config_dict["assets"] = list(
         filter(
             lambda element: element["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME,
             default_pandas_datasoure_config_dict["assets"],
         )
-    )
-    # TODO: <Alex>ALEX</Alex>
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_dict_default_pandas_config_round_trip()] DATASOURCE_WITHOUT_DEFAULT_PANDAS_DATA_ASSET_CONFIG_DICT:\n{datasource_without_default_pandas_data_asset_config_dict} ; TYPE: {str(type(datasource_without_default_pandas_data_asset_config_dict))}"
-    )
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_dict_default_pandas_config_round_trip()] DUMPED:\n{dumped} ; TYPE: {str(type(dumped))}"
     )
     assert datasource_without_default_pandas_data_asset_config_dict == dumped
 
@@ -894,12 +747,6 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     only_default_pandas_datasource_and_data_asset_config_dict = copy.deepcopy(
         DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT
     )
-    # TODO: <Alex>ALEX</Alex>
-    # only_default_pandas_datasource_and_data_asset_config_dict[_FLUENT_DATASOURCES_KEY][
-    #     DEFAULT_PANDAS_DATASOURCE_NAME
-    # ]["assets"].pop("my_csv_asset")
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     default_pandas_datasoure_config_dict = list(
         filter(
             lambda element: element["name"] == DEFAULT_PANDAS_DATASOURCE_NAME,
@@ -908,26 +755,17 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
             ],
         )
     )[0]
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_dict_default_pandas_config_round_trip()] DEFAULT_PANDAS_DATASOURE_CONFIG_DICT:\n{default_pandas_datasoure_config_dict} ; TYPE: {str(type(default_pandas_datasoure_config_dict))}"
-    )
     default_pandas_datasoure_config_dict["assets"] = list(
         filter(
             lambda element: element["name"] != "my_csv_asset",
             default_pandas_datasoure_config_dict["assets"],
         )
     )
-    # TODO: <Alex>ALEX</Alex>
 
     from_dict_only_default_pandas_config = GxConfig.parse_obj(
         only_default_pandas_datasource_and_data_asset_config_dict
     )
-    # TODO: <Alex>ALEX</Alex>
-    # assert from_dict_only_default_pandas_config.fluent_datasources == {}
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     assert from_dict_only_default_pandas_config.fluent_datasources == []
-    # TODO: <Alex>ALEX</Alex>
 
 
 @pytest.fixture
@@ -982,14 +820,7 @@ def test_config_substitution_retains_original_value_on_save(
     my_conn_str = f"sqlite:///{sqlite_database_path}"
     monkeypatch.setenv("MY_CONN_STR", my_conn_str)
 
-    # TODO: <Alex>ALEX</Alex>
-    # ds_w_subs: SqliteDatasource = context.fluent_config.datasources[  # type: ignore[assignment]
-    #     "my_sqlite_ds_w_subs"
-    # ]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     ds_w_subs: SqliteDatasource = context.fluent_config.get_datasources()["my_sqlite_ds_w_subs"]  # type: ignore[assignment]
-    # TODO: <Alex>ALEX</Alex>
 
     assert str(ds_w_subs.connection_string) == r"${MY_CONN_STR}"
     assert (
@@ -999,38 +830,11 @@ def test_config_substitution_retains_original_value_on_save(
         == my_conn_str
     )
 
-    # TODO: <Alex>ALEX</Alex>
     context._save_project_config()
-    # TODO: <Alex>ALEX</Alex>
 
-    # TODO: <Alex>ALEX</Alex>
     round_tripped = cast(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
     )[_FLUENT_DATASOURCES_KEY]["my_sqlite_ds_w_subs"]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    a = cast(dict, yaml.load(file_dc_config_file_with_substitutions.read_text()))[
-        _FLUENT_DATASOURCES_KEY
-    ]
-    print(
-        f"\n[ALEX_TEST] [TEST_CONFIG::test_config_substitution_retains_original_value_on_save()] ROUND_TRIPPED-0:\n{a} ; TYPE: {str(type(a))}"
-    )
-    # b = cast(dict, yaml.load(file_dc_config_file_with_substitutions.read_text()))[_FLUENT_DATASOURCES_KEY].get_datasources()
-    # print(f'\n[ALEX_TEST] [TEST_CONFIG::test_config_substitution_retains_original_value_on_save()] ROUND_TRIPPED-1:\n{b} ; TYPE: {str(type(b))}')
-    # TODO: <Alex>ALEX</Alex>
-    # round_tripped = list(
-    #     filter(
-    #         lambda element: element["name"] == "my_sqlite_ds_w_subs",
-    #         cast(dict, yaml.load(file_dc_config_file_with_substitutions.read_text()))[_FLUENT_DATASOURCES_KEY],
-    #     )
-    # )[0]
-    # TODO: <Alex>ALEX</Alex>
-
-    # TODO: <Alex>ALEX</Alex>
-    # # fixme: serialized items should not have name
-    # round_tripped.pop("name")
-    # TODO: <Alex>ALEX</Alex>
 
     assert round_tripped == original
 
@@ -1083,31 +887,5 @@ def test_config_substitution_retains_original_value_on_save_w_run_time_mods(
         dict, yaml.load(file_dc_config_file_with_substitutions.read_text())
     )[_FLUENT_DATASOURCES_KEY]
 
-    # TODO: <Alex>ALEX</Alex>
     assert round_tripped_datasources["my_new_one"]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     assert round_tripped_datasources["my_sqlite_ds_w_subs"]["assets"]["new_asset"]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # assert list(
-    #     filter(
-    #         lambda element: element["name"] == "my_new_one",
-    #         round_tripped_datasources,
-    #     )
-    # )[0]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
-    # my_sqlite_ds_w_subs_datasource_assets = list(
-    #     filter(
-    #         lambda element: element["name"] == "my_sqlite_ds_w_subs",
-    #         round_tripped_datasources,
-    #     )
-    # )[0]["assets"]
-    # assert list(
-    #     filter(
-    #         lambda element: element["name"] == "new_asset",
-    #         my_sqlite_ds_w_subs_datasource_assets,
-    #     )
-    # )[0]
-    # TODO: <Alex>ALEX</Alex>

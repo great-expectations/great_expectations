@@ -159,12 +159,7 @@ class SparkDatasource(_SparkDatasource):
     # instance attributes
     type: Literal["spark"] = "spark"
 
-    # TODO: <Alex>ALEX</Alex>
-    # assets: Dict[str, DataFrameAsset] = {}  # type: ignore[assignment]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     assets: List[DataFrameAsset] = []  # type: ignore[assignment]
-    # TODO: <Alex>ALEX</Alex>
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...

@@ -10,14 +10,10 @@ from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, U
 import pytest
 from pydantic import DirectoryPath, validate_arguments
 
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.datasource.fluent.constants import (
-    _DATASOURCE_NAME_KEY,
-    _DATA_ASSET_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
 )
 
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
@@ -380,9 +376,6 @@ def test_minimal_ds_to_asset_flow(context_sources_cleanup):
     # 4. Add a DataAsset
     red_asset: DataAsset = purple_ds.add_red_asset("my_asset_name")
     assert isinstance(red_asset, RedAsset)
-    print(
-        f"\n[ALEX_TEST] [TEST_METADATASOURCE.test_minimal_ds_to_asset_flow()] RED_ASSET:\n{red_asset} ; TYPE: {str(type(red_asset))}"
-    )
 
     # 5. Get an asset by name - (method defined in parent `Datasource`)
     assert red_asset is purple_ds.get_asset("my_asset_name")
@@ -409,18 +402,7 @@ def assert_fluent_datasource_content(
 ):
     config = yaml.load(config_file_path.read_text())
     assert _FLUENT_DATASOURCES_KEY in config
-    # TODO: <Alex>ALEX</Alex>
-    # assert sorted(
-    #     config[_FLUENT_DATASOURCES_KEY],
-    #     key=lambda element: element["name"],
-    # ) == sorted(
-    #     fluent_datasource_config,
-    #     key=lambda element: element["name"],
-    # )
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     assert config[_FLUENT_DATASOURCES_KEY] == fluent_datasource_config
-    # TODO: <Alex>ALEX</Alex>
 
 
 @pytest.fixture

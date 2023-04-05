@@ -60,12 +60,7 @@ def pandas_sql_data(
         sql=sqlalchemy.sql.text("SELECT * FROM my_table"),
         con=con,
     )
-    # TODO: <Alex>ALEX</Alex>
-    # asset = pandas_ds.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     asset = pandas_ds.get_assets()[DEFAULT_PANDAS_DATA_ASSET_NAME]
-    # TODO: <Alex>ALEX</Alex>
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 

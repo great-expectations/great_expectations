@@ -101,26 +101,14 @@ def test_serialize_fluent_config(
 
     assert fluent_file_context.fluent_config.datasources
 
-    # TODO: <Alex>ALEX</Alex>
-    # for ds_name, datasource in fluent_file_context.fluent_config.datasources.items():
-    #     assert ds_name in dumped_yaml
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     for (
         ds_name,
         datasource,
     ) in fluent_file_context.fluent_config.get_datasources().items():
         assert ds_name in dumped_yaml
-        # TODO: <Alex>ALEX</Alex>
 
-        # TODO: <Alex>ALEX</Alex>
-        # for asset_name in datasource.assets.keys():
-        #     assert asset_name in dumped_yaml
-        # TODO: <Alex>ALEX</Alex>
-        # TODO: <Alex>ALEX</Alex>
         for asset_name in datasource.get_assets().keys():
             assert asset_name in dumped_yaml
-        # TODO: <Alex>ALEX</Alex>
 
 
 def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataContext):
@@ -139,14 +127,8 @@ def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataC
 
             dc_datasources[datasource.type].append(datasource.name)
 
-            # TODO: <Alex>ALEX</Alex>
-            # for asset in datasource.assets.values():
-            #     assert isinstance(asset._data_connector, datasource.data_connector_type)
-            # TODO: <Alex>ALEX</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            for asset in datasource.assets:
+            for asset in datasource.get_assets().values():
                 assert isinstance(asset._data_connector, datasource.data_connector_type)
-            # TODO: <Alex>ALEX</Alex>
             print()
 
     print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
@@ -185,15 +167,8 @@ def test_save_datacontext_persists_fluent_config(
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
 
     initial_yaml = config_file.read_text()
-    # TODO: <Alex>ALEX</Alex>
-    # for ds_name in fluent_only_config.datasources:
-    #     assert ds_name not in initial_yaml
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     for ds_name in fluent_only_config.get_datasources():
         assert ds_name not in initial_yaml
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
 
     context: FileDataContext = get_context(
         context_root_dir=config_file.parent, cloud_mode=False
@@ -207,14 +182,8 @@ def test_save_datacontext_persists_fluent_config(
 
     print("\n".join(diff))
 
-    # TODO: <Alex>ALEX</Alex>
-    # for ds_name in fluent_only_config.datasources:
-    #     assert ds_name in final_yaml
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     for ds_name in fluent_only_config.get_datasources():
         assert ds_name in final_yaml
-    # TODO: <Alex>ALEX</Alex>
 
 
 def test_add_and_save_fluent_datasource(

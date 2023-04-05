@@ -47,8 +47,9 @@ def test_dataframe_asset(
     )
     assert len(datasource.assets) == 2
 
-    # TODO: <Alex>ALEX</Alex>
     assert all(
-        [asset.dataframe.toPandas().equals(pandas_df) for asset in datasource.assets]
+        [
+            asset.dataframe.toPandas().equals(pandas_df)
+            for asset in datasource.get_assets().values()
+        ]
     )
-    # TODO: <Alex>ALEX</Alex>

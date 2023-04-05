@@ -842,12 +842,7 @@ class SQLDatasource(Datasource):
     )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
-    # TODO: <Alex>ALEX</Alex>
-    # assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
-    # TODO: <Alex>ALEX</Alex>
-    # TODO: <Alex>ALEX</Alex>
     assets: List[Union[TableAsset, QueryAsset]] = []
-    # TODO: <Alex>ALEX</Alex>
 
     # private attrs
     _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
@@ -902,7 +897,7 @@ class SQLDatasource(Datasource):
                 f"{str(e)}"
             ) from e
         if self.assets and test_assets:
-            for asset in self.assets:
+            for asset in self.get_assets().values():
                 asset._datasource = self
                 asset.test_connection()
 
