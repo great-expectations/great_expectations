@@ -10,5 +10,5 @@ f5e7df1846102d9a62cc9b9110387925ffae60cc
 # https://github.com/great-expectations/great_expectations/pull/7290
 597b2b625569b6f5f110f8230ac26ab405167da6
 # Apply noqa markers for TID251 (sqlalchemy) violations
-# PR TBD
-# COMMIT TBD
+# https://github.com/great-expectations/great_expectations/pull/7564
+e55b3484a86f654e8b819041dd6cc73730e01a8f
