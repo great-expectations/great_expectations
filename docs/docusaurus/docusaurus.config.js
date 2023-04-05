@@ -1,6 +1,7 @@
 /** @type {import('@docusaurus/types').DocusaurusConfig} */
 
 const remarkNamedSnippets = require('./scripts/remark-named-snippets/index')
+const remarkCodeImport = require('remark-code-import')
 
 module.exports = {
   title: 'Great Expectations',
@@ -169,7 +170,7 @@ module.exports = {
         },
         {
           to: 'https://greatexpectations.io/gx-cloud',
-          label: 'Cloud early access',
+          label: 'GX Cloud',
           position: 'right',
           className: 'header-cloud-link',
           'aria-label': 'Early cloud access'
@@ -253,7 +254,8 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          remarkPlugins: [remarkNamedSnippets],
+          // Note: remarkCodeImport is included to handle earlier versions with line number references (e.g. v0.14.13)
+          remarkPlugins: [remarkNamedSnippets, remarkCodeImport],
           lastVersion: 'current',
           versions: {
             current: {

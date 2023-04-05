@@ -9,11 +9,10 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa
-    from sqlalchemy import Table
-    from sqlalchemy.engine import reflection
-    from sqlalchemy.exc import RemovedIn20Warning
-    from sqlalchemy.sql import Select
+    import sqlalchemy as sa  # noqa: TID251
+    from sqlalchemy import Table  # noqa: TID251
+    from sqlalchemy.engine import reflection  # noqa: TID251
+    from sqlalchemy.sql import Select  # noqa: TID251
 
 except ImportError:
     logger.debug(
@@ -23,7 +22,6 @@ except ImportError:
     reflection = None
     Table = None
     Select = None
-    RemovedIn20Warning = None
 
 
 def add_dataframe_to_db(
@@ -77,7 +75,10 @@ def add_dataframe_to_db(
     if isinstance(con, sa.engine.Engine):
         con = con.connect()
     with warnings.catch_warnings():
-        warnings.filterwarnings(action="ignore", category=RemovedIn20Warning)
+        # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+        # but using the base class here since sqlalchemy is an optional dependency and this
+        # warning type only exists in sqlalchemy < 2.0.
+        warnings.filterwarnings(action="ignore", category=DeprecationWarning)
         df.to_sql(
             name=name,
             con=con,
