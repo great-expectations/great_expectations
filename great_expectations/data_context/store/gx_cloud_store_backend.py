@@ -505,6 +505,8 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def _has_key(self, key: Tuple[str, ...]) -> bool:
         try:
             _ = self._get(key)
+        except StoreBackendTransientError:
+            raise
         except StoreBackendError as e:
             logger.info(f"Could not find object associated with key {key}: {e}")
             return False
