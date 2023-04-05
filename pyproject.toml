@@ -197,7 +197,6 @@ exclude = [
     # tests
     'tests/datasource/fluent/tasks\.py',
     'tests/datasource/fluent/integration/integration_test_utils\.py',
-    'tests/datasource/fluent/test_spark_datasource\.py',
 ]
 
 [tool.pydantic-mypy]
