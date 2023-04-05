@@ -91,7 +91,11 @@ class GxConfig(FluentBaseModel):
         return self.fluent_datasources
 
     def get_datasources_as_dict(self) -> Dict[str, Datasource]:
-        """Returns available Datasource objects as dictionary, with corresponding name as key."""
+        """Returns available Datasource objects as dictionary, with corresponding name as key.
+
+        Returns:
+            Dictionary of "Datasource" objects with "name" attribute serving as key.
+        """
         datasource: Datasource
         datasources_as_dict: Dict[str, Datasource] = {
             datasource.name: datasource for datasource in self.fluent_datasources

@@ -472,7 +472,11 @@ class Datasource(
         return data_asset.get_batch_list_from_batch_request(batch_request)
 
     def get_assets_as_dict(self) -> MutableMapping[str, _DataAssetT]:
-        """Returns available DataAsset objects as dictionary, with corresponding name as key."""
+        """Returns available DataAsset objects as dictionary, with corresponding name as key.
+
+        Returns:
+            Dictionary of "_DataAssetT" objects with "name" attribute serving as key.
+        """
         asset: _DataAssetT
         assets_as_dict: MutableMapping[str, _DataAssetT] = {
             asset.name: asset for asset in self.assets
