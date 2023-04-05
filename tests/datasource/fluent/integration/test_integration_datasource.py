@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pathlib
 
-import pandas as pd
 import pytest
 
 from great_expectations.checkpoint import SimpleCheckpoint
@@ -18,7 +17,6 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
     TestConnectionError,
 )
-from great_expectations.optional_imports import is_version_greater_or_equal
 from tests.datasource.fluent.integration.conftest import sqlite_datasource
 from tests.datasource.fluent.integration.integration_test_utils import (
     run_batch_head,
