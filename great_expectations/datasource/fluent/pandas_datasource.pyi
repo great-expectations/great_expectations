@@ -12,7 +12,7 @@ from typing import (
     Hashable,
     Iterable,
     Mapping,
-    MutableMapping,
+    MutableSequence,
     Optional,
     Sequence,
     Set,
@@ -117,7 +117,7 @@ _PandasDataAssetT = TypeVar("_PandasDataAssetT", bound=_PandasDataAsset)
 
 class _PandasDatasource(Datasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
-    assets: MutableMapping[str, _PandasDataAssetT]  # type: ignore[valid-type]
+    assets: MutableSequence[_PandasDataAssetT]  # type: ignore[valid-type]
     @property
     def execution_engine_type(self) -> Type[PandasExecutionEngine]: ...
     def test_connection(self, test_assets: bool = ...) -> None: ...
