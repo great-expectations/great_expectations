@@ -8,7 +8,6 @@ import pytest
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.expectations.registry import get_renderer_impl
-from great_expectations.optional_imports import is_version_greater_or_equal
 from great_expectations.render import RenderedAtomicContent
 
 
@@ -166,9 +165,6 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
     snapshot,
     get_prescriptive_rendered_content,
 ):
-    if is_version_greater_or_equal(pd.__version__, "2.0.0"):
-        pytest.xfail(reason="Altair is currently not compatible with pandas 2.0.0")
-
     update_dict = {
         "expectation_type": "expect_column_kl_divergence_to_be_less_than",
         "kwargs": {
@@ -196,9 +192,6 @@ def test_atomic_prescriptive_summary_expect_column_kl_divergence_to_be_less_than
 def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less_than(
     snapshot, get_diagnostic_rendered_content
 ):
-    if is_version_greater_or_equal(pd.__version__, "2.0.0"):
-        pytest.xfail(reason="Altair is currently not compatible with pandas 2.0.0")
-
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
     expectation_config = {
@@ -245,9 +238,6 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
 def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than(
     snapshot, get_diagnostic_rendered_content
 ):
-    if is_version_greater_or_equal(pd.__version__, "2.0.0"):
-        pytest.xfail(reason="Altair is currently not compatible with pandas 2.0.0")
-
     # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
     # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
     expectation_config = {
