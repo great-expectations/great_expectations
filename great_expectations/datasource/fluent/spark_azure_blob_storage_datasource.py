@@ -16,7 +16,10 @@ from great_expectations.datasource.fluent.config_str import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import TestConnectionError
+from great_expectations.datasource.fluent.interfaces import (
+    BatchMetadata,
+    TestConnectionError,
+)
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )

@@ -12,6 +12,9 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     DBFSDataConnector as DBFSDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
+    BatchMetadata,
+)
+from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )
 from great_expectations.datasource.fluent.interfaces import (
@@ -36,4 +39,5 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
     ) -> CSVAsset: ...

@@ -15,7 +15,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
-
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
