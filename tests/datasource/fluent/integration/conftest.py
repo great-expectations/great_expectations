@@ -25,7 +25,6 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
-from great_expectations.df_to_database_loader import add_dataframe_to_db
 
 logger = logging.getLogger(__name__)
 
