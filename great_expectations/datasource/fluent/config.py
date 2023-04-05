@@ -103,7 +103,11 @@ class GxConfig(FluentBaseModel):
         return datasources_as_dict
 
     def get_datasource_names(self) -> Set[str]:
-        """Returns the set of available Datasource names."""
+        """Returns the set of available Datasource names.
+
+        Returns:
+            Set of available Datasource names.
+        """
         datasource: Datasource
         return {datasource.name for datasource in self.datasources}
 

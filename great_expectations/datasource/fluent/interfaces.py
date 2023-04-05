@@ -481,7 +481,11 @@ class Datasource(
         return assets_as_dict
 
     def get_asset_names(self) -> Set[str]:
-        """Returns the set of available DataAsset names"""
+        """Returns the set of available DataAsset names
+
+        Returns:
+            Set of available DataAsset names.
+        """
         asset: _DataAssetT
         return {asset.name for asset in self.assets}
 
