@@ -490,6 +490,9 @@ class Datasource(
 
         Args:
             asset_name: name of DataAsset sought.
+
+        Returns:
+            _DataAssetT -- if named "DataAsset" object exists; otherwise, exception is raised.
         """
         # This default implementation will be used if protocol is inherited
         try:

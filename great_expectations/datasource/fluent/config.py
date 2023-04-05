@@ -112,6 +112,9 @@ class GxConfig(FluentBaseModel):
 
         Args:
             datasource_name: name of Datasource sought.
+
+        Returns:
+            Datasource -- if named "Datasource" objects exists; otherwise, exception is raised.
         """
         try:
             datasource: Datasource
