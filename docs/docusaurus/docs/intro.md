@@ -92,7 +92,7 @@ We’re committed to supporting and growing the community around Great Expectati
 Open source doesn’t always have the best reputation for being friendly and welcoming, and that makes us sad. Everyone belongs in open source, and Great Expectations is dedicated to making you feel welcome.
 
 #### Get in touch with the Great Expectations team
-Join our public slack channel here: [join Slack](https://greatexpectations.io/slack). We’re not always available, but we’re there and responsive an awful lot of the time. Please read our [Slack Guidelines](https://github.com/great-expectations/great_expectations/blob/develop/SLACK_GUIDELINES.md).
+Join our public slack channel here: [join Slack](https://greatexpectations.io/slack). We’re not always available, but we’re there and responsive an awful lot of the time. Please read our [Slack Guidelines](https://discourse.greatexpectations.io/t/slack-guidelines/1195).
 
 #### Ask a question
 Slack is good for that, too: [join Slack](https://greatexpectations.io/slack) and read [How to write a good question in Slack](https://github.com/great-expectations/great_expectations/discussions/4951). You can also use [GitHub Discussions](https://github.com/great-expectations/great_expectations/discussions/4951).

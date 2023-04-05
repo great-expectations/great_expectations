@@ -9,10 +9,10 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa
-    from sqlalchemy import Table
-    from sqlalchemy.engine import reflection
-    from sqlalchemy.sql import Select
+    import sqlalchemy as sa  # noqa: TID251
+    from sqlalchemy import Table  # noqa: TID251
+    from sqlalchemy.engine import reflection  # noqa: TID251
+    from sqlalchemy.sql import Select  # noqa: TID251
 
 except ImportError:
     logger.debug(

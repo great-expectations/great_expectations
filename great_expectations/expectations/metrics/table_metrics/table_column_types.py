@@ -18,7 +18,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 from great_expectations.expectations.metrics.util import get_sqlalchemy_column_metadata
 
 try:
-    from sqlalchemy.sql.elements import TextClause
+    from sqlalchemy.sql.elements import TextClause  # noqa: TID251
 except ImportError:
     TextClause = None
 
