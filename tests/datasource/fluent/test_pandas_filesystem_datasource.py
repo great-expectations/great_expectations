@@ -733,7 +733,7 @@ def test_test_connection_failures(
 
 
 @pytest.mark.unit
-def test_csv_asset_with_non_string_batching_regex_named_parameters(
+def test_csv_asset_batch_metadata(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     my_config_variables = {"pipeline_filename": __file__}
