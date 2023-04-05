@@ -7,6 +7,7 @@ import re
 import shutil
 import sys
 import traceback
+from datetime import datetime
 from glob import glob
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, check_output, run
@@ -30,6 +31,19 @@ logger.setLevel(logging.DEBUG)
 expectation_tracebacks = StringIO()
 expectation_checklists = StringIO()
 expectation_docstrings = StringIO()
+MIN_HOURS_UNTIL_REPROCESSING_FULL_BACKEND_ALLOWED = 2
+ALL_GALLERY_BACKENDS = (
+    "bigquery",
+    "mssql",
+    "mysql",
+    "pandas",
+    "postgresql",
+    "redshift",
+    "snowflake",
+    "spark",
+    "sqlite",
+    "trino",
+)
 
 
 def execute_shell_command(command: str) -> int:
@@ -211,6 +225,7 @@ def build_gallery(
     include_contrib: bool = True,
     ignore_suppress: bool = False,
     ignore_only_for: bool = False,
+    outfile_name: str = "",
     only_these_expectations: List[str] = [],
     only_consider_these_backends: List[str] = [],
     context: Optional[DataContext] = None,
@@ -228,8 +243,46 @@ def build_gallery(
         None
 
     """
-    gallery_info = dict()
     requirements_dict = {}
+    backend_outfile_suffix = "partial"
+    if include_core and include_contrib and not only_these_expectations:
+        backend_outfile_suffix = "full"
+    if ignore_suppress or ignore_only_for:
+        backend_outfile_suffix += "_nonstandard"
+    if backend_outfile_suffix == "full":
+        if only_consider_these_backends:
+            full_backend_files_to_check = [
+                f"{backend}_full.json"
+                for backend in only_consider_these_backends
+                if backend in ALL_GALLERY_BACKENDS
+            ]
+            _only_consider_this_set = set(only_consider_these_backends)
+        else:
+            full_backend_files_to_check = [f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS]
+            _only_consider_this_set = set(ALL_GALLERY_BACKENDS)
+
+        found_full_backend_files = glob("*_full.json")
+        now = datetime.now()
+        for _this_backend_file in full_backend_files_to_check:
+            if _this_backend_file not in found_full_backend_files:
+                logger.debug(f"{repr(_this_backend_file)} not found")
+                continue
+            hours_since_file_modified = (now - datetime.fromtimestamp(os.path.getmtime(_this_backend_file))).total_seconds() / 3600
+            logger.debug(f"Found {repr(_this_backend_file)} ... modified {hours_since_file_modified:.2f} hours ago")
+            if hours_since_file_modified < MIN_HOURS_UNTIL_REPROCESSING_FULL_BACKEND_ALLOWED:
+                logger.debug(f"It has not been {MIN_HOURS_UNTIL_REPROCESSING_FULL_BACKEND_ALLOWED} hours since {repr(_this_backend_file)} was modified")
+                _only_consider_this_set.remove(_this_backend_file.split("_")[0])
+
+        only_consider_these_backends = list(_only_consider_this_set)
+
+    if not only_consider_these_backends:
+        only_consider_these_backends = list(ALL_GALLERY_BACKENDS)
+
+    gallery_info_by_backend = {
+        backend: {}
+        for backend in only_consider_these_backends
+    }
+
     logger.info("Loading great_expectations library.")
     installed_packages = pkg_resources.working_set
     installed_packages_txt = sorted(f"{i.key}=={i.version}" for i in installed_packages)
@@ -295,7 +348,8 @@ def build_gallery(
                     requirements_dict[filename[:-3]]["group"] = contrib_subdir_name
         logger.info("Done finding contrib modules")
 
-    for expectation in sorted(requirements_dict):
+    # for expectation in sorted(requirements_dict):
+    for expectation in sorted(requirements_dict)[:5]:
         group = requirements_dict[expectation]["group"]
         print(f"\n\n\n=== {expectation} ({group}) ===")
         requirements = requirements_dict[expectation].get("requirements", [])
@@ -365,7 +419,7 @@ def build_gallery(
                 expectation_docstrings.write(
                     f"{diagnostics['description']['docstring']}\n"
                 )
-        except Exception:
+        except:
             logger.error(f"Failed to run diagnostics for: {expectation}")
             print(traceback.format_exc())
             expectation_tracebacks.write(
@@ -374,19 +428,24 @@ def build_gallery(
             expectation_tracebacks.write(traceback.format_exc())
         else:
             try:
-                gallery_info[expectation] = diagnostics.to_json_dict()
-                gallery_info[expectation]["created_at"] = expectation_file_info[
-                    expectation
-                ]["created_at"]
-                gallery_info[expectation]["updated_at"] = expectation_file_info[
-                    expectation
-                ]["updated_at"]
-                gallery_info[expectation]["package"] = expectation_file_info[
-                    expectation
-                ]["package"]
-                gallery_info[expectation]["exp_type"] = expectation_file_info[
-                    expectation
-                ].get("exp_type")
+                diagnostics_json_dict = diagnostics.to_json_dict()
+
+                # Some items need to be recalculated when {backend}_full.json files get combined
+                backend_test_result_counts = diagnostics_json_dict.pop("backend_test_result_counts")
+                maturity_checklist = diagnostics_json_dict.pop("maturity_checklist")
+                library_metadata = diagnostics_json_dict.pop("library_metadata")
+                coverage_score = diagnostics_json_dict.pop("coverage_score")
+
+                # Add non-backend/test specific info from diagnostics to the in-memory dict
+                expectation_file_info[expectation].update(diagnostics_json_dict)
+
+                # Add test results to gallery_info_by_backend
+                for test_result_counts in backend_test_result_counts:
+                    _backend = test_result_counts["backend"]
+                    gallery_info_by_backend[_backend][expectation] = {
+                        "backend_test_result_counts": [test_result_counts],
+                    }
+
             except TypeError as e:
                 logger.error(f"Failed to create JSON for: {expectation}")
                 print(traceback.format_exc())
@@ -394,6 +453,34 @@ def build_gallery(
                     f"\n\n----------------\n[JSON write fail] {expectation} ({group})\n"
                 )
                 expectation_tracebacks.write(traceback.format_exc())
+
+    # Iterate the gallery_info_by_backend dict and write the backend-specific files
+    for _backend in gallery_info_by_backend:
+        with open(f"{_backend}_{backend_outfile_suffix}.json", "w") as outfile:
+            json.dump(gallery_info_by_backend[_backend], outfile, indent=4)
+
+    # Only attempt to combine and write to file when no Expectations are skipped
+    if backend_outfile_suffix == "full":
+        expected_full_backend_files = [f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS]
+        found_full_backend_files = glob("*_full.json")
+
+        if True:
+        # if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
+            logger.info(f"All expected *_full.json files were found. Going to combine and write to {outfile_name}")
+            #
+            #   T O D O :   Figure out the combining
+            #       - expectation_file_info
+            #       - for each Expectation, read in the test result info from the 
+            #         {backend}_full.json file
+            #
+            #
+            #       * Likely will need to update expectation.py helper methods like
+            #         _get_maturity_checklist or make it a static method that can be
+            #         called with a bunch of pre calculated stuff passed to it
+            #
+
+            # with open(f"./{outfile_name}", "w") as outfile:
+            #     json.dump(gallery_info, outfile, indent=4)
 
     if just_installed:
         print("\n\n\n=== (Uninstalling) ===")
@@ -470,8 +557,6 @@ def build_gallery(
             )
             for exp_name in sorted(core_expectations_not_in_gallery):
                 expectation_tracebacks.write(f"- {exp_name}\n")
-
-    return gallery_info
 
 
 def format_docstring_to_markdown(docstr: str) -> str:
@@ -597,7 +682,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     "-o",
     "outfile_name",
     default="expectation_library_v2--staging.json",
-    help="Name for the generated JSON file",
+    help="Name for the generated JSON file assembled from full backend files (no partials)",
 )
 @click.option(
     "--backends",
@@ -618,11 +703,12 @@ def main(**kwargs):
     # context_dir, context = _disable_progress_bars()
     context = None
 
-    gallery_info = build_gallery(
+    build_gallery(
         include_core=not kwargs["no_core"],
         include_contrib=not kwargs["no_contrib"],
         ignore_suppress=kwargs["ignore_suppress"],
         ignore_only_for=kwargs["ignore_only_for"],
+        outfile_name=kwargs["outfile_name"],
         only_these_expectations=kwargs["args"],
         only_consider_these_backends=backends,
         context=context,
@@ -639,11 +725,9 @@ def main(**kwargs):
     if docstrings != "":
         with open("./docstrings.txt", "w") as outfile:
             outfile.write(docstrings)
-    with open(f"./{kwargs['outfile_name']}", "w") as outfile:
-        json.dump(gallery_info, outfile, indent=4)
 
-    # print(f"Deleting {context_dir}")
-    # shutil.rmtree(context_dir)
+    # # print(f"Deleting {context_dir}")
+    # # shutil.rmtree(context_dir)
 
 
 if __name__ == "__main__":
