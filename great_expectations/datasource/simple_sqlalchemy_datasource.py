@@ -10,7 +10,7 @@ from great_expectations.datasource.data_connector.configured_asset_sql_data_conn
 from great_expectations.datasource.new_datasource import BaseDatasource
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine as SaEngine
+    from sqlalchemy.engine import Engine as SaEngine  # noqa: TID251
 
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
