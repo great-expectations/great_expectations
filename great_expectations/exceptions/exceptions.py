@@ -52,6 +52,12 @@ class StoreBackendError(DataContextError):
     pass
 
 
+class StoreBackendTransientError(StoreBackendError):
+    """The result of a timeout or other networking issues"""
+
+    pass
+
+
 class ParserError(GreatExpectationsError):
     pass
 
