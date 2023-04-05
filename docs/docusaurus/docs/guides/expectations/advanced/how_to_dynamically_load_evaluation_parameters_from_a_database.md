@@ -9,9 +9,9 @@ This guide will help you create an <TechnicalTag tag="expectation" text="Expecta
 
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
-  - Obtained credentials for a database to query for dynamic values
-  - Identified a SQL query that will return values for your expectation configuration.
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- Obtained credentials for a database to query for dynamic values
+- Identified a SQL query that will return values for your expectation configuration.
 
 </Prerequisites>
 

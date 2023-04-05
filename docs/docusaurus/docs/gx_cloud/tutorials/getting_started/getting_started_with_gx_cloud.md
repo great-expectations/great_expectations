@@ -10,7 +10,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 Welcome to Great Expectations Cloud! This tutorial will help you onboard with GX Cloud and get ready to connect to your data.
 
 :::note Prerequisites
-- This tutorial assumes you have Great Expectations OSS installed on your machine. If that's not the case please complete [Step 1: OSS Setup](docs/tutorials/getting_started/tutorial_setup.md) first.
+- This tutorial assumes you have Great Expectations OSS installed on your machine. If that's not the case please complete [OSS Setup](/docs/guides/setup/installation/local) first.
 :::
 
 ## Steps
@@ -33,7 +33,7 @@ Welcome to Great Expectations Cloud! This tutorial will help you onboard with GX
 Any Python Interpreter or script file will work for the remaining steps in the guide, we recommend using a Jupyter Notebook, since they are included in the OSS GX installation and give the best experience of both composing a script file and running code in a live interpreter.
 :::
 
-- Set environment variables in the notebook (alternatively, add these as [Data Context config variables](docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md))
+- Set environment variables in the notebook (alternatively, add these as [Data Context config variables(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials))
 
 ```python
 import os

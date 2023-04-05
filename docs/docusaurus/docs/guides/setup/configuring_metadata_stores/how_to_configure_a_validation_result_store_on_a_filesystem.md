@@ -10,8 +10,8 @@ This guide will explain how to use an <TechnicalTag tag="action" text="Action" /
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
-- [Configured an Expectation Suite ](../../../tutorials/getting_started/tutorial_create_expectations.md).
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [Configured an Expectation Suite ](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - [Configured a Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 - Determined a new storage location where you would like to store Validation Results. This can either be a local path, or a path to a secure network filesystem.
 
@@ -82,4 +82,4 @@ great_expectations store list
 
 ### 5. Confirm that the Validation Results Store has been correctly configured
 
-Run a [Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md) to store results in the new Validation Results Store on in your new location then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
+Run a [Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on in your new location then visualize the results by re-building [Data Docs](../../../terms/data_docs.md).
