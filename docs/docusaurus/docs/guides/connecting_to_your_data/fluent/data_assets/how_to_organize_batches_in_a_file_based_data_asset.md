@@ -2,7 +2,7 @@
 title: How to organize Batches in a file-based Data Asset
 tag: [how-to, connect to data]
 description: A technical guide demonstrating how to organize Batches of data in a file-based Data Asset.
-keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, GCS, Google Cloud Server, AWS S3, Amazon Web Services S3, Azure Blob Storage, Local Filesystem]
+keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration method, GCS, Google Cloud Storage, AWS S3, Amazon Web Services S3, Azure Blob Storage, Local Filesystem]
 ---
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
@@ -65,7 +65,7 @@ Please reference the appropriate one of these guides:
 - [How to connect to one or more files using Pandas](docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.md)
 - [How to connect to one or more files using Spark](docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.md)
 
-#### Google Cloud Server
+#### Google Cloud Storage
 - [How to connect to data on GCS using Pandas](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas.md)
 - [How to connect to data on GCS using Spark](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark.md)
 
@@ -93,7 +93,7 @@ If you are using a Datasource that was created with the advanced block-config me
 
 <ImportGxAndInstantiateADataContext />
 
-### 1. Retrieve a file-based Datasource
+### 2. Retrieve a file-based Datasource
 
 For this guide, we will use a previously defined Datasource named `"my_datasource"`.  For purposes of our demonstration, this Datasource is a Pandas Filesystem Datasource that uses a folder named "data" as its `base_folder`.
 
@@ -103,7 +103,7 @@ To retrieve this Datasource, we will supply the `get_datasource(...)` method of 
 my_datasource = context.get_datasource("my_datasource")
 ```
 
-### 1. Create a `batching_regex`
+### 3. Create a `batching_regex`
 
 In a file-based Data Asset, any file that matches a provided regular expression (the `batching_regex` parameter) will be included as a Batch in the Data Asset.  Therefore, to organize multiple files into Batches in a single Data Asset we must define a regular expression that will match one or more of our source data files.
 
@@ -132,7 +132,7 @@ For more information, please see: [How to request data from a Data Asset](docs/g
 
 For more information on how to format regular expressions, we recommend referencing [Python's official how-to guide for working with regular expressions](https://docs.python.org/3/howto/regex.html).
 
-### 2. Add a Data Asset using the `batching_regex`
+### 4. Add a Data Asset using the `batching_regex`
 
 Now that we have put together a regular expression that will match one or more of the files in our Datasource's `base_folder`, we can use it to create our Data Asset.  Since the files in this particular Datasource's `base_folder` are csv files, we will use the `add_pandas_csv(...)` method of our Datasource to create the new Data Asset:
 
@@ -146,7 +146,7 @@ If you choose to omit the `batching_regex` parameter, your Data Asset will autom
 
 :::
 
-### 3. (Optional) Add Batch Sorters to the Data Asset
+### 5. (Optional) Add Batch Sorters to the Data Asset
 
 We will now add a Batch Sorter to our Data Asset.  This will allow us to explicitly state the order in which our Batches are returned when we request data from the Data Asset.  To do this, we will pass a list of sorters to the `add_sorters(...)` method of our Data Asset.
 
@@ -160,7 +160,7 @@ However, in this example we only have one named group, `"year"`, so our list of 
 my_asset.add_sorters(["+year"])
 ```
 
-### 4. Use a Batch Request to verify the Data Asset works as desired
+### 6. Use a Batch Request to verify the Data Asset works as desired
 
 To verify that our Data Asset will return the desired files as Batches, we will define a quick Batch Request that will include all the Batches available in the Data asset.  Then we will use that Batch Request to get a list of the returned Batches.
 
