@@ -390,9 +390,6 @@ class Datasource(
     assets: MutableSequence[_DataAssetT] = []
 
     # private attrs
-    # TODO: <Alex>ALEX</Alex>
-    # _data_assets: MutableMapping[str, _DataAssetT] = pydantic.PrivateAttr({})
-    # TODO: <Alex>ALEX</Alex>
     _data_context: GXDataContext = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
@@ -458,29 +455,43 @@ class Datasource(
         data_asset = self.get_asset(batch_request.data_asset_name)
         return data_asset.get_batch_list_from_batch_request(batch_request)
 
-    def get_assets(self) -> MutableMapping[str, _DataAssetT]:
+    def get_assets_as_dict(self) -> MutableMapping[str, _DataAssetT]:
+        """Returns available DataAsset objects as dictionary, with corresponding name as key."""
         asset: _DataAssetT
-        return {asset.name: asset for asset in self.assets}
+        assets_as_dict: MutableMapping[str, _DataAssetT] = {
+            asset.name: asset for asset in self.assets
+        }
+
+        return assets_as_dict
+
+    def get_asset_names(self) -> Set[str]:
+        """Returns the set of available DataAsset names"""
+        asset: _DataAssetT
+        return {asset.name for asset in self.assets}
 
     def get_asset(self, asset_name: str) -> _DataAssetT:
-        """Returns the DataAsset referred to by name"""
+        """Returns the DataAsset referred to by asset_name
+
+        Args:
+            asset_name: name of DataAsset sought.
+        """
         # This default implementation will be used if protocol is inherited
         try:
-            return self.get_assets()[asset_name]
-        except KeyError as exc:
+            asset: _DataAssetT
+            return list(filter(lambda asset: asset.name == asset_name, self.assets))[0]
+        except IndexError as exc:
             raise LookupError(
-                f"'{asset_name}' not found. Available assets are {list(self.get_assets().keys())}"
+                f"'{asset_name}' not found. Available assets are {self.get_asset_names()}"
             ) from exc
 
     def delete_asset(self, asset_name: str) -> None:
-        """
-        Args:
-            asset_name:
+        """Removes the DataAsset referred to by asset_name from internal list of available DataAsset objects.
 
+        Args:
+            asset_name: name of DataAsset to be deleted.
         """
         asset: _DataAssetT
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
-        self.assets = list(self.get_assets().values())
 
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
@@ -501,7 +512,8 @@ class Datasource(
         asset.test_connection()
 
         self.assets.append(asset)
-        self.assets = list(self.get_assets().values())
+        # Since dictionary keys are unique, this ensures uniqueness of "_DataAssetT" objects.
+        self.assets = list(self.get_assets_as_dict().values())
 
         return asset
 

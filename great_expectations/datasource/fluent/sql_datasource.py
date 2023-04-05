@@ -897,7 +897,7 @@ class SQLDatasource(Datasource):
                 f"{str(e)}"
             ) from e
         if self.assets and test_assets:
-            for asset in self.get_assets().values():
+            for asset in self.assets:
                 asset._datasource = self
                 asset.test_connection()
 

@@ -374,9 +374,9 @@ class TestDynamicPandasAssets:
         )
         _ = read_method(*positional_args.values())
         # read_* returns a validator, but we just want to inspect the asset
-        asset = empty_data_context.sources.pandas_default.get_assets()[
-            DEFAULT_PANDAS_DATA_ASSET_NAME
-        ]
+        asset = empty_data_context.sources.pandas_default.get_asset(
+            asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
+        )
         for positional_arg_name, positional_arg in positional_args.items():
             assert getattr(asset, positional_arg_name) == positional_arg
 
@@ -387,27 +387,29 @@ def test_default_pandas_datasource_get_and_set(
     pandas_datasource = empty_data_context.sources.pandas_default
     assert isinstance(pandas_datasource, PandasDatasource)
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
-    assert len(pandas_datasource.get_assets()) == 0
+    assert len(pandas_datasource.assets) == 0
 
     validator = pandas_datasource.read_csv(
         filepath_or_buffer=valid_file_path,
     )
     assert isinstance(validator, Validator)
-    csv_data_asset_1 = pandas_datasource.get_assets()[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    csv_data_asset_1 = pandas_datasource.get_asset(
+        asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
+    )
     assert isinstance(csv_data_asset_1, _PandasDataAsset)
     assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
-    assert len(pandas_datasource.get_assets()) == 1
+    assert len(pandas_datasource.assets) == 1
 
     # ensure we get the same datasource when we call pandas_default again
     pandas_datasource = empty_data_context.sources.pandas_default
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
-    assert len(pandas_datasource.get_assets()) == 1
-    assert pandas_datasource.get_assets()[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    assert len(pandas_datasource.assets) == 1
+    assert pandas_datasource.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
 
     # ensure we overwrite the ephemeral data asset if no name is passed
     _ = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
     assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
-    assert len(pandas_datasource.get_assets()) == 1
+    assert len(pandas_datasource.assets) == 1
 
     # ensure we get an additional named asset when one is passed
     expected_csv_data_asset_name = "my_csv_asset"
@@ -415,9 +417,11 @@ def test_default_pandas_datasource_get_and_set(
         asset_name=expected_csv_data_asset_name,
         filepath_or_buffer=valid_file_path,
     )
-    csv_data_asset_2 = pandas_datasource.get_assets()[expected_csv_data_asset_name]
+    csv_data_asset_2 = pandas_datasource.get_asset(
+        asset_name=expected_csv_data_asset_name
+    )
     assert csv_data_asset_2.name == expected_csv_data_asset_name
-    assert len(pandas_datasource.get_assets()) == 2
+    assert len(pandas_datasource.assets) == 2
 
 
 def test_default_pandas_datasource_name_conflict(
@@ -451,9 +455,9 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     )
     assert isinstance(validator, Validator)
     assert isinstance(
-        empty_data_context.sources.pandas_default.get_assets()[
-            DEFAULT_PANDAS_DATA_ASSET_NAME
-        ],
+        empty_data_context.sources.pandas_default.get_asset(
+            asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
+        ),
         DataFrameAsset,
     )
 
@@ -464,11 +468,11 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     )
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
-    assert len(empty_data_context.sources.pandas_default.get_assets()) == 2
+    assert len(empty_data_context.sources.pandas_default.assets) == 2
     assert all(
         [
             asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-            for asset in empty_data_context.sources.pandas_default.get_assets().values()
+            for asset in empty_data_context.sources.pandas_default.assets
         ]
     )
 

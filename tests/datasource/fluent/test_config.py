@@ -664,9 +664,9 @@ def test_assets_key_presence(
 def test_splitters_deserialization(
     inject_engine_lookup_double, from_all_config: GxConfig
 ):
-    table_asset: TableAsset = from_all_config.get_datasources()[
-        "my_pg_ds"
-    ].get_assets()["with_splitter"]
+    table_asset: TableAsset = from_all_config.get_datasource(
+        datasource_name="my_pg_ds"
+    ).get_asset(asset_name="with_splitter")
     assert isinstance(table_asset.splitter, SplitterYearAndMonth)
     assert table_asset.splitter.method_name == "split_on_year_and_month"
 
@@ -712,9 +712,9 @@ def test_dict_default_pandas_config_round_trip(inject_engine_lookup_double):
     )
     assert (
         DEFAULT_PANDAS_DATA_ASSET_NAME
-        not in from_dict_default_pandas_config.get_datasources()[
-            DEFAULT_PANDAS_DATASOURCE_NAME
-        ].get_assets()
+        not in from_dict_default_pandas_config.get_datasource(
+            datasource_name=DEFAULT_PANDAS_DATASOURCE_NAME
+        ).get_asset_names()
     )
 
     dumped: dict = from_dict_default_pandas_config.dict()
@@ -820,7 +820,7 @@ def test_config_substitution_retains_original_value_on_save(
     my_conn_str = f"sqlite:///{sqlite_database_path}"
     monkeypatch.setenv("MY_CONN_STR", my_conn_str)
 
-    ds_w_subs: SqliteDatasource = context.fluent_config.get_datasources()["my_sqlite_ds_w_subs"]  # type: ignore[assignment]
+    ds_w_subs: SqliteDatasource = context.fluent_config.get_datasource(datasource_name="my_sqlite_ds_w_subs")  # type: ignore[assignment]
 
     assert str(ds_w_subs.connection_string) == r"${MY_CONN_STR}"
     assert (

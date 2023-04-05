@@ -93,9 +93,6 @@ def test_batch_head(
     n_rows: int | float | str | None,
     success: bool,
 ) -> None:
-    if is_version_greater_or_equal(pd.__version__, "2.0.0"):
-        pytest.xfail(reason="Test is currently not compatible with pandas 2.0.0")
-
     run_batch_head(
         datasource_test_data=datasource_test_data,
         fetch_all=fetch_all,

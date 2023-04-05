@@ -87,48 +87,56 @@ class GxConfig(FluentBaseModel):
 
     @property
     def datasources(self) -> List[Datasource]:
+        """Returns available Fluent Datasources as list."""
         return self.fluent_datasources
 
-    def get_datasources(self) -> Dict[str, Datasource]:
+    def get_datasources_as_dict(self) -> Dict[str, Datasource]:
+        """Returns available Datasource objects as dictionary, with corresponding name as key."""
         datasource: Datasource
-        return {datasource.name: datasource for datasource in self.fluent_datasources}
+        datasources_as_dict: Dict[str, Datasource] = {
+            datasource.name: datasource for datasource in self.fluent_datasources
+        }
+
+        # Since dictionary keys are unique, this ensures uniqueness of "Datasource" objects.
+        self.fluent_datasources = list(datasources_as_dict.values())
+
+        return datasources_as_dict
+
+    def get_datasource_names(self) -> Set[str]:
+        """Returns the set of available Datasource names."""
+        datasource: Datasource
+        return {datasource.name for datasource in self.datasources}
+
+    def get_datasource(self, datasource_name: str) -> Datasource:
+        """Returns the Datasource referred to by datasource_name
+
+        Args:
+            datasource_name: name of Datasource sought.
+        """
+        try:
+            datasource: Datasource
+            return list(
+                filter(
+                    lambda datasource: datasource.name == datasource_name,
+                    self.datasources,
+                )
+            )[0]
+        except IndexError as exc:
+            raise LookupError(
+                f"'{datasource_name}' not found. Available datasources are {self.get_datasource_names()}"
+            ) from exc
 
     def update_datasources(self, datasources: Dict[str, Datasource]) -> None:
         """
-        # TODO: <Alex>ALEX-ADD_DOCSTRING</Alex>
+        Updates internal list of datasources using supplied datasources dictionary.
 
         Args:
-            datasources:
-
+            datasources: Dictionary of datasources to use to update internal datasources.
         """
-        current_datasources: Dict[str, Datasource] = self.get_datasources()
-        current_datasource_names: Set[str] = set(current_datasources.keys())
-        updating_datasource_names: Set[str] = set(datasources.keys())
-        unaltered_current_datasource_names: Set[str] = (
-            current_datasource_names - updating_datasource_names
-        )
-        common_datasource_names: Set[str] = (
-            updating_datasource_names & current_datasource_names
-        )
-        updating_new_datasource_names: Set[str] = (
-            updating_datasource_names - current_datasource_names
-        )
-        modified_datasource_names: Set[str] = (
-            common_datasource_names | updating_new_datasource_names
-        )
-
-        datasource: Datasource
-        datasource_name: str
-        self.fluent_datasources = list(
-            filter(
-                lambda datasource: datasource.name
-                in unaltered_current_datasource_names,
-                self.datasources,
-            )
-        ) + [
-            datasources[datasource_name]
-            for datasource_name in modified_datasource_names
-        ]
+        datasources_as_dict: Dict[str, Datasource] = self.get_datasources_as_dict()
+        datasources_as_dict.update(datasources)
+        # Since dictionary keys are unique, this ensures uniqueness of "Datasource" objects.
+        self.fluent_datasources = list(datasources_as_dict.values())
 
     # noinspection PyNestedDecorators
     @validator(_FLUENT_DATASOURCES_KEY, pre=True)
@@ -159,7 +167,7 @@ class GxConfig(FluentBaseModel):
             datasource = ds_type(**config)
 
             # the ephemeral asset should never be serialized
-            if DEFAULT_PANDAS_DATA_ASSET_NAME in datasource.get_assets():
+            if DEFAULT_PANDAS_DATA_ASSET_NAME in datasource.get_assets_as_dict():
                 datasource.delete_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
 
             # if the default pandas datasource has no assets, it should not be serialized
