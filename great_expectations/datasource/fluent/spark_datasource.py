@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import dataclasses
 import logging
+from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     ClassVar,
@@ -15,14 +17,15 @@ from typing import (
 import pydantic
 from typing_extensions import Literal
 
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchMetadata,
     BatchRequest,
+    BatchRequestOptions,
     DataAsset,
     Datasource,
 )
@@ -105,6 +108,45 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         raise NotImplementedError(
             """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
+
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
+        if options:
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(
+                "Data Assets associated with SparkDatasource can only contain a single batch,\n"
+                "therefore BatchRequest options cannot be supplied. BatchRequest options with keys:\n"
+                f"{actual_keys}\nwere passed.\n"
+            )
+
+        return BatchRequest(
+            datasource_name=self.datasource.name,
+            data_asset_name=self.name,
+            options={},
+        )
+
+    def _validate_batch_request(self, batch_request: BatchRequest) -> None:
+        """Validates the batch_request has the correct form.
+
+        Args:
+            batch_request: A batch request object to be validated.
+        """
+        if not (
+            batch_request.datasource_name == self.datasource.name
+            and batch_request.data_asset_name == self.name
+            and not batch_request.options
+        ):
+            expect_batch_request_form = BatchRequest(
+                datasource_name=self.datasource.name,
+                data_asset_name=self.name,
+                options={},
+            )
+            raise gx_exceptions.InvalidBatchRequestError(
+                "BatchRequest should have form:\n"
+                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
+                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+            )
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
