@@ -29,7 +29,7 @@ from great_expectations.exceptions import (
 )
 
 try:
-    from sqlalchemy.exc import SQLAlchemyError
+    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
 except ImportError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
