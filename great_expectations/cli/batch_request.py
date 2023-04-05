@@ -32,8 +32,8 @@ from great_expectations.util import filter_properties_dict
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy
-    from sqlalchemy.engine.reflection import Inspector
+    import sqlalchemy  # noqa: TID251
+    from sqlalchemy.engine.reflection import Inspector  # noqa: TID251
 except ImportError:
     logger.debug(
         "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"

@@ -15,7 +15,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 except ImportError:
     sa = None
 
