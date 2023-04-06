@@ -1,29 +1,19 @@
-# import functools
-# import operator
 from typing import Optional
 
 from pandas import to_datetime
 
-# from pyspark.sql.functions import col, floor, months_between, to_date
-# from sqlalchemy import func, column, cast, Integer
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
 )
 
-# SparkDFExecutionEngine,
-# SqlAlchemyExecutionEngine,
 from great_expectations.expectations.expectation import MulticolumnMapExpectation
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
 )
 
-# import logging
-
-# logger = logging.getLogger(__name__)
-# logger.setLevel(level="DEBUG")
 # This class defines a Metric to support your Expectation.
 class ColumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
 
@@ -239,5 +229,4 @@ class ExpectColumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-    # ExpectColumnDatetimeDifferenceInMonths().run_diagnostics(debug_logger=logger)
     ExpectColumnDatetimeDifferenceInMonths().print_diagnostic_checklist()
