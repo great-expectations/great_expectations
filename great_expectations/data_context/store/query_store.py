@@ -123,7 +123,7 @@ class SqlAlchemyQueryStore(Store):
         assert query, "Query must be specified to use SqlAlchemyQueryStore"
 
         query = Template(query).safe_substitute(query_parameters)
-        with self.engine.connect() as connection:
+        with self.engine.begin() as connection:
             res = connection.execute(sa.text(query)).fetchall()
             # NOTE: 20200617 - JPC: this approach is probably overly opinionated, but we can
             # adjust based on specific user requests

@@ -157,25 +157,23 @@ def validate_uuid4(uuid_string: str) -> bool:
 
 
 def get_sqlite_temp_table_names(engine):
-    with engine.connect() as connection:
+    if isinstance(engine, Engine):
+        connection: Connection = engine.connect()
+    else:
+        connection: Connection = engine
 
-        # if isinstance(engine, Engine):
-        #     connection: Connection = engine.connect()
-        # else:
-        #     connection: Connection = engine
-
-        result = connection.execute(
-            sa.text(
-                """
+    result = connection.execute(
+        sa.text(
+            """
 SELECT
     name
 FROM
     sqlite_temp_master
 """
-            )
         )
-        rows = result.fetchall()
-        return {row[0] for row in rows}
+    )
+    rows = result.fetchall()
+    return {row[0] for row in rows}
 
 
 def get_sqlite_table_names(engine):
@@ -696,7 +694,7 @@ def load_data_into_test_database(
         try:
             if drop_existing_table:
                 print(f"Dropping table {table_name}")
-                with engine.connect() as connection:
+                with engine.begin() as connection:
                     connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
                 print(f"Creating table {table_name} and adding data from {csv_paths}")
             else:

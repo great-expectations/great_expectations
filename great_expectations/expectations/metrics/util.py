@@ -411,219 +411,215 @@ def column_reflection_fallback(
     else:
         connection: Connection = sqlalchemy_engine
 
-    with connection:
-        col_info_dict_list: List[Dict[str, str]]
-        # noinspection PyUnresolvedReferences
-        if dialect.name.lower() == "mssql":
-            # Get column names and types from the database
-            # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
-            tables_table_clause: TableClause = sa.table(
-                "tables",
-                sa.column("object_id"),
-                sa.column("schema_id"),
-                sa.column("name"),
-                schema="sys",
-            ).alias("sys_tables_table_clause")
-            tables_table_query: Select = (
-                sa.select(
-                    tables_table_clause.c.object_id.label("object_id"),
-                    sa.func.schema_name(tables_table_clause.c.schema_id).label(
-                        "schema_name"
-                    ),
-                    tables_table_clause.c.name.label("table_name"),
-                )
-                .select_from(tables_table_clause)
-                .alias("sys_tables_table_subquery")
+    col_info_dict_list: List[Dict[str, str]]
+    # noinspection PyUnresolvedReferences
+    if dialect.name.lower() == "mssql":
+        # Get column names and types from the database
+        # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
+        tables_table_clause: TableClause = sa.table(
+            "tables",
+            sa.column("object_id"),
+            sa.column("schema_id"),
+            sa.column("name"),
+            schema="sys",
+        ).alias("sys_tables_table_clause")
+        tables_table_query: Select = (
+            sa.select(
+                tables_table_clause.c.object_id.label("object_id"),
+                sa.func.schema_name(tables_table_clause.c.schema_id).label(
+                    "schema_name"
+                ),
+                tables_table_clause.c.name.label("table_name"),
             )
-            columns_table_clause: TableClause = sa.table(
-                "columns",
-                sa.column("object_id"),
-                sa.column("user_type_id"),
-                sa.column("column_id"),
-                sa.column("name"),
-                sa.column("max_length"),
-                sa.column("precision"),
-                schema="sys",
-            ).alias("sys_columns_table_clause")
-            columns_table_query: Select = (
-                sa.select(
-                    columns_table_clause.c.object_id.label("object_id"),
-                    columns_table_clause.c.user_type_id.label("user_type_id"),
-                    columns_table_clause.c.column_id.label("column_id"),
-                    columns_table_clause.c.name.label("column_name"),
-                    columns_table_clause.c.max_length.label("column_max_length"),
-                    columns_table_clause.c.precision.label("column_precision"),
-                )
-                .select_from(columns_table_clause)
-                .alias("sys_columns_table_subquery")
+            .select_from(tables_table_clause)
+            .alias("sys_tables_table_subquery")
+        )
+        columns_table_clause: TableClause = sa.table(
+            "columns",
+            sa.column("object_id"),
+            sa.column("user_type_id"),
+            sa.column("column_id"),
+            sa.column("name"),
+            sa.column("max_length"),
+            sa.column("precision"),
+            schema="sys",
+        ).alias("sys_columns_table_clause")
+        columns_table_query: Select = (
+            sa.select(
+                columns_table_clause.c.object_id.label("object_id"),
+                columns_table_clause.c.user_type_id.label("user_type_id"),
+                columns_table_clause.c.column_id.label("column_id"),
+                columns_table_clause.c.name.label("column_name"),
+                columns_table_clause.c.max_length.label("column_max_length"),
+                columns_table_clause.c.precision.label("column_precision"),
             )
-            types_table_clause: TableClause = sa.table(
-                "types",
-                sa.column("user_type_id"),
-                sa.column("name"),
-                schema="sys",
-            ).alias("sys_types_table_clause")
-            types_table_query: Select = (
-                sa.select(
-                    types_table_clause.c.user_type_id.label("user_type_id"),
-                    types_table_clause.c.name.label("column_data_type"),
-                )
-                .select_from(types_table_clause)
-                .alias("sys_types_table_subquery")
+            .select_from(columns_table_clause)
+            .alias("sys_columns_table_subquery")
+        )
+        types_table_clause: TableClause = sa.table(
+            "types",
+            sa.column("user_type_id"),
+            sa.column("name"),
+            schema="sys",
+        ).alias("sys_types_table_clause")
+        types_table_query: Select = (
+            sa.select(
+                types_table_clause.c.user_type_id.label("user_type_id"),
+                types_table_clause.c.name.label("column_data_type"),
             )
-            inner_join_conditions: BinaryExpression = sa.and_(
-                *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
+            .select_from(types_table_clause)
+            .alias("sys_types_table_subquery")
+        )
+        inner_join_conditions: BinaryExpression = sa.and_(
+            *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
+        )
+        outer_join_conditions: BinaryExpression = sa.and_(
+            *(
+                columns_table_query.columns.user_type_id
+                == types_table_query.columns.user_type_id,
             )
-            outer_join_conditions: BinaryExpression = sa.and_(
-                *(
-                    columns_table_query.columns.user_type_id
-                    == types_table_query.columns.user_type_id,
-                )
+        )
+        col_info_query = (
+            sa.select(
+                tables_table_query.c.schema_name,
+                tables_table_query.c.table_name,
+                columns_table_query.c.column_id,
+                columns_table_query.c.column_name,
+                types_table_query.c.column_data_type,
+                columns_table_query.c.column_max_length,
+                columns_table_query.c.column_precision,
             )
-            col_info_query = (
-                sa.select(
-                    tables_table_query.c.schema_name,
-                    tables_table_query.c.table_name,
-                    columns_table_query.c.column_id,
-                    columns_table_query.c.column_name,
-                    types_table_query.c.column_data_type,
-                    columns_table_query.c.column_max_length,
-                    columns_table_query.c.column_precision,
-                )
-                .select_from(
-                    tables_table_query.join(
-                        right=columns_table_query,
-                        onclause=inner_join_conditions,
-                        isouter=False,
-                    ).join(
-                        right=types_table_query,
-                        onclause=outer_join_conditions,
-                        isouter=True,
-                    )
-                )
-                .where(tables_table_query.c.table_name == selectable.name)
-                .order_by(
-                    tables_table_query.c.schema_name.asc(),
-                    tables_table_query.c.table_name.asc(),
-                    columns_table_query.c.column_id.asc(),
+            .select_from(
+                tables_table_query.join(
+                    right=columns_table_query,
+                    onclause=inner_join_conditions,
+                    isouter=False,
+                ).join(
+                    right=types_table_query,
+                    onclause=outer_join_conditions,
+                    isouter=True,
                 )
             )
-            col_info_tuples_list: List[tuple] = connection.execute(
-                col_info_query
-            ).fetchall()
-            # type_module = _get_dialect_type_module(dialect=dialect)
-            col_info_dict_list = [
-                {
-                    "name": column_name,
-                    # "type": getattr(type_module, column_data_type.upper())(),
-                    "type": column_data_type.upper(),
-                }
-                for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
-            ]
-        elif dialect.name.lower() == "trino":
-            try:
-                table_name = selectable.name
-            except AttributeError:
-                table_name = selectable
-                if str(table_name).lower().startswith("select"):
-                    rx = re.compile(r"^.* from ([\S]+)", re.I)
-                    match = rx.match(str(table_name).replace("\n", ""))
-                    if match:
-                        table_name = match.group(1)
-            schema_name = sqlalchemy_engine.dialect.default_schema_name
+            .where(tables_table_query.c.table_name == selectable.name)
+            .order_by(
+                tables_table_query.c.schema_name.asc(),
+                tables_table_query.c.table_name.asc(),
+                columns_table_query.c.column_id.asc(),
+            )
+        )
+        col_info_tuples_list: List[tuple] = connection.execute(
+            col_info_query
+        ).fetchall()
+        # type_module = _get_dialect_type_module(dialect=dialect)
+        col_info_dict_list = [
+            {
+                "name": column_name,
+                # "type": getattr(type_module, column_data_type.upper())(),
+                "type": column_data_type.upper(),
+            }
+            for schema_name, table_name, column_id, column_name, column_data_type, column_max_length, column_precision in col_info_tuples_list
+        ]
+    elif dialect.name.lower() == "trino":
+        try:
+            table_name = selectable.name
+        except AttributeError:
+            table_name = selectable
+            if str(table_name).lower().startswith("select"):
+                rx = re.compile(r"^.* from ([\S]+)", re.I)
+                match = rx.match(str(table_name).replace("\n", ""))
+                if match:
+                    table_name = match.group(1)
+        schema_name = sqlalchemy_engine.dialect.default_schema_name
 
-            tables_table: sa.Table = sa.Table(
-                "tables",
-                sa.MetaData(),
-                schema="information_schema",
+        tables_table: sa.Table = sa.Table(
+            "tables",
+            sa.MetaData(),
+            schema="information_schema",
+        )
+        tables_table_query = (
+            sa.select(
+                sa.column("table_schema").label("schema_name"),
+                sa.column("table_name").label("table_name"),
             )
-            tables_table_query = (
-                sa.select(
-                    sa.column("table_schema").label("schema_name"),
-                    sa.column("table_name").label("table_name"),
+            .select_from(tables_table)
+            .alias("information_schema_tables_table")
+        )
+        columns_table: sa.Table = sa.Table(
+            "columns",
+            sa.MetaData(),
+            schema="information_schema",
+        )
+        columns_table_query = (
+            sa.select(
+                sa.column("column_name").label("column_name"),
+                sa.column("table_name").label("table_name"),
+                sa.column("table_schema").label("schema_name"),
+                sa.column("data_type").label("column_data_type"),
+            )
+            .select_from(columns_table)
+            .alias("information_schema_columns_table")
+        )
+        conditions = sa.and_(
+            *(
+                tables_table_query.c.table_name == columns_table_query.c.table_name,
+                tables_table_query.c.schema_name == columns_table_query.c.schema_name,
+            )
+        )
+        col_info_query = (
+            sa.select(
+                tables_table_query.c.schema_name,
+                tables_table_query.c.table_name,
+                columns_table_query.c.column_name,
+                columns_table_query.c.column_data_type,
+            )
+            .select_from(
+                tables_table_query.join(
+                    right=columns_table_query, onclause=conditions, isouter=False
                 )
-                .select_from(tables_table)
-                .alias("information_schema_tables_table")
             )
-            columns_table: sa.Table = sa.Table(
-                "columns",
-                sa.MetaData(),
-                schema="information_schema",
-            )
-            columns_table_query = (
-                sa.select(
-                    sa.column("column_name").label("column_name"),
-                    sa.column("table_name").label("table_name"),
-                    sa.column("table_schema").label("schema_name"),
-                    sa.column("data_type").label("column_data_type"),
-                )
-                .select_from(columns_table)
-                .alias("information_schema_columns_table")
-            )
-            conditions = sa.and_(
-                *(
-                    tables_table_query.c.table_name == columns_table_query.c.table_name,
-                    tables_table_query.c.schema_name
-                    == columns_table_query.c.schema_name,
-                )
-            )
-            col_info_query = (
-                sa.select(
-                    tables_table_query.c.schema_name,
-                    tables_table_query.c.table_name,
-                    columns_table_query.c.column_name,
-                    columns_table_query.c.column_data_type,
-                )
-                .select_from(
-                    tables_table_query.join(
-                        right=columns_table_query, onclause=conditions, isouter=False
+            .where(
+                sa.and_(
+                    *(
+                        tables_table_query.c.table_name == table_name,
+                        tables_table_query.c.schema_name == schema_name,
                     )
                 )
-                .where(
-                    sa.and_(
-                        *(
-                            tables_table_query.c.table_name == table_name,
-                            tables_table_query.c.schema_name == schema_name,
-                        )
-                    )
-                )
-                .order_by(
-                    tables_table_query.c.schema_name.asc(),
-                    tables_table_query.c.table_name.asc(),
-                    columns_table_query.c.column_name.asc(),
-                )
-                .alias("column_info")
             )
-            col_info_tuples_list = connection.execute(col_info_query).fetchall()
-            # type_module = _get_dialect_type_module(dialect=dialect)
-            col_info_dict_list = [
-                {
-                    "name": column_name,
-                    "type": column_data_type.upper(),
-                }
-                for schema_name, table_name, column_name, column_data_type in col_info_tuples_list
-            ]
+            .order_by(
+                tables_table_query.c.schema_name.asc(),
+                tables_table_query.c.table_name.asc(),
+                columns_table_query.c.column_name.asc(),
+            )
+            .alias("column_info")
+        )
+        col_info_tuples_list = connection.execute(col_info_query).fetchall()
+        # type_module = _get_dialect_type_module(dialect=dialect)
+        col_info_dict_list = [
+            {
+                "name": column_name,
+                "type": column_data_type.upper(),
+            }
+            for schema_name, table_name, column_name, column_data_type in col_info_tuples_list
+        ]
+    else:
+        # if a custom query was passed
+        if isinstance(selectable, TextClause):
+            query: TextClause = selectable
         else:
-            # if a custom query was passed
-            if isinstance(selectable, TextClause):
-                query: TextClause = selectable
+            # noinspection PyUnresolvedReferences
+            if dialect.name.lower() == GXSqlDialect.REDSHIFT:
+                # Redshift needs temp tables to be declared as text
+                query = (
+                    sa.select(sa.text("*")).select_from(sa.text(selectable)).limit(1)
+                )
             else:
-                # noinspection PyUnresolvedReferences
-                if dialect.name.lower() == GXSqlDialect.REDSHIFT:
-                    # Redshift needs temp tables to be declared as text
-                    query = (
-                        sa.select(sa.text("*"))
-                        .select_from(sa.text(selectable))
-                        .limit(1)
-                    )
-                else:
-                    query = sa.select(sa.text("*")).select_from(selectable).limit(1)
+                query = sa.select(sa.text("*")).select_from(selectable).limit(1)
 
-            result_object = connection.execute(query)
-            # noinspection PyProtectedMember
-            col_names: List[str] = result_object._metadata.keys
-            col_info_dict_list = [{"name": col_name} for col_name in col_names]
-        return col_info_dict_list
+        result_object = connection.execute(query)
+        # noinspection PyProtectedMember
+        col_names: List[str] = result_object._metadata.keys
+        col_info_dict_list = [{"name": col_name} for col_name in col_names]
+    return col_info_dict_list
 
 
 @overload

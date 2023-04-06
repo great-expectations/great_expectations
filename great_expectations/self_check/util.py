@@ -2814,7 +2814,7 @@ def _create_trino_engine(
     from sqlalchemy import text  # noqa: TID251
     from trino.exceptions import TrinoUserError
 
-    with engine.connect() as conn:
+    with engine.begin() as conn:
         try:
             schemas = conn.execute(
                 text(f"show schemas from memory like {repr(schema_name)}")

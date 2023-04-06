@@ -333,7 +333,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 default_table_name_prefix="#ge_temp_"
             )
 
-            with execution_engine.engine.connect() as connection:
+            with execution_engine.engine.begin():
                 metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
                 temp_table_obj: sa.Table = sa.Table(
                     temp_table_name,
@@ -348,7 +348,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                     [count_case_statement],
                     count_selectable,
                 )
-                connection.execute(inner_case_query)
+                execution_engine.engine.execute(inner_case_query)
 
                 count_selectable = temp_table_obj
 
@@ -360,14 +360,14 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
-        with execution_engine.engine.connect() as connection:
-            unexpected_count: Union[float, int] = connection.execute(
-                sa.select(
-                    unexpected_count_query.c[
-                        f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-                    ],
-                )
-            ).scalar()
+
+        unexpected_count: Union[float, int] = execution_engine.engine.execute(
+            sa.select(
+                unexpected_count_query.c[
+                    f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                ],
+            )
+        ).scalar()
         # Unexpected count can be None if the table is empty, in which case the count
         # should default to zero.
         try:
