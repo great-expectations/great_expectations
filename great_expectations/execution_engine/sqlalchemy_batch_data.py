@@ -303,6 +303,5 @@ class SqlAlchemyBatchData(BatchData):
                     connection.execute(sa.text(stmt))
             else:
                 # self._engine is already a connection
-                with self._engine.begin():
-                    self._engine.execute(sa.text(stmt))
+                self._engine.execute(sa.text(stmt))
         return stmt
