@@ -86,8 +86,10 @@ except (
 # may be not importable while TextClause is.
 try:
     TextClause = sqlalchemy.sql.elements.TextClause
+    Connection = sqlalchemy.engine.base.Connection
 except ImportError:
     TextClause = SQLALCHEMY_NOT_IMPORTED
+    Connection = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
     "api_np": {
@@ -426,6 +428,14 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     # PySpark schema serialization
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
+
+    if sqlalchemy and isinstance(data, TextClause):
+        # TextClause is converted to str manually
+        return str(data)
+
+    if sqlalchemy and isinstance(data, Connection):
+        # Connection is a module, which is non-serializable. Return module name instead.
+        return "sqlalchemy.engine.base.Connection"
 
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."

@@ -1058,7 +1058,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
-                res = self.engine.execute(sa_query_object).fetchall()
+                with self.engine.connect() as connection:
+                    res = connection.execute(sa_query_object).fetchall()
 
                 logger.debug(
                     f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
@@ -1143,8 +1144,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
             split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
-
-        return self.engine.execute(split_query).fetchall()
+        with self.engine.connect() as connection:
+            res = connection.execute(split_query).fetchall()
+            return res
 
     def get_data_for_batch_identifiers(
         self, selectable: Selectable, splitter_method_name: str, splitter_kwargs: dict

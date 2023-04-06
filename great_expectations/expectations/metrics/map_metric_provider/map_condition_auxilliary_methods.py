@@ -333,7 +333,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 default_table_name_prefix="#ge_temp_"
             )
 
-            with execution_engine.engine.begin():
+            with execution_engine.engine.begin() as connection:
                 metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
                 temp_table_obj: sa.Table = sa.Table(
                     temp_table_name,
@@ -348,7 +348,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                     [count_case_statement],
                     count_selectable,
                 )
-                execution_engine.engine.execute(inner_case_query)
+                connection.execute(inner_case_query)
 
                 count_selectable = temp_table_obj
 
@@ -361,19 +361,21 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .alias("UnexpectedCountSubquery")
         )
 
-        unexpected_count: Union[float, int] = execution_engine.engine.execute(
-            sa.select(
-                unexpected_count_query.c[
-                    f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-                ],
-            )
-        ).scalar()
-        # Unexpected count can be None if the table is empty, in which case the count
-        # should default to zero.
-        try:
-            unexpected_count = int(unexpected_count)
-        except TypeError:
-            unexpected_count = 0
+        with execution_engine.engine.begin() as connection:
+
+            unexpected_count: Union[float, int] = connection.execute(
+                sa.select(
+                    unexpected_count_query.c[
+                        f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                    ],
+                )
+            ).scalar()
+            # Unexpected count can be None if the table is empty, in which case the count
+            # should default to zero.
+            try:
+                unexpected_count = int(unexpected_count)
+            except TypeError:
+                unexpected_count = 0
 
     except OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."

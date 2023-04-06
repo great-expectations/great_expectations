@@ -260,7 +260,9 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(sel).fetchone()[0]
+            with self.engine.connect() as connection:
+                res = connection.execute(sel).fetchone()[0]
+                return res
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error fetching value: {str(e)}")
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
@@ -327,7 +329,8 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(sel).fetchone()[0] == 1
+            with self.engine.connect() as connection:
+                return connection.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error checking for value: {str(e)}")
             return False
@@ -347,7 +350,8 @@ class DatabaseStoreBackend(StoreBackend):
                 )
             )
         )
-        return [tuple(row) for row in self.engine.execute(sel).fetchall()]
+        with self.engine.connect() as connection:
+            return [tuple(row) for row in connection.execute(sel).fetchall()]
 
     def remove_key(self, key):
         delete_statement = self._table.delete().where(
