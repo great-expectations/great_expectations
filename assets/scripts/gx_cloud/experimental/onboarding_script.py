@@ -56,7 +56,7 @@ except ValueError:
         {data_connector_name}:
             class_name: RuntimeDataConnector
             batch_identifiers:
-            - batch_id
+            - path
     """
     # Test your configuration:
     datasource: BaseDatasource = context.test_yaml_config(datasource_yaml)
@@ -150,7 +150,7 @@ result = context.run_checkpoint(
             "batch_data": validation_df
         }},
         "batch_identifiers": {{
-            "batch_id": path_to_batch_to_validate
+            "path": path_to_batch_to_validate
         }},
     }}
 )
