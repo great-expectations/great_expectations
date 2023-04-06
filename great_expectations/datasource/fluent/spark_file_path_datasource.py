@@ -20,6 +20,10 @@ logger = logging.getLogger(__name__)
 class CSVAsset(_FilePathDataAsset):
     # Overridden inherited instance fields
     type: Literal["csv"] = "csv"
+    header: bool = False
+    inferSchema: bool = False
+
+    # TODO: consider forbidding extra fields
 
     def _get_reader_method(self) -> str:
         return self.type
