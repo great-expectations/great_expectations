@@ -4,6 +4,7 @@ import logging
 from typing import TYPE_CHECKING, ClassVar, Dict, List, Type
 
 import pydantic
+from pydantic import Field
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent import _SparkDatasource
@@ -22,10 +23,11 @@ class CSVAsset(_FilePathDataAsset):
     # Overridden inherited instance fields
     type: Literal["csv"] = "csv"
     header: bool = False
-    infer_schema: bool = False
+    infer_schema: bool = Field(False, alias="InferSchema")
 
     class Config:
         extra = pydantic.Extra.forbid
+        allow_population_by_field_name = True
 
     def _get_reader_method(self) -> str:
         return self.type
