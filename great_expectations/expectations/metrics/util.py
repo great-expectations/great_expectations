@@ -406,11 +406,10 @@ def column_reflection_fallback(
 ) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
 
-    connection: Connection
     if isinstance(sqlalchemy_engine, Engine):
-        connection = sqlalchemy_engine.connect()
+        connection: Connection = sqlalchemy_engine.connect()
     else:
-        connection = sqlalchemy_engine
+        connection: Connection = sqlalchemy_engine
 
     with connection:
         col_info_dict_list: List[Dict[str, str]]
