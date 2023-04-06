@@ -3,7 +3,7 @@
 # Build API docs then build docusaurus docs.
 # Currently used in our netlify pipeline.
 
-ORANGE='\033[0;33m'
+ORANGE='\033[38;5;208m'
 NC='\033[0m' # No Color
 
 CURRENT_COMMIT=$(git rev-parse HEAD)
