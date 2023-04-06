@@ -45,3 +45,36 @@ def execute_pandas_reader_fn(
     else:
         reader_fn_result = reader_fn(**reader_options)
     return reader_fn_result
+
+
+# TODO: Clean up and add all params
+def pandas_read_sql(
+    sql,
+    con,
+    chunksize,
+) -> pd.DataFrame | list[pd.DataFrame]:
+    """Suppress warnings while executing the pandas reader functions.
+
+    If pandas version is below 2.0 and sqlalchemy installed then suppress
+    the sqlalchemy 2.0 warning and raise our own warning. pandas does not
+    support sqlalchemy 2.0 until version 2.0 (see https://pandas.pydata.org/docs/dev/whatsnew/v2.0.0.html#other-enhancements)
+
+    Args:
+        reader_fn: Reader function to execute.
+        reader_options: Options to pass to reader function.
+
+    Returns:
+        dataframe or list of dataframes
+    """
+    if is_version_less_than(pd.__version__, "2.0.0"):
+        if sqlalchemy and is_version_greater_or_equal(sqlalchemy.__version__, "2.0.0"):
+            warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
+        with warnings.catch_warnings():
+            # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+            # but using the base class here since sqlalchemy is an optional dependency and this
+            # warning type only exists in sqlalchemy < 2.0.
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+            return_value = pd.read_sql(sql=sql, con=con, chunksize=chunksize)
+    else:
+        return_value = pd.read_sql(sql=sql, con=con, chunksize=chunksize)
+    return return_value
