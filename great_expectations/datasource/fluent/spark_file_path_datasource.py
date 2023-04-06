@@ -29,7 +29,7 @@ class CSVAsset(_FilePathDataAsset):
         return self.type
 
     def _get_reader_options_include(self) -> set[str] | None:
-        return {"header", "inferSchema"}
+        return {"header", "inferSchema", "infer_schema"}
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
