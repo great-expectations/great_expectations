@@ -12,9 +12,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     DBFSDataConnector as DBFSDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    BatchMetadata,
-)
-from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition as SortersDefinition,
 )
 from great_expectations.datasource.fluent.interfaces import (
@@ -22,6 +19,9 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+    )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
