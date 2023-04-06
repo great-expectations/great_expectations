@@ -334,7 +334,8 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             )
 
             with execution_engine.engine.begin():
-                metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
+                metadata: sa.MetaData = sa.MetaData()
+                metadata.reflect(bind=execution_engine.engine)
                 temp_table_obj: sa.Table = sa.Table(
                     temp_table_name,
                     metadata,
