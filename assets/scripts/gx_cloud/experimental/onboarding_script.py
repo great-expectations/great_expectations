@@ -4,7 +4,7 @@ import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.expectation_suite import ExpectationSuite
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context import CloudDataContext
 from great_expectations.datasource import BaseDatasource
 from great_expectations.exceptions import StoreBackendError
 from great_expectations.validator.validator import Validator
