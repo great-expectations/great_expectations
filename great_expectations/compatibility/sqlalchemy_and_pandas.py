@@ -20,7 +20,7 @@ def execute_pandas_reader_fn(
 ) -> pd.DataFrame | list[pd.DataFrame]:
     """Suppress warnings while executing the pandas reader functions.
 
-    If pandas version is below 2.0 and sqlalchemy installed then suppress
+    If pandas version is below 2.0 and sqlalchemy installed then we suppress
     the sqlalchemy 2.0 warning and raise our own warning. pandas does not
     support sqlalchemy 2.0 until version 2.0 (see https://pandas.pydata.org/docs/dev/whatsnew/v2.0.0.html#other-enhancements)
 
@@ -47,24 +47,26 @@ def execute_pandas_reader_fn(
     return reader_fn_result
 
 
-# TODO: Clean up and add all params
-def pandas_read_sql(
-    sql,
-    con,
-    chunksize,
-) -> pd.DataFrame | list[pd.DataFrame]:
-    """Suppress warnings while executing the pandas reader functions.
+def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame:
+    """Suppress deprecation warnings while executing the pandas read_sql function.
 
-    If pandas version is below 2.0 and sqlalchemy installed then suppress
+    Note this only passes params straight to pandas read_sql method, please
+    see the pandas documentation
+    (currently https://pandas.pydata.org/docs/reference/api/pandas.read_sql.html)
+    for more information on this method.
+
+    If pandas version is below 2.0 and sqlalchemy installed then we suppress
     the sqlalchemy 2.0 warning and raise our own warning. pandas does not
     support sqlalchemy 2.0 until version 2.0 (see https://pandas.pydata.org/docs/dev/whatsnew/v2.0.0.html#other-enhancements)
 
     Args:
-        reader_fn: Reader function to execute.
-        reader_options: Options to pass to reader function.
+        sql: str or SQLAlchemy Selectable (select or text object)
+        con: Options to pass to reader function.
+        **kwargs: Other keyword arguments, not enumerated here since they differ
+            between pandas versions.
 
     Returns:
-        dataframe or list of dataframes
+        dataframe
     """
     if is_version_less_than(pd.__version__, "2.0.0"):
         if sqlalchemy and is_version_greater_or_equal(sqlalchemy.__version__, "2.0.0"):
@@ -74,7 +76,7 @@ def pandas_read_sql(
             # but using the base class here since sqlalchemy is an optional dependency and this
             # warning type only exists in sqlalchemy < 2.0.
             warnings.filterwarnings(action="ignore", category=DeprecationWarning)
-            return_value = pd.read_sql(sql=sql, con=con, chunksize=chunksize)
+            return_value = pd.read_sql(sql=sql, con=con, **kwargs)
     else:
-        return_value = pd.read_sql(sql=sql, con=con, chunksize=chunksize)
+        return_value = pd.read_sql(sql=sql, con=con, **kwargs)
     return return_value
