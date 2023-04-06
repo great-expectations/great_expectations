@@ -48,7 +48,7 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
-            file_path_template_map_fn=DBFSPath.convert_to_file_semantics_version,
+            file_path_template_map_fn=DBFSPath.convert_to_protocol_version,
         )
 
         # build a more specific `_test_connection_error_message`
