@@ -542,9 +542,13 @@ class Datasource(
 
         asset.test_connection()
 
+        asset_names: Set[str] = self.get_asset_names()
+        if asset.name in asset_names:
+            raise ValueError(
+                f"'{asset.name}' already exists (all existing assets are {self.get_asset_names()})"
+            )
+
         self.assets.append(asset)
-        # Since dictionary keys are unique, this ensures uniqueness of "_DataAssetT" objects.
-        self.assets = list(self.get_assets_as_dict().values())
 
         return asset
 

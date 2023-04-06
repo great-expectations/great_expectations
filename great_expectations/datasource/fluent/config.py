@@ -101,9 +101,6 @@ class GxConfig(FluentBaseModel):
             datasource.name: datasource for datasource in self.fluent_datasources
         }
 
-        # Since dictionary keys are unique, this ensures uniqueness of "Datasource" objects.
-        self.fluent_datasources = list(datasources_as_dict.values())
-
         return datasources_as_dict
 
     def get_datasource_names(self) -> Set[str]:
@@ -146,7 +143,6 @@ class GxConfig(FluentBaseModel):
         """
         datasources_as_dict: Dict[str, Datasource] = self.get_datasources_as_dict()
         datasources_as_dict.update(datasources)
-        # Since dictionary keys are unique, this ensures uniqueness of "Datasource" objects.
         self.fluent_datasources = list(datasources_as_dict.values())
 
     # noinspection PyNestedDecorators
