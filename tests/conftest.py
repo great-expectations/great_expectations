@@ -1705,11 +1705,11 @@ def titanic_sqlite_db(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:///{titanic_db_path}")
-        with engine.connect() as connection:
+        with engine.begin() as connection:
             assert connection.execute(
                 sa.text("select count(*) from titanic")
             ).fetchall()[0] == (1313,)
-        return engine
+            return connection
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 
