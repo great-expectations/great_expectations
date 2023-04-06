@@ -37,6 +37,7 @@ from great_expectations.datasource.fluent.sql_datasource import (
     SplitterYearAndMonth,
     TableAsset,
 )
+from tests.datasource.fluent.conftest import FLUENT_DATASOURCE_TEST_DIR
 
 if TYPE_CHECKING:
     from pytest import FixtureRequest
@@ -48,12 +49,11 @@ LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
 
-EXPERIMENTAL_DATASOURCE_TEST_DIR = pathlib.Path(__file__).parent
-CSV_PATH = EXPERIMENTAL_DATASOURCE_TEST_DIR.joinpath(
+CSV_PATH = FLUENT_DATASOURCE_TEST_DIR.joinpath(
     pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
 )
 
-PG_CONFIG_YAML_FILE = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
+PG_CONFIG_YAML_FILE = FLUENT_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 PG_CONFIG_YAML_STR: Final[str] = PG_CONFIG_YAML_FILE.read_text()
 
 # TODO: create PG_CONFIG_YAML_FILE/STR from this dict
