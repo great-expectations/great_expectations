@@ -360,7 +360,13 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
-        with execution_engine.engine.connect() as connection:
+        connection: sa.engine.Connection
+        if isinstance(execution_engine.engine, sa.engine.Engine):
+            connection = execution_engine.engine.connect()
+        else:
+            connection = execution_engine.engine
+
+        with connection:
             unexpected_count: Union[float, int] = connection.execute(
                 sa.select(
                     unexpected_count_query.c[
