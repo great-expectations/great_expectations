@@ -221,6 +221,8 @@ Alternatively, you can visit the [Checkpoints page](https://app.greatexpectation
 
 Now that you've seen how to implement the GX workflow, it is time to customize the workflow to suit your specific use cases! To help with this we have prepared more detailed guides tailored to specific environments and resources.
 
+To get all the snippets above in one script, visit [GX OSS repository](https://github.com/great-expectations/great_expectations/blob/develop/assets/scripts/gx_cloud/experimental/onboarding_script.py)
+
 To invite additional team members to the app visit [“Settings” > “Users”](https://app.greatexpectations.io/users).
 
 For more details on installing GX for use with local filesystems, please see:
