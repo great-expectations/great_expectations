@@ -2814,16 +2814,15 @@ def _create_trino_engine(
     from sqlalchemy import text  # noqa: TID251
     from trino.exceptions import TrinoUserError
 
-    try:
-        with engine.connect() as conn:
+    with engine.connect() as conn:
+        try:
             schemas = conn.execute(
                 text(f"show schemas from memory like {repr(schema_name)}")
             ).fetchall()
-        if (schema_name,) not in schemas:
-            with engine.connect() as conn:
+            if (schema_name,) not in schemas:
                 conn.execute(text(f"create schema {schema_name}"))
-    except TrinoUserError:
-        pass
+        except TrinoUserError:
+            pass
 
     return engine
     # trino_user = os.getenv("GE_TEST_TRINO_USER")
