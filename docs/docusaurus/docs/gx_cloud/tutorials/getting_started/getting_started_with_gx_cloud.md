@@ -43,7 +43,6 @@ These tokens are view-once and stored as a hash in Great Expectation Cloud's bac
 Any Python Interpreter or script file will work for the remaining steps in the guide, we recommend using a Jupyter Notebook, since they are included in the OSS GX installation and give the best experience of both composing a script file and running code in a live interpreter.
 :::
 
-
 Switch to Jupyter Notebook and import modules we're going to use in this tutorial.
 
 ```python title="Jupyter Notebook"
@@ -57,7 +56,7 @@ import os
 Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTag tag="data_context" text="Data Context"/>. 
 
 :::caution
-Please note that GX Cloud API tokens are sensitive information and should not be committed to version control software. Alternatively, add these as [Data Context config variables](docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+Please note that GX Cloud API tokens are sensitive information and should not be committed to version control software. Alternatively, add these as [Data Context config variables](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/)
 :::
 
 ```python title="Jupyter Notebook"
@@ -74,7 +73,7 @@ Modify the following snippet code to connect to your <TechnicalTag tag="datasour
 In case you don't have some data handy to test in this guide, we can use the [NYC taxi data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). This is an open data set which is updated every month. Each record in the data corresponds to one taxi ride. You can find a link to it in the sniipet below.
 
 :::caution
-Please note you should not include sensitive info/credentials directly in the config while connecting to your Datasource, since this would be persisted in plain text in the database and presented in Cloud UI. If credentials/full connection string is required, you should use a [config variables file](docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md).
+Please note you should not include sensitive info/credentials directly in the config while connecting to your Datasource, since this would be persisted in plain text in the database and presented in Cloud UI. If credentials/full connection string is required, you should use a [config variables file](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
 :::
 
 ```python title="Jupyter Notebook"
@@ -121,7 +120,7 @@ datasource = context.test_yaml_config(datasource_yaml)
 datasource = context.save_datasource(datasource)
 ```
 
-In case you need more details on how to connect to your specific data system, we have step by step how-to guides that cover many common cases. [Start here](/docs/guides/connecting_to_your_data/connect_to_data_overview.md)
+In case you need more details on how to connect to your specific data system, we have step by step how-to guides that cover many common cases. [Start here](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview)
 
 ### 3. Create Expectations
 
