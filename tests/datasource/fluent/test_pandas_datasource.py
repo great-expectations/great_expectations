@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import inspect
 import logging
 import pathlib
@@ -473,22 +474,41 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     )
 
 
-def test_dynamic_pandas_batch_metadata(
+def test_pandas_data_asset_batch_metadata(
     empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
 ):
+    my_config_variables = {"pipeline_filename": __file__}
+    empty_data_context.config_variables.update(my_config_variables)
+
     pandas_datasource = empty_data_context.sources.pandas_default
 
     batch_metadata = {
-        "pipeline_filename": "my_data_pipeline.ipynb",
+        "no_curly_pipeline_filename": "$pipeline_filename",
+        "curly_pipeline_filename": "${pipeline_filename}",
         "pipeline_step": "transform_3",
     }
 
-    csv_asset_name = "my_csv_asset"
-
     csv_asset = pandas_datasource.add_csv_asset(
-        name=csv_asset_name,
+        name="my_csv_asset",
         filepath_or_buffer=valid_file_path,
         batch_metadata=batch_metadata,
     )
-    assert csv_asset
     assert csv_asset.batch_metadata == batch_metadata
+
+    batch_list = csv_asset.get_batch_list_from_batch_request(
+        csv_asset.build_batch_request()
+    )
+    assert len(batch_list) == 1
+
+    # allow mutation of this attribute
+    batch_list[0].metadata["also_this_one"] = "other_batch-level_value"
+
+    substituted_batch_metadata = copy.deepcopy(batch_metadata)
+    substituted_batch_metadata.update(
+        {
+            "no_curly_pipeline_filename": __file__,
+            "curly_pipeline_filename": __file__,
+            "also_this_one": "other_batch-level_value",
+        }
+    )
+    assert batch_list[0].metadata == substituted_batch_metadata

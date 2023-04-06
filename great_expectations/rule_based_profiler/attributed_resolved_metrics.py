@@ -17,13 +17,13 @@ from great_expectations.validator.computed_metric import MetricValue  # noqa: TC
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 except ImportError:
     logger.debug("No SqlAlchemy module available.")
     sa = None
 
 try:
-    from sqlalchemy.engine import Row as sqlalchemy_engine_Row
+    from sqlalchemy.engine import Row as sqlalchemy_engine_Row  # noqa: TID251
 except ImportError:
     logger.debug("No SqlAlchemy.engine module available.")
     sqlalchemy_engine_Row = None

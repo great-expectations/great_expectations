@@ -19,7 +19,7 @@ If you have a use case we have not considered, please [contact us on Slack](http
 
 <Prerequisites>
 
-- [Configured a Data Context](../../tutorials/getting_started/tutorial_setup.md).
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 - Have your <TechnicalTag tag="data_context" text="Data Context" /> configured to save Expectations to your filesystem (please see [How to configure an Expectation store to use a filesystem](../../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)) or another <TechnicalTag tag="expectation_store" text="Expectation Store" /> if you are in a hosted environment.
 
 </Prerequisites>

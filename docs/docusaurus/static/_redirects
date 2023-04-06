@@ -232,3 +232,12 @@
 
 # Redirects for renamed reference docs
 /docs/reference/anonymous_usage_statistics /docs/reference/usage_statistics
+
+# Redirect from Getting Started Tutorial to Quickstart
+/docs/docusaurus/docs/tutorials/getting_started/ /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_connect_to_data /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_create_expectations /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_overview /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_review /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_setup /docs/tutorials/quickstart
+/docs/tutorials/getting_started/tutorial_validate_data /docs/tutorials/quickstart
