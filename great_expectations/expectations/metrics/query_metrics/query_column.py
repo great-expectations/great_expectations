@@ -65,7 +65,7 @@ class QueryColumn(QueryMetricProvider):
         engine: sqlalchemy_engine_Engine = execution_engine.engine
         result: List[sqlalchemy_engine_Row] = engine.execute(sa.text(query)).fetchall()
 
-        return [dict(element) for element in result]
+        return [element._asdict() for element in result]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(

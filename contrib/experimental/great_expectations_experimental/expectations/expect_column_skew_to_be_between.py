@@ -17,7 +17,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
 )
 from great_expectations.expectations.expectation import ColumnExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
+    ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     column_aggregate_partial,
@@ -53,7 +53,7 @@ except ImportError:
         Row = None
 
 
-class ColumnSkew(ColumnMetricProvider):
+class ColumnSkew(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.custom.skew"

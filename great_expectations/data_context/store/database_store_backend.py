@@ -14,9 +14,13 @@ from great_expectations.util import (
 )
 
 try:
-    from sqlalchemy import Column, MetaData, String, Table, and_, column
-    from sqlalchemy.engine.url import URL
-    from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
+    from sqlalchemy import Column, MetaData, String, Table, and_, column  # noqa: TID251
+    from sqlalchemy.engine.url import URL  # noqa: TID251
+    from sqlalchemy.exc import (  # noqa: TID251
+        IntegrityError,
+        NoSuchTableError,
+        SQLAlchemyError,
+    )
 
     make_url = import_make_url()
 except ImportError:
@@ -103,7 +107,7 @@ class DatabaseStoreBackend(StoreBackend):
             cols.append(Column(column_, String, primary_key=True))
         cols.append(Column("value", String))
         try:
-            table = Table(table_name, meta, autoload=True, autoload_with=self.engine)
+            table = Table(table_name, meta, autoload_with=self.engine)
             # We do a "light" check: if the columns' names match, we will proceed, otherwise, create the table
             if {str(col.name).lower() for col in table.columns} != (
                 set(key_columns) | {"value"}

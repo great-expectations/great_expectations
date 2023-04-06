@@ -1,5 +1,8 @@
 from typing import Optional
 
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
+    DataProfilerProfileMetricProvider,
+)
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
@@ -8,8 +11,6 @@ from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
-
-from .data_profiler_profile_metric_provider import DataProfilerProfileMetricProvider
 
 
 class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
@@ -37,10 +38,9 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
             batch_columns_list=metrics["table.columns"],
         )
 
-        profile_report: dict = metrics["data_profiler.profile_report"]
-        profile_report_column_data_stats: dict = {
-            element["column_name"]: element for element in profile_report["data_stats"]
-        }
+        profile_report_column_data_stats: dict = metrics[
+            "data_profiler.table_column_infos"
+        ]
         return profile_report_column_data_stats[column_name]
 
     @classmethod
@@ -60,25 +60,13 @@ class DataProfilerColumnProfileReport(DataProfilerProfileMetricProvider):
         table_domain_kwargs: dict = {
             k: v for k, v in metric.metric_domain_kwargs.items() if k != "column"
         }
-        dependencies["data_profiler.profile_report"] = MetricConfiguration(
-            metric_name="data_profiler.profile_report",
+        dependencies["data_profiler.table_column_infos"] = MetricConfiguration(
+            metric_name="data_profiler.table_column_infos",
             metric_domain_kwargs={},
             metric_value_kwargs=metric.metric_value_kwargs,
         )
-        dependencies["table.column_types"] = MetricConfiguration(
-            metric_name="table.column_types",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs={
-                "include_nested": True,
-            },
-        )
         dependencies["table.columns"] = MetricConfiguration(
             metric_name="table.columns",
-            metric_domain_kwargs=table_domain_kwargs,
-            metric_value_kwargs=None,
-        )
-        dependencies["table.row_count"] = MetricConfiguration(
-            metric_name="table.row_count",
             metric_domain_kwargs=table_domain_kwargs,
             metric_value_kwargs=None,
         )

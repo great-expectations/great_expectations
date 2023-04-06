@@ -25,7 +25,7 @@ In this guide we will demonstrate how to use Pandas to connect to data stored on
 
 <Prerequisites>
 
-- [An installation of GX set up to work with GCS](docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
+- [An installation of GX set up to work with GCS](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs)
 - Access to data on a GCS bucket
 - A passion for data quality
 
@@ -62,9 +62,9 @@ datasource = context.sources.add_pandas_gcs(
 
 ```python title = "Python code"
 batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-prefix = "data/taxi_yellow_tripdata_samples/"
+gcs_prefix = "data/taxi_yellow_tripdata_samples/"
 data_asset = datasource.add_csv_asset(
-    name="my_taxi_data_asset", batching_regex=batching_regex, prefix=prefix
+    name="my_taxi_data_asset", batching_regex=batching_regex, gcs_prefix=gcs_prefix
 )
 ```
 
@@ -99,4 +99,4 @@ For more information on Google Cloud and authentication, please visit the follow
 
 ### Related reading
 
-For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials](docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)

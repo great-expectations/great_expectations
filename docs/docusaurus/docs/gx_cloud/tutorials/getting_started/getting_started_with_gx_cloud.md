@@ -39,9 +39,10 @@ These tokens are view-once and stored as a hash in Great Expectation Cloud's bac
 
 #### 1.2 Import modules
 
-:::tip 
+:::tip
 Any Python Interpreter or script file will work for the remaining steps in the guide, we recommend using a Jupyter Notebook, since they are included in the OSS GX installation and give the best experience of both composing a script file and running code in a live interpreter.
 :::
+
 
 Switch to Jupyter Notebook and import modules we're going to use in this tutorial.
 

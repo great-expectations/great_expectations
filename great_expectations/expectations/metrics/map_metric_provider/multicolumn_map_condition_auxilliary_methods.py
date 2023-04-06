@@ -160,7 +160,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
 
-    return [dict(val) for val in execution_engine.engine.execute(query).fetchall()]
+    return [val._asdict() for val in execution_engine.engine.execute(query).fetchall()]
 
 
 def _sqlalchemy_multicolumn_map_condition_filtered_row_count(

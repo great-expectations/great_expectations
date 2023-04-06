@@ -17,9 +17,11 @@ import numpy as np
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-from ruamel.yaml import YAML
 
 import great_expectations as gx
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -36,6 +38,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.core.util import get_or_create_spark_application
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import (
     AbstractDataContext,
     BaseDataContext,
@@ -77,7 +80,6 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
@@ -109,7 +111,7 @@ if TYPE_CHECKING:
     import pyspark.sql
     from pyspark.sql import SparkSession
 
-yaml = YAML()
+yaml = YAMLHandler()
 ###
 #
 # NOTE: THESE TESTS ARE WRITTEN WITH THE en_US.UTF-8 LOCALE AS DEFAULT FOR STRING FORMATTING
@@ -2324,8 +2326,10 @@ def test_db_connection_string(tmp_path_factory, test_backends):
         basepath = str(tmp_path_factory.mktemp("db_context"))
         path = os.path.join(basepath, "test.db")  # noqa: PTH118
         engine = sa.create_engine("sqlite:///" + str(path))
-        df1.to_sql(name="table_1", con=engine, index=True)
-        df2.to_sql(name="table_2", con=engine, index=True, schema="main")
+        add_dataframe_to_db(df=df1, name="table_1", con=engine, index=True)
+        add_dataframe_to_db(
+            df=df2, name="table_2", con=engine, index=True, schema="main"
+        )
 
         # Return a connection string to this newly-created db
         return "sqlite:///" + str(path)

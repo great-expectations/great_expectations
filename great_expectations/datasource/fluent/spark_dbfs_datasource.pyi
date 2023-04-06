@@ -17,6 +17,9 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+    )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
@@ -34,4 +37,5 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
+        batch_metadata: Optional[BatchMetadata] = ...,
     ) -> CSVAsset: ...
