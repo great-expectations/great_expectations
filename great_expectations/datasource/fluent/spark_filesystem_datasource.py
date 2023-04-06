@@ -12,7 +12,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    BatchMetadata,
     TestConnectionError,
 )
 
