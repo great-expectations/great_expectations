@@ -1147,10 +1147,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
             split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        if isinstance(self.engine, Engine):
-            self.engine = self.engine.connect()
-        query_result: List[Row] = self.engine.execute(split_query).fetchall()
-        return query_result
+        with self.engine.begin() as connection:
+            query_result: List[Row] = connection.execute(split_query).fetchall()
+            return query_result
 
     def get_data_for_batch_identifiers(
         self, selectable: Selectable, splitter_method_name: str, splitter_kwargs: dict

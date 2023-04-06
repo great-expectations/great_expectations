@@ -415,7 +415,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
         reflected_columns_list = column_reflection_fallback(
             selectable=selectable,
             dialect=sqlalchemy_engine.engine.dialect,
-            sqlalchemy_engine=sqlalchemy_engine.engine,
+            sqlalchemy_engine=sqlalchemy_engine.engine.engine,
         )
         for column_name in [
             reflected_column_config["name"]
