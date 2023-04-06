@@ -512,7 +512,7 @@ class Datasource(
             return found_asset
         except IndexError as exc:
             raise LookupError(
-                f"'{asset_name}' not found. Available assets are {self.get_asset_names()}"
+                f'"{asset_name}" not found. Available assets are {", ".join(self.get_asset_names())})'
             ) from exc
 
     def delete_asset(self, asset_name: str) -> None:
@@ -545,7 +545,7 @@ class Datasource(
         asset_names: Set[str] = self.get_asset_names()
         if asset.name in asset_names:
             raise ValueError(
-                f"'{asset.name}' already exists (all existing assets are {self.get_asset_names()})"
+                f'"{asset.name}" already exists (all existing assets are {", ".join(asset_names)})'
             )
 
         self.assets.append(asset)

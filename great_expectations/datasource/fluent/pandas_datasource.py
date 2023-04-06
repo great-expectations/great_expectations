@@ -487,6 +487,26 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
             **dumps_kwargs,
         )
 
+    def _add_asset(
+        self, asset: _DataAssetT, connect_options: dict | None = None
+    ) -> _DataAssetT:
+        """Adds an asset to this "_PandasDatasource" object.
+
+        The reserved asset name "DEFAULT_PANDAS_DATA_ASSET_NAME" undergoes replacement (rather than signaling error).
+
+        Args:
+            asset: The DataAsset to be added to this datasource.
+        """
+        asset_name: str = asset.name
+
+        asset_names: Set[str] = self.get_asset_names()
+
+        if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
+            if asset_name in asset_names:
+                self.delete_asset(asset_name=asset_name)
+
+        return super()._add_asset(asset=asset, connect_options=connect_options)
+
 
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
