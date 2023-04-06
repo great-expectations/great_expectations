@@ -7,11 +7,11 @@ from typing import TYPE_CHECKING, List
 import boto3
 import botocore
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import BatchDefinition, BatchRequest
 from great_expectations.core.batch_spec import PathBatchSpec
 from great_expectations.core.id_dict import BatchSpec
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetDBFSDataConnector,
@@ -22,8 +22,7 @@ from tests.test_utils import create_files_in_directory
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
-
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.mark.integration

@@ -35,12 +35,12 @@ In the script that you are defining and executing your Checkpoint in, enter the 
 
 Importing `great_expectations` will give you access to your Data Context, while we will configure an instance of the `Checkpoint` class as our in-memory Checkpoint.
 
-If you are planning to use a YAML string to configure your in-memory Checkpoint you will also need to import `yaml` from `ruamel`:
+If you are planning to use a YAML string to configure your in-memory Checkpoint you will also need to import `YAMLHandler` (which uses `ruamel.yaml`):
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py imports"
 ```
 
-You will also need to initialize `yaml.YAML(...)`:
+You will also need to initialize `YAMLHandler()`:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py yaml"
 ```
@@ -56,7 +56,7 @@ Checkpoints require a Data Context in order to access necessary Stores from whic
 
 ### 3. Define your Checkpoint configuration
 
-In addition to a Data Context, you will need a configuration with which to initialize your Checkpoint.  This configuration can be in the form of a YAML string or a Python dictionary,  The following examples show configurations that are equivalent to the one used by the Getting Started Tutorial.
+In addition to a Data Context, you will need a configuration with which to initialize your Checkpoint.  This configuration can be in the form of a YAML string or a Python dictionary.
 
 Normally, a Checkpoint configuration will include the keys `class_name` and `module_name`.  These are used by Great Expectations to identify the class of Checkpoint that should be initialized with a given configuration.  Since we are initializing an instance of the `Checkpoint` class directly we don't need the configuration to indicate the class of Checkpoint to be initialized.  Therefore, these two keys will be left out of our configuration.
 
@@ -134,5 +134,5 @@ Once you have run your script you can verify that it has worked by checking your
 ## Notes
 
 To view the full example scripts used in this documentation, see:
-- [how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py)
+- [how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py)
 - [how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py)

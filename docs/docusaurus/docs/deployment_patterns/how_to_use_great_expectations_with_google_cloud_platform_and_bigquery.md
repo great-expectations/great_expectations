@@ -52,15 +52,6 @@ Relevant documentation for the components can also be found here:
 - [How to host and share Data Docs on GCS](../guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.md)
 - Optionally, you can also use a [Secret Manager for GCP Credentials](../guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
 
-:::note Note on V3 Expectations for BigQuery
-
-  A small number of V3 Expectations have not been migrated to BigQuery, and will be very soon. These include:
-
-  - `expect_column_quantile_values_to_be_between`
-  - `expect_column_kl_divergence_to_be_less_than`
-
-:::
-
 ## Part 1: Local Configuration of Great Expectations that connects to Google Cloud Platform
 
 ### 1. If necessary, upgrade your Great Expectations version

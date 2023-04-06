@@ -12,13 +12,6 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.rule_based_profiler.domain_builder import (
-    # TODO: <Alex></Alex>
-    # """
-    # Leaving example of general GreatExpectations "ColumnDomainBuilder" (commented out) for reference.
-    # Subject to inclusion/exclusion arguments, "ColumnDomainBuilder" emits "Domain" object for every column in table.
-    # """
-    # ColumnDomainBuilder,
-    # TODO: <Alex></Alex>
     DomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -98,43 +91,13 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         rule.
         """
 
-        # TODO: <Alex></Alex>
-        """
-        Leaving example of general GreatExpectations "ColumnDomainBuilder" (commented out) for reference.
-        Subject to inclusion/exclusion arguments, "ColumnDomainBuilder" emits "Domain" object for every column in table.
-        """
-        # column_domain_builder: DomainBuilder = ColumnDomainBuilder(
-        #     include_column_names=None,
-        #     exclude_column_names=None,
-        #     include_column_name_suffixes=None,
-        #     exclude_column_name_suffixes=None,
-        #     semantic_type_filter_module_name=None,
-        #     semantic_type_filter_class_name=None,
-        #     include_semantic_types=None,
-        #     exclude_semantic_types=None,
-        #     data_context=None,
-        # )
-        # TODO: <Alex></Alex>
-        # TODO: <Alex></Alex>
         """
         Subject to inclusion/exclusion arguments, "DataProfilerColumnDomainBuilder" emits "Domain" object for every
         column name in profiler report; GreatExpectations "table.columns" metric is used to validate column existence.
         """
         data_profiler_column_domain_builder: DomainBuilder = (
-            DataProfilerColumnDomainBuilder(
-                profile_path=f"{VARIABLES_KEY}profile_path",
-                include_column_names=None,
-                exclude_column_names=None,
-                include_column_name_suffixes=None,
-                exclude_column_name_suffixes=None,
-                semantic_type_filter_module_name=None,
-                semantic_type_filter_class_name=None,
-                include_semantic_types=None,
-                exclude_semantic_types=None,
-                data_context=None,
-            )
+            DataProfilerColumnDomainBuilder()
         )
-        # TODO: <Alex></Alex>
 
         data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
             metric_name="data_profiler.column_profile_report",
@@ -226,16 +189,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         rule = Rule(
             name="numeric_rule",
             variables=variables,
-            # TODO: <Alex></Alex>
-            # """
-            # Leaving example of general GreatExpectations "ColumnDomainBuilder" (commented out) for reference.
-            # Subject to inclusion/exclusion arguments, "ColumnDomainBuilder" emits "Domain" object for every column in table.
-            # """
-            # domain_builder=column_domain_builder,
-            # TODO: <Alex></Alex>
-            # TODO: <Alex></Alex>
             domain_builder=data_profiler_column_domain_builder,
-            # TODO: <Alex></Alex>
             parameter_builders=parameter_builders,
             expectation_configuration_builders=expectation_configuration_builders,
         )

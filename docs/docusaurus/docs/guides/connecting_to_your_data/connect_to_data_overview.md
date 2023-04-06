@@ -15,10 +15,10 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
 :::note Prerequisites
-- Completing [Step 2: Connect to data](../../tutorials/getting_started/tutorial_connect_to_data.md) of the Getting Started tutorial is recommended.
+- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
 :::
 	
-Connecting to your data in Great Expectations is designed to be a painless process.  Once you have performed this step, you will have a consistent API for accessing and validating data on all kinds of source data systems: SQL-type data sources, local and remote file stores, in-memory data frames, and more.
+Connecting to your data in Great Expectations is designed to be a painless process.  Once you have defined your Datasources and Data Assets, you will have a consistent API for accessing and validating data on all kinds of source data systems such as SQL-type data sources, local and remote file stores, and in-memory data frames.
 
 ## The connect to data process
 
@@ -158,10 +158,11 @@ context.test_yaml_config(datasource_yaml)
 
 ```python
 import great_expectations as gx
-from ruamel import yaml
+from great_expectations.core.yaml_handler import YAMLHandler
 
 datasource_config = {}  # Replace this with the Python dictionary you want to check for errors.
 
+yaml = YAMLHandler()
 context = gx.get_context()
 context.test_yaml_config(yaml.dump(datasource_config))
 ```
@@ -188,10 +189,12 @@ What is the point of configuring a Datasource if you can't easily use it in the 
 
 The function `add_datasource()` takes in a series of named arguments corresponding to the keys in your `datasource_yaml` string.  Fortunately, python and the `yaml` module provide a convenient way to unpack yaml strings into named arguements so you don't have to. 
 
-First, you will want to import the yaml module with the command:
+First, you will want to import and initialize the YAMLHandler object:
 
 ```python
-from ruamel import yaml
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
 ```
 
 After that, the following code snippet will unpack your yaml string and save your Datasource configuration to the Data Context:

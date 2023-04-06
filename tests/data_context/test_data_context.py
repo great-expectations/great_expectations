@@ -8,7 +8,6 @@ from typing import Dict, List, Union
 import pandas as pd
 import pytest
 from freezegun import freeze_time
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint, SimpleCheckpoint
@@ -18,6 +17,7 @@ from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.run_identifier import RunIdentifier
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import DataContext
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
@@ -62,7 +62,7 @@ try:
 except ImportError:
     from unittest import mock
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 parameterized_expectation_suite_name = "my_dag_node.default"
 
@@ -1396,7 +1396,7 @@ def test_get_checkpoint(empty_context_with_checkpoint):
 
 
 def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
-    yaml_obj = YAML(typ="safe")
+    yaml_obj = YAMLHandler()
     context = empty_data_context
 
     checkpoint = {
@@ -1416,7 +1416,7 @@ def test_get_checkpoint_raises_error_on_missing_batches_key(empty_data_context):
 
 
 def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
-    yaml_obj = YAML(typ="safe")
+    yaml_obj = YAMLHandler()
     context = empty_data_context
 
     checkpoint = {
@@ -1439,7 +1439,7 @@ def test_get_checkpoint_raises_error_on_non_list_batches(empty_data_context):
 def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
     empty_data_context,
 ):
-    yaml_obj = YAML(typ="safe")
+    yaml_obj = YAMLHandler()
     context = empty_data_context
 
     checkpoint = {
@@ -1464,7 +1464,7 @@ def test_get_checkpoint_raises_error_on_missing_expectation_suite_names(
 
 
 def test_get_checkpoint_raises_error_on_missing_batch_kwargs(empty_data_context):
-    yaml_obj = YAML(typ="safe")
+    yaml_obj = YAMLHandler()
     context = empty_data_context
 
     checkpoint = {

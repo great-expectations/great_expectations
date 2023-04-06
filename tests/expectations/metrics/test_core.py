@@ -40,6 +40,10 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
+
 
 def test_metric_loads_pd():
     assert get_metric_provider("column.max", PandasExecutionEngine()) is not None
@@ -1729,7 +1733,7 @@ def test_map_value_set_sa(sa):
 def test_map_of_type_sa(sa):
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    df.to_sql(name="test", con=eng, index=False)
+    add_dataframe_to_db(df=df, name="test", con=eng, index=False)
     batch_data = SqlAlchemyBatchData(
         execution_engine=eng, table_name="test", source_table_name="test"
     )
@@ -1991,9 +1995,7 @@ def test_map_column_values_increasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [4], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([4], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-02-21"]
 
 
@@ -2180,9 +2182,7 @@ def test_map_column_values_decreasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [3], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([3], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-03-20"]
 
 

@@ -23,7 +23,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-import sqlalchemy
+import sqlalchemy  # noqa: TID251
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent.interfaces import (
@@ -143,12 +143,11 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"]
     assets: Dict[str, _PandasDataAsset]
     def test_connection(self, test_assets: bool = ...) -> None: ...
-    def _get_validator(self, asset: _PandasDataAssetT) -> Validator: ...
     def add_dataframe_asset(
         self,
         name: str,
-        *,
         dataframe: pd.DataFrame,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
     ) -> DataFrameAsset: ...
     def read_dataframe(

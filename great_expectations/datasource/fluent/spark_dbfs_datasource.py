@@ -18,6 +18,7 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
         Sorter,
         SortersDefinition,
     )
@@ -42,6 +43,7 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         header: bool = False,
         infer_schema: bool = False,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> CSVAsset:
         """Adds a CSV DataAsset to the present "SparkDBFSDatasource" object.
 
@@ -52,22 +54,22 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
             header: boolean (default False) indicating whether or not first line of CSV file is header line
             infer_schema: boolean (default False) instructing Spark to attempt to infer schema of CSV file heuristically
             order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
         """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
         order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
         asset = CSVAsset(
             name=name,
-            batching_regex=batching_regex_pattern,
+            batching_regex=batching_regex,  # type: ignore[arg-type] # pydantic will compile regex str to Pattern
             header=header,
             inferSchema=infer_schema,
             order_by=order_by_sorters,
+            batch_metadata=batch_metadata or {},
         )
         asset._data_connector = DBFSDataConnector.build_data_connector(
             datasource_name=self.name,
             data_asset_name=name,
-            batching_regex=batching_regex_pattern,
+            batching_regex=asset.batching_regex,
             base_directory=self.base_directory,
             glob_directive=glob_directive,
             data_context_root_directory=self.data_context_root_directory,
@@ -76,7 +78,7 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         asset._test_connection_error_message = (
             DBFSDataConnector.build_test_connection_error_message(
                 data_asset_name=name,
-                batching_regex=batching_regex_pattern,
+                batching_regex=asset.batching_regex,
                 glob_directive=glob_directive,
                 base_directory=self.base_directory,
             )

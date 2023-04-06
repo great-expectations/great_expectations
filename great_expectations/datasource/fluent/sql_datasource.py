@@ -47,8 +47,10 @@ from great_expectations.optional_imports import sqlalchemy
 
 if TYPE_CHECKING:
     # min version of typing_extension missing `Self`, so it can't be imported at runtime
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
     from typing_extensions import Self
+
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
 
 
 class SQLDatasourceError(Exception):
@@ -468,6 +470,13 @@ class _SQLAsset(DataAsset):
     def add_splitter_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
+        """Associates a datetime part splitter with this sql asset.
+        Args:
+            column_name: Name of the date column where parts will be parsed out.
+            datetime_parts: A list of datetime parts to split on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterDatetimePart(
                 method_name="split_on_date_parts",
@@ -477,6 +486,12 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_column_value(self: Self, column_name: str) -> Self:
+        """Associates a column value splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterColumnValue(
                 method_name="split_on_column_value",
@@ -487,6 +502,13 @@ class _SQLAsset(DataAsset):
     def add_splitter_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
+        """Associates a divided integer splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+            divisor: The divisor to use when splitting.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterDividedInteger(
                 method_name="split_on_divided_integer",
@@ -496,6 +518,13 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
+        """Associates a mod integer splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+            mod: The mod to use when splitting.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterModInteger(
                 method_name="split_on_mod_integer",
@@ -505,6 +534,12 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
+        """Associates a multi column value splitter with this sql asset.
+        Args:
+            column_names: A list of column names to split on.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterMultiColumnValue(
                 column_names=column_names, method_name="split_on_multi_column_values"
@@ -575,7 +610,9 @@ class _SQLAsset(DataAsset):
         splitter = self.splitter
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
-            batch_metadata = copy.deepcopy(request.options)
+            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+                batch_request=request
+            )
             batch_spec_kwargs = self._create_batch_spec_kwargs()
             if splitter:
                 batch_spec_kwargs["splitter_method"] = splitter.method_name
@@ -906,6 +943,7 @@ class SQLDatasource(Datasource):
         table_name: str,
         schema_name: Optional[str] = None,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
 
@@ -914,6 +952,7 @@ class SQLDatasource(Datasource):
             table_name: The table where the data resides.
             schema_name: The schema that holds the table.
             order_by: A list of Sorters or Sorter strings.
+            batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
             The table asset that is added to the datasource.
@@ -926,6 +965,7 @@ class SQLDatasource(Datasource):
             table_name=table_name,
             schema_name=schema_name,
             order_by=order_by_sorters,
+            batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)
 
@@ -935,6 +975,7 @@ class SQLDatasource(Datasource):
         name: str,
         query: str,
         order_by: Optional[SortersDefinition] = None,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> QueryAsset:
         """Adds a query asset to this datasource.
 
@@ -942,6 +983,7 @@ class SQLDatasource(Datasource):
             name: The name of this table asset.
             query: The SELECT query to selects the data to validate. It must begin with the "SELECT".
             order_by: A list of Sorters or Sorter strings.
+            batch_metadata: BatchMetadata we want to associate with this DataAsset and all batches derived from it.
 
         Returns:
             The query asset that is added to the datasource.
@@ -953,5 +995,6 @@ class SQLDatasource(Datasource):
             name=name,
             query=query,
             order_by=order_by_sorters,
+            batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset)
