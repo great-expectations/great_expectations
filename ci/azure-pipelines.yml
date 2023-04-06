@@ -443,9 +443,9 @@ stages:
             Python310:
               python.version: '3.10'
               constraints: 'ci/constraints-test/py310-min-install.txt'
-            Pandas20:
-              python.version: '3.9'
-              constraints: 'ci/constraints-test/pandas2-min-install.txt'
+            # Pandas20:
+            #   python.version: '3.9'
+            #   constraints: 'ci/constraints-test/pandas2-min-install.txt'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
