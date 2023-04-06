@@ -60,15 +60,15 @@ If you have GX Cloud configured on your system, `get_context()` will instantiate
 ## Next steps
 
 For guidance on further customizing your Data Context's configurations for Metadata Stores and Data Docs, please see:
-- [How to configure an Expectation Store on a filesystem](docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)
-- [How to configure a Validation Result Store on a filesystem](docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.md)
-- [How to configure and use a Metric Store](docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
-- [How to host and share Data Docs on a filesystem](docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md)
+- [How to configure an Expectation Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem)
+- [How to configure a Validation Result Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem)
+- [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
+- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)
 
 If you are content with the default configuration of your Data Context, you can move on to connecting GX to your source data:
-- [How to configure a Pandas Datasource](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.md)
-- [How to configure a Spark Datasource](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.md)
-- [How to configure a SQL Datasource](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+- [How to configure a Pandas Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
+- [How to configure a Spark Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
+- [How to configure a SQL Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
 ## Additional information
 
