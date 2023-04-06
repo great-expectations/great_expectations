@@ -1,5 +1,3 @@
-import random
-import string
 from unittest import mock
 
 import pandas as pd
