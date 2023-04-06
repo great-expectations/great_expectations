@@ -43,6 +43,7 @@ path_to_batch_to_validate = None  # e.g. "https://raw.githubusercontent.com/grea
 assert path_to_batch_to_validate, "Please set path_to_batch_to_validate. This can be a local filepath or a remote URL."
 
 # Create Datasource
+# For simplicity, this script creates a Datasource with a PandasExecutionEngine and a RuntimeDataConnector
 try:
     datasource: BaseDatasource = context.get_datasource(datasource_name=datasource_name)
 except ValueError:
