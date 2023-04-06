@@ -15,7 +15,7 @@ import pandas as pd
 # Create a GX Data Context
 # Make sure GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID
 # are set in your environment or config_variables.yml
-context: AbstractDataContext = gx.get_context(
+context: CloudDataContext = gx.get_context(
     cloud_mode=True,
 )
 
