@@ -18,6 +18,7 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.datasource.fluent import BatchMetadata
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
@@ -38,6 +39,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         self,
         name: str,
         *,
+        batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: re.Pattern | str = r".*",
         s3_prefix: str = "",
         s3_delimiter: str = "/",

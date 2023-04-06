@@ -23,6 +23,7 @@ from great_expectations.datasource.fluent.spark_datasource import (
 if TYPE_CHECKING:
     from azure.storage.blob import BlobServiceClient
 
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
@@ -46,6 +47,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         self,
         name: str,
         *,
+        batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: re.Pattern | str = r".*",
         abs_container: str = ...,
         abs_name_starts_with: str = "",

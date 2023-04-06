@@ -20,6 +20,7 @@ from great_expectations.datasource.fluent.interfaces import (
 if TYPE_CHECKING:
     from google.cloud.storage.client import Client as GoogleCloudStorageClient
 
+    from great_expectations.datasource.fluent import BatchMetadata
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
@@ -44,6 +45,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         self,
         name: str,
         *,
+        batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: re.Pattern | str = r".*",
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",

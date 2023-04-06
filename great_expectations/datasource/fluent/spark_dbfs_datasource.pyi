@@ -34,10 +34,11 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
     def add_csv_asset(
         self,
         name: str,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
-        batch_metadata: Optional[BatchMetadata] = ...,
     ) -> CSVAsset: ...
