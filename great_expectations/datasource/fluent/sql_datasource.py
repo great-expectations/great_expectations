@@ -476,7 +476,7 @@ class _SQLAsset(DataAsset):
             datetime_parts: A list of datetime parts to split on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
         Returns:
             This sql asset so we can use this method fluently.
-        """        
+        """
         return self._add_splitter(
             SplitterDatetimePart(
                 method_name="split_on_date_parts",
