@@ -466,7 +466,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
             row_condition_str: str = RendererConfiguration._get_row_condition_string(
                 row_condition_str=values["_row_condition"]
             )
-            v = f"{row_condition_str}{v}"
+            v = row_condition_str + v
 
         return v
 
