@@ -458,7 +458,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 condition, f"$row_condition__{str(idx)}"
             )
         row_condition_str = row_condition_str.lower()
-        return f"if {row_condition_str}"
+        return f"If {row_condition_str}"
 
     @validator("template_str")
     def _set_template_str(cls, v: str, values: dict) -> str:
