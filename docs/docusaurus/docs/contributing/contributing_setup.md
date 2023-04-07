@@ -56,7 +56,7 @@ python3 -m venv gx_dev
 
 source gx_dev/bin/activate
 
-pip install --upgrade pip==21.3.1
+pip install --upgrade pip
 
 pip install -c constraints-dev.txt -e ".[test]"
 ```
