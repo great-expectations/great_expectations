@@ -72,7 +72,11 @@ except ImportError:
     MultiPolygon = None
     LineString = None
 
-from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalchemy
+from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
+    sqlalchemy,
+    sqlalchemy_Connection,
+)
 
 try:
     LegacyRow = sqlalchemy.engine.row.LegacyRow
@@ -86,10 +90,8 @@ except (
 # may be not importable while TextClause is.
 try:
     TextClause = sqlalchemy.sql.elements.TextClause
-    Connection = sqlalchemy.engine.base.Connection
 except ImportError:
     TextClause = SQLALCHEMY_NOT_IMPORTED
-    Connection = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
     "api_np": {
@@ -432,7 +434,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if sqlalchemy and isinstance(data, TextClause):
         # TextClause is converted to str manually
         return str(data)
-    if sqlalchemy and isinstance(data, Connection):
+    if sqlalchemy and isinstance(data, sqlalchemy_Connection):
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
@@ -545,7 +547,7 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     if sqlalchemy and isinstance(data, sqlalchemy.sql.elements.TextClause):
         # TextClause is handled manually by convert_to_json_serializable()
         return
-    if sqlalchemy and isinstance(data, sqlalchemy.engine.base.Connection):
+    if sqlalchemy and isinstance(data, sqlalchemy.engine.base.sqlalchemy_Connection):
         # Connection module is handled manually by convert_to_json_serializable()
         return
 

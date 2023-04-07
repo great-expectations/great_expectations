@@ -102,6 +102,10 @@ try:
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
 
+try:
+    sqlalchemy_Connection = sqlalchemy.engine.base.Connection
+except (ImportError, AttributeError):
+    sqlalchemy_Connection = SQLALCHEMY_NOT_IMPORTED
 
 SPARK_NOT_IMPORTED = NotImported(
     "pyspark is not installed, please 'pip install pyspark'"
