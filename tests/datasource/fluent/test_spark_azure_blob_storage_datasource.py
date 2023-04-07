@@ -109,7 +109,7 @@ def csv_asset(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     return asset
 
@@ -241,7 +241,7 @@ def test_add_csv_asset_to_datasource(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
         batch_metadata=asset_specified_metadata,
     )
     assert asset.name == "csv_asset"
@@ -295,7 +295,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     options = asset.batch_request_options
     assert options == (
@@ -325,7 +325,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     options = asset.batch_request_options
     assert options == (
@@ -355,7 +355,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     options = asset.batch_request_options
     assert options == (
@@ -385,7 +385,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
@@ -421,7 +421,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
         batch_metadata=asset_specified_metadata,
     )
 

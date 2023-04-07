@@ -70,8 +70,8 @@ Once these values have been defined, we will define our Data Asset with the code
 data_asset = datasource.add_csv_asset(
     name=asset_name,
     batching_regex=batching_regex,
-    container=container,
-    name_starts_with=name_starts_with,
+    abs_container=abs_container,
+    abs_name_starts_with=abs_name_starts_with,
 )
 ```
 
