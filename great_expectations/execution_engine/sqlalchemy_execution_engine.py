@@ -45,8 +45,8 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
     SqlAlchemyDataSplitter,
 )
 from great_expectations.optional_imports import (
-    sqlalchemy_version_check,
     sqlalchemy_Engine,
+    sqlalchemy_version_check,
 )
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
@@ -101,7 +101,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import Dialect, Engine, Row  # noqa: TID251
+    from sqlalchemy.engine import Dialect, Row  # noqa: TID251
     from sqlalchemy.exc import OperationalError  # noqa: TID251
     from sqlalchemy.sql import Selectable  # noqa: TID251
     from sqlalchemy.sql.elements import (  # noqa: TID251

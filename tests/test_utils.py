@@ -189,6 +189,7 @@ def get_sqlite_table_names(execution_engine):
     rows = result.fetchall()
     return {row[0] for row in rows}
 
+
 def build_tuple_filesystem_store_backend(
     base_directory: str,
     *,
