@@ -123,9 +123,6 @@ stages:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
-
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
             displayName: 'Install dependencies'
@@ -213,9 +210,6 @@ stages:
              versionSpec: '3.7'
            displayName: 'Use Python 3.7'
 
-         - bash: python -m pip install --upgrade pip==21.3.1
-           displayName: 'Update pip'
-
          - script: |
              pip install  .
            displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
@@ -275,9 +269,6 @@ stages:
             inputs:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
@@ -339,9 +330,6 @@ stages:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
-
           - script: |
               pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
             displayName: 'Install dependencies'
@@ -394,9 +382,6 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
-            displayName: 'Update pip'
-
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
             displayName: 'Install dependencies'
@@ -430,9 +415,6 @@ stages:
             inputs:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
 
           - script: |
               printf 'Waiting for MySQL database to accept connections'
@@ -481,9 +463,6 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
-
           - script: |
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
@@ -520,9 +499,6 @@ stages:
             inputs:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
 
           - script: |
               printf 'Waiting for Trino database to accept connections'
@@ -572,9 +548,6 @@ stages:
             inputs:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip==21.3.1
-            displayName: 'Update pip'
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test, postgresql, spark, athena]" pytest-azurepipelines

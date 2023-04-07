@@ -13,9 +13,6 @@ jobs:
             versionSpec: ${{ pythonVersion }}
           displayName: Use Python ${{ pythonVersion }}
 
-        - bash: python -m pip install --upgrade pip==21.3.1
-          displayName: 'Update pip'
-
         - script: |
             # Get new tags from remote
             git fetch --tags
@@ -55,9 +52,6 @@ jobs:
           inputs:
             versionSpec: ${{ pythonVersion }}
           displayName: Use Python ${{ pythonVersion }}
-
-        - bash: python -m pip install --upgrade pip==21.3.1
-          displayName: 'Update pip'
 
         - script: |
             # Get new tags from remote

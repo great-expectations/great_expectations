@@ -141,9 +141,6 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
-            displayName: 'Update pip'
-
           - script: |
               printf 'Waiting for MySQL database to accept connections'
               until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
@@ -182,9 +179,6 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
-            displayName: 'Update pip'
-
           - script: |
               sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
@@ -213,9 +207,6 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
-            displayName: 'Update pip'
-
           - script: |
               pip install ".[test, postgresql]" pytest-azurepipelines
               # Install latest sqlalchemy version
@@ -240,9 +231,6 @@ stages:
             inputs:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
-
-          - bash: python -m pip install --upgrade pip==20.2.4
-            displayName: 'Update pip'
 
           - script: |
               printf 'Waiting for Trino database to accept connections'
