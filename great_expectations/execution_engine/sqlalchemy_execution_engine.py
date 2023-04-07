@@ -44,7 +44,10 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.optional_imports import sqlalchemy_version_check
+from great_expectations.optional_imports import (
+    sqlalchemy_version_check,
+    sqlalchemy_Engine,
+)
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
@@ -109,7 +112,6 @@ try:
     )
     from sqlalchemy.sql.selectable import Select, TextualSelect  # noqa: TID251
 except ImportError:
-    Engine = None
     BooleanClauseList = None
     DefaultDialect = None
     Dialect = None
@@ -448,7 +450,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             # but only do this if self.engine is an Engine and isn't a Connection
-            if isinstance(self.engine, Engine):
+            if sqlalchemy_Engine and isinstance(self.engine, sqlalchemy_Engine):
                 self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
@@ -1059,7 +1061,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
 
-                if isinstance(self.engine, Engine):
+                if sqlalchemy_Engine and isinstance(self.engine, sqlalchemy_Engine):
                     self.engine = self.engine.connect()
                 res = self.engine.execute(sa_query_object).fetchall()
 

@@ -103,9 +103,15 @@ except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
 
 try:
-    sqlalchemy_Connection = sqlalchemy.engine.base.Connection
+    sqlalchemy_Connection = sqlalchemy.engine.Connection
 except (ImportError, AttributeError):
     sqlalchemy_Connection = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    sqlalchemy_Engine = sqlalchemy.engine.Engine
+except (ImportError, AttributeError):
+    sqlalchemy_Engine = SQLALCHEMY_NOT_IMPORTED
+
 
 try:
     sqlalchemy_Row = sqlalchemy.engine.Row
