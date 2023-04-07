@@ -77,7 +77,7 @@ data_asset = datasource.add_csv_asset(
     batching_regex=batching_regex,
     header=True,
     infer_schema=True,
-    prefix=prefix,
+    s3_prefix=prefix,
 )
 ```
 

@@ -1,36 +1,39 @@
 from __future__ import annotations
 
+import pathlib
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, ClassVar, Optional, Type
 
 from typing_extensions import Literal
 
-from great_expectations.core._docs_decorators import public_api as public_api
-from great_expectations.datasource.fluent import SparkFilesystemDatasource
+from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
-    DBFSDataConnector as DBFSDataConnector,
+    FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    SortersDefinition as SortersDefinition,
-)
-from great_expectations.datasource.fluent.interfaces import (
-    TestConnectionError as TestConnectionError,
+    SortersDefinition,
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchMetadata,
-    )
+    from great_expectations.datasource.fluent import BatchMetadata
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
 
 logger: Logger
 
-class SparkDBFSDatasource(SparkFilesystemDatasource):
-    type: Literal["spark_dbfs"]  # type: ignore[assignment]
+class SparkFilesystemDatasource(_SparkFilePathDatasource):
+    # class attributes
+    data_connector_type: ClassVar[
+        Type[FilesystemDataConnector]
+    ] = FilesystemDataConnector
 
+    # instance attributes
+    type: Literal["spark_filesystem"] = "spark_filesystem"
+
+    base_directory: pathlib.Path
+    data_context_root_directory: Optional[pathlib.Path] = None
     def add_csv_asset(
         self,
         name: str,
