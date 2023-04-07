@@ -48,8 +48,8 @@
             "default": false,
             "type": "boolean"
         },
-        "infer_schema": {
-            "title": "Infer Schema",
+        "InferSchema": {
+            "title": "Inferschema",
             "default": false,
             "type": "boolean"
         }
