@@ -18,6 +18,8 @@ from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
+    SparkAzureBlobStorageDatasource,
+    SparkGoogleCloudStorageDatasource,
 )
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import _SourceFactories
@@ -161,12 +163,24 @@ def gcs_get_client_dummy(monkeypatch: MonkeyPatch):
         _get_test_client_dummy,
         raising=True,
     )
+    monkeypatch.setattr(
+        SparkGoogleCloudStorageDatasource,
+        "_get_gcs_client",
+        _get_test_client_dummy,
+        raising=True,
+    )
 
 
 @pytest.fixture
 def azure_get_client_dummy(monkeypatch: MonkeyPatch):
     monkeypatch.setattr(
         PandasAzureBlobStorageDatasource,
+        "_get_azure_client",
+        _get_test_client_dummy,
+        raising=True,
+    )
+    monkeypatch.setattr(
+        SparkAzureBlobStorageDatasource,
         "_get_azure_client",
         _get_test_client_dummy,
         raising=True,
@@ -184,7 +198,6 @@ def cloud_storage_get_client_doubles(
     gcs
     azure
     """
-    # TODO: patch Spark datasources as needed
     logger.warning(
         "Patching cloud storage _get_*_client() methods to return client test doubles"
     )
