@@ -196,8 +196,6 @@ exclude = [
     'validator/validator\.py', # 54
     # tests
     'tests/datasource/fluent/tasks\.py',
-    'tests/datasource/fluent/integration/integration_test_utils\.py',
-    'tests/datasource/fluent/test_spark_datasource\.py',
 ]
 
 [tool.pydantic-mypy]
@@ -465,9 +463,6 @@ filterwarnings = [
 
     # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
     # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
-    # Example Actual Warning: Found by running setup of test_validate_dataset[sqlite]
-    # sqlalchemy.exc.RemovedIn20Warning: The MetaData.bind argument is deprecated and will be removed in SQLAlchemy 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: The MetaData.bind argument is deprecated and will be removed in SQLAlchemy 2.0.:DeprecationWarning',
     # Example Actual Warning: sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
     # Found so far in test_cli_datasource_list
     'ignore: Deprecated API features detected!:DeprecationWarning',
