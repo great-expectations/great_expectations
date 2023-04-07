@@ -13,6 +13,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     multicolumn_condition_partial,
 )
 
+
 # This class defines a Metric to support your Expectation.
 class ColumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
 
