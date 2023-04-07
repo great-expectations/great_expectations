@@ -544,10 +544,10 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     if isinstance(data, RunIdentifier):
         return
 
-    if sqlalchemy and isinstance(data, sqlalchemy.sql.elements.TextClause):
+    if sqlalchemy and isinstance(data, TextClause):
         # TextClause is handled manually by convert_to_json_serializable()
         return
-    if sqlalchemy and isinstance(data, sqlalchemy.engine.base.sqlalchemy_Connection):
+    if sqlalchemy and isinstance(data, sqlalchemy_Connection):
         # Connection module is handled manually by convert_to_json_serializable()
         return
 
