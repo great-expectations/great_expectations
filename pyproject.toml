@@ -460,12 +460,6 @@ filterwarnings = [
     # Example Actual Warning: (tests/datasource/fluent/integration/conftest.py)
     # sqlalchemy.exc.SADeprecationWarning: Table.tometadata() is renamed to Table.to_metadata() (deprecated since: 1.4)
     'ignore: Table.tometadata\(\) is renamed to Table.to_metadata\(\):DeprecationWarning',
-
-    # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
-    # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
-    # Example Actual Warning: sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    # Found so far in test_cli_datasource_list
-    'ignore: Deprecated API features detected!:DeprecationWarning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
