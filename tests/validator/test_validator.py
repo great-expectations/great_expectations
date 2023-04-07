@@ -1098,7 +1098,7 @@ def test_validator_include_rendered_content_diagnostic(
                     "value": "passenger_count>0",
                 },
             },
-            template="if $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+            template="If $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
         ),
         value_type="StringValueType",
     )
