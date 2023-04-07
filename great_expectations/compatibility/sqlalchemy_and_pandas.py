@@ -61,7 +61,7 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame:
 
     Args:
         sql: str or SQLAlchemy Selectable (select or text object)
-        con: Options to pass to reader function.
+        con: SQLAlchemy connectable, str, or sqlite3 connection
         **kwargs: Other keyword arguments, not enumerated here since they differ
             between pandas versions.
 
@@ -79,4 +79,39 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame:
             return_value = pd.read_sql(sql=sql, con=con, **kwargs)
     else:
         return_value = pd.read_sql(sql=sql, con=con, **kwargs)
+    return return_value
+
+
+def pandas_read_sql_query(sql, con, **kwargs) -> pd.DataFrame:
+    """Suppress deprecation warnings while executing the pandas read_sql_query function.
+
+    Note this only passes params straight to pandas read_sql_query method, please
+    see the pandas documentation
+    (currently https://pandas.pydata.org/docs/reference/api/pandas.read_sql_query.html)
+    for more information on this method.
+
+    If pandas version is below 2.0 and sqlalchemy installed then we suppress
+    the sqlalchemy 2.0 warning and raise our own warning. pandas does not
+    support sqlalchemy 2.0 until version 2.0 (see https://pandas.pydata.org/docs/dev/whatsnew/v2.0.0.html#other-enhancements)
+
+    Args:
+        sql: str or SQLAlchemy Selectable (select or text object)
+        con: SQLAlchemy connectable, str, or sqlite3 connection
+        **kwargs: Other keyword arguments, not enumerated here since they differ
+            between pandas versions.
+
+    Returns:
+        dataframe
+    """
+    if is_version_less_than(pd.__version__, "2.0.0"):
+        if sqlalchemy and is_version_greater_or_equal(sqlalchemy.__version__, "2.0.0"):
+            warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
+        with warnings.catch_warnings():
+            # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
+            # but using the base class here since sqlalchemy is an optional dependency and this
+            # warning type only exists in sqlalchemy < 2.0.
+            warnings.filterwarnings(action="ignore", category=DeprecationWarning)
+            return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
+    else:
+        return_value = pd.read_sql_query(sql=sql, con=con, **kwargs)
     return return_value
