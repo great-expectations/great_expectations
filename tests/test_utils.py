@@ -174,20 +174,20 @@ def get_sqlite_temp_table_names(execution_engine):
 
 
 def get_sqlite_table_names(execution_engine):
-    with execution_engine.engine.engine.begin() as connection:
-        result = connection.execute(
-            sa.text(
-                """
-SELECT
-    name
-FROM
-    sqlite_master
-"""
-            )
-        )
-        rows = result.fetchall()
-        return {row[0] for row in rows}
 
+    statement = sa.text("SELECT name FROM sqlite_master")
+
+    # Since currently "execution_engine" can also be a connection we need to
+    # check first that it is an engine before creating a connection from it.
+    # Otherwise, we use the connection.
+    if isinstance(execution_engine, Connection):
+        result = execution_engine.execute(statement)
+    else:
+        with execution_engine.engine.engine.connect() as connection:
+            result = connection.execute(statement)
+
+    rows = result.fetchall()
+    return {row[0] for row in rows}
 
 def build_tuple_filesystem_store_backend(
     base_directory: str,

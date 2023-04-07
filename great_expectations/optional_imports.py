@@ -112,7 +112,6 @@ try:
 except (ImportError, AttributeError):
     sqlalchemy_Engine = SQLALCHEMY_NOT_IMPORTED
 
-
 try:
     sqlalchemy_Row = sqlalchemy.engine.Row
 except (ImportError, AttributeError):
