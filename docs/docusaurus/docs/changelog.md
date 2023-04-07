@@ -2,6 +2,14 @@
 title: Changelog
 ---
 
+### Deprecation policy
+
+- Deprecation warnings and the supporting code are maintained for two minor versions.  For example, v0.12 deprecations will only be removed as part of a v0.15 release.
+  - This means we have three supported minor versions in the release at any time.  For example: in v0.15 we support v0.15, v0.14, and v0.13.  When v0.16 ships we will support v0.16, v0.15, and v0.14 and will remove support for v0.13.
+- Deprecation warnings include (in the warning message) the version that they were introduced.  For example: "deprecated as of v0.13"
+- Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
+- Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
+
 ### 0.16.6
 * [FEATURE] Fluent `DataAsset` `batch_metadata` config variables ([#7513](https://github.com/great-expectations/great_expectations/pull/7513))
 * [FEATURE] Add batch metadata to spark add_*_asset methods ([#7534](https://github.com/great-expectations/great_expectations/pull/7534))
