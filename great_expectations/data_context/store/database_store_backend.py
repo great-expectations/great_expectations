@@ -1,11 +1,12 @@
+from __future__ import annotations
 import logging
 import uuid
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalchemy_Row
 from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     filter_properties_dict,
@@ -31,7 +32,6 @@ except ImportError:
     and_ = SQLALCHEMY_NOT_IMPORTED
     column = SQLALCHEMY_NOT_IMPORTED
     URL = SQLALCHEMY_NOT_IMPORTED
-    Row = SQLALCHEMY_NOT_IMPORTED
     IntegrityError = SQLALCHEMY_NOT_IMPORTED
     NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
     SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
@@ -352,7 +352,7 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         with self.engine.begin() as connection:
-            row_list: List[Row] = connection.execute(sel).fetchall()
+            row_list: list[sqlalchemy_Row] = connection.execute(sel).fetchall()
         return [tuple(row) for row in row_list]
 
     def remove_key(self, key):
