@@ -14,6 +14,9 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
 
 from great_expectations.cli import cli
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     GETTING_STARTED_DATASOURCE_NAME,
@@ -55,10 +58,10 @@ def titanic_data_context_with_sql_datasource(
             __file__, os.path.join("..", "test_sets", "Titanic.csv")
         )
         df: pd.DataFrame = pd.read_csv(filepath_or_buffer=csv_path)
-        df.to_sql(name="titanic", con=conn)
+        add_dataframe_to_db(df=df, name="titanic", con=conn)
         df = df.sample(frac=0.5, replace=True, random_state=1)
-        df.to_sql(name="incomplete", con=conn)
-        test_df.to_sql(name="wrong", con=conn)
+        add_dataframe_to_db(df=df, name="incomplete", con=conn)
+        add_dataframe_to_db(df=test_df, name="wrong", con=conn)
     except ValueError as ve:
         logger.warning(f"Unable to store information into database: {str(ve)}")
 
