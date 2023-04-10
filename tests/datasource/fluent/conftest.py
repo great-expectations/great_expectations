@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import pathlib
+import uuid
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -61,8 +62,11 @@ PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.
 DUMMY_JWT_TOKEN: Final[
     str
 ] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-DUMMY_ORG_ID: Final[str] = "0123456789"
+DUMMY_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
 
+DUMMY_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
+
+MISSING: Final = object()
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +168,15 @@ class FakeResponse:
 def cloud_api_fake(mocker: MockerFixture):
     dc_config_url = f"{CLOUD_DEFAULT_BASE_URL}/organizations/{DUMMY_ORG_ID}/data-context-configuration"
 
-    fake_db: dict = {dc_config_url: {"foo": "bar"}}
+    fake_db: dict = {
+        dc_config_url: {
+            "anonymous_usage_statistics": {
+                "data_context_id": DUMMY_DATA_CONTEXT_ID,
+                "enabled": False,
+            },
+            "datasources": {},
+        }
+    }
 
     logger.info("Mocking the GX Cloud API")
 
@@ -174,7 +186,8 @@ def cloud_api_fake(mocker: MockerFixture):
         # assert url == dc_config_url
         if item is MISSING:
             return FakeResponse(status_code=500)
-        return FakeResponse(status_code=200)
+        logger.info(f"mock - {item}")  # TODO: remove this
+        return FakeResponse(status_code=200, json_=item)
 
     patch = mocker.patch("requests.get", autospec=True)
     patch.side_effect = _request_mock
