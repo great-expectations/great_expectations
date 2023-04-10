@@ -110,3 +110,30 @@ try:
     import pyspark
 except ImportError:
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
+
+
+GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
+    "google cloud storage components are not installed, please 'pip install google-cloud-storage google-cloud-secret-manager'"
+)
+try:
+    import google.api_core as google_api_core
+    import google.cloud as google_cloud
+    import google.oauth as google_oauth
+    import google.oauth2 as google_oauth2
+    from google_cloud import storage as gcs
+except ImportError:
+    google_cloud = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    google_api_core = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    gcs = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    google_oauth = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    google_oauth2 = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+
+
+AZURE_BLOB_STORAGE_NOT_IMPORTED = NotImported(
+    "azure blob storage components are not installed, please 'pip install azure-storage-blob azure-identity azure-keyvault-secrets'"
+)
+try:
+    import azure.storage.blob as azure_blob_storage
+except ImportError:
+    azure_blob_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED

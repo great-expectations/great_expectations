@@ -12,6 +12,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import BatchRequest
+from great_expectations.optional_imports import AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -23,13 +24,13 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    from azure.storage.blob import BlobServiceClient, ContainerClient
-except ImportError:
-    BlobServiceClient = None
-    ContainerClient = None
-    logger.debug(
-        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
+    from great_expectations.optional_imports import (
+        azure_blob_storage as azure_blob_storage,
     )
+    from azure_blob_storage import BlobServiceClient, ContainerClient
+except ImportError:
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 
 class MockContainerClient:

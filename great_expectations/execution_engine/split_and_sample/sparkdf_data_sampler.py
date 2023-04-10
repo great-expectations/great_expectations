@@ -6,27 +6,21 @@ from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
+from great_expectations.optional_imports import SPARK_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
 try:
-    import pyspark
-    import pyspark.sql.functions as F
-
-    # noinspection SpellCheckingInspection
+    import pyspark.sql.functions as F  # noqa N801
     import pyspark.sql.types as sparktypes
     from pyspark.sql import DataFrame
 
+    from great_expectations.optional_imports import pyspark as pyspark
 except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    DataFrame = None  # type: ignore[assignment,misc]
-    F = None  # type: ignore[assignment]
-    # noinspection SpellCheckingInspection
-    sparktypes = None  # type: ignore[assignment]
-
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
+    pyspark = SPARK_NOT_IMPORTED
+    F = SPARK_NOT_IMPORTED
+    sparktypes = SPARK_NOT_IMPORTED
+    DataFrame = SPARK_NOT_IMPORTED
 
 
 class SparkDataSampler(DataSampler):

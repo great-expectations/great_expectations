@@ -16,41 +16,41 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnExpectation
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnAggregateMetricProvider,
-)
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
-try:
-    from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql import Select
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    ProgrammingError = None
-    Select = None
 
 try:
     from sqlalchemy.engine.row import Row
-except ImportError:
-    try:
-        from sqlalchemy.engine.row import RowProxy
+    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql import Select
 
-        Row = RowProxy
-    except ImportError:
-        logger.debug(
-            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
-        )
-        RowProxy = None
-        Row = None
+    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
+except ImportError:
+    ProgrammingError = SQLALCHEMY_NOT_IMPORTED
+    Select = SQLALCHEMY_NOT_IMPORTED
+    Row = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy.engine.row import RowProxy
+    from sqlalchemy.exc import ProgrammingError
+    from sqlalchemy.sql import Select
+
+    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
+
+    Row = RowProxy
+except ImportError:
+    ProgrammingError = SQLALCHEMY_NOT_IMPORTED
+    Select = SQLALCHEMY_NOT_IMPORTED
+    RowProxy = SQLALCHEMY_NOT_IMPORTED
 
 
 class ColumnSkew(ColumnAggregateMetricProvider):
@@ -142,7 +142,7 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
-        raise pe()
+        raise pe
 
     # @classmethod
     # def _get_evaluation_dependencies(

@@ -13,16 +13,18 @@ from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
 )
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.optional_imports import AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
 try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    BlobServiceClient = None
-    logger.debug(
-        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
+    from azure_blob_storage.BlobServiceClient import BlobServiceClient
+
+    from great_expectations.optional_imports import (
+        azure_blob_storage as azure_blob_storage,
     )
+except ImportError:
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 
 @public_api

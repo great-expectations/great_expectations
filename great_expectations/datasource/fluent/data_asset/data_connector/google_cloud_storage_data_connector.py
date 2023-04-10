@@ -15,7 +15,12 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
-    from google.cloud.storage.client import Client as GCSClient
+    from great_expectations.optional_imports import GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+
+    try:
+        import gcs.client as GCSClient  # noqa N801
+    except ImportError:
+        GCSClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
     from great_expectations.core.batch import BatchDefinition
 

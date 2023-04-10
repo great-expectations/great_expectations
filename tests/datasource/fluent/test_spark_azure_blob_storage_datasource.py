@@ -24,18 +24,19 @@ from great_expectations.datasource.fluent.spark_azure_blob_storage_datasource im
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
 )
+from great_expectations.optional_imports import AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 logger = logging.getLogger(__file__)
 
 
 try:
-    from azure.storage.blob import BlobServiceClient, ContainerClient
-except ImportError:
-    BlobServiceClient = None
-    ContainerClient = None
-    logger.debug(
-        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
+    from great_expectations.optional_imports import (
+        azure_blob_storage as azure_blob_storage,
     )
+    from azure_blob_storage import BlobServiceClient, ContainerClient
+except ImportError:
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 
 class MockContainerClient:

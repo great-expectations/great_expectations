@@ -41,6 +41,12 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_sampler im
 from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
     PandasDataSplitter,
 )
+from great_expectations.optional_imports import (
+    AZURE_BLOB_STORAGE_NOT_IMPORTED,
+    GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    gcs,
+    google_service_account,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -56,26 +62,20 @@ except ImportError:
     )
 
 try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    BlobServiceClient = None
-    logger.debug(
-        "Unable to load Azure connection object; install optional azure dependency for support"
+    from azure_blob_storage.BlobServiceClient import BlobServiceClient
+
+    from great_expectations.optional_imports import (
+        azure_blob_storage as azure_blob_storage,
     )
+except ImportError:
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
-    from google.api_core.exceptions import GoogleAPIError
-    from google.auth.exceptions import DefaultCredentialsError
-    from google.cloud import storage
-    from google.oauth2 import service_account
+    import google_api_core.exceptions as GoogleAPIError  # noqa N801
+    import google_auth.exceptions as DefaultCredentialsError  # noqa N801
 except ImportError:
-    storage = None
-    service_account = None
-    GoogleAPIError = None  # type: ignore[assignment,misc] # assigning None to a type
-    DefaultCredentialsError = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional google dependency for support"
-    )
+    GoogleAPIError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    DefaultCredentialsError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 
 HASH_THRESHOLD = 1e9
@@ -185,15 +185,19 @@ class PandasExecutionEngine(ExecutionEngine):
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
-                credentials = service_account.Credentials.from_service_account_file(
-                    filename=filename
+                credentials = (
+                    google_service_account.Credentials.from_service_account_file(
+                        filename=filename
+                    )
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
-                credentials = service_account.Credentials.from_service_account_info(
-                    info=info
+                credentials = (
+                    google_service_account.Credentials.from_service_account_info(
+                        info=info
+                    )
                 )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
+            self._gcs = gcs.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError, DefaultCredentialsError):
             self._gcs = None
 

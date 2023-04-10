@@ -27,19 +27,20 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,  # noqa: TCH001
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
+)
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy  # noqa: TID251
-    from sqlalchemy.engine.reflection import Inspector  # noqa: TID251
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    from great_expectations.optional_imports.sqlalchemy.engine.reflection import (
+        Inspector,
     )
-    sqlalchemy = None
-    Inspector = None
+except ImportError:
+    Inspector = SQLALCHEMY_NOT_IMPORTED
+
 
 DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
     "default_runtime_data_connector_name",

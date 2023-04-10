@@ -18,17 +18,17 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.validator.validator import Validator
+from great_expectations.optional_imports import SPARK_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
+
 try:
+    from great_expectations.optional_imports import pyspark as pyspark
     from pyspark.sql import DataFrame
 except ImportError:
-    DataFrame = None
-
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
+    pyspark = SPARK_NOT_IMPORTED
+    DataFrame = SPARK_NOT_IMPORTED
 
 
 @pytest.fixture

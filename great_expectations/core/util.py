@@ -36,6 +36,10 @@ from great_expectations import exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
+from great_expectations.optional_imports import (
+    SPARK_NOT_IMPORTED,
+    SQLALCHEMY_NOT_IMPORTED,
+)
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
 
@@ -49,19 +53,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    import pyspark
-    from pyspark.sql import SparkSession  # noqa: F401
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    SparkSession = None  # type: ignore[assignment,misc]
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
-
-try:
+    from pyspark.sql import DataFrame as SparkDataFrame
+    from pyspark.sql import SparkSession
     from pyspark.sql.types import StructType
+
+    from great_expectations.optional_imports import pyspark as pyspark
 except ImportError:
-    StructType = None  # type: ignore[assignment,misc]
+    pyspark = SPARK_NOT_IMPORTED
+    SparkDataFrame = SPARK_NOT_IMPORTED
+    SparkSession = SPARK_NOT_IMPORTED
+    StructType = SPARK_NOT_IMPORTED
 
 
 try:
@@ -72,21 +73,25 @@ except ImportError:
     MultiPolygon = None
     LineString = None
 
-from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalchemy
-
 try:
+    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
+
     LegacyRow = sqlalchemy.engine.row.LegacyRow
 except (
     ImportError,
     AttributeError,
 ):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
 
 # This is a separate try/except than the LegacyRow one since TextClause exists in sqlalchemy 2. This means LegacyRow
 # may be not importable while TextClause is.
 try:
+    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
+
     TextClause = sqlalchemy.sql.elements.TextClause
 except ImportError:
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {

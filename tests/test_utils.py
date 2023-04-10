@@ -30,23 +30,17 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
 
 try:
-    import sqlalchemy as sa
+    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
     from sqlalchemy.exc import SQLAlchemyError
-
 except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
-    SQLAlchemyError = None
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
 
 
 logger = logging.getLogger(__name__)

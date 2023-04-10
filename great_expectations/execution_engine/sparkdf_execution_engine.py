@@ -5,7 +5,6 @@ import datetime
 import logging
 from functools import reduce
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -62,6 +61,7 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_spark,
 )
+from great_expectations.optional_imports import SPARK_NOT_IMPORTED
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
@@ -70,31 +70,28 @@ from great_expectations.validator.metric_configuration import (
 logger = logging.getLogger(__name__)
 
 try:
-    import pyspark
-    import pyspark.sql.functions as F
-
-    # noinspection SpellCheckingInspection
-    import pyspark.sql.types as sparktypes
-    from pyspark import SparkContext
-    from pyspark.sql import DataFrame, Row, SparkSession
-    from pyspark.sql.readwriter import DataFrameReader
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    SparkContext = None  # type: ignore[assignment,misc]
-    SparkSession = None  # type: ignore[assignment,misc]
-    Row = None  # type: ignore[assignment,misc]
-    DataFrame = None  # type: ignore[assignment,misc]
-    DataFrameReader = None  # type: ignore[assignment,misc]
-    F = None  # type: ignore[assignment]
-    # noinspection SpellCheckingInspection
-    sparktypes = None  # type: ignore[assignment]
-
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
+    import great_expectations.optional_imports.pyspark as pyspark
+    import great_expectations.optional_imports.pyspark.sql.functions as F  # noqa N801
+    import great_expectations.optional_imports.pyspark.sql.types as sparktypes
+    from great_expectations.optional_imports.pyspark import SparkContext
+    from great_expectations.optional_imports.pyspark.sql import (
+        DataFrame,
+        Row,
+        SparkSession,
     )
+    from great_expectations.optional_imports.pyspark.sql.readwriter import (
+        DataFrameReader,
+    )
+except ImportError:
+    pyspark = SPARK_NOT_IMPORTED
+    F = SPARK_NOT_IMPORTED
+    sparktypes = SPARK_NOT_IMPORTED
+    SparkContext = SPARK_NOT_IMPORTED
+    DataFrame = SPARK_NOT_IMPORTED
+    Row = SPARK_NOT_IMPORTED
+    SparkSession = SPARK_NOT_IMPORTED
+    DataFrameReader = SPARK_NOT_IMPORTED
 
-if TYPE_CHECKING:
-    from pyspark.sql import DataFrame  # noqa: TCH004
 
 # noinspection SpellCheckingInspection
 def apply_dateutil_parse(column):

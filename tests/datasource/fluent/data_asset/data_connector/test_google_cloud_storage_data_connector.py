@@ -12,6 +12,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import BatchRequest
+from great_expectations.optional_imports import GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -21,14 +22,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
 try:
-    from google.cloud.storage.client import Client as GCSClient
+    from great_expectations.optional_imports import gcs
+    import gcs.client as GCSClient  # noqa N801
 except ImportError:
-    GCSClient = None
-    logger.debug(
-        "Unable to load GoogleCloudStorage connection object; install optional Google dependency for support"
-    )
+    GCSClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 
 class MockGCSClient:

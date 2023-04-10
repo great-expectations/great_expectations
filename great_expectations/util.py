@@ -61,6 +61,7 @@ from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
 
 try:
     import black
@@ -77,19 +78,19 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa  # noqa: TID251
-    from sqlalchemy import Table  # noqa: TID251
-    from sqlalchemy.engine import reflection  # noqa: TID251
-    from sqlalchemy.sql import Select  # noqa: TID251
+    import great_expectations.optional_imports.sqlalchemy as sqlalchemy
+
+    sa = sqlalchemy
+    from great_expectations.optional_imports.sqlalchemy import Table
+    from great_expectations.optional_imports.sqlalchemy.engine import reflection
+    from great_expectations.optional_imports.sqlalchemy.sql import Select
 
 except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    sa = SQLALCHEMY_NOT_IMPORTED
+    Table = SQLALCHEMY_NOT_IMPORTED
+    reflection = SQLALCHEMY_NOT_IMPORTED
+    Select = SQLALCHEMY_NOT_IMPORTED
 
 
 if TYPE_CHECKING:

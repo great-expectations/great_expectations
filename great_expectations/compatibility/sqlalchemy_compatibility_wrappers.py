@@ -6,22 +6,9 @@ from typing import Callable, Iterator, Sequence
 
 import pandas as pd
 
+from great_expectations.optional_imports import sqlalchemy as sa
+
 logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy as sa  # noqa: TID251
-    from sqlalchemy import Table  # noqa: TID251
-    from sqlalchemy.engine import reflection  # noqa: TID251
-    from sqlalchemy.sql import Select  # noqa: TID251
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
 
 
 def read_sql_table_as_df(

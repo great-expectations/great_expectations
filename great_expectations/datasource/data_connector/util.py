@@ -17,6 +17,13 @@ from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
 from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
+from great_expectations.optional_imports import (
+    AZURE_BLOB_STORAGE_NOT_IMPORTED,
+    SPARK_NOT_IMPORTED,
+)
+from great_expectations.optional_imports import (
+    pyspark as pyspark,
+)
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -25,32 +32,25 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    from azure.storage.blob import BlobPrefix, BlobServiceClient, ContainerClient
-except ImportError:
-    BlobPrefix = None
-    BlobServiceClient = None
-    ContainerClient = None
-    logger.debug(
-        "Unable to load azure types; install optional Azure dependency for support."
+    from azure_blob_storage.BlobServiceClient import (
+        BlobPrefix,
+        BlobServiceClient,
+        ContainerClient,
     )
 
-try:
-    from google.cloud import storage
-except ImportError:
-    storage = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional Google dependency for support"
+    from great_expectations.optional_imports import (
+        azure_blob_storage as azure_blob_storage,
     )
+except ImportError:
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+
 
 try:
-    import pyspark
     import pyspark.sql as pyspark_sql
 except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    pyspark_sql = None  # type: ignore[assignment]
-    logger.debug(
-        "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
-    )
+    pyspark_sql = SPARK_NOT_IMPORTED
 
 
 DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"

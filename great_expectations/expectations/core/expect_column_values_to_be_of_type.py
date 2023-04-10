@@ -24,6 +24,10 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
+from great_expectations.optional_imports import (
+    SPARK_NOT_IMPORTED,
+    SQLALCHEMY_NOT_IMPORTED,
+)
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -47,23 +51,16 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    import pyspark.sql.types as sparktypes
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
+    import great_expectations.optional_imports.pyspark.sql.types as sparktypes
+except ImportError:
+    sparktypes = SPARK_NOT_IMPORTED
 
 try:
-    import sqlalchemy as sa  # noqa: TID251
-    from sqlalchemy.dialects import registry  # noqa: TID251
-
+    import great_expectations.optional_imports.sqlalchemy as sa
+    from great_expectations.optional_imports.sqlalchemy.dialects import registry
 except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    registry = None
+    sa = SQLALCHEMY_NOT_IMPORTED
+    registry = SQLALCHEMY_NOT_IMPORTED
 
 try:
     import sqlalchemy_redshift.dialect

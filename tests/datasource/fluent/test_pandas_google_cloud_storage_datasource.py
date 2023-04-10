@@ -25,19 +25,16 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
+from great_expectations.optional_imports import GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 logger = logging.getLogger(__file__)
 
 
 try:
-    from google.cloud import storage
-    from google.cloud.storage import Client as GCSClient
+    from great_expectations.optional_imports import gcs
+    import gcs.client as GCSClient  # noqa N801
 except ImportError:
-    storage = None
-    GCSClient = None
-    logger.debug(
-        "Unable to load GoogleCloudStorage connection object; install optional Google dependency for support"
-    )
+    GCSClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 
 # apply markers to entire test module

@@ -24,6 +24,7 @@ from typing import (
     Union,
 )
 
+import pandas as pd
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
@@ -74,14 +75,6 @@ from great_expectations.validator.validation_graph import (
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import (

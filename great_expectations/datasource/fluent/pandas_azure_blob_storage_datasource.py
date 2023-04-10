@@ -16,6 +16,7 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError,
 )
+from great_expectations.optional_imports import AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.file_path_data_asset import (
@@ -25,15 +26,15 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-ABS_IMPORTED = False
 try:
-    from azure.storage.blob import (
-        BlobServiceClient,  # noqa: disable=E0602
-    )
+    from azure_blob_storage.BlobServiceClient import BlobServiceClient
 
-    ABS_IMPORTED = True
+    from great_expectations.optional_imports import (
+        azure_blob_storage as azure_blob_storage,
+    )
 except ImportError:
-    pass
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+
 
 _MISSING: Final = object()
 
@@ -70,32 +71,30 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                     "You must provide one of `conn_str` or `account_url` to the `azure_options` key in your config (but not both)"
                 )
 
-            # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if ABS_IMPORTED:
-                try:
-                    if conn_str is not None:
-                        self._account_name = re.search(  # type: ignore[union-attr]
-                            r".*?AccountName=(.+?);.*?", conn_str
-                        ).group(1)
-                        azure_client = BlobServiceClient.from_connection_string(
-                            **self.azure_options
-                        )
-                    elif account_url is not None:
-                        self._account_name = re.search(  # type: ignore[union-attr]
-                            r"(?:https?://)?(.+?).blob.core.windows.net", account_url
-                        ).group(1)
-                        azure_client = BlobServiceClient(**self.azure_options)
-                except Exception as e:
-                    # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
-                    raise PandasAzureBlobStorageDatasourceError(
-                        f'Due to exception: "{str(e)}", "azure_client" could not be created.'
-                    ) from e
-            else:
+            try:
+                if conn_str is not None:
+                    self._account_name = re.search(  # type: ignore[union-attr]
+                        r".*?AccountName=(.+?);.*?", conn_str
+                    ).group(1)
+                    azure_client = BlobServiceClient.from_connection_string(
+                        **self.azure_options
+                    )
+                elif account_url is not None:
+                    self._account_name = re.search(  # type: ignore[union-attr]
+                        r"(?:https?://)?(.+?).blob.core.windows.net", account_url
+                    ).group(1)
+                    azure_client = BlobServiceClient(**self.azure_options)
+            except Exception as e:
+                # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                 raise PandasAzureBlobStorageDatasourceError(
-                    'Unable to create "PandasAzureBlobStorageDatasource" due to missing azure.storage.blob dependency.'
-                )
+                    f'Due to exception: "{str(e)}", "azure_client" could not be created.'
+                ) from e
+        else:
+            raise PandasAzureBlobStorageDatasourceError(
+                'Unable to create "PandasAzureBlobStorageDatasource" due to missing azure.storage.blob dependency.'
+            )
 
-            self._azure_client = azure_client
+        self._azure_client = azure_client
 
         return azure_client
 

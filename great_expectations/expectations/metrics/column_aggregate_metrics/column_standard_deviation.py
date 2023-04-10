@@ -18,17 +18,18 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.optional_imports import SPARK_NOT_IMPORTED
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import stddev_samp  # noqa: F401
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
+    from pyspark.sql.functions import stddev_samp
+
+    from great_expectations.optional_imports import pyspark as pyspark
+except ImportError:
+    pyspark = SPARK_NOT_IMPORTED
+    stddev_samp = SPARK_NOT_IMPORTED
 
 
 class ColumnStandardDeviation(ColumnAggregateMetricProvider):

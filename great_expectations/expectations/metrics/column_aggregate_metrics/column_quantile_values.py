@@ -21,7 +21,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
-from great_expectations.optional_imports import sqlalchemy as sa
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
@@ -31,32 +31,43 @@ except ImportError:
     TrinoUserError = None
 
 try:
-    from sqlalchemy.exc import ProgrammingError  # noqa: TID251
-    from sqlalchemy.sql import Select  # noqa: TID251
-    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup  # noqa: TID251
-    from sqlalchemy.sql.selectable import CTE  # noqa: TID251
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
+    import great_expectations.optional_imports.sqlalchemy as sqlalchemy
+
+    sa = sqlalchemy
+    from great_expectations.optional_imports.sqlalchemy.exc import ProgrammingError
+    from great_expectations.optional_imports.sqlalchemy.sql import Select
+    from great_expectations.optional_imports.sqlalchemy.sql.elements import (
+        Label,
+        TextClause,
+        WithinGroup,
     )
-    ProgrammingError = None
-    Select = None
-    Label = None
-    TextClause = None
-    WithinGroup = None
-    CTE = None
+    from great_expectations.optional_imports.sqlalchemy.sql.selectable import CTE
+except ImportError:
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    sa = SQLALCHEMY_NOT_IMPORTED
+    ProgrammingError = SQLALCHEMY_NOT_IMPORTED
+    Select = SQLALCHEMY_NOT_IMPORTED
+    Label = SQLALCHEMY_NOT_IMPORTED
+    TextClause = SQLALCHEMY_NOT_IMPORTED
+    WithinGroup = SQLALCHEMY_NOT_IMPORTED
+    CTE = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy.engine.row import Row  # noqa: TID251
+
+    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
 except ImportError:
     try:
         from sqlalchemy.engine.row import RowProxy  # noqa: TID251
+
+        from great_expectations.optional_imports import sqlalchemy as sqlalchemy
 
         Row = RowProxy
     except ImportError:
         logger.debug(
             "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
         )
+        sqlalchemy = SQLALCHEMY_NOT_IMPORTED
         RowProxy = None
         Row = None
 

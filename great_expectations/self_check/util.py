@@ -67,6 +67,10 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.optional_imports import (
+    SPARK_NOT_IMPORTED,
+    SQLALCHEMY_NOT_IMPORTED,
+)
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (
     LockingConnectionCheck,
@@ -97,36 +101,37 @@ expectationSuiteSchema = ExpectationSuiteSchema()
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sqlalchemy  # noqa: TID251
-    from sqlalchemy import create_engine  # noqa: TID251
-    from sqlalchemy.engine import Engine  # noqa: TID251
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
+    import great_expectations.optional_imports.sqlalchemy as sqlalchemy
+    from great_expectations.optional_imports.sqlalchemy import create_engine
+    from great_expectations.optional_imports.sqlalchemy.engine import Engine
+    from great_expectations.optional_imports.sqlalchemy.exc import SQLAlchemyError
 except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    Engine = None
-    SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    create_engine = SQLALCHEMY_NOT_IMPORTED
+    Engine = SQLALCHEMY_NOT_IMPORTED
+    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
+
 
 try:
     from pyspark.sql import DataFrame as SparkDataFrame
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructType
-except ImportError:
-    SparkDataFrame = type(None)  # type: ignore[assignment,misc]
-    SparkSession = None  # type: ignore[assignment,misc]
-    StructType = None  # type: ignore[assignment,misc]
 
-try:
-    from pyspark.sql import DataFrame as spark_DataFrame
+    from great_expectations.optional_imports import pyspark as pyspark
 except ImportError:
-    spark_DataFrame = type(None)  # type: ignore[assignment,misc]
+    pyspark = SPARK_NOT_IMPORTED
+    SparkDataFrame = SPARK_NOT_IMPORTED
+    SparkSession = SPARK_NOT_IMPORTED
+    StructType = SPARK_NOT_IMPORTED
+
 
 try:
     import sqlalchemy.dialects.sqlite as sqlitetypes  # noqa: TID251
 
     # noinspection PyPep8Naming
     from sqlalchemy.dialects.sqlite import dialect as sqliteDialect  # noqa: TID251
+
+    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
 
     SQLITE_TYPES = {
         "VARCHAR": sqlitetypes.VARCHAR,
@@ -140,8 +145,9 @@ try:
         "TIMESTAMP": sqlitetypes.TIMESTAMP,
     }
 except (ImportError, KeyError):
-    sqlitetypes = None
-    sqliteDialect = None
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    sqlitetypes = SQLALCHEMY_NOT_IMPORTED
+    sqliteDialect = SQLALCHEMY_NOT_IMPORTED
     SQLITE_TYPES = {}
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"

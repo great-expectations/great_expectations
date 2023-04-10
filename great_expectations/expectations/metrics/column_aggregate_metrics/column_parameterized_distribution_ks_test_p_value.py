@@ -1,5 +1,7 @@
 import logging
 
+from scipy import stats
+
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
@@ -9,18 +11,17 @@ from great_expectations.expectations.metrics.util import (
     _scipy_distribution_positional_args_from_dict,
     validate_distribution_parameters,
 )
+from great_expectations.optional_imports import SPARK_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
 try:
-    from pyspark.sql.functions import stddev_samp  # noqa: F401
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
+    from pyspark.sql.functions import stddev_samp
 
-from scipy import stats
+    from great_expectations.optional_imports import pyspark as pyspark
+except ImportError:
+    pyspark = SPARK_NOT_IMPORTED
+    stddev_samp = SPARK_NOT_IMPORTED
 
 
 class ColumnParameterizedDistributionKSTestPValue(ColumnAggregateMetricProvider):
