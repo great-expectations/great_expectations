@@ -170,7 +170,7 @@ class DatabaseStoreBackend(StoreBackend):
                 if self._manually_initialize_store_backend_id
                 else str(uuid.uuid4())
             )
-            self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIL}{store_id}"
+            self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIX}{store_id}"
         return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
     def _build_engine(self, credentials, **kwargs) -> sa.engine.Engine:
