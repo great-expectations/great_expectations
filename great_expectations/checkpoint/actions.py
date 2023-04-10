@@ -13,9 +13,6 @@ import requests
 from typing_extensions import Final
 
 from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
-from great_expectations.data_context.types.refs import (
-    GXCloudResourceRef,  # noqa: TCH001
-)
 
 try:
     import pypd
@@ -902,9 +899,10 @@ class StoreValidationResultAction(ValidationAction):
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
         if self._using_cloud_context:
-            return_val: GXCloudResourceRef
+            # return_val is a GXCloudResourceRef instance
             new_ge_cloud_id = return_val.id
             validation_result_suite_identifier.id = new_ge_cloud_id
+        return return_val
 
 
 @public_api
