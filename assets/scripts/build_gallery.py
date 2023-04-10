@@ -460,19 +460,41 @@ def build_gallery(
             json.dump(gallery_info_by_backend[_backend], outfile, indent=4)
 
     # Only attempt to combine and write to file when no Expectations are skipped
-    if backend_outfile_suffix == "full":
+    if True:                                                                                #   D E L E T E   if True
+    # if backend_outfile_suffix == "full":
         expected_full_backend_files = [f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS]
         found_full_backend_files = glob("*_full.json")
 
-        if True:
+        if True:                                                                            #   D E L E T E   if True
         # if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
             logger.info(f"All expected *_full.json files were found. Going to combine and write to {outfile_name}")
+
             #
-            #   T O D O :   Figure out the combining
-            #       - expectation_file_info
-            #       - for each Expectation, read in the test result info from the 
-            #         {backend}_full.json file
             #
+            # Local testing via: build-gallery --backends "sqlite, pandas" --no-contrib
+            found_full_backend_files = ["pandas_partial.json", "sqlite_partial.json"]       #   D E L E T E
+            #
+            #
+
+            for fname in found_full_backend_files:
+                with open(fname, "r") as fp:
+                    text = fp.read()
+                data = json.loads(text)
+
+                for expectation_name in data:
+                    try:
+                        expectation_file_info[expectation_name]["backend_test_result_counts"].extend(data[expectation_name]["backend_test_result_counts"])
+                    except KeyError:
+                        expectation_file_info[expectation_name]["backend_test_result_counts"] = data[expectation_name]["backend_test_result_counts"]
+
+            breakpoint()
+            print("see expectation_file_info")
+
+            #
+            #   T O D O :   Add missing fields to expectation_file_info dict
+            #       - maturity_checklist
+            #       - library_metadata
+            #       - coverage_score
             #
             #       * Likely will need to update expectation.py helper methods like
             #         _get_maturity_checklist or make it a static method that can be
@@ -480,7 +502,7 @@ def build_gallery(
             #
 
             # with open(f"./{outfile_name}", "w") as outfile:
-            #     json.dump(gallery_info, outfile, indent=4)
+            #     json.dump(expectation_file_info, outfile, indent=4)
 
     if just_installed:
         print("\n\n\n=== (Uninstalling) ===")
