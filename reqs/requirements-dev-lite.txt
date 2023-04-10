@@ -15,6 +15,5 @@ pytest-order>=0.9.5
 pytest-random-order>=1.0.4
 pytest-timeout>=2.1.0
 requirements-parser>=0.2.0
-s3fs>=0.5.1
 snapshottest==0.6.0 # GX Cloud atomic renderer tests
 sqlalchemy>=1.4.0,<2.0.0
