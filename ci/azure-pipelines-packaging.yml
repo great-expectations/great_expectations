@@ -27,7 +27,7 @@ stages:
   - stage: contrib_install_gx
     dependsOn: []
     jobs:
-      - job: install gx
+      - job: install_gx
         steps:
           - bash: pip install --upgrade pip
           - bash: pip install -c constraints-dev.txt -e ".[test]"
