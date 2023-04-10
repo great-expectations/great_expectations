@@ -63,7 +63,7 @@ def fluent_yaml_config_file(
         yaml_string = "\n# Fluent\n" + fluent_gx_config_yml_str
         f_append.write(yaml_string)
 
-    logger.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
+    logger.debug(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
 
 
