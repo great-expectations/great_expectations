@@ -431,7 +431,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
 
-    if sqlalchemy and isinstance(data, TextClause):
+    if TextClause and isinstance(data, TextClause):
         # TextClause is converted to str manually
         return str(data)
     if sqlalchemy and isinstance(data, sqlalchemy_Connection):
@@ -544,10 +544,10 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     if isinstance(data, RunIdentifier):
         return
 
-    if sqlalchemy and isinstance(data, TextClause):
+    if TextClause and isinstance(data, TextClause):
         # TextClause is handled manually by convert_to_json_serializable()
         return
-    if sqlalchemy and isinstance(data, sqlalchemy_Connection):
+    if sqlalchemy_Connection and isinstance(data, sqlalchemy_Connection):
         # Connection module is handled manually by convert_to_json_serializable()
         return
 
