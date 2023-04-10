@@ -9,7 +9,6 @@ We also consolidate logic for warning based on version number in this module.
 """
 from __future__ import annotations
 
-import warnings
 from typing import Any
 
 from packaging.version import Version
@@ -33,22 +32,6 @@ class NotImported:
 
     def __bool__(self):
         return False
-
-
-def sqlalchemy_version_check(version: str | Version) -> None:
-    """Check if the sqlalchemy version is supported or warn if not.
-
-    Args:
-        version: sqlalchemy version as a string or Version.
-    """
-    if isinstance(version, str):
-        version = Version(version)
-
-    if version >= Version("2.0.0"):
-        warnings.warn(
-            "SQLAlchemy v2.0.0 or later is not yet supported by Great Expectations.",
-            UserWarning,
-        )
 
 
 def is_version_greater_or_equal(
@@ -97,8 +80,6 @@ SQLALCHEMY_NOT_IMPORTED = NotImported(
 )
 try:
     import sqlalchemy
-
-    sqlalchemy_version_check(sqlalchemy.__version__)
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
 
