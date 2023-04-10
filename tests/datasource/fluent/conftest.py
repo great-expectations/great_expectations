@@ -3,12 +3,23 @@ from __future__ import annotations
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Type,
+    Union,
+    TYPE_CHECKING,
+)
 
 import pytest
 from pytest import MonkeyPatch
 from typing_extensions import Final
 
+import great_expectations as gx
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
@@ -29,8 +40,18 @@ from great_expectations.execution_engine import (
 )
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import CloudDataContext
+
+
 EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
 PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
+
+DUMMY_JWT_TOKEN: Final[
+    str
+] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+DUMMY_ORG_ID: Final[str] = "0123456789"
+
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +133,18 @@ def inject_engine_lookup_double(
     finally:
         for source, engine in original_engine_override.items():
             source.execution_engine_override = engine
+
+
+@pytest.fixture
+def cloud_api_fake():
+    logger.info("Mocking the GX Cloud API")
+    yield
+
+
+@pytest.fixture
+def empty_cloud_context_fluent(cloud_api_fake) -> CloudDataContext:
+    context = gx.get_context(cloud_mode=True)
+    return context
 
 
 @pytest.fixture
