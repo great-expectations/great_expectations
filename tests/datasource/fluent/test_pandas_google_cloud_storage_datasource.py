@@ -31,9 +31,10 @@ logger = logging.getLogger(__file__)
 
 
 try:
-    from great_expectations.optional_imports import gcs
+    from great_expectations.optional_imports import gcs as storage
     import gcs.client as GCSClient  # noqa N801
 except ImportError:
+    storage = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     GCSClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 

@@ -44,7 +44,10 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.optional_imports import sqlalchemy_version_check
+from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
+    sqlalchemy_version_check,
+)
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
@@ -89,39 +92,46 @@ from great_expectations.validator.metric_configuration import (
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sa  # noqa: TID251
+    import great_expectations.optional_imports.sqlalchemy as sa
 
     sqlalchemy_version_check(sa.__version__)
 
     make_url = import_make_url()
 except ImportError:
-    sa = None
+    sa = SQLALCHEMY_NOT_IMPORTED
 
 try:
-    from sqlalchemy.engine import Dialect, Engine, Row  # noqa: TID251
-    from sqlalchemy.exc import OperationalError  # noqa: TID251
-    from sqlalchemy.sql import Selectable  # noqa: TID251
-    from sqlalchemy.sql.elements import (  # noqa: TID251
+    from great_expectations.optional_imports.sqlalchemy.engine import (
+        Dialect,
+        Engine,
+        Row,
+    )
+    from great_expectations.optional_imports.sqlalchemy.exc import OperationalError
+    from great_expectations.optional_imports.sqlalchemy.sql import Selectable
+    from great_expectations.optional_imports.sqlalchemy.sql.elements import (
         BooleanClauseList,
         Label,
         TextClause,
         quoted_name,
     )
-    from sqlalchemy.sql.selectable import Select, TextualSelect  # noqa: TID251
+    from great_expectations.optional_imports.sqlalchemy.sql.selectable import (
+        Select,
+        TextualSelect,
+    )
 except ImportError:
-    Engine = None
-    BooleanClauseList = None
-    DefaultDialect = None
-    Dialect = None
-    Label = None
-    OperationalError = None
-    reflection = None
-    Row = None
-    Select = None
-    Selectable = None
-    TextClause = None
-    TextualSelect = None
-    quoted_name = None
+    Engine = SQLALCHEMY_NOT_IMPORTED
+    BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
+    DefaultDialect = SQLALCHEMY_NOT_IMPORTED
+    Dialect = SQLALCHEMY_NOT_IMPORTED
+    Label = SQLALCHEMY_NOT_IMPORTED
+    OperationalError = SQLALCHEMY_NOT_IMPORTED
+    reflection = SQLALCHEMY_NOT_IMPORTED
+    Row = SQLALCHEMY_NOT_IMPORTED
+    Select = SQLALCHEMY_NOT_IMPORTED
+    Selectable = SQLALCHEMY_NOT_IMPORTED
+    TextClause = SQLALCHEMY_NOT_IMPORTED
+    TextualSelect = SQLALCHEMY_NOT_IMPORTED
+    quoted_name = SQLALCHEMY_NOT_IMPORTED
 
 
 try:
