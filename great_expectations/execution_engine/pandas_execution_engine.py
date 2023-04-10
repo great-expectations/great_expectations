@@ -44,11 +44,19 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_splitter i
 from great_expectations.optional_imports import (
     AZURE_BLOB_STORAGE_NOT_IMPORTED,
     GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
-    gcs,
-    google_service_account,
 )
 
 logger = logging.getLogger(__name__)
+
+try:
+    from great_expectations.optional_imports import (
+        gcs,
+        google_service_account,
+    )
+except ImportError:
+    gcs = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    google_service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+
 
 try:
     import boto3
@@ -62,10 +70,8 @@ except ImportError:
     )
 
 try:
-    from azure_blob_storage.BlobServiceClient import BlobServiceClient
-
-    from great_expectations.optional_imports import (
-        azure_blob_storage as azure_blob_storage,
+    from great_expectations.optional_imports.azure_blob_storage.BlobServiceClient import (
+        BlobServiceClient,
     )
 except ImportError:
     BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED

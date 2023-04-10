@@ -18,28 +18,25 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError,
 )
-
-if TYPE_CHECKING:
-    from google.cloud.storage.client import Client as GoogleCloudStorageClient
-    from google.oauth2.service_account import (
-        Credentials as GoogleServiceAccountCredentials,
-    )
-
-    from great_expectations.datasource.fluent.file_path_data_asset import (
-        _FilePathDataAsset,
-    )
+from great_expectations.optional_imports import GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
 
 
-GCS_IMPORTED = False
 try:
-    from google.cloud import storage  # noqa: disable=E0602
-    from google.oauth2 import service_account  # noqa: disable=E0602
+    import gcs.client as GoogleCloudStorageClient  # noqa N801
+    from google_service_account import Credentials as GoogleServiceAccountCredentials
 
-    GCS_IMPORTED = True
+    import great_expectations.optional_imports.google_service_account as google_service_account
 except ImportError:
-    pass
+    google_service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    GoogleServiceAccountCredentials = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    GoogleCloudStorageClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.file_path_data_asset import (
+        _FilePathDataAsset,
+    )
 
 
 class PandasGoogleCloudStorageDatasourceError(PandasDatasourceError):
@@ -66,41 +63,39 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def _get_gcs_client(self) -> GoogleCloudStorageClient:
         gcs_client: Union[GoogleCloudStorageClient, None] = self._gcs_client
         if not gcs_client:
-            # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
-            if GCS_IMPORTED:
-                try:
-                    credentials: Union[
-                        GoogleServiceAccountCredentials, None
-                    ] = None  # If configured with gcloud CLI / env vars
-                    if "filename" in self.gcs_options:
-                        filename: str = str(self.gcs_options.pop("filename"))
-                        credentials = (
-                            service_account.Credentials.from_service_account_file(
-                                filename=filename
-                            )
+            try:
+                credentials: Union[
+                    GoogleServiceAccountCredentials, None
+                ] = None  # If configured with gcloud CLI / env vars
+                if "filename" in self.gcs_options:
+                    filename: str = str(self.gcs_options.pop("filename"))
+                    credentials = (
+                        google_service_account.Credentials.from_service_account_file(
+                            filename=filename
                         )
-                    elif "info" in self.gcs_options:
-                        info: Any = self.gcs_options.pop("info")
-                        credentials = (
-                            service_account.Credentials.from_service_account_info(
-                                info=info
-                            )
-                        )
-
-                    gcs_client = storage.Client(
-                        credentials=credentials, **self.gcs_options
                     )
-                except Exception as e:
-                    # Failure to create "gcs_client" is most likely due invalid "gcs_options" dictionary.
-                    raise PandasGoogleCloudStorageDatasourceError(
-                        f'Due to exception: "{str(e)}", "gcs_client" could not be created.'
-                    ) from e
-            else:
-                raise PandasGoogleCloudStorageDatasourceError(
-                    'Unable to create "PandasGoogleCloudStorageDatasource" due to missing google dependency.'
-                )
+                elif "info" in self.gcs_options:
+                    info: Any = self.gcs_options.pop("info")
+                    credentials = (
+                        google_service_account.Credentials.from_service_account_info(
+                            info=info
+                        )
+                    )
 
-            self._gcs_client = gcs_client
+                gcs_client = GoogleCloudStorageClient(
+                    credentials=credentials, **self.gcs_options
+                )
+            except Exception as e:
+                # Failure to create "gcs_client" is most likely due invalid "gcs_options" dictionary.
+                raise PandasGoogleCloudStorageDatasourceError(
+                    f'Due to exception: "{str(e)}", "gcs_client" could not be created.'
+                ) from e
+        else:
+            raise PandasGoogleCloudStorageDatasourceError(
+                'Unable to create "PandasGoogleCloudStorageDatasource" due to missing google dependency.'
+            )
+
+        self._gcs_client = gcs_client
 
         return gcs_client
 

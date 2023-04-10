@@ -23,13 +23,20 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
+from great_expectations.optional_imports import GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+
+try:
+    import gcs.client as GoogleCloudStorageClient  # noqa N801
+    from google_service_account import Credentials as GoogleServiceAccountCredentials
+
+    import great_expectations.optional_imports.google_service_account as google_service_account
+except ImportError:
+    google_service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    GoogleServiceAccountCredentials = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    GoogleCloudStorageClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+
 
 if TYPE_CHECKING:
-    from google.cloud.storage.client import Client as GoogleCloudStorageClient
-    from google.oauth2.service_account import (
-        Credentials as GoogleServiceAccountCredentials,
-    )
-
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )

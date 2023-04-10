@@ -121,13 +121,14 @@ try:
     import google.oauth as google_oauth
     import google.oauth2 as google_oauth2
     from google_cloud import storage as gcs
+    from google_oauth2 import service_account as google_service_account
 except ImportError:
     google_cloud = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     google_api_core = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     gcs = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     google_oauth = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     google_oauth2 = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    google_service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 
 AZURE_BLOB_STORAGE_NOT_IMPORTED = NotImported(
