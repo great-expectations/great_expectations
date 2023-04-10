@@ -31,7 +31,6 @@ logger.setLevel(logging.DEBUG)
 expectation_tracebacks = StringIO()
 expectation_checklists = StringIO()
 expectation_docstrings = StringIO()
-MIN_HOURS_UNTIL_REPROCESSING_FULL_BACKEND_ALLOWED = 2
 ALL_GALLERY_BACKENDS = (
     "bigquery",
     "mssql",
@@ -249,33 +248,13 @@ def build_gallery(
         backend_outfile_suffix = "full"
     if ignore_suppress or ignore_only_for:
         backend_outfile_suffix += "_nonstandard"
-    if backend_outfile_suffix == "full":
-        if only_consider_these_backends:
-            full_backend_files_to_check = [
-                f"{backend}_full.json"
-                for backend in only_consider_these_backends
-                if backend in ALL_GALLERY_BACKENDS
-            ]
-            _only_consider_this_set = set(only_consider_these_backends)
-        else:
-            full_backend_files_to_check = [f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS]
-            _only_consider_this_set = set(ALL_GALLERY_BACKENDS)
-
-        found_full_backend_files = glob("*_full.json")
-        now = datetime.now()
-        for _this_backend_file in full_backend_files_to_check:
-            if _this_backend_file not in found_full_backend_files:
-                logger.debug(f"{repr(_this_backend_file)} not found")
-                continue
-            hours_since_file_modified = (now - datetime.fromtimestamp(os.path.getmtime(_this_backend_file))).total_seconds() / 3600
-            logger.debug(f"Found {repr(_this_backend_file)} ... modified {hours_since_file_modified:.2f} hours ago")
-            if hours_since_file_modified < MIN_HOURS_UNTIL_REPROCESSING_FULL_BACKEND_ALLOWED:
-                logger.debug(f"It has not been {MIN_HOURS_UNTIL_REPROCESSING_FULL_BACKEND_ALLOWED} hours since {repr(_this_backend_file)} was modified")
-                _only_consider_this_set.remove(_this_backend_file.split("_")[0])
-
-        only_consider_these_backends = list(_only_consider_this_set)
-
-    if not only_consider_these_backends:
+    if only_consider_these_backends:
+        only_consider_these_backends = [
+            backend
+            for backend in only_consider_these_backends
+            if backend in ALL_GALLERY_BACKENDS
+        ]
+    else:
         only_consider_these_backends = list(ALL_GALLERY_BACKENDS)
 
     gallery_info_by_backend = {
