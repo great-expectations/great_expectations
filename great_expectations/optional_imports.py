@@ -118,6 +118,11 @@ except (ImportError, AttributeError):
     sqlalchemy_Row = SQLALCHEMY_NOT_IMPORTED
 
 try:
+    sqlalchemy_URL = sqlalchemy.engine.url.URL
+except (ImportError, AttributeError):
+    sqlalchemy_URL = SQLALCHEMY_NOT_IMPORTED
+
+try:
     sqlalchemy_TextClause = sqlalchemy.sql.elements.TextClause
 except (ImportError, AttributeError):
     sqlalchemy_TextClause = SQLALCHEMY_NOT_IMPORTED

@@ -11,6 +11,7 @@ from great_expectations.optional_imports import (
     SQLALCHEMY_NOT_IMPORTED,
     sqlalchemy_Engine,
     sqlalchemy_Row,
+    sqlalchemy_URL,
 )
 from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
@@ -202,7 +203,7 @@ class DatabaseStoreBackend(StoreBackend):
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str, credentials: dict
-    ) -> Tuple[sqlalchemy_Engine.url.URL, Dict]:
+    ) -> Tuple[sqlalchemy_URL, Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
