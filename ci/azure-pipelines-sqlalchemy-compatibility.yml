@@ -132,11 +132,11 @@ stages:
               pip install --constraint constraints-dev-temp.txt ".[dev]" pytest-azurepipelines
             displayName: 'Install dependencies using SQLAlchemy version $(sqlalchemy_base_version)'
 
-          # TODO: Currently the below test only runs expectations tests for postgresql. We should figure out what the
+          # TODO: Currently the below test only runs tests with postgresql. We should figure out what the
           # TODO: best way to test for sqlalchemy version compatibility and implement that here.
           - script: |
               # Run pytest
-              pytest --postgresql tests/test_definitions/test_expectations_v3_api.py
+              pytest --postgresql -m sqlalchemy_version_compatibility
               pytest --postgresql -m unit
 
             displayName: 'pytest'
