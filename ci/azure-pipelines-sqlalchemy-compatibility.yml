@@ -129,7 +129,7 @@ stages:
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
               echo "SQLAlchemy~=$(sqlalchemy_base_version)" >> constraints-dev-temp.txt 
-              pip install --constraint constraints-dev-temp.txt ".[dev]" pytest-azurepipelines
+              pip install --constraint constraints-dev-temp.txt ".[test]" pytest-azurepipelines
             displayName: 'Install dependencies using SQLAlchemy version $(sqlalchemy_base_version)'
 
           # TODO: Currently the below test only runs tests with postgresql. We should figure out what the
