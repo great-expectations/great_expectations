@@ -31,7 +31,7 @@ def parse_requirements_files(files: list[pathlib.Path]) -> dict:
         key = abs_path.rsplit(os.path.sep, 1)[-1]
         with open(req_file) as f:
             req_set_dict[key] = {
-                f'{line.name}{"".join(line.specs[0])}'
+                f'{line.name}{",".join(["".join(spec) for spec in line.specs])}'
                 for line in rp.parse(f)
                 if line.specs
             }
@@ -126,3 +126,6 @@ def test_requirements_files():
     ) <= {"numpy>=1.21.0", "scipy>=1.7.0"}
 
 
+def test_polish_and_ratchet_pins_and_upper_bounds():
+    req_files = collect_requirements_files()
+    req_set_dict = parse_requirements_files(files=req_files)
