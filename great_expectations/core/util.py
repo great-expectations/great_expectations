@@ -434,7 +434,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if TextClause and isinstance(data, TextClause):
         # TextClause is converted to str manually
         return str(data)
-    if sqlalchemy and isinstance(data, sqlalchemy_Connection):
+    if sqlalchemy_Connection and isinstance(data, sqlalchemy_Connection):
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
