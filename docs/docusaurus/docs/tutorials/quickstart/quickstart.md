@@ -17,7 +17,7 @@ Once you have completed this guide you will have a foundation in the basics of u
 :::info Great Expectations Cloud
 This guide is intended to introduce you to the open source Python and command line use of Great Expectations.  GX also offers an online interface, currently in Beta.  The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
 
-If you are interested in GX Cloud, you should join the GX Cloud Beta.  During this program limited seats are available, but joining the queue will keep you informed of the product's process.
+If you are interested in GX Cloud, you should join the GX Cloud Beta.  During this program limited seats are available, but signing up will keep you informed of the product's process.
 
 **[Sign up for the GX Cloud Beta!](https://greatexpectations.io/cloud)**
 :::
