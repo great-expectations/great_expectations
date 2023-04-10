@@ -4,6 +4,7 @@ import logging
 import pathlib
 from pprint import pformat as pf
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -12,12 +13,14 @@ from typing import (
     Optional,
     Type,
     Union,
-    TYPE_CHECKING,
 )
 
+import json
 import pytest
 from pytest import MonkeyPatch
 from typing_extensions import Final
+import requests
+from pydantic import dataclasses as dc
 
 import great_expectations as gx
 from great_expectations.core.batch import BatchData
@@ -38,10 +41,20 @@ from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.data_context.cloud_constants import (
+    CLOUD_APP_DEFAULT_BASE_URL,
+    CLOUD_DEFAULT_BASE_URL,
+)
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import CloudDataContext
+    from pytest import FixtureRequest
+    from pytest_mock import MockerFixture
+
+    from great_expectations.data_context import (
+        CloudDataContext,
+        FileDataContext,
+    )
 
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
@@ -143,7 +156,11 @@ def cloud_api_fake():
 
 @pytest.fixture
 def empty_cloud_context_fluent(cloud_api_fake) -> CloudDataContext:
-    context = gx.get_context(cloud_mode=True)
+    context = gx.get_context(
+        cloud_access_token=DUMMY_JWT_TOKEN,
+        cloud_organization_id=DUMMY_ORG_ID,
+        cloud_mode=True,
+    )
     return context
 
 
@@ -161,6 +178,22 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     tmp_gx_dir = gx_yml.parent.absolute()
     logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
     return tmp_gx_dir
+
+
+@pytest.fixture
+def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
+    context = gx.get_context(context_root_dir=file_dc_config_dir_init, cloud_mode=False)
+    return context
+
+
+@pytest.fixture(
+    params=["empty_cloud_context_fluent", "empty_file_context"], ids=["cloud", "file"]
+)
+def empty_contexts(request: FixtureRequest) -> FileDataContext | CloudDataContext:
+    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
+        request.param
+    )
+    return context_fixture
 
 
 @pytest.fixture(scope="session")

@@ -6,11 +6,9 @@ import logging
 import pathlib
 from collections import defaultdict
 from pprint import pformat as pf
+from typing import TYPE_CHECKING
 
 import pytest
-
-# apply markers to entire test module
-pytestmark = [pytest.mark.integration]
 
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
@@ -18,6 +16,16 @@ from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
     Datasource,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import (
+        CloudDataContext,
+        FileDataContext,
+    )
+
+# apply markers to entire test module
+pytestmark = [pytest.mark.integration]
+
 
 logger = logging.getLogger(__file__)
 
@@ -184,7 +192,7 @@ def test_save_datacontext_persists_fluent_config(
         assert ds_name in final_yaml
 
 
-def test_add_and_save_fluent_datasource(
+def test_file_context_add_and_save_fluent_datasource(
     file_dc_config_dir_init: pathlib.Path,
     fluent_only_config: GxConfig,
     db_file: pathlib.Path,
@@ -212,6 +220,21 @@ def test_add_and_save_fluent_datasource(
     assert datasource_name in final_yaml
     # ensure comments preserved
     assert "# Welcome to Great Expectations!" in final_yaml
+
+
+def test_context_add_and_save_fluent_datasource(
+    empty_contexts: CloudDataContext | FileDataContext,
+    db_file: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource_name = "save_ds_test"
+
+    context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    )
+
+    assert datasource_name in context.datasources
 
 
 if __name__ == "__main__":
