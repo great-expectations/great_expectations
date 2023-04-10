@@ -24,6 +24,7 @@ from great_expectations.self_check.util import (
     snowflakeDialect,
     sqliteDialect,
     trinoDialect,
+    generate_dataset_name_from_expectation_name,
 )
 from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
@@ -51,8 +52,8 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                 pk_column: bool = False
                 file = open(filename)
                 test_configuration = json.load(file)
-
-                for test_config in test_configuration["datasets"]:
+                expectation_type = filename.split(".json")[0]
+                for index, test_config in enumerate(test_configuration["datasets"], 1):
                     datasets = []
                     # optional only_for and suppress_test flag at the datasets-level that can prevent data being
                     # added to incompatible backends. Currently only used by expect_column_values_to_be_unique
@@ -76,12 +77,24 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                         skip_expectation = False
                         if isinstance(test_config["data"], list):
                             sqlite_db_path = generate_sqlite_db_path()
+                            sub_index: int = (
+                                1  # additional index needed when dataset is a list
+                            )
                             for dataset in test_config["data"]:
+                                dataset_name = (
+                                    generate_dataset_name_from_expectation_name(
+                                        dataset=dataset,
+                                        expectation_type=expectation_type,
+                                        index=index,
+                                        sub_index=sub_index,
+                                    )
+                                )
+
                                 datasets.append(
                                     get_test_validator_with_data(
                                         execution_engine=backend,
                                         data=dataset["data"],
-                                        table_name=dataset["dataset_name"],
+                                        table_name=dataset_name,
                                         schemas=dataset.get("schemas"),
                                         sqlite_db_path=sqlite_db_path,
                                         context=cast(
@@ -105,10 +118,16 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 if "schemas" in test_config
                                 else None
                             )
+                            dataset = test_config["data"]
+                            dataset_name = generate_dataset_name_from_expectation_name(
+                                dataset=dataset,
+                                expectation_type=expectation_type,
+                                index=index,
+                            )
                             validator_with_data = get_test_validator_with_data(
                                 execution_engine=backend,
-                                data=test_config["data"],
-                                table_name=test_config["dataset_name"],
+                                data=dataset,
+                                table_name=dataset_name,
                                 schemas=schemas,
                                 context=cast(
                                     DataContext, build_in_memory_runtime_context()

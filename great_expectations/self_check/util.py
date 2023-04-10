@@ -2757,7 +2757,7 @@ def generate_test_table_name(
 def generate_dataset_name_from_expectation_name(
     dataset: dict, expectation_type: str, index: int, sub_index: int | None = None
 ) -> str:
-    """Method to generate datset_name for tests. Will either use the name defined in the test
+    """Method to generate dataset_name for tests. Will either use the name defined in the test
     configuration ("dataset_name"), or generate one using the Expectation name and index. In cases where
     the dataset is a list, then an additional index will be used.
 
