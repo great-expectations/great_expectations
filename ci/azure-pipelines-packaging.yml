@@ -33,6 +33,7 @@ stages:
           - bash: pip install -c constraints-dev.txt -e ".[test]"
           - bash: pip install -r requirements-dev.txt -c constraints-dev.txt
           - bash: pip install -e .
+          - bash: pytest
 
   - stage: user_install_linux
     dependsOn: []
