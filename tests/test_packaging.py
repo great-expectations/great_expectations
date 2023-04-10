@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os.path
 import pathlib
 from typing import List
@@ -15,12 +16,17 @@ def collect_requirements_files() -> List[pathlib.Path]:
     return list(project_root.glob(pattern)) + list(reqs_dir.glob(pattern))
 
 
-def test_requirements_files():
-    """requirements.txt should be a subset of requirements-dev.txt"""
+def parse_requirements_files(files: list[pathlib.Path]) -> dict:
+    """Parse requirements files to dict.
+
+    dict of the form {"filename": {"package_name_with_specs"}}
+
+    Args:
+        files: Paths to files that should be parsed
+    """
 
     req_set_dict = {}
-    req_files = collect_requirements_files()
-    for req_file in req_files:
+    for req_file in files:
         abs_path = req_file.absolute().as_posix()
         key = abs_path.rsplit(os.path.sep, 1)[-1]
         with open(req_file) as f:
@@ -29,6 +35,15 @@ def test_requirements_files():
                 for line in rp.parse(f)
                 if line.specs
             }
+
+    return req_set_dict
+
+
+def test_requirements_files():
+    """requirements.txt should be a subset of requirements-dev.txt"""
+
+    req_files = collect_requirements_files()
+    req_set_dict = parse_requirements_files(files=req_files)
 
     assert req_set_dict["requirements.txt"] <= req_set_dict["requirements-dev.txt"]
 
@@ -109,3 +124,5 @@ def test_requirements_files():
         | req_set_dict["requirements-dev-trino.txt"]
         | req_set_dict["requirements-dev-vertica.txt"]
     ) <= {"numpy>=1.21.0", "scipy>=1.7.0"}
+
+
