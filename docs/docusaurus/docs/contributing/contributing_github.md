@@ -1,5 +1,5 @@
 ---
-title: Contributing through GitHub
+title: Contributing with GitHub
 ---
 
 To edit documentation and avoid forking the repository, Great Expectations recommends using the GitHub markdown editor.
