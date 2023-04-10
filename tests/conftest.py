@@ -1709,7 +1709,7 @@ def titanic_sqlite_db(sa):
             assert connection.execute(
                 sa.text("select count(*) from titanic")
             ).fetchall()[0] == (1313,)
-            return connection
+            return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 

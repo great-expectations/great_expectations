@@ -33,10 +33,10 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
 
+from great_expectations.optional_imports import sqlalchemy_Connection
 
 try:
     import sqlalchemy as sa
-    from sqlalchemy.engine.base import Connection, Engine
     from sqlalchemy.exc import SQLAlchemyError
 
 except ImportError:
@@ -45,8 +45,6 @@ except ImportError:
     )
     sa = None
     reflection = None
-    Connection = None
-    Engine = None
     Table = None
     Select = None
     SQLAlchemyError = None
@@ -160,10 +158,10 @@ def get_sqlite_temp_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    if isinstance(execution_engine, Connection):
+    if isinstance(execution_engine, sqlalchemy_Connection):
         result = execution_engine.execute(statement)
     else:
-        with execution_engine.engine.engine.begin() as connection:
+        with execution_engine.engine.begin() as connection:
             result = connection.execute(statement)
 
     rows = result.fetchall()
@@ -174,9 +172,13 @@ def get_sqlite_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_master")
 
-    with execution_engine.engine.engine.begin() as connection:
-        result = connection.execute(statement)
-        rows = result.fetchall()
+    if isinstance(execution_engine, sqlalchemy_Connection):
+        result = execution_engine.execute(statement)
+    else:
+        with execution_engine.engine.begin() as connection:
+            result = connection.execute(statement)
+
+    rows = result.fetchall()
 
     return {row[0] for row in rows}
 

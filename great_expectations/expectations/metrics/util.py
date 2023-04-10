@@ -20,6 +20,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
+from great_expectations.optional_imports import sqlalchemy_Engine
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:
@@ -405,7 +406,13 @@ def column_reflection_fallback(
     selectable: Select, dialect: Dialect, sqlalchemy_engine: Engine
 ) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
-    with sqlalchemy_engine.begin() as connection:
+
+    if isinstance(sqlalchemy_engine.engine, sqlalchemy_Engine):
+        connection = sqlalchemy_engine.engine.connect()
+    else:
+        connection = sqlalchemy_engine.engine
+
+    with connection:
 
         col_info_dict_list: List[Dict[str, str]]
         # noinspection PyUnresolvedReferences
