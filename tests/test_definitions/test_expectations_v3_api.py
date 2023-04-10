@@ -16,6 +16,7 @@ from great_expectations.self_check.util import (
     BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list_v3_api,
     evaluate_json_test_v3_api,
+    generate_dataset_name_from_expectation_name,
     generate_sqlite_db_path,
     get_test_validator_with_data,
     mssqlDialect,
@@ -24,7 +25,6 @@ from great_expectations.self_check.util import (
     snowflakeDialect,
     sqliteDialect,
     trinoDialect,
-    generate_dataset_name_from_expectation_name,
 )
 from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
