@@ -20,7 +20,7 @@ To edit documentation and avoid forking the repository, Great Expectations recom
 
 8. Click **Propose changes**.
 
-    If this is your first contribution to Great Expectations documentation, you'll be prompted to complete the Contributor Licence Agreement (CLA). Complete the CLA and add `@cla-bot check` as a comment to the pull request (PR) to indicate that you’ve signed it.
+    If this is your first contribution to Great Expectations documentation, you'll be prompted to complete the Contributor Licence Agreement (CLA). Complete the CLA and add `@cla-bot check` as a comment to the pull request (PR) to indicate that you’ve completed it.
 
 9. Wait for the Continuous Integration (CI) checks to complete and correct any syntax or formatting issues.
 
