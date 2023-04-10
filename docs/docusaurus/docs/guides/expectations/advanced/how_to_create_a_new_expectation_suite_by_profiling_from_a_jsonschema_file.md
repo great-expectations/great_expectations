@@ -8,7 +8,7 @@ The ``JsonSchemaProfiler`` helps you quickly create <TechnicalTag tag="expectati
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
 - Have a valid jsonschema file that has top level object of type `object`
 
 </Prerequisites>

@@ -11,7 +11,7 @@ This will work to get the URLs for any type of Data Docs site setup, e.g. S3 or 
 
 <Prerequisites>
 
-  - [Created an Expectation Suite to use for validation](../../../tutorials/getting_started/tutorial_create_expectations.md)
+  - [Created an Expectation Suite to use for Validation](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
   - [Reviewed our guidance on Validation Actions](../../../terms/action.md)
 
 </Prerequisites>

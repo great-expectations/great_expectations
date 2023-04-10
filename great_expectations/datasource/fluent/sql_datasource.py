@@ -30,7 +30,6 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchMetadata,
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
@@ -50,6 +49,8 @@ if TYPE_CHECKING:
     # min version of typing_extension missing `Self`, so it can't be imported at runtime
     import sqlalchemy as sa  # noqa: TID251
     from typing_extensions import Self
+
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
 
 
 class SQLDatasourceError(Exception):
@@ -469,6 +470,13 @@ class _SQLAsset(DataAsset):
     def add_splitter_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
+        """Associates a datetime part splitter with this sql asset.
+        Args:
+            column_name: Name of the date column where parts will be parsed out.
+            datetime_parts: A list of datetime parts to split on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterDatetimePart(
                 method_name="split_on_date_parts",
@@ -478,6 +486,12 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_column_value(self: Self, column_name: str) -> Self:
+        """Associates a column value splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterColumnValue(
                 method_name="split_on_column_value",
@@ -488,6 +502,13 @@ class _SQLAsset(DataAsset):
     def add_splitter_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
+        """Associates a divided integer splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+            divisor: The divisor to use when splitting.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterDividedInteger(
                 method_name="split_on_divided_integer",
@@ -497,6 +518,13 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
+        """Associates a mod integer splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+            mod: The mod to use when splitting.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterModInteger(
                 method_name="split_on_mod_integer",
@@ -506,6 +534,12 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
+        """Associates a multi column value splitter with this sql asset.
+        Args:
+            column_names: A list of column names to split on.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterMultiColumnValue(
                 column_names=column_names, method_name="split_on_multi_column_values"
@@ -576,8 +610,9 @@ class _SQLAsset(DataAsset):
         splitter = self.splitter
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
-            batch_metadata = copy.deepcopy(self.batch_metadata)
-            batch_metadata.update(copy.deepcopy(request.options))
+            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+                batch_request=request
+            )
             batch_spec_kwargs = self._create_batch_spec_kwargs()
             if splitter:
                 batch_spec_kwargs["splitter_method"] = splitter.method_name
