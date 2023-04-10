@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import pathlib
 from pprint import pformat as pf
@@ -15,12 +16,10 @@ from typing import (
     Union,
 )
 
-import json
 import pytest
+from pydantic import dataclasses as dc
 from pytest import MonkeyPatch
 from typing_extensions import Final
-import requests
-from pydantic import dataclasses as dc
 
 import great_expectations as gx
 from great_expectations.core.batch import BatchData
@@ -29,6 +28,9 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import FileDataContext
+from great_expectations.data_context.cloud_constants import (
+    CLOUD_DEFAULT_BASE_URL,
+)
 from great_expectations.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
@@ -40,10 +42,6 @@ from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
-)
-from great_expectations.data_context.cloud_constants import (
-    CLOUD_APP_DEFAULT_BASE_URL,
-    CLOUD_DEFAULT_BASE_URL,
 )
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
@@ -148,9 +146,39 @@ def inject_engine_lookup_double(
             source.execution_engine_override = engine
 
 
+@dc.dataclass
+class FakeResponse:
+    status_code: int = 500
+    content: bytes = b""
+    json_: Union[dict, list, None] = None
+
+    def json(self):
+        if self.json_ is None:
+            raise json.JSONDecodeError(
+                f"{type(self).__name__} is not json", "foobar", 0
+            )
+        return self.json_
+
+
 @pytest.fixture
-def cloud_api_fake():
+def cloud_api_fake(mocker: MockerFixture):
+    dc_config_url = f"{CLOUD_DEFAULT_BASE_URL}/organizations/{DUMMY_ORG_ID}/data-context-configuration"
+
+    fake_db: dict = {dc_config_url: {"foo": "bar"}}
+
     logger.info("Mocking the GX Cloud API")
+
+    def _request_mock(url, *args, **kwargs):
+        logger.info(f"mock http -> {url}\n{args}\n{kwargs}")
+        item = fake_db.get(url, MISSING)
+        # assert url == dc_config_url
+        if item is MISSING:
+            return FakeResponse(status_code=500)
+        return FakeResponse(status_code=200)
+
+    patch = mocker.patch("requests.get", autospec=True)
+    patch.side_effect = _request_mock
+
     yield
 
 
