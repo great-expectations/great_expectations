@@ -76,6 +76,7 @@ from great_expectations.optional_imports import (
     SQLALCHEMY_NOT_IMPORTED,
     sqlalchemy,
     sqlalchemy_Connection,
+    sqlalchemy_TextClause,
 )
 
 try:
@@ -85,13 +86,6 @@ except (
     AttributeError,
 ):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
-
-# This is a separate try/except than the LegacyRow one since TextClause exists in sqlalchemy 2. This means LegacyRow
-# may be not importable while TextClause is.
-try:
-    TextClause = sqlalchemy.sql.elements.TextClause
-except ImportError:
-    TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
     "api_np": {
@@ -418,7 +412,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return dict(data)
 
     # sqlalchemy text for SqlAlchemy 2 compatibility
-    if TextClause and isinstance(data, TextClause):
+    if sqlalchemy_TextClause and isinstance(data, sqlalchemy_TextClause):
         return str(data)
 
     if isinstance(data, decimal.Decimal):
@@ -431,7 +425,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
 
-    if TextClause and isinstance(data, TextClause):
+    if sqlalchemy_TextClause and isinstance(data, sqlalchemy_TextClause):
         # TextClause is converted to str manually
         return str(data)
     if sqlalchemy and isinstance(data, sqlalchemy_Connection):
@@ -544,7 +538,7 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     if isinstance(data, RunIdentifier):
         return
 
-    if TextClause and isinstance(data, TextClause):
+    if sqlalchemy_TextClause and isinstance(data, sqlalchemy_TextClause):
         # TextClause is handled manually by convert_to_json_serializable()
         return
     if sqlalchemy_Connection and isinstance(data, sqlalchemy_Connection):

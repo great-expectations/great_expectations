@@ -122,6 +122,11 @@ try:
 except (ImportError, AttributeError):
     sqlalchemy_URL = SQLALCHEMY_NOT_IMPORTED
 
+try:
+    sqlalchemy_TextClause = sqlalchemy.sql.elements.TextClause
+except (ImportError, AttributeError):
+    sqlalchemy_TextClause = SQLALCHEMY_NOT_IMPORTED
+
 SPARK_NOT_IMPORTED = NotImported(
     "pyspark is not installed, please 'pip install pyspark'"
 )
