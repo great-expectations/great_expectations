@@ -16,7 +16,7 @@ from jinja2 import (
 
 try:
     from jinja2 import contextfilter
-except ImportError:
+except (ImportError, DeprecationWarning):
     from jinja2 import pass_context as contextfilter
 
 from great_expectations import __version__ as ge_version
