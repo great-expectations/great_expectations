@@ -160,10 +160,13 @@ def get_sqlite_temp_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    with execution_engine.engine.engine.begin() as connection:
-        result = connection.execute(statement)
-        rows = result.fetchall()
+    if isinstance(execution_engine, Connection):
+        result = execution_engine.execute(statement)
+    else:
+        with execution_engine.engine.engine.begin() as connection:
+            result = connection.execute(statement)
 
+    rows = result.fetchall()
     return {row[0] for row in rows}
 
 

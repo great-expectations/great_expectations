@@ -2284,18 +2284,17 @@ def sqlite_view_engine(test_backends):
                 con=sqlite_engine,
                 index=True,
             )
-            with sqlite_engine.connect() as connection:
-                with connection.begin():
-                    connection.execute(
-                        sa.text(
-                            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-                        )
+            with sqlite_engine.begin() as connection:
+                connection.execute(
+                    sa.text(
+                        "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
                     )
-                    connection.execute(
-                        sa.text(
-                            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-                        )
+                )
+                connection.execute(
+                    sa.text(
+                        "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
                     )
+                )
             return sqlite_engine
         except ImportError:
             sa = None
