@@ -9,7 +9,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.optional_imports import (
     SQLALCHEMY_NOT_IMPORTED,
-    sqlalchemy_Engine,
     sqlalchemy_Row,
 )
 from great_expectations.optional_imports import sqlalchemy as sa
@@ -21,7 +20,6 @@ from great_expectations.util import (
 
 try:
     from sqlalchemy import Column, MetaData, String, Table, and_, column  # noqa: TID251
-    from sqlalchemy.engine.url import URL  # noqa: TID251
     from sqlalchemy.exc import (  # noqa: TID251
         IntegrityError,
         NoSuchTableError,
@@ -36,7 +34,6 @@ except ImportError:
     Table = SQLALCHEMY_NOT_IMPORTED
     and_ = SQLALCHEMY_NOT_IMPORTED
     column = SQLALCHEMY_NOT_IMPORTED
-    URL = SQLALCHEMY_NOT_IMPORTED
     IntegrityError = SQLALCHEMY_NOT_IMPORTED
     NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
     SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
@@ -173,10 +170,10 @@ class DatabaseStoreBackend(StoreBackend):
                 if self._manually_initialize_store_backend_id
                 else str(uuid.uuid4())
             )
-            self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIX}{store_id}"
+            self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIL}{store_id}"
         return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
-    def _build_engine(self, credentials, **kwargs) -> sqlalchemy_Engine:
+    def _build_engine(self, credentials, **kwargs) -> sa.engine.Engine:
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -204,7 +201,7 @@ class DatabaseStoreBackend(StoreBackend):
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str, credentials: dict
-    ) -> Tuple[URL, Dict]:
+    ) -> Tuple[sa.engine.Engine.url.URL, Dict]:
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
