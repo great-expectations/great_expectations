@@ -19,7 +19,7 @@ This guide is intended to introduce you to the open source Python and command li
 
 If you are interested in GX Cloud, you should join the GX Cloud Beta.  During this program limited seats are available, but joining the queue will keep you informed of the product's process.
 
-**[Sign up for the GX Cloud Beta program!](https://greatexpectations.io/cloud)**
+**[Sign up for the GX Cloud Beta!](https://greatexpectations.io/cloud)**
 :::
 
 ## Prerequisites
