@@ -151,6 +151,11 @@ def test_requirements_files():
 
 @pytest.mark.integration
 def test_polish_and_ratchet_pins_and_upper_bounds():
+    """What does this test do and why?
+
+    We would like to reduce the number of pins and upper bounds on dependencies
+    so that we can stay up to date with our dependencies where possible.
+    """
     req_files = collect_requirements_files()
     req_set_dict = parse_requirements_files_to_specs(files=req_files)
 
