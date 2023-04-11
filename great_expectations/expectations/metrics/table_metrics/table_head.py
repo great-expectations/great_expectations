@@ -4,6 +4,10 @@ from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
 
+from great_expectations.compatibility.sqlalchemy_and_pandas import (
+    pandas_read_sql,
+    pandas_read_sql_query,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     read_sql_table_as_df,
 )
@@ -78,13 +82,13 @@ class TableHead(TableMetricProvider):
             # if a custom query was passed
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = pd.read_sql_query(
+                    df = pandas_read_sql_query(
                         sql=selectable,
                         con=execution_engine.engine,
                     )
                 else:
                     # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = pd.read_sql_query(
+                    df_chunk_iterator = pandas_read_sql_query(
                         sql=selectable,
                         con=execution_engine.engine,
                         chunksize=abs(n_rows),
@@ -164,14 +168,14 @@ class TableHead(TableMetricProvider):
 
             # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
             if n_rows <= 0 and not fetch_all:
-                df_chunk_iterator = pd.read_sql(
+                df_chunk_iterator = pandas_read_sql(
                     sql=sql, con=execution_engine.engine, chunksize=abs(n_rows)
                 )
                 df = TableHead._get_head_df_from_df_iterator(
                     df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                 )
             else:
-                df = pd.read_sql(sql=sql, con=execution_engine.engine)
+                df = pandas_read_sql(sql=sql, con=execution_engine.engine)
 
         return df
 
