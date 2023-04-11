@@ -46,7 +46,7 @@ from great_expectations.self_check.util import (
             "expect_many_many_many_many_many_many_many_many_many_many_things",
             1,
             None,
-            "many_many_many_many_many_many_many_many_many_things_dataset_1",
+            "y_many_many_many_many_many_many_many_many_many_things_dataset_1",
             does_not_raise(),
             id="expection_name_truncated_and_underscore_removed",
         ),
