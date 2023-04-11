@@ -78,6 +78,7 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_sqlalchemy,
 )
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_selectable,
@@ -92,30 +93,32 @@ from great_expectations.validator.metric_configuration import (
 logger = logging.getLogger(__name__)
 
 try:
-    import great_expectations.optional_imports.sqlalchemy as sa
-
     sqlalchemy_version_check(sa.__version__)
     make_url = import_make_url()
-    from great_expectations.optional_imports.sqlalchemy.engine import (
+except ImportError:
+    pass
+
+
+try:
+    from sqlalchemy.engine import (  # noqa: TID251
         Dialect,
         Engine,
         Row,
     )
-    from great_expectations.optional_imports.sqlalchemy.exc import OperationalError
-    from great_expectations.optional_imports.sqlalchemy.sql import Selectable
-    from great_expectations.optional_imports.sqlalchemy.sql.elements import (
+    from sqlalchemy.exc import OperationalError  # noqa: TID251
+    from sqlalchemy.sql import Selectable  # noqa: TID251
+    from sqlalchemy.sql.elements import (  # noqa: TID251
         BooleanClauseList,
         Label,
         TextClause,
         quoted_name,
     )
-    from great_expectations.optional_imports.sqlalchemy.sql.selectable import (
+    from sqlalchemy.sql.selectable import (  # noqa: TID251
         Select,
         TextualSelect,
     )
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
-    sa = SQLALCHEMY_NOT_IMPORTED
     Engine = SQLALCHEMY_NOT_IMPORTED
     BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
     DefaultDialect = SQLALCHEMY_NOT_IMPORTED
