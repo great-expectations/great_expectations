@@ -24,42 +24,4 @@ To avoid forking the repository, Great Expectations recommends using the GitHub 
 
 9. Wait for the Continuous Integration (CI) checks to complete and then correct any syntax or formatting issues.
 
-* Please pay close attention to the [Style Guide](./style_guides/docs_style.md).
-
-### Submit a pull request
-
-#### 3. Submit your edits as a PR
-
-* When you’re done, add a meaningful commit message at the bottom. Use a short title and a meaningful explanation of what you changed and why.
-
-* Click the `Propose File Change` button at the bottom of the page.
-
-* Click the `Create Pull Request` button.
-
-* Optionally: Add comment to explain your change, if it’s not already in the commit message.
-
-* Click the next `Create Pull Request` button to create the actual PR.
-
-#### 4. Sign the CLA
-
-* If this is your first contribution to Great Expectations, You will see a comment from the “CLA Bot” that asks you to complete the Contributor Licence Agreement form.
-
-* Please complete the form and comment on the PR to say that you’ve signed the form.
-
-#### 5. Verify continuous integration checks
-
-* Wait for the other Continuous Integration (CI) checks to go green and watch out for a comment from the automated linter that checks for syntax and formatting issues.
-
-* Fix any issues that are flagged. (For documentation changes, it’s unlikely that you’ll have any issues.)
-
-#### 6. Wait for a core team member to approve and merge your PR
-
-* Once all checks pass, a Great Expectations team member will approve your PR and merge it.
-
-* GitHub will notify you of comments or a successful merge according to your notification settings.
-
-* If there are any issues, please address them promptly.
-
-Congratulations! You’ve just contributed to Great Expectations!
-
-
+    A Great Expectations team member reviews, approves, and merges your PR. Depending on your GitHub notification settings, you'll be notified when there are comments or when your changes are successfully merged.
