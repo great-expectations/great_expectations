@@ -158,10 +158,10 @@ def get_sqlite_temp_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    if isinstance(execution_engine, sqlalchemy_Connection):
-        result = execution_engine.execute(statement)
+    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+        result = execution_engine.engine.execute(statement)
     else:
-        with execution_engine.engine.begin() as connection:
+        with execution_engine.engine.connect() as connection:
             result = connection.execute(statement)
 
     rows = result.fetchall()
@@ -172,10 +172,10 @@ def get_sqlite_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_master")
 
-    if isinstance(execution_engine, sqlalchemy_Connection):
-        result = execution_engine.execute(statement)
+    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+        result = execution_engine.engine.execute(statement)
     else:
-        with execution_engine.engine.begin() as connection:
+        with execution_engine.engine.connect() as connection:
             result = connection.execute(statement)
 
     rows = result.fetchall()

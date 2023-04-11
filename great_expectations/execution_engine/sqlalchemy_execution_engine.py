@@ -450,8 +450,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # # sqlite/mssql temp tables only persist within a connection so override the engine
             # # but only do this if self.engine is an Engine and isn't a Connection
-            # if sqlalchemy_Engine and isinstance(self.engine, sqlalchemy_Engine):
-            #     self.engine = self.engine.connect()
+            if sqlalchemy_Engine and isinstance(self.engine, sqlalchemy_Engine):
+                self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
