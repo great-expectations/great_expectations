@@ -2,7 +2,7 @@
 title: Contributing with GitHub
 ---
 
-To avoid forking the repository, Great Expectations recommends using the GitHub markdown editor to edit documentation.
+To avoid forking the repository, Great Expectations recommends using the GitHub Markdown editor to edit documentation.
 
 1. Open a browser and go to the [GitHub Great Expectations docs repository](https://github.com/great-expectations/great_expectations/tree/develop/docs).
 
