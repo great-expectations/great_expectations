@@ -42,7 +42,7 @@ If you want to change documentation, but not code, we suggest using the GitHub m
 
 #### 4. Sign the CLA
 
-* If this is your first contribution to Great Expectations, You will see a comment from the “CLA Bot” that asks you to complete the Contributor Licence Agreement form.
+* If this is your first contribution to Great Expectations, you will see a comment from the “CLA Bot” that asks you to complete the Contributor Licence Agreement form.
 
 * Please complete the form and comment on the PR to say that you’ve signed the form.
 
