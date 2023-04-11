@@ -1010,7 +1010,7 @@ class TestExecuteQuery:
 
     def test_execute_query(self, sa):
         execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
-            pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
+            pd.DataFrame({"a": [1, 2], "b": [4, 4]}), sa
         )
         data = execution_engine.get_domain_records(
             domain_kwargs={
@@ -1020,7 +1020,7 @@ class TestExecuteQuery:
         result = execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(data)
         )
-        expected = [(1, 4), (2, 4), (1, 4), (2, 4), (3, 4), (3, 4)]
+        expected = [(1, 4), (2, 4)]
         assert [r for r in result] == expected
 
 
@@ -1038,7 +1038,7 @@ class TestConnectionPersistence:
         connection is used for subsequent queries.
         """
         execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
-            pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
+            pd.DataFrame({"a": [1, 2], "b": [4, 4]}), sa
         )
 
         assert execution_engine.dialect_name == GXSqlDialect.SQLITE
@@ -1059,6 +1059,33 @@ class TestConnectionPersistence:
 
         assert execution_engine._connection is not None
         assert connection_id == id(execution_engine._connection)
+
+    def test_connection_closed_sqlite(self, sa):
+        """What does this test and why?
+
+        We want to make sure that the connection is closed when the execution
+        engine is deleted.
+        """
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
+            pd.DataFrame({"a": [1, 2], "b": [4, 4]}), sa
+        )
+
+        assert execution_engine.dialect_name == GXSqlDialect.SQLITE
+        assert execution_engine._connection is None
+
+        data = execution_engine.get_domain_records(
+            domain_kwargs={
+                "column": "a",
+            }
+        )
+        query = sa.select(sa.text("*")).select_from(data)
+        execution_engine.execute_query(query)
+
+        assert execution_engine._connection is not None
+
+        connection = execution_engine._connection
+        execution_engine.__del__()
+        assert connection.closed
 
     def test_same_connection_not_used_postgresql(self, sa):
         """What does this test and why?
