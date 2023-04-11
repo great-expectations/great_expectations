@@ -701,15 +701,25 @@ class TupleS3StoreBackend(TupleStoreBackend):
 
     def _assume_role_and_get_secret_credentials(self):
         import boto3
+
         role_session_name = "GXAssumeRoleSession"
-        client = boto3.client('sts', self._boto3_options.get("region_name"))
+        client = boto3.client("sts", self._boto3_options.get("region_name"))
         role_arn = self._boto3_options.pop("assume_role_arn")
         assume_role_duration = self._boto3_options.pop("assume_role_duration")
-        response = client.assume_role(RoleArn=role_arn, RoleSessionName=role_session_name,
-                                      DurationSeconds=assume_role_duration)
-        self._boto3_options['aws_access_key_id'] = response['Credentials']['AccessKeyId']
-        self._boto3_options['aws_secret_access_key'] = response['Credentials']['SecretAccessKey']
-        self._boto3_options['aws_session_token'] = response['Credentials']['SessionToken']
+        response = client.assume_role(
+            RoleArn=role_arn,
+            RoleSessionName=role_session_name,
+            DurationSeconds=assume_role_duration,
+        )
+        self._boto3_options["aws_access_key_id"] = response["Credentials"][
+            "AccessKeyId"
+        ]
+        self._boto3_options["aws_secret_access_key"] = response["Credentials"][
+            "SecretAccessKey"
+        ]
+        self._boto3_options["aws_session_token"] = response["Credentials"][
+            "SessionToken"
+        ]
 
     @property
     def boto3_options(self):
