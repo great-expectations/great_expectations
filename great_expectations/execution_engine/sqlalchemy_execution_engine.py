@@ -95,12 +95,7 @@ try:
     import great_expectations.optional_imports.sqlalchemy as sa
 
     sqlalchemy_version_check(sa.__version__)
-
     make_url = import_make_url()
-except ImportError:
-    sa = SQLALCHEMY_NOT_IMPORTED
-
-try:
     from great_expectations.optional_imports.sqlalchemy.engine import (
         Dialect,
         Engine,
@@ -119,6 +114,8 @@ try:
         TextualSelect,
     )
 except ImportError:
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    sa = SQLALCHEMY_NOT_IMPORTED
     Engine = SQLALCHEMY_NOT_IMPORTED
     BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
     DefaultDialect = SQLALCHEMY_NOT_IMPORTED

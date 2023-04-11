@@ -381,7 +381,7 @@ def sa(test_backends):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         try:
-            import sqlalchemy as sa
+            from great_expectations.optional_imports import sqlalchemy as sa
 
             return sa
         except ImportError:

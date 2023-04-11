@@ -70,10 +70,11 @@ except ImportError:
     )
 
 try:
-    from great_expectations.optional_imports.azure_blob_storage.BlobServiceClient import (
-        BlobServiceClient,
-    )
+    from azure_blob_storage import BlobServiceClient as BlobServiceClient
+
+    from great_expectations.optional_imports import azure_blob_storage
 except ImportError:
+    azure_blob_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
     BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:

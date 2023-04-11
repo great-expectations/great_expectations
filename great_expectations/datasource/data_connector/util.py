@@ -33,16 +33,21 @@ logger = logging.getLogger(__name__)
 try:
     import gcs.client as GCSClient  # noqa N801
 
+    from great_expectations.optional_imports import gcs
 except ImportError:
+    gcs = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     GCSClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 try:
-    from great_expectations.optional_imports.azure_blob_storage import (
+    from azure_blob_storage import (
         BlobPrefix,
         BlobServiceClient,
         ContainerClient,
     )
+
+    from great_expectations.optional_imports import azure_blob_storage
 except ImportError:
+    azure_blob_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
     BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
     BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
     ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED

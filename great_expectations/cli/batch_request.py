@@ -35,9 +35,7 @@ from great_expectations.util import filter_properties_dict
 logger = logging.getLogger(__name__)
 
 try:
-    from great_expectations.optional_imports.sqlalchemy.engine.reflection import (
-        Inspector,
-    )
+    import great_expectations.optional_imports.sqlalchemy.engine.Inspector as Inspector
 except ImportError:
     Inspector = SQLALCHEMY_NOT_IMPORTED
 

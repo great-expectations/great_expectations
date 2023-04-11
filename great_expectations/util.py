@@ -78,15 +78,11 @@ except ModuleNotFoundError:
 logger = logging.getLogger(__name__)
 
 try:
-    import great_expectations.optional_imports.sqlalchemy as sqlalchemy
-
-    sa = sqlalchemy
+    import great_expectations.optional_imports.sqlalchemy as sa
     from great_expectations.optional_imports.sqlalchemy import Table
     from great_expectations.optional_imports.sqlalchemy.engine import reflection
     from great_expectations.optional_imports.sqlalchemy.sql import Select
-
 except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     sa = SQLALCHEMY_NOT_IMPORTED
     Table = SQLALCHEMY_NOT_IMPORTED
     reflection = SQLALCHEMY_NOT_IMPORTED

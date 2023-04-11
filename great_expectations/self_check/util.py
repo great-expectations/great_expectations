@@ -101,12 +101,10 @@ expectationSuiteSchema = ExpectationSuiteSchema()
 logger = logging.getLogger(__name__)
 
 try:
-    import great_expectations.optional_imports.sqlalchemy as sqlalchemy
     from great_expectations.optional_imports.sqlalchemy import create_engine
     from great_expectations.optional_imports.sqlalchemy.engine import Engine
     from great_expectations.optional_imports.sqlalchemy.exc import SQLAlchemyError
 except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     create_engine = SQLALCHEMY_NOT_IMPORTED
     Engine = SQLALCHEMY_NOT_IMPORTED
     SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED

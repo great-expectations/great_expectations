@@ -51,8 +51,11 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    import great_expectations.optional_imports.pyspark.sql.types as sparktypes
+    import pyspark.sql.types as sparktypes
+
+    from great_expectations.optional_imports import pyspark
 except ImportError:
+    pyspark = SPARK_NOT_IMPORTED
     sparktypes = SPARK_NOT_IMPORTED
 
 try:

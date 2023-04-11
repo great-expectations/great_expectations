@@ -24,14 +24,15 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    import gcs.client as GoogleCloudStorageClient  # noqa N801
+    from gcs import client as GoogleCloudStorageClient  # noqa N801
     from google_service_account import Credentials as GoogleServiceAccountCredentials
 
-    import great_expectations.optional_imports.google_service_account as google_service_account
+    from great_expectations.optional_imports import gcs, google_service_account
 except ImportError:
+    gcs = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     google_service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    GoogleServiceAccountCredentials = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     GoogleCloudStorageClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    GoogleServiceAccountCredentials = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.file_path_data_asset import (
@@ -70,14 +71,14 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                 if "filename" in self.gcs_options:
                     filename: str = str(self.gcs_options.pop("filename"))
                     credentials = (
-                        google_service_account.Credentials.from_service_account_file(
+                        GoogleServiceAccountCredentials.from_service_account_file(
                             filename=filename
                         )
                     )
                 elif "info" in self.gcs_options:
                     info: Any = self.gcs_options.pop("info")
                     credentials = (
-                        google_service_account.Credentials.from_service_account_info(
+                        GoogleServiceAccountCredentials.from_service_account_info(
                             info=info
                         )
                     )

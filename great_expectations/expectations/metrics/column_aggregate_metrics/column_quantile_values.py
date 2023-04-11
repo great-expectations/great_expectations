@@ -31,9 +31,7 @@ except ImportError:
     TrinoUserError = None
 
 try:
-    import great_expectations.optional_imports.sqlalchemy as sqlalchemy
-
-    sa = sqlalchemy
+    import great_expectations.optional_imports.sqlalchemy as sa
     from great_expectations.optional_imports.sqlalchemy.exc import ProgrammingError
     from great_expectations.optional_imports.sqlalchemy.sql import Select
     from great_expectations.optional_imports.sqlalchemy.sql.elements import (
@@ -43,7 +41,6 @@ try:
     )
     from great_expectations.optional_imports.sqlalchemy.sql.selectable import CTE
 except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     sa = SQLALCHEMY_NOT_IMPORTED
     ProgrammingError = SQLALCHEMY_NOT_IMPORTED
     Select = SQLALCHEMY_NOT_IMPORTED

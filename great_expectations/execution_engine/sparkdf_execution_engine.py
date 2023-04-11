@@ -70,18 +70,19 @@ from great_expectations.validator.metric_configuration import (
 logger = logging.getLogger(__name__)
 
 try:
-    import great_expectations.optional_imports.pyspark as pyspark
-    import great_expectations.optional_imports.pyspark.sql.functions as F  # noqa N801
-    import great_expectations.optional_imports.pyspark.sql.types as sparktypes
-    from great_expectations.optional_imports.pyspark import SparkContext
-    from great_expectations.optional_imports.pyspark.sql import (
+    import pyspark.sql.functions as F  # noqa N801
+    import pyspark.sql.types as sparktypes
+    from pyspark import SparkContext
+    from pyspark.sql import (
         DataFrame,
         Row,
         SparkSession,
     )
-    from great_expectations.optional_imports.pyspark.sql.readwriter import (
+    from pyspark.sql.readwriter import (
         DataFrameReader,
     )
+
+    from great_expectations.optional_imports import pyspark
 except ImportError:
     pyspark = SPARK_NOT_IMPORTED
     F = SPARK_NOT_IMPORTED

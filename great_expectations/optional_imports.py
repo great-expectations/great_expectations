@@ -96,7 +96,7 @@ SQLALCHEMY_NOT_IMPORTED = NotImported(
     "sqlalchemy is not installed, please 'pip install sqlalchemy'"
 )
 try:
-    import sqlalchemy
+    import sqlalchemy as sqlalchemy
 
     sqlalchemy_version_check(sqlalchemy.__version__)
 except ImportError:
@@ -107,7 +107,7 @@ SPARK_NOT_IMPORTED = NotImported(
     "pyspark is not installed, please 'pip install pyspark'"
 )
 try:
-    import pyspark
+    import pyspark as pyspark
 except ImportError:
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
 
