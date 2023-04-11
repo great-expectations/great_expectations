@@ -14,6 +14,14 @@ Few things are as daunting as taking your first steps with a new piece of softwa
 
 Once you have completed this guide you will have a foundation in the basics of using GX.  In the future you will be able to adapt GX to suit your specific needs by customizing the execution of the individual steps you will learn here.
 
+:::info Great Expectations Cloud
+This guide is intended to introduce you to the open source Python and command line use of Great Expectations.  GX also offers an online interface, currently in Beta.  The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
+
+If you are interested in GX Cloud, you should join the GX Cloud Beta.  During this program limited seats are available, but signing up will keep you informed of the product's process.
+
+**[Sign up for the GX Cloud Beta!](https://greatexpectations.io/cloud)**
+:::
+
 ## Prerequisites
 
 <Prerequisites requirePython = {true} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
@@ -116,14 +124,6 @@ Great Expectations provides a friendly, human-readable way to view the results o
 ```python name="tutorials/quickstart/quickstart.py view_results"
 ```
 
-
-### 5. (Optional) Great Expectations Cloud
-
-By completing the Quickstart guide, you now have the opportunity to join the Cloud Early Access program and explore how Great Expectations Cloud visualizes and creates shareable links for anyone on your team. The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
-
-To access GX Cloud, you need to join our Cloud Early Access program. During this program, limited seats are available, but joining the queue will keep you informed of the product's progress.
-
-**[Sign up for the Cloud Early Access program!](https://greatexpectations.io/cloud)**
 
 ## Next Steps 
 
