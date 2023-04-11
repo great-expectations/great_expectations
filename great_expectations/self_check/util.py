@@ -111,13 +111,12 @@ except ImportError:
 
 
 try:
-    from pyspark.sql import DataFrame as SparkDataFrame
-    from pyspark.sql import SparkSession
-    from pyspark.sql.types import StructType
-
-    from great_expectations.optional_imports import pyspark as pyspark
+    from great_expectations.optional_imports.pyspark.sql import (
+        DataFrame as SparkDataFrame,
+    )
+    from great_expectations.optional_imports.pyspark.sql import SparkSession
+    from great_expectations.optional_imports.pyspark.sql.types import StructType
 except ImportError:
-    pyspark = SPARK_NOT_IMPORTED
     SparkDataFrame = SPARK_NOT_IMPORTED
     SparkSession = SPARK_NOT_IMPORTED
     StructType = SPARK_NOT_IMPORTED
