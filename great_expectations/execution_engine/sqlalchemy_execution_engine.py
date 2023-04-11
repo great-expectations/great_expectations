@@ -1149,12 +1149,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
             split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        if isinstance(self.engine, sqlalchemy_Engine):
-            connection = self.engine.connect()
-        else:
-            connection = self.engine
-
-        with connection:
+        # ensuring that we are executing the split query with an sa.Engine and not sa.Connection with engine.engine.
+        with self.engine.engine.begin() as connection:
             query_result: List[Row] = connection.execute(split_query).fetchall()
             return query_result
 

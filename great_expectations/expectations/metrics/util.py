@@ -412,6 +412,7 @@ def column_reflection_fallback(
     else:
         connection = sqlalchemy_engine.engine
 
+    # with sqlalchemy_engine.begin() as connection:
     with connection:
 
         col_info_dict_list: List[Dict[str, str]]
