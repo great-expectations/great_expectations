@@ -37,6 +37,7 @@ from great_expectations.expectations.metrics.util import (
     verify_column_names_exist,
 )
 from great_expectations.optional_imports import sqlalchemy as sa
+from great_expectations.optional_imports import sqlalchemy_Engine
 from great_expectations.util import (
     generate_temporary_table_name,
     get_sqlalchemy_selectable,
@@ -361,7 +362,18 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
-        with execution_engine.engine.engine.begin() as connection:
+        if sqlalchemy_Engine and isinstance(execution_engine.engine, sqlalchemy_Engine):
+            with execution_engine.engine.begin() as connection:
+                unexpected_count: Union[float, int] = connection.execute(
+                    sa.select(
+                        unexpected_count_query.c[
+                            f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                        ],
+                    )
+                ).scalar()
+        else:
+            # if connection, then use it directly
+            connection = execution_engine.engine
             unexpected_count: Union[float, int] = connection.execute(
                 sa.select(
                     unexpected_count_query.c[
