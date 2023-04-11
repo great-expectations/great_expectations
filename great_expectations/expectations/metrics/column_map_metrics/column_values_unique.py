@@ -4,15 +4,19 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    F,
-    Window,
-    sa,
-    sqlalchemy_engine_Engine,
-)
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
+)
+from great_expectations.optional_imports import (
+    F,
+    sqlalchemy_engine_Engine,
+)
+from great_expectations.optional_imports import (
+    pyspark_sql_Window as Window,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
 )
 from great_expectations.util import generate_temporary_table_name
 

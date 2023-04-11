@@ -14,7 +14,7 @@ from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     ExpectationValidationResult,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.optional_imports import F, sqlalchemy as sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,

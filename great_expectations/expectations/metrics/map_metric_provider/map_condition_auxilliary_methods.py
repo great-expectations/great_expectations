@@ -22,7 +22,6 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     OperationalError,
 )
-from great_expectations.expectations.metrics.import_manager import F, quoted_name
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
 )
@@ -36,6 +35,7 @@ from great_expectations.expectations.metrics.util import (
     sql_statement_with_post_compile_to_string,
     verify_column_names_exist,
 )
+from great_expectations.optional_imports import F, quoted_name
 from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     generate_temporary_table_name,
@@ -51,7 +51,6 @@ if TYPE_CHECKING:
         SqlAlchemyExecutionEngine,
     )
 
-    # from great_expectations.expectations.metrics.import_manager import quoted_name
 
 logger = logging.getLogger(__name__)
 

@@ -7,14 +7,7 @@ import pandas as pd
 import pytest
 
 from great_expectations.util import is_candidate_subset_of_target
-
-try:
-    pyspark = pytest.importorskip("pyspark")
-    from pyspark.sql.types import Row
-except ImportError:
-    pyspark = None
-    Row = None
-
+from great_expectations.optional_imports import pyspark_sql_Row
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
@@ -949,7 +942,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
         BatchRequest(**batch_request)
     )
     # check that the batch_spec_passthrough has worked
-    assert batch[0].data.dataframe.head() == Row(x="1", y="2")
+    assert batch[0].data.dataframe.head() == pyspark_sql_Row(x="1", y="2")
 
 
 @pytest.mark.integration

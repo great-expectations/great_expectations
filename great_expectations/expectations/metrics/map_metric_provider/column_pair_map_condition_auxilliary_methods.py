@@ -9,7 +9,6 @@ from typing import (
     Union,
 )
 
-from great_expectations.expectations.metrics.import_manager import F, quoted_name
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
 )
@@ -17,6 +16,7 @@ from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
     verify_column_names_exist,
 )
+from great_expectations.optional_imports import F, quoted_name
 from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     get_sqlalchemy_selectable,
@@ -29,7 +29,6 @@ if TYPE_CHECKING:
         SqlAlchemyExecutionEngine,
     )
 
-    # from great_expectations.expectations.metrics.import_manager import quoted_name
 
 logger = logging.getLogger(__name__)
 

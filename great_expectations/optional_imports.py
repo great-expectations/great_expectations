@@ -99,8 +99,39 @@ try:
     import sqlalchemy
 
     sqlalchemy_version_check(sqlalchemy.__version__)
+
+    from sqlalchemy.engine import (
+        Engine as sqlalchemy_engine_Engine,
+    )
+    from sqlalchemy.engine import (
+        Inspector as sqlalchemy_engine_Inspector,
+    )
+    from sqlalchemy.engine import (
+        Row as sqlalchemy_engine_Row,
+    )
+    from sqlalchemy.engine import (
+        reflection as sqlalchemy_reflection,
+    )
+    from sqlalchemy.sql.elements import quoted_name
+    from sqlalchemy.sql.expression import (
+        ColumnClause as sa_sql_expression_ColumnClause,
+    )
+    from sqlalchemy.sql.expression import (
+        Select as sa_sql_expression_Select,
+    )
+    from sqlalchemy.sql.expression import (
+        Selectable as sa_sql_expression_Selectable,
+    )
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_engine_Engine = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_engine_Row = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_reflection = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_ColumnClause = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_Select = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_Selectable = SQLALCHEMY_NOT_IMPORTED
+    quoted_name = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_engine_Inspector = SQLALCHEMY_NOT_IMPORTED
 
 
 SPARK_NOT_IMPORTED = NotImported(
@@ -108,9 +139,40 @@ SPARK_NOT_IMPORTED = NotImported(
 )
 try:
     import pyspark as pyspark
+    import pyspark.sql.functions as F  # noqa N801
+    import pyspark.sql.types as sparktypes
+    from pyspark import SparkContext
+    from pyspark.ml.feature import Bucketizer
+    from pyspark.sql import (
+        Column as pyspark_sql_Column,
+    )
+    from pyspark.sql import (
+        DataFrame as pyspark_sql_DataFrame,
+    )
+    from pyspark.sql import (
+        Row as pyspark_sql_Row,
+    )
+    from pyspark.sql import (
+        SparkSession as pyspark_sql_SparkSession,
+    )
+    from pyspark.sql import (
+        SQLContext as pyspark_SQLContext,
+    )
+    from pyspark.sql import (
+        Window as pyspark_sql_Window,
+    )
 except ImportError:
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
-
+    pyspark_sql_Row = SPARK_NOT_IMPORTED
+    F = SPARK_NOT_IMPORTED
+    sparktypes = SPARK_NOT_IMPORTED
+    pyspark_sql_DataFrame = SPARK_NOT_IMPORTED
+    pyspark_sql_Column = SPARK_NOT_IMPORTED
+    SparkContext = SPARK_NOT_IMPORTED
+    pyspark_sql_SparkSession = SPARK_NOT_IMPORTED
+    pyspark_SQLContext = SPARK_NOT_IMPORTED
+    pyspark_sql_Window = SPARK_NOT_IMPORTED
+    Bucketizer = SPARK_NOT_IMPORTED
 
 GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
     "google cloud storage components are not installed, please 'pip install google-cloud-storage google-cloud-secret-manager'"

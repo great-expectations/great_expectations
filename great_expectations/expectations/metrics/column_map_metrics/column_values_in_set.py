@@ -7,11 +7,11 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+from great_expectations.optional_imports import F
 from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 try:

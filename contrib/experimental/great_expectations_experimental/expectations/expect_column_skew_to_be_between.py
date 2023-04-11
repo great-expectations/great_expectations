@@ -21,9 +21,9 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
+from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, F
+from great_expectations.optional_imports import sqlalchemy as sa
 
 logger = logging.getLogger(__name__)
 

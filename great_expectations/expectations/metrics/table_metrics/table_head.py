@@ -27,7 +27,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
+    from great_expectations.optional_imports import pyspark_sql_Row
 
 
 class TableHead(TableMetricProvider):

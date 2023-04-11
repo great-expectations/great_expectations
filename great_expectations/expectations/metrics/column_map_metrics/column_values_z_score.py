@@ -12,12 +12,13 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
     column_function_partial,
 )
+from great_expectations.optional_imports import F
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 

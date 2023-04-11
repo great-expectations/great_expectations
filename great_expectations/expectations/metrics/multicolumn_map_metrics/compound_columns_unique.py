@@ -10,7 +10,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
 )
@@ -19,6 +18,15 @@ from great_expectations.expectations.metrics.map_metric_provider.multicolumn_con
 )
 from great_expectations.expectations.metrics.map_metric_provider.multicolumn_function_partial import (
     multicolumn_function_partial,
+)
+from great_expectations.optional_imports import (
+    F,
+)
+from great_expectations.optional_imports import (
+    pyspark_sql_Window as Window,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 

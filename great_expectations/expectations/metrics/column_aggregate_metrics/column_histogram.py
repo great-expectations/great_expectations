@@ -18,8 +18,9 @@ from great_expectations.execution_engine import (
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
 )
-from great_expectations.expectations.metrics.import_manager import Bucketizer, F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.optional_imports import Bucketizer, F
+from great_expectations.optional_imports import sqlalchemy as sa
 
 logger = logging.getLogger(__name__)
 

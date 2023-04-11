@@ -14,7 +14,6 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.metrics import DeprecatedMetaMetricProvider
-from great_expectations.expectations.metrics.import_manager import quoted_name, sa
 from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
     metric_value,
@@ -25,6 +24,8 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
+from great_expectations.optional_imports import quoted_name
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 logger = logging.getLogger(__name__)

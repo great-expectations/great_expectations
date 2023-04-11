@@ -22,7 +22,7 @@ from great_expectations.expectations.metrics import (
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.optional_imports import F, sqlalchemy as sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.render import RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer

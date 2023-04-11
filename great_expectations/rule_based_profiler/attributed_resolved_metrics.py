@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from great_expectations.core.util import convert_to_json_serializable
+from great_expectations.optional_imports import pyspark_sql_Row
 from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricValues,  # noqa: TCH001
 )
@@ -27,12 +28,6 @@ try:
 except ImportError:
     logger.debug("No SqlAlchemy.engine module available.")
     sqlalchemy_engine_Row = None
-
-try:
-    from pyspark.sql import Row as pyspark_sql_Row
-except ImportError:
-    logger.debug("No spark SQLContext available.")
-    pyspark_sql_Row = None  # type: ignore[assignment,misc]
 
 
 def _condition_metric_values(metric_values: MetricValues) -> MetricValues:

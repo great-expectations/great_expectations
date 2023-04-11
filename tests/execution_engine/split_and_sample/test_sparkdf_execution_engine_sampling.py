@@ -5,12 +5,6 @@ import pytest
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 
-try:
-    pyspark = pytest.importorskip("pyspark")
-
-except ImportError:
-    pyspark = None
-
 
 @pytest.mark.parametrize(
     "underscore_prefix",

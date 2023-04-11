@@ -23,14 +23,6 @@ from great_expectations.optional_imports import SPARK_NOT_IMPORTED
 logger = logging.getLogger(__name__)
 
 
-try:
-    from great_expectations.optional_imports import pyspark as pyspark
-    from pyspark.sql import DataFrame
-except ImportError:
-    pyspark = SPARK_NOT_IMPORTED
-    DataFrame = SPARK_NOT_IMPORTED
-
-
 @pytest.fixture
 def test_pandas_df():
     df: pd.DataFrame = pd.DataFrame(
