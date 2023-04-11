@@ -8,9 +8,9 @@ By default, <TechnicalTag tag="validation_result" text="Validation Results" /> a
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
-- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
-- [Configured a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md).
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [Configured a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
 - Configured a Google Cloud Platform (GCP) [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that can access the appropriate GCP resources, which include Storage Objects.
 - Identified the GCP project, GCS bucket, and prefix where Validation Results will be stored.
 
@@ -72,7 +72,7 @@ Only the active Stores will be listed. Great Expectations will look for Validati
 
 ### 6. Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md) to store results in the new Validation Results Store on GCS then visualize the results by [re-building Data Docs](../../../tutorials/getting_started/tutorial_validate_data.md).
+[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on GCS then visualize the results by [re-building Data Docs](/docs/terms/data_docs).
 
 
 ## Additional Notes

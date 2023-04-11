@@ -2,6 +2,48 @@
 title: Changelog
 ---
 
+### Deprecation policy
+
+- Deprecation warnings and the supporting code are maintained for two minor versions.  For example, v0.12 deprecations will only be removed as part of a v0.15 release.
+  - This means we have three supported minor versions in the release at any time.  For example: in v0.15 we support v0.15, v0.14, and v0.13.  When v0.16 ships we will support v0.16, v0.15, and v0.14 and will remove support for v0.13.
+- Deprecation warnings include (in the warning message) the version that they were introduced.  For example: "deprecated as of v0.13"
+- Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
+- Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
+
+### 0.16.6
+* [FEATURE] Fluent `DataAsset` `batch_metadata` config variables ([#7513](https://github.com/great-expectations/great_expectations/pull/7513))
+* [FEATURE] Add batch metadata to spark add_*_asset methods ([#7534](https://github.com/great-expectations/great_expectations/pull/7534))
+* [BUGFIX] Fluent Datasource load from config fixes for remaining Pandas Datasources ([#7442](https://github.com/great-expectations/great_expectations/pull/7442))
+* [BUGFIX] Address `pandas==2.0.0` test failures ([#7553](https://github.com/great-expectations/great_expectations/pull/7553))
+* [BUGFIX] Render prescriptive `ExpectationConfiguration`s with evaluation parameters inline ([#7552](https://github.com/great-expectations/great_expectations/pull/7552))
+* [BUGFIX] Release Pipeline Fix ([#7575](https://github.com/great-expectations/great_expectations/pull/7575))
+* [DOCS] Update GX version in `_data.jsx` component ([#7549](https://github.com/great-expectations/great_expectations/pull/7549))
+* [DOCS] Adds guides on using Ephemeral Data Contexts and updates Quickstart Next Steps ([#7500](https://github.com/great-expectations/great_expectations/pull/7500))
+* [DOCS] Fixes broken code block and incorrectly numbered steps in "How to organize Batches in a SQL-based Data Asset" ([#7533](https://github.com/great-expectations/great_expectations/pull/7533))
+* [DOCS] Update nav to match gx.io site ([#7557](https://github.com/great-expectations/great_expectations/pull/7557))
+* [DOCS] Corrects step numbers in "How to organize Batches in a file-based Data Asset" ([#7559](https://github.com/great-expectations/great_expectations/pull/7559))
+* [DOCS] Delete SLACK_GUIDELINES.md ([#7566](https://github.com/great-expectations/great_expectations/pull/7566))
+* [DOCS] Update syntax highlighting of code blocks in GX Cloud Getting Started guide ([#7563](https://github.com/great-expectations/great_expectations/pull/7563))
+* [DOCS] Fix code snippets for earlier versions ([#7554](https://github.com/great-expectations/great_expectations/pull/7554))
+* [DOCS]  Fix typo in docs ([#7568](https://github.com/great-expectations/great_expectations/pull/7568))
+* [DOCS] Moar typo fix ([#7569](https://github.com/great-expectations/great_expectations/pull/7569))
+* [DOCS] removes the original getting started tutorial pages and redirects to the quickstart guide ([#7548](https://github.com/great-expectations/great_expectations/pull/7548))
+* [DOCS] Fix integral typo ([#7578](https://github.com/great-expectations/great_expectations/pull/7578))
+* [DOCS] Prepare earlier versions using develop ([#7567](https://github.com/great-expectations/great_expectations/pull/7567))
+* [DOCS] Use orange in docs logs ([#7579](https://github.com/great-expectations/great_expectations/pull/7579))
+* [DOCS] Add GX Cloud Onboarding Script ([#7517](https://github.com/great-expectations/great_expectations/pull/7517))
+* [MAINTENANCE] release prep for 0.16.5 ([#7545](https://github.com/great-expectations/great_expectations/pull/7545))
+* [MAINTENANCE] Test Pandas 2.0 prerelease in CI/CD ([#7343](https://github.com/great-expectations/great_expectations/pull/7343))
+* [MAINTENANCE] Add noqa directives for existing sqlalchemy imports ([#7564](https://github.com/great-expectations/great_expectations/pull/7564))
+* [MAINTENANCE] Add ruff rule for sqlalchemy imports ([#7562](https://github.com/great-expectations/great_expectations/pull/7562))
+* [MAINTENANCE] adding a footer to data docs with a link to the cloud page ([#7532](https://github.com/great-expectations/great_expectations/pull/7532))
+* [MAINTENANCE] Harden tests for `CloudDataContext` always `include_rendered_content` ([#7558](https://github.com/great-expectations/great_expectations/pull/7558))
+* [MAINTENANCE] FluentDatasources - Quickstart Snippets converted to Named Snippets ([#7550](https://github.com/great-expectations/great_expectations/pull/7550))
+* [MAINTENANCE] Simplify `GXCloudStoreBackend._has_key` check ([#7561](https://github.com/great-expectations/great_expectations/pull/7561))
+* [MAINTENANCE] Temporarily Pin `pandas<2.0.0` for compatibility ([#7571](https://github.com/great-expectations/great_expectations/pull/7571))
+* [MAINTENANCE] SqlAlchemy 2.0 Compatibility - branched connection + `bind` argument now required ([#7529](https://github.com/great-expectations/great_expectations/pull/7529))
+* [MAINTENANCE]  Add missing docstrings to fluent `sql_datasource` splitter methods. ([#7577](https://github.com/great-expectations/great_expectations/pull/7577))
+
 ### 0.16.5
 * [FEATURE] Add batch metadata to sql datasources. ([#7499](https://github.com/great-expectations/great_expectations/pull/7499))
 * [BUGFIX] Fix issue running quickstart ([#7539](https://github.com/great-expectations/great_expectations/pull/7539))

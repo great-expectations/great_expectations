@@ -8,7 +8,7 @@ This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text=
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
 - You have created a Checkpoint.
 
 </Prerequisites>
