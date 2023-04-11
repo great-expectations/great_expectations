@@ -19,10 +19,8 @@ from great_expectations.datasource.data_connector.asset import Asset  # noqa: TC
 from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 from great_expectations.optional_imports import (
     AZURE_BLOB_STORAGE_NOT_IMPORTED,
+    GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
     SPARK_NOT_IMPORTED,
-)
-from great_expectations.optional_imports import (
-    pyspark as pyspark,
 )
 
 if TYPE_CHECKING:
@@ -31,15 +29,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 try:
-    from azure_blob_storage.BlobServiceClient import (
+    import gcs.client as GCSClient  # noqa N801
+
+except ImportError:
+    GCSClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+
+try:
+    from great_expectations.optional_imports.azure_blob_storage import (
         BlobPrefix,
         BlobServiceClient,
         ContainerClient,
-    )
-
-    from great_expectations.optional_imports import (
-        azure_blob_storage as azure_blob_storage,
     )
 except ImportError:
     BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
