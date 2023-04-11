@@ -96,7 +96,7 @@ SQLALCHEMY_NOT_IMPORTED = NotImported(
     "sqlalchemy is not installed, please 'pip install sqlalchemy'"
 )
 try:
-    import sqlalchemy as sqlalchemy
+    import sqlalchemy
 
     sqlalchemy_version_check(sqlalchemy.__version__)
 except ImportError:
