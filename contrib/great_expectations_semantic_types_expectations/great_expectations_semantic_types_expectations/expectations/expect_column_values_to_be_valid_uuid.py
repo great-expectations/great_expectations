@@ -54,9 +54,6 @@ class ColumnValuesToBeValidUUID(ColumnMapMetricProvider):
         )
         return column.regexp_match(regex_pattern)
 
-
-
-
     # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
     # @column_condition_partial(engine=SparkDFExecutionEngine)
     # def _spark(cls, column, **kwargs):
