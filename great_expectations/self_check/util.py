@@ -95,7 +95,7 @@ expectationSuiteSchema = ExpectationSuiteSchema()
 
 # mysql and mssql allow table names to be a maximum of 128 characters
 # for postgres it is 63.
-MAX_TABLE_NAME_LENGTH: int = 63
+MAX_TABLE_NAME_LENGTH: int = 62
 
 logger = logging.getLogger(__name__)
 
