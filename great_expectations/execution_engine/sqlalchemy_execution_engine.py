@@ -276,6 +276,10 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
+def _dialects_requiring_persisted_connection() -> tuple[GXSqlDialect, ...]:
+    return GXSqlDialect.SQLITE, GXSqlDialect.MSSQL
+
+
 @public_api
 class SqlAlchemyExecutionEngine(ExecutionEngine):
     """SparkDFExecutionEngine instantiates the ExecutionEngine API to support computations using Spark platform.
@@ -1324,33 +1328,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if self._connection:
             self._connection.close()
 
-    # @contextmanager
-    def _get_connection(self):
-        # TODO: docstring, return type
-        # TODO: yield a connection here and close it down after final use
-
-        connection = self.engine.connect()
-        return connection
-        # try:
-        #     yield connection
-        # except Exception as e:
-        #     connection.rollback()
-        #     raise e
-        # finally:
-        #     connection.close()
-
-    # TODO: What is return type
+    # TODO: What is return type, docstring
     def execute_query(self, query: Selectable):
+        """Execute a query using the underlying database engine.
+
+        Some databases sqlite/mssql temp tables only persist within a connection,
+        so we need to keep the connection alive.
+
+        Args:
+            query:
+
+        Returns:
+
+        """
+
         # TODO: Add docstring
 
-        if self.dialect_name in [GXSqlDialect.SQLITE, GXSqlDialect.MSSQL]:
-            # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive.
+        if self.dialect_name in _dialects_requiring_persisted_connection():
+            # sqlite/mssql temp tables only persist within a connection,
+            # so we need to keep the connection alive.
             if not self._connection:
-                self._connection = self._get_connection()
+                self._connection = self.engine.connect()
             result = self._connection.execute(query)
 
         else:
-            # Get a connection from the engine
+            # Get a connection from the engine and close it after executing the query.
             with self.engine.connect() as connection:
                 result = connection.execute(query)
 
