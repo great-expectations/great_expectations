@@ -163,19 +163,24 @@ class FakeResponse:
             )
         return self.json_
 
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise Exception(f"HTTP ERROR {self.status_code}")
+
 
 @pytest.fixture
 def cloud_api_fake(mocker: MockerFixture):
-    dc_config_url = f"{CLOUD_DEFAULT_BASE_URL}/organizations/{DUMMY_ORG_ID}/data-context-configuration"
+    org_url_base = f"{CLOUD_DEFAULT_BASE_URL}/organizations/{DUMMY_ORG_ID}"
 
     fake_db: dict = {
-        dc_config_url: {
+        f"{org_url_base}/data-context-configuration": {
             "anonymous_usage_statistics": {
                 "data_context_id": DUMMY_DATA_CONTEXT_ID,
                 "enabled": False,
             },
             "datasources": {},
-        }
+        },
+        f"{org_url_base}/datasources": MISSING,
     }
 
     logger.info("Mocking the GX Cloud API")
@@ -189,8 +194,26 @@ def cloud_api_fake(mocker: MockerFixture):
         logger.info(f"mock - {item}")  # TODO: remove this
         return FakeResponse(status_code=200, json_=item)
 
-    patch = mocker.patch("requests.get", autospec=True)
-    patch.side_effect = _request_mock
+    def _post(self, url, **kwargs):
+        logger.info(f"mock POST -> {url}\n{kwargs}")
+        if url not in fake_db:
+            return FakeResponse(status_code=404)
+        item = fake_db.get(url, MISSING)
+        json = kwargs.get("json")
+        if item is MISSING and json:
+            id_ = str(uuid.uuid4())
+            json["data"]["id"] = id_
+            fake_db[url] = json
+            return FakeResponse(status_code=201, json_={"data": {"id": id_}})
+        return FakeResponse(
+            status_code=400, json_={"error": "something bad maybe a conflict"}
+        )
+
+    get_patch = mocker.patch("requests.get", autospec=True)
+    get_patch.side_effect = _request_mock
+
+    mocker.patch("requests.post", autospec=True).side_effect = _post
+    mocker.patch("requests.Session.post", autospec=True).side_effect = _post
 
     yield
 
