@@ -55,3 +55,95 @@ fluent_datasources:
       my_csv_asset_with_default_connect_options:
         type: csv
         sep: ","
+  my_pandas_s3_ds:
+    type: pandas_s3
+    bucket: "test_bucket"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          s3_delimiter: "/"
+          s3_prefix: ""
+          s3_max_keys: 99
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        delimiter: ","
+  my_pandas_gcs_ds:
+    type: pandas_gcs
+    bucket_or_name: "test_bucket"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          gcs_delimiter: "/"
+          gcs_prefix: ""
+          gcs_max_results: 99
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        delimiter: ","
+  my_pandas_abs_ds:
+    type: pandas_abs
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          abs_container: "test"
+          abs_name_starts_with: ""
+          abs_delimiter: "/"
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        delimiter: ","
+        connect_options:
+          abs_container: "this_is_always_required"
+  my_spark_fs_ds:
+    type: spark_filesystem
+    base_directory: "."
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        InferSchema: True
+        connect_options:
+          glob_directive: "**/*.csv"
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        infer_schema: False
+  my_spark_s3_ds:
+    type: spark_s3
+    bucket: "test_bucket"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        connect_options:
+          s3_delimiter: "/"
+          s3_prefix: ""
+          s3_max_keys: 99
+      my_csv_asset_with_default_connect_options:
+        type: csv
+  my_spark_gcs_ds:
+    type: spark_gcs
+    bucket_or_name: "test_bucket"
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        connect_options:
+          gcs_delimiter: "/"
+          gcs_prefix: ""
+          gcs_max_results: 99
+      my_csv_asset_with_default_connect_options:
+        type: csv
+  my_spark_abs_ds:
+    type: spark_abs
+    assets:
+      my_csv_asset_w_custom_connect_options:
+        type: csv
+        connect_options:
+          abs_container: "test"
+          abs_name_starts_with: ""
+          abs_delimiter: "/"
+      my_csv_asset_with_default_connect_options:
+        type: csv
+        connect_options:
+          abs_container: "this_is_always_required"

@@ -14,9 +14,13 @@ from great_expectations.util import (
 )
 
 try:
-    from sqlalchemy import Column, MetaData, String, Table, and_, column
-    from sqlalchemy.engine.url import URL
-    from sqlalchemy.exc import IntegrityError, NoSuchTableError, SQLAlchemyError
+    from sqlalchemy import Column, MetaData, String, Table, and_, column  # noqa: TID251
+    from sqlalchemy.engine.url import URL  # noqa: TID251
+    from sqlalchemy.exc import (  # noqa: TID251
+        IntegrityError,
+        NoSuchTableError,
+        SQLAlchemyError,
+    )
 
     make_url = import_make_url()
 except ImportError:
