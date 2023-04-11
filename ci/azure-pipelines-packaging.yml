@@ -29,6 +29,10 @@ stages:
     jobs:
       - job: install_gx
         steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: 3.8
+            displayName: Use Python 3.8
           - bash: pip install --upgrade pip
           - bash: pip install -c constraints-dev.txt -e ".[test]"
           - bash: pip install -r requirements-dev.txt -c constraints-dev.txt
