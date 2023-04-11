@@ -52,7 +52,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                 pk_column: bool = False
                 file = open(filename)
                 test_configuration = json.load(file)
-                expectation_type = filename.split(".json")[0]
+                expectation_type = filename.split(".json")[0].split("/")[-1]
                 for index, test_config in enumerate(test_configuration["datasets"], 1):
                     datasets = []
                     # optional only_for and suppress_test flag at the datasets-level that can prevent data being
