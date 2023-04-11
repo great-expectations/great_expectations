@@ -59,6 +59,9 @@ if TYPE_CHECKING:
 EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
 PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 
+
+GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
+
 DUMMY_JWT_TOKEN: Final[
     str
 ] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
@@ -154,6 +157,7 @@ def inject_engine_lookup_double(
 class FakeResponse:
     status_code: int = 500
     content: bytes = b""
+    text: str = ""
     json_: Union[dict, list, None] = None
 
     def json(self):
@@ -170,7 +174,7 @@ class FakeResponse:
 
 @pytest.fixture
 def cloud_api_fake(mocker: MockerFixture):
-    org_url_base = f"{CLOUD_DEFAULT_BASE_URL}/organizations/{DUMMY_ORG_ID}"
+    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{DUMMY_ORG_ID}"
 
     fake_db: dict = {
         f"{org_url_base}/data-context-configuration": {
@@ -186,36 +190,41 @@ def cloud_api_fake(mocker: MockerFixture):
     logger.info("Mocking the GX Cloud API")
 
     def _request_mock(url, *args, **kwargs):
-        logger.info(f"mock http -> {url}\n{args}\n{kwargs}")
+        logger.info(f"mock GET -> {url}\n{args}\n{kwargs}")
         item = fake_db.get(url, MISSING)
         # assert url == dc_config_url
         if item is MISSING:
-            return FakeResponse(status_code=500)
+            return FakeResponse(status_code=500, text=f"HTTP {500} {url}")
         logger.info(f"mock - {item}")  # TODO: remove this
         return FakeResponse(status_code=200, json_=item)
 
-    def _post(self, url, **kwargs):
+    def _post(self, url: str, **kwargs):
         logger.info(f"mock POST -> {url}\n{kwargs}")
         if url not in fake_db:
-            return FakeResponse(status_code=404)
+            return FakeResponse(status_code=404, text=f"NotFound {url}")
         item = fake_db.get(url, MISSING)
         json = kwargs.get("json")
         if item is MISSING and json:
             id_ = str(uuid.uuid4())
             json["data"]["id"] = id_
             fake_db[url] = json
+            # add the resource
+            fake_db[f"{url}/{id_}"] = json["data"]
             return FakeResponse(status_code=201, json_={"data": {"id": id_}})
+        logger.warning(f"json\n{json}\n\n{item}")
         return FakeResponse(
             status_code=400, json_={"error": "something bad maybe a conflict"}
         )
 
-    get_patch = mocker.patch("requests.get", autospec=True)
-    get_patch.side_effect = _request_mock
+    mocker.patch("requests.get", autospec=True).side_effect = _request_mock
+    mocker.patch("requests.Session.get", autospec=True).side_effect = _post
 
     mocker.patch("requests.post", autospec=True).side_effect = _post
     mocker.patch("requests.Session.post", autospec=True).side_effect = _post
 
     yield
+
+    logger.info(f"Ending state ->\n{pf(fake_db, depth=1)}")
 
 
 @pytest.fixture
@@ -223,6 +232,7 @@ def empty_cloud_context_fluent(cloud_api_fake) -> CloudDataContext:
     context = gx.get_context(
         cloud_access_token=DUMMY_JWT_TOKEN,
         cloud_organization_id=DUMMY_ORG_ID,
+        cloud_base_url=GX_CLOUD_MOCK_BASE_URL,
         cloud_mode=True,
     )
     return context
