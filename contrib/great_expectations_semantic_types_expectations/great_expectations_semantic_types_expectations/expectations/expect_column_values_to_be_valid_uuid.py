@@ -49,7 +49,9 @@ class ColumnValuesToBeValidUUID(ColumnMapMetricProvider):
         For future purposes, the stricter pattern can be found here as well, commented out.
         """
         # regex_pattern = '^(urn:uuid:)?\{?[A-Fa-f0-9]{8}-?[A-Fa-f0-9]{4}-?[1-5][A-Fa-f0-9]{3}-?[89ABab][A-Fa-f0-9]{3}-?[A-Fa-f0-9]{12}\}?$'
-        regex_pattern = '^(urn:uuid:)?\\{?[0-9a-fA-F]{8}(-?[0-9a-fA-F]{4}){3}-?[0-9a-fA-F]{12}\\}?$'
+        regex_pattern = (
+            "^(urn:uuid:)?\\{?[0-9a-fA-F]{8}(-?[0-9a-fA-F]{4}){3}-?[0-9a-fA-F]{12}\\}?$"
+        )
         return column.regexp_match(regex_pattern)
 
 
@@ -161,7 +163,7 @@ class ExpectColumnValuesToBeValidUUID(ColumnMapExpectation):
         "tags": ["typed-entities"],  # Tags for this Expectation in the Gallery
         "contributors": [  # Github handles for all contributors to this Expectation.
             "@joshua-stauffer",  # Don't forget to add your github handle here!
-            "@asafla"
+            "@asafla",
         ],
     }
 
