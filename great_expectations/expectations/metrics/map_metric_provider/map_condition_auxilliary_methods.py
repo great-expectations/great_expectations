@@ -363,24 +363,17 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .alias("UnexpectedCountSubquery")
         )
         if sqlalchemy_Engine and isinstance(execution_engine.engine, sqlalchemy_Engine):
-            with execution_engine.engine.begin() as connection:
-                unexpected_count: Union[float, int] = connection.execute(
-                    sa.select(
-                        unexpected_count_query.c[
-                            f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-                        ],
-                    )
-                ).scalar()
+            connection = execution_engine.engine.connect()
         else:
             # execution_engine.engine is already a Connection. Use it directly
             connection = execution_engine.engine
-            unexpected_count: Union[float, int] = connection.execute(
-                sa.select(
-                    unexpected_count_query.c[
-                        f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-                    ],
-                )
-            ).scalar()
+        unexpected_count: Union[float, int] = connection.execute(
+            sa.select(
+                unexpected_count_query.c[
+                    f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                ],
+            )
+        ).scalar()
         # Unexpected count can be None if the table is empty, in which case the count
         # should default to zero.
         try:
