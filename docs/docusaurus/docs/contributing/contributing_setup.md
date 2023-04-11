@@ -49,7 +49,7 @@ In order to contribute to Great Expectations, you will need the following:
 ### Install Python dependencies
 ### (Easy version of steps 5-7 below for Mac/Linux users)
 
-Create a virtual environment in your local repo using Python 3.7 - 3.10, activate the environment, and install the necessary dependencies.
+Create a virtual environment in your local repository using Python versions 3.7 to 3.10, activate the environment, and then install the necessary dependencies.
 
 ```
 python3 -m venv gx_dev
