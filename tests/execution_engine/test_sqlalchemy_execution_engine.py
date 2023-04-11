@@ -1020,9 +1020,8 @@ class TestExecuteQuery:
         result = execution_engine.execute_query(
             sa.select(sa.text("*")).select_from(data)
         )
-        print(result)
-
-        pass
+        expected = [(1, 4), (2, 4), (1, 4), (2, 4), (3, 4), (3, 4)]
+        assert [r for r in result] == expected
 
 
 class TestConnectionPersistence:
@@ -1032,4 +1031,42 @@ class TestConnectionPersistence:
     These tests ensure that we use the existing connection if one is available.
     """
 
-    pass
+    def test_same_connection_used_sqlite(self, sa):
+        """What does this test and why?
+
+        We want to make sure that the connection is not set, then the same
+        connection is used for subsequent queries.
+        """
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
+            pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
+        )
+
+        assert execution_engine.dialect_name == GXSqlDialect.SQLITE
+        assert execution_engine._connection is None
+
+        data = execution_engine.get_domain_records(
+            domain_kwargs={
+                "column": "a",
+            }
+        )
+        query = sa.select(sa.text("*")).select_from(data)
+        execution_engine.execute_query(query)
+
+        assert execution_engine._connection is not None
+        connection_id = id(execution_engine._connection)
+
+        execution_engine.execute_query(query)
+
+        assert execution_engine._connection is not None
+        assert connection_id == id(execution_engine._connection)
+
+    def test_same_connection_not_used_postgresql(self, sa):
+        """What does this test and why?
+
+        We want to make sure that different connections are used and no connection
+        is stored on the SQLAlchemyExecutionEngine when using a dialect that is
+        not one of the dialects that requires a persistent connection.
+        Here we use the postgresql dialect to test.
+        """
+        # TODO: Add this test
+        pass
