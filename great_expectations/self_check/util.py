@@ -94,7 +94,8 @@ expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
 
 # mysql and mssql allow table names to be a maximum of 128 characters
-MAX_TABLE_NAME_LENGTH: int = 128
+# for postgres it is 63.
+MAX_TABLE_NAME_LENGTH: int = 63
 
 logger = logging.getLogger(__name__)
 
@@ -2782,7 +2783,8 @@ def generate_dataset_name_from_expectation_name(
             "dataset_name", f"{expectation_type}_dataset_{index}_{sub_index}"
         )
     if len(dataset_name) > MAX_TABLE_NAME_LENGTH:
-        new_dataset_name = dataset_name[:MAX_TABLE_NAME_LENGTH]
+        # starting from the end, so that we always get the index and sub_index
+        new_dataset_name = dataset_name[-MAX_TABLE_NAME_LENGTH:]
         logger.info(
             f"dataset_name: '{dataset_name}' was truncated to '{new_dataset_name}' to keep within length limits."
         )
