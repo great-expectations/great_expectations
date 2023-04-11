@@ -18,9 +18,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
 from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
 from great_expectations.optional_imports import (
-    AZURE_BLOB_STORAGE_NOT_IMPORTED,
-    GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
-    SPARK_NOT_IMPORTED,
+    BlobPrefix,
+    BlobServiceClient,
+    ContainerClient,
+    google_cloud_storage,  # noqa: F401
 )
 
 if TYPE_CHECKING:
@@ -28,35 +29,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource import DataConnector
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    import gcs.client as GCSClient  # noqa N801
-
-    from great_expectations.optional_imports import gcs
-except ImportError:
-    gcs = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    GCSClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-
-try:
-    from azure_blob_storage import (
-        BlobPrefix,
-        BlobServiceClient,
-        ContainerClient,
-    )
-
-    from great_expectations.optional_imports import azure_blob_storage
-except ImportError:
-    azure_blob_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
-
-
-try:
-    import pyspark.sql as pyspark_sql
-except ImportError:
-    pyspark_sql = SPARK_NOT_IMPORTED
 
 
 DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"

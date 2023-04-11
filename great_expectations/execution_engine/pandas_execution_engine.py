@@ -42,20 +42,14 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_splitter i
     PandasDataSplitter,
 )
 from great_expectations.optional_imports import (
-    AZURE_BLOB_STORAGE_NOT_IMPORTED,
-    GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    BlobServiceClient,
+    DefaultCredentialsError,
+    GoogleAPIError,
+    google_cloud_storage,
+    google_service_account,
 )
 
 logger = logging.getLogger(__name__)
-
-try:
-    from great_expectations.optional_imports import (
-        gcs,
-        google_service_account,
-    )
-except ImportError:
-    gcs = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    google_service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 
 try:
@@ -68,21 +62,6 @@ except ImportError:
     logger.debug(
         "Unable to load AWS connection object; install optional boto3 dependency for support"
     )
-
-try:
-    from azure_blob_storage import BlobServiceClient as BlobServiceClient
-
-    from great_expectations.optional_imports import azure_blob_storage
-except ImportError:
-    azure_blob_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
-
-try:
-    import google_api_core.exceptions as GoogleAPIError  # noqa N801
-    import google_auth.exceptions as DefaultCredentialsError  # noqa N801
-except ImportError:
-    GoogleAPIError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    DefaultCredentialsError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 
 HASH_THRESHOLD = 1e9
@@ -204,7 +183,9 @@ class PandasExecutionEngine(ExecutionEngine):
                         info=info
                     )
                 )
-            self._gcs = gcs.Client(credentials=credentials, **gcs_options)
+            self._gcs = google_cloud_storage.Client(
+                credentials=credentials, **gcs_options
+            )
         except (TypeError, AttributeError, DefaultCredentialsError):
             self._gcs = None
 

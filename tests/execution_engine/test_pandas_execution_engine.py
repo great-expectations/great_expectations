@@ -8,28 +8,10 @@ import pytest
 # noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.optional_imports import AZURE_BLOB_STORAGE_NOT_IMPORTED
 from great_expectations.optional_imports import (
-    GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
-    gcs,
+    azure_storage,
     AZURE_BLOB_STORAGE_NOT_IMPORTED,
-    azure_blob_storage,
 )
-
-
-try:
-    import gcs.client as GCSClient  # noqa N801
-except ImportError:
-    GCSClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-
-
-try:
-    from azure_blob_storage import BlobServiceClient, ContainerClient
-except ImportError:
-    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
-
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import (
@@ -585,14 +567,14 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
 
 
 @pytest.mark.skipif(
-    gcs == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    azure_storage == AZURE_BLOB_STORAGE_NOT_IMPORTED,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.service_account",
+    "great_expectations.execution_engine.pandas_execution_engine.google_service_account",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google_cloud_storage.Client",
 )
 def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     # default instantiation
@@ -609,11 +591,11 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
 
 
 @pytest.mark.skipif(
-    gcs == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    azure_storage == AZURE_BLOB_STORAGE_NOT_IMPORTED,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google_cloud_storage.Client",
 )
 def test_get_batch_data_with_gcs_batch_spec(
     mock_gcs_conn,
@@ -647,7 +629,7 @@ def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monke
 
 
 @pytest.mark.skipif(
-    gcs == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    azure_storage == AZURE_BLOB_STORAGE_NOT_IMPORTED,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):

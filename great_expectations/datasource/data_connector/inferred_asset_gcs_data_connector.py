@@ -9,8 +9,10 @@ from great_expectations.datasource.data_connector.inferred_asset_file_path_data_
 )
 from great_expectations.datasource.data_connector.util import list_gcs_keys
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
-from great_expectations.optional_imports import gcs as storage
-from great_expectations.optional_imports import google_service_account
+from great_expectations.optional_imports import (
+    google_cloud_storage,
+    google_service_account,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +102,9 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
                         info=info
                     )
                 )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
+            self._gcs = google_cloud_storage.Client(
+                credentials=credentials, **gcs_options
+            )
         except (TypeError, AttributeError):
             raise ImportError(
                 "Unable to load GCS Client (it is required for InferredAssetGCSDataConnector)."

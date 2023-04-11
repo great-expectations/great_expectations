@@ -25,7 +25,7 @@ from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource i
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
-from great_expectations.optional_imports import AZURE_BLOB_STORAGE_NOT_IMPORTED
+from great_expectations.optional_imports import BlobServiceClient, ContainerClient
 
 logger = logging.getLogger(__file__)
 
@@ -36,16 +36,6 @@ pytestmark = [
         PANDAS_VERSION < 1.2, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
     )
 ]
-
-
-try:
-    from great_expectations.optional_imports import (
-        azure_blob_storage as azure_blob_storage,
-    )
-    from azure_blob_storage import BlobServiceClient, ContainerClient
-except ImportError:
-    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 
 class MockContainerClient:

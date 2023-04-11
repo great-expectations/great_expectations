@@ -116,25 +116,35 @@ GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
     "google cloud storage components are not installed, please 'pip install google-cloud-storage google-cloud-secret-manager'"
 )
 try:
-    import google.api_core as google_api_core
-    import google.cloud.storage as gcs
-    import google.oauth2 as google_oauth2
-    import google.oauth2.service_account as google_service_account
+    from google.api_core.exceptions import GoogleAPIError  # noqa N801
+    from google.auth.exceptions import DefaultCredentialsError  # noqa N801
+    from google.cloud import storage as google_cloud_storage
+    from google.cloud.storage import Client as GoogleCloudStorageClient
+    from google.oauth2 import service_account as google_service_account
+    from google.oauth2.service_account import (
+        Credentials as GoogleServiceAccountCredentials,
+    )
 except ImportError:
-    google_api_core = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    gcs = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    google_oauth2 = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    google_service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    google_cloud_storage = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    google_service_account = GoogleServiceAccountCredentials
+    GoogleServiceAccountCredentials = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    GoogleCloudStorageClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    GoogleAPIError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    DefaultCredentialsError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 
 AZURE_BLOB_STORAGE_NOT_IMPORTED = NotImported(
     "azure blob storage components are not installed, please 'pip install azure-storage-blob azure-identity azure-keyvault-secrets'"
 )
 try:
-    import azure as azure
-    import azure.storage as azure_storage
-    import azure.storage.blob as azure_blob_storage
+    from azure import storage as azure_storage
+    from azure.storage.blob import (
+        BlobPrefix,
+        BlobServiceClient,
+        ContainerClient,
+    )
 except ImportError:
-    azure = AZURE_BLOB_STORAGE_NOT_IMPORTED
     azure_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    azure_blob_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED

@@ -16,7 +16,10 @@ from great_expectations.datasource.data_connector.util import (
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
-from great_expectations.optional_imports import gcs, GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+from great_expectations.optional_imports import (
+    GoogleCloudStorageClient,
+    GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+)
 
 
 def test_batch_definition_matches_batch_request():
@@ -513,10 +516,12 @@ def test_build_sorters_from_config_bad_config():
 
 
 @pytest.mark.skipif(
-    gcs == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
     reason="Could not import 'storage' from google.cloud in datasource.data_connector.util",
 )
-@mock.patch("great_expectations.datasource.data_connector.util.storage.Client")
+@mock.patch(
+    "great_expectations.datasource.data_connector.util.google_cloud_storage.Client"
+)
 def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
     # Set defaults for ConfiguredAssetGCSDataConnector
     query_options = {"delimiter": None}
