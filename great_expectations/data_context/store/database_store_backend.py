@@ -175,7 +175,7 @@ class DatabaseStoreBackend(StoreBackend):
             self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIX}{store_id}"
         return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
-    def _build_engine(self, credentials, **kwargs) -> sa.engine.Engine:  # type: ignore
+    def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":  # noqa: UP037
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -203,7 +203,7 @@ class DatabaseStoreBackend(StoreBackend):
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str, credentials: dict
-    ) -> Tuple[URL, Dict]:  # type: ignore
+    ) -> Tuple["URL", Dict]:  # noqa: UP037
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
