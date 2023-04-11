@@ -60,9 +60,11 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
             Optional custom list of "Rule" objects implementing particular "DataAssistant" functionality.
         """
         numeric_rule: Rule = self._build_numeric_rule()
+        float_rule: Rule = self._build_float_rule()
 
         return [
             numeric_rule,
+            float_rule,
         ]
 
     def _build_data_assistant_result(
