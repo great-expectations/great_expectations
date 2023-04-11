@@ -1007,6 +1007,7 @@ class TestExecuteQuery:
     the creation and management of connections. Here we check that it works
     as intended.
     """
+
     pass
 
 
