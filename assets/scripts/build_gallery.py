@@ -17,6 +17,10 @@ import click
 import pkg_resources
 
 from great_expectations.data_context.data_context import DataContext
+from great_expectations.expectations.expectation import Expectation
+from great_expectations.core.expectation_diagnostics.supporting_types import (
+    ExpectationBackendTestResultCounts,
+)
 
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
@@ -32,16 +36,23 @@ expectation_tracebacks = StringIO()
 expectation_checklists = StringIO()
 expectation_docstrings = StringIO()
 ALL_GALLERY_BACKENDS = (
-    "bigquery",
-    "mssql",
-    "mysql",
+    #   "bigquery",
+    #   "mssql",
+    #   "mysql",
     "pandas",
     "postgresql",
-    "redshift",
-    "snowflake",
+    #   "redshift",
+    #   "snowflake",
     "spark",
     "sqlite",
     "trino",
+)
+IGNORE_NON_V3_EXPECTATIONS = (
+    "expect_column_bootstrapped_ks_test_p_value_to_be_greater_than",
+    "expect_column_chisquare_test_p_value_to_be_greater_than",
+    "expect_column_pair_cramers_phi_value_to_be_less_than",
+    "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
+    "expect_multicolumn_values_to_be_unique",
 )
 
 
@@ -135,6 +146,8 @@ def get_expectation_file_info_dict(
             package_name = "core"
         name = os.path.basename(file_path).replace(".py", "")
         if only_these_expectations and name not in only_these_expectations:
+            continue
+        if name in IGNORE_NON_V3_EXPECTATIONS:
             continue
 
         updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
@@ -257,10 +270,9 @@ def build_gallery(
     else:
         only_consider_these_backends = list(ALL_GALLERY_BACKENDS)
 
-    gallery_info_by_backend = {
-        backend: {}
-        for backend in only_consider_these_backends
-    }
+    gallery_info_by_backend = {backend: {} for backend in only_consider_these_backends}
+    diagnostic_objects = {}
+    expectation_instances = {}
 
     logger.info("Loading great_expectations library.")
     installed_packages = pkg_resources.working_set
@@ -327,8 +339,7 @@ def build_gallery(
                     requirements_dict[filename[:-3]]["group"] = contrib_subdir_name
         logger.info("Done finding contrib modules")
 
-    # for expectation in sorted(requirements_dict):
-    for expectation in sorted(requirements_dict)[:5]:
+    for expectation in sorted(requirements_dict):
         group = requirements_dict[expectation]["group"]
         print(f"\n\n\n=== {expectation} ({group}) ===")
         requirements = requirements_dict[expectation].get("requirements", [])
@@ -379,6 +390,8 @@ def build_gallery(
                 only_consider_these_backends=only_consider_these_backends,
                 context=context,
             )
+            expectation_instances[expectation] = impl()
+            diagnostic_objects[expectation] = diagnostics
             checklist_string = diagnostics.generate_checklist()
             expectation_checklists.write(
                 f"\n\n----------------\n{expectation} ({group})\n"
@@ -410,10 +423,17 @@ def build_gallery(
                 diagnostics_json_dict = diagnostics.to_json_dict()
 
                 # Some items need to be recalculated when {backend}_full.json files get combined
-                backend_test_result_counts = diagnostics_json_dict.pop("backend_test_result_counts")
-                maturity_checklist = diagnostics_json_dict.pop("maturity_checklist")
-                library_metadata = diagnostics_json_dict.pop("library_metadata")
-                coverage_score = diagnostics_json_dict.pop("coverage_score")
+                backend_test_result_counts = diagnostics_json_dict.pop(
+                    "backend_test_result_counts"
+                )
+                diagnostics_json_dict.pop("maturity_checklist")
+                diagnostics_json_dict.pop("coverage_score")
+
+                # Some items just need to be popped off
+                #   - the attributes from the actual diagnostics object will be used for
+                #     regenerating the checklist
+                diagnostics_json_dict.pop("tests")
+                diagnostics_json_dict.pop("examples")
 
                 # Add non-backend/test specific info from diagnostics to the in-memory dict
                 expectation_file_info[expectation].update(diagnostics_json_dict)
@@ -435,25 +455,21 @@ def build_gallery(
 
     # Iterate the gallery_info_by_backend dict and write the backend-specific files
     for _backend in gallery_info_by_backend:
-        with open(f"{_backend}_{backend_outfile_suffix}.json", "w") as outfile:
-            json.dump(gallery_info_by_backend[_backend], outfile, indent=4)
+        if gallery_info_by_backend[_backend]:
+            with open(f"{_backend}_{backend_outfile_suffix}.json", "w") as outfile:
+                json.dump(gallery_info_by_backend[_backend], outfile, indent=4)
 
     # Only attempt to combine and write to file when no Expectations are skipped
-    if True:                                                                                #   D E L E T E   if True
-    # if backend_outfile_suffix == "full":
-        expected_full_backend_files = [f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS]
+    if backend_outfile_suffix == "full":
+        expected_full_backend_files = [
+            f"{backend}_full.json" for backend in ALL_GALLERY_BACKENDS
+        ]
         found_full_backend_files = glob("*_full.json")
 
-        if True:                                                                            #   D E L E T E   if True
-        # if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
-            logger.info(f"All expected *_full.json files were found. Going to combine and write to {outfile_name}")
-
-            #
-            #
-            # Local testing via: build-gallery --backends "sqlite, pandas" --no-contrib
-            found_full_backend_files = ["pandas_partial.json", "sqlite_partial.json"]       #   D E L E T E
-            #
-            #
+        if sorted(found_full_backend_files) == sorted(expected_full_backend_files):
+            logger.info(
+                f"All expected *_full.json files were found. Going to combine and write to {outfile_name}"
+            )
 
             for fname in found_full_backend_files:
                 with open(fname, "r") as fp:
@@ -462,26 +478,60 @@ def build_gallery(
 
                 for expectation_name in data:
                     try:
-                        expectation_file_info[expectation_name]["backend_test_result_counts"].extend(data[expectation_name]["backend_test_result_counts"])
+                        expectation_file_info[expectation_name][
+                            "backend_test_result_counts"
+                        ].extend(data[expectation_name]["backend_test_result_counts"])
                     except KeyError:
-                        expectation_file_info[expectation_name]["backend_test_result_counts"] = data[expectation_name]["backend_test_result_counts"]
+                        expectation_file_info[expectation_name][
+                            "backend_test_result_counts"
+                        ] = data[expectation_name]["backend_test_result_counts"]
 
-            breakpoint()
-            print("see expectation_file_info")
+            # Re-calculate maturity_checklist, library_metadata, and coverage_score
+            for expectation_name in expectation_file_info:
+                try:
+                    diagnostic_object = diagnostic_objects[expectation_name]
+                except KeyError:
+                    logger.error(f"No diagnostic obj for {expectation_name}")
+                    continue
+                expectation_instance = expectation_instances[expectation_name]
+                try:
+                    backend_test_result_counts_object = [
+                        ExpectationBackendTestResultCounts(**backend_results)
+                        for backend_results in expectation_file_info[expectation_name][
+                            "backend_test_result_counts"
+                        ]
+                    ]
+                except KeyError:
+                    logger.error(
+                        f"No backend_test_result_counts for {expectation_name}"
+                    )
+                    continue
+                maturity_checklist_object = Expectation._get_maturity_checklist(
+                    expectation_instance=expectation_instance,
+                    library_metadata=diagnostic_object.library_metadata,
+                    description=diagnostic_object.description,
+                    examples=diagnostic_object.examples,
+                    tests=diagnostic_object.tests,
+                    backend_test_result_counts=backend_test_result_counts_object,
+                    execution_engines=diagnostic_object.execution_engines,
+                )
+                expectation_file_info[expectation_name][
+                    "maturity_checklist"
+                ] = maturity_checklist_object.to_dict()
+                expectation_file_info[expectation_name][
+                    "coverage_score"
+                ] = Expectation._get_coverage_score(
+                    backend_test_result_counts=backend_test_result_counts_object,
+                    execution_engines=diagnostic_object.execution_engines,
+                )
+                expectation_file_info[expectation_name]["library_metadata"][
+                    "maturity"
+                ] = Expectation._get_final_maturity_level(
+                    maturity_checklist=maturity_checklist_object
+                )
 
-            #
-            #   T O D O :   Add missing fields to expectation_file_info dict
-            #       - maturity_checklist
-            #       - library_metadata
-            #       - coverage_score
-            #
-            #       * Likely will need to update expectation.py helper methods like
-            #         _get_maturity_checklist or make it a static method that can be
-            #         called with a bunch of pre calculated stuff passed to it
-            #
-
-            # with open(f"./{outfile_name}", "w") as outfile:
-            #     json.dump(expectation_file_info, outfile, indent=4)
+            with open(f"./{outfile_name}", "w") as outfile:
+                json.dump(expectation_file_info, outfile, indent=4)
 
     if just_installed:
         print("\n\n\n=== (Uninstalling) ===")
@@ -682,7 +732,8 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     "--outfile-name",
     "-o",
     "outfile_name",
-    default="expectation_library_v2--staging.json",
+    # default="expectation_library_v2--staging.json",
+    default="expectation_library_v2--PLAY.json",
     help="Name for the generated JSON file assembled from full backend files (no partials)",
 )
 @click.option(
