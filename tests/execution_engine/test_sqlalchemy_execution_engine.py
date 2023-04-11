@@ -1008,7 +1008,21 @@ class TestExecuteQuery:
     as intended.
     """
 
-    pass
+    def test_execute_query(self, sa):
+        execution_engine: SqlAlchemyExecutionEngine = build_sa_engine(
+            pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
+        )
+        data = execution_engine.get_domain_records(
+            domain_kwargs={
+                "column": "a",
+            }
+        )
+        result = execution_engine.execute_query(
+            sa.select(sa.text("*")).select_from(data)
+        )
+        print(result)
+
+        pass
 
 
 class TestConnectionPersistence:

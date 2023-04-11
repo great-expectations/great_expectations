@@ -11,6 +11,7 @@ import re
 import string
 import traceback
 import warnings
+from contextlib import contextmanager
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -1318,16 +1319,31 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return batch_data, batch_markers
 
+    def __del__(self):
+        """Close any open connections on shutdown."""
+        if self._connection:
+            self._connection.close()
+
+    # @contextmanager
     def _get_connection(self):
         # TODO: docstring, return type
         # TODO: yield a connection here and close it down after final use
-        pass
+
+        connection = self.engine.connect()
+        return connection
+        # try:
+        #     yield connection
+        # except Exception as e:
+        #     connection.rollback()
+        #     raise e
+        # finally:
+        #     connection.close()
 
     # TODO: What is return type
     def execute_query(self, query: Selectable):
         # TODO: Add docstring
 
-        if self.dialect in [GXSqlDialect.SQLITE, GXSqlDialect.MSSQL]:
+        if self.dialect_name in [GXSqlDialect.SQLITE, GXSqlDialect.MSSQL]:
             # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive.
             if not self._connection:
                 self._connection = self._get_connection()
