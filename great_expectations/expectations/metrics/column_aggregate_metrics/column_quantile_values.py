@@ -22,6 +22,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
+from great_expectations.optional_imports import sqlalchemy as sa
 
 logger = logging.getLogger(__name__)
 
@@ -31,17 +32,18 @@ except ImportError:
     TrinoUserError = None
 
 try:
-    import great_expectations.optional_imports.sqlalchemy as sa
-    from great_expectations.optional_imports.sqlalchemy.exc import ProgrammingError
-    from great_expectations.optional_imports.sqlalchemy.sql import Select
-    from great_expectations.optional_imports.sqlalchemy.sql.elements import (
+    from sqlalchemy.exc import ProgrammingError  # noqa: TID251
+    from sqlalchemy.sql import Select  # noqa: TID251
+    from sqlalchemy.sql.elements import (  # noqa: TID251
         Label,
         TextClause,
         WithinGroup,
     )
-    from great_expectations.optional_imports.sqlalchemy.sql.selectable import CTE
+    from sqlalchemy.sql.selectable import CTE  # noqa: TID251
+
+    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
-    sa = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     ProgrammingError = SQLALCHEMY_NOT_IMPORTED
     Select = SQLALCHEMY_NOT_IMPORTED
     Label = SQLALCHEMY_NOT_IMPORTED
@@ -52,12 +54,12 @@ except ImportError:
 try:
     from sqlalchemy.engine.row import Row  # noqa: TID251
 
-    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
+    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
     try:
         from sqlalchemy.engine.row import RowProxy  # noqa: TID251
 
-        from great_expectations.optional_imports import sqlalchemy as sqlalchemy
+        from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 
         Row = RowProxy
     except ImportError:

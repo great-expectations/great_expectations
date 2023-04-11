@@ -28,6 +28,7 @@ from great_expectations.optional_imports import (
     SPARK_NOT_IMPORTED,
     SQLALCHEMY_NOT_IMPORTED,
 )
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -51,7 +52,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    import pyspark.sql.types as sparktypes
+    from pyspark.sql.types import sparktypes
 
     from great_expectations.optional_imports import pyspark
 except ImportError:
@@ -59,10 +60,11 @@ except ImportError:
     sparktypes = SPARK_NOT_IMPORTED
 
 try:
-    import great_expectations.optional_imports.sqlalchemy as sa
-    from great_expectations.optional_imports.sqlalchemy.dialects import registry
+    from sqlalchemy.dialects import registry  # noqa: TID251
+
+    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
-    sa = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     registry = SQLALCHEMY_NOT_IMPORTED
 
 try:

@@ -101,21 +101,22 @@ expectationSuiteSchema = ExpectationSuiteSchema()
 logger = logging.getLogger(__name__)
 
 try:
-    from great_expectations.optional_imports.sqlalchemy import create_engine
-    from great_expectations.optional_imports.sqlalchemy.engine import Engine
-    from great_expectations.optional_imports.sqlalchemy.exc import SQLAlchemyError
+    from sqlalchemy import create_engine  # noqa: TID251
+    from sqlalchemy.engine import Engine  # noqa: TID251
+    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
+
+    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     create_engine = SQLALCHEMY_NOT_IMPORTED
     Engine = SQLALCHEMY_NOT_IMPORTED
     SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
 
 
 try:
-    from great_expectations.optional_imports.pyspark.sql import (
-        DataFrame as SparkDataFrame,
-    )
-    from great_expectations.optional_imports.pyspark.sql import SparkSession
-    from great_expectations.optional_imports.pyspark.sql.types import StructType
+    from pyspark.sql import DataFrame as SparkDataFrame
+    from pyspark.sql import SparkSession
+    from pyspark.sql.types import StructType
 except ImportError:
     SparkDataFrame = SPARK_NOT_IMPORTED
     SparkSession = SPARK_NOT_IMPORTED

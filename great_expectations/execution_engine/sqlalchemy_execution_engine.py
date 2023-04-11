@@ -96,7 +96,7 @@ try:
     sqlalchemy_version_check(sa.__version__)
     make_url = import_make_url()
 except ImportError:
-    pass
+    sa = SQLALCHEMY_NOT_IMPORTED
 
 
 try:
@@ -117,6 +117,8 @@ try:
         Select,
         TextualSelect,
     )
+
+    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     Engine = SQLALCHEMY_NOT_IMPORTED
