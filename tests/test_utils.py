@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 try:
-    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
     from sqlalchemy.exc import SQLAlchemyError
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED

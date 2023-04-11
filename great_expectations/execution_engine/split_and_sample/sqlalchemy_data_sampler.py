@@ -8,17 +8,27 @@ from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.optional_imports import sqlalchemy as sa
+from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 try:
-    from sa.engine import Dialect
-    from sa.sql import Selectable
-    from sa.sql.elements import BinaryExpression, BooleanClauseList
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
+    from sqlalchemy.engine import Dialect  # noqa: TID251
+    from sqlalchemy.sql import Selectable  # noqa: TID251
+    from sqlalchemy.sql.elements import (  # noqa: TID251
+        BinaryExpression,
+        BooleanClauseList,
+    )
 except ImportError:
-    Selectable = None
-    BinaryExpression = None
-    BooleanClauseList = None
-    Dialect = None
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    Selectable = SQLALCHEMY_NOT_IMPORTED
+    BinaryExpression = SQLALCHEMY_NOT_IMPORTED
+    BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
+    Dialect = SQLALCHEMY_NOT_IMPORTED
 
 
 if TYPE_CHECKING:

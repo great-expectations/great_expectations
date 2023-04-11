@@ -29,25 +29,25 @@ logger = logging.getLogger(__name__)
 
 
 try:
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
     from sqlalchemy.engine.row import Row
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql import Select
-
-    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
 except ImportError:
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     ProgrammingError = SQLALCHEMY_NOT_IMPORTED
     Select = SQLALCHEMY_NOT_IMPORTED
     Row = SQLALCHEMY_NOT_IMPORTED
 
 try:
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
     from sqlalchemy.engine.row import RowProxy
     from sqlalchemy.exc import ProgrammingError
     from sqlalchemy.sql import Select
 
-    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
-
     Row = RowProxy
 except ImportError:
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     ProgrammingError = SQLALCHEMY_NOT_IMPORTED
     Select = SQLALCHEMY_NOT_IMPORTED
     RowProxy = SQLALCHEMY_NOT_IMPORTED

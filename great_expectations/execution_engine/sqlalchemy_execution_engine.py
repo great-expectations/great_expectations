@@ -100,6 +100,7 @@ except ImportError:
 
 
 try:
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
     from sqlalchemy.engine import (  # noqa: TID251
         Dialect,
         Engine,
@@ -117,8 +118,6 @@ try:
         Select,
         TextualSelect,
     )
-
-    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     Engine = SQLALCHEMY_NOT_IMPORTED

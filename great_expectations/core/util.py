@@ -74,7 +74,7 @@ except ImportError:
     LineString = None
 
 try:
-    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
 
     LegacyRow = sqlalchemy.engine.row.LegacyRow
 except (
@@ -87,7 +87,7 @@ except (
 # This is a separate try/except than the LegacyRow one since TextClause exists in sqlalchemy 2. This means LegacyRow
 # may be not importable while TextClause is.
 try:
-    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
 
     TextClause = sqlalchemy.sql.elements.TextClause
 except ImportError:

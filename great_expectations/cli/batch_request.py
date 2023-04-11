@@ -35,9 +35,8 @@ from great_expectations.util import filter_properties_dict
 logger = logging.getLogger(__name__)
 
 try:
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
     from sqlalchemy.engine import Inspector as Inspector  # noqa: TID251
-
-    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     Inspector = SQLALCHEMY_NOT_IMPORTED

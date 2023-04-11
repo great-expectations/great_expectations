@@ -101,11 +101,10 @@ expectationSuiteSchema = ExpectationSuiteSchema()
 logger = logging.getLogger(__name__)
 
 try:
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
     from sqlalchemy import create_engine  # noqa: TID251
     from sqlalchemy.engine import Engine  # noqa: TID251
     from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-
-    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     create_engine = SQLALCHEMY_NOT_IMPORTED
@@ -124,12 +123,11 @@ except ImportError:
 
 
 try:
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
     import sqlalchemy.dialects.sqlite as sqlitetypes  # noqa: TID251
 
     # noinspection PyPep8Naming
     from sqlalchemy.dialects.sqlite import dialect as sqliteDialect  # noqa: TID251
-
-    from great_expectations.optional_imports import sqlalchemy as sqlalchemy
 
     SQLITE_TYPES = {
         "VARCHAR": sqlitetypes.VARCHAR,

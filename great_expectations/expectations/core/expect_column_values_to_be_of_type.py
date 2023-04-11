@@ -60,9 +60,8 @@ except ImportError:
     sparktypes = SPARK_NOT_IMPORTED
 
 try:
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
     from sqlalchemy.dialects import registry  # noqa: TID251
-
-    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     registry = SQLALCHEMY_NOT_IMPORTED

@@ -6,13 +6,7 @@ from typing import Callable, Iterator, Sequence
 
 import pandas as pd
 
-from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
-
-try:
-    from great_expectations.optional_imports import sqlalchemy as sa
-except ImportError:
-    sa = SQLALCHEMY_NOT_IMPORTED
-
+from great_expectations.optional_imports import sqlalchemy as sa
 
 logger = logging.getLogger(__name__)
 
