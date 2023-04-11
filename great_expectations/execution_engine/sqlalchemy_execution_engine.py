@@ -448,8 +448,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 # sqlite3.Connection (distinct from a sqlalchemy Connection).
                 _add_sqlite_functions(self.engine.raw_connection())
             self._engine_backup = self.engine
-            # # sqlite/mssql temp tables only persist within a connection so override the engine
-            # # but only do this if self.engine is an Engine and isn't a Connection
+            # sqlite/mssql temp tables only persist within a connection so override the engine
+            # but only do this if self.engine is an Engine and isn't a Connection
             if sqlalchemy_Engine and isinstance(self.engine, sqlalchemy_Engine):
                 self.engine = self.engine.connect()
 
