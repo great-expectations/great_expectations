@@ -168,3 +168,4 @@ class ExpectColumnValuesToBeValidUUID(ColumnMapExpectation):
 
 if __name__ == "__main__":
     ExpectColumnValuesToBeValidUUID().print_diagnostic_checklist()
+
