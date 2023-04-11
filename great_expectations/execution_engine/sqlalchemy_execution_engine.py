@@ -358,6 +358,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     "Credentials or an engine are required for a SqlAlchemyExecutionEngine."
                 )
 
+        # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive.
+        self._connection = None
+
         # these are two backends where temp_table_creation is not supported we set the default value to False.
         if self.dialect_name in [
             GXSqlDialect.TRINO,
@@ -1318,3 +1321,25 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             )
 
         return batch_data, batch_markers
+
+    def _get_connection(self):
+        # TODO: docstring, return type
+        # TODO: yield a connection here and close it down after final use
+        pass
+
+    # TODO: What is return type
+    def execute_query(self, query: Selectable):
+        # TODO: Add docstring
+
+        if self.dialect in [GXSqlDialect.SQLITE, GXSqlDialect.MSSQL]:
+            # use singleton connection
+            if not self._connection:
+                self._connection = self._get_connection()
+            result = self._connection.execute(query)
+
+        else:
+            # Get a connection from the engine
+            with self.engine.connect() as connection:
+                result = connection.execute(query)
+
+        return result
