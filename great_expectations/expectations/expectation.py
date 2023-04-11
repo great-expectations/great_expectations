@@ -2242,7 +2242,7 @@ class Expectation(metaclass=MetaExpectation):
     @staticmethod
     def _get_final_maturity_level(
         maturity_checklist: ExpectationDiagnosticMaturityMessages,
-    ) -> str:
+    ) -> Maturity:
         """Get final maturity level based on status of all checks"""
         maturity = ""
         all_experimental = all(

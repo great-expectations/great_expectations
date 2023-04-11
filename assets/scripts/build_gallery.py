@@ -778,8 +778,8 @@ def main(**kwargs):
         with open("./docstrings.txt", "w") as outfile:
             outfile.write(docstrings)
 
-    # # print(f"Deleting {context_dir}")
-    # # shutil.rmtree(context_dir)
+    # print(f"Deleting {context_dir}")
+    # shutil.rmtree(context_dir)
 
 
 if __name__ == "__main__":
