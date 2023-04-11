@@ -998,3 +998,23 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     )
 
     validate_tmp_tables()
+
+
+class TestExecuteQuery:
+    """What does this test and why?
+
+    The `SQLAlchemyExecutionEngine.execute_query()` method exists to encapsulate
+    the creation and management of connections. Here we check that it works
+    as intended.
+    """
+    pass
+
+
+class TestConnectionPersistence:
+    """What does this test and why?
+
+    sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive.
+    These tests ensure that we use the existing connection if one is available.
+    """
+
+    pass

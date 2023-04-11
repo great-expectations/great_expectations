@@ -1328,7 +1328,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         # TODO: Add docstring
 
         if self.dialect in [GXSqlDialect.SQLITE, GXSqlDialect.MSSQL]:
-            # use singleton connection
+            # sqlite/mssql temp tables only persist within a connection, so we need to keep the connection alive.
             if not self._connection:
                 self._connection = self._get_connection()
             result = self._connection.execute(query)
