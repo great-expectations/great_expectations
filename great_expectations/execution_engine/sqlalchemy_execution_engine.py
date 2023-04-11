@@ -449,10 +449,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 # sqlite3.Connection (distinct from a sqlalchemy Connection).
                 _add_sqlite_functions(self.engine.raw_connection())
             self._engine_backup = self.engine
-            # sqlite/mssql temp tables only persist within a connection so override the engine
-            # but only do this if self.engine is an Engine and isn't a Connection
-            if isinstance(self.engine, Engine):
-                self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
         if data_context is not None and getattr(
@@ -1061,7 +1057,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
-                res = self.engine.execute(sa_query_object).fetchall()
+                res = self.execute_query(sa_query_object).fetchall()
 
                 logger.debug(
                     f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
@@ -1147,7 +1143,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
             split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        return self.engine.execute(split_query).fetchall()
+        return self.execute_query(split_query).fetchall()
 
     def get_data_for_batch_identifiers(
         self, selectable: Selectable, splitter_method_name: str, splitter_kwargs: dict
