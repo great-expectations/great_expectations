@@ -25,7 +25,7 @@ In this guide we will demonstrate how to use Spark to connect to data stored on 
 
 <Prerequisites>
 
-- [An installation of GX set up to work with GCS](docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
+- [An installation of GX set up to work with GCS](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs)
 - Access to data on a GCS bucket
 - A passion for data quality
 
@@ -68,7 +68,7 @@ data_asset = datasource.add_csv_asset(
     batching_regex=batching_regex,
     header=True,
     infer_schema=True,
-    prefix=prefix,
+    gcs_prefix=prefix,
 )
 ```
 
@@ -109,4 +109,4 @@ For more information on Google Cloud and authentication, please visit the follow
 
 ### Related reading
 
-For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials](docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)

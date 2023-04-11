@@ -105,7 +105,6 @@ class GXDependencies:
             "pytest-random-order",
             "pytest-timeout",
             "requirements-parser",
-            "s3fs",
             "snapshottest",
             "snowflake-connector-python",
             "snowflake-sqlalchemy",
@@ -146,7 +145,6 @@ class GXDependencies:
         "pytest-icdiff",
         "pytest-timeout",
         "requirements-parser",
-        "s3fs",
         "snapshottest",
         # "sqlalchemy",  # Not excluded from tracking
         "trino",

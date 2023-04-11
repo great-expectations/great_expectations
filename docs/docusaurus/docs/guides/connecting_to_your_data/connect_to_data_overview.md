@@ -15,10 +15,10 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
 :::note Prerequisites
-- Completing [Step 2: Connect to data](../../tutorials/getting_started/tutorial_connect_to_data.md) of the Getting Started tutorial is recommended.
+- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
 :::
 	
-Connecting to your data in Great Expectations is designed to be a painless process.  Once you have performed this step, you will have a consistent API for accessing and validating data on all kinds of source data systems: SQL-type data sources, local and remote file stores, in-memory data frames, and more.
+Connecting to your data in Great Expectations is designed to be a painless process.  Once you have defined your Datasources and Data Assets, you will have a consistent API for accessing and validating data on all kinds of source data systems such as SQL-type data sources, local and remote file stores, and in-memory data frames.
 
 ## The connect to data process
 

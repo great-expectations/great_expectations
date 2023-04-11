@@ -49,7 +49,6 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 )
 
 if TYPE_CHECKING:
-
     from great_expectations.datasource.fluent.config_str import ConfigStr
     from great_expectations.datasource.fluent.dynamic_pandas import (
         CompressionOptions,

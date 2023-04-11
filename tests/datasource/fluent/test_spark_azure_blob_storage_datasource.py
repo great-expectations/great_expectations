@@ -109,7 +109,7 @@ def csv_asset(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     return asset
 
@@ -237,16 +237,19 @@ def test_add_csv_asset_to_datasource(
     spark_abs_datasource: SparkAzureBlobStorageDatasource,
 ):
     mock_list_keys.return_value = object_keys
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
+        batch_metadata=asset_specified_metadata,
     )
     assert asset.name == "csv_asset"
     assert asset.batching_regex.match("random string") is None
     assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
     m1 = asset.batching_regex.match("alex_20200819_1300.csv")
     assert m1 is not None
+    assert asset.batch_metadata == asset_specified_metadata
 
 
 @pytest.mark.integration
@@ -292,7 +295,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     options = asset.batch_request_options
     assert options == (
@@ -322,7 +325,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     options = asset.batch_request_options
     assert options == (
@@ -352,7 +355,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     options = asset.batch_request_options
     assert options == (
@@ -382,7 +385,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
     )
     with pytest.raises(ge_exceptions.InvalidBatchRequestError):
         # price is an int which will raise an error
@@ -414,10 +417,12 @@ def test_get_batch_list_from_fully_specified_batch_request(
         instantiate_azure_client_spy,
         raising=True,
     )
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_abs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
-        container="my_container",
+        abs_container="my_container",
+        batch_metadata=asset_specified_metadata,
     )
 
     request = asset.build_batch_request(
@@ -439,6 +444,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "name": "alex",
         "timestamp": "20200819",
         "price": "1300",
+        **asset_specified_metadata,
     }
     assert (
         batch.id

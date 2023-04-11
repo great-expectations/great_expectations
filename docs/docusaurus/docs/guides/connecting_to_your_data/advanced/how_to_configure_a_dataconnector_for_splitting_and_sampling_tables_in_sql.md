@@ -20,7 +20,7 @@ your data at various levels of granularity:
 
 <Prerequisites>
 
-- [Configured and loaded a Data Context](../../../tutorials/getting_started/tutorial_setup.md)
+- [Configured and loaded a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
 - [Configured a Datasource and Data Connector](../../../terms/datasource.md)
 - Reviewed [How to configure a DataConnector to introspect and partition tables in SQL](../how_to_configure_a_dataconnector_to_introspect_and_partition_tables_in_sql.md)
 
@@ -99,7 +99,7 @@ Note: Splitter methods can be specified with or without a preceding underscore.
 | `split_on_year_and_month`         | `table_name='table', column_name='col'`                                  | Rows where the year and month of a datetime column are the same                                                                                                                                            |
 | `split_on_year_and_month_and_day` | `table_name='table', column_name='col'`                                  | Rows where the year, month and day of a datetime column are the same                                                                                                                                       |
 | `split_on_date_parts`             | `table_name='table', column_name='col', date_parts='<list[DatePart]>'`   | Rows where the date parts of a datetime column are the same. Date parts can be specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second" |
-| `split_on_divided_integer`        | `table_name='table', column_name='col', divisor=<int>`                   | Rows where value of column_name divided (using integral division) by the given divisor are same                                                                                                            |
+| `split_on_divided_integer`        | `table_name='table', column_name='col', divisor=<int>`                   | Rows where value of column_name divided (using integer division) by the given divisor are same                                                                                                            |
 | `split_on_mod_integer`            | `table_name='table', column_name='col', mod=<int>`                       | Rows where value of column_name divided (using modular division) by the given mod are same                                                                                                                 |
 | `split_on_multi_column_values`    | `table_name='table', column_names='<list[col]>'`                         | Rows where values of column_names are same                                                                                                                                                                 |
 | `split_on_converted_datetime`     | `table_name='table', column_name='col', date_format_string=<'%Y-%m-%d'>` | Rows where value of column_name converted to datetime using the given date_format_string are same                                                                                                          |
