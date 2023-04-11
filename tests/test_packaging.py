@@ -179,7 +179,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 81
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 76
 
     assert sorted_packages_with_pins_or_upper_bounds == [
         ("requirements-dev-api-docs-test.txt", "docstring-parser", (("==", "0.15"),)),
@@ -189,7 +189,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-contrib.txt", "ruff", (("==", "0.0.255"),)),
         ("requirements-dev-dremio.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-dev-excel.txt", "xlrd", (("<", "2.0.0"), (">=", "1.1.0"))),
-        ("requirements-dev-lite.txt", "boto3", (("==", "1.17.106"),)),
         ("requirements-dev-lite.txt", "ipykernel", (("<=", "6.17.1"),)),
         ("requirements-dev-lite.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
         ("requirements-dev-lite.txt", "snapshottest", (("==", "0.6.0"),)),
@@ -201,7 +200,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
             "PyMySQL",
             (("<", "0.10"), (">=", "0.9.3")),
         ),
-        ("requirements-dev-sqlalchemy.txt", "boto3", (("==", "1.17.106"),)),
         ("requirements-dev-sqlalchemy.txt", "ipykernel", (("<=", "6.17.1"),)),
         ("requirements-dev-sqlalchemy.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
         ("requirements-dev-sqlalchemy.txt", "snapshottest", (("==", "0.6.0"),)),
@@ -219,7 +217,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev-teradata.txt", "teradatasqlalchemy", (("==", "17.0.0.1"),)),
         ("requirements-dev-test.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev-test.txt", "black", (("==", "22.3.0"),)),
-        ("requirements-dev-test.txt", "boto3", (("==", "1.17.106"),)),
         ("requirements-dev-test.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev-test.txt", "ipykernel", (("<=", "6.17.1"),)),
         ("requirements-dev-test.txt", "moto", (("<", "3.0.0"), (">=", "2.0.0"))),
@@ -231,7 +228,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-dev.txt", "altair", (("<", "4.2.1"), (">=", "4.0.0"))),
         ("requirements-dev.txt", "black", (("==", "22.3.0"),)),
-        ("requirements-dev.txt", "boto3", (("==", "1.17.106"),)),
         ("requirements-dev.txt", "docstring-parser", (("==", "0.15"),)),
         ("requirements-dev.txt", "ipykernel", (("<=", "6.17.1"),)),
         ("requirements-dev.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
@@ -253,7 +249,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-types.txt", "adr-tools-python", (("==", "1.0.3"),)),
         ("requirements-types.txt", "altair", (("<", "4.2.1"), (">=", "4.0.0"))),
         ("requirements-types.txt", "black", (("==", "22.3.0"),)),
-        ("requirements-types.txt", "boto3", (("==", "1.17.106"),)),
         ("requirements-types.txt", "ipykernel", (("<=", "6.17.1"),)),
         ("requirements-types.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements-types.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
