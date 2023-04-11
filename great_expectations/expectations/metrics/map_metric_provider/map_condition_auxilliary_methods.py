@@ -372,7 +372,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                     )
                 ).scalar()
         else:
-            # if connection, then use it directly
+            # execution_engine.engine is already a Connection. Use it directly
             connection = execution_engine.engine
             unexpected_count: Union[float, int] = connection.execute(
                 sa.select(
