@@ -26,11 +26,15 @@ from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
 )
 from great_expectations.expectations.metrics.util import (
-    Engine,
     get_dbms_compatible_column_names,
 )
-from great_expectations.optional_imports import quoted_name
-from great_expectations.optional_imports import sqlalchemy as sa
+from great_expectations.optional_imports import (
+    quoted_name,
+    sqlalchemy_engine_Engine,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -167,7 +171,7 @@ def column_condition_partial(  # noqa: C901 - 23
                     batch_columns_list=metrics["table.columns"],
                 )
 
-                sqlalchemy_engine: Engine = execution_engine.engine
+                sqlalchemy_engine: sqlalchemy_engine_Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
                 if dialect is None:

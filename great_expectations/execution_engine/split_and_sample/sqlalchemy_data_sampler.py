@@ -9,8 +9,8 @@ from great_expectations.execution_engine.split_and_sample.data_sampler import (
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.optional_imports import (
-    BinaryExpression,
-    BooleanClauseList,
+    sa_sql_expression_BinaryExpression,
+    sa_sql_expression_BooleanClauseList,
     sa_sql_expression_Selectable,
 )
 from great_expectations.optional_imports import (
@@ -29,7 +29,9 @@ class SqlAlchemyDataSampler(DataSampler):
         execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
         where_clause: Optional[sa_sql_expression_Selectable] = None,
-    ) -> Union[str, BinaryExpression, BooleanClauseList]:
+    ) -> Union[
+        str, sa_sql_expression_BinaryExpression, sa_sql_expression_BooleanClauseList
+    ]:
         """Sample using a limit with configuration provided via the batch_spec.
 
         Note: where_clause needs to be included at this stage since SqlAlchemy's semantics

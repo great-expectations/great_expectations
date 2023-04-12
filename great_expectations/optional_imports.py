@@ -136,7 +136,16 @@ try:
         CTE,
     )
     from sqlalchemy.sql.expression import (
+        BinaryExpression as sa_sql_expression_BinaryExpression,
+    )
+    from sqlalchemy.sql.expression import (
+        BooleanClauseList as sa_sql_expression_BooleanClauseList,
+    )
+    from sqlalchemy.sql.expression import (
         ColumnClause as sa_sql_expression_ColumnClause,
+    )
+    from sqlalchemy.sql.expression import (
+        Label as sa_sql_expression_Label,
     )
     from sqlalchemy.sql.expression import (
         Select as sa_sql_expression_Select,
@@ -161,7 +170,7 @@ except ImportError:
     sqlalchemy_dialects_registry = SQLALCHEMY_NOT_IMPORTED
     sa_sql_Insert = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_TableClause = SQLALCHEMY_NOT_IMPORTED
-    BinaryExpression = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_BinaryExpression = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_ProgrammingError = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_IntegrityError = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
@@ -170,8 +179,8 @@ except ImportError:
     sa_sql_expression_WithinGroup = SQLALCHEMY_NOT_IMPORTED
     CTE = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Dialect = SQLALCHEMY_NOT_IMPORTED
-    BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
-    Label = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_Label = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_reflection = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_ColumnClause = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_Select = SQLALCHEMY_NOT_IMPORTED

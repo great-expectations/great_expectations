@@ -21,9 +21,9 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.optional_imports import (
+    sa_sql_expression_BinaryExpression,
     sa_sql_expression_Select,
     sa_sql_expression_TableClause,
-    sqlalchemy_BinaryExpression,
     sqlalchemy_custom_op,
     sqlalchemy_dialects_registry,
     sqlalchemy_engine_Dialect,
@@ -130,11 +130,11 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
         # postgres
         if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
             if positive:
-                return sqlalchemy_BinaryExpression(
+                return sa_sql_expression_BinaryExpression(
                     column, sqlalchemy_literal(regex), sqlalchemy_custom_op("~")
                 )
             else:
-                return sqlalchemy_BinaryExpression(
+                return sa_sql_expression_BinaryExpression(
                     column, sqlalchemy_literal(regex), sqlalchemy_custom_op("!~")
                 )
     except AttributeError:
@@ -147,11 +147,11 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
             dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
         ):
             if positive:
-                return sqlalchemy_BinaryExpression(
+                return sa_sql_expression_BinaryExpression(
                     column, sqlalchemy_literal(regex), sqlalchemy_custom_op("~")
                 )
             else:
-                return sqlalchemy_BinaryExpression(
+                return sa_sql_expression_BinaryExpression(
                     column, sqlalchemy_literal(regex), sqlalchemy_custom_op("!~")
                 )
     except (
@@ -164,11 +164,11 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
         # MySQL
         if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
             if positive:
-                return sqlalchemy_BinaryExpression(
+                return sa_sql_expression_BinaryExpression(
                     column, sqlalchemy_literal(regex), sqlalchemy_custom_op("REGEXP")
                 )
             else:
-                return sqlalchemy_BinaryExpression(
+                return sa_sql_expression_BinaryExpression(
                     column,
                     sqlalchemy_literal(regex),
                     sqlalchemy_custom_op("NOT REGEXP"),
@@ -492,10 +492,10 @@ def column_reflection_fallback(
                 .select_from(types_table_clause)
                 .alias("sys_types_table_subquery")
             )
-            inner_join_conditions: sqlalchemy_BinaryExpression = sa.and_(
+            inner_join_conditions: sa_sql_expression_BinaryExpression = sa.and_(
                 *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
             )
-            outer_join_conditions: sqlalchemy_BinaryExpression = sa.and_(
+            outer_join_conditions: sa_sql_expression_BinaryExpression = sa.and_(
                 *(
                     columns_table_query.columns.user_type_id
                     == types_table_query.columns.user_type_id,

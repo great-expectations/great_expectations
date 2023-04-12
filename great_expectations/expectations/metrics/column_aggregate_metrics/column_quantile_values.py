@@ -24,7 +24,7 @@ from great_expectations.expectations.metrics.util import attempt_allowing_relati
 from great_expectations.optional_imports import (
     CTE,
     SQLALCHEMY_NOT_IMPORTED,
-    Label,
+    sa_sql_expression_Label,
     sa_sql_expression_Select,
     sa_sql_expression_WithinGroup,
     sqlalchemy_ProgrammingError,
@@ -282,14 +282,14 @@ def _get_column_quantiles_mysql(
         # pymysql cannot handle conversion of numpy float64 to float; convert just in case
         if np.issubdtype(type(quantile), np.float_):
             quantile = float(quantile)
-        quantile_column: Label = (
+        quantile_column: sa_sql_expression_Label = (
             sa.func.first_value(column)
             .over(
                 order_by=sa.case(
                     (
-                        percent_rank_query.c.p
+                        percent_rank_query.columns.p
                         <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
-                        percent_rank_query.c.p,
+                        percent_rank_query.columns.p,
                     ),
                     else_=None,
                 ).desc()
@@ -298,7 +298,7 @@ def _get_column_quantiles_mysql(
         )
         selects.append(quantile_column)
     quantiles_query: sa_sql_expression_Select = (
-        sa.select(*selects).distinct().order_by(percent_rank_query.c.p.desc())
+        sa.select(*selects).distinct().order_by(percent_rank_query.columns.p.desc())
     )
 
     try:
