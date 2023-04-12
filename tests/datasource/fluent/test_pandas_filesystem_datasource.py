@@ -704,7 +704,9 @@ def datasource_test_connection_error_messages(
         batching_regex=batching_regex,
     )
     csv_asset._datasource = pandas_filesystem_datasource
-    pandas_filesystem_datasource.assets = {"csv_asset": csv_asset}
+    pandas_filesystem_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = FilesystemDataConnector(
         datasource_name=pandas_filesystem_datasource.name,
         data_asset_name=csv_asset.name,

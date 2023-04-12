@@ -96,13 +96,20 @@ class SerializableDataContext(AbstractDataContext):
 
                 fluent_datasources = self._synchronize_fluent_datasources()
                 if fluent_datasources:
-                    self.fluent_config.datasources.update(fluent_datasources)
+                    self.fluent_config.update_datasources(
+                        datasources=fluent_datasources
+                    )
                     logger.info(
                         f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
                     )
                     fluent_json_dict: dict[
                         str, JSONValues
                     ] = self.fluent_config._json_dict()
+                    fluent_json_dict = (
+                        self.fluent_config._exclude_name_fields_from_fluent_datasources(
+                            config=fluent_json_dict
+                        )
+                    )
                     self.config._commented_map.update(fluent_json_dict)
 
                 self.config.to_yaml(outfile)

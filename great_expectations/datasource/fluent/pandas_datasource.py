@@ -10,11 +10,10 @@ from typing import (
     Any,
     Callable,
     ClassVar,
-    Dict,
     Generic,
     List,
     Mapping,
-    MutableMapping,
+    MutableSequence,
     Optional,
     Sequence,
     Set,
@@ -400,10 +399,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
 
     # instance attributes
-    assets: MutableMapping[
-        str,
-        _DataAssetT,
-    ] = {}
+    assets: MutableSequence[_DataAssetT] = []
 
     # Abstract Methods
     @property
@@ -462,7 +458,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         )
         if "assets" in self.__fields_set__:
             exclude_assets = {}
-            for asset_name, asset in self.assets.items():
+            for asset in self.assets:
                 # don't check fields that should always be set
                 check_fields: set[str] = asset.__fields_set__.copy().difference(
                     _FIELDS_ALWAYS_SET
@@ -471,7 +467,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
                     if isinstance(
                         getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
                     ):
-                        exclude_assets[asset_name] = {field: True}
+                        exclude_assets[asset.name] = {field: True}
             if exclude_assets:
                 exclude_fields["assets"] = exclude_assets
 
@@ -487,6 +483,26 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
             models_as_dict=models_as_dict,
             **dumps_kwargs,
         )
+
+    def _add_asset(
+        self, asset: _DataAssetT, connect_options: dict | None = None
+    ) -> _DataAssetT:
+        """Adds an asset to this "_PandasDatasource" object.
+
+        The reserved asset name "DEFAULT_PANDAS_DATA_ASSET_NAME" undergoes replacement (rather than signaling error).
+
+        Args:
+            asset: The DataAsset to be added to this datasource.
+        """
+        asset_name: str = asset.name
+
+        asset_names: Set[str] = self.get_asset_names()
+
+        if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
+            if asset_name in asset_names:
+                self.delete_asset(asset_name=asset_name)
+
+        return super()._add_asset(asset=asset, connect_options=connect_options)
 
 
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
@@ -509,7 +525,7 @@ class PandasDatasource(_PandasDatasource):
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
-    assets: Dict[str, _PandasDataAsset] = {}
+    assets: List[_PandasDataAsset] = []
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...
