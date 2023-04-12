@@ -157,3 +157,10 @@ from .expect_column_values_to_be_valid_wyoming_zip import (
 )
 from .expect_column_values_to_be_valid_zip5 import ExpectColumnValuesToBeValidZip5
 from .expect_column_values_to_be_valid_zip9 import ExpectColumnValuesToBeValidZip9
+
+# Uncomment this when https://pypi.org/project/indiapins works
+#   - Currently fails on `import indiapins`
+#   - FileNotFoundError: [Errno 2] No such file or directory: '/Users/me/great_expectations/venv/lib/python3.8/site-packages/indiapins/pins.json.bz2'
+# from .expect_column_values_to_be_valid_india_zip import (
+#     ExpectColumnValuesToBeValidIndiaZip,
+# )

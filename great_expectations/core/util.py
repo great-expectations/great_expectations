@@ -299,6 +299,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         # No problem to encode json
         return data
 
+    if isinstance(data, range):
+        return list(data)
+
     if isinstance(data, dict):
         new_dict = {}
         for key in data:
