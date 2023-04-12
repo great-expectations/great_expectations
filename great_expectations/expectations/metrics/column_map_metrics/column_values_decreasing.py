@@ -17,10 +17,8 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.optional_imports import (
     F,
+    pyspark_sql_Window,
     sparktypes,
-)
-from great_expectations.optional_imports import (
-    pyspark_sql_Window as Window,
 )
 from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
@@ -130,10 +128,13 @@ class ColumnValuesDecreasing(ColumnMapMetricProvider):
             column_metadata["type"], (sparktypes.TimestampType, sparktypes.DateType)
         ):
             diff = F.datediff(
-                column, F.lag(column).over(Window.orderBy(F.lit("constant")))
+                column,
+                F.lag(column).over(pyspark_sql_Window.orderBy(F.lit("constant"))),
             )
         else:
-            diff = column - F.lag(column).over(Window.orderBy(F.lit("constant")))
+            diff = column - F.lag(column).over(
+                pyspark_sql_Window.orderBy(F.lit("constant"))
+            )
             diff = F.when(diff.isNull(), -1).otherwise(diff)
 
         # NOTE: because in spark we are implementing the window function directly,
