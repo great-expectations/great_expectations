@@ -10,7 +10,7 @@ from great_expectations.core import (
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnDistinctValuesToBeInSet(ColumnExpectation):
+class ExpectColumnDistinctValuesToBeInSet(ColumnAggregateExpectation):
     """Expect the set of distinct column values to be contained by a given set.
 
     expect_column_distinct_values_to_be_in_set is a \

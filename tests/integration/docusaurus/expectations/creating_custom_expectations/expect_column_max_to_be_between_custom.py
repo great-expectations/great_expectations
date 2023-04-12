@@ -13,7 +13,7 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     ExpectationValidationResult,
     render_evaluation_parameter_string,
 )
@@ -89,7 +89,7 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
 #     </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py ExpectColumnMaxToBeBetween class_def">
-class ExpectColumnMaxToBeBetweenCustom(ColumnExpectation):
+class ExpectColumnMaxToBeBetweenCustom(ColumnAggregateExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py docstring">
     """Expect column max to be between a given range."""

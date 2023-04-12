@@ -15,7 +15,7 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnAggregateMetricProvider,
 )
@@ -187,7 +187,7 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
     #     return dependencies
 
 
-class ExpectColumnSkewToBeBetween(ColumnExpectation):
+class ExpectColumnSkewToBeBetween(ColumnAggregateExpectation):
     """Expect column skew to be between. Currently tests against Gamma and Beta distributions."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

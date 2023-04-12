@@ -8,7 +8,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import column_aggregate_partial
 from great_expectations.expectations.metrics.column_aggregate_metric import (
     ColumnAggregateMetricProvider,
@@ -100,7 +100,7 @@ class ColumnKurtosis(ColumnAggregateMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnKurtosisToBeBetween(ColumnExpectation):
+class ExpectColumnKurtosisToBeBetween(ColumnAggregateExpectation):
     """Expect column Kurtosis to be between. Test values are drawn from various distributions (uniform, normal, gamma, student-t)."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

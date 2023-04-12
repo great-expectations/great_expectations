@@ -2532,8 +2532,8 @@ class QueryExpectation(TableExpectation, ABC):
 
 
 @public_api
-class ColumnExpectation(TableExpectation, ABC):
-    """Base class for column-type Expectations.
+class ColumnAggregateExpectation(TableExpectation, ABC):
+    """Base class for column aggregate Expectations.
 
     These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
     number of unique values, column type, etc.
@@ -2571,6 +2571,47 @@ class ColumnExpectation(TableExpectation, ABC):
             ), "'column' parameter is required for column expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+
+
+@public_api
+class ColumnExpectation(ColumnAggregateExpectation, ABC):
+    """Base class for column aggregate Expectations.
+
+    These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
+    number of unique values, column type, etc.
+
+    WARNING: This class is deprecated in favor of ColumnAggregateExpectation as of v0.16.6. It will be removed in a future release.
+    There is no change in functionality between the two classes; just a name change for clarity.
+
+    --Documentation--
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/
+
+    Args:
+     domain_keys (tuple): A tuple of the keys used to determine the domain of the
+         expectation.
+     success_keys (tuple): A tuple of the keys used to determine the success of
+         the expectation.
+     default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
+         kwargs from the Expectation Configuration.
+
+         - A  "column" key is required for column expectations.
+
+    Raises:
+        InvalidExpectationConfigurationError: If no `column` is specified
+    """
+
+    def __init__(
+        self,
+        configuration: Optional[ExpectationConfiguration] = None,
+    ):        
+        # deprecated-v0.16.6
+        warnings.warn(
+            "The abstract base class ColumnExpectation is deprecated in favor of ColumnAggregateExpectation as of v0.16.6. It will be removed in "
+            "v0.19. If you are using this class, please switch ColumnAggregateExpectation. There is no change in functionality between the two classes; just a name change for clarity.",
+            DeprecationWarning,
+        )
+
+        super().__init__(configuration=configuration,)
 
 
 @public_api
