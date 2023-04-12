@@ -252,9 +252,9 @@ except ImportError:
     pyspark_DataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
     pyspark_sql_Row = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-    F = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    F = SPARK_NOT_IMPORTED  # type: ignore[assignment]
     pyspark_sql_utils_AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-    sparktypes = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    sparktypes = SPARK_NOT_IMPORTED  # type: ignore[assignment]
     pyspark_sql_DataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_Column = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     SparkContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
@@ -296,6 +296,6 @@ try:
     )
 except ImportError:
     azure_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
-    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
-    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
+    BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
