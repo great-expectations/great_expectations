@@ -81,7 +81,7 @@ As all of those use cases are realized, we imagine the full class hierarchy for 
                 
                 ... for other types of models
 
-        *ColumnExpectation* (ABC)
+        *ColumnAggregateExpectation* (ABC)
             ColumnAggregateTimeSeriesExpectation (ABC, :white_check_mark:)
                 expect_column_max_to_match_prophet_date_model (:white_check_mark:)
                 expect_column_{property}_to_match_{model}_model

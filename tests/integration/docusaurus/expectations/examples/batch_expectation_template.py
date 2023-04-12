@@ -25,9 +25,15 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 
 
 # This class defines a Metric to support your Expectation.
+<<<<<<< HEAD:tests/integration/docusaurus/expectations/examples/batch_expectation_template.py
 # For most ColumnExpectations, the main business logic for calculation will live in this class.
 # <snippet name="tests/integration/docusaurus/expectations/examples/batch_expectation_template.py BatchMeetsSomeCriteria class_def">
 class BatchMeetsSomeCriteria(TableMetricProvider):
+=======
+# For most TableExpectations, the main business logic for calculation will live in this class.
+# <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py TableMeetsSomeCriteria class_def">
+class TableMeetsSomeCriteria(TableMetricProvider):
+>>>>>>> develop:tests/integration/docusaurus/expectations/examples/table_expectation_template.py
     # </snippet>
 
     # This is the id string that will be used to reference your Metric.
