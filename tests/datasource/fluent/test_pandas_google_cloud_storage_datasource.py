@@ -439,7 +439,9 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = pandas_gcs_datasource
-    pandas_gcs_datasource.assets = {"csv_asset": csv_asset}
+    pandas_gcs_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = GoogleCloudStorageDataConnector(
         datasource_name=pandas_gcs_datasource.name,
         data_asset_name=csv_asset.name,

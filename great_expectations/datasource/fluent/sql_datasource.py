@@ -672,6 +672,7 @@ class _SQLAsset(DataAsset):
         self.sort_batches(batch_list)
         return batch_list
 
+    @public_api
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
@@ -882,7 +883,7 @@ class SQLDatasource(Datasource):
     )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
-    assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
+    assets: List[Union[TableAsset, QueryAsset]] = []
 
     # private attrs
     _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
@@ -937,7 +938,7 @@ class SQLDatasource(Datasource):
                 f"{str(e)}"
             ) from e
         if self.assets and test_assets:
-            for asset in self.assets.values():
+            for asset in self.assets:
                 asset._datasource = self
                 asset.test_connection()
 
