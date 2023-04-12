@@ -567,7 +567,7 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
 
 
 @pytest.mark.skipif(
-    azure_storage == AZURE_BLOB_STORAGE_NOT_IMPORTED,
+    not azure_storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
@@ -591,7 +591,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
 
 
 @pytest.mark.skipif(
-    azure_storage == AZURE_BLOB_STORAGE_NOT_IMPORTED,
+    not azure_storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
@@ -629,7 +629,7 @@ def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monke
 
 
 @pytest.mark.skipif(
-    azure_storage == AZURE_BLOB_STORAGE_NOT_IMPORTED,
+    not azure_storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):

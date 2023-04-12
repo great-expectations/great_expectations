@@ -10,7 +10,6 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetGCSDataConnector
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.optional_imports import (
-    GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
     GoogleCloudStorageClient,
 )
 
@@ -41,7 +40,7 @@ def expected_config_dict():
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -78,7 +77,7 @@ def test_instantiation_without_args(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -121,7 +120,7 @@ def test_instantiation_with_filename_arg(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -164,7 +163,7 @@ def test_instantiation_with_info_arg(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -209,7 +208,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -259,7 +258,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -320,7 +319,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -410,7 +409,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -464,7 +463,7 @@ def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -539,7 +538,7 @@ default_regex:
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -606,7 +605,7 @@ default_regex:
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -685,7 +684,7 @@ default_regex:
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -761,7 +760,7 @@ def test_nested_directory_data_asset_name_in_folder(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -829,7 +828,7 @@ def test_redundant_information_in_naming_convention_random_hash(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -896,7 +895,7 @@ def test_redundant_information_in_naming_convention_timestamp(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -964,7 +963,7 @@ def test_redundant_information_in_naming_convention_bucket(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1092,7 +1091,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1154,7 +1153,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1219,7 +1218,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(

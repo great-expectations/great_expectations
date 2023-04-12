@@ -45,7 +45,6 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
     SqlAlchemyDataSplitter,
 )
 from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
     quoted_name,
     sa_sql_expression_Select,
     sa_sql_expression_Selectable,
@@ -104,7 +103,7 @@ from great_expectations.validator.metric_configuration import (
 logger = logging.getLogger(__name__)
 
 
-if sa != SQLALCHEMY_NOT_IMPORTED:
+if sa:
     sqlalchemy_version_check(sa.__version__)
     make_url = import_make_url()
 
@@ -433,7 +432,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             # but only do this if self.engine is an Engine and isn't a Connection
-            if sqlalchemy_engine_Engine != SQLALCHEMY_NOT_IMPORTED and isinstance(
+            if sqlalchemy_engine_Engine and isinstance(
                 self.engine, sqlalchemy_engine_Engine
             ):
                 self.engine = self.engine.connect()
@@ -639,9 +638,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         as a subquery wrapped in "(subquery) alias". TextClause must first be converted
         to TextualSelect using sa.columns() before it can be converted to type Subquery
         """
-        if sqlalchemy_TextClause != SQLALCHEMY_NOT_IMPORTED and isinstance(
-            selectable, sqlalchemy_TextClause
-        ):
+        if sqlalchemy_TextClause and isinstance(selectable, sqlalchemy_TextClause):
             selectable = selectable.columns().subquery()
 
         # Filtering by row condition.
@@ -1033,16 +1030,18 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 as a subquery wrapped in "(subquery) alias". TextClause must first be converted
                 to TextualSelect using sa.columns() before it can be converted to type Subquery
                 """
-                if sqlalchemy_TextClause != SQLALCHEMY_NOT_IMPORTED and isinstance(
+                if sqlalchemy_TextClause and isinstance(
                     selectable, sqlalchemy_TextClause
                 ):
                     sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.columns().subquery()
                     )
                 elif (
-                    sa_sql_expression_Select != SQLALCHEMY_NOT_IMPORTED
+                    sa_sql_expression_Select
                     and isinstance(selectable, sa_sql_expression_Select)
-                    or (isinstance(selectable, sa_sql_expression_TextualSelect))
+                ) or (
+                    sa_sql_expression_TextualSelect
+                    and isinstance(selectable, sa_sql_expression_TextualSelect)
                 ):
                     sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.subquery()
@@ -1054,7 +1053,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
 
-                if sqlalchemy_engine_Engine != SQLALCHEMY_NOT_IMPORTED and isinstance(
+                if sqlalchemy_engine_Engine and isinstance(
                     self.engine, sqlalchemy_engine_Engine
                 ):
                     self.engine = self.engine.connect()
@@ -1147,7 +1146,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
             split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        if sqlalchemy_engine_Engine != SQLALCHEMY_NOT_IMPORTED and isinstance(
+        if sqlalchemy_engine_Engine and isinstance(
             self.engine, sqlalchemy_engine_Engine
         ):
             connection = self.engine.connect()

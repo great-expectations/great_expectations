@@ -109,8 +109,8 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 
 if TYPE_CHECKING:
     from great_expectations.optional_imports import (
-        pyspark_sql_SparkSession,
         pyspark_sql_DataFrame,
+        pyspark_sql_SparkSession,
     )
 
 yaml = YAMLHandler()
@@ -397,11 +397,10 @@ def spark_session(test_backends) -> pyspark_sql_SparkSession:
         pytest.skip("No spark backend selected.")
 
     from great_expectations.optional_imports import (
-        SPARK_NOT_IMPORTED,
         pyspark_sql_SparkSession,
     )
 
-    if pyspark_sql_SparkSession != SPARK_NOT_IMPORTED:
+    if pyspark_sql_SparkSession:
         return get_or_create_spark_application(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",

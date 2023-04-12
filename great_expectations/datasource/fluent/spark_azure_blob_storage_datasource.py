@@ -23,7 +23,6 @@ from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
 from great_expectations.optional_imports import (
-    AZURE_BLOB_STORAGE_NOT_IMPORTED,
     BlobServiceClient,
 )
 
@@ -72,7 +71,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if BlobServiceClient != AZURE_BLOB_STORAGE_NOT_IMPORTED:
+            if BlobServiceClient:
                 try:
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None

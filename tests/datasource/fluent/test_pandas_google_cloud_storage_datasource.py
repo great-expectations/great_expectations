@@ -26,7 +26,6 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
 from great_expectations.optional_imports import (
-    GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
     GoogleCloudStorageClient,
 )
 
@@ -71,7 +70,7 @@ def _build_pandas_gcs_datasource(
 
 @pytest.fixture
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 def pandas_gcs_datasource() -> PandasGoogleCloudStorageDatasource:
@@ -116,7 +115,7 @@ def csv_asset(
 
 @pytest.fixture
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
@@ -132,7 +131,7 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 def test_construct_pandas_gcs_datasource_without_gcs_options():
@@ -152,7 +151,7 @@ def test_construct_pandas_gcs_datasource_without_gcs_options():
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
@@ -177,7 +176,7 @@ def test_construct_pandas_gcs_datasource_with_filename_in_gcs_options(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
@@ -202,7 +201,7 @@ def test_construct_pandas_gcs_datasource_with_info_in_gcs_options(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
@@ -229,7 +228,7 @@ def test_add_csv_asset_to_datasource(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
@@ -253,7 +252,7 @@ def test_construct_csv_asset_directly(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
@@ -282,7 +281,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
@@ -311,7 +310,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
@@ -340,7 +339,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
@@ -370,7 +369,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     reason="Accessing objects on google.cloud.storage using Pandas is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
 )
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 def test_get_batch_list_from_fully_specified_batch_request(
@@ -427,7 +426,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason='Could not import "storage" from google.cloud',
 )
 def test_test_connection_failures(

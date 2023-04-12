@@ -30,7 +30,6 @@ from great_expectations.expectations.metrics.util import (
     verify_column_names_exist,
 )
 from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
     F,
     pyspark,
     quoted_name,
@@ -364,7 +363,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
-        if sqlalchemy_engine_Engine != SQLALCHEMY_NOT_IMPORTED and isinstance(
+        if sqlalchemy_engine_Engine and isinstance(
             execution_engine.engine, sqlalchemy_engine_Engine
         ):
             connection = execution_engine.engine.connect()

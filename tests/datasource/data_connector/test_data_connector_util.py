@@ -17,7 +17,6 @@ from great_expectations.datasource.data_connector.util import (
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
 from great_expectations.optional_imports import (
-    GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
     GoogleCloudStorageClient,
 )
 
@@ -516,7 +515,7 @@ def test_build_sorters_from_config_bad_config():
 
 
 @pytest.mark.skipif(
-    GoogleCloudStorageClient == GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    not GoogleCloudStorageClient,
     reason="Could not import 'storage' from google.cloud in datasource.data_connector.util",
 )
 @mock.patch(

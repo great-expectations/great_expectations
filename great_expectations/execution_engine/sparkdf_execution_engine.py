@@ -62,7 +62,6 @@ from great_expectations.expectations.row_conditions import (
     parse_condition_to_spark,
 )
 from great_expectations.optional_imports import (
-    SPARK_NOT_IMPORTED,
     F,
     pyspark_DataFrameReader,
     pyspark_sql_DataFrame,
@@ -243,9 +242,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def load_batch_data(  # type: ignore[override]
         self, batch_id: str, batch_data: Union[SparkDFBatchData, pyspark_sql_DataFrame]
     ) -> None:
-        if pyspark_sql_DataFrame != SPARK_NOT_IMPORTED and isinstance(
-            batch_data, pyspark_sql_DataFrame
-        ):
+        if pyspark_sql_DataFrame and isinstance(batch_data, pyspark_sql_DataFrame):
             batch_data = SparkDFBatchData(self, batch_data)
         elif not isinstance(batch_data, SparkDFBatchData):
             raise GreatExpectationsError(

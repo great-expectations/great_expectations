@@ -62,7 +62,6 @@ from great_expectations.exceptions import (
     PluginModuleNotFoundError,
 )
 from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
     sa_sql_expression_Select,
     sqlalchemy_reflection,
 )
@@ -2044,9 +2043,7 @@ def get_sqlalchemy_selectable(
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if sa_sql_expression_Select != SQLALCHEMY_NOT_IMPORTED and isinstance(
-        selectable, sa_sql_expression_Select
-    ):
+    if sa_sql_expression_Select and isinstance(selectable, sa_sql_expression_Select):
         if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
         else:

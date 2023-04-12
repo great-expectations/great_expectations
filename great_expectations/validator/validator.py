@@ -1971,13 +1971,10 @@ class BridgeValidator:
 
         if self.expectation_engine is None:
             from great_expectations.optional_imports import (
-                SPARK_NOT_IMPORTED,
                 pyspark_sql_DataFrame,
             )
 
-            if pyspark_sql_DataFrame != SPARK_NOT_IMPORTED and isinstance(
-                batch.data, pyspark_sql_DataFrame
-            ):
+            if pyspark_sql_DataFrame and isinstance(batch.data, pyspark_sql_DataFrame):
                 self.expectation_engine = SparkDFDataset
 
         if self.expectation_engine is None:
@@ -2011,12 +2008,11 @@ class BridgeValidator:
 
         elif issubclass(self.expectation_engine, SparkDFDataset):
             from great_expectations.optional_imports import (
-                SPARK_NOT_IMPORTED,
                 pyspark_sql_DataFrame,
             )
 
             if not (
-                pyspark_sql_DataFrame != SPARK_NOT_IMPORTED
+                pyspark_sql_DataFrame
                 and isinstance(self.batch.data, pyspark_sql_DataFrame)
             ):
                 raise ValueError(

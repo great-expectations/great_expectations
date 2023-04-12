@@ -8,7 +8,6 @@ from typing import Dict, Tuple
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
     SQLAlchemyError,
     sqlalchemy_engine_Row,
     sqlalchemy_IntegrityError,
@@ -23,7 +22,7 @@ from great_expectations.util import (
     import_make_url,
 )
 
-if sa != SQLALCHEMY_NOT_IMPORTED:
+if sa:
     make_url = import_make_url()
 
 
