@@ -28,6 +28,7 @@ import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
@@ -495,7 +496,16 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
 
+@public_api
 class PandasDatasource(_PandasDatasource):
+    """Adds a single-batch pandas datasource to the data context.
+
+    Args:
+        name: The name of this datasource.
+        assets: An optional dictionary whose keys are Pandas DataAsset names and whose values
+            are Pandas DataAsset objects.
+    """
+
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
         DataFrameAsset
