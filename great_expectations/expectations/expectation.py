@@ -117,6 +117,7 @@ from great_expectations.render.util import (
 )
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
+    generate_dataset_name_from_expectation_name,
     generate_expectation_tests,
 )
 from great_expectations.util import camel_to_snake, is_parseable_date
@@ -1552,7 +1553,7 @@ class Expectation(metaclass=MetaExpectation):
         all_examples: List[dict] = self.examples or self._get_examples_from_json()
 
         included_examples = []
-        for example in all_examples:
+        for i, example in enumerate(all_examples, 1):
 
             included_test_cases = []
             # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests
@@ -1597,6 +1598,15 @@ class Expectation(metaclass=MetaExpectation):
                     copied_example["test_backends"] = [
                         TestBackend(**tb) for tb in copied_example["test_backends"]
                     ]
+
+                if "dataset_name" not in copied_example:
+                    dataset_name = generate_dataset_name_from_expectation_name(
+                        dataset=copied_example,
+                        expectation_type=self.expectation_type,
+                        index=i,
+                    )
+                    copied_example["dataset_name"] = dataset_name
+
                 included_examples.append(ExpectationTestDataCases(**copied_example))
 
         return included_examples
@@ -2532,8 +2542,8 @@ class QueryExpectation(TableExpectation, ABC):
 
 
 @public_api
-class ColumnExpectation(TableExpectation, ABC):
-    """Base class for column-type Expectations.
+class ColumnAggregateExpectation(TableExpectation, ABC):
+    """Base class for column aggregate Expectations.
 
     These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
     number of unique values, column type, etc.
@@ -2571,6 +2581,35 @@ class ColumnExpectation(TableExpectation, ABC):
             ), "'column' parameter is required for column expectations"
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
+
+
+@public_api
+class ColumnExpectation(ColumnAggregateExpectation, ABC):
+    """Base class for column aggregate Expectations.
+
+    These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
+    number of unique values, column type, etc.
+
+    WARNING: This class will be deprecated in favor of ColumnAggregateExpectation, and removed in a future release.
+    If you're using this class, please update your code to use ColumnAggregateExpectation instead.
+    There is no change in functionality between the two classes; just a name change for clarity.
+
+    --Documentation--
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/
+
+    Args:
+     domain_keys (tuple): A tuple of the keys used to determine the domain of the
+         expectation.
+     success_keys (tuple): A tuple of the keys used to determine the success of
+         the expectation.
+     default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
+         kwargs from the Expectation Configuration.
+
+         - A  "column" key is required for column expectations.
+
+    Raises:
+        InvalidExpectationConfigurationError: If no `column` is specified
+    """
 
 
 @public_api

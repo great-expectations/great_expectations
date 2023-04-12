@@ -42,14 +42,14 @@ except ImportError:
     pass
 
 
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnMaxToBeBetween(ColumnExpectation):
+class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     """Expect the column maximum to be between a minimum value and a maximum value.
 
     expect_column_max_to_be_between is a \
@@ -59,13 +59,13 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         column (str): \
             The column name
         min_value (comparable type or None): \
-            The minimum number of unique values allowed.
+            The minimum value of the acceptable range for the column maximum.
         max_value (comparable type or None): \
-            The maximum number of unique values allowed.
+            The maximum value of the acceptable range for the column maximum.
         strict_min (boolean): \
-            If True, the minimal column minimum must be strictly larger than min_value, default=False
+            If True, the lower bound of the column maximum acceptable range must be strictly larger than min_value, default=False
         strict_max (boolean): \
-            If True, the maximal column minimum must be strictly smaller than max_value, default=False
+            If True, the upper bound of the column maximum acceptable range must be strictly smaller than max_value, default=False
 
     Keyword Args:
         parse_strings_as_datetimes (Boolean or None): \
