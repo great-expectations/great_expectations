@@ -228,4 +228,4 @@ class ExpectMulticolumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnDatetimeDifferenceInMonths().print_diagnostic_checklist()
+    ExpectMulticolumnDatetimeDifferenceInMonths().print_diagnostic_checklist()

@@ -1599,7 +1599,7 @@ class Expectation(metaclass=MetaExpectation):
                         TestBackend(**tb) for tb in copied_example["test_backends"]
                     ]
 
-                if not "dataset_name" in copied_example:
+                if "dataset_name" not in copied_example:
                     dataset_name = generate_dataset_name_from_expectation_name(
                         dataset=copied_example,
                         expectation_type=self.expectation_type,
