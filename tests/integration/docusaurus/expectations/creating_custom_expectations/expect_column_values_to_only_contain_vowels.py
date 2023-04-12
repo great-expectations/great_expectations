@@ -19,7 +19,6 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py examples">
     examples = [
         {
-            "dataset_name": "expect_column_values_to_only_contain_vowels_1",
             "data": {
                 "only_vowels": ["a", "e", "I", "O", "U", "y", ""],
                 "mixed": ["A", "b", "c", "D", "E", "F", "g"],

@@ -303,7 +303,6 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "table_data_1",
                     "data": {
                         "columnone": [3, 5, 7],
                         "columntwo": [True, False, True],
@@ -312,7 +311,6 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                     },
                 },
                 {
-                    "dataset_name": "table_data_2",
                     "data": {
                         "columnone": [3, 5, 7],
                         "columntwo": [True, False, True],
@@ -321,7 +319,6 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                     },
                 },
                 {
-                    "dataset_name": "table_data_3",
                     "data": {
                         "columnone": [3, 5, 7, 8],
                         "columntwo": [True, False, True, False],

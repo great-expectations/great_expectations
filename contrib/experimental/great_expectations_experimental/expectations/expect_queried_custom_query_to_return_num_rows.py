@@ -63,7 +63,6 @@ class ExpectQueriedCustomQueryToReturnNumRows(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {"col1": [1, 2, 3, 4, 5, 5], "col2": [10, 3, 4, 4, 5, 5]},
                 }
             ],
