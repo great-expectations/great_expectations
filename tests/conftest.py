@@ -108,8 +108,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
-    import pyspark.sql
-    from pyspark.sql import SparkSession
+    from great_expectations.optional_imports import pyspark_sql_SparkSession
 
 yaml = YAMLHandler()
 ###
@@ -130,7 +129,7 @@ def spark_warehouse_session(tmp_path_factory):
     pyspark = pytest.importorskip("pyspark")  # noqa: F841
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: SparkSession = get_or_create_spark_application(
+    spark: pyspark_sql_SparkSession = get_or_create_spark_application(
         spark_config={
             "spark.sql.catalogImplementation": "in-memory",
             "spark.executor.memory": "450m",
@@ -390,14 +389,16 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends) -> SparkSession:
+def spark_session(test_backends) -> pyspark_sql_SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    try:
-        import pyspark  # noqa: F401
-        from pyspark.sql import SparkSession  # noqa: F401
+    from great_expectations.optional_imports import (
+        pyspark_sql_SparkSession,
+        SPARK_NOT_IMPORTED,
+    )
 
+    if pyspark_sql_SparkSession != SPARK_NOT_IMPORTED:
         return get_or_create_spark_application(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
@@ -405,8 +406,8 @@ def spark_session(test_backends) -> SparkSession:
                 # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
-    except ImportError:
-        raise ValueError("spark tests are requested, but pyspark is not installed")
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture

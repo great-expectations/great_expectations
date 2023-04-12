@@ -21,6 +21,7 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
 from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
     sa_sql_expression_BinaryExpression,
     sa_sql_expression_Select,
     sa_sql_expression_TableClause,
@@ -380,7 +381,9 @@ def get_sqlalchemy_column_metadata(
         inspector: sqlalchemy_reflection.Inspector = get_sqlalchemy_inspector(engine)
         try:
             # if a custom query was passed
-            if isinstance(table_selectable, sqlalchemy_TextClause):
+            if sqlalchemy_TextClause != SQLALCHEMY_NOT_IMPORTED and isinstance(
+                table_selectable, sqlalchemy_TextClause
+            ):
                 if hasattr(table_selectable, "selected_columns"):
                     columns = table_selectable.selected_columns.columns
                 else:

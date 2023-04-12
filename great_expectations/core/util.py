@@ -37,9 +37,14 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.optional_imports import (
+    SPARK_NOT_IMPORTED,
+    SQLALCHEMY_NOT_IMPORTED,
     pyspark_sql_DataFrame,
     pyspark_sql_SparkSession,
     sparktypes,
+    sqlalchemy,
+    sqlalchemy_engine_Connection,
+    sqlalchemy_TextClause,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
@@ -61,12 +66,6 @@ except ImportError:
     MultiPolygon = None
     LineString = None
 
-from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
-    sqlalchemy,
-    sqlalchemy_engine_Connection,
-    sqlalchemy_TextClause,
-)
 
 try:
     LegacyRow = sqlalchemy.engine.row.LegacyRow
@@ -392,7 +391,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if isinstance(data, pd.DataFrame):
         return convert_to_json_serializable(data.to_dict(orient="records"))
 
-    if isinstance(data, pyspark_sql_DataFrame):
+    if pyspark_sql_DataFrame != SPARK_NOT_IMPORTED and isinstance(
+        data, pyspark_sql_DataFrame
+    ):
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return convert_to_json_serializable(
@@ -400,11 +401,13 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         )
 
     # SQLAlchemy serialization
-    if isinstance(data, LegacyRow):
+    if LegacyRow != SQLALCHEMY_NOT_IMPORTED and isinstance(data, LegacyRow):
         return dict(data)
 
     # sqlalchemy text for SqlAlchemy 2 compatibility
-    if isinstance(data, sqlalchemy_TextClause):
+    if sqlalchemy_TextClause != SQLALCHEMY_NOT_IMPORTED and isinstance(
+        data, sqlalchemy_TextClause
+    ):
         return str(data)
 
     if isinstance(data, decimal.Decimal):
@@ -417,7 +420,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if isinstance(data, sparktypes.StructType):
         return dict(data.jsonValue())
 
-    if isinstance(data, sqlalchemy_engine_Connection):
+    if sqlalchemy_engine_Connection != SQLALCHEMY_NOT_IMPORTED and isinstance(
+        data, sqlalchemy_engine_Connection
+    ):
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
@@ -511,7 +516,9 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
         ]
         return
 
-    if isinstance(data, pyspark_sql_DataFrame):
+    if pyspark_sql_DataFrame != SPARK_NOT_IMPORTED and isinstance(
+        data, pyspark_sql_DataFrame
+    ):
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return ensure_json_serializable(
@@ -527,17 +534,21 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     if isinstance(data, RunIdentifier):
         return
 
-    if isinstance(data, sqlalchemy_TextClause):
+    if sqlalchemy_TextClause != SQLALCHEMY_NOT_IMPORTED and isinstance(
+        data, sqlalchemy_TextClause
+    ):
         # TextClause is handled manually by convert_to_json_serializable()
         return
-    if isinstance(data, sqlalchemy_engine_Connection):
+
+    if sqlalchemy_engine_Connection != SQLALCHEMY_NOT_IMPORTED and isinstance(
+        data, sqlalchemy_engine_Connection
+    ):
         # Connection module is handled manually by convert_to_json_serializable()
         return
 
-    else:
-        raise InvalidExpectationConfigurationError(
-            f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
-        )
+    raise InvalidExpectationConfigurationError(
+        f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
+    )
 
 
 def substitute_all_strftime_format_strings(

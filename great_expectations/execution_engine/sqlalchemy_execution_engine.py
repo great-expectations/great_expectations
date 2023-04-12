@@ -433,7 +433,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             # but only do this if self.engine is an Engine and isn't a Connection
-            if isinstance(self.engine, sqlalchemy_engine_Engine):
+            if sqlalchemy_engine_Engine != SQLALCHEMY_NOT_IMPORTED and isinstance(
+                self.engine, sqlalchemy_engine_Engine
+            ):
                 self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
@@ -637,7 +639,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         as a subquery wrapped in "(subquery) alias". TextClause must first be converted
         to TextualSelect using sa.columns() before it can be converted to type Subquery
         """
-        if isinstance(selectable, sqlalchemy_TextClause):
+        if sqlalchemy_TextClause != SQLALCHEMY_NOT_IMPORTED and isinstance(
+            selectable, sqlalchemy_TextClause
+        ):
             selectable = selectable.columns().subquery()
 
         # Filtering by row condition.
@@ -1029,12 +1033,16 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 as a subquery wrapped in "(subquery) alias". TextClause must first be converted
                 to TextualSelect using sa.columns() before it can be converted to type Subquery
                 """
-                if isinstance(selectable, sqlalchemy_TextClause):
+                if sqlalchemy_TextClause != SQLALCHEMY_NOT_IMPORTED and isinstance(
+                    selectable, sqlalchemy_TextClause
+                ):
                     sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.columns().subquery()
                     )
-                elif isinstance(selectable, sa_sql_expression_Select) or (
-                    isinstance(selectable, sa_sql_expression_TextualSelect)
+                elif (
+                    sa_sql_expression_Select != SQLALCHEMY_NOT_IMPORTED
+                    and isinstance(selectable, sa_sql_expression_Select)
+                    or (isinstance(selectable, sa_sql_expression_TextualSelect))
                 ):
                     sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.subquery()
@@ -1046,8 +1054,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
 
-                if isinstance(self.engine, sqlalchemy_engine_Engine):
+                if sqlalchemy_engine_Engine != SQLALCHEMY_NOT_IMPORTED and isinstance(
+                    self.engine, sqlalchemy_engine_Engine
+                ):
                     self.engine = self.engine.connect()
+
                 res = self.engine.execute(sa_query_object).fetchall()
 
                 logger.debug(
@@ -1136,7 +1147,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
             split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        if isinstance(self.engine, sqlalchemy_engine_Engine):
+        if sqlalchemy_engine_Engine != SQLALCHEMY_NOT_IMPORTED and isinstance(
+            self.engine, sqlalchemy_engine_Engine
+        ):
             connection = self.engine.connect()
         else:
             connection = self.engine

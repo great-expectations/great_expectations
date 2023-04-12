@@ -110,6 +110,9 @@ try:
     from sqlalchemy.engine import (
         reflection as sqlalchemy_reflection,
     )
+    from sqlalchemy.engine.default import (
+        DefaultDialect as sqlalchemy_engine_DefaultDialect,
+    )
     from sqlalchemy.exc import (
         IntegrityError as sqlalchemy_IntegrityError,
     )
@@ -133,7 +136,7 @@ try:
         quoted_name,
     )
     from sqlalchemy.sql.expression import (
-        CTE,
+        CTE as sa_sql_expression_CTE,  # noqa N812
     )
     from sqlalchemy.sql.expression import (
         BinaryExpression as sa_sql_expression_BinaryExpression,
@@ -170,6 +173,7 @@ except ImportError:
     sqlalchemy_dialects_registry = SQLALCHEMY_NOT_IMPORTED
     sa_sql_Insert = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_TableClause = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_engine_DefaultDialect = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_BinaryExpression = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_ProgrammingError = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_IntegrityError = SQLALCHEMY_NOT_IMPORTED
@@ -177,7 +181,7 @@ except ImportError:
     sqlalchemy_OperationalError = SQLALCHEMY_NOT_IMPORTED
     SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_WithinGroup = SQLALCHEMY_NOT_IMPORTED
-    CTE = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_CTE = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Dialect = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_Label = SQLALCHEMY_NOT_IMPORTED
@@ -225,7 +229,7 @@ try:
     import pyspark.sql.functions as F  # noqa N801
     import pyspark.sql.types as sparktypes
     from pyspark import SparkContext
-    from pyspark.ml.feature import Bucketizer
+    from pyspark.ml.feature import Bucketizer as pyspark_ml_Bucketizer
     from pyspark.sql import (
         Column as pyspark_sql_Column,
     )
@@ -261,7 +265,7 @@ except ImportError:
     pyspark_sql_SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_SQLContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_Window = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-    Bucketizer = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_ml_Bucketizer = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
     "google cloud storage components are not installed, please 'pip install google-cloud-storage google-cloud-secret-manager'"

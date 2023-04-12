@@ -22,8 +22,8 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
 from great_expectations.optional_imports import (
-    CTE,
     SQLALCHEMY_NOT_IMPORTED,
+    sa_sql_expression_CTE,
     sa_sql_expression_Label,
     sa_sql_expression_Select,
     sa_sql_expression_WithinGroup,
@@ -264,7 +264,7 @@ def _get_column_quantiles_mysql(
 ) -> list:
     # MySQL does not support "percentile_disc", so we implement it as a compound query.
     # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
-    percent_rank_query: CTE = (
+    percent_rank_query: sa_sql_expression_CTE = (
         sa.select(
             column,
             sa.cast(

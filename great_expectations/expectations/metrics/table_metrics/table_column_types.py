@@ -15,7 +15,12 @@ from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.expectations.metrics.util import get_sqlalchemy_column_metadata
-from great_expectations.optional_imports import sparktypes, sqlalchemy_TextClause
+from great_expectations.optional_imports import (
+    SPARK_NOT_IMPORTED,
+    SQLALCHEMY_NOT_IMPORTED,
+    sparktypes,
+    sqlalchemy_TextClause,
+)
 
 
 class ColumnTypes(TableMetricProvider):
@@ -89,7 +94,9 @@ class ColumnTypes(TableMetricProvider):
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     # if a custom query was passed
-    if isinstance(batch_data.selectable, sqlalchemy_TextClause):
+    if sqlalchemy_TextClause != SQLALCHEMY_NOT_IMPORTED and isinstance(
+        batch_data.selectable, sqlalchemy_TextClause
+    ):
         table_selectable: sqlalchemy_TextClause = batch_data.selectable
         schema_name = None
     else:
@@ -110,17 +117,21 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
     if parent_name != "":
         parent_name = f"{parent_name}."
 
-    if isinstance(field, sparktypes.StructType):
+    if sparktypes != SPARK_NOT_IMPORTED and isinstance(field, sparktypes.StructType):
         for child in field.fields:
             cols += _get_spark_column_metadata(child, parent_name=parent_name)
-    elif isinstance(field, sparktypes.StructField):
+    elif sparktypes != SPARK_NOT_IMPORTED and isinstance(field, sparktypes.StructField):
         if "." in field.name:
             name = f"{parent_name}`{field.name}`"
         else:
             name = parent_name + field.name
         field_metadata = {"name": name, "type": field.dataType}
         cols.append(field_metadata)
-        if include_nested and isinstance(field.dataType, sparktypes.StructType):
+        if (
+            include_nested
+            and sparktypes != SPARK_NOT_IMPORTED
+            and isinstance(field.dataType, sparktypes.StructType)
+        ):
             for child in field.dataType.fields:
                 cols += _get_spark_column_metadata(
                     child,

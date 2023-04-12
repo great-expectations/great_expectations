@@ -29,7 +29,10 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
-from great_expectations.optional_imports import pyspark_sql_DataFrame
+from great_expectations.optional_imports import (
+    SPARK_NOT_IMPORTED,
+    pyspark_sql_DataFrame,
+)
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
@@ -87,7 +90,10 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def _validate_dataframe(
         cls, dataframe: pyspark_sql_DataFrame
     ) -> pyspark_sql_DataFrame:
-        if not isinstance(dataframe, pyspark_sql_DataFrame):
+        if not (
+            (pyspark_sql_DataFrame != SPARK_NOT_IMPORTED)
+            and isinstance(dataframe, pyspark_sql_DataFrame)
+        ):
             raise ValueError("dataframe must be of type pyspark.sql.DataFrame")
 
         return dataframe

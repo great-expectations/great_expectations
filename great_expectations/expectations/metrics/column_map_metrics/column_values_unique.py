@@ -9,6 +9,7 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_condition_partial,
 )
 from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
     F,
     sqlalchemy_engine_Engine,
 )
@@ -67,7 +68,9 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 source_table=_table,
                 column_name=column.name,
             )
-            if isinstance(sql_engine, sqlalchemy_engine_Engine):
+            if sqlalchemy_engine_Engine != SQLALCHEMY_NOT_IMPORTED and isinstance(
+                sql_engine, sqlalchemy_engine_Engine
+            ):
                 with sql_engine.connect() as connection:
                     with connection.begin():
                         connection.execute(sa.text(temp_table_stmt))
