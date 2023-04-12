@@ -304,7 +304,7 @@ class Expectation(metaclass=MetaExpectation):
         2. `success_keys`: a tuple of the *keys* used to determine the success of
            the expectation.
 
-    In some cases, subclasses of Expectation (such as TableExpectation) can
+    In some cases, subclasses of Expectation (such as BatchExpectation) can
     inherit these properties from their parent class.
 
     They *may* optionally override `runtime_keys` and `default_kwarg_values`, and
@@ -2568,13 +2568,8 @@ class QueryExpectation(BatchExpectation, ABC):
 
 
 @public_api
-<<<<<<< HEAD
-class ColumnExpectation(BatchExpectation, ABC):
-    """Base class for column-type Expectations.
-=======
-class ColumnAggregateExpectation(TableExpectation, ABC):
+class ColumnAggregateExpectation(BatchExpectation, ABC):
     """Base class for column aggregate Expectations.
->>>>>>> develop
 
     These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
     number of unique values, column type, etc.
@@ -2615,9 +2610,6 @@ class ColumnAggregateExpectation(TableExpectation, ABC):
 
 
 @public_api
-<<<<<<< HEAD
-class ColumnMapExpectation(BatchExpectation, ABC):
-=======
 class ColumnExpectation(ColumnAggregateExpectation, ABC):
     """Base class for column aggregate Expectations.
 
@@ -2647,8 +2639,7 @@ class ColumnExpectation(ColumnAggregateExpectation, ABC):
 
 
 @public_api
-class ColumnMapExpectation(TableExpectation, ABC):
->>>>>>> develop
+class ColumnMapExpectation(BatchExpectation, ABC):
     """Base class for ColumnMapExpectations.
 
     ColumnMapExpectations are evaluated for a column and ask a yes/no question about every row in the column.
