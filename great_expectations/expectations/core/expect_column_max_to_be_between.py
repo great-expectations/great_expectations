@@ -59,13 +59,13 @@ class ExpectColumnMaxToBeBetween(ColumnExpectation):
         column (str): \
             The column name
         min_value (comparable type or None): \
-            The minimum number of unique values allowed.
+            The minimum value of the acceptable range for the column maximum.
         max_value (comparable type or None): \
-            The maximum number of unique values allowed.
+            The maximum value of the acceptable range for the column maximum.
         strict_min (boolean): \
-            If True, the minimal column minimum must be strictly larger than min_value, default=False
+            If True, the lower bound of the column maximum acceptable range must be strictly larger than min_value, default=False
         strict_max (boolean): \
-            If True, the maximal column minimum must be strictly smaller than max_value, default=False
+            If True, the upper bound of the column maximum acceptable range must be strictly smaller than max_value, default=False
 
     Keyword Args:
         parse_strings_as_datetimes (Boolean or None): \
