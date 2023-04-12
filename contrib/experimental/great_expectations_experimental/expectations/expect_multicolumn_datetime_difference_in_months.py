@@ -109,7 +109,6 @@ class ExpectColumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
 
     examples = [
         {
-            "dataset_name": "test",
             "data": {
                 "start_datetime": [
                     "2022-03-22 10:00:00",
