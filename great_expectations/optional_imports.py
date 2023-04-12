@@ -114,6 +114,9 @@ try:
         DefaultDialect as sqlalchemy_engine_DefaultDialect,
     )
     from sqlalchemy.exc import (
+        DatabaseError as sqlalchemy_DatabaseError,
+    )
+    from sqlalchemy.exc import (
         IntegrityError as sqlalchemy_IntegrityError,
     )
     from sqlalchemy.exc import (
@@ -167,31 +170,31 @@ try:
     )
     from sqlalchemy.sql.operators import custom_op as sqlalchemy_custom_op
 except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_literal = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_custom_op = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_dialects_registry = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_Insert = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_TableClause = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_engine_Dialect = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_engine_Inspector = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_reflection = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_DefaultDialect = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_BinaryExpression = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_ProgrammingError = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_DatabaseError = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_IntegrityError = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_OperationalError = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_ProgrammingError = SQLALCHEMY_NOT_IMPORTED
     SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_WithinGroup = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_CTE = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_engine_Dialect = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_Label = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_reflection = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_ColumnClause = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_Select = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_TextualSelect = SQLALCHEMY_NOT_IMPORTED
-    sa_sql_expression_Selectable = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_Insert = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_literal = SQLALCHEMY_NOT_IMPORTED
     quoted_name = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_engine_Inspector = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_CTE = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_BinaryExpression = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_ColumnClause = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_Label = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_Select = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_Selectable = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_TableClause = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_TextualSelect = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_WithinGroup = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_custom_op = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy.engine import (
@@ -228,7 +231,7 @@ try:
     import pyspark as pyspark
     import pyspark.sql.functions as F  # noqa N801
     import pyspark.sql.types as sparktypes
-    from pyspark import SparkContext
+    from pyspark import SparkContext as pyspark_sql_SparkContext
     from pyspark.ml.feature import Bucketizer as pyspark_ml_Bucketizer
     from pyspark.sql import (
         Column as pyspark_sql_Column,
@@ -253,15 +256,15 @@ try:
         AnalysisException as pyspark_sql_utils_AnalysisException,
     )
 except ImportError:
-    pyspark_DataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
-    pyspark_sql_Row = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     F = SPARK_NOT_IMPORTED  # type: ignore[assignment]
-    pyspark_sql_utils_AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     sparktypes = SPARK_NOT_IMPORTED  # type: ignore[assignment]
+    pyspark_DataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_sql_Row = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_sql_utils_AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_DataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_Column = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-    SparkContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_sql_SparkContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_SQLContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_Window = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
