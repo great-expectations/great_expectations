@@ -11,8 +11,6 @@ import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_stil
 import DataContextInitializeQuickOrFilesystem from '/docs/components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
 import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
 
-## Introduction
-
 In order to Validate data, we must first define a set of Expectations for that data to be validated against.  In this guide, we will walk you through processes of interactively creating and editing Expectations while simultaneously validating them against a Batch of data. By validating our Expectations as we define them we can quickly see if the Expectations we are setting are suitable for our data, and adjust them if necessary.
 
 :::tip Does this process edit my data?
@@ -71,6 +69,15 @@ Please reference the appropriate guide from the following:
 
 ### 1. Import the Great Expectations module and instantiate a Data Context
 
-### 2. Retrieve a Datasource from the Data Context
+### 2. Retrieve a Data Asset from a Datasource in the Data Context
 
-### 3. 
+```python
+my_asset = context.get_datasource("my_datasource").get_asset("my_taxi_data_asset")
+```
+
+### 3. Create a Batch Request
+
+```python
+my_batch_request = my_asset.build_batch_request()
+```
+
