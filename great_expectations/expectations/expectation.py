@@ -2590,7 +2590,8 @@ class ColumnExpectation(ColumnAggregateExpectation, ABC):
     These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
     number of unique values, column type, etc.
 
-    WARNING: This class is deprecated in favor of ColumnAggregateExpectation as of v0.16.6. It will be removed in a future release.
+    WARNING: This class will be deprecated in favor of ColumnAggregateExpectation, and removed in a future release.
+    If you're using this class, please update your code to use ColumnAggregateExpectation instead.
     There is no change in functionality between the two classes; just a name change for clarity.
 
     --Documentation--
@@ -2609,21 +2610,6 @@ class ColumnExpectation(ColumnAggregateExpectation, ABC):
     Raises:
         InvalidExpectationConfigurationError: If no `column` is specified
     """
-
-    def __init__(
-        self,
-        configuration: Optional[ExpectationConfiguration] = None,
-    ):
-        # deprecated-v0.16.6
-        warnings.warn(
-            "The abstract base class ColumnExpectation is deprecated in favor of ColumnAggregateExpectation as of v0.16.6. It will be removed in "
-            "v0.19. If you are using this class, please switch ColumnAggregateExpectation. There is no change in functionality between the two classes; just a name change for clarity.",
-            DeprecationWarning,
-        )
-
-        super().__init__(
-            configuration=configuration,
-        )
 
 
 @public_api
