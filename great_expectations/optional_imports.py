@@ -249,19 +249,19 @@ try:
         AnalysisException as pyspark_sql_utils_AnalysisException,
     )
 except ImportError:
-    pyspark_DataFrameReader = SPARK_NOT_IMPORTED
+    pyspark_DataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
-    pyspark_sql_Row = SPARK_NOT_IMPORTED
-    F = SPARK_NOT_IMPORTED
-    pyspark_sql_utils_AnalysisException = SPARK_NOT_IMPORTED
-    sparktypes = SPARK_NOT_IMPORTED
-    pyspark_sql_DataFrame = SPARK_NOT_IMPORTED
-    pyspark_sql_Column = SPARK_NOT_IMPORTED
-    SparkContext = SPARK_NOT_IMPORTED
-    pyspark_sql_SparkSession = SPARK_NOT_IMPORTED
-    pyspark_SQLContext = SPARK_NOT_IMPORTED
-    pyspark_sql_Window = SPARK_NOT_IMPORTED
-    Bucketizer = SPARK_NOT_IMPORTED
+    pyspark_sql_Row = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    F = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_sql_utils_AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    sparktypes = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_sql_DataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_sql_Column = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    SparkContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_sql_SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_SQLContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_sql_Window = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    Bucketizer = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
     "google cloud storage components are not installed, please 'pip install google-cloud-storage google-cloud-secret-manager'"
@@ -280,7 +280,7 @@ except ImportError:
     google_service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     GoogleServiceAccountCredentials = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     GoogleCloudStorageClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    GoogleAPIError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    GoogleAPIError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
     DefaultCredentialsError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 
@@ -296,6 +296,6 @@ try:
     )
 except ImportError:
     azure_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
-    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+    BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
+    BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
+    ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
