@@ -734,7 +734,7 @@ class _SQLAsset(DataAsset):
         """
         raise NotImplementedError
 
-    def as_selectable(self) -> sa.sql.Selectable:
+    def as_selectable(self) -> sa_sql_expression_Selectable:
         """Returns a Selectable that can be used to query this data
 
         Returns:
@@ -755,7 +755,7 @@ class QueryAsset(_SQLAsset):
             raise ValueError("query must start with 'SELECT' followed by a whitespace.")
         return v
 
-    def as_selectable(self) -> sa.sql.Selectable:
+    def as_selectable(self) -> sa_sql_expression_Selectable:
         """Returns the Selectable that is used to retrieve the data.
 
         This can be used in a subselect FROM clause for queries against this data.
