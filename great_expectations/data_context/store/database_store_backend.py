@@ -187,7 +187,7 @@ class DatabaseStoreBackend(StoreBackend):
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str, credentials: dict
-    ) -> Tuple["URL", Dict]:  # noqa: F821, UP037
+    ) -> Tuple["URL", Dict]:  # type: ignore[name-defined]  # noqa F821
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
