@@ -114,8 +114,11 @@ stages:
           matrix:
             sqlalchemy_1_4_x:
               sqlalchemy_base_version: '1.4.0'
+              pandas_base_version: '1.5.0'
             sqlalchemy_2_0_x:
               sqlalchemy_base_version: '2.0.0'
+              # sqlalchemy 2.0.0 and up is only supported by pandas 2.0.0 and up
+              pandas_base_version: '2.0.0'
 
         services:
           postgres: postgres
@@ -128,9 +131,10 @@ stages:
 
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
-              echo "SQLAlchemy~=$(sqlalchemy_base_version)" >> constraints-dev-temp.txt 
+              echo "SQLAlchemy~=$(sqlalchemy_base_version)" >> constraints-dev-temp.txt
+              echo "pandas~=$(pandas_base_version)" >> constraints-dev-temp.txt
               pip install --constraint constraints-dev-temp.txt ".[test,postgresql]" pytest-azurepipelines
-            displayName: 'Install dependencies using SQLAlchemy version $(sqlalchemy_base_version)'
+            displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version) and pandas base version $(pandas_base_version)'
 
           # TODO: Currently the below test only runs tests with postgresql. We should figure out what the
           # TODO: best way to test for sqlalchemy version compatibility and implement that here.
