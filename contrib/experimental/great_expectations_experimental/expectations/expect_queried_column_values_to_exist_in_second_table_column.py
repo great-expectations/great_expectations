@@ -76,19 +76,16 @@ class ExpectQueriedColumnValuesToExistInSecondTableColumn(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "msid": ["aaa", "bbb"],
                     },
                 },
                 {
-                    "dataset_name": "test_2",
                     "data": {
                         "msid": ["aaa", "aaa"],
                     },
                 },
                 {
-                    "dataset_name": "test_3",
                     "data": {
                         "msid": [
                             "aaa",
