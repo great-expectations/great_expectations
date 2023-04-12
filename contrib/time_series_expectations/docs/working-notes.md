@@ -109,9 +109,9 @@ You can learn more about the Expectations in the Expectation gallery, [here](lin
 
 The most important ABCs are [BatchAggregateStatisticTimeSeriesExpectation](link), [ColumnAggregateTimeSeriesExpectation](link), and  [ColumnPairTimeSeriesExpectation](link). They allow time series models to be applied to data in a variety of shapes and formats. Please see the class docstrings for more detailed explanation.
 
-The full class hiereachy is:
+The full class hierarchy is:
 
-    *TableExpectation* (ABC)
+    *BatchExpectation* (ABC)
         BatchAggregateStatisticExpectation (ABC)
             ExpectBatchAggregateStatisticToBeBetween (ABC)
                 expect_batch_update_time_to_be_between
