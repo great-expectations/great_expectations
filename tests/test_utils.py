@@ -137,33 +137,34 @@ def validate_uuid4(uuid_string: str) -> bool:
     return val.hex == uuid_string.replace("-", "")
 
 
-def get_sqlite_temp_table_names(engine):
-    result = engine.execute(
-        sa.text(
-            """
-SELECT
-    name
-FROM
-    sqlite_temp_master
-"""
-        )
-    )
+def get_sqlite_temp_table_names(execution_engine):
+
+    statement = sa.text("SELECT name FROM sqlite_temp_master")
+
+    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+        connection = execution_engine.engine
+        result = connection.execute(statement)
+    else:
+        with execution_engine.engine.connect() as connection:
+            result = connection.execute(statement)
+
     rows = result.fetchall()
     return {row[0] for row in rows}
 
 
-def get_sqlite_table_names(engine):
-    result = engine.execute(
-        sa.text(
-            """
-SELECT
-    name
-FROM
-    sqlite_master
-"""
-        )
-    )
+def get_sqlite_table_names(execution_engine):
+
+    statement = sa.text("SELECT name FROM sqlite_master")
+
+    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+        connection = execution_engine.engine
+        result = connection.execute(statement)
+    else:
+        with execution_engine.engine.connect() as connection:
+            result = connection.execute(statement)
+
     rows = result.fetchall()
+
     return {row[0] for row in rows}
 
 

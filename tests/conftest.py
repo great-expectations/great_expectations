@@ -1705,10 +1705,11 @@ def titanic_sqlite_db(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:///{titanic_db_path}")
-        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
-            0
-        ] == (1313,)
-        return engine
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
+            return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 
@@ -1721,9 +1722,10 @@ def titanic_sqlite_db_connection_string(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:////{titanic_db_path}")
-        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
-            0
-        ] == (1313,)
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
         return f"sqlite:///{titanic_db_path}"
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1761,7 +1763,7 @@ def empty_sqlite_db(sa):
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
-        with engine.connect() as connection:
+        with engine.begin() as connection:
             assert connection.execute(sa.text("select 1")).fetchall()[0] == (1,)
         return engine
     except ImportError:
@@ -2282,18 +2284,17 @@ def sqlite_view_engine(test_backends):
                 con=sqlite_engine,
                 index=True,
             )
-            with sqlite_engine.connect() as connection:
-                with connection.begin():
-                    connection.execute(
-                        sa.text(
-                            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-                        )
+            with sqlite_engine.begin() as connection:
+                connection.execute(
+                    sa.text(
+                        "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
                     )
-                    connection.execute(
-                        sa.text(
-                            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-                        )
+                )
+                connection.execute(
+                    sa.text(
+                        "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
                     )
+                )
             return sqlite_engine
         except ImportError:
             sa = None
