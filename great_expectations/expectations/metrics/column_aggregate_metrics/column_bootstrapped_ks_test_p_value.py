@@ -8,17 +8,8 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 from great_expectations.expectations.metrics.util import (
     is_valid_continuous_partition_object,
 )
-from great_expectations.optional_imports import SPARK_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
-
-try:
-    from pyspark.sql.functions import stddev_samp
-
-    from great_expectations.optional_imports import pyspark as pyspark
-except ImportError:
-    pyspark = SPARK_NOT_IMPORTED
-    stddev_samp = SPARK_NOT_IMPORTED
 
 
 import numpy as np

@@ -22,35 +22,17 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, F
-from great_expectations.optional_imports import sqlalchemy as sa
+from great_expectations.optional_imports import (
+    F,
+    sa_sql_expression_Select,
+    sqlalchemy_engine_Row,
+    sqlalchemy_ProgrammingError,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    from great_expectations.optional_imports import sqlalchemy  # isort:skip
-    from sqlalchemy.engine.row import Row
-    from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql import Select
-except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
-    ProgrammingError = SQLALCHEMY_NOT_IMPORTED
-    Select = SQLALCHEMY_NOT_IMPORTED
-    Row = SQLALCHEMY_NOT_IMPORTED
-
-try:
-    from great_expectations.optional_imports import sqlalchemy  # isort:skip
-    from sqlalchemy.engine.row import RowProxy
-    from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql import Select
-
-    Row = RowProxy
-except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
-    ProgrammingError = SQLALCHEMY_NOT_IMPORTED
-    Select = SQLALCHEMY_NOT_IMPORTED
-    RowProxy = SQLALCHEMY_NOT_IMPORTED
 
 
 class ColumnSkew(ColumnAggregateMetricProvider):
@@ -130,12 +112,14 @@ class ColumnSkew(ColumnAggregateMetricProvider):
 
 
 def _get_query_result(func, selectable, sqlalchemy_engine):
-    simple_query: Select = sa.select(func).select_from(selectable)
+    simple_query: sa_sql_expression_Select = sa.select(func).select_from(selectable)
 
     try:
-        result: Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
+        result: sqlalchemy_engine_Row = sqlalchemy_engine.execute(
+            simple_query
+        ).fetchone()[0]
         return result
-    except ProgrammingError as pe:
+    except sqlalchemy_ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (

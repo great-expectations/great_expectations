@@ -37,8 +37,12 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.optional_imports import (
-    SPARK_NOT_IMPORTED,
     SQLALCHEMY_NOT_IMPORTED,
+    TextClause,
+    pyspark,
+    pyspark_sql_SparkSession,
+    sparktypes,
+    sqlalchemy,
 )
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
@@ -52,18 +56,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-try:
-    from pyspark.sql import DataFrame as SparkDataFrame
-    from pyspark.sql import SparkSession
-    from pyspark.sql.types import StructType
-
-    from great_expectations.optional_imports import pyspark as pyspark
-except ImportError:
-    pyspark = SPARK_NOT_IMPORTED
-    SparkDataFrame = SPARK_NOT_IMPORTED
-    SparkSession = SPARK_NOT_IMPORTED
-    StructType = SPARK_NOT_IMPORTED
-
 
 try:
     from shapely.geometry import LineString, MultiPolygon, Point, Polygon
@@ -74,25 +66,13 @@ except ImportError:
     LineString = None
 
 try:
-    from great_expectations.optional_imports import sqlalchemy  # isort:skip
-
     LegacyRow = sqlalchemy.engine.row.LegacyRow
 except (
     ImportError,
     AttributeError,
 ):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
 
-# This is a separate try/except than the LegacyRow one since TextClause exists in sqlalchemy 2. This means LegacyRow
-# may be not importable while TextClause is.
-try:
-    from great_expectations.optional_imports import sqlalchemy  # isort:skip
-
-    TextClause = sqlalchemy.sql.elements.TextClause
-except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
-    TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
     "api_np": {
@@ -429,7 +409,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return data.to_json_dict()
 
     # PySpark schema serialization
-    if StructType is not None and isinstance(data, StructType):
+    if sparktypes.StructType is not None and isinstance(data, sparktypes.StructType):
         return dict(data.jsonValue())
 
     raise TypeError(
@@ -538,7 +518,7 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     if isinstance(data, RunIdentifier):
         return
 
-    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
+    if sqlalchemy is not None and isinstance(data, TextClause):
         return str(data)
 
     else:
@@ -801,7 +781,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
     force_reuse_spark_context: bool = True,
-) -> SparkSession:
+) -> pyspark_sql_SparkSession:
     """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
@@ -827,7 +807,7 @@ def get_or_create_spark_application(
 
     spark_config.update({"spark.app.name": name})
 
-    spark_session: Optional[SparkSession] = get_or_create_spark_session(
+    spark_session: Optional[pyspark_sql_SparkSession] = get_or_create_spark_session(
         spark_config=spark_config
     )
     if spark_session is None:
@@ -863,7 +843,7 @@ def get_or_create_spark_application(
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
-) -> SparkSession | None:
+) -> pyspark_sql_SparkSession | None:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
@@ -878,14 +858,14 @@ def get_or_create_spark_session(
     Returns:
 
     """
-    spark_session: Optional[SparkSession]
+    spark_session: Optional[pyspark_sql_SparkSession]
     try:
         if spark_config is None:
             spark_config = {}
         else:
             spark_config = copy.deepcopy(spark_config)
 
-        builder = SparkSession.builder
+        builder = pyspark_sql_SparkSession.builder
 
         app_name: Optional[str] = spark_config.get("spark.app.name")
         if app_name:

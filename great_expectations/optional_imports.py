@@ -100,6 +100,10 @@ try:
 
     sqlalchemy_version_check(sqlalchemy.__version__)
 
+    from sqlalchemy.dialects import registry as sqlalchemy_dialects_registry
+    from sqlalchemy.engine import (
+        Dialect as sqlalchemy_engine_Dialect,
+    )
     from sqlalchemy.engine import (
         Engine as sqlalchemy_engine_Engine,
     )
@@ -112,7 +116,28 @@ try:
     from sqlalchemy.engine import (
         reflection as sqlalchemy_reflection,
     )
-    from sqlalchemy.sql.elements import quoted_name
+    from sqlalchemy.exc import (
+        IntegrityError as sqlalchemy_IntegrityError,
+    )
+    from sqlalchemy.exc import (
+        NoSuchTableError as sqlalchemy_NoSuchTableError,
+    )
+    from sqlalchemy.exc import (
+        ProgrammingError as sqlalchemy_ProgrammingError,
+    )
+    from sqlalchemy.exc import (
+        SQLAlchemyError,
+    )
+    from sqlalchemy.sql.elements import (
+        BinaryExpression,
+        BooleanClauseList,
+        Label,
+        TextClause,
+        quoted_name,
+    )
+    from sqlalchemy.sql.expression import (
+        CTE,
+    )
     from sqlalchemy.sql.expression import (
         ColumnClause as sa_sql_expression_ColumnClause,
     )
@@ -122,15 +147,30 @@ try:
     from sqlalchemy.sql.expression import (
         Selectable as sa_sql_expression_Selectable,
     )
+    from sqlalchemy.sql.expression import (
+        WithinGroup as sa_sql_expression_WithinGroup,
+    )
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_dialects_registry = SQLALCHEMY_NOT_IMPORTED
+    BinaryExpression = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_ProgrammingError = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_WithinGroup = SQLALCHEMY_NOT_IMPORTED
+    CTE = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_IntegrityError = SQLALCHEMY_NOT_IMPORTED
+    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Engine = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_engine_Dialect = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Row = SQLALCHEMY_NOT_IMPORTED
+    BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
+    Label = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_reflection = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_ColumnClause = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_Select = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_Selectable = SQLALCHEMY_NOT_IMPORTED
     quoted_name = SQLALCHEMY_NOT_IMPORTED
+    TextClause = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Inspector = SQLALCHEMY_NOT_IMPORTED
 
 
@@ -161,10 +201,16 @@ try:
     from pyspark.sql import (
         Window as pyspark_sql_Window,
     )
+    from pyspark.sql.readwriter import DataFrameReader as pyspark_DataFrameReader
+    from pyspark.sql.utils import (
+        AnalysisException as pyspark_sql_utils_AnalysisException,
+    )
 except ImportError:
+    pyspark_DataFrameReader = SPARK_NOT_IMPORTED
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
     pyspark_sql_Row = SPARK_NOT_IMPORTED
     F = SPARK_NOT_IMPORTED
+    pyspark_sql_utils_AnalysisException = SPARK_NOT_IMPORTED
     sparktypes = SPARK_NOT_IMPORTED
     pyspark_sql_DataFrame = SPARK_NOT_IMPORTED
     pyspark_sql_Column = SPARK_NOT_IMPORTED

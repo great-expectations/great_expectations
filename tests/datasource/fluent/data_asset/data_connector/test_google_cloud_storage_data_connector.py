@@ -12,7 +12,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import BatchRequest
-from great_expectations.optional_imports import GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+from great_expectations.optional_imports import GoogleCloudStorageClient
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -21,12 +21,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-try:
-    from great_expectations.optional_imports import gcs
-    import gcs.client as GCSClient  # noqa N801
-except ImportError:
-    GCSClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 
 class MockGCSClient:
@@ -53,7 +47,9 @@ def test_basic_instantiation(mock_list_keys):
         "alpha-3.csv",
     ]
 
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: GoogleCloudStorageClient = cast(
+        GoogleCloudStorageClient, MockGCSClient()
+    )
     my_data_connector: DataConnector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
@@ -100,7 +96,9 @@ def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
         "alpha-3.csv",
     ]
 
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: GoogleCloudStorageClient = cast(
+        GoogleCloudStorageClient, MockGCSClient()
+    )
     my_data_connector: DataConnector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
@@ -144,7 +142,9 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         "will_20200810_1001.csv",
     ]
 
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: GoogleCloudStorageClient = cast(
+        GoogleCloudStorageClient, MockGCSClient()
+    )
     my_data_connector: DataConnector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
@@ -468,7 +468,9 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
         "A/file_3.csv",
     ]
 
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: GoogleCloudStorageClient = cast(
+        GoogleCloudStorageClient, MockGCSClient()
+    )
 
     my_data_connector: DataConnector
 
@@ -554,7 +556,9 @@ def test_alpha(mock_list_keys):
         "test_dir_alpha/D.csv",
     ]
 
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: GoogleCloudStorageClient = cast(
+        GoogleCloudStorageClient, MockGCSClient()
+    )
     my_data_connector: DataConnector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
@@ -611,7 +615,9 @@ def test_alpha(mock_list_keys):
 def test_foxtrot(mock_list_keys):
     mock_list_keys.return_value = []
 
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: GoogleCloudStorageClient = cast(
+        GoogleCloudStorageClient, MockGCSClient()
+    )
 
     my_data_connector: DataConnector
 

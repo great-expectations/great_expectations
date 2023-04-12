@@ -61,37 +61,21 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_spark,
 )
-from great_expectations.optional_imports import SPARK_NOT_IMPORTED
+from great_expectations.optional_imports import (
+    F,
+    pyspark_DataFrameReader,
+    pyspark_sql_DataFrame,
+    pyspark_sql_Row,
+    pyspark_sql_SparkSession,
+    pyspark_sql_utils_AnalysisException,
+    sparktypes,
+)
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
 )
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark.sql.functions as F  # noqa N801
-    import pyspark.sql.types as sparktypes
-    from pyspark import SparkContext
-    from pyspark.sql import (
-        DataFrame,
-        Row,
-        SparkSession,
-    )
-    from pyspark.sql.readwriter import (
-        DataFrameReader,
-    )
-
-    from great_expectations.optional_imports import pyspark
-except ImportError:
-    pyspark = SPARK_NOT_IMPORTED
-    F = SPARK_NOT_IMPORTED
-    sparktypes = SPARK_NOT_IMPORTED
-    SparkContext = SPARK_NOT_IMPORTED
-    DataFrame = SPARK_NOT_IMPORTED
-    Row = SPARK_NOT_IMPORTED
-    SparkSession = SPARK_NOT_IMPORTED
-    DataFrameReader = SPARK_NOT_IMPORTED
 
 
 # noinspection SpellCheckingInspection
@@ -218,7 +202,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if spark_config is None:
             spark_config = {}
 
-        spark: SparkSession = get_or_create_spark_application(
+        spark: pyspark_sql_SparkSession = get_or_create_spark_application(
             spark_config=spark_config,
             force_reuse_spark_context=force_reuse_spark_context,
         )
@@ -246,7 +230,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self._data_sampler = SparkDataSampler()
 
     @property
-    def dataframe(self) -> DataFrame:
+    def dataframe(self) -> pyspark_sql_DataFrame:
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
         if self.batch_manager.active_batch_data is None:
             raise ValueError(
@@ -256,9 +240,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
     def load_batch_data(  # type: ignore[override]
-        self, batch_id: str, batch_data: Union[SparkDFBatchData, DataFrame]
+        self, batch_id: str, batch_data: Union[SparkDFBatchData, pyspark_sql_DataFrame]
     ) -> None:
-        if isinstance(batch_data, DataFrame):
+        if isinstance(batch_data, pyspark_sql_DataFrame):
             batch_data = SparkDFBatchData(self, batch_data)
         elif not isinstance(batch_data, SparkDFBatchData):
             raise GreatExpectationsError(
@@ -291,8 +275,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
         reader_method: str
         reader_options: dict
         path: str
-        schema: Optional[Union[pyspark.sql.types.StructType, dict, str]]
-        reader: DataFrameReader
+        schema: Optional[Union[sparktypes.StructType, dict, str]]
+        reader: pyspark_DataFrameReader
         reader_fn: Callable
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
@@ -375,7 +359,7 @@ illegal.  Please check your config."""
                     """
                 )
             # pyspark will raise an AnalysisException error if path is incorrect
-            except pyspark.sql.utils.AnalysisException:
+            except pyspark_sql_utils_AnalysisException:
                 raise ExecutionEngineError(
                     f"""Unable to read in batch from the following path: {path}. Please check your configuration."""
                 )
@@ -491,7 +475,7 @@ illegal.  Please check your config."""
     def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
-    ) -> DataFrame:
+    ) -> pyspark_sql_DataFrame:
         """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 
         Args:
@@ -637,7 +621,7 @@ illegal.  Please check your config."""
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[DataFrame, dict, dict]:
+    ) -> Tuple[pyspark_sql_DataFrame, dict, dict]:
         """Uses a DataFrame and Domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
 
         Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain \
@@ -665,7 +649,9 @@ illegal.  Please check your config."""
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
-        data: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+        data: pyspark_sql_DataFrame = self.get_domain_records(
+            domain_kwargs=domain_kwargs
+        )
 
         split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
@@ -729,7 +715,7 @@ illegal.  Please check your config."""
         """
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
-        res: List[Row]
+        res: List[pyspark_sql_Row]
 
         aggregates: Dict[Tuple[str, str, str], dict] = {}
 
@@ -762,7 +748,9 @@ illegal.  Please check your config."""
 
         for aggregate in aggregates.values():
             domain_kwargs: dict = aggregate["domain_kwargs"]
-            df: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+            df: pyspark_sql_DataFrame = self.get_domain_records(
+                domain_kwargs=domain_kwargs
+            )
 
             assert len(aggregate["column_aggregates"]) == len(aggregate["metric_ids"])
 

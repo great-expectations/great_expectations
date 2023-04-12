@@ -25,8 +25,6 @@ from great_expectations.datasource.fluent.spark_datasource import (
 )
 from great_expectations.optional_imports import (
     GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
-    GoogleCloudStorageClient,
-    GoogleServiceAccountCredentials,
     google_cloud_storage,
     google_service_account,
 )
@@ -34,6 +32,10 @@ from great_expectations.optional_imports import (
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
+    )
+    from great_expectations.optional_imports import (
+        GoogleCloudStorageClient,
+        GoogleServiceAccountCredentials,
     )
 
 
@@ -66,7 +68,10 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         gcs_client: Union[GoogleCloudStorageClient, None] = self._gcs_client
         if not gcs_client:
             # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
-            if GoogleServiceAccountCredentials != GOOGLE_CLOUD_STORAGE_NOT_IMPORTED:
+            if (
+                google_cloud_storage != GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+                and google_service_account != GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+            ):
                 try:
                     credentials: Union[
                         GoogleServiceAccountCredentials, None

@@ -44,10 +44,6 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
-    sqlalchemy_version_check,
-)
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
@@ -78,7 +74,22 @@ from great_expectations.expectations.row_conditions import (
     RowConditionParserType,
     parse_condition_to_sqlalchemy,
 )
-from great_expectations.optional_imports import sqlalchemy as sa
+from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
+    TextClause,
+    quoted_name,
+    sa_sql_expression_Select,
+    sa_sql_expression_Selectable,
+    sa_sql_expression_TextualSelect,
+    sqlalchemy_engine_Dialect,
+    sqlalchemy_engine_Engine,
+    sqlalchemy_engine_Row,
+    sqlalchemy_OperationalError,
+    sqlalchemy_version_check,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_selectable,
@@ -97,42 +108,6 @@ try:
     make_url = import_make_url()
 except ImportError:
     sa = SQLALCHEMY_NOT_IMPORTED
-
-
-try:
-    from great_expectations.optional_imports import sqlalchemy  # isort:skip
-    from sqlalchemy.engine import (  # noqa: TID251
-        Dialect,
-        Engine,
-        Row,
-    )
-    from sqlalchemy.exc import OperationalError  # noqa: TID251
-    from sqlalchemy.sql import Selectable  # noqa: TID251
-    from sqlalchemy.sql.elements import (  # noqa: TID251
-        BooleanClauseList,
-        Label,
-        TextClause,
-        quoted_name,
-    )
-    from sqlalchemy.sql.selectable import (  # noqa: TID251
-        Select,
-        TextualSelect,
-    )
-except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
-    Engine = SQLALCHEMY_NOT_IMPORTED
-    BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
-    DefaultDialect = SQLALCHEMY_NOT_IMPORTED
-    Dialect = SQLALCHEMY_NOT_IMPORTED
-    Label = SQLALCHEMY_NOT_IMPORTED
-    OperationalError = SQLALCHEMY_NOT_IMPORTED
-    reflection = SQLALCHEMY_NOT_IMPORTED
-    Row = SQLALCHEMY_NOT_IMPORTED
-    Select = SQLALCHEMY_NOT_IMPORTED
-    Selectable = SQLALCHEMY_NOT_IMPORTED
-    TextClause = SQLALCHEMY_NOT_IMPORTED
-    TextualSelect = SQLALCHEMY_NOT_IMPORTED
-    quoted_name = SQLALCHEMY_NOT_IMPORTED
 
 
 try:
@@ -459,7 +434,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             # but only do this if self.engine is an Engine and isn't a Connection
-            if isinstance(self.engine, Engine):
+            if isinstance(self.engine, sqlalchemy_engine_Engine):
                 self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
@@ -508,7 +483,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return self._url
 
     @property
-    def dialect(self) -> Dialect:
+    def dialect(self) -> sqlalchemy_engine_Dialect:
         return self.engine.dialect
 
     @property
@@ -606,7 +581,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_domain_records(  # noqa: C901 - 24
         self,
         domain_kwargs: dict,
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a Batch of data.
 
         Args:
@@ -638,7 +613,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     f"Unable to find batch with batch_id {batch_id}"
                 )
 
-        selectable: Selectable
+        selectable: sa_sql_expression_Selectable
         if "table" in domain_kwargs and domain_kwargs["table"] is not None:
             # TODO: Add logic to handle record_set_name once implemented
             # (i.e. multiple record sets (tables) in one batch
@@ -824,7 +799,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[Selectable, dict, dict]:
+    ) -> Tuple[sa_sql_expression_Selectable, dict, dict]:
         """Uses a given batch dictionary and Domain kwargs to obtain a SqlAlchemy column object.
 
         Args:
@@ -843,7 +818,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             domain_kwargs, domain_type, accessor_keys
         )
 
-        selectable: Selectable = self.get_domain_records(domain_kwargs=domain_kwargs)
+        selectable: sa_sql_expression_Selectable = self.get_domain_records(
+            domain_kwargs=domain_kwargs
+        )
 
         return selectable, split_domain_kwargs.compute, split_domain_kwargs.accessor
 
@@ -995,7 +972,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
-        res: List[Row]
+        res: List[sqlalchemy_engine_Row]
 
         # We need a different query for each Domain (where clause).
         queries: Dict[Tuple[str, str, str], dict] = {}
@@ -1041,7 +1018,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         for query in queries.values():
             domain_kwargs: dict = query["domain_kwargs"]
-            selectable: Selectable = self.get_domain_records(
+            selectable: sa_sql_expression_Selectable = self.get_domain_records(
                 domain_kwargs=domain_kwargs
             )
 
@@ -1057,8 +1034,12 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.columns().subquery()
                     )
-                elif (Select and isinstance(selectable, Select)) or (
-                    TextualSelect and isinstance(selectable, TextualSelect)
+                elif (
+                    sa_sql_expression_Select
+                    and isinstance(selectable, sa_sql_expression_Select)
+                ) or (
+                    sa_sql_expression_TextualSelect
+                    and isinstance(selectable, sa_sql_expression_TextualSelect)
                 ):
                     sa_query_object = sa.select(*query["select"]).select_from(
                         selectable.subquery()
@@ -1075,7 +1056,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
 {IDDict(domain_kwargs).to_id()}"""
                 )
-            except OperationalError as oe:
+            except sqlalchemy_OperationalError as oe:
                 exception_message: str = "An SQL execution Exception occurred.  "
                 exception_traceback: str = traceback.format_exc()
                 exception_message += f'{type(oe).__name__}: "{str(oe)}".  Traceback: "{exception_traceback}".'
@@ -1135,7 +1116,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         return self._data_splitter.get_splitter_method(splitter_method_name)
 
-    def execute_split_query(self, split_query: Selectable) -> List[Row]:
+    def execute_split_query(
+        self, split_query: sa_sql_expression_Selectable
+    ) -> List[sqlalchemy_engine_Row]:
         """Use the execution engine to run the split query and fetch all of the results.
 
         Args:
@@ -1158,7 +1141,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return self.engine.execute(split_query).fetchall()
 
     def get_data_for_batch_identifiers(
-        self, selectable: Selectable, splitter_method_name: str, splitter_kwargs: dict
+        self,
+        selectable: sa_sql_expression_Selectable,
+        splitter_method_name: str,
+        splitter_kwargs: dict,
     ) -> List[dict]:
         """Build data used to construct batch identifiers for the input table using the provided splitter config.
 
@@ -1181,7 +1167,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
-    ) -> Union[Selectable, str]:
+    ) -> Union[sa_sql_expression_Selectable, str]:
         if (
             batch_spec.get("query") is not None
             and batch_spec.get("sampling_method") is not None
@@ -1206,7 +1192,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             else:
                 split_clause = sa.true()
 
-        selectable: Selectable = self._subselectable(batch_spec)
+        selectable: sa_sql_expression_Selectable = self._subselectable(batch_spec)
         sampling_method: Optional[str] = batch_spec.get("sampling_method")
         if sampling_method is not None:
             if sampling_method in [
@@ -1236,10 +1222,10 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         return sa.select("*").select_from(selectable).where(split_clause)
 
-    def _subselectable(self, batch_spec: BatchSpec) -> Selectable:
+    def _subselectable(self, batch_spec: BatchSpec) -> sa_sql_expression_Selectable:
         table_name = batch_spec.get("table_name")
         query = batch_spec.get("query")
-        selectable: Selectable
+        selectable: sa_sql_expression_Selectable
         if table_name:
             selectable = sa.table(
                 table_name, schema=batch_spec.get("schema_name", None)
@@ -1317,9 +1303,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            selectable: Union[Selectable, str] = self._build_selectable_from_batch_spec(
-                batch_spec=batch_spec
-            )
+            selectable: Union[
+                sa_sql_expression_Selectable, str
+            ] = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,

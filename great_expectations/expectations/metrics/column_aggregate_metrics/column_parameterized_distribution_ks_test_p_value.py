@@ -11,17 +11,8 @@ from great_expectations.expectations.metrics.util import (
     _scipy_distribution_positional_args_from_dict,
     validate_distribution_parameters,
 )
-from great_expectations.optional_imports import SPARK_NOT_IMPORTED
 
 logger = logging.getLogger(__name__)
-
-try:
-    from pyspark.sql.functions import stddev_samp
-
-    from great_expectations.optional_imports import pyspark as pyspark
-except ImportError:
-    pyspark = SPARK_NOT_IMPORTED
-    stddev_samp = SPARK_NOT_IMPORTED
 
 
 class ColumnParameterizedDistributionKSTestPValue(ColumnAggregateMetricProvider):
