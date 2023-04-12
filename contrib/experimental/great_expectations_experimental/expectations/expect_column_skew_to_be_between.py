@@ -16,7 +16,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnExpectation
-from great_expectations.expectations.metrics.column_aggregate_metric import (
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
