@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import uuid
 from pathlib import Path
@@ -5,7 +7,10 @@ from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED
+from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
+    sqlalchemy_Row,
+)
 from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     filter_properties_dict,
@@ -170,7 +175,7 @@ class DatabaseStoreBackend(StoreBackend):
             self._store_backend_id = f"{self.STORE_BACKEND_ID_PREFIX}{store_id}"
         return self._store_backend_id.replace(self.STORE_BACKEND_ID_PREFIX, "")
 
-    def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":
+    def _build_engine(self, credentials, **kwargs) -> "sa.engine.Engine":  # noqa: UP037
         """
         Using a set of given credentials, constructs an Execution Engine , connecting to a database using a URL or a
         private key path.
@@ -198,7 +203,7 @@ class DatabaseStoreBackend(StoreBackend):
     @staticmethod
     def _get_sqlalchemy_key_pair_auth_url(
         drivername: str, credentials: dict
-    ) -> Tuple["URL", Dict]:
+    ) -> Tuple["URL", Dict]:  # noqa: UP037
         """
         Utilizing a private key path and a passphrase in a given credentials dictionary, attempts to encode the provided
         values into a private key. If passphrase is incorrect, this will fail and an exception is raised.
@@ -260,7 +265,9 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(sel).fetchone()[0]
+            with self.engine.begin() as connection:
+                row = connection.execute(sel).fetchone()[0]
+            return row
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error fetching value: {str(e)}")
             raise gx_exceptions.StoreError(f"Unable to fetch value for key: {str(key)}")
@@ -327,7 +334,8 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(sel).fetchone()[0] == 1
+            with self.engine.begin() as connection:
+                return connection.execute(sel).fetchone()[0] == 1
         except (IndexError, SQLAlchemyError) as e:
             logger.debug(f"Error checking for value: {str(e)}")
             return False
@@ -347,7 +355,9 @@ class DatabaseStoreBackend(StoreBackend):
                 )
             )
         )
-        return [tuple(row) for row in self.engine.execute(sel).fetchall()]
+        with self.engine.begin() as connection:
+            row_list: list[sqlalchemy_Row] = connection.execute(sel).fetchall()
+        return [tuple(row) for row in row_list]
 
     def remove_key(self, key):
         delete_statement = self._table.delete().where(
@@ -359,7 +369,8 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         try:
-            return self.engine.execute(delete_statement)
+            with self.engine.begin() as connection:
+                return connection.execute(delete_statement)
         except SQLAlchemyError as e:
             raise gx_exceptions.StoreBackendError(
                 f"Unable to delete key: got sqlalchemy error {str(e)}"

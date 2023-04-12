@@ -44,7 +44,10 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.optional_imports import sqlalchemy_version_check
+from great_expectations.optional_imports import (
+    sqlalchemy_Engine,
+    sqlalchemy_version_check,
+)
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
@@ -98,7 +101,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import Dialect, Engine, Row  # noqa: TID251
+    from sqlalchemy.engine import Dialect, Row  # noqa: TID251
     from sqlalchemy.exc import OperationalError  # noqa: TID251
     from sqlalchemy.sql import Selectable  # noqa: TID251
     from sqlalchemy.sql.elements import (  # noqa: TID251
@@ -109,7 +112,6 @@ try:
     )
     from sqlalchemy.sql.selectable import Select, TextualSelect  # noqa: TID251
 except ImportError:
-    Engine = None
     BooleanClauseList = None
     DefaultDialect = None
     Dialect = None
@@ -448,7 +450,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             self._engine_backup = self.engine
             # sqlite/mssql temp tables only persist within a connection so override the engine
             # but only do this if self.engine is an Engine and isn't a Connection
-            if isinstance(self.engine, Engine):
+            if sqlalchemy_Engine and isinstance(self.engine, sqlalchemy_Engine):
                 self.engine = self.engine.connect()
 
         # Send a connect event to provide dialect type
@@ -1058,6 +1060,9 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
 
                 logger.debug(f"Attempting query {str(sa_query_object)}")
+
+                if sqlalchemy_Engine and isinstance(self.engine, sqlalchemy_Engine):
+                    self.engine = self.engine.connect()
                 res = self.engine.execute(sa_query_object).fetchall()
 
                 logger.debug(
@@ -1144,7 +1149,13 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
             split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        return self.engine.execute(split_query).fetchall()
+        if sqlalchemy_Engine and isinstance(self.engine, sqlalchemy_Engine):
+            connection = self.engine.connect()
+        else:
+            connection = self.engine
+
+        query_result: List[Row] = connection.execute(split_query).fetchall()
+        return query_result
 
     def get_data_for_batch_identifiers(
         self, selectable: Selectable, splitter_method_name: str, splitter_kwargs: dict
