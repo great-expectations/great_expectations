@@ -42,14 +42,14 @@ except ImportError:
     pass
 
 
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.render.renderer.renderer import renderer
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnMaxToBeBetween(ColumnExpectation):
+class ExpectColumnMaxToBeBetween(ColumnAggregateExpectation):
     """Expect the column maximum to be between a minimum value and a maximum value.
 
     expect_column_max_to_be_between is a \
