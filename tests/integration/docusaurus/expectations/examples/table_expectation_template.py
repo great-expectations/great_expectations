@@ -25,7 +25,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 
 
 # This class defines a Metric to support your Expectation.
-# For most ColumnExpectations, the main business logic for calculation will live in this class.
+# For most TableExpectations, the main business logic for calculation will live in this class.
 # <snippet name="tests/integration/docusaurus/expectations/examples/table_expectation_template.py TableMeetsSomeCriteria class_def">
 class TableMeetsSomeCriteria(TableMetricProvider):
     # </snippet>
