@@ -22,6 +22,8 @@ from tests.test_utils import get_sqlite_temp_table_names
 
 from tests.sqlalchemy_test_doubles import MockSaEngine, Dialect
 
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
+
 
 def test_instantiation_with_table_name(sqlite_view_engine):
     execution_engine: SqlAlchemyExecutionEngine = SqlAlchemyExecutionEngine(

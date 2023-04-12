@@ -8,7 +8,7 @@ from great_expectations.core import (
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -30,7 +30,7 @@ from great_expectations.validator.validator import (
 )
 
 
-class ExpectTableRowCountToEqualOtherTable(TableExpectation):
+class ExpectTableRowCountToEqualOtherTable(BatchExpectation):
     """Expect the number of rows to equal the number in another table.
 
     expect_table_row_count_to_equal_other_table is a \
