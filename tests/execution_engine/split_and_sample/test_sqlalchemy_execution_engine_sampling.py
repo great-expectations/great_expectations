@@ -29,6 +29,8 @@ try:
 except ImportError:
     sqlalchemy = None
 
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
+
 
 @pytest.mark.parametrize(
     "underscore_prefix",
