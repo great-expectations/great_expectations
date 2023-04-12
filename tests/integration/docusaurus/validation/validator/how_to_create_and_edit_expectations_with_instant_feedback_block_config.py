@@ -46,8 +46,21 @@ validator = context.get_validator(
 validator.head()
 # </snippet>
 
+# this snippet is only for users who are not using a jupyter notebook
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py inspect_data_no_jupyter">
+print(validator.head())
+# </snippet>
+
 # <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py interactive_validation">
 validator.expect_column_values_to_not_be_null(column="vendor_id")
+# </snippet>
+
+# this snippet is only for users who are not using a jupyter notebook
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py interactive_validation_no_jupyter">
+expectation_validation_result = validator.expect_column_values_to_not_be_null(
+    column="vendor_id"
+)
+print(expectation_validation_result)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py save_expectation_suite">
