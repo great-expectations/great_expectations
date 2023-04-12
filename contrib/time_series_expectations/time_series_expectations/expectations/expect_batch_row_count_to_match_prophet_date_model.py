@@ -7,16 +7,16 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.execution_engine import (
     ExecutionEngine,
 )
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import BatchExpectation
 from time_series_expectations.expectations.prophet_model_deserializer import (
     ProphetModelDeserializer,
 )
 
 
-class ExpectBatchRowCountToMatchProphetDateModel(TableExpectation):
+class ExpectBatchRowCountToMatchProphetDateModel(BatchExpectation):
     """This Expectation checks to see if the number of rows in a Batch matches the predictions of a prophet model for a given date.
 
-    expect_batch_row_count_to_match_prophet_date_model is a [TableExpectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations)
+    expect_batch_row_count_to_match_prophet_date_model is a [BatchExpectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations)
 
     Args:
         date (str):
