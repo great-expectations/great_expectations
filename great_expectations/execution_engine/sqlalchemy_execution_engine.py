@@ -1329,6 +1329,17 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if self._connection:
             self._connection.close()
 
+    def get_connection(self):
+        # TODO: Turn this into a context manager to make sure it closes the connection
+        # TODO: Docstring
+        if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
+            if not self._connection:
+                self._connection = self.engine.connect()
+            return self._connection
+        else:
+            with self.engine.connect() as connection:
+                return connection
+
     # TODO: What is return type, docstring
     def execute_query(self, query: Selectable):
         """Execute a query using the underlying database engine.
