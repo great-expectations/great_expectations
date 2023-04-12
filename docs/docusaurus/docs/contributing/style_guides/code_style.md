@@ -84,7 +84,7 @@ Or [run `mypy`](https://mypy.readthedocs.io/en/stable/running_mypy.html) directl
 | Base class                   |  prefix                         |
 |------------------------------|---------------------------------|
 | `Expectation`                |  `expect_...`                   | 
-| `TableExpectation`           |  `expect_table_...`             | 
+| `BatchExpectation`           |  `expect_table_...`             | 
 | `ColumnMapExpectation`       |  `expect_column_values_...`     | 
 | `ColumnAggregateExpectation` |  `expect_column_...`            | 
 | `ColumnPairMapExpectation`   |  `expect_column_pair_values...` | 

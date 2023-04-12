@@ -22,7 +22,7 @@ title: "Create Expectations: Index"
 - [Overview](../../guides/expectations/creating_custom_expectations/overview.md)
 - [How to create a Custom Column Aggregate Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations.md)
 - [How to create a Custom Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations.md)
-- [How to create a Custom Table Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations.md)
+- [How to create a Custom Batch Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_batch_expectations.md)
 - [How to create a Custom Column Pair Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_column_pair_map_expectations.md)
 - [How to create a Custom Multicolumn Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_multicolumn_map_expectations.md)
 - [How to create a Custom Regex-Based Column Map Expectation](../../guides/expectations/creating_custom_expectations/how_to_create_custom_regex_based_column_map_expectations.md)
