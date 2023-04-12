@@ -17,7 +17,7 @@ from great_expectations.execution_engine.util import (
     is_valid_partition_object,
 )
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import (
@@ -58,7 +58,7 @@ logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
 
-class ExpectColumnKlDivergenceToBeLessThan(ColumnExpectation):
+class ExpectColumnKlDivergenceToBeLessThan(ColumnAggregateExpectation):
     """Expect the Kulback-Leibler (KL) divergence (relative entropy) of the specified column with respect to the partition object to be lower than the provided threshold.
 
     KL divergence compares two distributions. The higher the divergence value (relative entropy), the larger \

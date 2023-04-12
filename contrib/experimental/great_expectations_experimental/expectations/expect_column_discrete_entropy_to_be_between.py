@@ -16,10 +16,10 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    ColumnExpectation,
+    ColumnAggregateExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
@@ -128,7 +128,7 @@ class ColumnDiscreteEntropy(ColumnAggregateMetricProvider):
         return dependencies
 
 
-class ExpectColumnDiscreteEntropyToBeBetween(ColumnExpectation):
+class ExpectColumnDiscreteEntropyToBeBetween(ColumnAggregateExpectation):
     """Expect the column discrete entropy to be between a minimum value and a maximum value.
             The Shannon entropy of a discrete probability distribution is given by
             - \\sum_{i=1}^{n} P(x_i) * \\log(P(x_i))

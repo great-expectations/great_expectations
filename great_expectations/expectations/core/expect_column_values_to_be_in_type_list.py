@@ -465,10 +465,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> ValidationDependencies:
-        # This calls TableExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
+        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
-        # TableExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
+        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
         # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(

@@ -7,8 +7,8 @@ from great_expectations.core import (
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
+    BatchExpectation,
     InvalidExpectationConfigurationError,
-    TableExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -20,7 +20,7 @@ from great_expectations.render.renderer_configuration import (
 from great_expectations.render.util import substitute_none_for_missing
 
 
-class ExpectTableRowCountToEqual(TableExpectation):
+class ExpectTableRowCountToEqual(BatchExpectation):
     """Expect the number of rows to equal a value.
 
     expect_table_row_count_to_equal is a \
