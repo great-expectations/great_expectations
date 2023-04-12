@@ -28,7 +28,7 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                     pd.DataFrame,
                     pd.Series,
                     sqlalchemy_engine_Row if sqlalchemy_engine_Row else None,
-                    pyspark_sql_Row if pyspark_sql_Row else None,
+                    pyspark_sql_Row if pyspark_sql_Row else None,  # type: ignore[truthy-function]
                     set,
                 )
             ),
