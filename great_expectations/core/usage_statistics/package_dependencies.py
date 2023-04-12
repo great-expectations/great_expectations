@@ -173,6 +173,7 @@ class GXDependencies:
         "global-land-mask",
         "gtin",
         "holidays",
+        # "indiapins",      # Currently a broken package
         "ipwhois",
         "isbnlib",
         "langid",
@@ -180,6 +181,7 @@ class GXDependencies:
         "phonenumbers",
         "price_parser",
         "primefac",
+        "prophet",
         "pwnedpasswords",
         "py-moneyed",
         "pydnsbl",
