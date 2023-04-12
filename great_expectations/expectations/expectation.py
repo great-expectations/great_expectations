@@ -2603,7 +2603,7 @@ class ColumnExpectation(ColumnAggregateExpectation, ABC):
     def __init__(
         self,
         configuration: Optional[ExpectationConfiguration] = None,
-    ):        
+    ):
         # deprecated-v0.16.6
         warnings.warn(
             "The abstract base class ColumnExpectation is deprecated in favor of ColumnAggregateExpectation as of v0.16.6. It will be removed in "
@@ -2611,7 +2611,9 @@ class ColumnExpectation(ColumnAggregateExpectation, ABC):
             DeprecationWarning,
         )
 
-        super().__init__(configuration=configuration,)
+        super().__init__(
+            configuration=configuration,
+        )
 
 
 @public_api
