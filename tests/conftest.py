@@ -108,7 +108,10 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.optional_imports import pyspark_sql_SparkSession
+    from great_expectations.optional_imports import (
+        pyspark_sql_SparkSession,
+        pyspark_sql_DataFrame,
+    )
 
 yaml = YAMLHandler()
 ###
@@ -394,8 +397,8 @@ def spark_session(test_backends) -> pyspark_sql_SparkSession:
         pytest.skip("No spark backend selected.")
 
     from great_expectations.optional_imports import (
-        pyspark_sql_SparkSession,
         SPARK_NOT_IMPORTED,
+        pyspark_sql_SparkSession,
     )
 
     if pyspark_sql_SparkSession != SPARK_NOT_IMPORTED:
@@ -7459,7 +7462,7 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index() -> pd.DataF
 @pytest.fixture
 def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark.sql.dataframe.DataFrame:
+) -> pyspark_sql_DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7489,7 +7492,7 @@ def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark.sql.dataframe.DataFrame:
+) -> pyspark_sql_DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7506,7 +7509,7 @@ def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> pyspark.sql.dataframe.DataFrame:
+) -> pyspark_sql_DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
