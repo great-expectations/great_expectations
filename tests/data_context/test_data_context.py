@@ -41,7 +41,7 @@ from great_expectations.datasource import (
     SimpleSqlalchemyDatasource,
 )
 from great_expectations.datasource.types.batch_kwargs import PathBatchKwargs
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.render import (
     AtomicPrescriptiveRendererType,
     AtomicRendererType,
@@ -2867,7 +2867,7 @@ def test_check_for_usage_stats_sync_short_circuits_due_to_disabled_usage_stats(
     assert res is False
 
 
-class ExpectSkyToBeColor(TableExpectation):
+class ExpectSkyToBeColor(BatchExpectation):
     metric_dependencies = ("table.color",)
     success_keys = ("color",)
     args_keys = ("color",)
