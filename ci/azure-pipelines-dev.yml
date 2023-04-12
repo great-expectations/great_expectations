@@ -128,6 +128,8 @@ stages:
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
+              # TODO: Temporary for testing, remove this sqlalchemy pin
+              pip install sqlalchemy==1.14.47
             displayName: 'Install dependencies'
 
           - script: |
