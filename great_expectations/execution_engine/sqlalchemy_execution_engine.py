@@ -278,8 +278,7 @@ def _get_dialect_type_module(dialect):
     return dialect
 
 
-def _dialects_requiring_persisted_connection() -> tuple[GXSqlDialect, ...]:
-    return GXSqlDialect.SQLITE, GXSqlDialect.MSSQL
+_PERSISTED_CONNECTION_DIALECTS = (GXSqlDialect.SQLITE, GXSqlDialect.MSSQL)
 
 
 @public_api
@@ -1346,8 +1345,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
         # TODO: Add docstring
 
-        if self.dialect_name in _dialects_requiring_persisted_connection():
-            # sqlite/mssql temp tables only persist within a connection,
+        if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
+            # Temp tables only persist within a connection for some dialects,
             # so we need to keep the connection alive.
             if not self._connection:
                 self._connection = self.engine.connect()
