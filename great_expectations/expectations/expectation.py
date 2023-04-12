@@ -2421,6 +2421,7 @@ representation."""
 
         return {"success": success, "result": {"observed_value": metric_value}}
 
+
 @public_api
 class TableExpectation(BatchExpectation, ABC):
     """Base class for TableExpectations.

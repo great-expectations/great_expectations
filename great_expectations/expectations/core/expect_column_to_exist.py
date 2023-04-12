@@ -7,8 +7,8 @@ from great_expectations.core import (
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
-    InvalidExpectationConfigurationError,
     BatchExpectation,
+    InvalidExpectationConfigurationError,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
