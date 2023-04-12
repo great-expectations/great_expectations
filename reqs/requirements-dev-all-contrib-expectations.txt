@@ -16,6 +16,7 @@ geopy
 global-land-mask
 gtin
 holidays
+# indiapins         # This package does not work (FileNotFoundError: '...lib/python3.8/site-packages/indiapins/pins.json.bz2')
 ipwhois
 isbnlib
 langid>=1.1.6
