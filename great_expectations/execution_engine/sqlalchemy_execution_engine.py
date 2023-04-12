@@ -45,7 +45,10 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_sample
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.optional_imports import sqlalchemy_version_check
+from great_expectations.optional_imports import (
+    sqlalchemy_Engine,
+    sqlalchemy_version_check,
+)
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 
 del get_versions  # isort:skip
@@ -99,7 +102,7 @@ except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.engine import Dialect, Engine, Row  # noqa: TID251
+    from sqlalchemy.engine import Dialect, Row  # noqa: TID251
     from sqlalchemy.exc import OperationalError  # noqa: TID251
     from sqlalchemy.sql import Selectable  # noqa: TID251
     from sqlalchemy.sql.elements import (  # noqa: TID251
@@ -110,7 +113,6 @@ try:
     )
     from sqlalchemy.sql.selectable import Select, TextualSelect  # noqa: TID251
 except ImportError:
-    Engine = None
     BooleanClauseList = None
     DefaultDialect = None
     Dialect = None
