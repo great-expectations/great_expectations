@@ -169,9 +169,16 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
         return batch_list
 
+    @public_api
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
+        """A batch request that can be used to obtain batches for this DataAsset.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
         if options:
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(

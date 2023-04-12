@@ -18,6 +18,7 @@ import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
@@ -109,9 +110,16 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
 
+    @public_api
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
+        """A batch request that can be used to obtain batches for this DataAsset.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
         if options:
             actual_keys = set(options.keys())
             raise gx_exceptions.InvalidBatchRequestError(
