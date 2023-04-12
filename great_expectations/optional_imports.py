@@ -231,7 +231,7 @@ try:
     import pyspark as pyspark
     import pyspark.sql.functions as F  # noqa N801
     import pyspark.sql.types as sparktypes
-    from pyspark import SparkContext as pyspark_sql_SparkContext
+    from pyspark import SparkContext as pyspark_SparkContext
     from pyspark.ml.feature import Bucketizer as pyspark_ml_Bucketizer
     from pyspark.sql import (
         Column as pyspark_sql_Column,
@@ -264,7 +264,7 @@ except ImportError:
     pyspark_sql_utils_AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_DataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_Column = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
-    pyspark_sql_SparkContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+    pyspark_SparkContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_SQLContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
     pyspark_sql_Window = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
