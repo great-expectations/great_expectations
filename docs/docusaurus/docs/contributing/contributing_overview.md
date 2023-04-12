@@ -9,7 +9,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 
 #### 1. Join the community on Slack
 
-* Go to [greatexpectations.io/slack](https://greatexpectations.io/slack) and introduce yourself in the `#contributors-contributing` channel.
+* Go to [greatexpectations.io/slack](https://greatexpectations.io/slack) and introduce yourself in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel.
 
 #### 2. Contribute small changes directly through GitHub 
 
@@ -18,15 +18,13 @@ Our goal is to make your experience as great as possible. Please follow these st
 #### 3. Set up your development environment to contribute large changes
 * Follow these instructions to [set up your dev environment](./contributing_setup.md).
 
-Alternatively, for small changes that don’t need to be tested locally (e.g. documentation changes), you can [make changes directly through GitHub](https://docs.greatexpectations.io/docs/contributing/contributing_github).
-
 #### 4. Identify the type of contribution that you want to make
 
 * [Issues in GitHub](https://github.com/great-expectations/great_expectations/issues) are a great place to start. Check out the help wanted and good first issue labels. Comment to let everyone know you’re working on it.
 
 * If there’s no issue for what you want to work on, please create one. Add a comment to let everyone know that you’re working on it. We prefer small, incremental commits, because it makes the thought process behind changes easier to review.
 
-* Our [Levels of maturity grid](./contributing_maturity.md) provides guidelines for how the maintainers of Great Expectations evaluate levels of maturity of a feature.
+* Our [Levels of Maturity grid](./contributing_maturity.md) provides guidelines for how the maintainers of Great Expectations evaluate levels of maturity of a feature.
 
 #### 5. Start developing
 * Make sure to reference the style guides for [code](./style_guides/code_style.md) and
