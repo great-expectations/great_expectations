@@ -117,6 +117,7 @@ from great_expectations.render.util import (
 )
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
+    generate_dataset_name_from_expectation_name,
     generate_expectation_tests,
 )
 from great_expectations.util import camel_to_snake, is_parseable_date
@@ -1552,7 +1553,7 @@ class Expectation(metaclass=MetaExpectation):
         all_examples: List[dict] = self.examples or self._get_examples_from_json()
 
         included_examples = []
-        for example in all_examples:
+        for i, example in enumerate(all_examples, 1):
 
             included_test_cases = []
             # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests
@@ -1597,6 +1598,15 @@ class Expectation(metaclass=MetaExpectation):
                     copied_example["test_backends"] = [
                         TestBackend(**tb) for tb in copied_example["test_backends"]
                     ]
+
+                if not "dataset_name" in copied_example:
+                    dataset_name = generate_dataset_name_from_expectation_name(
+                        dataset=copied_example,
+                        expectation_type=self.expectation_type,
+                        index=i,
+                    )
+                    copied_example["dataset_name"] = dataset_name
+
                 included_examples.append(ExpectationTestDataCases(**copied_example))
 
         return included_examples
