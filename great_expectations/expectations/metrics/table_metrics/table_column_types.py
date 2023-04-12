@@ -15,12 +15,7 @@ from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.expectations.metrics.util import get_sqlalchemy_column_metadata
-from great_expectations.optional_imports import sparktypes
-
-try:
-    from sqlalchemy.sql.elements import TextClause  # noqa: TID251
-except ImportError:
-    TextClause = None
+from great_expectations.optional_imports import sparktypes, sqlalchemy_TextClause
 
 
 class ColumnTypes(TableMetricProvider):
@@ -94,8 +89,8 @@ class ColumnTypes(TableMetricProvider):
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     # if a custom query was passed
-    if isinstance(batch_data.selectable, TextClause):
-        table_selectable: TextClause = batch_data.selectable
+    if isinstance(batch_data.selectable, sqlalchemy_TextClause):
+        table_selectable: sqlalchemy_TextClause = batch_data.selectable
         schema_name = None
     else:
         table_selectable: str = (  # type: ignore[no-redef]

@@ -105,13 +105,7 @@ try:
         Dialect as sqlalchemy_engine_Dialect,
     )
     from sqlalchemy.engine import (
-        Engine as sqlalchemy_engine_Engine,
-    )
-    from sqlalchemy.engine import (
         Inspector as sqlalchemy_engine_Inspector,
-    )
-    from sqlalchemy.engine import (
-        Row as sqlalchemy_engine_Row,
     )
     from sqlalchemy.engine import (
         reflection as sqlalchemy_reflection,
@@ -123,16 +117,19 @@ try:
         NoSuchTableError as sqlalchemy_NoSuchTableError,
     )
     from sqlalchemy.exc import (
+        OperationalError as sqlalchemy_OperationalError,
+    )
+    from sqlalchemy.exc import (
         ProgrammingError as sqlalchemy_ProgrammingError,
     )
     from sqlalchemy.exc import (
         SQLAlchemyError,
     )
+    from sqlalchemy.sql import Insert as sa_sql_Insert
     from sqlalchemy.sql.elements import (
-        BinaryExpression,
-        BooleanClauseList,
-        Label,
-        TextClause,
+        literal as sqlalchemy_literal,
+    )
+    from sqlalchemy.sql.elements import (
         quoted_name,
     )
     from sqlalchemy.sql.expression import (
@@ -148,49 +145,67 @@ try:
         Selectable as sa_sql_expression_Selectable,
     )
     from sqlalchemy.sql.expression import (
+        TableClause as sa_sql_expression_TableClause,
+    )
+    from sqlalchemy.sql.expression import (
+        TextualSelect as sa_sql_expression_TextualSelect,
+    )
+    from sqlalchemy.sql.expression import (
         WithinGroup as sa_sql_expression_WithinGroup,
     )
+    from sqlalchemy.sql.operators import custom_op as sqlalchemy_custom_op
 except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_literal = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_custom_op = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_dialects_registry = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_Insert = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_TableClause = SQLALCHEMY_NOT_IMPORTED
     BinaryExpression = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_ProgrammingError = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_IntegrityError = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
+    sqlalchemy_OperationalError = SQLALCHEMY_NOT_IMPORTED
+    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_WithinGroup = SQLALCHEMY_NOT_IMPORTED
     CTE = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_NoSuchTableError = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_IntegrityError = SQLALCHEMY_NOT_IMPORTED
-    SQLAlchemyError = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_engine_Engine = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Dialect = SQLALCHEMY_NOT_IMPORTED
-    sqlalchemy_engine_Row = SQLALCHEMY_NOT_IMPORTED
     BooleanClauseList = SQLALCHEMY_NOT_IMPORTED
     Label = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_reflection = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_ColumnClause = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_Select = SQLALCHEMY_NOT_IMPORTED
+    sa_sql_expression_TextualSelect = SQLALCHEMY_NOT_IMPORTED
     sa_sql_expression_Selectable = SQLALCHEMY_NOT_IMPORTED
     quoted_name = SQLALCHEMY_NOT_IMPORTED
-    TextClause = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Inspector = SQLALCHEMY_NOT_IMPORTED
 
 try:
-    sqlalchemy_Connection = sqlalchemy.engine.Connection
-except (ImportError, AttributeError):
-    sqlalchemy_Connection = SQLALCHEMY_NOT_IMPORTED
+    from sqlalchemy.engine import (
+        Connection as sqlalchemy_engine_Connection,
+    )
+except ImportError:
+    sqlalchemy_engine_Connection = SQLALCHEMY_NOT_IMPORTED
 
 try:
-    sqlalchemy_Engine = sqlalchemy.engine.Engine
-except (ImportError, AttributeError):
-    sqlalchemy_Engine = SQLALCHEMY_NOT_IMPORTED
+    from sqlalchemy.engine import (
+        Engine as sqlalchemy_engine_Engine,
+    )
+except ImportError:
+    sqlalchemy_engine_Engine = SQLALCHEMY_NOT_IMPORTED
 
 try:
-    sqlalchemy_Row = sqlalchemy.engine.Row
-except (ImportError, AttributeError):
-    sqlalchemy_Row = SQLALCHEMY_NOT_IMPORTED
+    from sqlalchemy.engine import (
+        Row as sqlalchemy_engine_Row,
+    )
+except ImportError:
+    sqlalchemy_engine_Row = SQLALCHEMY_NOT_IMPORTED
 
 try:
-    sqlalchemy_TextClause = sqlalchemy.sql.elements.TextClause
-except (ImportError, AttributeError):
+    from sqlalchemy.sql.elements import (
+        TextClause as sqlalchemy_TextClause,
+    )
+except ImportError:
     sqlalchemy_TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SPARK_NOT_IMPORTED = NotImported(

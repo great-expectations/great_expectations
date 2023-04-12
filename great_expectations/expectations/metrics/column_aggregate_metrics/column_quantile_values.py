@@ -25,10 +25,10 @@ from great_expectations.optional_imports import (
     CTE,
     SQLALCHEMY_NOT_IMPORTED,
     Label,
-    TextClause,
     sa_sql_expression_Select,
     sa_sql_expression_WithinGroup,
     sqlalchemy_ProgrammingError,
+    sqlalchemy_TextClause,
 )
 from great_expectations.optional_imports import (
     sqlalchemy as sa,
@@ -319,7 +319,7 @@ def _get_column_quantiles_trino(
 ) -> list:
     # Trino does not have the percentile_disc func, but instead has approx_percentile
     sql_approx: str = f"approx_percentile({column}, ARRAY{list(quantiles)})"
-    selects_approx: List[TextClause] = [sa.text(sql_approx)]
+    selects_approx: List[sqlalchemy_TextClause] = [sa.text(sql_approx)]
     quantiles_query: sa_sql_expression_Select = sa.select(*selects_approx).select_from(
         selectable
     )
@@ -385,7 +385,7 @@ def _get_column_quantiles_athena(
     sqlalchemy_engine,
 ) -> list:
     approx_percentiles = f"approx_percentile({column}, ARRAY{list(quantiles)})"
-    selects_approx: List[TextClause] = [sa.text(approx_percentiles)]
+    selects_approx: List[sqlalchemy_TextClause] = [sa.text(approx_percentiles)]
     quantiles_query_approx: sa_sql_expression_Select = sa.select(
         *selects_approx
     ).select_from(selectable)
@@ -437,7 +437,7 @@ def _get_column_quantiles_generic_sqlalchemy(
             sql_approx: str = get_approximate_percentile_disc_sql(
                 selects=selects, sql_engine_dialect=dialect
             )
-            selects_approx: List[TextClause] = [sa.text(sql_approx)]
+            selects_approx: List[sqlalchemy_TextClause] = [sa.text(sql_approx)]
             quantiles_query_approx: sa_sql_expression_Select = sa.select(
                 *selects_approx
             ).select_from(selectable)

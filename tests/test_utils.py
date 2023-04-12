@@ -30,7 +30,11 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.optional_imports import sqlalchemy as sa, SQLAlchemyError
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+    SQLAlchemyError,
+    sqlalchemy_engine_Connection,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -141,7 +145,7 @@ def get_sqlite_temp_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+    if isinstance(execution_engine.engine, sqlalchemy_engine_Connection):
         connection = execution_engine.engine
         result = connection.execute(statement)
     else:
@@ -156,7 +160,7 @@ def get_sqlite_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_master")
 
-    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+    if isinstance(execution_engine.engine, sqlalchemy_engine_Connection):
         connection = execution_engine.engine
         result = connection.execute(statement)
     else:

@@ -35,7 +35,7 @@ from great_expectations.expectations.metrics.util import (
     sql_statement_with_post_compile_to_string,
     verify_column_names_exist,
 )
-from great_expectations.optional_imports import F, quoted_name, sqlalchemy_Engine
+from great_expectations.optional_imports import F, quoted_name, sqlalchemy_engine_Engine
 from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     generate_temporary_table_name,
@@ -360,7 +360,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
-        if sqlalchemy_Engine and isinstance(execution_engine.engine, sqlalchemy_Engine):
+        if isinstance(execution_engine.engine, sqlalchemy_engine_Engine):
             connection = execution_engine.engine.connect()
         else:
             # execution_engine.engine is already a Connection. Use it directly
