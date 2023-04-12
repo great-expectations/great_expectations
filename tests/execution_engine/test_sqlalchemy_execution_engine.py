@@ -47,6 +47,8 @@ try:
 except ImportError:
     sqlalchemy = None
 
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
+
 
 def test_instantiation_via_connection_string(sa, test_db_connection_string):
     my_execution_engine = SqlAlchemyExecutionEngine(
