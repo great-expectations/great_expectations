@@ -8,7 +8,7 @@ from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectTableColumnsToMatchSet(TableExpectation):
+class ExpectTableColumnsToMatchSet(BatchExpectation):
     """Expect the columns to match an unordered set.
 
     expect_table_columns_to_match_set is a \
