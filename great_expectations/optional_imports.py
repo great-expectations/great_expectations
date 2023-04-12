@@ -277,7 +277,7 @@ try:
     )
 except ImportError:
     google_cloud_storage = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
-    google_service_account = GoogleServiceAccountCredentials
+    google_service_account = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     GoogleServiceAccountCredentials = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     GoogleCloudStorageClient = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     GoogleAPIError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
