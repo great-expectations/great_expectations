@@ -170,6 +170,7 @@ try:
     )
     from sqlalchemy.sql.operators import custom_op as sqlalchemy_custom_op
 except ImportError:
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_dialects_registry = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Dialect = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Inspector = SQLALCHEMY_NOT_IMPORTED
