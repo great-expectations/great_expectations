@@ -64,7 +64,6 @@ if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
-        BatchRequestOptions,
     )
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.validator.validator import Validator
@@ -170,23 +169,13 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         return batch_list
 
     @public_api
-    def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
-    ) -> BatchRequest:
+    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        if options:
-            actual_keys = set(options.keys())
-            raise gx_exceptions.InvalidBatchRequestError(
-                "Data Assets associated with PandasDatasource can only contain a single batch,\n"
-                "therefore BatchRequest options cannot be supplied. BatchRequest options with keys:\n"
-                f"{actual_keys}\nwere passed.\n"
-            )
-
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
