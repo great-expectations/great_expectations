@@ -667,6 +667,7 @@ class _SQLAsset(DataAsset):
         self.sort_batches(batch_list)
         return batch_list
 
+    @public_api
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:

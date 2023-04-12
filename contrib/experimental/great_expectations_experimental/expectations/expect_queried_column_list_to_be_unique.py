@@ -87,7 +87,6 @@ class ExpectQueriedColumnListToBeUnique(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "unique_num": [1, 2, 3, 4, 5, 6],
                         "unique_str": ["a", "b", "c", "d", "e", "f"],

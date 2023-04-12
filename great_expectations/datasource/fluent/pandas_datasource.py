@@ -27,6 +27,7 @@ import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
@@ -62,7 +63,6 @@ if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
-        BatchRequestOptions,
     )
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.validator.validator import Validator
@@ -167,17 +167,14 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
         return batch_list
 
-    def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
-    ) -> BatchRequest:
-        if options:
-            actual_keys = set(options.keys())
-            raise gx_exceptions.InvalidBatchRequestError(
-                "Data Assets associated with PandasDatasource can only contain a single batch,\n"
-                "therefore BatchRequest options cannot be supplied. BatchRequest options with keys:\n"
-                f"{actual_keys}\nwere passed.\n"
-            )
+    @public_api
+    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+        """A batch request that can be used to obtain batches for this DataAsset.
 
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -511,7 +508,16 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
 
+@public_api
 class PandasDatasource(_PandasDatasource):
+    """Adds a single-batch pandas datasource to the data context.
+
+    Args:
+        name: The name of this datasource.
+        assets: An optional dictionary whose keys are Pandas DataAsset names and whose values
+            are Pandas DataAsset objects.
+    """
+
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
         DataFrameAsset

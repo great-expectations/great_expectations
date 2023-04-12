@@ -108,7 +108,6 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "uuid": [1, 2, 2, 3, 4, 4],
                         "is_open": [True, False, True, True, True, True],

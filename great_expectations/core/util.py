@@ -72,7 +72,12 @@ except ImportError:
     MultiPolygon = None
     LineString = None
 
-from great_expectations.optional_imports import SQLALCHEMY_NOT_IMPORTED, sqlalchemy
+from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
+    sqlalchemy,
+    sqlalchemy_Connection,
+    sqlalchemy_TextClause,
+)
 
 try:
     LegacyRow = sqlalchemy.engine.row.LegacyRow
@@ -81,13 +86,6 @@ except (
     AttributeError,
 ):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
-
-# This is a separate try/except than the LegacyRow one since TextClause exists in sqlalchemy 2. This means LegacyRow
-# may be not importable while TextClause is.
-try:
-    TextClause = sqlalchemy.sql.elements.TextClause
-except ImportError:
-    TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
     "api_np": {
@@ -312,6 +310,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         # No problem to encode json
         return data
 
+    if isinstance(data, range):
+        return list(data)
+
     if isinstance(data, dict):
         new_dict = {}
         for key in data:
@@ -414,7 +415,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return dict(data)
 
     # sqlalchemy text for SqlAlchemy 2 compatibility
-    if TextClause and isinstance(data, TextClause):
+    if sqlalchemy_TextClause and isinstance(data, sqlalchemy_TextClause):
         return str(data)
 
     if isinstance(data, decimal.Decimal):
@@ -426,6 +427,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     # PySpark schema serialization
     if StructType is not None and isinstance(data, StructType):
         return dict(data.jsonValue())
+
+    if sqlalchemy_Connection and isinstance(data, sqlalchemy_Connection):
+        # Connection is a module, which is non-serializable. Return module name instead.
+        return "sqlalchemy.engine.base.Connection"
 
     raise TypeError(
         f"{str(data)} is of type {type(data).__name__} which cannot be serialized."
@@ -533,8 +538,12 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     if isinstance(data, RunIdentifier):
         return
 
-    if sqlalchemy is not None and isinstance(data, sqlalchemy.sql.elements.TextClause):
-        return str(data)
+    if sqlalchemy_TextClause and isinstance(data, sqlalchemy_TextClause):
+        # TextClause is handled manually by convert_to_json_serializable()
+        return
+    if sqlalchemy_Connection and isinstance(data, sqlalchemy_Connection):
+        # Connection module is handled manually by convert_to_json_serializable()
+        return
 
     else:
         raise InvalidExpectationConfigurationError(

@@ -235,10 +235,11 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     library_metadata = {
-        "tags": [],  # Tags for this Expectation in the Gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@your_name_here",  # Don't forget to add your github handle here!
+        "tags": [],
+        "contributors": [
+            "@abegong",
         ],
+        "requirements": ["prophet"],
     }
 
 

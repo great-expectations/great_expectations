@@ -18,7 +18,7 @@ from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_function_partial,
@@ -140,7 +140,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
         return dependencies
 
 
-class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnExpectation):
+class ExpectColumnValuesToBeStringIntegersIncreasing(ColumnAggregateExpectation):
     """Expect a column to contain string-typed integers to be increasing.
 
     expect_column_values_to_be_string_integers_increasing is a \

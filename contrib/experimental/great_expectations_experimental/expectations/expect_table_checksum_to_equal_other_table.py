@@ -26,7 +26,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
@@ -264,8 +264,8 @@ class TableChecksumValues(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableChecksumToEqualOtherTable(TableExpectation):
-    """Expect the checksum table to equal the checksum of another table.
+class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
+    """Expect the checksum for one batch table to equal the checksum of another table.
 
     expect_table_checksum_to_equal_other_table is a \
     [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
@@ -303,7 +303,6 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "table_data_1",
                     "data": {
                         "columnone": [3, 5, 7],
                         "columntwo": [True, False, True],
@@ -312,7 +311,6 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                     },
                 },
                 {
-                    "dataset_name": "table_data_2",
                     "data": {
                         "columnone": [3, 5, 7],
                         "columntwo": [True, False, True],
@@ -321,7 +319,6 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                     },
                 },
                 {
-                    "dataset_name": "table_data_3",
                     "data": {
                         "columnone": [3, 5, 7, 8],
                         "columntwo": [True, False, True, False],
