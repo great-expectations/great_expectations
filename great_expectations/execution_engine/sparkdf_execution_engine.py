@@ -242,7 +242,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
     def load_batch_data(  # type: ignore[override]
         self, batch_id: str, batch_data: Union[SparkDFBatchData, pyspark_sql_DataFrame]
     ) -> None:
-        if pyspark_sql_DataFrame and isinstance(batch_data, pyspark_sql_DataFrame):
+        if pyspark_sql_DataFrame and isinstance(batch_data, pyspark_sql_DataFrame):  # type: ignore[truthy-function]
             batch_data = SparkDFBatchData(self, batch_data)
         elif not isinstance(batch_data, SparkDFBatchData):
             raise GreatExpectationsError(

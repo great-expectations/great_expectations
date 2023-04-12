@@ -88,7 +88,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def _validate_dataframe(
         cls, dataframe: pyspark_sql_DataFrame
     ) -> pyspark_sql_DataFrame:
-        if not (pyspark_sql_DataFrame and isinstance(dataframe, pyspark_sql_DataFrame)):
+        if not (pyspark_sql_DataFrame and isinstance(dataframe, pyspark_sql_DataFrame)):  # type: ignore[truthy-function]
             raise ValueError("dataframe must be of type pyspark.sql.DataFrame")
 
         return dataframe

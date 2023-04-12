@@ -390,7 +390,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if isinstance(data, pd.DataFrame):
         return convert_to_json_serializable(data.to_dict(orient="records"))
 
-    if pyspark_sql_DataFrame and isinstance(data, pyspark_sql_DataFrame):
+    if pyspark_sql_DataFrame and isinstance(data, pyspark_sql_DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return convert_to_json_serializable(
@@ -509,7 +509,7 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
         ]
         return
 
-    if pyspark_sql_DataFrame and isinstance(data, pyspark_sql_DataFrame):
+    if pyspark_sql_DataFrame and isinstance(data, pyspark_sql_DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return ensure_json_serializable(
