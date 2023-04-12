@@ -11,14 +11,13 @@ from jinja2 import (
     Environment,
     FileSystemLoader,
     PackageLoader,
-    pass_context,
     select_autoescape,
 )
 
-# try:
-#    from jinja2 import contextfilter
-# except (ImportError, DeprecationWarning):
-#    from jinja2 import pass_context as contextfilter
+try:
+    from jinja2 import contextfilter
+except (ImportError, DeprecationWarning):
+    from jinja2 import pass_context as contextfilter
 from great_expectations import __version__ as ge_version
 from great_expectations.render import (
     RenderedComponentContent,
@@ -118,7 +117,7 @@ class DefaultJinjaView:
 
         return template
 
-    @pass_context
+    @contextfilter
     def add_data_context_id_to_url(self, jinja_context, url, add_datetime=True):
         data_context_id = jinja_context.get("data_context_id")
         if add_datetime:
@@ -131,7 +130,7 @@ class DefaultJinjaView:
             url += data_context_id
         return url
 
-    @pass_context
+    @contextfilter
     def render_content_block(
         self,
         jinja_context,
@@ -210,7 +209,7 @@ class DefaultJinjaView:
                 context, val, index, content_block_id
             )
 
-    @pass_context
+    @contextfilter
     def render_bootstrap_table_data(
         self, context, table_data, index=None, content_block_id=None
     ):
@@ -561,7 +560,7 @@ class DefaultMarkdownPageView(DefaultJinjaView):
             template.get("params", {})
         )
 
-    @pass_context
+    @contextfilter
     def render_content_block(
         self,
         jinja_context,
