@@ -19,7 +19,7 @@ from great_expectations.expectations.expectation import (
     ColumnExpectation,
     render_evaluation_parameter_string,
 )
-from great_expectations.expectations.metrics.column_aggregate_metric import (
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
