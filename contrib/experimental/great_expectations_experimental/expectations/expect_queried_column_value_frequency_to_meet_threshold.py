@@ -109,7 +109,6 @@ class ExpectQueriedColumnValueFrequencyToMeetThreshold(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "col1": [1, 2, 2, 3, 4],
                         "col2": ["a", "a", "b", "b", "a"],

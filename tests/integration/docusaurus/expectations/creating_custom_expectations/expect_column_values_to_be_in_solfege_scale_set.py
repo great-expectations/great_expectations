@@ -42,7 +42,6 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_be_in_solfege_scale_set.py examples">
     examples = [
         {
-            "dataset_name": "expect_column_values_to_be_in_solfege_scale_set_1",
             "data": {
                 "lowercase_solfege_scale": [
                     "do",
