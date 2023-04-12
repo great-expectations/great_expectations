@@ -10,8 +10,8 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import InferredAssetGCSDataConnector
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.optional_imports import (
-    GoogleCloudStorageClient,
     GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    GoogleCloudStorageClient,
 )
 
 yaml = YAMLHandler()

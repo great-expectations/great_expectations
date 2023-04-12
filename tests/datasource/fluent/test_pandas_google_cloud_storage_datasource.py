@@ -26,8 +26,8 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
 )
 from great_expectations.optional_imports import (
-    GoogleCloudStorageClient,
     GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    GoogleCloudStorageClient,
 )
 
 logger = logging.getLogger(__file__)

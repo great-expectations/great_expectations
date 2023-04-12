@@ -31,11 +31,12 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.optional_imports import (
-    sqlalchemy as sa,
     SQLAlchemyError,
     sqlalchemy_engine_Connection,
 )
-
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()

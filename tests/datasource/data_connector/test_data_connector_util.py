@@ -17,8 +17,8 @@ from great_expectations.datasource.data_connector.util import (
     map_data_reference_string_to_batch_definition_list_using_regex,
 )
 from great_expectations.optional_imports import (
-    GoogleCloudStorageClient,
     GOOGLE_CLOUD_STORAGE_NOT_IMPORTED,
+    GoogleCloudStorageClient,
 )
 
 

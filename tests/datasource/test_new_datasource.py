@@ -6,8 +6,6 @@ from typing import Any, Dict, List, Optional, Union
 import pandas as pd
 import pytest
 
-from great_expectations.util import is_candidate_subset_of_target
-from great_expectations.optional_imports import pyspark_sql_Row
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
     Batch,
@@ -25,6 +23,8 @@ from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
 from great_expectations.datasource.new_datasource import Datasource
+from great_expectations.optional_imports import pyspark_sql_Row
+from great_expectations.util import is_candidate_subset_of_target
 from tests.test_utils import create_files_in_directory
 
 yaml = YAMLHandler()
