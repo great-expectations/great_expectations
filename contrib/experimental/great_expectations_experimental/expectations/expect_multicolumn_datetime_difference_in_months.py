@@ -93,7 +93,7 @@ class ColumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
+class ExpectMulticolumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
 
     """Expect the difference of 2 datetime columns is equal to another column in month.
 
