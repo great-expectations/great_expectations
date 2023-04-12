@@ -45,6 +45,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
     SqlAlchemyDataSplitter,
 )
 from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
     quoted_name,
     sa_sql_expression_Select,
     sa_sql_expression_Selectable,
@@ -102,9 +103,10 @@ from great_expectations.validator.metric_configuration import (
 
 logger = logging.getLogger(__name__)
 
-sqlalchemy_version_check(sa.__version__)
 
-make_url = import_make_url()
+if sa != SQLALCHEMY_NOT_IMPORTED:
+    sqlalchemy_version_check(sa.__version__)
+    make_url = import_make_url()
 
 
 try:
