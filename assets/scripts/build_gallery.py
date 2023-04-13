@@ -54,9 +54,7 @@ IGNORE_NON_V3_EXPECTATIONS = (
     "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
     "expect_multicolumn_values_to_be_unique",
 )
-IGNORE_FAULTY_EXPECTATIONS = (
-    "expect_column_values_to_be_valid_india_zip",
-)
+IGNORE_FAULTY_EXPECTATIONS = ("expect_column_values_to_be_valid_india_zip",)
 
 
 def execute_shell_command(command: str) -> int:
