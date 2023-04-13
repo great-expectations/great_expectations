@@ -1,7 +1,7 @@
 import copy
 from typing import Optional
 
-from capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
     DataProfilerProfileMetricProvider,
 )
 from great_expectations.core.expectation_configuration import ExpectationConfiguration

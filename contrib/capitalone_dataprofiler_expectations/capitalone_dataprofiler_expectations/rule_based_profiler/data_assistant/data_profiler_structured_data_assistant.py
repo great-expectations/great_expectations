@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional
 
-from capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
     DataProfilerStructuredDataAssistantResult,
 )
-from capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.domain_builder.data_profiler_column_domain_builder import (
+from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.domain_builder.data_profiler_column_domain_builder import (
     DataProfilerColumnDomainBuilder,
 )
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
