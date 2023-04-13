@@ -6,7 +6,6 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     ClassVar,
-    Dict,
     Generic,
     List,
     Optional,
@@ -203,7 +202,7 @@ class SparkDatasource(_SparkDatasource):
     # instance attributes
     type: Literal["spark"] = "spark"
 
-    assets: Dict[str, DataFrameAsset] = {}  # type: ignore[assignment]
+    assets: List[DataFrameAsset] = []  # type: ignore[assignment]
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...
