@@ -2,11 +2,11 @@
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.optional_imports import sqlalchemy as sa
-
 
 yaml = YAMLHandler()
 # </snippet>
+
+from great_expectations.optional_imports import sqlalchemy as sa
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_introspect_and_partition_your_data/sql_database/yaml_example_complete.py get_context">
 context = gx.get_context()
