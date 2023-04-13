@@ -139,14 +139,19 @@ class PandasExecutionEngine(ExecutionEngine):
         self._data_sampler = PandasDataSampler()
 
     def _instantiate_azure_client(self) -> None:
+        self._azure = None
         if BlobServiceClient:
             azure_options = self.config.get("azure_options", {})
-            if "conn_str" in azure_options:
-                self._azure = BlobServiceClient.from_connection_string(**azure_options)
-            else:
-                self._azure = BlobServiceClient(**azure_options)
-        else:
-            self._azure = None
+            try:
+                if "conn_str" in azure_options:
+                    self._azure = BlobServiceClient.from_connection_string(
+                        **azure_options
+                    )
+                else:
+                    self._azure = BlobServiceClient(**azure_options)
+            except (TypeError, AttributeError):
+                # If exception occurs, then "self._azure = None" remains in effect.
+                pass
 
     def _instantiate_s3_client(self) -> None:
         # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
