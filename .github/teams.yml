@@ -44,4 +44,5 @@ core:
   - '@wookasz'         # Łukasz Lempart
 
 bot:
-  - '@dependabot'      # Dependabot
+  - '@dependabot'
+  - '@dependabot[bot]'
