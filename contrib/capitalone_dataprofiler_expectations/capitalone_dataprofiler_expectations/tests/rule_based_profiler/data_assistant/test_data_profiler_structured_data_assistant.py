@@ -7,11 +7,11 @@ from unittest import mock
 
 import pytest
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # noqa: F401,F403  # registers this DataAssistant and prevents removal of "unused" import
+from capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
+from capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # noqa: F401,F403  # registers this DataAssistant and prevents removal of "unused" import
     DataProfilerStructuredDataAssistant,
 )
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
+from capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
     DataProfilerStructuredDataAssistantResult,
 )
 from great_expectations.core import ExpectationSuite
