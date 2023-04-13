@@ -307,3 +307,12 @@ except (ImportError, AttributeError):
     BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
     BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
     ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
+
+
+PYARROW_NOT_IMPORTED = NotImported(
+    "pyarrow is not installed, please 'pip install pyarrow'"
+)
+try:
+    import pyarrow as pyarrow
+except (ImportError, AttributeError):
+    pyarrow = PYARROW_NOT_IMPORTED

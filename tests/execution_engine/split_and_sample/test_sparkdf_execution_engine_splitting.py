@@ -25,7 +25,7 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
     SINGLE_DATE_PART_BATCH_IDENTIFIERS,
     SINGLE_DATE_PART_DATE_PARTS,
 )
-from great_expectations.optional_imports import F, pyspark_sql_DataFrame
+from great_expectations.optional_imports import F, pyspark_sql_DataFrame, pyarrow
 
 # Here we add SparkDataSplitter specific test cases to the generic test cases:
 SINGLE_DATE_PART_DATE_PARTS += [
@@ -300,6 +300,10 @@ def test_get_batch_empty_splitter_tsv(
     assert len(test_sparkdf.columns) == 2
 
 
+@pytest.mark.skipif(
+    not pyarrow,
+    reason='Could not import "pyarrow"',
+)
 def test_get_batch_empty_splitter_parquet(
     test_folder_connection_path_parquet, basic_spark_df_execution_engine
 ):

@@ -139,13 +139,13 @@ class PandasExecutionEngine(ExecutionEngine):
         self._data_sampler = PandasDataSampler()
 
     def _instantiate_azure_client(self) -> None:
-        azure_options = self.config.get("azure_options", {})
-        try:
+        if BlobServiceClient:
+            azure_options = self.config.get("azure_options", {})
             if "conn_str" in azure_options:
                 self._azure = BlobServiceClient.from_connection_string(**azure_options)
             else:
                 self._azure = BlobServiceClient(**azure_options)
-        except (TypeError, AttributeError):
+        else:
             self._azure = None
 
     def _instantiate_s3_client(self) -> None:
