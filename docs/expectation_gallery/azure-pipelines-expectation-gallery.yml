@@ -82,7 +82,96 @@ stages:
       vmImage: 'ubuntu-20.04'
 
     jobs:
-      - job: non_cloud
+      - job: dataframes
+        timeoutInMinutes: 180
+        variables:
+          python.version: '3.8'
+          GE_pytest_opts: ''
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install \
+                "cryptography==38.0.4" \
+                --requirement reqs/requirements-dev-all-contrib-expectations.txt \
+                --editable ".[spark]" \
+                --constraint constraints-dev.txt
+            displayName: 'Install dependencies'
+
+          - bash: python ./build_gallery.py --backends "spark, pandas" 2>&1 | tee output--build_gallery--dataframes.txt ; grep -o "Took .* seconds to .*" output--build_gallery--dataframes.txt | sort -k2,2nr > testing-times--dataframes.txt ; grep -o "ERROR - (.*" output--build_gallery--dataframes.txt | sort > testing-error-messages--dataframes.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery--dataframes.txt | sort > gallery-exp-types--dataframes.txt ; mv checklists.txt checklists--dataframes.txt ; mv gallery-tracebacks.txt gallery-tracebacks--dataframes.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'build_gallery.py partial run'
+            env:
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+              # Azure credentials
+              AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
+              AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+          - bash: grep -o "coverage_score:.*" output--build_gallery--dataframes.txt | sort -k2,2nr
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show coverage scores'
+
+          - bash: cut -d " " -f 3,4 gallery-exp-types--dataframes.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types--dataframes.txt | sort
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show Expectation types and counts'
+
+          - bash: grep -o "Implemented engines.*" output--build_gallery--dataframes.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show implemented engines'
+
+          - bash: cat checklists--dataframes.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show full checklist summary'
+
+          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists--dataframes.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show checklist issues'
+
+          - bash: cat testing-error-messages--dataframes.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing errors'
+
+          - bash: grep --color -n -i warning -B 2 output--build_gallery--dataframes.txt || echo "No warnings found"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing warnings'
+
+          - bash: cat gallery-tracebacks--dataframes.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show gallery tracebacks'
+
+          - bash: grep "to df.to_sql" testing-times--dataframes.txt || echo "No df.to_sql calls were made"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show DataFrame to SQL times'
+
+          - bash: grep "to run" testing-times--dataframes.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times grouped by backend and Expectation'
+
+          - bash: grep "to evaluate_json" testing-times--dataframes.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times for individual tests'
+
+#         - task: S3Upload@1
+#           inputs:
+#             regionName: 'us-east-2'
+#             awsCredentials: 'aws-ci-great-expectations'
+#             bucketName: 'superconductive-public'
+#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+#             globExpressions: '*.json'
+#             targetFolder: 'static/gallery/'
+#             filesAcl: 'public-read'
+
+      - job: non_cloud_sql
         timeoutInMinutes: 180
         variables:
           python.version: '3.8'
@@ -107,7 +196,7 @@ stages:
               pip install \
                 "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
-                --editable ".[spark, postgresql, mysql, mssql, trino]" \
+                --editable ".[postgresql, mysql, mssql, trino]" \
                 --constraint constraints-dev.txt
             displayName: 'Install dependencies'
 
@@ -137,8 +226,7 @@ stages:
 #             done;
             displayName: 'Wait for Trino database to initialise'
 
-          # Note: sqlite is used when --only-combine is passed in
-          - bash: python ./build_gallery.py --backends "spark, pandas, postgresql, mysql, mssql, trino" 2>&1 | tee output--build_gallery--non_cloud.txt ; grep -o "Took .* seconds to .*" output--build_gallery--non_cloud.txt | sort -k2,2nr > testing-times--non_cloud.txt ; grep -o "ERROR - (.*" output--build_gallery--non_cloud.txt | sort > testing-error-messages--non_cloud.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery--non_cloud.txt | sort > gallery-exp-types--non_cloud.txt ; mv checklists.txt checklists--non_cloud.txt ; mv gallery-tracebacks.txt gallery-tracebacks--non_cloud.txt
+          - bash: python ./build_gallery.py --backends "postgresql, mysql, mssql, trino" 2>&1 | tee output--build_gallery--non_cloud_sql.txt ; grep -o "Took .* seconds to .*" output--build_gallery--non_cloud_sql.txt | sort -k2,2nr > testing-times--non_cloud_sql.txt ; grep -o "ERROR - (.*" output--build_gallery--non_cloud_sql.txt | sort > testing-error-messages--non_cloud_sql.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery--non_cloud_sql.txt | sort > gallery-exp-types--non_cloud_sql.txt ; mv checklists.txt checklists--non_cloud_sql.txt ; mv gallery-tracebacks.txt gallery-tracebacks--non_cloud_sql.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'build_gallery.py partial run'
             env:
@@ -150,59 +238,59 @@ stages:
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-          - bash: grep -o "coverage_score:.*" output--build_gallery--non_cloud.txt | sort -k2,2nr
+          - bash: grep -o "coverage_score:.*" output--build_gallery--non_cloud_sql.txt | sort -k2,2nr
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show coverage scores'
 
-          - bash: cut -d " " -f 3,4 gallery-exp-types--non_cloud.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types--non_cloud.txt | sort
+          - bash: cut -d " " -f 3,4 gallery-exp-types--non_cloud_sql.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types--non_cloud_sql.txt | sort
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show Expectation types and counts'
 
-          - bash: grep -o "Implemented engines.*" output--build_gallery--non_cloud.txt
+          - bash: grep -o "Implemented engines.*" output--build_gallery--non_cloud_sql.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show implemented engines'
 
-          - bash: cat checklists--non_cloud.txt
+          - bash: cat checklists--non_cloud_sql.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show full checklist summary'
 
-          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists--non_cloud.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
+          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists--non_cloud_sql.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show checklist issues'
 
-          - bash: cat testing-error-messages--non_cloud.txt
+          - bash: cat testing-error-messages--non_cloud_sql.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing errors'
 
-          - bash: grep --color -n -i warning -B 2 output--build_gallery--non_cloud.txt || echo "No warnings found"
+          - bash: grep --color -n -i warning -B 2 output--build_gallery--non_cloud_sql.txt || echo "No warnings found"
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing warnings'
 
-          - bash: cat gallery-tracebacks--non_cloud.txt
+          - bash: cat gallery-tracebacks--non_cloud_sql.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show gallery tracebacks'
 
-          - bash: grep "to df.to_sql" testing-times--non_cloud.txt || echo "No df.to_sql calls were made"
+          - bash: grep "to df.to_sql" testing-times--non_cloud_sql.txt || echo "No df.to_sql calls were made"
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show DataFrame to SQL times'
 
-          - bash: grep "to run" testing-times--non_cloud.txt
+          - bash: grep "to run" testing-times--non_cloud_sql.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times grouped by backend and Expectation'
 
-          - bash: grep "to evaluate_json" testing-times--non_cloud.txt
+          - bash: grep "to evaluate_json" testing-times--non_cloud_sql.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times for individual tests'
 
-          - task: S3Upload@1
-            inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
+#         - task: S3Upload@1
+#           inputs:
+#             regionName: 'us-east-2'
+#             awsCredentials: 'aws-ci-great-expectations'
+#             bucketName: 'superconductive-public'
+#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+#             globExpressions: '*.json'
+#             targetFolder: 'static/gallery/'
+#             filesAcl: 'public-read'
 
 
       - job: gcp
@@ -296,15 +384,15 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times for individual tests'
 
-          - task: S3Upload@1
-            inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
+#         - task: S3Upload@1
+#           inputs:
+#             regionName: 'us-east-2'
+#             awsCredentials: 'aws-ci-great-expectations'
+#             bucketName: 'superconductive-public'
+#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+#             globExpressions: '*.json'
+#             targetFolder: 'static/gallery/'
+#             filesAcl: 'public-read'
 
 
       - job: snowflake
@@ -394,15 +482,15 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times for individual tests'
 
-          - task: S3Upload@1
-            inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
+#         - task: S3Upload@1
+#           inputs:
+#             regionName: 'us-east-2'
+#             awsCredentials: 'aws-ci-great-expectations'
+#             bucketName: 'superconductive-public'
+#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+#             globExpressions: '*.json'
+#             targetFolder: 'static/gallery/'
+#             filesAcl: 'public-read'
 
 
       - job: aws
@@ -499,20 +587,19 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times for individual tests'
 
-          - task: S3Upload@1
-            inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
+#         - task: S3Upload@1
+#           inputs:
+#             regionName: 'us-east-2'
+#             awsCredentials: 'aws-ci-great-expectations'
+#             bucketName: 'superconductive-public'
+#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+#             globExpressions: '*.json'
+#             targetFolder: 'static/gallery/'
+#             filesAcl: 'public-read'
 
 
   - stage: build_gallery_staging
     dependsOn: exp_tests_on_all_backends
-    condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -535,10 +622,15 @@ stages:
           - script: |
               pip install \
                 "cryptography==38.0.4" \
+                --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable "contrib/cli" \
-                --editable "." \
+                --editable ".[sqlalchemy]" \
                 --constraint constraints-dev.txt
             displayName: 'Install dependencies'
+
+          - bash: ls -ltr
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'ls in assets/scripts'
 
           - bash: python ./build_gallery.py --only-combine --outfile-name "expectation_library_v2--PLAY.json" 2>&1 | tee output--build_gallery--combined.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
@@ -551,6 +643,10 @@ stages:
               # Azure credentials
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+          - bash: cat expectation_library_v2--PLAY.json
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show generated JSON'
 
           - task: S3Upload@1
             inputs:
@@ -618,8 +714,7 @@ stages:
 #
 
   - stage: update_algolia_indexes
-    dependsOn: build_gallery_staging
-    condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+    dependsOn: [exp_tests_on_all_backends, build_gallery_staging]
     pool:
       vmImage: 'ubuntu-20.04'
 
