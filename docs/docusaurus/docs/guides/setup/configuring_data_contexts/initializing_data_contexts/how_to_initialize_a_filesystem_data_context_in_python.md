@@ -42,7 +42,7 @@ For purposes of this example, we will assume that we have an empty folder to ini
 path_to_empty_folder = '/my_gx_project/'
 ```
 
-### 2. Run GX's `get_context(...)` method
+### 3. Run GX's `get_context(...)` method
 
 We will provide our empty folder's path to the GX library's `get_context(...)` method as the `context_root_dir` parameter.  Because we are providing a path to an empty folder `get_context(...)` will initialize a Filesystem Data Context at that location.
 
@@ -59,7 +59,7 @@ If a Data Context already exists at the provided `path`, the `get_context(...)` 
 :::
 
 
-### 3. Verify the content of the returned Data Context
+### 4. Verify the content of the returned Data Context
 
 <DataContextVerifyContents />
 
