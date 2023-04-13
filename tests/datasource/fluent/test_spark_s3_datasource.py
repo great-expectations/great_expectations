@@ -289,7 +289,9 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = spark_s3_datasource
-    spark_s3_datasource.assets = {"csv_asset": csv_asset}
+    spark_s3_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = S3DataConnector(
         datasource_name=spark_s3_datasource.name,
         data_asset_name=csv_asset.name,
