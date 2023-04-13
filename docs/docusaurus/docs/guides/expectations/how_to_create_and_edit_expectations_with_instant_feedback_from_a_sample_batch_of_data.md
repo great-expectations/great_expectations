@@ -1,7 +1,7 @@
 ---
 title: How to create Expectations interactively in Python
 tag: [how-to, getting started]
-description: A how-to guide describing how to create Expectations in a Python interpreter or script while interactively receiving feedback by validating them against a Batch of data.
+description: Create Expectations with a Python interpreter or a script and then use interactive feedback to validate them with batch data.
 keywords: [Expectations, Interactive Mode, Interactive]
 ---
 
