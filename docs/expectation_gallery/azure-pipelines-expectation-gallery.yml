@@ -75,15 +75,15 @@ stages:
                 [ScriptsChanged]
                 assets/scripts/**
 
-  - stage: deploy_gallery_staging
+  - stage: exp_tests_on_all_backends
     dependsOn: scope_check
     condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-20.04'
 
     jobs:
-      - job: build_gallery
-        timeoutInMinutes: 420
+      - job: non_cloud
+        timeoutInMinutes: 180
         variables:
           python.version: '3.8'
           GE_pytest_opts: ''
@@ -105,11 +105,9 @@ stages:
 
           - script: |
               pip install \
-                "google-cloud-bigquery-storage" \
                 "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
-                --editable "contrib/cli" \
-                --editable ".[dev]" \
+                --editable ".[spark, postgresql, mysql, mssql, trino]" \
                 --constraint constraints-dev.txt
             displayName: 'Install dependencies'
 
@@ -139,99 +137,62 @@ stages:
 #             done;
             displayName: 'Wait for Trino database to initialise'
 
-          - task: DownloadSecureFile@1
-            name: gcp_authkey
-            displayName: 'Download Google Service Account'
-            inputs:
-              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
-              retryCount: '2'
-
-          - bash: python ./build_gallery.py --backends "pandas" --outfile-name "quick_check.json" ; exp_count=$(grep "^ *\"expect_" quick_check.json | wc -l); package_summary=$(grep "\"package\":" quick_check.json | sort | uniq -c | sort -nr) ; touch gallery-tracebacks.txt; cat gallery-tracebacks.txt ; echo -e "\n\n$exp_count Expectations in quick_check.json\n";  echo -e "$package_summary"; [[ $exp_count -lt 297 ]] && echo "Fewer than 297 Expectations" && exit 1 ; [[ $(echo -e "$package_summary" | wc -l) -lt 6 ]] && echo "Fewer than 6 packages" && exit 1 ; echo "ok"
+          # Note: sqlite is used when --only-combine is passed in
+          - bash: python ./build_gallery.py --backends "spark, pandas, postgresql, mysql, mssql, trino" 2>&1 | tee output--build_gallery--non_cloud.txt ; grep -o "Took .* seconds to .*" output--build_gallery--non_cloud.txt | sort -k2,2nr > testing-times--non_cloud.txt ; grep -o "ERROR - (.*" output--build_gallery--non_cloud.txt | sort > testing-error-messages--non_cloud.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery--non_cloud.txt | sort > gallery-exp-types--non_cloud.txt ; mv checklists.txt checklists--non_cloud.txt ; mv gallery-tracebacks.txt gallery-tracebacks--non_cloud.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Build Gallery Quick Check'
-
-          - bash: python ./build_gallery.py --outfile-name "expectation_library_v2--staging.json" 2>&1 | tee output--build_gallery.txt ; grep -o "Took .* seconds to .*" output--build_gallery.txt | sort -k2,2nr > testing-times.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt
-            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Build Gallery'
+            displayName: 'build_gallery.py partial run'
             env:
-              # snowflake credentials
-              SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
-              SNOWFLAKE_USER: $(SNOWFLAKE_USER)
-              SNOWFLAKE_PW: $(SNOWFLAKE_PW)
-              SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
-              SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
-              SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
-              SNOWFLAKE_ROLE: $(SNOWFLAKE_ROLE)
-              # redshift credentials
-              REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
-              REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
-              REDSHIFT_HOST: $(REDSHIFT_HOST)
-              REDSHIFT_PORT: $(REDSHIFT_PORT)
-              REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
-              REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
               # AWS credentials
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
               AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
               AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-              ATHENA_DB_NAME: $(ATHENA_DB_NAME)
-              ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
-              ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
-              ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
-              # GCP credentials
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
-              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
               # Azure credentials
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-          - bash: grep -o "coverage_score:.*" output--build_gallery.txt | sort -k2,2nr
+          - bash: grep -o "coverage_score:.*" output--build_gallery--non_cloud.txt | sort -k2,2nr
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show coverage scores'
 
-          - bash: cut -d " " -f 3,4 gallery-exp-types.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types.txt | sort
+          - bash: cut -d " " -f 3,4 gallery-exp-types--non_cloud.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types--non_cloud.txt | sort
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show Expectation types and counts'
 
-          - bash: grep -o "Implemented engines.*" output--build_gallery.txt
+          - bash: grep -o "Implemented engines.*" output--build_gallery--non_cloud.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show implemented engines'
 
-          - bash: cat checklists.txt
+          - bash: cat checklists--non_cloud.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show full checklist summary'
 
-          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
+          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists--non_cloud.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show checklist issues'
 
-          - bash: cat testing-error-messages.txt
+          - bash: cat testing-error-messages--non_cloud.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing errors'
 
-          - bash: grep --color -n -i warning -B 2 output--build_gallery.txt || echo "No warnings found"
+          - bash: grep --color -n -i warning -B 2 output--build_gallery--non_cloud.txt || echo "No warnings found"
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing warnings'
 
-          - bash: cat gallery-tracebacks.txt
+          - bash: cat gallery-tracebacks--non_cloud.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show gallery tracebacks'
 
-          - bash: grep "to df.to_sql" testing-times.txt || echo "No df.to_sql calls were made"
+          - bash: grep "to df.to_sql" testing-times--non_cloud.txt || echo "No df.to_sql calls were made"
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show DataFrame to SQL times'
 
-          - bash: grep "to run" testing-times.txt
+          - bash: grep "to run" testing-times--non_cloud.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times grouped by backend and Expectation'
 
-          - bash: grep "to evaluate_json" testing-times.txt
+          - bash: grep "to evaluate_json" testing-times--non_cloud.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times for individual tests'
-
-          - bash: python ./build_package_gallery.py
-            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'Build Package Gallery'
 
           - task: S3Upload@1
             inputs:
@@ -243,6 +204,430 @@ stages:
               targetFolder: 'static/gallery/'
               filesAcl: 'public-read'
 
+
+      - job: gcp
+        timeoutInMinutes: 240
+        variables:
+          python.version: '3.8'
+          GE_pytest_opts: ''
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install \
+                "google-cloud-bigquery-storage" \
+                "cryptography==38.0.4" \
+                --requirement reqs/requirements-dev-all-contrib-expectations.txt \
+                --editable ".[bigquery]" \
+                --constraint constraints-dev.txt
+            displayName: 'Install dependencies'
+
+          - task: DownloadSecureFile@1
+            name: gcp_authkey
+            displayName: 'Download Google Service Account'
+            inputs:
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+              retryCount: '2'
+
+          - bash: python ./build_gallery.py --backends "bigquery" 2>&1 | tee output--build_gallery--gcp.txt ; grep -o "Took .* seconds to .*" output--build_gallery--gcp.txt | sort -k2,2nr > testing-times--gcp.txt ; grep -o "ERROR - (.*" output--build_gallery--gcp.txt | sort > testing-error-messages--gcp.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery--gcp.txt | sort > gallery-exp-types--gcp.txt ; mv checklists.txt checklists--gcp.txt ; mv gallery-tracebacks.txt gallery-tracebacks--gcp.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'build_gallery.py partial run'
+            env:
+              # GCP credentials
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+              # Azure credentials
+              AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
+              AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+          - bash: grep -o "coverage_score:.*" output--build_gallery--gcp.txt | sort -k2,2nr
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show coverage scores'
+
+          - bash: cut -d " " -f 3,4 gallery-exp-types--gcp.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types--gcp.txt | sort
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show Expectation types and counts'
+
+          - bash: grep -o "Implemented engines.*" output--build_gallery--gcp.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show implemented engines'
+
+          - bash: cat checklists--gcp.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show full checklist summary'
+
+          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists--gcp.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show checklist issues'
+
+          - bash: cat testing-error-messages--gcp.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing errors'
+
+          - bash: grep --color -n -i warning -B 2 output--build_gallery--gcp.txt || echo "No warnings found"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing warnings'
+
+          - bash: cat gallery-tracebacks--gcp.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show gallery tracebacks'
+
+          - bash: grep "to df.to_sql" testing-times--gcp.txt || echo "No df.to_sql calls were made"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show DataFrame to SQL times'
+
+          - bash: grep "to run" testing-times--gcp.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times grouped by backend and Expectation'
+
+          - bash: grep "to evaluate_json" testing-times--gcp.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times for individual tests'
+
+          - task: S3Upload@1
+            inputs:
+              regionName: 'us-east-2'
+              awsCredentials: 'aws-ci-great-expectations'
+              bucketName: 'superconductive-public'
+              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+              globExpressions: '*.json'
+              targetFolder: 'static/gallery/'
+              filesAcl: 'public-read'
+
+
+      - job: snowflake
+        timeoutInMinutes: 240
+        variables:
+          python.version: '3.8'
+          GE_pytest_opts: ''
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install \
+                "cryptography==38.0.4" \
+                --requirement reqs/requirements-dev-all-contrib-expectations.txt \
+                --editable ".[snowflake]" \
+                --constraint constraints-dev.txt
+            displayName: 'Install dependencies'
+
+          - bash: python ./build_gallery.py --backends "snowflake" 2>&1 | tee output--build_gallery--snowflake.txt ; grep -o "Took .* seconds to .*" output--build_gallery--snowflake.txt | sort -k2,2nr > testing-times--snowflake.txt ; grep -o "ERROR - (.*" output--build_gallery--snowflake.txt | sort > testing-error-messages--snowflake.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery--snowflake.txt | sort > gallery-exp-types--snowflake.txt ; mv checklists.txt checklists--snowflake.txt ; mv gallery-tracebacks.txt gallery-tracebacks--snowflake.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'build_gallery.py partial run'
+            env:
+              # snowflake credentials
+              SNOWFLAKE_ACCOUNT: $(SNOWFLAKE_ACCOUNT)
+              SNOWFLAKE_USER: $(SNOWFLAKE_USER)
+              SNOWFLAKE_PW: $(SNOWFLAKE_PW)
+              SNOWFLAKE_DATABASE: $(SNOWFLAKE_DATABASE)
+              SNOWFLAKE_SCHEMA: $(SNOWFLAKE_SCHEMA)
+              SNOWFLAKE_WAREHOUSE: $(SNOWFLAKE_WAREHOUSE)
+              SNOWFLAKE_ROLE: $(SNOWFLAKE_ROLE)
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+              # Azure credentials
+              AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
+              AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+          - bash: grep -o "coverage_score:.*" output--build_gallery--snowflake.txt | sort -k2,2nr
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show coverage scores'
+
+          - bash: cut -d " " -f 3,4 gallery-exp-types--snowflake.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types--snowflake.txt | sort
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show Expectation types and counts'
+
+          - bash: grep -o "Implemented engines.*" output--build_gallery--snowflake.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show implemented engines'
+
+          - bash: cat checklists--snowflake.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show full checklist summary'
+
+          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists--snowflake.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show checklist issues'
+
+          - bash: cat testing-error-messages--snowflake.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing errors'
+
+          - bash: grep --color -n -i warning -B 2 output--build_gallery--snowflake.txt || echo "No warnings found"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing warnings'
+
+          - bash: cat gallery-tracebacks--snowflake.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show gallery tracebacks'
+
+          - bash: grep "to df.to_sql" testing-times--snowflake.txt || echo "No df.to_sql calls were made"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show DataFrame to SQL times'
+
+          - bash: grep "to run" testing-times--snowflake.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times grouped by backend and Expectation'
+
+          - bash: grep "to evaluate_json" testing-times--snowflake.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times for individual tests'
+
+          - task: S3Upload@1
+            inputs:
+              regionName: 'us-east-2'
+              awsCredentials: 'aws-ci-great-expectations'
+              bucketName: 'superconductive-public'
+              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+              globExpressions: '*.json'
+              targetFolder: 'static/gallery/'
+              filesAcl: 'public-read'
+
+
+      - job: aws
+        timeoutInMinutes: 240
+        variables:
+          python.version: '3.8'
+          GE_pytest_opts: ''
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install \
+                "cryptography==38.0.4" \
+                --requirement reqs/requirements-dev-all-contrib-expectations.txt \
+                --editable ".[redshift, athena]" \
+                --constraint constraints-dev.txt
+            displayName: 'Install dependencies'
+
+            #
+            # Update to `--backends "redshift, athena"` when athena testing is real
+            #
+          - bash: python ./build_gallery.py --backends "redshift" 2>&1 | tee output--build_gallery--aws.txt ; grep -o "Took .* seconds to .*" output--build_gallery--aws.txt | sort -k2,2nr > testing-times--aws.txt ; grep -o "ERROR - (.*" output--build_gallery--aws.txt | sort > testing-error-messages--aws.txt; touch gallery-tracebacks.txt; grep -o "Expectation type.*" output--build_gallery--aws.txt | sort > gallery-exp-types--aws.txt ; mv checklists.txt checklists--aws.txt ; mv gallery-tracebacks.txt gallery-tracebacks--aws.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'build_gallery.py partial run'
+            env:
+              # redshift credentials
+              REDSHIFT_USERNAME: $(REDSHIFT_USERNAME)
+              REDSHIFT_PASSWORD: $(REDSHIFT_PASSWORD)
+              REDSHIFT_HOST: $(REDSHIFT_HOST)
+              REDSHIFT_PORT: $(REDSHIFT_PORT)
+              REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
+              REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
+              # Athena credentials
+              ATHENA_DB_NAME: $(ATHENA_DB_NAME)
+              ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
+              ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
+              ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+              # Azure credentials
+              AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
+              AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+          - bash: grep -o "coverage_score:.*" output--build_gallery--aws.txt | sort -k2,2nr
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show coverage scores'
+
+          - bash: cut -d " " -f 3,4 gallery-exp-types--aws.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types--aws.txt | sort
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show Expectation types and counts'
+
+          - bash: grep -o "Implemented engines.*" output--build_gallery--aws.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show implemented engines'
+
+          - bash: cat checklists--aws.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show full checklist summary'
+
+          - bash: grep -E "(^expect|Completeness checklist|^ *[A-z]|^ *-|-----)" checklists--aws.txt | grep -vE '(No validate_configuration|Using default validate_configuration|Has a full suite|Has passed a manual)'
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show checklist issues'
+
+          - bash: cat testing-error-messages--aws.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing errors'
+
+          - bash: grep --color -n -i warning -B 2 output--build_gallery--aws.txt || echo "No warnings found"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing warnings'
+
+          - bash: cat gallery-tracebacks--aws.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show gallery tracebacks'
+
+          - bash: grep "to df.to_sql" testing-times--aws.txt || echo "No df.to_sql calls were made"
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show DataFrame to SQL times'
+
+          - bash: grep "to run" testing-times--aws.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times grouped by backend and Expectation'
+
+          - bash: grep "to evaluate_json" testing-times--aws.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show testing times for individual tests'
+
+          - task: S3Upload@1
+            inputs:
+              regionName: 'us-east-2'
+              awsCredentials: 'aws-ci-great-expectations'
+              bucketName: 'superconductive-public'
+              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+              globExpressions: '*.json'
+              targetFolder: 'static/gallery/'
+              filesAcl: 'public-read'
+
+
+  - stage: build_gallery_staging
+    dependsOn: exp_tests_on_all_backends
+    condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+    pool:
+      vmImage: 'ubuntu-20.04'
+
+    jobs:
+      - job: combine_backend_results
+        timeoutInMinutes: 180
+        variables:
+          python.version: '3.8'
+          GE_pytest_opts: ''
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '$(python.version)'
+            displayName: 'Use Python $(python.version)'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install \
+                "cryptography==38.0.4" \
+                --editable "contrib/cli" \
+                --editable "." \
+                --constraint constraints-dev.txt
+            displayName: 'Install dependencies'
+
+          - bash: python ./build_gallery.py --only-combine --outfile-name "expectation_library_v2--PLAY.json" 2>&1 | tee output--build_gallery--combined.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'build_gallery.py combining run'
+            env:
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+              # Azure credentials
+              AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
+              AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+          - task: S3Upload@1
+            inputs:
+              regionName: 'us-east-2'
+              awsCredentials: 'aws-ci-great-expectations'
+              bucketName: 'superconductive-public'
+              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+              globExpressions: '*.json'
+              targetFolder: 'static/gallery/'
+              filesAcl: 'public-read'
+
+
+# Don't do build_package_gallery.py stuff...
+#   - Currently, this script will call the run_diagnostics method on every Expectation
+#     that exists in each package for all backends (even though this was already done
+#     by the build_gallery.py script)
+#   - The build_gallery.py script is now package aware
+#   - The Expectation Gallery site can now accept a URL that has a filter applied to
+#     limit results to a specific package, so no need to bundle them in the "packages" tab
+#
+#
+# - stage: build_package_gallery
+#   dependsOn: build_gallery_staging
+#   condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+#   pool:
+#     vmImage: 'ubuntu-20.04'
+#
+#   jobs:
+#     - job: build_package_gallery
+#       timeoutInMinutes: 180
+#       variables:
+#         python.version: '3.8'
+#         GE_pytest_opts: ''
+#
+#       steps:
+#         - task: UsePythonVersion@0
+#           inputs:
+#             versionSpec: '$(python.version)'
+#           displayName: 'Use Python $(python.version)'
+#
+#         - bash: python -m pip install --upgrade pip
+#           displayName: 'Update pip'
+#
+#         - script: |
+#             pip install \
+#               "cryptography==38.0.4" \
+#               --editable "contrib/cli" \
+#               --editable "." \
+#               --constraint constraints-dev.txt
+#           displayName: 'Install dependencies'
+#
+#         - bash: python ./build_package_gallery.py
+#           workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+#           displayName: 'Build Package Gallery'
+#
+#         - task: S3Upload@1
+#           inputs:
+#             regionName: 'us-east-2'
+#             awsCredentials: 'aws-ci-great-expectations'
+#             bucketName: 'superconductive-public'
+#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+#             globExpressions: '*.json'
+#             targetFolder: 'static/gallery/'
+#             filesAcl: 'public-read'
+#
+
+  - stage: update_algolia_indexes
+    dependsOn: build_gallery_staging
+    condition: or(eq(variables.isScheduled, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+    pool:
+      vmImage: 'ubuntu-20.04'
+
+    jobs:
+      - job: trigger_algolia
+        timeoutInMinutes: 60
+
+        steps:
           - task: NodeTool@0
             inputs:
               versionSpec: '16.16'

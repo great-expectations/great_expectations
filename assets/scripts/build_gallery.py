@@ -36,13 +36,13 @@ expectation_tracebacks = StringIO()
 expectation_checklists = StringIO()
 expectation_docstrings = StringIO()
 ALL_GALLERY_BACKENDS = (
-    #   "bigquery",
-    #   "mssql",
-    #   "mysql",
+    "bigquery",
+    "mssql",
+    "mysql",
     "pandas",
     "postgresql",
-    #   "redshift",
-    #   "snowflake",
+    "redshift",
+    "snowflake",
     "spark",
     "sqlite",
     "trino",
@@ -53,6 +53,9 @@ IGNORE_NON_V3_EXPECTATIONS = (
     "expect_column_pair_cramers_phi_value_to_be_less_than",
     "expect_column_parameterized_distribution_ks_test_p_value_to_be_greater_than",
     "expect_multicolumn_values_to_be_unique",
+)
+IGNORE_FAULTY_EXPECTATIONS = (
+    "expect_column_values_to_be_valid_india_zip",
 )
 
 
@@ -147,7 +150,7 @@ def get_expectation_file_info_dict(
         name = os.path.basename(file_path).replace(".py", "")
         if only_these_expectations and name not in only_these_expectations:
             continue
-        if name in IGNORE_NON_V3_EXPECTATIONS:
+        if name in IGNORE_NON_V3_EXPECTATIONS or name in IGNORE_FAULTY_EXPECTATIONS:
             continue
 
         updated_at_cmd = f'git log -1 --format="%ai %ar" -- {repr(file_path)}'
@@ -233,6 +236,7 @@ def get_contrib_requirements(filepath: str) -> Dict:
 
 
 def build_gallery(
+    only_combine: bool = False,
     include_core: bool = True,
     include_contrib: bool = True,
     ignore_suppress: bool = False,
@@ -246,6 +250,7 @@ def build_gallery(
     Build the gallery object by running diagnostics for each Expectation and returning the resulting reports.
 
     Args:
+        only_combine: if true, only combine the various backend_full.json files
         include_core: if true, include Expectations defined in the core module
         include_contrib: if true, include Expectations defined in contrib:
         only_these_expectations: list of specific Expectations to include
@@ -256,6 +261,13 @@ def build_gallery(
 
     """
     requirements_dict = {}
+    if only_combine:
+        include_core = True
+        include_contrib = True
+        ignore_suppress = False
+        ignore_only_for = False
+        only_these_expectations = []
+        only_consider_these_backends = ["sqlite"]
     backend_outfile_suffix = "partial"
     if include_core and include_contrib and not only_these_expectations:
         backend_outfile_suffix = "full"
@@ -697,6 +709,14 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
 
 @click.command()
 @click.option(
+    "--only-combine",
+    "-O",
+    "only_combine",
+    is_flag=True,
+    default=False,
+    help="Generate sqlite_full.json and combine data from other *_full.json files to outfile_name",
+)
+@click.option(
     "--no-core",
     "-C",
     "no_core",
@@ -756,6 +776,7 @@ def main(**kwargs):
     context = None
 
     build_gallery(
+        only_combine=kwargs["only_combine"],
         include_core=not kwargs["no_core"],
         include_contrib=not kwargs["no_contrib"],
         ignore_suppress=kwargs["ignore_suppress"],
