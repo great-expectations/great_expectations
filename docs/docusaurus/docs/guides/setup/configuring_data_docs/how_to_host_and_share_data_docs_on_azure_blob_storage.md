@@ -13,8 +13,7 @@ Data Docs will be served using an Azure Blob Storage static website with restric
 - Have permission to create and configured an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage)
 
 </Prerequisites>
-    
-   
+
 ## Steps
 
 ### 1. Create an Azure Blob Storage static website
