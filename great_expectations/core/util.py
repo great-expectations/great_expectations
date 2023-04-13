@@ -412,7 +412,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return data.to_json_dict()
 
     # PySpark schema serialization
-    if isinstance(data, sparktypes.StructType):
+    if sparktypes and isinstance(data, sparktypes.StructType):
         return dict(data.jsonValue())
 
     if sqlalchemy_engine_Connection and isinstance(data, sqlalchemy_engine_Connection):
