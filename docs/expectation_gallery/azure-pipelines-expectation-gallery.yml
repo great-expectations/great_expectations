@@ -117,9 +117,9 @@ stages:
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-          - bash: ls -ltr
+          - bash: ls -ltr; for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'ls in assets/scripts'
+            displayName: 'ls and cat in assets/scripts'
 
           - bash: grep -o "coverage_score:.*" output--build_gallery--dataframes.txt | sort -k2,2nr
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
@@ -238,9 +238,9 @@ stages:
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-          - bash: ls -ltr
+          - bash: ls -ltr; for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'ls in assets/scripts'
+            displayName: 'ls and cat in assets/scripts'
 
           - bash: grep -o "coverage_score:.*" output--build_gallery--non_cloud_sql.txt | sort -k2,2nr
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
@@ -339,9 +339,9 @@ stages:
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-          - bash: ls -ltr
+          - bash: ls -ltr; for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'ls in assets/scripts'
+            displayName: 'ls and cat in assets/scripts'
 
           - bash: grep -o "coverage_score:.*" output--build_gallery--mssql.txt | sort -k2,2nr
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
@@ -445,9 +445,9 @@ stages:
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-          - bash: ls -ltr
+          - bash: ls -ltr; for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'ls in assets/scripts'
+            displayName: 'ls and cat in assets/scripts'
 
           - bash: grep -o "coverage_score:.*" output--build_gallery--gcp.txt | sort -k2,2nr
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
@@ -547,9 +547,9 @@ stages:
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-          - bash: ls -ltr
+          - bash: ls -ltr; for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'ls in assets/scripts'
+            displayName: 'ls and cat in assets/scripts'
 
           - bash: grep -o "coverage_score:.*" output--build_gallery--snowflake.txt | sort -k2,2nr
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
@@ -656,9 +656,9 @@ stages:
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
 
-          - bash: ls -ltr
+          - bash: ls -ltr; for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'ls in assets/scripts'
+            displayName: 'ls and cat in assets/scripts'
 
           - bash: grep -o "coverage_score:.*" output--build_gallery--aws.txt | sort -k2,2nr
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
@@ -744,9 +744,9 @@ stages:
                 --constraint constraints-dev.txt
             displayName: 'Install dependencies'
 
-          - bash: ls -ltr
+          - bash: ls -ltr; for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-            displayName: 'ls in assets/scripts'
+            displayName: 'ls and cat in assets/scripts'
 
           - bash: python ./build_gallery.py --only-combine --outfile-name "expectation_library_v2--PLAY.json" 2>&1 | tee output--build_gallery--combined.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
