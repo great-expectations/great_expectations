@@ -129,10 +129,11 @@ Now that you've seen how easy it is to implement the GX workflow, it is time to 
 
 <DataContextInitializeInstantiateSave />
 
-### Great Expectations Cloud
+:::info Great Expectations Cloud
 
 This guide has introduced you to the open source Python and command line use of Great Expectations.  GX also offers an online interface, currently in Beta.  The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
 
 If you are interested in GX Cloud, you should join the GX Cloud Beta.  During this program limited seats are available, but signing up will keep you informed of the product's process.
 
 **[Sign up for the GX Cloud Beta!](https://greatexpectations.io/cloud)**
+:::
