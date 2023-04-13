@@ -169,7 +169,7 @@ try:
         WithinGroup as sa_sql_expression_WithinGroup,
     )
     from sqlalchemy.sql.operators import custom_op as sqlalchemy_custom_op
-except ImportError:
+except (ImportError, AttributeError):
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_dialects_registry = SQLALCHEMY_NOT_IMPORTED
     sqlalchemy_engine_Dialect = SQLALCHEMY_NOT_IMPORTED
@@ -201,28 +201,28 @@ try:
     from sqlalchemy.engine import (
         Connection as sqlalchemy_engine_Connection,
     )
-except ImportError:
+except (ImportError, AttributeError):
     sqlalchemy_engine_Connection = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy.engine import (
         Engine as sqlalchemy_engine_Engine,
     )
-except ImportError:
+except (ImportError, AttributeError):
     sqlalchemy_engine_Engine = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy.engine import (
         Row as sqlalchemy_engine_Row,
     )
-except ImportError:
+except (ImportError, AttributeError):
     sqlalchemy_engine_Row = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy.sql.elements import (
         TextClause as sqlalchemy_TextClause,
     )
-except ImportError:
+except (ImportError, AttributeError):
     sqlalchemy_TextClause = SQLALCHEMY_NOT_IMPORTED
 
 SPARK_NOT_IMPORTED = NotImported(
@@ -256,7 +256,7 @@ try:
     from pyspark.sql.utils import (
         AnalysisException as pyspark_sql_utils_AnalysisException,
     )
-except ImportError:
+except (ImportError, AttributeError):
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
     F = SPARK_NOT_IMPORTED  # type: ignore[assignment]
     sparktypes = SPARK_NOT_IMPORTED  # type: ignore[assignment]
@@ -283,7 +283,7 @@ try:
     from google.oauth2.service_account import (
         Credentials as GoogleServiceAccountCredentials,
     )
-except ImportError:
+except (ImportError, AttributeError):
     GoogleAPIError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
     DefaultCredentialsError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
     google_cloud_storage = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
@@ -302,7 +302,7 @@ try:
         BlobServiceClient,
         ContainerClient,
     )
-except ImportError:
+except (ImportError, AttributeError):
     azure_storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
     BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
     BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
