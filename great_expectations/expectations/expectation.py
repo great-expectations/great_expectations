@@ -453,7 +453,7 @@ class Expectation(metaclass=MetaExpectation):
                 RendererValueType.STRING,
                 renderer_configuration.expectation_type,
             ),
-            ("kwargs", RendererValueType.STRING, renderer_configuration.kwargs),
+            ("kwargs", RendererValueType.OBJECT, renderer_configuration.kwargs),
         )
         for name, param_type, value in add_param_args:
             renderer_configuration.add_param(
