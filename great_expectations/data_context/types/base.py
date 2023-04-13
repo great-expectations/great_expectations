@@ -1629,6 +1629,7 @@ class DataContextConfigSchema(Schema):
         allow_none=True,
     )
     fluent_datasources = fields.Dict(
+        keys=fields.Str(),
         required=False,
         allow_none=True,
         load_only=True,
