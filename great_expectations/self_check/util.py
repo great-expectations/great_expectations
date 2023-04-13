@@ -780,7 +780,7 @@ def _get_test_validator_with_data_sqlalchemy(
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator | None:
-    if not sa.create_engine:
+    if not sa:
         return None
 
     if table_name is None:
