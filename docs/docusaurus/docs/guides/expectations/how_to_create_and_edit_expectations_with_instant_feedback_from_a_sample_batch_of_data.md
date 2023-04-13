@@ -95,6 +95,12 @@ A Batch Request allows you to limit the Batches returned from a Data Asset by pr
 
 :::
 
+:::caution Batch Requests and Datasources built with the advanced block-config method
+
+If you are working with a Datasource that was created using the advanced block-config method, you will need to build your Batch Request differently than was demonstrated above.  For more information, please see our guide on [how to get one or more batches from a Datasource configured with the block-config method](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
+
+:::
+
 ### 3. Create a Validator
 
 We will use a Validator to interactively create our Expectations.  To do this, a Validator needs two parameters: one will indicate the data to run Expectations against, and the other will provide a name for the combined list of Expectations should we decide to save them for future use.
