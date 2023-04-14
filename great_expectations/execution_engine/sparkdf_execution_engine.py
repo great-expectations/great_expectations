@@ -484,6 +484,11 @@ illegal.  Please check your config."""
         Returns:
             A DataFrame (the data on which to compute returned in the format of a Spark DataFrame)
         """
+        """
+        # TODO: <Alex>Docusaurus run fails, unless "pyspark_sql_DataFrame" type hint above is enclosed in quotes.
+        This may be caused by it becoming great_expectations.optional_imports.NotImported when pyspark is not installed.
+        </Alex>
+        """
         table = domain_kwargs.get("table", None)
         if table:
             raise ValueError(
@@ -642,6 +647,11 @@ illegal.  Please check your config."""
               - a dictionary of compute_domain_kwargs, describing the DataFrame
               - a dictionary of accessor_domain_kwargs, describing any accessors needed to
                 identify the Domain within the compute domain
+        """
+        """
+        # TODO: <Alex>Docusaurus run fails, unless "pyspark_sql_DataFrame" type hint above is enclosed in quotes.
+        This may be caused by it becoming great_expectations.optional_imports.NotImported when pyspark is not installed.
+        </Alex>
         """
         table: str = domain_kwargs.get("table", None)
         if table:
