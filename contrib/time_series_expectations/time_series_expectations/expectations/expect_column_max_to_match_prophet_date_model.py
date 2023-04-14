@@ -93,6 +93,14 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
 
     metric_dependency = "column.max"
 
+    library_metadata = {
+        "tags": [],
+        "contributors": [
+            "@abegong",
+        ],
+        "requirements": ["prophet"],
+    }
+
 
 if __name__ == "__main__":
     ExpectColumnMaxToMatchProphetDateModel().print_diagnostic_checklist()

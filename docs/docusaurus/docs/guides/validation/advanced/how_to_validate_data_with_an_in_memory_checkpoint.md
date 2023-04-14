@@ -56,7 +56,7 @@ Checkpoints require a Data Context in order to access necessary Stores from whic
 
 ### 3. Define your Checkpoint configuration
 
-In addition to a Data Context, you will need a configuration with which to initialize your Checkpoint.  This configuration can be in the form of a YAML string or a Python dictionary,  The following examples show configurations that are equivalent to the one used by the Getting Started Tutorial.
+In addition to a Data Context, you will need a configuration with which to initialize your Checkpoint.  This configuration can be in the form of a YAML string or a Python dictionary.
 
 Normally, a Checkpoint configuration will include the keys `class_name` and `module_name`.  These are used by Great Expectations to identify the class of Checkpoint that should be initialized with a given configuration.  Since we are initializing an instance of the `Checkpoint` class directly we don't need the configuration to indicate the class of Checkpoint to be initialized.  Therefore, these two keys will be left out of our configuration.
 

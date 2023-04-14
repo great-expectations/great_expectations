@@ -52,7 +52,6 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 from packaging import version
-from pkg_resources import Distribution
 from typing_extensions import Literal, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
@@ -61,6 +60,13 @@ from great_expectations.exceptions import (
     GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
+)
+from great_expectations.optional_imports import (
+    sa_sql_expression_Select,
+    sqlalchemy_reflection,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
 )
 
 try:
@@ -77,26 +83,11 @@ except ModuleNotFoundError:
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy as sa
-    from sqlalchemy import Table
-    from sqlalchemy.engine import reflection
-    from sqlalchemy.sql import Select
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
-    RemovedIn20Warning = None
-
 
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
+    from pkg_resources import Distribution
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import FileDataContext
@@ -2024,7 +2015,7 @@ def generate_temporary_table_name(
 def get_sqlalchemy_inspector(engine):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
-        insp = reflection.Inspector.from_engine(engine)
+        insp = sqlalchemy_reflection.Inspector.from_engine(engine)
     else:
         insp = sa.inspect(engine)
     return insp
@@ -2039,7 +2030,9 @@ def get_sqlalchemy_url(drivername, **credentials):
     return url
 
 
-def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+def get_sqlalchemy_selectable(
+    selectable: Union[sa.Table, sa_sql_expression_Select]
+) -> Union[sa.Table, sa_sql_expression_Select]:
     """
     Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
@@ -2050,7 +2043,7 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if isinstance(selectable, Select):
+    if sa_sql_expression_Select and isinstance(selectable, sa_sql_expression_Select):
         if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
         else:
@@ -2087,9 +2080,9 @@ def import_make_url():
     still be accessed from sqlalchemy.engine.url to avoid import errors.
     """
     if version.parse(sa.__version__) < version.parse("1.4"):
-        from sqlalchemy.engine.url import make_url
+        from sqlalchemy.engine.url import make_url  # noqa: TID251
     else:
-        from sqlalchemy.engine import make_url
+        from sqlalchemy.engine import make_url  # noqa: TID251
 
     return make_url
 

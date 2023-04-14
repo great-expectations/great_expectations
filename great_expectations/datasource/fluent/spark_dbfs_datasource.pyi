@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional
 
 from typing_extensions import Literal
 
@@ -17,6 +19,9 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+    )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )
@@ -29,8 +34,10 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
     def add_csv_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[re.Pattern, str]] = ...,
-        glob_directive: str = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: re.Pattern | str = r".*",
+        glob_directive: str = "**/*",
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,

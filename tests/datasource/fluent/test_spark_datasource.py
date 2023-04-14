@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import copy
 import logging
+import pathlib
 from typing import TYPE_CHECKING
 
+import pandas as pd
 import pydantic
 import pytest
 
@@ -15,6 +18,22 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__file__)
+
+
+@pytest.fixture
+def csv_path() -> pathlib.Path:
+    relative_path = pathlib.Path(
+        "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+    )
+    abs_csv_path = (
+        pathlib.Path(__file__).parent.joinpath(relative_path).resolve(strict=True)
+    )
+    return abs_csv_path
+
+
+@pytest.fixture
+def valid_file_path(csv_path: pathlib.Path) -> pathlib.Path:
+    return csv_path / "yellow_tripdata_sample_2018-03.csv"
 
 
 def test_dataframe_asset(
@@ -48,8 +67,46 @@ def test_dataframe_asset(
     assert len(datasource.assets) == 2
 
     assert all(
-        [
-            asset.dataframe.toPandas().equals(pandas_df)
-            for asset in datasource.assets.values()
-        ]
+        [asset.dataframe.toPandas().equals(pandas_df) for asset in datasource.assets]
     )
+
+
+def test_spark_data_asset_batch_metadata(
+    empty_data_context: AbstractDataContext,
+    valid_file_path: pathlib.Path,
+    test_df_pandas: pd.DataFrame,
+    spark_session,
+    spark_df_from_pandas_df,
+):
+    my_config_variables = {"pipeline_filename": __file__}
+    empty_data_context.config_variables.update(my_config_variables)
+
+    spark_df = spark_df_from_pandas_df(spark_session, test_df_pandas)
+
+    spark_datasource = empty_data_context.sources.add_spark("my_spark_datasource")
+
+    batch_metadata = {
+        "no_curly_pipeline_filename": "$pipeline_filename",
+        "curly_pipeline_filename": "${pipeline_filename}",
+        "pipeline_step": "transform_3",
+    }
+
+    dataframe_asset = spark_datasource.add_dataframe_asset(
+        name="my_dataframe_asset",
+        dataframe=spark_df,
+        batch_metadata=batch_metadata,
+    )
+    assert dataframe_asset.batch_metadata == batch_metadata
+
+    batch_list = dataframe_asset.get_batch_list_from_batch_request(
+        dataframe_asset.build_batch_request()
+    )
+    assert len(batch_list) == 1
+    substituted_batch_metadata = copy.deepcopy(batch_metadata)
+    substituted_batch_metadata.update(
+        {
+            "no_curly_pipeline_filename": __file__,
+            "curly_pipeline_filename": __file__,
+        }
+    )
+    assert batch_list[0].metadata == substituted_batch_metadata

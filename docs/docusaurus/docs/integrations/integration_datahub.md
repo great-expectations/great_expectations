@@ -93,12 +93,9 @@ The Validation Results would show up in Validation tab on Dataset page in DataHu
 ## Further discussion
 
 ### Things to consider
-Currently this integration only supports v3 API Datasources using `SqlAlchemyExecutionEngine`.
-
 This integration does not support
 
-- v2 Datasources such as `SqlAlchemyDataset`
-- v3 Datasources using an Execution Engine other than `SqlAlchemyExecutionEngine` (Spark, Pandas)
+- Datasources using an Execution Engine other than `SqlAlchemyExecutionEngine` (Spark, Pandas)
 - Cross-dataset Expectations (those involving > 1 table)
 
 ### When things don't work

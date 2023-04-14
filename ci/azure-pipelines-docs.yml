@@ -39,7 +39,7 @@ stages:
     - job: link_checker
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
-      - bash: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/ -s docs --skip-external
+      - bash: python docs/checks/docs_link_checker.py -p docs/docusaurus/docs -r docs/docusaurus/docs -s docs --skip-external
         name: LinkChecker
 
     - job: docs_snippet_checker

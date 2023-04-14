@@ -8,11 +8,11 @@ from typing import (
     Any,
     Callable,
     ClassVar,
-    Dict,
     Hashable,
     Iterable,
+    List,
     Mapping,
-    MutableMapping,
+    MutableSequence,
     Optional,
     Sequence,
     Set,
@@ -23,7 +23,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-import sqlalchemy
+import sqlalchemy  # noqa: TID251
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent.interfaces import (
@@ -117,7 +117,7 @@ _PandasDataAssetT = TypeVar("_PandasDataAssetT", bound=_PandasDataAsset)
 
 class _PandasDatasource(Datasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
-    assets: MutableMapping[str, _PandasDataAssetT]  # type: ignore[valid-type]
+    assets: MutableSequence[_PandasDataAssetT]  # type: ignore[valid-type]
     @property
     def execution_engine_type(self) -> Type[PandasExecutionEngine]: ...
     def test_connection(self, test_assets: bool = ...) -> None: ...
@@ -141,14 +141,13 @@ _DYNAMIC_ASSET_TYPES: list[Type[_PandasDataAsset]]
 class PandasDatasource(_PandasDatasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]]
     type: Literal["pandas"]
-    assets: Dict[str, _PandasDataAsset]
+    assets: List[_PandasDataAsset]
     def test_connection(self, test_assets: bool = ...) -> None: ...
-    def _get_validator(self, asset: _PandasDataAssetT) -> Validator: ...
     def add_dataframe_asset(
         self,
         name: str,
-        *,
         dataframe: pd.DataFrame,
+        *,
         batch_metadata: Optional[BatchMetadata] = ...,
     ) -> DataFrameAsset: ...
     def read_dataframe(

@@ -9,11 +9,13 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,

@@ -15,45 +15,27 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
-from great_expectations.expectations.metrics.column_aggregate_metric import (
-    ColumnMetricProvider,
-)
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
+    ColumnAggregateMetricProvider,
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.optional_imports import (
+    F,
+    sa_sql_expression_Select,
+    sqlalchemy_engine_Row,
+    sqlalchemy_ProgrammingError,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 logger = logging.getLogger(__name__)
 
-try:
-    from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql import Select
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    ProgrammingError = None
-    Select = None
 
-try:
-    from sqlalchemy.engine.row import Row
-except ImportError:
-    try:
-        from sqlalchemy.engine.row import RowProxy
-
-        Row = RowProxy
-    except ImportError:
-        logger.debug(
-            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
-        )
-        RowProxy = None
-        Row = None
-
-
-class ColumnSkew(ColumnMetricProvider):
+class ColumnSkew(ColumnAggregateMetricProvider):
     """MetricProvider Class for Aggregate Mean MetricProvider"""
 
     metric_name = "column.custom.skew"
@@ -130,19 +112,21 @@ class ColumnSkew(ColumnMetricProvider):
 
 
 def _get_query_result(func, selectable, sqlalchemy_engine):
-    simple_query: Select = sa.select(func).select_from(selectable)
+    simple_query: sa_sql_expression_Select = sa.select(func).select_from(selectable)
 
     try:
-        result: Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
+        result: sqlalchemy_engine_Row = sqlalchemy_engine.execute(
+            simple_query
+        ).fetchone()[0]
         return result
-    except ProgrammingError as pe:
+    except sqlalchemy_ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
-        raise pe()
+        raise pe
 
     # @classmethod
     # def _get_evaluation_dependencies(
@@ -187,7 +171,7 @@ def _get_query_result(func, selectable, sqlalchemy_engine):
     #     return dependencies
 
 
-class ExpectColumnSkewToBeBetween(ColumnExpectation):
+class ExpectColumnSkewToBeBetween(ColumnAggregateExpectation):
     """Expect column skew to be between. Currently tests against Gamma and Beta distributions."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

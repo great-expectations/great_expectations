@@ -9,8 +9,8 @@ This guide will help you create a new <TechnicalTag tag="expectation_suite" text
 
 <Prerequisites>
 
-- [Configured a Data Context](../../tutorials/getting_started/tutorial_setup.md).
-- Configured a [Datasource](../../tutorials/getting_started/tutorial_connect_to_data.md)
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [Configured a Datasource](/docs/guides/connecting_to_your_data/connect_to_data_overview)
 
 </Prerequisites>
 

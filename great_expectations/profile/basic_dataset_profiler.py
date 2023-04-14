@@ -8,7 +8,7 @@ from great_expectations.profile.base import (
 )
 
 try:
-    from sqlalchemy.exc import OperationalError
+    from sqlalchemy.exc import OperationalError  # noqa: TID251
 except ModuleNotFoundError:
     OperationalError = RuntimeError
 

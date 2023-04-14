@@ -5,17 +5,19 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_DataFrame,
-    pyspark_sql_Row,
-    pyspark_sql_SparkSession,
-    sa,
-    sqlalchemy_engine_Engine,
-    sqlalchemy_engine_Row,
-)
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
+)
+from great_expectations.optional_imports import (
+    pyspark_sql_DataFrame,
+    pyspark_sql_Row,
+    pyspark_sql_SparkSession,
+    sqlalchemy_engine_Engine,
+    sqlalchemy_engine_Row,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
 )
 from great_expectations.util import get_sqlalchemy_subquery_type
 
@@ -96,7 +98,7 @@ class QueryTemplateValues(QueryMetricProvider):
                 e._query_id = None
             raise e
 
-        return [dict(element) for element in result]
+        return [element._asdict() for element in result]
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(

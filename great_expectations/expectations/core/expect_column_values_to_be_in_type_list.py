@@ -27,6 +27,7 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
+from great_expectations.optional_imports import sparktypes
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -51,14 +52,6 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark.sql.types as sparktypes
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
 
 
 class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
@@ -465,10 +458,10 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> ValidationDependencies:
-        # This calls TableExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
+        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
-        # TableExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
+        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
         # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(

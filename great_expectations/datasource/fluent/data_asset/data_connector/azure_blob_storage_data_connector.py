@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+
+import pydantic
 
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
@@ -20,6 +22,12 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+class _AzureOptions(pydantic.BaseModel):
+    abs_container: str
+    abs_name_starts_with: str = ""
+    abs_delimiter: str = "/"
 
 
 class AzureBlobStorageDataConnector(FilePathDataConnector):
@@ -40,6 +48,13 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on ABS
     """
+
+    asset_level_option_keys: ClassVar[tuple[str, ...]] = (
+        "abs_container",
+        "abs_name_starts_with",
+        "abs_delimiter",
+    )
+    asset_options_type: ClassVar[Type[_AzureOptions]] = _AzureOptions
 
     def __init__(
         self,

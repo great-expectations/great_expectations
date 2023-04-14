@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 import click
 from typing_extensions import Final
@@ -31,15 +31,10 @@ from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy
-    from sqlalchemy.engine.reflection import Inspector
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sqlalchemy = None
-    Inspector = None
+
+if TYPE_CHECKING:
+    from great_expectations.optional_imports import sqlalchemy_engine_Inspector
+
 
 DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
     "default_runtime_data_connector_name",
@@ -441,7 +436,9 @@ Would you like to continue?"""
 
 def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     execution_engine: SqlAlchemyExecutionEngine = datasource.execution_engine
-    inspector: Inspector = get_sqlalchemy_inspector(execution_engine.engine)
+    inspector: sqlalchemy_engine_Inspector = get_sqlalchemy_inspector(
+        execution_engine.engine
+    )
     return inspector.default_schema_name
 
 

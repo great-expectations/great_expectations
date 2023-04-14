@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Tuple
 from unittest import mock
 
 import pytest
+import pandas as pd
 from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
 
@@ -24,6 +25,7 @@ from great_expectations.core.usage_statistics.anonymizers.types.base import (
 from great_expectations.data_context.data_context.file_data_context import (
     FileDataContext,
 )
+
 from great_expectations.util import (
     deep_filter_properties_iterable,
     get_context,
@@ -1722,6 +1724,7 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_withou
     - NOT open Data Docs
     - open jupyter
     """
+
     context = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
@@ -1975,8 +1978,8 @@ def test_suite_edit_multiple_datasources_with_sql_with_no_additional_args_with_c
 
     The command should:
     - NOT open Data Docs
-    - NOT open jupyter
     """
+
     context = titanic_v013_multi_datasource_multi_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 

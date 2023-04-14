@@ -41,7 +41,9 @@ pytestmark = [
 
 
 @pytest.fixture
-def pandas_dbfs_datasource(fs: FakeFilesystem) -> PandasDBFSDatasource:
+def pandas_dbfs_datasource(
+    empty_data_context, fs: FakeFilesystem
+) -> PandasDBFSDatasource:
     # Copy boto modules into fake filesystem (see https://github.com/spulec/moto/issues/1682#issuecomment-645016188)
     for module in [boto3, botocore]:
         module_dir = pathlib.Path(module.__file__).parent
@@ -71,10 +73,13 @@ def pandas_dbfs_datasource(fs: FakeFilesystem) -> PandasDBFSDatasource:
         ],
     )
 
-    return PandasDBFSDatasource(  # type: ignore[call-arg]
+    pandas_dbfs_datasource = PandasDBFSDatasource(  # type: ignore[call-arg]
         name="pandas_dbfs_datasource",
         base_directory=pathlib.Path(base_directory),
     )
+    pandas_dbfs_datasource._data_context = empty_data_context
+
+    return pandas_dbfs_datasource
 
 
 @pytest.fixture
@@ -84,25 +89,6 @@ def csv_asset(pandas_dbfs_datasource: PandasDBFSDatasource) -> _FilePathDataAsse
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
     )
     return asset
-
-
-# TODO: <Alex>ALEX</Alex>
-def bad_batching_regex_config(
-    csv_path: pathlib.Path,
-) -> tuple[re.Pattern, TestConnectionError]:
-    batching_regex = re.compile(
-        r"green_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
-    )
-    test_connection_error = TestConnectionError(
-        "No file at base_directory path "
-        f'"{csv_path.resolve()}" matched regular expressions pattern '
-        f'"{batching_regex.pattern}" and/or glob_directive "**/*" for '
-        'DataAsset "csv_asset".'
-    )
-    return batching_regex, test_connection_error
-
-
-# TODO: <Alex>ALEX</Alex>
 
 
 @pytest.fixture
@@ -199,7 +185,9 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = pandas_dbfs_datasource
-    pandas_dbfs_datasource.assets = {"csv_asset": csv_asset}
+    pandas_dbfs_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = DBFSDataConnector(
         datasource_name=pandas_dbfs_datasource.name,
         data_asset_name=csv_asset.name,

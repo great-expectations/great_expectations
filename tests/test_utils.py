@@ -13,6 +13,9 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import (
     CheckpointStore,
@@ -27,24 +30,13 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-logger = logging.getLogger(__name__)
-
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.exc import SQLAlchemyError
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
-    SQLAlchemyError = None
-
+from great_expectations.optional_imports import (
+    SQLAlchemyError,
+    sqlalchemy_engine_Connection,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
@@ -150,33 +142,38 @@ def validate_uuid4(uuid_string: str) -> bool:
     return val.hex == uuid_string.replace("-", "")
 
 
-def get_sqlite_temp_table_names(engine):
-    result = engine.execute(
-        sa.text(
-            """
-SELECT
-    name
-FROM
-    sqlite_temp_master
-"""
-        )
-    )
+def get_sqlite_temp_table_names(execution_engine):
+
+    statement = sa.text("SELECT name FROM sqlite_temp_master")
+
+    if sqlalchemy_engine_Connection and isinstance(
+        execution_engine.engine, sqlalchemy_engine_Connection
+    ):
+        connection = execution_engine.engine
+        result = connection.execute(statement)
+    else:
+        with execution_engine.engine.connect() as connection:
+            result = connection.execute(statement)
+
     rows = result.fetchall()
     return {row[0] for row in rows}
 
 
-def get_sqlite_table_names(engine):
-    result = engine.execute(
-        sa.text(
-            """
-SELECT
-    name
-FROM
-    sqlite_master
-"""
-        )
-    )
+def get_sqlite_table_names(execution_engine):
+
+    statement = sa.text("SELECT name FROM sqlite_master")
+
+    if sqlalchemy_engine_Connection and isinstance(
+        execution_engine.engine, sqlalchemy_engine_Connection
+    ):
+        connection = execution_engine.engine
+        result = connection.execute(statement)
+    else:
+        with execution_engine.engine.connect() as connection:
+            result = connection.execute(statement)
+
     rows = result.fetchall()
+
     return {row[0] for row in rows}
 
 
@@ -691,7 +688,8 @@ def load_data_into_test_database(
                     f"Adding to existing table {table_name} and adding data from {csv_paths}"
                 )
 
-            all_dfs_concatenated.to_sql(
+            add_dataframe_to_db(
+                df=all_dfs_concatenated,
                 name=table_name,
                 con=engine,
                 schema=schema_name,

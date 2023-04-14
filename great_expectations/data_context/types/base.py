@@ -1023,7 +1023,7 @@ class ExecutionEngineConfigSchema(Schema):
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
     )
     connect_args = fields.Dict(
-        keys=fields.Str(), values=fields.Dict(), required=False, allow_none=True
+        keys=fields.Str(), values=fields.Raw(), required=False, allow_none=True
     )
     azure_options = fields.Dict(
         keys=fields.Str(), values=fields.Str(), required=False, allow_none=True
@@ -1629,6 +1629,7 @@ class DataContextConfigSchema(Schema):
         allow_none=True,
     )
     fluent_datasources = fields.Dict(
+        keys=fields.Str(),
         required=False,
         allow_none=True,
         load_only=True,

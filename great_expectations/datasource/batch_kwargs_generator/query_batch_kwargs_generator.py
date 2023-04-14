@@ -11,9 +11,9 @@ from great_expectations.exceptions import BatchKwargsError, ClassInstantiationEr
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine import reflection
+    import sqlalchemy  # noqa: TID251
+    from sqlalchemy import create_engine  # noqa: TID251
+    from sqlalchemy.engine import reflection  # noqa: TID251
 except ImportError:
     sqlalchemy = None
     create_engine = None

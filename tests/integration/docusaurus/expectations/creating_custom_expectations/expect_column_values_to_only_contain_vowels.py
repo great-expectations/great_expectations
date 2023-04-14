@@ -1,12 +1,5 @@
-from typing import Dict, Optional
-
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions.exceptions import (
-    InvalidExpectationConfigurationError,
-)
 from great_expectations.expectations.regex_based_column_map_expectation import (
     RegexBasedColumnMapExpectation,
-    RegexColumnMapMetricProvider,
 )
 
 
@@ -26,7 +19,6 @@ class ExpectColumnValuesToOnlyContainVowels(RegexBasedColumnMapExpectation):
     # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_values_to_only_contain_vowels.py examples">
     examples = [
         {
-            "dataset_name": "expect_column_values_to_only_contain_vowels_1",
             "data": {
                 "only_vowels": ["a", "e", "I", "O", "U", "y", ""],
                 "mixed": ["A", "b", "c", "D", "E", "F", "g"],

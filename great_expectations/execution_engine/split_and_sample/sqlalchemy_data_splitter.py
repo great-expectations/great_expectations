@@ -27,15 +27,19 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 except ImportError:
     sa = None
 
 try:
-    import sqlalchemy.sql.functions.concat as concat
-    from sqlalchemy.engine import LegacyRow
-    from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.elements import BinaryExpression, BooleanClauseList, Label
+    import sqlalchemy.sql.functions.concat as concat  # noqa: TID251
+    from sqlalchemy.engine import LegacyRow  # noqa: TID251
+    from sqlalchemy.sql import Selectable  # noqa: TID251
+    from sqlalchemy.sql.elements import (  # noqa: TID251
+        BinaryExpression,
+        BooleanClauseList,
+        Label,
+    )
 except ImportError:
     LegacyRow = None
     Selectable = None
@@ -45,8 +49,8 @@ except ImportError:
     concat = None
 
 if TYPE_CHECKING:
-    from sqlalchemy.sql import Selectable
-    from sqlalchemy.sql.expression import Cast, ColumnOperators
+    from sqlalchemy.sql import Selectable  # noqa: TID251
+    from sqlalchemy.sql.expression import Cast, ColumnOperators  # noqa: TID251
 
     from great_expectations.execution_engine.sqlalchemy_execution_engine import (
         SqlAlchemyExecutionEngine,

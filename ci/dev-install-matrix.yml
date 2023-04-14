@@ -13,7 +13,7 @@ jobs:
             versionSpec: ${{ pythonVersion }}
           displayName: Use Python ${{ pythonVersion }}
 
-        - bash: python -m pip install --upgrade pip==21.3.1
+        - bash: python -m pip install --upgrade pip
           displayName: 'Update pip'
 
         - script: |
@@ -56,7 +56,7 @@ jobs:
             versionSpec: ${{ pythonVersion }}
           displayName: Use Python ${{ pythonVersion }}
 
-        - bash: python -m pip install --upgrade pip==21.3.1
+        - bash: python -m pip install --upgrade pip
           displayName: 'Update pip'
 
         - script: |

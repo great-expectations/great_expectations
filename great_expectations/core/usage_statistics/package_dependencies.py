@@ -105,7 +105,6 @@ class GXDependencies:
             "pytest-random-order",
             "pytest-timeout",
             "requirements-parser",
-            "s3fs",
             "snapshottest",
             "snowflake-connector-python",
             "snowflake-sqlalchemy",
@@ -146,7 +145,6 @@ class GXDependencies:
         "pytest-icdiff",
         "pytest-timeout",
         "requirements-parser",
-        "s3fs",
         "snapshottest",
         # "sqlalchemy",  # Not excluded from tracking
         "trino",
@@ -175,6 +173,7 @@ class GXDependencies:
         "global-land-mask",
         "gtin",
         "holidays",
+        # "indiapins",      # Currently a broken package
         "ipwhois",
         "isbnlib",
         "langid",
@@ -182,6 +181,7 @@ class GXDependencies:
         "phonenumbers",
         "price_parser",
         "primefac",
+        "prophet",
         "pwnedpasswords",
         "py-moneyed",
         "pydnsbl",

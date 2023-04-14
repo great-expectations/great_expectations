@@ -1,7 +1,7 @@
 """Run integration and docs tests.
 
 Individual tests can be run by setting the '-k' flag and referencing the name of test, like the following example:
-    pytest -v --docs-tests -m integration -k "test_docs[migration_guide_spark_v2_api]" tests/integration/test_script_runner.py
+    pytest -v --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
 """
 
 import importlib.machinery
@@ -231,6 +231,11 @@ local_tests = [
         name="how_to_configure_result_format_parameter",
         user_flow_script="tests/integration/docusaurus/reference/core_concepts/result_format.py",
     ),
+    IntegrationTestFixture(
+        name="how_to_create_and_edit_expectations_with_instant_feedback_block_config",
+        user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
     # Fluent Datasources
     IntegrationTestFixture(
         name="how_to_connect_to_one_or_more_files_using_pandas",
@@ -238,11 +243,24 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
+    IntegrationTestFixture(
+        name="how_to_create_and_edit_expectations_with_instant_feedback_fluent",
+        user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+]
+
+quickstart = [
+    IntegrationTestFixture(
+        name="quickstart",
+        user_flow_script="tests/integration/docusaurus/tutorials/quickstart/quickstart.py",
+    ),
 ]
 
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
+docs_test_matrix += quickstart
 docs_test_matrix += spark_integration_tests
 docs_test_matrix += sqlite_integration_tests
 docs_test_matrix += mysql_integration_tests

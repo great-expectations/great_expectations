@@ -6,7 +6,7 @@ from shapely.geometry import Point, Polygon
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
@@ -45,7 +45,7 @@ class ColumnValuesToCheckOverlap(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnValuesGeometryNotToOverlap(ColumnExpectation):
+class ExpectColumnValuesGeometryNotToOverlap(ColumnAggregateExpectation):
     """Expect geometries in this column Not to overlap with each other. If any two geometries do overlap, expectation will return False.
 
     For more information look here \

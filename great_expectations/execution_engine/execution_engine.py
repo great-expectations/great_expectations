@@ -37,7 +37,7 @@ from great_expectations.validator.metric_configuration import (
 if TYPE_CHECKING:
     # noinspection PyPep8Naming
     import pyspark.sql.functions as F
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 
     from great_expectations.core.batch import (
         BatchData,
@@ -49,16 +49,6 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 
 class NoOpDict:

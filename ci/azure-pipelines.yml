@@ -426,23 +426,26 @@ stages:
               eval ${PYTEST}
             displayName: 'Pytest cli'
 
-      - job: test_min_versions
+      - job: test_dependency_versions
         dependsOn: [make_suffix, build_push]
         condition: succeeded()
         strategy:
           matrix:
             Python37:
               python.version: '3.7'
-              min_constraints: 'ci/constraints-test/py37-min-install.txt'
+              constraints: 'ci/constraints-test/py37-min-install.txt'
             Python38:
               python.version: '3.8'
-              min_constraints: 'ci/constraints-test/py38-min-install.txt'
+              constraints: 'ci/constraints-test/py38-min-install.txt'
             Python39:
               python.version: '3.9'
-              min_constraints: 'ci/constraints-test/py39-min-install.txt'
+              constraints: 'ci/constraints-test/py39-min-install.txt'
             Python310:
               python.version: '3.10'
-              min_constraints: 'ci/constraints-test/py310-min-install.txt'
+              constraints: 'ci/constraints-test/py310-min-install.txt'
+            # Pandas20:
+            #   python.version: '3.9'
+            #   constraints: 'ci/constraints-test/pandas2-min-install.txt'
         variables:
           IMAGE_SUFFIX: $[ dependencies.make_suffix.outputs['suffix.IMAGE_SUFFIX'] ]
         steps:
@@ -453,7 +456,7 @@ stages:
               PYTEST+="--network=host greatexpectations/test:${DOCKER_TAG} bash -c \""
               PYTEST+="pip install --no-cache-dir --requirement requirements-dev.txt "
               PYTEST+="--requirement reqs/requirements-dev-test.txt --constraint constraints-dev.txt "
-              PYTEST+="--constraint $(min_constraints) && "
+              PYTEST+="--constraint $(constraints) && "
               PYTEST+="pytest --no-sqlalchemy --random-order --ignore=tests/cli --ignore=tests/integration/usage_statistic "
               PYTEST+="--ignore=tests/rule_based_profiler/data_assistant/test_onboarding_data_assistant.py\""
               echo ${PYTEST}

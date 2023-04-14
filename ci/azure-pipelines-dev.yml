@@ -109,6 +109,34 @@ stages:
               invoke lint || EXIT_STATUS=$?
               exit $EXIT_STATUS
 
+  - stage: unit_tests
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: run_unit_tests
+        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
+            displayName: 'Install dependencies'
+
+          - script: |
+              invoke tests --cloud --unit --timeout=3.0
+            displayName: 'Unit Tests'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true
+
   - stage: custom_checks
     dependsOn: scope_check
     pool:
@@ -124,9 +152,11 @@ stages:
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
+        name: StaticTypeCheck
+      - script: |
           # initial run doesn't check `.pyi` source files
           invoke type-check --ci --pretty --check-stub-sources
-        name: StaticTypeCheck
+        name: TypeCheckStubSourceFiles
 
     - job: docstring_linter
       steps:
@@ -183,7 +213,7 @@ stages:
              versionSpec: '3.7'
            displayName: 'Use Python 3.7'
 
-         - bash: python -m pip install --upgrade pip==21.3.1
+         - bash: python -m pip install --upgrade pip
            displayName: 'Update pip'
 
          - script: |
@@ -194,8 +224,33 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
+  - stage: quickstart
+    dependsOn: scope_check
+    pool:
+      vmImage: 'ubuntu-20.04'
+
+    jobs:
+      - job: quickstart
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
+
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test]"
+              pip uninstall -y sqlalchemy
+            displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+
+          - script: |
+              pytest -v --no-sqlalchemy --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
+            displayName: 'Run Quickstart'
+
+
+
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, quickstart]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -212,10 +267,8 @@ stages:
           matrix:
             standard:
               pytest_args: 'tests --ignore "tests/rule_based_profiler" --ignore "tests/integration"'
-              run_unit_tests: true
             slow:
               pytest_args: 'tests/rule_based_profiler tests/integration'
-              run_unit_tests: false
 
         steps:
           - task: UsePythonVersion@0
@@ -223,23 +276,12 @@ stages:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
             displayName: 'Install dependencies'
-
-          - script: |
-              # Run unit-tests
-              if $(run_unit_tests); then
-                invoke tests --ci --cloud --timeout=3.0
-              fi
-
-            displayName: 'Unit Tests'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-              SQLALCHEMY_WARN_20: true
 
           - script: |
               # Run pytest
@@ -297,7 +339,7 @@ stages:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -336,7 +378,7 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -352,7 +394,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -371,7 +413,7 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
 
     jobs:
       - job: mysql
@@ -389,7 +431,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -439,7 +481,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -479,7 +521,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -511,7 +553,7 @@ stages:
               SQLALCHEMY_WARN_20: true
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -531,7 +573,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -548,7 +590,7 @@ stages:
               SQLALCHEMY_WARN_20: true
 
   - stage: airflow_provider
-    dependsOn: [scope_check, lint, import_ge, custom_checks]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
     pool:
       vmImage: 'ubuntu-latest'
 

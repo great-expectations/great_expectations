@@ -3,11 +3,14 @@ from __future__ import annotations
 import logging
 import os
 import re
+from pprint import pformat as pf
 from typing import TYPE_CHECKING, List, cast
 
 import pandas as pd
+import pydantic
 import pytest
 from moto import mock_s3
+from pytest import param
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.util import S3Url
@@ -80,7 +83,9 @@ def s3_bucket(s3_mock: BaseClient, aws_s3_bucket_name: str) -> str:
 
 
 @pytest.fixture
-def pandas_s3_datasource(s3_mock, s3_bucket: str) -> PandasS3Datasource:
+def pandas_s3_datasource(
+    empty_data_context, s3_mock, s3_bucket: str
+) -> PandasS3Datasource:
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     keys: List[str] = [
@@ -103,10 +108,13 @@ def pandas_s3_datasource(s3_mock, s3_bucket: str) -> PandasS3Datasource:
             Key=key,
         )
 
-    return PandasS3Datasource(  # type: ignore[call-arg]
+    pandas_s3_datasource = PandasS3Datasource(  # type: ignore[call-arg]
         name="pandas_s3_datasource",
         bucket=s3_bucket,
     )
+    pandas_s3_datasource._data_context = empty_data_context
+
+    return pandas_s3_datasource
 
 
 @pytest.fixture
@@ -158,6 +166,110 @@ def test_construct_csv_asset_directly():
     assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
     m1 = asset.batching_regex.match("alex_20200819_1300.csv")
     assert m1 is not None
+
+
+@pytest.mark.unit
+def test_invalid_connect_options(pandas_s3_datasource: PandasS3Datasource):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        pandas_s3_datasource.add_csv_asset(  # type: ignore[call-arg]
+            name="csv_asset",
+            batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
+            extra_field="invalid",
+        )
+
+    error_dicts = exc_info.value.errors()
+    print(pf(error_dicts))
+    assert [
+        {
+            "loc": ("extra_field",),
+            "msg": "extra fields not permitted",
+            "type": "value_error.extra",
+        }
+    ] == error_dicts
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ["connect_option_kwargs", "expected_error_dicts"],
+    [
+        param(
+            {"my_prefix": "/"},
+            [
+                {
+                    "loc": ("my_prefix",),
+                    "msg": "extra fields not permitted",
+                    "type": "value_error.extra",
+                }
+            ],
+            id="extra_fields",
+        ),
+        param(
+            {"s3_delimiter": ["/only", "/one_delimiter"]},
+            [
+                {
+                    "loc": ("s3_delimiter",),
+                    "msg": "str type expected",
+                    "type": "type_error.str",
+                },
+            ],
+            id="wrong_type",
+        ),
+    ],
+)
+def test_invalid_connect_options_value(
+    pandas_s3_datasource: PandasS3Datasource,
+    connect_option_kwargs: dict,
+    expected_error_dicts: list[dict],
+):
+    with pytest.raises(pydantic.ValidationError) as exc_info:
+        pandas_s3_datasource.add_csv_asset(
+            name="csv_asset",
+            batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
+            **connect_option_kwargs,
+        )
+
+    print(f"Exception raised:\n\t{repr(exc_info.value)}")
+    error_dicts = exc_info.value.errors()
+    print(pf(error_dicts))
+    assert expected_error_dicts == error_dicts
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "connect_options",
+    [
+        param({}, id="default connect options"),
+        param({"s3_prefix": ""}, id="prefix ''"),
+        param({"s3_delimiter": "/"}, id="s3_delimiter '/'"),
+        # param({"s3_prefix": "non_default"}, id="s3_prefix 'non_default'"), # TODO: what prefix should I test?
+        param(
+            {"s3_prefix": "", "s3_delimiter": "/", "s3_max_keys": 20},
+            id="all options",
+        ),
+    ],
+)
+def test_asset_connect_options_in_repr(
+    pandas_s3_datasource: PandasS3Datasource, connect_options: dict
+):
+    print(f"connect_options\n{pf(connect_options)}\n")
+
+    asset = pandas_s3_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
+        **connect_options,
+    )
+
+    print(f"__repr__\n{repr(asset)}\n")
+    asset_as_str = str(asset)
+    print(f"__str__\n{asset_as_str}\n")
+
+    for option_name, option_value in connect_options.items():
+        assert option_name in asset_as_str
+        assert str(option_value) in asset_as_str
+    if not connect_options:
+        # if no connect options are provided the defaults should be used and should not
+        # be part of any serialization. str(asset) == asset.yaml()
+        assert "connect_options" not in asset_as_str
 
 
 @pytest.mark.integration
@@ -277,7 +389,9 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = pandas_s3_datasource
-    pandas_s3_datasource.assets = {"csv_asset": csv_asset}
+    pandas_s3_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = S3DataConnector(
         datasource_name=pandas_s3_datasource.name,
         data_asset_name=csv_asset.name,

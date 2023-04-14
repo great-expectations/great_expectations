@@ -1,3 +1,4 @@
+from __future__ import annotations
 import datetime
 import os
 from typing import List
@@ -19,12 +20,16 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import import_library_module
-from great_expectations.df_to_database_loader import add_dataframe_to_db
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
+
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 
 @pytest.mark.parametrize(
@@ -277,9 +282,13 @@ def test_sqlite_sample_using_limit(sa):
     assert num_rows == n
 
     # Right rows?
-    rows: sa.Row = batch_data.execution_engine.engine.execute(
-        sa.select(sa.text("*")).select_from(batch_data.selectable)
-    ).fetchall()
+    rows: list[sa.RowMapping] = (
+        batch_data.execution_engine.engine.execute(
+            sa.select(sa.text("*")).select_from(batch_data.selectable)
+        )
+        .mappings()
+        .fetchall()
+    )
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
     for row_date in row_dates:

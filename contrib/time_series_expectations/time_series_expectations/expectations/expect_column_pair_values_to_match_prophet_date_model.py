@@ -9,11 +9,11 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
 )
 from great_expectations.expectations.expectation import ColumnPairMapExpectation
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
 )
+from great_expectations.optional_imports import F, sparktypes
 from time_series_expectations.expectations.prophet_model_deserializer import (
     ProphetModelDeserializer,
 )
@@ -235,10 +235,11 @@ class ExpectColumnPairValuesToMatchProphetDateModel(ColumnPairMapExpectation):
         #     raise InvalidExpectationConfigurationError(str(e))
 
     library_metadata = {
-        "tags": [],  # Tags for this Expectation in the Gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@your_name_here",  # Don't forget to add your github handle here!
+        "tags": [],
+        "contributors": [
+            "@abegong",
         ],
+        "requirements": ["prophet"],
     }
 
 

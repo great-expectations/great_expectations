@@ -19,6 +19,13 @@ def regex_for_deprecation_comments() -> Pattern:
 @pytest.fixture
 def files_with_deprecation_warnings() -> List[str]:
     files: List[str] = glob.glob("great_expectations/**/*.py", recursive=True)
+    files_to_exclude = [
+        "great_expectations/compatibility/sqlalchemy_compatibility_wrappers.py",
+        "great_expectations/compatibility/sqlalchemy_and_pandas.py",
+    ]
+    for file_to_exclude in files_to_exclude:
+        if file_to_exclude in files:
+            files.remove(file_to_exclude)
     return files
 
 

@@ -28,13 +28,13 @@ except ImportError:
     F = None
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 except ImportError:
     sa = None
 
 if TYPE_CHECKING:
     import pyspark.sql
-    from sqlalchemy.sql.expression import ColumnElement
+    from sqlalchemy.sql.expression import ColumnElement  # noqa: TID251
 
 
 def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`

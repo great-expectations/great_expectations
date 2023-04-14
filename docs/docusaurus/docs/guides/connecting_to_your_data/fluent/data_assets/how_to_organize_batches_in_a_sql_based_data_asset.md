@@ -75,7 +75,7 @@ Or, for guides on using the block-config method for advanced SQL Datasource conf
 
 :::caution Datasources defined with the block-config method
 
-If you are using a Datasource that was created with the advanced block-config method please follow our guide on [how to configure a SQL Datasource with the block-config method](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md), instead.
+If you are using a Datasource that was created with the advanced block-config method please follow our guide on [how to configure a SQL Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource), instead.
 
 :::
 
@@ -85,7 +85,7 @@ If you are using a Datasource that was created with the advanced block-config me
 
 <ImportGxAndInstantiateADataContext />
 
-### 1. Retrieve a SQL Datasource and Data Asset
+### 2. Retrieve a SQL Datasource and Data Asset
 
 For this guide, we will use a previously defined SQL Datasource named `"my_datasource"` with a Table Data Asset called `"my_asset"` which points to a table with taxi data. 
 
@@ -94,8 +94,9 @@ To retrieve this Datasource, we will supply the `get_datasource(...)` method of 
 ```python title="Python code"
 my_datasource = context.get_datasource("my_datasource")
 my_asset = my_datasource.get_asset("my_asset")
+```
 
-### 2. Add a Splitter to the Data Asset
+### 3. Add a Splitter to the Data Asset
 
 Our table has a datetime column called "`pickup_datetime`" which we will use to split our TableAsset into Batches.
 
@@ -103,7 +104,7 @@ Our table has a datetime column called "`pickup_datetime`" which we will use to 
 table_asset.add_year_and_month_splitter(column_name="pickup_datetime")
 ```
 
-### 3. (Optional) Add Batch Sorters to the Data Asset
+### 4. (Optional) Add Batch Sorters to the Data Asset
 
 We will now add a Batch Sorter to our Data Asset.  This will allow us to explicitly state the order in which our Batches are returned when we request data from the Data Asset.  To do this, we will pass a list of sorters to the `add_sorters(...)` method of our Data Asset.
 
@@ -117,7 +118,7 @@ However, in this example we only have one named group, `"year"`, so our list of 
 my_asset.add_sorters(["+year"])
 ```
 
-### 4. Use a Batch Request to verify the Data Asset works as desired
+### 5. Use a Batch Request to verify the Data Asset works as desired
 
 To verify that our Data Asset will return the desired files as Batches, we will define a quick Batch Request that will include all the Batches available in the Data asset.  Then we will use that Batch Request to get a list of the returned Batches.
 

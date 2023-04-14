@@ -20,7 +20,7 @@ import ConnectingToSqlDatasourcesBlockConfig from '/docs/components/connect_to_d
 
 In this guide we will demonstrate how to connect Great Expectations to a generic SQL table.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, please see [SQLAlchemy's official documentation on dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
-If you would like to connect to the results of a SQL query instead of the contents of a SQL table, please see [our guide on how to connect to SQL data using a query](docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query.md), instead.
+If you would like to connect to the results of a SQL query instead of the contents of a SQL table, please see [our guide on how to connect to SQL data using a query](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_sql_data_using_a_query), instead.
 
 ## Prerequisites
 
@@ -66,7 +66,7 @@ Or, for guides on using the block-config method for advanced SQL Datasource conf
 
 :::caution Datasources defined with the block-config method
 
-If you are using a Datasource that was created with the advanced block-config method please follow our guide on [how to configure a SQL Datasource with the block-config method](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md), instead.
+If you are using a Datasource that was created with the advanced block-config method please follow our guide on [how to configure a SQL Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource), instead.
 
 :::
 
@@ -103,12 +103,12 @@ If you wish to connect to additional tables in the same SQL Database, simply rep
 Now that you have connected to a SQL table, you may want to look into:
 
 ### Configuring SQL Data Assets further
-- [How to organize Batches in a SQL based Data Asset](docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset.md)
+- [How to organize Batches in a SQL based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
 
 ### Requesting Data from a Data Asset
-- [How to request data from a Data Asset](docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
 
 ### Using Data Assets to create Expectations
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
 

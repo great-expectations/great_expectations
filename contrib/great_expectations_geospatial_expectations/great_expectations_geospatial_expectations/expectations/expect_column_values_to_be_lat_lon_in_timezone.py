@@ -12,7 +12,7 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
+from great_expectations.optional_imports import F, sparktypes
 
 
 # This class defines a Metric to support your Expectation.

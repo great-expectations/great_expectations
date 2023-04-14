@@ -17,7 +17,7 @@ A Profiler generates <TechnicalTag relative="../" tag="metric" text="Metrics" />
 
 ### Features and promises
 
-A Profiler creates a starting point for quickly generating Expectations. For example, during the [Getting Started Tutorial](../tutorials/getting_started/tutorial_overview.md), Great Expectations uses the `UserConfigurableProfiler` to demonstrate important features of Expectations by creating and validating an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" /> that has several kinds of Expectations built from a small sample of data. 
+A Profiler creates a starting point for quickly generating Expectations.
 
 There are several Profilers included with Great Expectations; conceptually, each Profiler is a checklist of questions which will generate an Expectation Suite when asked of a Batch of data.
 

@@ -15,18 +15,19 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import (
+from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.optional_imports import (
     F,
     pyspark_sql_Column,
     pyspark_sql_DataFrame,
     pyspark_sql_Row,
-    sa_func_count,
     sa_sql_expression_ColumnClause,
     sa_sql_expression_Selectable,
     sqlalchemy_engine_Engine,
 )
-from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.optional_imports import sqlalchemy as sa
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 
@@ -116,7 +117,7 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
         cls,
         column: sa_sql_expression_ColumnClause,
         **kwargs,
-    ) -> sa_func_count:
+    ) -> sa_sql_expression_Selectable:
         """
         Past implementations of column.distinct_values.count depended on column.value_counts and column.distinct_values.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent

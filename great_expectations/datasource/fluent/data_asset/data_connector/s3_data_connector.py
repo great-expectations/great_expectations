@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+
+import pydantic
 
 from great_expectations.core.batch_spec import PathBatchSpec, S3BatchSpec
 from great_expectations.datasource.data_connector.util import (
@@ -20,6 +22,12 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+class _S3Options(pydantic.BaseModel):
+    s3_prefix: str = ""
+    s3_delimiter: str = "/"
+    s3_max_keys: int = 1000
 
 
 class S3DataConnector(FilePathDataConnector):
@@ -41,6 +49,13 @@ class S3DataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on S3
     """
+
+    asset_level_option_keys: ClassVar[tuple[str, ...]] = (
+        "s3_prefix",
+        "s3_delimiter",
+        "s3_max_keys",
+    )
+    asset_options_type: ClassVar[Type[_S3Options]] = _S3Options
 
     def __init__(
         self,

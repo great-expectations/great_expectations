@@ -42,11 +42,22 @@
             "title": "Connect Options",
             "description": "Optional filesystem specific advanced parameters for connecting to data assets",
             "type": "object"
+        },
+        "header": {
+            "title": "Header",
+            "default": false,
+            "type": "boolean"
+        },
+        "InferSchema": {
+            "title": "Inferschema",
+            "default": false,
+            "type": "boolean"
         }
     },
     "required": [
         "name"
     ],
+    "additionalProperties": false,
     "definitions": {
         "Sorter": {
             "title": "Sorter",

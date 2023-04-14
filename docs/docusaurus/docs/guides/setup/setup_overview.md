@@ -13,10 +13,10 @@ import UniversalMap from '@site/docs/images/universal_map/_universal_map.mdx';
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
 :::note Prerequisites
-- Completing [Step 1: Setup](../../tutorials/getting_started/tutorial_setup.md) of the Getting Started tutorial is recommended.
+- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
 :::
 
-Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all of the features of Great Expectations from a single entry point: Your <TechnicalTag relative="../" tag="data_context" text="Data Context" />.  You will also have your <TechnicalTag relative="../" tag="store" text="Stores" /> and <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> configured in the manner most suitable for your project's purposes.
+Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all the features of Great Expectations from a single entry point: Your <TechnicalTag relative="../" tag="data_context" text="Data Context" />.  You will also have your <TechnicalTag relative="../" tag="store" text="Stores" /> and <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> configured in the manner most suitable for your project's purposes.
 
 ### The alternative to manual Setup
 

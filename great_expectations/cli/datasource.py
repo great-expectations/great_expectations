@@ -27,13 +27,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sqlalchemy = None
 
 yaml = YAMLToString()
 yaml.indent(mapping=2, sequence=4, offset=2)

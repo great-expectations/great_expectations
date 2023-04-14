@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import inspect
 import logging
 import pathlib
@@ -31,6 +32,7 @@ if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
         SortersDefinition,
     )
 
@@ -45,7 +47,7 @@ pytestmark = [
 
 
 @pytest.fixture
-def pandas_filesystem_datasource() -> PandasFilesystemDatasource:
+def pandas_filesystem_datasource(empty_data_context) -> PandasFilesystemDatasource:
     base_directory_rel_path = pathlib.Path(
         "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
     )
@@ -54,10 +56,12 @@ def pandas_filesystem_datasource() -> PandasFilesystemDatasource:
         .parent.joinpath(base_directory_rel_path)
         .resolve(strict=True)
     )
-    return PandasFilesystemDatasource(  # type: ignore[call-arg]
+    pandas_filesystem_datasource = PandasFilesystemDatasource(  # type: ignore[call-arg]
         name="pandas_filesystem_datasource",
         base_directory=base_directory_abs_path,
     )
+    pandas_filesystem_datasource._data_context = empty_data_context
+    return pandas_filesystem_datasource
 
 
 @pytest.fixture
@@ -700,7 +704,9 @@ def datasource_test_connection_error_messages(
         batching_regex=batching_regex,
     )
     csv_asset._datasource = pandas_filesystem_datasource
-    pandas_filesystem_datasource.assets = {"csv_asset": csv_asset}
+    pandas_filesystem_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = FilesystemDataConnector(
         datasource_name=pandas_filesystem_datasource.name,
         data_asset_name=csv_asset.name,
@@ -726,3 +732,49 @@ def test_test_connection_failures(
     with pytest.raises(type(test_connection_error)) as e:
         pandas_filesystem_datasource.test_connection()
     assert str(e.value) == str(test_connection_error)
+
+
+@pytest.mark.unit
+def test_csv_asset_batch_metadata(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+):
+    my_config_variables = {"pipeline_filename": __file__}
+    pandas_filesystem_datasource._data_context.config_variables.update(
+        my_config_variables
+    )
+
+    asset_specified_metadata = {
+        "pipeline_name": "my_pipeline",
+        "no_curly_pipeline_filename": "$pipeline_filename",
+        "curly_pipeline_filename": "${pipeline_filename}",
+    }
+
+    asset = pandas_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_\d{4}-(?P<month>\d{2})\.csv",
+        batch_metadata=asset_specified_metadata,
+    )
+    assert asset.batch_metadata == asset_specified_metadata
+
+    batch_request = asset.build_batch_request()
+
+    batches = pandas_filesystem_datasource.get_batch_list_from_batch_request(
+        batch_request
+    )
+
+    substituted_batch_metadata: BatchMetadata = copy.deepcopy(asset_specified_metadata)
+    substituted_batch_metadata.update(
+        {
+            "no_curly_pipeline_filename": __file__,
+            "curly_pipeline_filename": __file__,
+        }
+    )
+
+    months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+
+    for i, month in enumerate(months):
+        substituted_batch_metadata["month"] = month
+        actual_metadata = copy.deepcopy(batches[i].metadata)
+        # not testing path for the purposes of this test
+        actual_metadata.pop("path")
+        assert actual_metadata == substituted_batch_metadata

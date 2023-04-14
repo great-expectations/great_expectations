@@ -3,26 +3,8 @@ import os
 import random
 from typing import Optional, Union
 
+import pandas as pd
 import pytest
-
-from great_expectations.datasource import (
-    BaseDatasource,
-    LegacyDatasource,
-    SimpleSqlalchemyDatasource,
-)
-from great_expectations.exceptions.exceptions import ExecutionEngineError
-
-logger = logging.getLogger(__name__)
-
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -33,6 +15,12 @@ from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
 )
+from great_expectations.datasource import (
+    BaseDatasource,
+    LegacyDatasource,
+    SimpleSqlalchemyDatasource,
+)
+from great_expectations.exceptions.exceptions import ExecutionEngineError
 from great_expectations.validator.validator import Validator
 
 try:
@@ -48,7 +36,11 @@ except ImportError:
     except ImportError:
         sqla_bigquery = None
 
+
 yaml = YAMLHandler()
+
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture

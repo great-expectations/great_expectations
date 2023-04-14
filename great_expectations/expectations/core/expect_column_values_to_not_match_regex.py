@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 

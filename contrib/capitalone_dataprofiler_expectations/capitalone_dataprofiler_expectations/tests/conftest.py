@@ -1,32 +1,58 @@
+from __future__ import annotations
+
 import os
 import shutil
 import sys
 
 import pytest
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import (  # registers these metrics
-    DataProfilerColumnProfileReport,
-    DataProfilerProfileReport,
-)
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.types.base import AnonymizedUsageStatisticsConfig
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.self_check.util import build_test_backends_list
-from tests.conftest import (
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,  # implicitly used fixture
+from tests.conftest import (  # noqa: F401,F403,F811  # registers implicitly used fixture and prevents removal of "unused" import
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
 )
-
-_ = DataProfilerProfileReport  # prevents removal of "unused" import
-_ = DataProfilerColumnProfileReport  # prevents removal of "unused" import
-
-_ = set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder  # prevents removal of "unused" import
 
 sys.path.insert(0, os.path.abspath("../.."))  # noqa: PTH100
 
 test_root_path: str = os.path.dirname(  # noqa: PTH120
     os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # noqa: PTH120
 )
+
+
+class BaseProfiler:
+    """
+    This class should ideally be named "MockBaseProfiler"; however, it has to be called "BaseProfiler", because its
+    "load()" method returns "BaseProfiler" type, which is type of class itself (using "fluent" programming style).
+    """
+
+    # noinspection PyMethodMayBeStatic,PyMethodParameters
+    def load(cls, filepath: str) -> BaseProfiler:
+        return cls
+
+    # noinspection PyMethodMayBeStatic
+    def report(self, report_options: dict = None) -> dict:
+        return {
+            "global_stats": {
+                "profile_schema": {},
+            },
+            "data_stats": [
+                {
+                    "column_name": "vendor_id",
+                },
+                {
+                    "column_name": "passenger_count",
+                },
+                {
+                    "column_name": "total_amount",
+                },
+                {
+                    "column_name": "congestion_surcharge",
+                },
+            ],
+        }
 
 
 def pytest_addoption(parser):
@@ -129,8 +155,13 @@ def pytest_generate_tests(metafunc):
 
 
 @pytest.fixture(scope="function")
+def mock_base_data_profiler() -> BaseProfiler:
+    return BaseProfiler()
+
+
+@pytest.fixture(scope="function")
 def bobby_columnar_table_multi_batch_deterministic_data_context(
-    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
+    set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,  # noqa: F401,F403,F811
     tmp_path_factory,
     monkeypatch,
 ) -> FileDataContext:

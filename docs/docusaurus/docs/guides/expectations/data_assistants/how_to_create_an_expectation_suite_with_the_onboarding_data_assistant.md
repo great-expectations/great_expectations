@@ -19,7 +19,7 @@ great_expectations suite new --profile
 
 <Prerequisites>
 
-- A [configured Data Context](../../../tutorials/getting_started/tutorial_setup.md).
+- A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 - The knowledge to [configure and save a Datasource](../../connecting_to_your_data/connect_to_data_overview.md).
 - The knowledge to [configure and save a Batch Request](../../connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md).
 

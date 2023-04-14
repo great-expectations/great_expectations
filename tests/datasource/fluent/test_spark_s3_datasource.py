@@ -19,7 +19,7 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
-from great_expectations.datasource.fluent.spark_s3_datasource import CSVAsset
+from great_expectations.datasource.fluent.spark_file_path_datasource import CSVAsset
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient
@@ -126,17 +126,20 @@ def test_construct_spark_s3_datasource(spark_s3_datasource: SparkS3Datasource):
 
 @pytest.mark.integration
 def test_add_csv_asset_to_datasource(spark_s3_datasource: SparkS3Datasource):
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
         header=True,
         infer_schema=True,
+        batch_metadata=asset_specified_metadata,
     )
     assert asset.name == "csv_asset"
     assert asset.batching_regex.match("random string") is None
     assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
     m1 = asset.batching_regex.match("alex_20200819_1300.csv")
     assert m1 is not None
+    assert asset.batch_metadata == asset_specified_metadata
 
 
 @pytest.mark.integration
@@ -234,11 +237,13 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 def test_get_batch_list_from_fully_specified_batch_request(
     spark_s3_datasource: SparkS3Datasource,
 ):
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_s3_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
         header=True,
         infer_schema=True,
+        batch_metadata=asset_specified_metadata,
     )
 
     request = asset.build_batch_request(
@@ -260,6 +265,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "name": "alex",
         "timestamp": "20200819",
         "price": "1300",
+        **asset_specified_metadata,
     }
     assert (
         batch.id
@@ -283,7 +289,9 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = spark_s3_datasource
-    spark_s3_datasource.assets = {"csv_asset": csv_asset}
+    spark_s3_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = S3DataConnector(
         datasource_name=spark_s3_datasource.name,
         data_asset_name=csv_asset.name,

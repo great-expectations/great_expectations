@@ -36,12 +36,12 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import (
 from great_expectations.util import deep_filter_properties_iterable
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 except ImportError:
     sa = None
 
 try:
-    from sqlalchemy.sql import Selectable
+    from sqlalchemy.sql import Selectable  # noqa: TID251
 except ImportError:
     Selectable = None
 

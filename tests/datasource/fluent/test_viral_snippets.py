@@ -15,7 +15,9 @@ pytestmark = [pytest.mark.integration]
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
-from great_expectations.datasource.fluent.interfaces import Datasource
+from great_expectations.datasource.fluent.interfaces import (
+    Datasource,
+)
 
 logger = logging.getLogger(__file__)
 
@@ -67,7 +69,10 @@ def fluent_yaml_config_file(
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def fluent_file_context(fluent_yaml_config_file: pathlib.Path) -> FileDataContext:
+def fluent_file_context(
+    cloud_storage_get_client_doubles,
+    fluent_yaml_config_file: pathlib.Path,
+) -> FileDataContext:
     context = get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
     )
@@ -76,7 +81,9 @@ def fluent_file_context(fluent_yaml_config_file: pathlib.Path) -> FileDataContex
 
 
 def test_load_an_existing_config(
-    fluent_yaml_config_file: pathlib.Path, fluent_only_config: GxConfig
+    cloud_storage_get_client_doubles,
+    fluent_yaml_config_file: pathlib.Path,
+    fluent_only_config: GxConfig,
 ):
     context = get_context(
         context_root_dir=fluent_yaml_config_file.parent, cloud_mode=False
@@ -85,33 +92,43 @@ def test_load_an_existing_config(
     assert context.fluent_config == fluent_only_config
 
 
-def test_serialize_fluent_config(fluent_file_context: FileDataContext):
+def test_serialize_fluent_config(
+    cloud_storage_get_client_doubles,
+    fluent_file_context: FileDataContext,
+):
     dumped_yaml: str = fluent_file_context.fluent_config.yaml()
     print(f"  Dumped Config\n\n{dumped_yaml}\n")
 
     assert fluent_file_context.fluent_config.datasources
 
-    for ds_name, datasource in fluent_file_context.fluent_config.datasources.items():
+    for (
+        ds_name,
+        datasource,
+    ) in fluent_file_context.fluent_config.get_datasources_as_dict().items():
         assert ds_name in dumped_yaml
 
-        for asset_name in datasource.assets.keys():
+        for asset_name in datasource.get_asset_names():
             assert asset_name in dumped_yaml
 
 
 def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataContext):
+    """
+    Ensure that all Datasources that require data_connectors have their data_connectors
+    created when loaded from config.
+    """
     dc_datasources: dict[str, list[str]] = defaultdict(list)
 
     for datasource in fluent_file_context.fluent_datasources.values():
         if datasource.data_connector_type:
             print(f"class: {datasource.__class__.__name__}")
             print(f"type: {datasource.type}")
+            print(f"data_connector: {datasource.data_connector_type.__name__}")
             print(f"name: {datasource.name}", end="\n\n")
 
             dc_datasources[datasource.type].append(datasource.name)
 
-            for asset in datasource.assets.values():
-                asset.test_connection()
-                print(f"✅ '{asset.name}' connected with {type(asset._data_connector)}")
+            for asset in datasource.assets:
+                assert isinstance(asset._data_connector, datasource.data_connector_type)
             print()
 
     print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
@@ -150,7 +167,7 @@ def test_save_datacontext_persists_fluent_config(
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
 
     initial_yaml = config_file.read_text()
-    for ds_name in fluent_only_config.datasources:
+    for ds_name in fluent_only_config.get_datasource_names():
         assert ds_name not in initial_yaml
 
     context: FileDataContext = get_context(
@@ -165,7 +182,7 @@ def test_save_datacontext_persists_fluent_config(
 
     print("\n".join(diff))
 
-    for ds_name in fluent_only_config.datasources:
+    for ds_name in fluent_only_config.get_datasource_names():
         assert ds_name in final_yaml
 
 

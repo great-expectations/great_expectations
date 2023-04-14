@@ -5,10 +5,10 @@ from typing import Dict
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sqlalchemy
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine import Connection, Engine
-    from sqlalchemy.exc import SQLAlchemyError
+    import sqlalchemy as sqlalchemy  # noqa: TID251
+    from sqlalchemy import create_engine  # noqa: TID251
+    from sqlalchemy.engine import Connection, Engine  # noqa: TID251
+    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
 except ImportError:
     sqlalchemy = None
     create_engine = None
