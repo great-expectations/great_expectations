@@ -84,7 +84,7 @@ If you're using an Ephemeral Data Context, your configurations will not persist 
 
 ### 2. Use an existing Data Asset to create a Batch Request
 
-From the Data Context we initialized we can access our previously created Datasources and Data Assets.  We will retrieve a previously configured Data Asset, and then create a Batch Request indicating the Batch of data that we intend to Validate our Expectations against:
+Add the following method to retrieve a previously configured Data Asset from the Data Context you initialized and create a Batch Request to identify the Batch of data within the Data Asset that you'll use to validate your Expectations:
 
 ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_data_asset_and_build_batch_request"
 ```
