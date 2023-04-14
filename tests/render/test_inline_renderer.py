@@ -44,7 +44,7 @@ def test_inline_renderer_instantiation_error_message(
 
 @pytest.mark.xfail(
     reason="Not currently working with pandas 2.0.0 and python 3.8",
-    run=True,
+    run=False,
     strict=True,
 )
 @pytest.mark.unit
@@ -419,7 +419,7 @@ def test_inline_renderer_expectation_validation_result_serialization(
 
 @pytest.mark.xfail(
     reason="Not currently working with pandas 2.0.0 and python 3.8",
-    run=True,
+    run=False,
     strict=True,
 )
 @pytest.mark.unit
