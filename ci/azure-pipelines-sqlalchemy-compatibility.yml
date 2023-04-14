@@ -115,8 +115,8 @@ stages:
             sqlalchemy_1_4_x:
               sqlalchemy_base_version: '1.4.0'
             # Uncomment when we are compatible with 2.0.x.
-            # sqlalchemy_2_0_x:
-            #   sqlalchemy_base_version: '2.0.0'
+            sqlalchemy_2_0_x:
+              sqlalchemy_base_version: '2.0.0'
 
         services:
           postgres: postgres
@@ -129,7 +129,7 @@ stages:
 
           - script: |
               cp constraints-dev.txt constraints-dev-temp.txt
-              echo "SQLAlchemy~=$(sqlalchemy_base_version)" >> constraints-dev-temp.txt 
+              echo "SQLAlchemy~=$(sqlalchemy_base_version)" >> constraints-dev-temp.txt
               pip install --constraint constraints-dev-temp.txt ".[dev]" pytest-azurepipelines
             displayName: 'Install dependencies using SQLAlchemy base version $(sqlalchemy_base_version)'
 
