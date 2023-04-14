@@ -6,8 +6,8 @@ from great_expectations.execution_engine import ExecutionEngine, PandasExecution
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
-from great_expectations.expectations.metrics.column_aggregate_metric import (
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
@@ -201,7 +201,7 @@ class ColumnDistributionMatchesBenfordsLaw(ColumnAggregateMetricProvider):
         return dependencies
 
 
-class ExpectColumnDistributionToMatchBenfordsLaw(ColumnExpectation):
+class ExpectColumnDistributionToMatchBenfordsLaw(ColumnAggregateExpectation):
     """Expect column distribution to match Benford's Law.
 
     Tests whether data matches Benford's Law Fraud Detection Algorithm. Uses a Chi-Square Goodness of Fit test with an 80@ p-value.

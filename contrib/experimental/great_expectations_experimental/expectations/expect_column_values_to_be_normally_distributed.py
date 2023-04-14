@@ -4,8 +4,8 @@ from scipy import stats as stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
-from great_expectations.expectations.metrics.column_aggregate_metric import (
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
@@ -115,7 +115,7 @@ class ColumnNormallyDistributed(ColumnAggregateMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnValuesToBeNormallyDistributed(ColumnExpectation):
+class ExpectColumnValuesToBeNormallyDistributed(ColumnAggregateExpectation):
     """Expect column values to be normally distributed. NaN values are omitted."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation

@@ -61,6 +61,13 @@ from great_expectations.exceptions import (
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
 )
+from great_expectations.optional_imports import (
+    sa_sql_expression_Select,
+    sqlalchemy_reflection,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 try:
     import black
@@ -75,21 +82,6 @@ except ModuleNotFoundError:
     import importlib_metadata
 
 logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy as sa  # noqa: TID251
-    from sqlalchemy import Table  # noqa: TID251
-    from sqlalchemy.engine import reflection  # noqa: TID251
-    from sqlalchemy.sql import Select  # noqa: TID251
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
 
 
 if TYPE_CHECKING:
@@ -2041,7 +2033,7 @@ def generate_temporary_table_name(
 def get_sqlalchemy_inspector(engine):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
-        insp = reflection.Inspector.from_engine(engine)
+        insp = sqlalchemy_reflection.Inspector.from_engine(engine)
     else:
         insp = sa.inspect(engine)
     return insp
@@ -2056,7 +2048,9 @@ def get_sqlalchemy_url(drivername, **credentials):
     return url
 
 
-def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, Select]:
+def get_sqlalchemy_selectable(
+    selectable: Union[sa.Table, sa_sql_expression_Select]
+) -> Union[sa.Table, sa_sql_expression_Select]:
     """
     Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
@@ -2067,7 +2061,7 @@ def get_sqlalchemy_selectable(selectable: Union[Table, Select]) -> Union[Table, 
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if isinstance(selectable, Select):
+    if sa_sql_expression_Select and isinstance(selectable, sa_sql_expression_Select):
         if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
         else:

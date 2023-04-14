@@ -41,8 +41,16 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_sampler im
 from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
     PandasDataSplitter,
 )
+from great_expectations.optional_imports import (
+    BlobServiceClient,
+    DefaultCredentialsError,
+    GoogleAPIError,
+    google_cloud_storage,
+    google_service_account,
+)
 
 logger = logging.getLogger(__name__)
+
 
 try:
     import boto3
@@ -53,28 +61,6 @@ except ImportError:
     ParamValidationError = None
     logger.debug(
         "Unable to load AWS connection object; install optional boto3 dependency for support"
-    )
-
-try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    BlobServiceClient = None
-    logger.debug(
-        "Unable to load Azure connection object; install optional azure dependency for support"
-    )
-
-try:
-    from google.api_core.exceptions import GoogleAPIError
-    from google.auth.exceptions import DefaultCredentialsError
-    from google.cloud import storage
-    from google.oauth2 import service_account
-except ImportError:
-    storage = None
-    service_account = None
-    GoogleAPIError = None  # type: ignore[assignment,misc] # assigning None to a type
-    DefaultCredentialsError = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional google dependency for support"
     )
 
 
@@ -153,14 +139,19 @@ class PandasExecutionEngine(ExecutionEngine):
         self._data_sampler = PandasDataSampler()
 
     def _instantiate_azure_client(self) -> None:
-        azure_options = self.config.get("azure_options", {})
-        try:
-            if "conn_str" in azure_options:
-                self._azure = BlobServiceClient.from_connection_string(**azure_options)
-            else:
-                self._azure = BlobServiceClient(**azure_options)
-        except (TypeError, AttributeError):
-            self._azure = None
+        self._azure = None
+        if BlobServiceClient:
+            azure_options = self.config.get("azure_options", {})
+            try:
+                if "conn_str" in azure_options:
+                    self._azure = BlobServiceClient.from_connection_string(
+                        **azure_options
+                    )
+                else:
+                    self._azure = BlobServiceClient(**azure_options)
+            except (TypeError, AttributeError):
+                # If exception occurs, then "self._azure = None" remains in effect.
+                pass
 
     def _instantiate_s3_client(self) -> None:
         # Try initializing cloud provider client. If unsuccessful, we'll catch it when/if a BatchSpec is passed in.
@@ -185,15 +176,21 @@ class PandasExecutionEngine(ExecutionEngine):
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
-                credentials = service_account.Credentials.from_service_account_file(
-                    filename=filename
+                credentials = (
+                    google_service_account.Credentials.from_service_account_file(
+                        filename=filename
+                    )
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
-                credentials = service_account.Credentials.from_service_account_info(
-                    info=info
+                credentials = (
+                    google_service_account.Credentials.from_service_account_info(
+                        info=info
+                    )
                 )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
+            self._gcs = google_cloud_storage.Client(
+                credentials=credentials, **gcs_options
+            )
         except (TypeError, AttributeError, DefaultCredentialsError):
             self._gcs = None
 

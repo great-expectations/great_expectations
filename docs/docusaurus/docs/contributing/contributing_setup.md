@@ -49,7 +49,7 @@ In order to contribute to Great Expectations, you will need the following:
 ### Install Python dependencies
 ### (Easy version of steps 5-7 below for Mac/Linux users)
 
-Create a virtual environment in your locally cloned repo, use the same version of `pip` that we use in our CI/CD pipelines (for Python 3.7 - 3.10), and install the fewest dependencies needed for a dev environment (to minimize potential setup headaches).
+Create a virtual environment in your local repository using Python versions 3.7 to 3.10, activate the environment, and then install the necessary dependencies.
 
 ```
 python3 -m venv gx_dev
@@ -105,7 +105,7 @@ Later on, try setting up the full dev environment (as mentioned in step 6) when 
 
 ### 5. Create a new virtual environment
 
-* Make a new virtual environment (e.g. using virtualenv or conda), name it “great_expectations_dev” or similar.
+* Make a new virtual environment and name it “great_expectations_dev” or similar.
 
 * Ex virtualenv: `python3 -m venv <path_to_environments_folder\>/great_expectations_dev` and then `<source path_to_environments_folder\>/great_expectations_dev/bin/activate`
 

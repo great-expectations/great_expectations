@@ -16,6 +16,9 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError,
 )
+from great_expectations.optional_imports import (
+    BlobServiceClient,
+)
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.file_path_data_asset import (
@@ -24,16 +27,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-
-ABS_IMPORTED = False
-try:
-    from azure.storage.blob import (
-        BlobServiceClient,  # noqa: disable=E0602
-    )
-
-    ABS_IMPORTED = True
-except ImportError:
-    pass
 
 _MISSING: Final = object()
 
@@ -71,7 +64,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if ABS_IMPORTED:
+            if BlobServiceClient:
                 try:
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr]
@@ -117,7 +110,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             ) from e
 
         if self.assets and test_assets:
-            for asset in self.assets.values():
+            for asset in self.assets:
                 asset.test_connection()
 
     def _build_data_connector(

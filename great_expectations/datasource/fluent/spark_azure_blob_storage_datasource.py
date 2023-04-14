@@ -22,19 +22,12 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
+from great_expectations.optional_imports import (
+    BlobServiceClient,
+)
 
 logger = logging.getLogger(__name__)
 
-
-ABS_IMPORTED = False
-try:
-    from azure.storage.blob import (
-        BlobServiceClient,  # noqa: disable=E0602
-    )
-
-    ABS_IMPORTED = True
-except ImportError:
-    pass
 
 _MISSING: Final = object()
 
@@ -78,7 +71,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if ABS_IMPORTED:
+            if BlobServiceClient:
                 try:
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
@@ -129,7 +122,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             ) from e
 
         if self.assets and test_assets:
-            for asset in self.assets.values():
+            for asset in self.assets:
                 asset.test_connection()
 
     def _build_data_connector(

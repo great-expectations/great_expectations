@@ -13,14 +13,14 @@ from great_expectations.datasource.fluent.config_str import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    SortersDefinition,
-)
 
 if TYPE_CHECKING:
     from google.cloud.storage.client import Client as GoogleCloudStorageClient
 
     from great_expectations.datasource.fluent import BatchMetadata
+    from great_expectations.datasource.fluent.interfaces import (
+        SortersDefinition,
+    )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
     )

@@ -66,5 +66,7 @@ def test_sa_null_filters(sa):
     # Demonstrate that spark's max aggregate function can tolerate null values
     df = pd.DataFrame({"a": [1, 2, 3, None, None, 4]})
     add_dataframe_to_db(df=df, name="test", con=eng, index=False)
-
-    assert eng.execute(sa.text(f"SELECT MAX(a) FROM test;")).fetchone()[0] == 4
+    with eng.begin() as connection:
+        assert (
+            connection.execute(sa.text(f"SELECT MAX(a) FROM test;")).fetchone()[0] == 4
+        )

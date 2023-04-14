@@ -1,23 +1,16 @@
 import logging
-import os
 from typing import Dict, List
 
-import pytest
 from packaging.version import Version, parse as parse_version
+
+from great_expectations.optional_imports import pyspark_sql_SparkSession, pyspark
 
 logger = logging.getLogger(__name__)
 
 try:
-    import pyspark
-    from pyspark import SparkContext
-    from pyspark.sql import SparkSession
-
     from great_expectations.datasource import SparkDFDatasource
     from great_expectations.execution_engine import SparkDFExecutionEngine
 except ImportError:
-    pyspark = None
-    SparkContext = None
-    SparkSession = None
     SparkDFDatasource = None
     SparkDFExecutionEngine = None
     # TODO: review logging more detail here
@@ -41,7 +34,7 @@ def test_spark_config_datasource(spark_session_v012):
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
     source: SparkDFDatasource = SparkDFDatasource(spark_config=spark_config)
-    spark_session: SparkSession = source.spark
+    spark_session: pyspark_sql_SparkSession = source.spark
     # noinspection PyProtectedMember
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     assert not sc_stopped
@@ -63,7 +56,7 @@ def test_spark_config_execution_engine(spark_session):
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
     execution_engine = SparkDFExecutionEngine(spark_config=new_spark_config)
-    new_spark_session: SparkSession = execution_engine.spark
+    new_spark_session: pyspark_sql_SparkSession = execution_engine.spark
 
     # noinspection PyProtectedMember
     sc_stopped: bool = new_spark_session.sparkContext._jsc.sc().isStopped()

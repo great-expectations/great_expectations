@@ -23,29 +23,22 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
 )
+from great_expectations.optional_imports import (
+    google_cloud_storage,
+    google_service_account,
+)
 
 if TYPE_CHECKING:
-    from google.cloud.storage.client import Client as GoogleCloudStorageClient
-    from google.oauth2.service_account import (
-        Credentials as GoogleServiceAccountCredentials,
-    )
-
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
+    )
+    from great_expectations.optional_imports import (
+        GoogleCloudStorageClient,
+        GoogleServiceAccountCredentials,
     )
 
 
 logger = logging.getLogger(__name__)
-
-
-GCS_IMPORTED = False
-try:
-    from google.cloud import storage  # noqa: disable=E0602
-    from google.oauth2 import service_account  # noqa: disable=E0602
-
-    GCS_IMPORTED = True
-except ImportError:
-    pass
 
 
 class SparkGoogleCloudStorageDatasourceError(SparkDatasourceError):
@@ -74,27 +67,23 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
         gcs_client: Union[GoogleCloudStorageClient, None] = self._gcs_client
         if not gcs_client:
             # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
-            if GCS_IMPORTED:
+            if google_cloud_storage and google_service_account:
                 try:
                     credentials: Union[
                         GoogleServiceAccountCredentials, None
                     ] = None  # If configured with gcloud CLI / env vars
                     if "filename" in self.gcs_options:
                         filename: str = str(self.gcs_options.pop("filename"))
-                        credentials = (
-                            service_account.Credentials.from_service_account_file(
-                                filename=filename
-                            )
+                        credentials = google_service_account.Credentials.from_service_account_file(
+                            filename=filename
                         )
                     elif "info" in self.gcs_options:
                         info: Any = self.gcs_options.pop("info")
-                        credentials = (
-                            service_account.Credentials.from_service_account_info(
-                                info=info
-                            )
+                        credentials = google_service_account.Credentials.from_service_account_info(
+                            info=info
                         )
 
-                    gcs_client = storage.Client(
+                    gcs_client = google_cloud_storage.Client(
                         credentials=credentials, **self.gcs_options
                     )
                 except Exception as e:
@@ -129,7 +118,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
             ) from e
 
         if self.assets and test_assets:
-            for asset in self.assets.values():
+            for asset in self.assets:
                 asset.test_connection()
 
     def _build_data_connector(

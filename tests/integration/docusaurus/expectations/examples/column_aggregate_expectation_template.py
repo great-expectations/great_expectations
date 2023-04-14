@@ -1,5 +1,5 @@
 """
-This is a template for creating custom ColumnExpectations.
+This is a template for creating custom ColumnAggregateExpectations.
 For detailed instructions on how to use it, please see:
     https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations
 """
@@ -14,7 +14,7 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
     column_aggregate_partial,
@@ -23,7 +23,7 @@ from great_expectations.expectations.metrics import (
 
 
 # This class defines a Metric to support your Expectation.
-# For most ColumnExpectations, the main business logic for calculation will live in this class.
+# For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 # <snippet name="tests/integration/docusaurus/expectations/examples/column_aggregate_expectation_template.py ColumnAggregateMatchesSomeCriteria class_def">
 class ColumnAggregateMatchesSomeCriteria(ColumnAggregateMetricProvider):
     # </snippet>
@@ -52,7 +52,7 @@ class ColumnAggregateMatchesSomeCriteria(ColumnAggregateMetricProvider):
 
 # This class defines the Expectation itself
 # <snippet name="tests/integration/docusaurus/expectations/examples/column_aggregate_expectation_template.py ExpectColumnAggregateToMatchSomeCriteria class_def">
-class ExpectColumnAggregateToMatchSomeCriteria(ColumnExpectation):
+class ExpectColumnAggregateToMatchSomeCriteria(ColumnAggregateExpectation):
     # </snippet>
     # <snippet name="tests/integration/docusaurus/expectations/examples/column_aggregate_expectation_template.py docstring">
     """TODO: add a docstring here"""

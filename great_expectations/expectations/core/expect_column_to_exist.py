@@ -7,8 +7,8 @@ from great_expectations.core import (
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.expectations.expectation import (
+    BatchExpectation,
     InvalidExpectationConfigurationError,
-    TableExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 
-class ExpectColumnToExist(TableExpectation):
+class ExpectColumnToExist(BatchExpectation):
     """Expect the specified column to exist.
 
     expect_column_to_exist is a \

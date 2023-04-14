@@ -8,18 +8,14 @@ from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.optional_imports import sqlalchemy as sa
-
-try:
-    from sa.engine import Dialect
-    from sa.sql import Selectable
-    from sa.sql.elements import BinaryExpression, BooleanClauseList
-except ImportError:
-    Selectable = None
-    BinaryExpression = None
-    BooleanClauseList = None
-    Dialect = None
-
+from great_expectations.optional_imports import (
+    sa_sql_expression_BinaryExpression,
+    sa_sql_expression_BooleanClauseList,
+    sa_sql_expression_Selectable,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 if TYPE_CHECKING:
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
@@ -32,8 +28,10 @@ class SqlAlchemyDataSampler(DataSampler):
         self,
         execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
-        where_clause: Optional[Selectable] = None,
-    ) -> Union[str, BinaryExpression, BooleanClauseList]:
+        where_clause: Optional[sa_sql_expression_Selectable] = None,
+    ) -> Union[
+        str, sa_sql_expression_BinaryExpression, sa_sql_expression_BooleanClauseList
+    ]:
         """Sample using a limit with configuration provided via the batch_spec.
 
         Note: where_clause needs to be included at this stage since SqlAlchemy's semantics
@@ -66,7 +64,7 @@ class SqlAlchemyDataSampler(DataSampler):
         if dialect_name == GXSqlDialect.ORACLE:
             # TODO: AJB 20220429 WARNING THIS oracle dialect METHOD IS NOT COVERED BY TESTS
             # limit doesn't compile properly for oracle so we will append rownum to query string later
-            raw_query: Selectable = (
+            raw_query: sa_sql_expression_Selectable = (
                 sa.select("*")
                 .select_from(
                     sa.table(table_name, schema=batch_spec.get("schema_name", None))
@@ -84,7 +82,7 @@ class SqlAlchemyDataSampler(DataSampler):
         elif dialect_name == GXSqlDialect.MSSQL:
             # Note that this code path exists because the limit parameter is not getting rendered
             # successfully in the resulting mssql query.
-            selectable_query: Selectable = (
+            selectable_query: sa_sql_expression_Selectable = (
                 sa.select("*")
                 .select_from(
                     sa.table(table_name, schema=batch_spec.get("schema_name", None))
@@ -137,8 +135,8 @@ class SqlAlchemyDataSampler(DataSampler):
     def sample_using_random(
         execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
-        where_clause: Optional[Selectable] = None,
-    ) -> Selectable:
+        where_clause: Optional[sa_sql_expression_Selectable] = None,
+    ) -> sa_sql_expression_Selectable:
         """Sample using random data with configuration provided via the batch_spec.
 
         Note: where_clause needs to be included at this stage since we use the where clause
@@ -180,7 +178,7 @@ class SqlAlchemyDataSampler(DataSampler):
     def sample_using_mod(
         self,
         batch_spec: BatchSpec,
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Take the mod of named column, and only keep rows that match the given value.
 
         Args:
@@ -207,7 +205,7 @@ class SqlAlchemyDataSampler(DataSampler):
     def sample_using_a_list(
         self,
         batch_spec: BatchSpec,
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Match the values in the named column against value_list, and only keep the matches.
 
         Args:
@@ -233,7 +231,7 @@ class SqlAlchemyDataSampler(DataSampler):
     def sample_using_md5(
         self,
         batch_spec: BatchSpec,
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Hash the values in the named column using md5, and only keep rows that match the given hash_value.
 
         Args:

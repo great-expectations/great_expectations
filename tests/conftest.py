@@ -108,8 +108,10 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
-    import pyspark.sql
-    from pyspark.sql import SparkSession
+    from great_expectations.optional_imports import (
+        pyspark_sql_DataFrame,
+        pyspark_sql_SparkSession,
+    )
 
 yaml = YAMLHandler()
 ###
@@ -130,7 +132,7 @@ def spark_warehouse_session(tmp_path_factory):
     pyspark = pytest.importorskip("pyspark")  # noqa: F841
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: SparkSession = get_or_create_spark_application(
+    spark: pyspark_sql_SparkSession = get_or_create_spark_application(
         spark_config={
             "spark.sql.catalogImplementation": "in-memory",
             "spark.executor.memory": "450m",
@@ -381,7 +383,7 @@ def sa(test_backends):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         try:
-            import sqlalchemy as sa
+            from great_expectations.optional_imports import sqlalchemy as sa
 
             return sa
         except ImportError:
@@ -390,14 +392,15 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends) -> SparkSession:
+def spark_session(test_backends) -> pyspark_sql_SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    try:
-        import pyspark  # noqa: F401
-        from pyspark.sql import SparkSession  # noqa: F401
+    from great_expectations.optional_imports import (
+        pyspark_sql_SparkSession,
+    )
 
+    if pyspark_sql_SparkSession:
         return get_or_create_spark_application(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
@@ -405,8 +408,8 @@ def spark_session(test_backends) -> SparkSession:
                 # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
-    except ImportError:
-        raise ValueError("spark tests are requested, but pyspark is not installed")
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
@@ -1705,10 +1708,11 @@ def titanic_sqlite_db(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:///{titanic_db_path}")
-        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
-            0
-        ] == (1313,)
-        return engine
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
+            return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 
@@ -1721,9 +1725,10 @@ def titanic_sqlite_db_connection_string(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:////{titanic_db_path}")
-        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
-            0
-        ] == (1313,)
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
         return f"sqlite:///{titanic_db_path}"
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1761,7 +1766,7 @@ def empty_sqlite_db(sa):
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
-        with engine.connect() as connection:
+        with engine.begin() as connection:
             assert connection.execute(sa.text("select 1")).fetchall()[0] == (1,)
         return engine
     except ImportError:
@@ -2282,18 +2287,17 @@ def sqlite_view_engine(test_backends):
                 con=sqlite_engine,
                 index=True,
             )
-            with sqlite_engine.connect() as connection:
-                with connection.begin():
-                    connection.execute(
-                        sa.text(
-                            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-                        )
+            with sqlite_engine.begin() as connection:
+                connection.execute(
+                    sa.text(
+                        "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
                     )
-                    connection.execute(
-                        sa.text(
-                            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-                        )
+                )
+                connection.execute(
+                    sa.text(
+                        "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
                     )
+                )
             return sqlite_engine
         except ImportError:
             sa = None
@@ -7457,7 +7461,7 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index() -> pd.DataF
 @pytest.fixture
 def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark.sql.dataframe.DataFrame:
+) -> pyspark_sql_DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7487,7 +7491,7 @@ def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark.sql.dataframe.DataFrame:
+) -> pyspark_sql_DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7504,7 +7508,7 @@ def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> pyspark.sql.dataframe.DataFrame:
+) -> pyspark_sql_DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
