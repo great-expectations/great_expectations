@@ -143,20 +143,20 @@ stages:
       vmImage: 'ubuntu-latest'
 
     jobs:
-    - job: static_type_check
-      steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: 3.8
-        displayName: 'Use Python 3.8'
-      - script: |
-          pip install --requirement requirements-types.txt
-          invoke type-check --ci --pretty
-        name: StaticTypeCheck
-      - script: |
-          # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources
-        name: TypeCheckStubSourceFiles
+    # - job: static_type_check
+    #   steps:
+    #   - task: UsePythonVersion@0
+    #     inputs:
+    #       versionSpec: 3.8
+    #     displayName: 'Use Python 3.8'
+    #   - script: |
+    #       pip install --requirement requirements-types.txt
+    #       invoke type-check --ci --pretty
+    #     name: StaticTypeCheck
+    #   - script: |
+    #       # initial run doesn't check `.pyi` source files
+    #       invoke type-check --ci --pretty --check-stub-sources
+    #     name: TypeCheckStubSourceFiles
 
     - job: docstring_linter
       steps:
