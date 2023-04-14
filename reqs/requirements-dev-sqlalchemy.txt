@@ -1,7 +1,7 @@
 --requirement requirements-dev-lite.txt
 
 --requirement requirements-dev-athena.txt
---requirement requirements-dev-bigquery.txt
+#--requirement requirements-dev-bigquery.txt
 --requirement requirements-dev-dremio.txt
 --requirement requirements-dev-mssql.txt
 --requirement requirements-dev-mysql.txt
