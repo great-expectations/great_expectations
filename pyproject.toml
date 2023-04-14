@@ -460,10 +460,6 @@ filterwarnings = [
     # Example Actual Warning: (tests/datasource/fluent/integration/conftest.py)
     # sqlalchemy.exc.SADeprecationWarning: Table.tometadata() is renamed to Table.to_metadata() (deprecated since: 1.4)
     'ignore: Table.tometadata\(\) is renamed to Table.to_metadata\(\):DeprecationWarning',
-
-    # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
-    # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
-    'ignore: The Engine.execute\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. All statement execution in SQLAlchemy 2.0 is performed by the Connection.execute\(\) method of Connection, or in the ORM by the Session.execute\(\) method of Session.:DeprecationWarning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
@@ -475,7 +471,8 @@ markers = [
     "integration: mark test as an integration test.",
     "slow: mark tests taking longer than 1 second.",
     "unit: mark a test as a unit test.",
-    "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors)",
+    "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
+    "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
 ]
 testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`

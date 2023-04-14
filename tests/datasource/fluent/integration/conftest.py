@@ -42,7 +42,7 @@ def default_pandas_data(
     pandas_ds.read_csv(
         filepath_or_buffer=csv_path / "yellow_tripdata_sample_2019-02.csv",
     )
-    asset = pandas_ds.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    asset = pandas_ds.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 
@@ -63,7 +63,7 @@ def pandas_sql_data(
         sql=sqlalchemy.sql.text("SELECT * FROM my_table"),
         con=con,
     )
-    asset = pandas_ds.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    asset = pandas_ds.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
     batch_request = asset.build_batch_request()
     return context, pandas_ds, asset, batch_request
 

@@ -68,7 +68,7 @@ name = "taxi_dataframe"
 Now that we have the `name` and `dataframe` for our Data Asset, we can create the Data Asset with the code:
 
 ```python title="Python code"
-data_asset = datasource.add_dataframe(name=name, dataframe=dataframe)
+data_asset = datasource.add_dataframe_asset(name=name, dataframe=dataframe)
 ```
 
 ## Next steps

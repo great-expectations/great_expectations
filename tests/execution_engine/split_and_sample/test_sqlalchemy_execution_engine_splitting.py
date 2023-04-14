@@ -56,6 +56,8 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
     )
 ]
 
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
+
 
 @mock.patch(
     "great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter.SqlAlchemyDataSplitter.split_on_date_parts"

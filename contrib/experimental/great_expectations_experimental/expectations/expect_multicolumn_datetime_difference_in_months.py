@@ -93,7 +93,7 @@ class ColumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
+class ExpectMulticolumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
 
     """Expect the difference of 2 datetime columns is equal to another column in month.
 
@@ -109,7 +109,6 @@ class ExpectColumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
 
     examples = [
         {
-            "dataset_name": "test",
             "data": {
                 "start_datetime": [
                     "2022-03-22 10:00:00",
@@ -229,4 +228,4 @@ class ExpectColumnDatetimeDifferenceInMonths(MulticolumnMapExpectation):
 
 
 if __name__ == "__main__":
-    ExpectColumnDatetimeDifferenceInMonths().print_diagnostic_checklist()
+    ExpectMulticolumnDatetimeDifferenceInMonths().print_diagnostic_checklist()

@@ -6,7 +6,6 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     ClassVar,
-    Dict,
     Generic,
     List,
     Optional,
@@ -18,6 +17,7 @@ import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
@@ -25,11 +25,12 @@ from great_expectations.datasource.fluent.constants import (
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchRequest,
-    BatchRequestOptions,
     DataAsset,
     Datasource,
 )
-from great_expectations.optional_imports import SPARK_NOT_IMPORTED, pyspark
+from great_expectations.optional_imports import (
+    pyspark_sql_DataFrame,
+)
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
@@ -37,12 +38,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    DataFrame = pyspark.sql.DataFrame
-except ImportError:
-    DataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 
 # this enables us to include dataframe in the json schema
@@ -90,8 +85,10 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         extra = pydantic.Extra.forbid
 
     @pydantic.validator("dataframe")
-    def _validate_dataframe(cls, dataframe: DataFrame) -> DataFrame:
-        if not isinstance(dataframe, DataFrame):
+    def _validate_dataframe(
+        cls, dataframe: pyspark_sql_DataFrame
+    ) -> pyspark_sql_DataFrame:
+        if not (pyspark_sql_DataFrame and isinstance(dataframe, pyspark_sql_DataFrame)):  # type: ignore[truthy-function]
             raise ValueError("dataframe must be of type pyspark.sql.DataFrame")
 
         return dataframe
@@ -109,17 +106,14 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
 
-    def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
-    ) -> BatchRequest:
-        if options:
-            actual_keys = set(options.keys())
-            raise gx_exceptions.InvalidBatchRequestError(
-                "Data Assets associated with SparkDatasource can only contain a single batch,\n"
-                "therefore BatchRequest options cannot be supplied. BatchRequest options with keys:\n"
-                f"{actual_keys}\nwere passed.\n"
-            )
+    @public_api
+    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+        """A batch request that can be used to obtain batches for this DataAsset.
 
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -206,7 +200,7 @@ class SparkDatasource(_SparkDatasource):
     # instance attributes
     type: Literal["spark"] = "spark"
 
-    assets: Dict[str, DataFrameAsset] = {}  # type: ignore[assignment]
+    assets: List[DataFrameAsset] = []  # type: ignore[assignment]
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...
@@ -214,7 +208,7 @@ class SparkDatasource(_SparkDatasource):
     def add_dataframe_asset(
         self,
         name: str,
-        dataframe: DataFrame,
+        dataframe: pyspark_sql_DataFrame,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this SparkDatasource object.

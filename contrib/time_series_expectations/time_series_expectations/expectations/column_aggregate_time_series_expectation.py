@@ -7,13 +7,13 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 from great_expectations.execution_engine import (
     ExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from time_series_expectations.expectations.prophet_model_deserializer import (
     ProphetModelDeserializer,
 )
 
 
-class ColumnAggregateTimeSeriesExpectation(ColumnExpectation, ABC):
+class ColumnAggregateTimeSeriesExpectation(ColumnAggregateExpectation, ABC):
     """This Expectation abstract base class checks to see if an aggregate statistic calculated from a column matches the predictions of a prophet model for a given date.
 
     To complete this Expectation, you must implement a metric_dependency. If you're referring to a metric that already exists, this can be as simple as:

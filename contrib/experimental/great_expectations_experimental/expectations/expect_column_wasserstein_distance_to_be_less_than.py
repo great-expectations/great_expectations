@@ -4,8 +4,8 @@ from scipy import stats as stats
 
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
-from great_expectations.expectations.expectation import ColumnExpectation
-from great_expectations.expectations.metrics.column_aggregate_metric import (
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
+from great_expectations.expectations.metrics.column_aggregate_metric_provider import (
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
@@ -129,7 +129,7 @@ class ColumnWassersteinDistance(ColumnAggregateMetricProvider):
     #     return dependencies
 
 
-class ExpectColumnWassersteinDistanceToBeLessThan(ColumnExpectation):
+class ExpectColumnWassersteinDistanceToBeLessThan(ColumnAggregateExpectation):
     """Expect that the Wasserstein Distance of the specified column with respect to an optional partition object to be lower than the provided value.
 
     See Also:

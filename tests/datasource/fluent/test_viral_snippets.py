@@ -101,10 +101,13 @@ def test_serialize_fluent_config(
 
     assert fluent_file_context.fluent_config.datasources
 
-    for ds_name, datasource in fluent_file_context.fluent_config.datasources.items():
+    for (
+        ds_name,
+        datasource,
+    ) in fluent_file_context.fluent_config.get_datasources_as_dict().items():
         assert ds_name in dumped_yaml
 
-        for asset_name in datasource.assets.keys():
+        for asset_name in datasource.get_asset_names():
             assert asset_name in dumped_yaml
 
 
@@ -124,7 +127,7 @@ def test_data_connectors_are_built_on_config_load(fluent_file_context: FileDataC
 
             dc_datasources[datasource.type].append(datasource.name)
 
-            for asset in datasource.assets.values():
+            for asset in datasource.assets:
                 assert isinstance(asset._data_connector, datasource.data_connector_type)
             print()
 
@@ -165,7 +168,7 @@ def test_save_datacontext_persists_fluent_config(
     config_file = file_dc_config_dir_init / FileDataContext.GX_YML
 
     initial_yaml = config_file.read_text()
-    for ds_name in fluent_only_config.datasources:
+    for ds_name in fluent_only_config.get_datasource_names():
         assert ds_name not in initial_yaml
 
     context: FileDataContext = get_context(
@@ -180,7 +183,7 @@ def test_save_datacontext_persists_fluent_config(
 
     print("\n".join(diff))
 
-    for ds_name in fluent_only_config.datasources:
+    for ds_name in fluent_only_config.get_datasource_names():
         assert ds_name in final_yaml
 
 
