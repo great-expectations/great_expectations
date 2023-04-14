@@ -10,7 +10,8 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
+from great_expectations.optional_imports import F
+from great_expectations.optional_imports import sqlalchemy as sa
 
 
 class ColumnValuesLengthMin(ColumnAggregateMetricProvider):

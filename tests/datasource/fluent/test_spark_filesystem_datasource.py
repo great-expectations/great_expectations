@@ -356,7 +356,9 @@ def datasource_test_connection_error_messages(
         batching_regex=batching_regex,
     )
     csv_asset._datasource = spark_filesystem_datasource
-    spark_filesystem_datasource.assets = {"csv_asset": csv_asset}
+    spark_filesystem_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = FilesystemDataConnector(
         datasource_name=spark_filesystem_datasource.name,
         data_asset_name=csv_asset.name,

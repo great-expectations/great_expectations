@@ -21,7 +21,18 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
-from great_expectations.optional_imports import sqlalchemy as sa
+from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
+    sa_sql_expression_CTE,
+    sa_sql_expression_Label,
+    sa_sql_expression_Select,
+    sa_sql_expression_WithinGroup,
+    sqlalchemy_ProgrammingError,
+    sqlalchemy_TextClause,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,33 +41,23 @@ try:
 except ImportError:
     TrinoUserError = None
 
-try:
-    from sqlalchemy.exc import ProgrammingError  # noqa: TID251
-    from sqlalchemy.sql import Select  # noqa: TID251
-    from sqlalchemy.sql.elements import Label, TextClause, WithinGroup  # noqa: TID251
-    from sqlalchemy.sql.selectable import CTE  # noqa: TID251
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    ProgrammingError = None
-    Select = None
-    Label = None
-    TextClause = None
-    WithinGroup = None
-    CTE = None
 
 try:
     from sqlalchemy.engine.row import Row  # noqa: TID251
+
+    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 except ImportError:
     try:
         from sqlalchemy.engine.row import RowProxy  # noqa: TID251
+
+        from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
 
         Row = RowProxy
     except ImportError:
         logger.debug(
             "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
         )
+        sqlalchemy = SQLALCHEMY_NOT_IMPORTED
         RowProxy = None
         Row = None
 
@@ -213,16 +214,18 @@ def _get_column_quantiles_mssql(
     column, quantiles: Iterable, selectable, sqlalchemy_engine
 ) -> list:
     # mssql requires over(), so we add an empty over() clause
-    selects: List[WithinGroup] = [
+    selects: List[sa_sql_expression_WithinGroup] = [
         sa.func.percentile_disc(quantile).within_group(column.asc()).over()
         for quantile in quantiles
     ]
-    quantiles_query: Select = sa.select(*selects).select_from(selectable)
+    quantiles_query: sa_sql_expression_Select = sa.select(*selects).select_from(
+        selectable
+    )
 
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
-    except ProgrammingError as pe:
+    except sqlalchemy_ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
@@ -236,15 +239,17 @@ def _get_column_quantiles_bigquery(
     column, quantiles: Iterable, selectable, sqlalchemy_engine
 ) -> list:
     # BigQuery does not support "WITHIN", so we need a special case for it
-    selects: List[WithinGroup] = [
+    selects: List[sa_sql_expression_WithinGroup] = [
         sa.func.percentile_disc(column, quantile).over() for quantile in quantiles
     ]
-    quantiles_query: Select = sa.select(*selects).select_from(selectable)
+    quantiles_query: sa_sql_expression_Select = sa.select(*selects).select_from(
+        selectable
+    )
 
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
-    except ProgrammingError as pe:
+    except sqlalchemy_ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
@@ -259,7 +264,7 @@ def _get_column_quantiles_mysql(
 ) -> list:
     # MySQL does not support "percentile_disc", so we implement it as a compound query.
     # Please see https://stackoverflow.com/questions/19770026/calculate-percentile-value-using-mysql for reference.
-    percent_rank_query: CTE = (
+    percent_rank_query: sa_sql_expression_CTE = (
         sa.select(
             column,
             sa.cast(
@@ -272,19 +277,19 @@ def _get_column_quantiles_mysql(
         .cte("t")
     )
 
-    selects: List[WithinGroup] = []
+    selects: List[sa_sql_expression_WithinGroup] = []
     for idx, quantile in enumerate(quantiles):
         # pymysql cannot handle conversion of numpy float64 to float; convert just in case
         if np.issubdtype(type(quantile), np.float_):
             quantile = float(quantile)
-        quantile_column: Label = (
+        quantile_column: sa_sql_expression_Label = (
             sa.func.first_value(column)
             .over(
                 order_by=sa.case(
                     (
-                        percent_rank_query.c.p
+                        percent_rank_query.columns.p
                         <= sa.cast(quantile, sa.dialects.mysql.DECIMAL(18, 15)),
-                        percent_rank_query.c.p,
+                        percent_rank_query.columns.p,
                     ),
                     else_=None,
                 ).desc()
@@ -292,14 +297,14 @@ def _get_column_quantiles_mysql(
             .label(f"q_{idx}")
         )
         selects.append(quantile_column)
-    quantiles_query: Select = (
-        sa.select(*selects).distinct().order_by(percent_rank_query.c.p.desc())
+    quantiles_query: sa_sql_expression_Select = (
+        sa.select(*selects).distinct().order_by(percent_rank_query.columns.p.desc())
     )
 
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
-    except ProgrammingError as pe:
+    except sqlalchemy_ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
@@ -314,13 +319,15 @@ def _get_column_quantiles_trino(
 ) -> list:
     # Trino does not have the percentile_disc func, but instead has approx_percentile
     sql_approx: str = f"approx_percentile({column}, ARRAY{list(quantiles)})"
-    selects_approx: List[TextClause] = [sa.text(sql_approx)]
-    quantiles_query: Select = sa.select(*selects_approx).select_from(selectable)
+    selects_approx: List[sqlalchemy_TextClause] = [sa.text(sql_approx)]
+    quantiles_query: sa_sql_expression_Select = sa.select(*selects_approx).select_from(
+        selectable
+    )
 
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)[0]
-    except (ProgrammingError, TrinoUserError) as pe:
+    except (sqlalchemy_ProgrammingError, TrinoUserError) as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
@@ -340,7 +347,7 @@ def _get_column_quantiles_sqlite(
     the analytical processing is not a very strongly represented capability of the SQLite database management system.
     """
     offsets: List[int] = [quantile * table_row_count - 1 for quantile in quantiles]
-    quantile_queries: List[Select] = [
+    quantile_queries: List[sa_sql_expression_Select] = [
         sa.select(column)
         .order_by(column.asc())
         .offset(offset)
@@ -350,7 +357,7 @@ def _get_column_quantiles_sqlite(
     ]
 
     quantile_result: Row
-    quantile_query: Select
+    quantile_query: sa_sql_expression_Select
     try:
         quantiles_results: List[Row] = [
             sqlalchemy_engine.execute(quantile_query).fetchone()
@@ -361,7 +368,7 @@ def _get_column_quantiles_sqlite(
                 [list(quantile_result) for quantile_result in quantiles_results]
             )
         )
-    except ProgrammingError as pe:
+    except sqlalchemy_ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
@@ -378,8 +385,10 @@ def _get_column_quantiles_athena(
     sqlalchemy_engine,
 ) -> list:
     approx_percentiles = f"approx_percentile({column}, ARRAY{list(quantiles)})"
-    selects_approx: List[TextClause] = [sa.text(approx_percentiles)]
-    quantiles_query_approx: Select = sa.select(*selects_approx).select_from(selectable)
+    selects_approx: List[sqlalchemy_TextClause] = [sa.text(approx_percentiles)]
+    quantiles_query_approx: sa_sql_expression_Select = sa.select(
+        *selects_approx
+    ).select_from(selectable)
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(
             quantiles_query_approx
@@ -387,9 +396,7 @@ def _get_column_quantiles_athena(
         # the ast literal eval is needed because the method is returning a json string and not a dict
         results = ast.literal_eval(quantiles_results[0])
         return results
-
-        return results
-    except ProgrammingError as pe:
+    except sqlalchemy_ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
@@ -411,16 +418,18 @@ def _get_column_quantiles_generic_sqlalchemy(
     selectable,
     sqlalchemy_engine,
 ) -> list:
-    selects: List[WithinGroup] = [
+    selects: List[sa_sql_expression_WithinGroup] = [
         sa.func.percentile_disc(quantile).within_group(column.asc())
         for quantile in quantiles
     ]
-    quantiles_query: Select = sa.select(*selects).select_from(selectable)
+    quantiles_query: sa_sql_expression_Select = sa.select(*selects).select_from(
+        selectable
+    )
 
     try:
         quantiles_results: Row = sqlalchemy_engine.execute(quantiles_query).fetchone()
         return list(quantiles_results)
-    except ProgrammingError:
+    except sqlalchemy_ProgrammingError:
         # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
         # use approximate percentile_disc or percentile_cont instead.
         if attempt_allowing_relative_error(dialect):
@@ -428,17 +437,17 @@ def _get_column_quantiles_generic_sqlalchemy(
             sql_approx: str = get_approximate_percentile_disc_sql(
                 selects=selects, sql_engine_dialect=dialect
             )
-            selects_approx: List[TextClause] = [sa.text(sql_approx)]
-            quantiles_query_approx: Select = sa.select(*selects_approx).select_from(
-                selectable
-            )
+            selects_approx: List[sqlalchemy_TextClause] = [sa.text(sql_approx)]
+            quantiles_query_approx: sa_sql_expression_Select = sa.select(
+                *selects_approx
+            ).select_from(selectable)
             if allow_relative_error or sqlalchemy_engine.driver == "psycopg2":
                 try:
                     quantiles_results: Row = sqlalchemy_engine.execute(
                         quantiles_query_approx
                     ).fetchone()
                     return list(quantiles_results)
-                except ProgrammingError as pe:
+                except sqlalchemy_ProgrammingError as pe:
                     exception_message: str = "An SQL syntax Exception occurred."
                     exception_traceback: str = traceback.format_exc()
                     exception_message += f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'

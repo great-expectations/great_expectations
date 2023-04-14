@@ -10,18 +10,12 @@ from great_expectations.datasource.data_connector.configured_asset_file_path_dat
 )
 from great_expectations.datasource.data_connector.util import list_gcs_keys
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.optional_imports import (
+    google_cloud_storage,
+    google_service_account,
+)
 
 logger = logging.getLogger(__name__)
-
-try:
-    from google.cloud import storage
-    from google.oauth2 import service_account
-except ImportError:
-    storage = None
-    service_account = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional Google dependency for support"
-    )
 
 
 @public_api
@@ -94,16 +88,22 @@ class ConfiguredAssetGCSDataConnector(ConfiguredAssetFilePathDataConnector):
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
-                credentials = service_account.Credentials.from_service_account_file(
-                    filename=filename
+                credentials = (
+                    google_service_account.Credentials.from_service_account_file(
+                        filename=filename
+                    )
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
-                credentials = service_account.Credentials.from_service_account_info(
-                    info=info
+                credentials = (
+                    google_service_account.Credentials.from_service_account_info(
+                        info=info
+                    )
                 )
-            self._gcs = storage.Client(credentials=credentials, **gcs_options)
-        except (TypeError, AttributeError):
+            self._gcs = google_cloud_storage.Client(
+                credentials=credentials, **gcs_options
+            )
+        except (TypeError, AttributeError, ModuleNotFoundError):
             raise ImportError(
                 "Unable to load GCS Client (it is required for ConfiguredAssetGCSDataConnector)."
             )
