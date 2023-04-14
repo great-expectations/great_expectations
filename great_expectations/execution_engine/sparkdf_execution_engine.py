@@ -475,7 +475,7 @@ illegal.  Please check your config."""
     def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
-    ) -> "pyspark_sql_DataFrame":  # type: ignore[name-defined]  # noqa F821
+    ) -> "pyspark_sql_DataFrame":  # noqa F821
         """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 
         Args:
@@ -621,7 +621,7 @@ illegal.  Please check your config."""
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple["pyspark_sql_DataFrame", dict, dict]:  # type: ignore[name-defined]  # noqa F821
+    ) -> Tuple["pyspark_sql_DataFrame", dict, dict]:  # noqa F821
         """Uses a DataFrame and Domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
 
         Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain \
