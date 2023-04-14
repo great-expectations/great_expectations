@@ -78,32 +78,32 @@ Run the following code to import Great Expectations and instantiate a Data Conte
 
 :::info Data Contexts and persisting data
 
-If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context if it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [How to quickly instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+If you're using an Ephemeral Data Context, your configurations will not persist beyond the current Python session.  However, if you're using a Filesystem or Cloud Data Context, they do persist.  The `get_context()` method returns the first Cloud or Filesystem Data Context it can find.  If a Cloud or Filesystem Data Context has not be configured or cannot be found, it provides an Ephemeral Data Context.  For more information about the `get_context()` method, see [How to quickly instantiate a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 
 :::
 
 ### 2. Use an existing Data Asset to create a Batch Request
 
-Add the following method to retrieve a previously configured Data Asset from the Data Context you initialized and create a Batch Request to identify the Batch of data within the Data Asset that you'll use to validate your Expectations:
+Add the following method to retrieve a previously configured Data Asset from the Data Context you initialized and create a Batch Request to identify the Batch of data that you'll use to validate your Expectations:
 
 ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_data_asset_and_build_batch_request"
 ```
 
 :::info Limit the Batches returned by a Batch Request
 
-You can provide a dictionary as the `options` parameter to limit the Batches returned by a Batch Request.  If you leave the `options` parameter empty, your Batch Request will include all the Batches configured in the corresponding Data Asset.  For more information about Batch Requests, see [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset).
+You can provide a dictionary as the `options` parameter of `build_batch_request()` to limit the Batches returned by a Batch Request.  If you leave the `options` parameter empty, your Batch Request will include all the Batches configured in the corresponding Data Asset.  For more information about Batch Requests, see [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset).
 
 :::
 
 :::caution Batch Requests and Datasources built with the advanced block-config method
 
-If you are working with a Datasource that was created using the advanced block-config method, you will need to build your Batch Request differently than was demonstrated above.  For more information, please see our guide on [how to get one or more batches from a Datasource configured with the block-config method](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
+If you are working with a Datasource that was created using the advanced block-config method, you will need to build your Batch Request differently than was demonstrated earlier.  For more information, please see our guide on [How to get one or more batches from a Datasource configured with the block-config method](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
 
 :::
 
 ### 3. Create a Validator
 
-We will use a Validator to interactively create our Expectations.  To do this, a Validator needs two parameters. One parameter indicates the Batch containing data that is used to validate the Expectations. The other provides a name for the combined list of Expectations should we decide to save them for future use.
+We will use a Validator to interactively create our Expectations.  To do this, a Validator needs two parameters. One parameter indicates the Batch containing data that is used to Validate the Expectations. The other provides a name for the combined list of Expectations we create.
 
 ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_validator_and_inspect_data"
 ```
@@ -136,7 +136,7 @@ If you are not working in a Jupyter Notebook you may need to explicitly print yo
 
 ### 5. (Optional) Repeat step 4 to edit Expectations or create additional Expectations
 
-If you choose to edit an Expectation after you've viewed the Validation Results that were returned when it was created, you can do so by running the `validator.expect_*()` method with different parameters than previously.  You can also have the Validator run an entirely different `expect_*()` method and create additional Expectations.  All the Expectations that you create are stored in a list in the Validator's in-memory configuration.
+If you choose to edit an Expectation after you've viewed the Validation Results that were returned when it was created, you can do so by running the `validator.expect_*()` method with different parameters than you supplied previously.  You can also have the Validator run an entirely different `expect_*()` method and create additional Expectations.  All the Expectations that you create are stored in a list in the Validator's in-memory configuration.
 
 :::tip What if I want to use the same Expectation more than once?
 
