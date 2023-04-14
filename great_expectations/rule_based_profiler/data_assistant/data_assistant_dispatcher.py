@@ -88,7 +88,7 @@ class DataAssistantDispatcher:
         registered_data_assistants = cls._registered_data_assistants
 
         if name in registered_data_assistants:
-            raise ValueError(f'Existing declarations of DataAssistant "{name}" found.')
+            logger.warning(f'Existing declarations of DataAssistant "{name}" found.')
 
         logger.debug(
             f'Registering the declaration of DataAssistant "{name}" took place.'
