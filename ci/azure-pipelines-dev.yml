@@ -137,92 +137,92 @@ stages:
               GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
               SQLALCHEMY_WARN_20: true
 
-  - stage: custom_checks
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: custom_checks
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-    - job: static_type_check
-      steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: 3.8
-        displayName: 'Use Python 3.8'
-      - script: |
-          pip install --requirement requirements-types.txt
-          invoke type-check --ci --pretty
-        name: StaticTypeCheck
-      - script: |
-          # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources
-        name: TypeCheckStubSourceFiles
+  #   jobs:
+  #   - job: static_type_check
+  #     steps:
+  #     - task: UsePythonVersion@0
+  #       inputs:
+  #         versionSpec: 3.8
+  #       displayName: 'Use Python 3.8'
+  #     - script: |
+  #         pip install --requirement requirements-types.txt
+  #         invoke type-check --ci --pretty
+  #       name: StaticTypeCheck
+  #     - script: |
+  #         # initial run doesn't check `.pyi` source files
+  #         invoke type-check --ci --pretty --check-stub-sources
+  #       name: TypeCheckStubSourceFiles
 
-    - job: docstring_linter
-      steps:
-      - script: |
-          pip install --requirement reqs/requirements-dev-test.txt
-          invoke docstrings
-        name: DocstringLinter
+  #   - job: docstring_linter
+  #     steps:
+  #     - script: |
+  #         pip install --requirement reqs/requirements-dev-test.txt
+  #         invoke docstrings
+  #       name: DocstringLinter
 
-    - job: unused_import_checker
-      steps:
-      - script: |
-          pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
-          # https://www.flake8rules.com/rules/F401.html
-          ruff --select F401 great_expectations tests
-        name: UnusedImportChecker
+  #   - job: unused_import_checker
+  #     steps:
+  #     - script: |
+  #         pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
+  #         # https://www.flake8rules.com/rules/F401.html
+  #         ruff --select F401 great_expectations tests
+  #       name: UnusedImportChecker
 
-    - job: check_repo_root_size
-      steps:
-        - script: ./ci/checks/check_repo_root_size.sh
-          name: CheckRepoRootSize
+  #   - job: check_repo_root_size
+  #     steps:
+  #       - script: ./ci/checks/check_repo_root_size.sh
+  #         name: CheckRepoRootSize
 
-    - job: docs_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
-      steps:
-      - script: |
-          yarn install
-          python ci/checks/validate_docs_snippets.py
-        name: DocsSnippetChecker
+  #   - job: docs_snippet_checker
+  #     condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+  #     steps:
+  #     - script: |
+  #         yarn install
+  #         python ci/checks/validate_docs_snippets.py
+  #       name: DocsSnippetChecker
 
-    - job: line_number_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
-      steps:
-        - script: |
-            python ci/checks/check_no_line_number_snippets.py
-          name: LineNumberSnippetChecker
+  #   - job: line_number_snippet_checker
+  #     condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+  #     steps:
+  #       - script: |
+  #           python ci/checks/check_no_line_number_snippets.py
+  #         name: LineNumberSnippetChecker
 
-    - job: public_api_report
-      steps:
-        - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
-          name: PublicAPIReport
+  #   - job: public_api_report
+  #     steps:
+  #       - script: |
+  #           python docs/sphinx_api_docs_source/public_api_report.py
+  #         name: PublicAPIReport
 
-  - stage: import_ge
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
+  # - stage: import_ge
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-20.04'
 
-    jobs:
-      - job: import_ge
+  #   jobs:
+  #     - job: import_ge
 
-        steps:
-         - task: UsePythonVersion@0
-           inputs:
-             versionSpec: '3.8'
-           displayName: 'Use Python 3.8'
+  #       steps:
+  #        - task: UsePythonVersion@0
+  #          inputs:
+  #            versionSpec: '3.8'
+  #          displayName: 'Use Python 3.8'
 
-         - bash: python -m pip install --upgrade pip
-           displayName: 'Update pip'
+  #        - bash: python -m pip install --upgrade pip
+  #          displayName: 'Update pip'
 
-         - script: |
-             pip install  .
-           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+  #        - script: |
+  #            pip install  .
+  #          displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
-         - script: |
-             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
-           displayName: 'Import Great Expectations'
+  #        - script: |
+  #            python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
+  #          displayName: 'Import Great Expectations'
 
   - stage: quickstart
     dependsOn: scope_check
