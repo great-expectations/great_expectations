@@ -12,12 +12,14 @@ from typing import (
     Dict,
     Generator,
     List,
+    NamedTuple,
     Optional,
     Type,
     Union,
 )
 
 import pytest
+import responses
 from pydantic import dataclasses as dc
 from pytest import MonkeyPatch
 from typing_extensions import Final
@@ -29,9 +31,6 @@ from great_expectations.core.batch_spec import (
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import FileDataContext
-from great_expectations.data_context.cloud_constants import (
-    CLOUD_DEFAULT_BASE_URL,
-)
 from great_expectations.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
@@ -49,11 +48,9 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 if TYPE_CHECKING:
     from pytest import FixtureRequest
     from pytest_mock import MockerFixture
+    from requests import PreparedRequest
 
-    from great_expectations.data_context import (
-        CloudDataContext,
-        FileDataContext,
-    )
+    from great_expectations.data_context import CloudDataContext
 
 
 EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
@@ -172,59 +169,93 @@ class FakeResponse:
             raise Exception(f"HTTP ERROR {self.status_code}")
 
 
+_CLOUD_API_FAKE_DB: dict = {}
+
+
+class _CallbackResult(NamedTuple):
+    status: int
+    headers: dict[str, str]
+    body: str
+
+
+def _get_fake_db_cb(
+    request: PreparedRequest,
+) -> _CallbackResult:
+    url = request.url
+    logger.info(f"{request.method} {url}")
+    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
+    if item is MISSING:
+        return _CallbackResult(404, headers={}, body=f"NotFound at {url}")
+
+    return _CallbackResult(
+        200, headers={"content-type": "application/json"}, body=json.dumps(item)
+    )
+
+
 @pytest.fixture
 def cloud_api_fake(mocker: MockerFixture):
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{DUMMY_ORG_ID}"
+    dc_config_url = f"{org_url_base}/data-context-configuration"
+    datasources_url = f"{org_url_base}/datasources"
 
-    fake_db: dict = {
-        f"{org_url_base}/data-context-configuration": {
-            "anonymous_usage_statistics": {
-                "data_context_id": DUMMY_DATA_CONTEXT_ID,
-                "enabled": False,
+    _CLOUD_API_FAKE_DB.update(
+        {
+            dc_config_url: {
+                "anonymous_usage_statistics": {
+                    "data_context_id": DUMMY_DATA_CONTEXT_ID,
+                    "enabled": False,
+                },
+                "datasources": {},
             },
-            "datasources": {},
-        },
-        f"{org_url_base}/datasources": MISSING,
-    }
+            datasources_url: MISSING,
+        }
+    )
 
     logger.info("Mocking the GX Cloud API")
 
-    def _request_mock(url, *args, **kwargs):
-        logger.info(f"mock GET -> {url}\n{args}\n{kwargs}")
-        item = fake_db.get(url, MISSING)
-        # assert url == dc_config_url
-        if item is MISSING:
-            return FakeResponse(status_code=500, text=f"HTTP {500} {url}")
-        logger.info(f"mock - {item}")  # TODO: remove this
-        return FakeResponse(status_code=200, json_=item)
+    with responses.RequestsMock() as resp_mocker:
+        resp_mocker.add_callback(responses.GET, dc_config_url, _get_fake_db_cb)
+        resp_mocker.add_callback(responses.POST, datasources_url, _get_fake_db_cb)
 
-    def _post(self, url: str, **kwargs):
-        logger.info(f"mock POST -> {url}\n{kwargs}")
-        if url not in fake_db:
-            return FakeResponse(status_code=404, text=f"NotFound {url}")
-        item = fake_db.get(url, MISSING)
-        json = kwargs.get("json")
-        if item is MISSING and json:
-            id_ = str(uuid.uuid4())
-            json["data"]["id"] = id_
-            fake_db[url] = json
-            # add the resource
-            fake_db[f"{url}/{id_}"] = json["data"]
-            return FakeResponse(status_code=201, json_={"data": {"id": id_}})
-        logger.warning(f"json\n{json}\n\n{item}")
-        return FakeResponse(
-            status_code=400, json_={"error": "something bad maybe a conflict"}
-        )
+        yield resp_mocker
+        _CLOUD_API_FAKE_DB.clear()
 
-    mocker.patch("requests.get", autospec=True).side_effect = _request_mock
-    mocker.patch("requests.Session.get", autospec=True).side_effect = _post
+    # def _request_mock(url, *args, **kwargs):
+    #     logger.info(f"mock GET -> {url}\n{args}\n{kwargs}")
+    #     item = fake_db.get(url, MISSING)
+    #     # assert url == dc_config_url
+    #     if item is MISSING:
+    #         return FakeResponse(status_code=500, text=f"HTTP {500} {url}")
+    #     logger.info(f"mock - {item}")  # TODO: remove this
+    #     return FakeResponse(status_code=200, json_=item)
 
-    mocker.patch("requests.post", autospec=True).side_effect = _post
-    mocker.patch("requests.Session.post", autospec=True).side_effect = _post
+    # def _post(self, url: str, **kwargs):
+    #     logger.info(f"mock POST -> {url}\n{kwargs}")
+    #     if url not in fake_db:
+    #         return FakeResponse(status_code=404, text=f"NotFound {url}")
+    #     item = fake_db.get(url, MISSING)
+    #     json = kwargs.get("json")
+    #     if item is MISSING and json:
+    #         id_ = str(uuid.uuid4())
+    #         json["data"]["id"] = id_
+    #         fake_db[url] = json
+    #         # add the resource
+    #         fake_db[f"{url}/{id_}"] = json["data"]
+    #         return FakeResponse(status_code=201, json_={"data": {"id": id_}})
+    #     logger.warning(f"json\n{json}\n\n{item}")
+    #     return FakeResponse(
+    #         status_code=400, json_={"error": "something bad maybe a conflict"}
+    #     )
 
-    yield
+    # mocker.patch("requests.get", autospec=True).side_effect = _request_mock
+    # mocker.patch("requests.Session.get", autospec=True).side_effect = _post
 
-    logger.info(f"Ending state ->\n{pf(fake_db, depth=1)}")
+    # mocker.patch("requests.post", autospec=True).side_effect = _post
+    # mocker.patch("requests.Session.post", autospec=True).side_effect = _post
+
+    # yield
+
+    logger.info(f"Ending state ->\n{pf(_CLOUD_API_FAKE_DB, depth=1)}")
 
 
 @pytest.fixture

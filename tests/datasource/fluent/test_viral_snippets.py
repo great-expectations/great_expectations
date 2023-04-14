@@ -18,10 +18,7 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import (
-        CloudDataContext,
-        FileDataContext,
-    )
+    from great_expectations.data_context import CloudDataContext
 
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
