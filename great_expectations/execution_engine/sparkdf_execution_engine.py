@@ -475,7 +475,7 @@ illegal.  Please check your config."""
     def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
-    ) -> pyspark_sql_DataFrame:
+    ) -> "pyspark_sql_DataFrame":  # type: ignore[name-defined]  # noqa F821
         """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 
         Args:
