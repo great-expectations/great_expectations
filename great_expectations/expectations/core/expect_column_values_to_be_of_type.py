@@ -143,8 +143,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
             in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
             'StringType', 'BooleanType' and other pyspark-defined type names. Note that the strings representing these \
-            types are sometimes case-sensitive. For instance, with a Pandas backend `datetime` be unrecognized and
-            fail the expectation, while `Datetime` would pass with valid data.
+            types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` be unrecognized and
+            fail the expectation, while `Timestamp` would pass with valid data.
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
