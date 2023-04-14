@@ -2086,6 +2086,63 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
 
 
 @pytest.mark.integration
+def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_output_limit_1(
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - SUMMARY output, which means we have `partial_unexpected_index_list` only
+        - 1 Expectations added to suite
+        - limit is 1 so we only get 1 output in the `partial_unexpected_index_list`
+    """
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "SUMMARY",
+            "partial_unexpected_count": 1,
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="metrics_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [
+        {
+            "animals": "giraffe",
+            "pk_1": 3,
+        }
+    ]
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
+
+
+@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
