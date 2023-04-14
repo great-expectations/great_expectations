@@ -772,7 +772,10 @@ def _spark_map_condition_index(
             )
 
     if result_format["result_format"] != "COMPLETE":
-        filtered.limit(result_format["partial_unexpected_count"])
+        filtered = filtered.limit(result_format["partial_unexpected_count"])
+
+    # Prune the dataframe down only the columns we care about
+    filtered = filtered.select(columns_to_keep)
 
     for row in filtered.collect():
         dict_to_add: dict = {}
