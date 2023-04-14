@@ -99,8 +99,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
+              versionSpec: 3.8
+            displayName: 'Use Python 3.8'
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -147,8 +147,8 @@ stages:
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
-        displayName: 'Use Python 3.7'
+          versionSpec: 3.8
+        displayName: 'Use Python 3.8'
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
@@ -210,8 +210,8 @@ stages:
         steps:
          - task: UsePythonVersion@0
            inputs:
-             versionSpec: '3.7'
-           displayName: 'Use Python 3.7'
+             versionSpec: '3.8'
+           displayName: 'Use Python 3.8'
 
          - bash: python -m pip install --upgrade pip
            displayName: 'Update pip'
@@ -235,8 +235,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test]"
@@ -273,8 +273,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
@@ -336,8 +336,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
@@ -599,8 +599,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
             name: CheckMinAirflowDependencyCompatibility
