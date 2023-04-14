@@ -621,7 +621,7 @@ illegal.  Please check your config."""
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple[pyspark_sql_DataFrame, dict, dict]:
+    ) -> Tuple["pyspark_sql_DataFrame", dict, dict]:  # type: ignore[name-defined]  # noqa F821
         """Uses a DataFrame and Domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
 
         Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain \
