@@ -71,7 +71,7 @@ See one of the following guides:
 
 For this guide we will be working with Python code in a Jupyter Notebook. Jupyter is included with GX and lets us easily edit code and immediately see the results of our changes.
 
-The code to import Great Expectations and instantiate a Data Context is:
+Run the following code to import Great Expectations and instantiate a Data Context:
 
 ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports and data context"
 ```
