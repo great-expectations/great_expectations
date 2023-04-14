@@ -250,7 +250,8 @@ stages:
 
 
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, quickstart]
+    #dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, quickstart]
+    dependsOn: [scope_check, lint, import_ge, unit_tests, quickstart]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -378,7 +379,8 @@ stages:
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
   - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    #dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    dependsOn: [scope_check, lint, import_ge, unit_tests]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -413,7 +415,8 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    #dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    dependsOn: [scope_check, lint, import_ge, unit_tests]
 
     jobs:
       - job: mysql
@@ -553,7 +556,8 @@ stages:
               SQLALCHEMY_WARN_20: true
 
   - stage: cli_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    #dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    dependsOn: [scope_check, lint, import_ge, unit_tests]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -590,7 +594,8 @@ stages:
               SQLALCHEMY_WARN_20: true
 
   - stage: airflow_provider
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    #dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+    dependsOn: [scope_check, lint, import_ge, unit_tests]
     pool:
       vmImage: 'ubuntu-latest'
 

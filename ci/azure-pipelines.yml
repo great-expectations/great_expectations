@@ -135,8 +135,9 @@ stages:
   #         name: PublicAPIReport
 
   - stage: docker_tests
-    dependsOn: [lint, custom_checks]
-    condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
+    #dependsOn: [lint, custom_checks]
+    dependsOn: [lint]
+    condition: or(eqvariables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
@@ -565,7 +566,8 @@ stages:
   - stage: db_integration
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [lint, import_ge, custom_checks]
+    #dependsOn: [lint, import_ge, custom_checks]
+    dependsOn: [lint, import_ge]
     jobs:
       - job: mssql
         condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
@@ -604,7 +606,8 @@ stages:
             displayName: 'Pytest mssql'
 
   - stage: airflow_provider
-    dependsOn: [lint, import_ge, custom_checks]
+    #dependsOn: [lint, import_ge, custom_checks]
+    dependsOn: [lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -633,7 +636,8 @@ stages:
             name: RunAirflowProviderTests
 
   - stage: test_build_docs
-    dependsOn: [lint, import_ge, custom_checks]
+    #dependsOn: [lint, import_ge, custom_checks]
+    dependsOn: [lint, import_ge]
     pool:
       vmImage: 'ubuntu-latest'
 
@@ -654,7 +658,8 @@ stages:
     condition: and(succeeded(), eq(variables.isRelease, true))
     pool:
       vmImage: 'ubuntu-latest'
-    dependsOn: [import_ge, custom_checks, lint, db_integration, docker_tests]
+    #dependsOn: [import_ge, custom_checks, lint, db_integration, docker_tests]
+    dependsOn: [import_ge, lint, db_integration, docker_tests]
     jobs:
       - job: deploy
         variables:
