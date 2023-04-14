@@ -30,25 +30,13 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-
-logger = logging.getLogger(__name__)
-
-from great_expectations.optional_imports import sqlalchemy_Connection
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.exc import SQLAlchemyError
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
-    SQLAlchemyError = None
-
+from great_expectations.optional_imports import (
+    SQLAlchemyError,
+    sqlalchemy_engine_Connection,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
@@ -158,7 +146,9 @@ def get_sqlite_temp_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+    if sqlalchemy_engine_Connection and isinstance(
+        execution_engine.engine, sqlalchemy_engine_Connection
+    ):
         connection = execution_engine.engine
         result = connection.execute(statement)
     else:
@@ -173,7 +163,9 @@ def get_sqlite_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_master")
 
-    if isinstance(execution_engine.engine, sqlalchemy_Connection):
+    if sqlalchemy_engine_Connection and isinstance(
+        execution_engine.engine, sqlalchemy_engine_Connection
+    ):
         connection = execution_engine.engine
         result = connection.execute(statement)
     else:

@@ -10,18 +10,7 @@ import pytest
 from moto import mock_s3
 
 from great_expectations.core.batch_spec import AzureBatchSpec, GCSBatchSpec
-
-try:
-    import pyspark
-
-    # noinspection PyPep8Naming
-    import pyspark.sql.functions as F
-    from pyspark.sql.types import IntegerType, StringType
-except ImportError:
-    pyspark = None
-    F = None
-    IntegerType = None
-    StringType = None
+from great_expectations.optional_imports import sparktypes, F
 
 
 @pytest.fixture(scope="function")
@@ -209,7 +198,8 @@ def test_sparkdf(spark_session) -> "pyspark.sql.DataFrame":  # noqa: F821
         )
     )
     spark_df = spark_df.withColumn(
-        "timestamp", F.col("timestamp").cast(IntegerType()).cast(StringType())
+        "timestamp",
+        F.col("timestamp").cast(sparktypes.IntegerType()).cast(sparktypes.StringType()),
     )
     return spark_df
 

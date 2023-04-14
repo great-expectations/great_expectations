@@ -7,7 +7,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import (
     metric_partial,
     metric_value,
@@ -15,6 +14,8 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
+from great_expectations.optional_imports import F
+from great_expectations.optional_imports import sqlalchemy as sa
 
 
 class TableRowCount(TableMetricProvider):

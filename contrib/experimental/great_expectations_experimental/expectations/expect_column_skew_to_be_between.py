@@ -21,34 +21,18 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_partial,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F, sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
+from great_expectations.optional_imports import (
+    F,
+    sa_sql_expression_Select,
+    sqlalchemy_engine_Row,
+    sqlalchemy_ProgrammingError,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 logger = logging.getLogger(__name__)
-
-try:
-    from sqlalchemy.exc import ProgrammingError
-    from sqlalchemy.sql import Select
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    ProgrammingError = None
-    Select = None
-
-try:
-    from sqlalchemy.engine.row import Row
-except ImportError:
-    try:
-        from sqlalchemy.engine.row import RowProxy
-
-        Row = RowProxy
-    except ImportError:
-        logger.debug(
-            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
-        )
-        RowProxy = None
-        Row = None
 
 
 class ColumnSkew(ColumnAggregateMetricProvider):
@@ -128,19 +112,21 @@ class ColumnSkew(ColumnAggregateMetricProvider):
 
 
 def _get_query_result(func, selectable, sqlalchemy_engine):
-    simple_query: Select = sa.select(func).select_from(selectable)
+    simple_query: sa_sql_expression_Select = sa.select(func).select_from(selectable)
 
     try:
-        result: Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
+        result: sqlalchemy_engine_Row = sqlalchemy_engine.execute(
+            simple_query
+        ).fetchone()[0]
         return result
-    except ProgrammingError as pe:
+    except sqlalchemy_ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (
             f'{type(pe).__name__}: "{str(pe)}".  Traceback: "{exception_traceback}".'
         )
         logger.error(exception_message)
-        raise pe()
+        raise pe
 
     # @classmethod
     # def _get_evaluation_dependencies(

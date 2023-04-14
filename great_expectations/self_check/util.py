@@ -67,6 +67,17 @@ from great_expectations.execution_engine import (
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.optional_imports import (
+    SQLALCHEMY_NOT_IMPORTED,
+    SQLAlchemyError,
+    pyspark_sql_DataFrame,
+    pyspark_sql_SparkSession,
+    sparktypes,
+    sqlalchemy_engine_Engine,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (
     LockingConnectionCheck,
@@ -100,32 +111,7 @@ MAX_TABLE_NAME_LENGTH: int = 63
 logger = logging.getLogger(__name__)
 
 try:
-    import sqlalchemy as sqlalchemy  # noqa: TID251
-    from sqlalchemy import create_engine  # noqa: TID251
-    from sqlalchemy.engine import Engine  # noqa: TID251
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    Engine = None
-    SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-
-try:
-    from pyspark.sql import DataFrame as SparkDataFrame
-    from pyspark.sql import SparkSession
-    from pyspark.sql.types import StructType
-except ImportError:
-    SparkDataFrame = type(None)  # type: ignore[assignment,misc]
-    SparkSession = None  # type: ignore[assignment,misc]
-    StructType = None  # type: ignore[assignment,misc]
-
-try:
-    from pyspark.sql import DataFrame as spark_DataFrame
-except ImportError:
-    spark_DataFrame = type(None)  # type: ignore[assignment,misc]
-
-try:
+    from great_expectations.optional_imports import sqlalchemy  # isort:skip
     import sqlalchemy.dialects.sqlite as sqlitetypes  # noqa: TID251
 
     # noinspection PyPep8Naming
@@ -143,8 +129,9 @@ try:
         "TIMESTAMP": sqlitetypes.TIMESTAMP,
     }
 except (ImportError, KeyError):
-    sqlitetypes = None
-    sqliteDialect = None
+    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
+    sqlitetypes = SQLALCHEMY_NOT_IMPORTED
+    sqliteDialect = SQLALCHEMY_NOT_IMPORTED
     SQLITE_TYPES = {}
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
@@ -793,7 +780,7 @@ def _get_test_validator_with_data_sqlalchemy(
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator | None:
-    if not create_engine:
+    if not sa:
         return None
 
     if table_name is None:
@@ -1026,7 +1013,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         connection_string = get_sqlite_connection_url(sqlite_db_path)
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "postgresql":
         connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
         engine = connection_manager.get_connection(connection_string)
@@ -1035,25 +1022,25 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         engine = connection_manager.get_connection(connection_string)
     elif sa_engine_name == "mssql":
         connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
-        engine = create_engine(
+        engine = sa.create_engine(
             connection_string,
             # echo=True,
         )
     elif sa_engine_name == "bigquery":
         connection_string = _get_bigquery_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "trino":
         connection_string = _get_trino_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "redshift":
         connection_string = _get_redshift_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "athena":
         connection_string = _get_athena_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "snowflake":
         connection_string = _get_snowflake_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     else:
         connection_string = None
         engine = None
@@ -1225,8 +1212,8 @@ def modify_locale(func):
 
 
 def build_spark_validator_with_data(
-    df: Union[pd.DataFrame, SparkDataFrame],
-    spark: SparkSession,
+    df: Union[pd.DataFrame, pyspark_sql_DataFrame],
+    spark: pyspark_sql_SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
@@ -1281,7 +1268,9 @@ def build_sa_engine(
     table_name: str = "test"
 
     # noinspection PyUnresolvedReferences
-    sqlalchemy_engine: Engine = sa.create_engine("sqlite://", echo=False)
+    sqlalchemy_engine: sqlalchemy_engine_Engine = sa.create_engine(
+        "sqlite://", echo=False
+    )
     add_dataframe_to_db(
         df=df,
         name=table_name,
@@ -1312,9 +1301,9 @@ def build_sa_engine(
 
 # Builds a Spark Execution Engine
 def build_spark_engine(
-    spark: SparkSession,
-    df: Union[pd.DataFrame, SparkDataFrame],
-    schema: Optional[StructType] = None,
+    spark: pyspark_sql_SparkSession,
+    df: Union[pd.DataFrame, pyspark_sql_DataFrame],
+    schema: Optional[sparktypes.StructType] = None,
     batch_id: Optional[str] = None,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
@@ -1663,7 +1652,7 @@ def build_test_backends_list(  # noqa: C901 - 48
 
         if include_mysql:
             try:
-                engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
+                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, SQLAlchemyError):
@@ -1683,7 +1672,7 @@ def build_test_backends_list(  # noqa: C901 - 48
         if include_mssql:
             # noinspection PyUnresolvedReferences
             try:
-                engine = create_engine(
+                engine = sa.create_engine(
                     f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
                     # echo=True,
@@ -2822,8 +2811,8 @@ def _check_if_valid_dataset_name(dataset_name: str) -> str:
     return dataset_name
 
 
-def _create_bigquery_engine() -> Engine:
-    return create_engine(_get_bigquery_connection_string())
+def _create_bigquery_engine() -> sqlalchemy_engine_Engine:
+    return sa.create_engine(_get_bigquery_connection_string())
 
 
 def _get_bigquery_connection_string() -> str:
@@ -2847,8 +2836,8 @@ def _bigquery_dataset() -> str:
 
 def _create_trino_engine(
     hostname: str = "localhost", schema_name: str = "schema"
-) -> Engine:
-    engine = create_engine(
+) -> sqlalchemy_engine_Engine:
+    engine = sa.create_engine(
         _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
     )
     from sqlalchemy import text  # noqa: TID251
@@ -2900,8 +2889,8 @@ def _get_trino_connection_string(
     return f"trino://test@{hostname}:8088/memory/{schema_name}"
 
 
-def _create_redshift_engine() -> Engine:
-    return create_engine(_get_redshift_connection_string())
+def _create_redshift_engine() -> sqlalchemy_engine_Engine:
+    return sa.create_engine(_get_redshift_connection_string())
 
 
 def _get_redshift_connection_string() -> str:
@@ -2945,8 +2934,12 @@ def _get_redshift_connection_string() -> str:
     return url
 
 
-def _create_athena_engine(db_name_env_var: str = "ATHENA_DB_NAME") -> Engine:
-    return create_engine(_get_athena_connection_string(db_name_env_var=db_name_env_var))
+def _create_athena_engine(
+    db_name_env_var: str = "ATHENA_DB_NAME",
+) -> sqlalchemy_engine_Engine:
+    return sa.create_engine(
+        _get_athena_connection_string(db_name_env_var=db_name_env_var)
+    )
 
 
 def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
@@ -2972,8 +2965,8 @@ def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> st
     return url
 
 
-def _create_snowflake_engine() -> Engine:
-    return create_engine(_get_snowflake_connection_string())
+def _create_snowflake_engine() -> sqlalchemy_engine_Engine:
+    return sa.create_engine(_get_snowflake_connection_string())
 
 
 def _get_snowflake_connection_string() -> str:

@@ -18,17 +18,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.validator.validator import Validator
+from great_expectations.optional_imports import pyspark_sql_DataFrame
 
 logger = logging.getLogger(__name__)
-
-try:
-    from pyspark.sql import DataFrame
-except ImportError:
-    DataFrame = None
-
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
 
 
 @pytest.fixture
@@ -41,7 +33,7 @@ def test_pandas_df():
 
 @pytest.fixture
 def test_spark_df(test_pandas_df, spark_session):
-    df: DataFrame = spark_session.createDataFrame(data=test_pandas_df)
+    df: pyspark_sql_DataFrame = spark_session.createDataFrame(data=test_pandas_df)
     return df
 
 
