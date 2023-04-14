@@ -624,17 +624,16 @@ illegal.  Please check your config."""
     ) -> Tuple[pyspark_sql_DataFrame, dict, dict]:
         """Uses a DataFrame and Domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
 
-        Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain \
+        Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain
         is a single column, this is added to 'accessor Domain kwargs' and used for later access.
 
         Args:
             domain_kwargs (dict): a dictionary consisting of the Domain kwargs specifying which data to obtain
-            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like \
-            to be using, or a corresponding string value representing it.  String types include "identity", "column", \
-            "column_pair", "table" and "other".  Enum types include capitalized versions of these from the class \
-            MetricDomainTypes.
-            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when \
-            describing the Domain and simply transferred with their associated values into accessor_domain_kwargs.
+            domain_type (str or MetricDomainTypes): an Enum value indicating which metric Domain the user would like
+            to be using, or a corresponding string value representing it.  String types include "identity", "column",
+            "column_pair", "table" and "other".  Enum types include capitalized versions of these from the class MetricDomainTypes.
+            accessor_keys (str iterable): keys that are part of the compute Domain but should be ignored when describing
+            the Domain and simply transferred with their associated values into accessor_domain_kwargs.
 
         Returns:
             A tuple including:
@@ -705,7 +704,7 @@ illegal.  Please check your config."""
         if bundling the metrics together is not possible.
 
             Args:
-                metric_fn_bundle (Iterable[MetricComputationConfiguration]): \
+                metric_fn_bundle (Iterable[MetricComputationConfiguration]):
                     "MetricComputationConfiguration" contains MetricProvider's MetricConfiguration (its unique identifier),
                     its metric provider function (the function that actually executes the metric), and arguments to pass
                     to metric provider function (dictionary of metrics defined in registry and corresponding arguments).
