@@ -14,7 +14,7 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import F
+from great_expectations.optional_imports import F
 
 
 class ColumnKurtosis(ColumnAggregateMetricProvider):

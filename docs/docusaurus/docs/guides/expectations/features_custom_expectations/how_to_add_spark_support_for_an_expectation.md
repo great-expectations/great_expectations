@@ -74,7 +74,7 @@ For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, 
 ```
 
 If we need a builtin function from `pyspark.sql.functions`, usually aliased to `F`, the import logic in 
-`from great_expectations.expectations.metrics.import_manager import F`
+`from great_expectations.optional_imports import F`
 allows us to access these functions even when PySpark is not installed.
 
 <details>

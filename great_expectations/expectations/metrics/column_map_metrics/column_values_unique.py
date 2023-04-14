@@ -4,16 +4,16 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    F,
-    Window,
-    sa,
-    sqlalchemy_engine_Engine,
-)
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
+from great_expectations.optional_imports import (
+    F,
+    pyspark_sql_Window,
+    sqlalchemy_engine_Engine,
+)
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import generate_temporary_table_name
 
 
@@ -63,7 +63,9 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 source_table=_table,
                 column_name=column.name,
             )
-            if isinstance(sql_engine, sqlalchemy_engine_Engine):
+            if sqlalchemy_engine_Engine and isinstance(
+                sql_engine, sqlalchemy_engine_Engine
+            ):
                 with sql_engine.connect() as connection:
                     with connection.begin():
                         connection.execute(sa.text(temp_table_stmt))
@@ -91,4 +93,4 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
     )
     def _spark(cls, column, **kwargs):
-        return F.count(F.lit(1)).over(Window.partitionBy(column)) <= 1
+        return F.count(F.lit(1)).over(pyspark_sql_Window.partitionBy(column)) <= 1
