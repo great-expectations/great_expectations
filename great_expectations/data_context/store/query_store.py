@@ -9,10 +9,11 @@ from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
 from great_expectations.util import filter_properties_dict
 
-if is_version_greater_or_equal(sa.__version__, "1.4.0"):
-    url_create_fn = URL.create
-else:
-    url_create_fn = URL
+if sa:
+    if is_version_greater_or_equal(sa.__version__, "1.4.0"):
+        url_create_fn = URL.create
+    else:
+        url_create_fn = URL
 
 
 logger = logging.getLogger(__name__)
