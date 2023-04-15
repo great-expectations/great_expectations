@@ -18,8 +18,7 @@ from great_expectations.datasource.fluent.spark_datasource import (
 )
 
 if TYPE_CHECKING:
-    from azure.storage.blob import BlobServiceClient
-
+    from great_expectations.compatibility.azure import BlobServiceClient
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         SortersDefinition,
