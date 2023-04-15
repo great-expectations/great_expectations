@@ -7,6 +7,11 @@ GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
 )
 
 try:
+    from google.cloud import secretmanager  # noqa: TID251
+except (ImportError, AttributeError):
+    secretmanager = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+try:
     from google.api_core.exceptions import GoogleAPIError  # noqa: TID251
 except (ImportError, AttributeError):
     GoogleAPIError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
@@ -15,6 +20,11 @@ try:
     from google.auth.exceptions import DefaultCredentialsError  # noqa: TID251
 except (ImportError, AttributeError):
     DefaultCredentialsError = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+
+try:
+    from google.cloud.exceptions import NotFound  # noqa: TID251
+except (ImportError, AttributeError):
+    NotFound = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
 
 try:
     from google.cloud import storage  # noqa: TID251

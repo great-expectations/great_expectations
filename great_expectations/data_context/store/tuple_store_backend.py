@@ -861,7 +861,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     ):
         gcs_object_key = self._build_gcs_object_key(key)
 
-        from google.cloud import storage
+        from great_expectations.compatibility.google import storage
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
@@ -877,7 +877,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return gcs_object_key
 
     def _move(self, source_key, dest_key, **kwargs) -> None:
-        from google.cloud import storage
+        from great_expectations.compatibility.google import storage
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
@@ -896,7 +896,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
-        from google.cloud import storage
+        from great_expectations.compatibility.google import storage
 
         gcs = storage.Client(self.project)
 
@@ -957,8 +957,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return path_url
 
     def remove_key(self, key):
-        from google.cloud import storage
-        from google.cloud.exceptions import NotFound
+        from great_expectations.compatibility.google import NotFound, storage
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
@@ -1023,9 +1022,10 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     @property
     @functools.lru_cache()
     def _container_client(self) -> Any:
-
-        from azure.identity import DefaultAzureCredential
-        from azure.storage.blob import BlobServiceClient
+        from great_expectations.compatibility.azure import (
+            BlobServiceClient,
+            DefaultAzureCredential,
+        )
 
         if self.connection_string:
             blob_service_client: BlobServiceClient = (
@@ -1051,8 +1051,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         )
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
-
-        from azure.storage.blob import ContentSettings
+        from great_expectations.compatibility.azure import ContentSettings
 
         az_blob_key = os.path.join(  # noqa: PTH118
             self.prefix, self._convert_key_to_filepath(key)

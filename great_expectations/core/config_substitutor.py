@@ -9,14 +9,9 @@ from typing import Any, Dict, Optional
 from typing_extensions import Final
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.azure import DefaultAzureCredential, SecretClient
+from great_expectations.compatibility.google import secretmanager
 from great_expectations.data_context.types.base import BaseYamlConfig
-
-try:
-    from azure.identity import DefaultAzureCredential
-    from azure.keyvault.secrets import SecretClient
-except ImportError:
-    SecretClient = None
-    DefaultAzureCredential = None
 
 try:
     import boto3
@@ -25,10 +20,6 @@ except ImportError:
     boto3 = None
     ClientError = None
 
-try:
-    from google.cloud import secretmanager
-except ImportError:
-    secretmanager = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
