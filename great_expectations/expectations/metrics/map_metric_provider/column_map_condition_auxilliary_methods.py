@@ -30,7 +30,9 @@ from great_expectations.expectations.metrics.util import (
 )
 
 if TYPE_CHECKING:
-    import pyspark
+    from great_expectations.compatibility.pyspark import (
+        DataFrame as pyspark_sql_DataFrame,
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -409,7 +411,7 @@ def _spark_column_map_condition_value_counts(
         batch_columns_list=metrics["table.columns"],
     )
 
-    df: pyspark.sql.dataframe.DataFrame = execution_engine.get_domain_records(
+    df: pyspark_sql_DataFrame = execution_engine.get_domain_records(
         domain_kwargs=compute_domain_kwargs
     )
 
