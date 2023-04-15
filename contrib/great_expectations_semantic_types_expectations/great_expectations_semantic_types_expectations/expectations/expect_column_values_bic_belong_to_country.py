@@ -16,7 +16,7 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
-# from great_expectations.optional_imports import F, sparktypes
+# from great_expectations.compatibility.pyspark import functions as F, types as sparktypes
 
 
 def bic_belong_to_country(bic: str, country_code: str) -> bool:

@@ -839,7 +839,7 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def _get(self, key):
         gcs_object_key = self._build_gcs_object_key(key)
 
-        from google.cloud import storage
+        from great_expectations.compatibility.google import storage
 
         gcs = storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)

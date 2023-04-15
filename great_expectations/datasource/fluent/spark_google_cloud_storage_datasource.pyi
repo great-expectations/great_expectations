@@ -15,8 +15,9 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
-    from google.cloud.storage.client import Client as GoogleCloudStorageClient
-
+    from great_expectations.compatibility.google import (
+        Client as GoogleCloudStorageClient,
+    )
     from great_expectations.datasource.fluent import BatchMetadata
     from great_expectations.datasource.fluent.interfaces import (
         SortersDefinition,

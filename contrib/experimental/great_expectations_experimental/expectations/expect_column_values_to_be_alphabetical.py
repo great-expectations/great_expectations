@@ -97,9 +97,9 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 #     # if isinstance(
 #     #     column_metadata["type"],
 #     #     (
-#     #         sparktypes.LongType,
-#     #         sparktypes.DoubleType,
-#     #         sparktypes.IntegerType,
+#     #         types.LongType,
+#     #         types.DoubleType,
+#     #         types.IntegerType,
 #     #     ),
 #     # ):
 #     #     # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
@@ -123,7 +123,7 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 #     column = F.col(column_name)
 #     column = F.lower(column)
 #     # if isinstance(
-#     #     column_metadata["type"], (sparktypes.TimestampType, sparktypes.DateType)
+#     #     column_metadata["type"], (types.TimestampType, types.DateType)
 #     # ):
 #     #     diff = F.datediff(
 #     #         column, F.lag(column).over(Window.orderBy(F.lit("constant")))

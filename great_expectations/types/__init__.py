@@ -5,10 +5,11 @@ from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
 
-from great_expectations.optional_imports import (
-    SPARK_NOT_IMPORTED,
+from great_expectations.compatibility.pyspark import (
+    DataFrame as pyspark_sql_DataFrame,
+)
+from great_expectations.compatibility.pyspark import (
     pyspark,
-    pyspark_sql_DataFrame,
 )
 
 from ..alias_types import JSONValues  # noqa: TCH001

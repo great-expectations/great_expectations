@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 import pydantic
 from typing_extensions import Final, Literal
 
+from great_expectations.compatibility.azure import BlobServiceClient
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
@@ -21,9 +22,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.spark_datasource import (
     SparkDatasourceError,
-)
-from great_expectations.optional_imports import (
-    BlobServiceClient,
 )
 
 logger = logging.getLogger(__name__)

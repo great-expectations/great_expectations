@@ -14,6 +14,29 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import pyspark
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Insert as sa_sql_Insert,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Label as sa_sql_expression_Label,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    OperationalError as sqlalchemy_OperationalError,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Select as sa_sql_expression_Select,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    quoted_name,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
@@ -28,19 +51,6 @@ from great_expectations.expectations.metrics.util import (
     get_sqlalchemy_source_table_and_schema,
     sql_statement_with_post_compile_to_string,
     verify_column_names_exist,
-)
-from great_expectations.optional_imports import (
-    F,
-    pyspark,
-    quoted_name,
-    sa_sql_expression_Label,
-    sa_sql_expression_Select,
-    sa_sql_Insert,
-    sqlalchemy_engine_Engine,
-    sqlalchemy_OperationalError,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
 )
 from great_expectations.util import (
     generate_temporary_table_name,

@@ -1,5 +1,14 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Row as sqlalchemy_engine_Row,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
@@ -9,17 +18,18 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
 )
-from great_expectations.optional_imports import (
-    pyspark_sql_DataFrame,
-    pyspark_sql_Row,
-    pyspark_sql_SparkSession,
-    sqlalchemy_engine_Engine,
-    sqlalchemy_engine_Row,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 from great_expectations.util import get_sqlalchemy_subquery_type
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility.pyspark import (
+        DataFrame as pyspark_sql_DataFrame,
+    )
+    from great_expectations.compatibility.pyspark import (
+        Row as pyspark_sql_Row,
+    )
+    from great_expectations.compatibility.pyspark import (
+        SparkSession as pyspark_sql_SparkSession,
+    )
 
 
 class QueryColumn(QueryMetricProvider):

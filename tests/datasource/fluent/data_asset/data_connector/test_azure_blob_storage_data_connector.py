@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.compatibility.azure import BlobServiceClient, ContainerClient
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import AzureUrl
@@ -12,7 +13,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import BatchRequest
-from great_expectations.optional_imports import BlobServiceClient, ContainerClient
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (

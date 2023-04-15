@@ -2,6 +2,30 @@ from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
 
+from great_expectations.compatibility.pyspark import (
+    Column as pyspark_sql_Column,
+)
+from great_expectations.compatibility.pyspark import (
+    DataFrame as pyspark_sql_DataFrame,
+)
+from great_expectations.compatibility.pyspark import (
+    Row as pyspark_sql_Row,
+)
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    ColumnClause as sa_sql_expression_ColumnClause,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Selectable as sa_sql_expression_Selectable,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -16,18 +40,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     column_aggregate_value,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.optional_imports import (
-    F,
-    pyspark_sql_Column,
-    pyspark_sql_DataFrame,
-    pyspark_sql_Row,
-    sa_sql_expression_ColumnClause,
-    sa_sql_expression_Selectable,
-    sqlalchemy_engine_Engine,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
 

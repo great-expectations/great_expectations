@@ -3,6 +3,7 @@ from string import Template
 
 from marshmallow import Schema, ValidationError, fields, post_load
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
@@ -11,16 +12,6 @@ from great_expectations.exceptions import BatchKwargsError, GreatExpectationsErr
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy  # noqa: TID251
-    from sqlalchemy import create_engine  # noqa: TID251
-    from sqlalchemy.engine import reflection  # noqa: TID251
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    reflection = None
-    logger.debug("Unable to import sqlalchemy.")
 
 
 class AssetConfigurationSchema(Schema):

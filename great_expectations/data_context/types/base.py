@@ -42,6 +42,7 @@ from ruamel.yaml.compat import StringIO
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility.pyspark import types as sparktypes
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.batch import BatchRequestBase, get_batch_request_as_dict
 from great_expectations.core.configuration import AbstractConfig, AbstractConfigSchema
@@ -50,11 +51,6 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.types.configurations import ClassConfigSchema
 from great_expectations.util import deep_filter_properties_iterable
-
-try:
-    from pyspark.sql.types import StructType
-except ImportError:
-    StructType = None  # type: ignore[assignment,misc]
 
 if TYPE_CHECKING:
     from io import TextIOWrapper
@@ -460,7 +456,7 @@ class AssetConfigSchema(Schema):
         This method calls the schema's jsonValue() method, which translates the object into a json
         """
         # check whether spark exists
-        if StructType is None:
+        if (not sparktypes) or (sparktypes.StructType is None):
             return data
 
         batch_spec_passthrough_config = data.get("batch_spec_passthrough")
@@ -468,7 +464,7 @@ class AssetConfigSchema(Schema):
             reader_options: dict = batch_spec_passthrough_config.get("reader_options")
             if reader_options:
                 schema = reader_options.get("schema")
-                if schema and isinstance(schema, StructType):
+                if schema and sparktypes and isinstance(schema, sparktypes.StructType):
                     data["batch_spec_passthrough"]["reader_options"][
                         "schema"
                     ] = schema.jsonValue()
@@ -933,7 +929,7 @@ continue.
         This method calls the schema's jsonValue() method, which translates the object into a json
         """
         # check whether spark exists
-        if StructType is None:
+        if (not sparktypes) or (sparktypes.StructType is None):
             return data
 
         batch_spec_passthrough_config = data.get("batch_spec_passthrough")
@@ -941,7 +937,7 @@ continue.
             reader_options: dict = batch_spec_passthrough_config.get("reader_options")
             if reader_options:
                 schema = reader_options.get("schema")
-                if schema and isinstance(schema, StructType):
+                if schema and sparktypes and isinstance(schema, sparktypes.StructType):
                     data["batch_spec_passthrough"]["reader_options"][
                         "schema"
                     ] = schema.jsonValue()

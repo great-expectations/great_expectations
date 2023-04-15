@@ -10,7 +10,7 @@ import pytest
 from moto import mock_s3
 
 from great_expectations.core.batch_spec import AzureBatchSpec, GCSBatchSpec
-from great_expectations.optional_imports import sparktypes, F
+from great_expectations.compatibility.pyspark import functions as F, types as sparktypes
 
 
 @pytest.fixture(scope="function")

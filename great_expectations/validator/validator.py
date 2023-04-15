@@ -1970,8 +1970,8 @@ class BridgeValidator:
                     self.expectation_engine = PandasDataset
 
         if self.expectation_engine is None:
-            from great_expectations.optional_imports import (
-                pyspark_sql_DataFrame,
+            from great_expectations.compatibility.pyspark import (
+                DataFrame as pyspark_sql_DataFrame,
             )
 
             if pyspark_sql_DataFrame and isinstance(batch.data, pyspark_sql_DataFrame):
@@ -2007,8 +2007,8 @@ class BridgeValidator:
             )
 
         elif issubclass(self.expectation_engine, SparkDFDataset):
-            from great_expectations.optional_imports import (
-                pyspark_sql_DataFrame,
+            from great_expectations.compatibility.pyspark import (
+                DataFrame as pyspark_sql_DataFrame,
             )
 
             if not (

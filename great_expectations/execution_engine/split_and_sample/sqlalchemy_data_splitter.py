@@ -19,6 +19,15 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import (
+    BinaryExpression,
+    BooleanClauseList,
+    Label,
+    LegacyRow,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
@@ -26,32 +35,12 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import (
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
-try:
-    import sqlalchemy as sa  # noqa: TID251
-except ImportError:
-    sa = None
-
-try:
-    import sqlalchemy.sql.functions.concat as concat  # noqa: TID251
-    from sqlalchemy.engine import LegacyRow  # noqa: TID251
-    from sqlalchemy.sql import Selectable  # noqa: TID251
-    from sqlalchemy.sql.elements import (  # noqa: TID251
-        BinaryExpression,
-        BooleanClauseList,
-        Label,
-    )
-except ImportError:
-    LegacyRow = None
-    Selectable = None
-    BinaryExpression = None
-    BooleanClauseList = None
-    Label = None
-    concat = None
-
 if TYPE_CHECKING:
-    from sqlalchemy.sql import Selectable  # noqa: TID251
-    from sqlalchemy.sql.expression import Cast, ColumnOperators  # noqa: TID251
-
+    from great_expectations.compatibility.sqlalchemy import (
+        Cast,
+        ColumnOperators,
+        Selectable,
+    )
     from great_expectations.execution_engine.sqlalchemy_execution_engine import (
         SqlAlchemyExecutionEngine,
     )

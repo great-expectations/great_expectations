@@ -5,6 +5,13 @@ from typing import Any, Dict
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility.pyspark import (
+    Bucketizer as pyspark_ml_Bucketizer,
+)
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import (
     convert_to_json_serializable,
@@ -19,8 +26,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.optional_imports import F, pyspark_ml_Bucketizer
-from great_expectations.optional_imports import sqlalchemy as sa
 
 logger = logging.getLogger(__name__)
 

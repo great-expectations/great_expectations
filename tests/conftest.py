@@ -108,9 +108,11 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.optional_imports import (
-        pyspark_sql_DataFrame,
-        pyspark_sql_SparkSession,
+    from great_expectations.compatibility.pyspark import (
+        DataFrame as pyspark_sql_DataFrame,
+    )
+    from great_expectations.compatibility.pyspark import (
+        SparkSession as pyspark_sql_SparkSession,
     )
 
 yaml = YAMLHandler()
@@ -383,7 +385,7 @@ def sa(test_backends):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         try:
-            from great_expectations.optional_imports import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             return sa
         except ImportError:
@@ -396,8 +398,8 @@ def spark_session(test_backends) -> pyspark_sql_SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    from great_expectations.optional_imports import (
-        pyspark_sql_SparkSession,
+    from great_expectations.compatibility.pyspark import (
+        SparkSession as pyspark_sql_SparkSession,
     )
 
     if pyspark_sql_SparkSession:
@@ -432,35 +434,50 @@ def spark_df_taxi_data_schema(spark_session):
     """
 
     # will not import unless we have a spark_session already passed in as fixture
-    from pyspark.sql.types import (
-        DoubleType,
-        IntegerType,
-        StringType,
-        StructField,
-        StructType,
-        TimestampType,
-    )
+    from great_expectations.compatibility.pyspark import types as sparktypes
 
-    schema = StructType(
+    schema = sparktypes.StructType(
         [
-            StructField("vendor_id", IntegerType(), True, None),
-            StructField("pickup_datetime", TimestampType(), True, None),
-            StructField("dropoff_datetime", TimestampType(), True, None),
-            StructField("passenger_count", IntegerType(), True, None),
-            StructField("trip_distance", DoubleType(), True, None),
-            StructField("rate_code_id", IntegerType(), True, None),
-            StructField("store_and_fwd_flag", StringType(), True, None),
-            StructField("pickup_location_id", IntegerType(), True, None),
-            StructField("dropoff_location_id", IntegerType(), True, None),
-            StructField("payment_type", IntegerType(), True, None),
-            StructField("fare_amount", DoubleType(), True, None),
-            StructField("extra", DoubleType(), True, None),
-            StructField("mta_tax", DoubleType(), True, None),
-            StructField("tip_amount", DoubleType(), True, None),
-            StructField("tolls_amount", DoubleType(), True, None),
-            StructField("improvement_surcharge", DoubleType(), True, None),
-            StructField("total_amount", DoubleType(), True, None),
-            StructField("congestion_surcharge", DoubleType(), True, None),
+            sparktypes.StructField("vendor_id", sparktypes.IntegerType(), True, None),
+            sparktypes.StructField(
+                "pickup_datetime", sparktypes.TimestampType(), True, None
+            ),
+            sparktypes.StructField(
+                "dropoff_datetime", sparktypes.TimestampType(), True, None
+            ),
+            sparktypes.StructField(
+                "passenger_count", sparktypes.IntegerType(), True, None
+            ),
+            sparktypes.StructField(
+                "trip_distance", sparktypes.DoubleType(), True, None
+            ),
+            sparktypes.StructField(
+                "rate_code_id", sparktypes.IntegerType(), True, None
+            ),
+            sparktypes.StructField(
+                "store_and_fwd_flag", sparktypes.StringType(), True, None
+            ),
+            sparktypes.StructField(
+                "pickup_location_id", sparktypes.IntegerType(), True, None
+            ),
+            sparktypes.StructField(
+                "dropoff_location_id", sparktypes.IntegerType(), True, None
+            ),
+            sparktypes.StructField(
+                "payment_type", sparktypes.IntegerType(), True, None
+            ),
+            sparktypes.StructField("fare_amount", sparktypes.DoubleType(), True, None),
+            sparktypes.StructField("extra", sparktypes.DoubleType(), True, None),
+            sparktypes.StructField("mta_tax", sparktypes.DoubleType(), True, None),
+            sparktypes.StructField("tip_amount", sparktypes.DoubleType(), True, None),
+            sparktypes.StructField("tolls_amount", sparktypes.DoubleType(), True, None),
+            sparktypes.StructField(
+                "improvement_surcharge", sparktypes.DoubleType(), True, None
+            ),
+            sparktypes.StructField("total_amount", sparktypes.DoubleType(), True, None),
+            sparktypes.StructField(
+                "congestion_surcharge", sparktypes.DoubleType(), True, None
+            ),
         ]
     )
     return schema

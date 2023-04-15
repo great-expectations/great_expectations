@@ -6,6 +6,13 @@ from typing import TYPE_CHECKING, Dict, Optional
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility.pyspark import types as sparktypes
+from great_expectations.compatibility.sqlalchemy import (
+    registry as sqlalchemy_dialects_registry,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationValidationResult,  # noqa: TCH001
@@ -24,13 +31,6 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.optional_imports import (
-    sparktypes,
-    sqlalchemy_dialects_registry,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (

@@ -74,7 +74,7 @@ For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, 
 ```
 
 If we need a builtin function from `pyspark.sql.functions`, usually aliased to `F`, the import logic in 
-`from great_expectations.optional_imports import F`
+`from great_expectations.compatibility.pyspark import F`
 allows us to access these functions even when PySpark is not installed.
 
 <details>
@@ -90,7 +90,7 @@ def _spark(cls, column, strftime_format, **kwargs):
     def is_equal_to_three(val):
         return (val == 3)
 
-    success_udf = F.udf(is_equal_to_three, sparktypes.BooleanType())
+    success_udf = F.udf(is_equal_to_three, types.BooleanType())
     return success_udf(column)
 ```
 

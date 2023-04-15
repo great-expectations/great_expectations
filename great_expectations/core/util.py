@@ -33,18 +33,28 @@ from IPython import get_ipython
 from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
+from great_expectations.compatibility.pyspark import (
+    DataFrame as pyspark_sql_DataFrame,
+)
+from great_expectations.compatibility.pyspark import (
+    SparkSession as pyspark_sql_SparkSession,
+)
+from great_expectations.compatibility.pyspark import (
+    types as sparktypes,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    SQLALCHEMY_NOT_IMPORTED,
+    LegacyRow,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Connection as sqlalchemy_engine_Connection,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    TextClause as sqlalchemy_TextClause,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
-    pyspark_sql_DataFrame,
-    pyspark_sql_SparkSession,
-    sparktypes,
-    sqlalchemy,
-    sqlalchemy_engine_Connection,
-    sqlalchemy_TextClause,
-)
 from great_expectations.types import SerializableDictDot
 from great_expectations.types.base import SerializableDotDict
 
@@ -66,12 +76,7 @@ except ImportError:
     LineString = None
 
 
-try:
-    LegacyRow = sqlalchemy.engine.row.LegacyRow
-except (
-    ImportError,
-    AttributeError,
-):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
+if not LegacyRow:
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {

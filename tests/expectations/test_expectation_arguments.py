@@ -18,7 +18,7 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     UsageStatisticsHandler,
 )
 from great_expectations.validator.validator import Validator
-from great_expectations.optional_imports import pyspark_sql_DataFrame
+from great_expectations.compatibility.pyspark import DataFrame as pyspark_sql_DataFrame
 
 logger = logging.getLogger(__name__)
 

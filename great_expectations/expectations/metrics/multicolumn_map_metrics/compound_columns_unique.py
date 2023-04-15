@@ -1,5 +1,12 @@
 from typing import Optional
 
+from great_expectations.compatibility.pyspark import (
+    Window as pyspark_sql_Window,
+)
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypeSuffixes,
@@ -19,11 +26,6 @@ from great_expectations.expectations.metrics.map_metric_provider.multicolumn_con
 from great_expectations.expectations.metrics.map_metric_provider.multicolumn_function_partial import (
     multicolumn_function_partial,
 )
-from great_expectations.optional_imports import (
-    F,
-    pyspark_sql_Window,
-)
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 

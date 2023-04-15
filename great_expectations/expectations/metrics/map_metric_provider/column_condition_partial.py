@@ -11,6 +11,15 @@ from typing import (
     Union,
 )
 
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    quoted_name,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
@@ -27,13 +36,6 @@ from great_expectations.expectations.metrics.metric_provider import (
 )
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
-)
-from great_expectations.optional_imports import (
-    quoted_name,
-    sqlalchemy_engine_Engine,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
 )
 
 logger = logging.getLogger(__name__)

@@ -25,7 +25,11 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
     SINGLE_DATE_PART_BATCH_IDENTIFIERS,
     SINGLE_DATE_PART_DATE_PARTS,
 )
-from great_expectations.optional_imports import F, pyspark_sql_DataFrame, pyarrow
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+    DataFrame as pyspark_sql_DataFrame,
+)
+from great_expectations.compatibility.pyarrow import pyarrow
 
 # Here we add SparkDataSplitter specific test cases to the generic test cases:
 SINGLE_DATE_PART_DATE_PARTS += [

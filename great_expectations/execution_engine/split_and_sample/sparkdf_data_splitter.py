@@ -4,12 +4,20 @@ import hashlib
 import logging
 from typing import List, Union
 
+from great_expectations.compatibility.pyspark import (
+    DataFrame,
+)
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.pyspark import (
+    types as sparktypes,
+)
 from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
     DataSplitter,
     DatePart,
 )
-from great_expectations.optional_imports import F, pyspark_sql_DataFrame, sparktypes
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +31,10 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_year(
         self,
-        df: pyspark_sql_DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> pyspark_sql_DataFrame:
+    ) -> DataFrame:
         """Split on year values in column_name.
 
         Args:
@@ -49,10 +57,10 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_year_and_month(
         self,
-        df: pyspark_sql_DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> pyspark_sql_DataFrame:
+    ) -> DataFrame:
         """Split on year and month values in column_name.
 
         Args:
@@ -75,10 +83,10 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_year_and_month_and_day(
         self,
-        df: pyspark_sql_DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
-    ) -> pyspark_sql_DataFrame:
+    ) -> DataFrame:
         """Split on year and month and day values in column_name.
 
         Args:
@@ -101,11 +109,11 @@ class SparkDataSplitter(DataSplitter):
 
     def split_on_date_parts(
         self,
-        df: pyspark_sql_DataFrame,
+        df: DataFrame,
         column_name: str,
         batch_identifiers: dict,
         date_parts: Union[List[DatePart], List[str]],
-    ) -> pyspark_sql_DataFrame:
+    ) -> DataFrame:
         """Split on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
@@ -173,8 +181,8 @@ class SparkDataSplitter(DataSplitter):
 
     @staticmethod
     def split_on_whole_table(
-        df: pyspark_sql_DataFrame,
-    ) -> pyspark_sql_DataFrame:
+        df: DataFrame,
+    ) -> DataFrame:
         """No op. Return the same data that is passed in.
 
         Args:
@@ -188,7 +196,7 @@ class SparkDataSplitter(DataSplitter):
     @staticmethod
     def split_on_column_value(
         df, column_name: str, batch_identifiers: dict
-    ) -> pyspark_sql_DataFrame:
+    ) -> DataFrame:
         """Return a dataframe where rows are filtered based on the specified column value.
 
         Args:
@@ -207,7 +215,7 @@ class SparkDataSplitter(DataSplitter):
         column_name: str,
         batch_identifiers: dict,
         date_format_string: str = "yyyy-MM-dd",
-    ) -> pyspark_sql_DataFrame:
+    ) -> DataFrame:
         """Return a dataframe where rows are filtered based on whether their converted
         datetime (using date_format_string) matches the datetime string value provided
         in batch_identifiers for the specified column.

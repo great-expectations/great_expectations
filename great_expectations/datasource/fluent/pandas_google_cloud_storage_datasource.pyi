@@ -46,8 +46,9 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 )
 
 if TYPE_CHECKING:
-    from google.cloud.storage.client import Client as GoogleCloudStorageClient
-
+    from great_expectations.compatibility.google import (
+        Client as GoogleCloudStorageClient,
+    )
     from great_expectations.datasource.fluent.dynamic_pandas import (
         CompressionOptions,
         CSVEngine,

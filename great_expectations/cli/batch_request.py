@@ -33,7 +33,9 @@ logger = logging.getLogger(__name__)
 
 
 if TYPE_CHECKING:
-    from great_expectations.optional_imports import sqlalchemy_engine_Inspector
+    from great_expectations.compatibility.sqlalchemy import (
+        Inspector as sqlalchemy_engine_Inspector,
+    )
 
 
 DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [

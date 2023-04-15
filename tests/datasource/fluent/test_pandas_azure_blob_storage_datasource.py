@@ -9,6 +9,13 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.pandas_execution_engine
+from great_expectations.compatibility.azure import (
+    BlobServiceClient,
+    ContainerClient,
+)
+from great_expectations.compatibility.azure import (
+    storage as blob_storage,
+)
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -24,11 +31,6 @@ from great_expectations.datasource.fluent.pandas_azure_blob_storage_datasource i
 )
 from great_expectations.datasource.fluent.pandas_file_path_datasource import (
     CSVAsset,
-)
-from great_expectations.optional_imports import (
-    BlobServiceClient,
-    ContainerClient,
-    azure_storage,
 )
 
 logger = logging.getLogger(__file__)
@@ -74,7 +76,7 @@ def _build_pandas_abs_datasource(
 
 @pytest.fixture
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def pandas_abs_datasource() -> PandasAzureBlobStorageDatasource:
@@ -120,7 +122,7 @@ def csv_asset(
 
 @pytest.fixture
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
@@ -136,7 +138,7 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def test_construct_pandas_abs_datasource_with_account_url_and_credential():
@@ -154,7 +156,7 @@ def test_construct_pandas_abs_datasource_with_account_url_and_credential():
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def test_construct_pandas_abs_datasource_with_conn_str_and_credential():
@@ -172,7 +174,7 @@ def test_construct_pandas_abs_datasource_with_conn_str_and_credential():
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def test_construct_pandas_abs_datasource_with_valid_account_url_assigns_account_name():
@@ -190,7 +192,7 @@ def test_construct_pandas_abs_datasource_with_valid_account_url_assigns_account_
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def test_construct_pandas_abs_datasource_with_valid_conn_str_assigns_account_name():
@@ -208,7 +210,7 @@ def test_construct_pandas_abs_datasource_with_valid_conn_str_assigns_account_nam
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error():
@@ -227,7 +229,7 @@ def test_construct_pandas_abs_datasource_with_multiple_auth_methods_raises_error
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
@@ -255,7 +257,7 @@ def test_add_csv_asset_to_datasource(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
@@ -279,7 +281,7 @@ def test_construct_csv_asset_directly(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
@@ -309,7 +311,7 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
@@ -339,7 +341,7 @@ def test_csv_asset_with_batching_regex_named_parameters(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
@@ -369,7 +371,7 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
@@ -400,7 +402,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     reason="Accessing objects on azure.storage.blob using Pandas is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
 )
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def test_get_batch_list_from_fully_specified_batch_request(
@@ -456,7 +458,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not azure_storage,
+    not blob_storage,
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def test_test_connection_failures(

@@ -2,33 +2,30 @@ import logging
 import threading
 from typing import Dict
 
-logger = logging.getLogger(__name__)
+from great_expectations.compatibility.sqlalchemy import (
+    Connection as sqlalchemy_engine_Connection,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    SQLAlchemyError,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 
-try:
-    import sqlalchemy as sqlalchemy  # noqa: TID251
-    from sqlalchemy import create_engine  # noqa: TID251
-    from sqlalchemy.engine import Connection, Engine  # noqa: TID251
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    Connection = None
-    Engine = None
-    SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
+logger = logging.getLogger(__name__)
 
 
 class SqlAlchemyConnectionManager:
     def __init__(self) -> None:
         self.lock = threading.Lock()
-        self._connections: Dict[str, Connection] = {}
+        self._connections: Dict[str, sqlalchemy_engine_Connection] = {}
 
     def get_connection(self, connection_string):
-        if sqlalchemy is not None:
+        if sa is not None:
             with self.lock:
                 if connection_string not in self._connections:
                     try:
-                        engine = create_engine(connection_string)
+                        engine = sa.create_engine(connection_string)
                         conn = engine.connect()
                         self._connections[connection_string] = conn
                     except (ImportError, SQLAlchemyError) as e:

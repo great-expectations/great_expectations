@@ -11,6 +11,39 @@ from dateutil.parser import parse
 from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import (
+    BinaryExpression as sa_sql_expression_BinaryExpression,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Dialect as sqlalchemy_engine_Dialect,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Select as sa_sql_expression_Select,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    TableClause as sa_sql_expression_TableClause,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    TextClause as sqlalchemy_TextClause,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    custom_op as sqlalchemy_custom_op,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    literal as sqlalchemy_literal,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    reflection as sqlalchemy_reflection,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    registry as sqlalchemy_dialects_registry,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.execution_engine import (
     PandasExecutionEngine,  # noqa: TCH001
     SqlAlchemyExecutionEngine,  # noqa: TCH001
@@ -20,21 +53,6 @@ from great_expectations.execution_engine.sqlalchemy_batch_data import (
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.util import check_sql_engine_dialect
-from great_expectations.optional_imports import (
-    sa_sql_expression_BinaryExpression,
-    sa_sql_expression_Select,
-    sa_sql_expression_TableClause,
-    sqlalchemy_custom_op,
-    sqlalchemy_dialects_registry,
-    sqlalchemy_engine_Dialect,
-    sqlalchemy_engine_Engine,
-    sqlalchemy_literal,
-    sqlalchemy_reflection,
-    sqlalchemy_TextClause,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:

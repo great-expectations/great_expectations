@@ -7,6 +7,8 @@ For detailed instructions on how to use it, please see:
 from math import cos, pi, sqrt
 from typing import Any, List, Optional, Union
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import types as sparktypes
 from great_expectations.core import ExpectationValidationResult
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -22,7 +24,6 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.optional_imports import F, sparktypes
 from great_expectations.render import (
     RenderedBulletListContent,
     RenderedGraphContent,

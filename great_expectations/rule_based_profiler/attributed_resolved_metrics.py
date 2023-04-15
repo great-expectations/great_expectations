@@ -5,8 +5,9 @@ from typing import Dict, Iterator, List, Optional, Sized
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility.pyspark import Row as pyspark_sql_Row
+from great_expectations.compatibility.sqlalchemy import Row as sqlalchemy_engine_Row
 from great_expectations.core.util import convert_to_json_serializable
-from great_expectations.optional_imports import pyspark_sql_Row, sqlalchemy_engine_Row
 from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricValues,  # noqa: TCH001
 )

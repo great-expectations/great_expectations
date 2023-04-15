@@ -18,6 +18,9 @@ if TYPE_CHECKING:
         SqlAlchemyExecutionEngine,
     )
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import quoted_name
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
@@ -25,8 +28,6 @@ from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_m
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
-from great_expectations.optional_imports import F, quoted_name
-from great_expectations.optional_imports import sqlalchemy as sa
 
 if TYPE_CHECKING:
     import pyspark

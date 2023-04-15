@@ -7,6 +7,33 @@ from typing import Any, Dict, List
 
 import numpy as np
 
+from great_expectations.compatibility.sqlalchemy import (
+    CTE as sa_sql_expression_CTE,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Label as sa_sql_expression_Label,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    ProgrammingError as sqlalchemy_ProgrammingError,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Row as sqlalchemy_engine_Row,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    RowProxy as sqlalchemy_engine_RowProxy,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Select as sa_sql_expression_Select,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    TextClause as sqlalchemy_TextClause,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    WithinGroup as sa_sql_expression_WithinGroup,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -21,18 +48,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.util import attempt_allowing_relative_error
-from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
-    sa_sql_expression_CTE,
-    sa_sql_expression_Label,
-    sa_sql_expression_Select,
-    sa_sql_expression_WithinGroup,
-    sqlalchemy_ProgrammingError,
-    sqlalchemy_TextClause,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -42,24 +57,10 @@ except ImportError:
     TrinoUserError = None
 
 
-try:
-    from sqlalchemy.engine.row import Row  # noqa: TID251
-
-    from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
-except ImportError:
-    try:
-        from sqlalchemy.engine.row import RowProxy  # noqa: TID251
-
-        from great_expectations.optional_imports import sqlalchemy  # noqa: TID251
-
-        Row = RowProxy
-    except ImportError:
-        logger.debug(
-            "Unable to load SqlAlchemy Row class; please upgrade you sqlalchemy installation to the latest version."
-        )
-        sqlalchemy = SQLALCHEMY_NOT_IMPORTED
-        RowProxy = None
-        Row = None
+if sqlalchemy_engine_Row:
+    Row = sqlalchemy_engine_Row
+else:
+    Row = sqlalchemy_engine_RowProxy
 
 
 class ColumnQuantileValues(ColumnAggregateMetricProvider):

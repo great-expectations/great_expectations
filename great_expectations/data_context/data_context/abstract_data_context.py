@@ -131,13 +131,13 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     send_usage_message,
     usage_statistics_enabled_method,
 )
+from great_expectations.compatibility.sqlalchemy import SQLAlchemyError
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-except ImportError:
+if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = gx_exceptions.ProfilerError
+
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint

@@ -4,6 +4,15 @@ from typing import Any, Dict
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.compatibility.pyspark import (
+    Window as pyspark_sql_Window,
+)
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.pyspark import (
+    types as sparktypes,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
@@ -15,11 +24,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     column_condition_partial,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_partial
-from great_expectations.optional_imports import (
-    F,
-    pyspark_sql_Window,
-    sparktypes,
-)
 from great_expectations.warnings import warn_deprecated_parse_strings_as_datetimes
 
 

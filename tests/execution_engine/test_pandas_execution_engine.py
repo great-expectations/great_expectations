@@ -8,7 +8,7 @@ import pytest
 # noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.optional_imports import google_cloud_storage
+from great_expectations.compatibility.google import storage as google_cloud_storage
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import (

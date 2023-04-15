@@ -1,3 +1,15 @@
+from great_expectations.compatibility.pyspark import (
+    Window as pyspark_sql_Window,
+)
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -8,12 +20,6 @@ from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.optional_imports import (
-    F,
-    pyspark_sql_Window,
-    sqlalchemy_engine_Engine,
-)
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import generate_temporary_table_name
 
 

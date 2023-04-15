@@ -19,22 +19,16 @@ from pyparsing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 
-try:
-    import pyspark.sql.functions as F
-except ImportError:
-    F = None
-
-try:
-    import sqlalchemy as sa  # noqa: TID251
-except ImportError:
-    sa = None
-
 if TYPE_CHECKING:
-    import pyspark.sql
-    from sqlalchemy.sql.expression import ColumnElement  # noqa: TID251
+    from great_expectations.compatibility.pyspark import Column as pyspark_sql_Column
+    from great_expectations.compatibility.sqlalchemy import (
+        ColumnElement as sa_sql_expression_ColumnElement,
+    )
 
 
 def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`
@@ -135,7 +129,7 @@ def _parse_great_expectations_condition(row_condition: str):
 # noinspection PyUnresolvedReferences
 def parse_condition_to_spark(
     row_condition: str,
-) -> pyspark.sql.Column:  # TODO: pyspark typing
+) -> pyspark_sql_Column:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
@@ -179,7 +173,9 @@ def generate_condition_by_operator(column, op, value):
     return operators[op](column, value)
 
 
-def parse_condition_to_sqlalchemy(row_condition: str) -> ColumnElement:
+def parse_condition_to_sqlalchemy(
+    row_condition: str,
+) -> sa_sql_expression_ColumnElement:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "date" in parsed:

@@ -38,24 +38,12 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+    sqlalchemy as sa,
+)
 
 logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy as sqlalchemy
-    from sqlalchemy import create_engine
-
-    # noinspection PyProtectedMember
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.exc import SQLAlchemyError
-    from sqlalchemy.sql import Select
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    Engine = None
-    Select = None
-    SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
 
 
 def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, dict]:
@@ -345,7 +333,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
     include_bigquery: bool = "bigquery" in test_backends
     include_trino: bool = "trino" in test_backends
 
-    if not create_engine:
+    if not sa.create_engine:
         pytest.skip("Unable to import sqlalchemy.create_engine() -- skipping.")
 
     test_backend_names: List[str] = build_test_backends_list_v3(
@@ -385,7 +373,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
             if validator is not None:
                 validators_config[table_name] = validator
 
-    engine: Engine
+    engine: sqlalchemy_engine_Engine
 
     metrics: dict = {}
 
@@ -406,9 +394,9 @@ def test_table_column_reflection_fallback(test_backends, sa):
         )
         metrics.update(results)
         assert set(metrics[table_columns_metric.id]) == {"name", "age", "pet"}
-        selectable: Select = sqlalchemy.Table(
+        selectable: sa_sql_expression_Select = sa.Table(
             table_name,
-            sqlalchemy.MetaData(),
+            sa.MetaData(),
             schema=None,
         )
         sqlalchemy_engine = cast(SqlAlchemyExecutionEngine, validator.execution_engine)
@@ -440,7 +428,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
 
 
 @pytest.mark.skipif(
-    sqlalchemy is None,
+    sa is None,
     reason="sqlalchemy is not installed",
 )
 def test__generate_expectation_tests__with_test_backends():
@@ -486,7 +474,7 @@ def test__generate_expectation_tests__with_test_backends():
 
 
 @pytest.mark.skipif(
-    sqlalchemy is None,
+    sa is None,
     reason="sqlalchemy is not installed",
 )
 def test__generate_expectation_tests__with_test_backends2():
@@ -541,7 +529,7 @@ def test__generate_expectation_tests__with_test_backends2():
     reason="Timeout of 30 seconds reached trying to connect to localhost:8088 (trino port)"
 )
 @pytest.mark.skipif(
-    sqlalchemy is None,
+    sa is None,
     reason="sqlalchemy is not installed",
 )
 def test__generate_expectation_tests__with_no_test_backends():

@@ -12,6 +12,19 @@ import pandas as pd
 from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.azure import BlobServiceClient
+from great_expectations.compatibility.google import (
+    DefaultCredentialsError as GoogleDefaultCredentialsError,
+)
+from great_expectations.compatibility.google import (
+    GoogleAPIError,
+)
+from great_expectations.compatibility.google import (
+    service_account as google_service_account,
+)
+from great_expectations.compatibility.google import (
+    storage as google_cloud_storage,
+)
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     execute_pandas_reader_fn,
 )
@@ -40,13 +53,6 @@ from great_expectations.execution_engine.split_and_sample.pandas_data_sampler im
 )
 from great_expectations.execution_engine.split_and_sample.pandas_data_splitter import (
     PandasDataSplitter,
-)
-from great_expectations.optional_imports import (
-    BlobServiceClient,
-    DefaultCredentialsError,
-    GoogleAPIError,
-    google_cloud_storage,
-    google_service_account,
 )
 
 logger = logging.getLogger(__name__)
@@ -191,7 +197,7 @@ class PandasExecutionEngine(ExecutionEngine):
             self._gcs = google_cloud_storage.Client(
                 credentials=credentials, **gcs_options
             )
-        except (TypeError, AttributeError, DefaultCredentialsError):
+        except (TypeError, AttributeError, GoogleDefaultCredentialsError):
             self._gcs = None
 
     def configure_validator(self, validator) -> None:

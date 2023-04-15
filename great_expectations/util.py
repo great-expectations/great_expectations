@@ -55,18 +55,20 @@ from packaging import version
 from typing_extensions import Literal, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import (
+    Select as sa_sql_expression_Select,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    reflection as sqlalchemy_reflection,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
-)
-from great_expectations.optional_imports import (
-    sa_sql_expression_Select,
-    sqlalchemy_reflection,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
 )
 
 try:
@@ -2079,10 +2081,12 @@ def import_make_url():
     Beginning from SQLAlchemy 1.4, make_url is accessed from sqlalchemy.engine; earlier versions must
     still be accessed from sqlalchemy.engine.url to avoid import errors.
     """
+    from great_expectations.compatibility.sqlalchemy import engine, url
+
     if version.parse(sa.__version__) < version.parse("1.4"):
-        from sqlalchemy.engine.url import make_url  # noqa: TID251
+        make_url = url.make_url
     else:
-        from sqlalchemy.engine import make_url  # noqa: TID251
+        make_url = engine.make_url
 
     return make_url
 

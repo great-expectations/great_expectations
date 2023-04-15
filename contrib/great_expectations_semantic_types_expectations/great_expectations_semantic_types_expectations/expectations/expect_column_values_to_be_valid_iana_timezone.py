@@ -2,6 +2,8 @@ from typing import Optional
 
 import pytz
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import types as sparktypes
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -12,7 +14,6 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.optional_imports import F, sparktypes
 
 
 def is_valid_timezone(timezone: str) -> bool:

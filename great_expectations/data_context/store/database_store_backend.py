@@ -6,16 +6,22 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.optional_imports import (
-    SQLAlchemyError,
-    sqlalchemy_engine_Row,
-    sqlalchemy_IntegrityError,
-    sqlalchemy_NoSuchTableError,
+from great_expectations.compatibility.sqlalchemy import (
+    IntegrityError as sqlalchemy_IntegrityError,
 )
-from great_expectations.optional_imports import (
+from great_expectations.compatibility.sqlalchemy import (
+    NoSuchTableError as sqlalchemy_NoSuchTableError,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Row as sqlalchemy_engine_Row,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    SQLAlchemyError,
+)
+from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,

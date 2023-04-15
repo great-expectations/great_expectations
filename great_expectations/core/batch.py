@@ -10,14 +10,16 @@ import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility.pyspark import (
+    SPARK_NOT_IMPORTED,
+)
+from great_expectations.compatibility.pyspark import (
+    DataFrame as pyspark_sql_DataFrame,
+)
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
-from great_expectations.optional_imports import (
-    SPARK_NOT_IMPORTED,
-    pyspark_sql_DataFrame,
-)
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable, load_class
 

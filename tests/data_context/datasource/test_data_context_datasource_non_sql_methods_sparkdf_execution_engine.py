@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import shutil
-from typing import List, Union
+from typing import List, Union, TYPE_CHECKING
 
 import pandas as pd
 import pytest
@@ -13,19 +15,22 @@ from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchD
 from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+
 yaml = YAMLHandler()
 
 
 @pytest.fixture
 def schema_for_spark_testset(spark_session):
-    from pyspark.sql.types import IntegerType, StructField, StructType
+    from great_expectations.compatibility.pyspark import types as sparktypes
 
     # add schema
-    schema = StructType(
+    schema = sparktypes.StructType(
         [
-            StructField("x", IntegerType(), True),
-            StructField("y", IntegerType(), True),
-            StructField("z", IntegerType(), True),
+            sparktypes.StructField("x", sparktypes.IntegerType(), True),
+            sparktypes.StructField("y", sparktypes.IntegerType(), True),
+            sparktypes.StructField("z", sparktypes.IntegerType(), True),
         ]
     )
     return schema
@@ -88,7 +93,7 @@ def context_with_single_titanic_csv_spark(
 
 @pytest.mark.integration
 def test_get_validator(context_with_single_titanic_csv_spark):
-    context: "DataContext" = context_with_single_titanic_csv_spark
+    context: AbstractDataContext = context_with_single_titanic_csv_spark
     batch_request_dict: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
@@ -111,7 +116,7 @@ def test_get_validator(context_with_single_titanic_csv_spark):
 
 @pytest.mark.integration
 def test_get_validator_bad_batch_request(context_with_single_titanic_csv_spark):
-    context: "DataContext" = context_with_single_titanic_csv_spark
+    context: AbstractDataContext = context_with_single_titanic_csv_spark
     batch_request_dict: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",

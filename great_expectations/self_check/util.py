@@ -34,6 +34,25 @@ from dateutil.parser import parse
 from great_expectations.compatibility.pandas_compatibility import (
     execute_pandas_to_datetime,
 )
+from great_expectations.compatibility.pyspark import (
+    DataFrame as pyspark_sql_DataFrame,
+)
+from great_expectations.compatibility.pyspark import (
+    SparkSession as pyspark_sql_SparkSession,
+)
+from great_expectations.compatibility.pyspark import (
+    types as sparktypes,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    SQLALCHEMY_NOT_IMPORTED,
+    SQLAlchemyError,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -66,17 +85,6 @@ from great_expectations.execution_engine import (
 )
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
-)
-from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
-    SQLAlchemyError,
-    pyspark_sql_DataFrame,
-    pyspark_sql_SparkSession,
-    sparktypes,
-    sqlalchemy_engine_Engine,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
 )
 from great_expectations.profile import ColumnsExistProfiler
 from great_expectations.self_check.sqlalchemy_connection_manager import (
@@ -111,8 +119,9 @@ MAX_TABLE_NAME_LENGTH: int = 63
 logger = logging.getLogger(__name__)
 
 try:
-    from great_expectations.optional_imports import sqlalchemy  # isort:skip
-    import sqlalchemy.dialects.sqlite as sqlitetypes  # noqa: TID251
+    from great_expectations.compatibility.sqlalchemy import dialects
+
+    sqlitetypes = dialects.sqlite
 
     # noinspection PyPep8Naming
     from sqlalchemy.dialects.sqlite import dialect as sqliteDialect  # noqa: TID251
@@ -128,7 +137,7 @@ try:
         "BOOLEAN": sqlitetypes.BOOLEAN,
         "TIMESTAMP": sqlitetypes.TIMESTAMP,
     }
-except (ImportError, KeyError):
+except (ImportError, KeyError, AttributeError):
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
     sqlitetypes = SQLALCHEMY_NOT_IMPORTED
     sqliteDialect = SQLALCHEMY_NOT_IMPORTED
@@ -555,7 +564,6 @@ def get_dataset(  # noqa: C901 - 110
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "SparkDFDataset":
-        import pyspark.sql.types as sparktypes
 
         spark_types = {
             "StringType": sparktypes.StringType,
@@ -808,7 +816,6 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator:
-    import pyspark.sql.types as sparktypes
 
     spark_types: dict = {
         "StringType": sparktypes.StringType,
@@ -2840,16 +2847,15 @@ def _create_trino_engine(
     engine = sa.create_engine(
         _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
     )
-    from sqlalchemy import text  # noqa: TID251
     from trino.exceptions import TrinoUserError
 
     with engine.begin() as conn:
         try:
             schemas = conn.execute(
-                text(f"show schemas from memory like {repr(schema_name)}")
+                sa.text(f"show schemas from memory like {repr(schema_name)}")
             ).fetchall()
             if (schema_name,) not in schemas:
-                conn.execute(text(f"create schema {schema_name}"))
+                conn.execute(sa.text(f"create schema {schema_name}"))
         except TrinoUserError:
             pass
 

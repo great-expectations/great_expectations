@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 import pydantic
 from typing_extensions import Final, Literal
 
+from great_expectations.compatibility.azure import BlobServiceClient
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -15,9 +16,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError,
-)
-from great_expectations.optional_imports import (
-    BlobServiceClient,
 )
 
 if TYPE_CHECKING:

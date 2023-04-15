@@ -13,6 +13,15 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility.sqlalchemy import (
+    Connection as sqlalchemy_engine_Connection,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    SQLAlchemyError,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -30,13 +39,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.optional_imports import (
-    SQLAlchemyError,
-    sqlalchemy_engine_Connection,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()

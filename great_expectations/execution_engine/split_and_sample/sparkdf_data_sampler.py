@@ -2,11 +2,19 @@ import hashlib
 import logging
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.pyspark import (
+    DataFrame,
+)
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.pyspark import (
+    types as sparktypes,
+)
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
 )
-from great_expectations.optional_imports import F, pyspark_sql_DataFrame, sparktypes
 
 logger = logging.getLogger(__name__)
 
@@ -14,9 +22,7 @@ logger = logging.getLogger(__name__)
 class SparkDataSampler(DataSampler):
     """Methods for sampling a Spark dataframe."""
 
-    def sample_using_limit(
-        self, df: pyspark_sql_DataFrame, batch_spec: BatchSpec
-    ) -> pyspark_sql_DataFrame:
+    def sample_using_limit(self, df: DataFrame, batch_spec: BatchSpec) -> DataFrame:
         """Sample the first n rows of data.
 
         Args:
@@ -36,9 +42,7 @@ class SparkDataSampler(DataSampler):
         n: int = batch_spec["sampling_kwargs"]["n"]
         return df.limit(n)
 
-    def sample_using_random(
-        self, df: pyspark_sql_DataFrame, batch_spec: BatchSpec
-    ) -> pyspark_sql_DataFrame:
+    def sample_using_random(self, df: DataFrame, batch_spec: BatchSpec) -> DataFrame:
         """Take a random sample of rows, retaining proportion p.
 
         Args:
@@ -65,9 +69,7 @@ class SparkDataSampler(DataSampler):
         )
         return res
 
-    def sample_using_mod(
-        self, df: pyspark_sql_DataFrame, batch_spec: BatchSpec
-    ) -> pyspark_sql_DataFrame:
+    def sample_using_mod(self, df: DataFrame, batch_spec: BatchSpec) -> DataFrame:
         """Take the mod of named column, and only keep rows that match the given value.
 
         Args:
@@ -100,9 +102,9 @@ class SparkDataSampler(DataSampler):
 
     def sample_using_a_list(
         self,
-        df: pyspark_sql_DataFrame,
+        df: DataFrame,
         batch_spec: BatchSpec,
-    ) -> pyspark_sql_DataFrame:
+    ) -> DataFrame:
         """Match the values in the named column against value_list, and only keep the matches.
 
         Args:
@@ -129,9 +131,9 @@ class SparkDataSampler(DataSampler):
 
     def sample_using_hash(
         self,
-        df: pyspark_sql_DataFrame,
+        df: DataFrame,
         batch_spec: BatchSpec,
-    ) -> pyspark_sql_DataFrame:
+    ) -> DataFrame:
         """Hash the values in the named column, and only keep rows that match the given hash_value.
 
         Args:

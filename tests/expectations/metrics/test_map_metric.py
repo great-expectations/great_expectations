@@ -38,15 +38,18 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+)
 
 
 @pytest.fixture
 def sqlite_table_for_unexpected_rows_with_index(
     test_backends,
-) -> "sqlalchemy.engine.Engine":  # noqa: F821
+) -> sqlalchemy_engine_Engine:  # noqa: F821
     if "sqlite" in test_backends:
         try:
-            import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             sqlite_path = file_relative_path(
                 __file__, "../../test_sets/metrics_test.db"

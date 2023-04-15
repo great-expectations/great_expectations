@@ -11,6 +11,7 @@ import pandas as pd
 from dateutil.parser import parse
 from scipy import stats
 
+from great_expectations.compatibility.sqlalchemy import quoted_name
 from great_expectations.data_asset.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
 from great_expectations.dataset.util import (
@@ -21,15 +22,6 @@ from great_expectations.dataset.util import (
 )
 
 logger = logging.getLogger(__name__)
-
-try:
-    from sqlalchemy.sql import quoted_name  # noqa: TID251
-
-except:
-    logger.debug(
-        "Unable to load quoted name from SqlAlchemy; install optional sqlalchemy dependency for support"
-    )
-    quoted_name = None
 
 
 class MetaDataset(DataAsset):

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from packaging import version
 
+from great_expectations.compatibility.pyspark import types as sparktypes
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationValidationResult,  # noqa: TCH001
@@ -27,7 +28,6 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.optional_imports import sparktypes
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (

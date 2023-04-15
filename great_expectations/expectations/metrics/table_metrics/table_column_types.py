@@ -1,5 +1,9 @@
 from typing import Any, Dict, Optional, cast
 
+from great_expectations.compatibility.pyspark import types as sparktypes
+from great_expectations.compatibility.sqlalchemy import (
+    TextClause as sqlalchemy_TextClause,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import (
@@ -15,10 +19,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.expectations.metrics.util import get_sqlalchemy_column_metadata
-from great_expectations.optional_imports import (
-    sparktypes,
-    sqlalchemy_TextClause,
-)
 
 
 class ColumnTypes(TableMetricProvider):

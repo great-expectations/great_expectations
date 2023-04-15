@@ -3,7 +3,10 @@ from typing import Dict, List
 
 from packaging.version import Version, parse as parse_version
 
-from great_expectations.optional_imports import pyspark_sql_SparkSession, pyspark
+from great_expectations.compatibility.pyspark import (
+    SparkSession as pyspark_sql_SparkSession,
+    pyspark,
+)
 
 logger = logging.getLogger(__name__)
 

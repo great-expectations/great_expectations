@@ -293,7 +293,7 @@ convention = "google"
 
 [tool.ruff.flake8-tidy-imports]
 [tool.ruff.flake8-tidy-imports.banned-api]
-"sqlalchemy".msg = "Don't import sqlalchemy directly, please use the great_expectations.optional_imports."
+"sqlalchemy".msg = "Please do not import sqlalchemy directly, import from great_expectations.compatibility.sqlalchemy instead."
 
 [tool.pytest.ini_options]
 filterwarnings = [

@@ -14,6 +14,7 @@ from marshmallow import Schema
 
 from great_expectations import DataContext
 from great_expectations.checkpoint import Checkpoint
+from great_expectations.compatibility.pyspark import types as sparktypes
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.types.base import (
@@ -35,24 +36,18 @@ from great_expectations.util import (
     requires_lossy_conversion,
 )
 
-try:
-    from pyspark.sql.types import IntegerType, StructField, StructType
-except ImportError:
-    IntegerType = None
-    StructField = None
-    StructType = None
-
 if TYPE_CHECKING:
-    from pyspark.sql import SparkSession
-    from pyspark.sql.types import StructType
+    from great_expectations.compatibility.pyspark import (
+        SparkSession as pyspark_sql_SparkSession,
+    )
 
 
 @pytest.fixture
-def spark_schema(spark_session: SparkSession) -> StructType:
-    return StructType(
+def spark_schema(spark_session: pyspark_sql_SparkSession) -> sparktypes.StructType:
+    return sparktypes.StructType(
         [
-            StructField("a", IntegerType(), True, None),
-            StructField("b", IntegerType(), True, None),
+            sparktypes.StructField("a", sparktypes.IntegerType(), True, None),
+            sparktypes.StructField("b", sparktypes.IntegerType(), True, None),
         ]
     )
 
@@ -61,7 +56,9 @@ def spark_schema(spark_session: SparkSession) -> StructType:
 # Spark schemas. They follow the pattern described in:
 # https://miguendes.me/how-to-use-fixtures-as-arguments-in-pytestmarkparametrize
 @pytest.fixture
-def checkpoint_config_spark(spark_session: SparkSession) -> CheckpointConfig:
+def checkpoint_config_spark(
+    spark_session: pyspark_sql_SparkSession,
+) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
         config_version=1,
@@ -84,7 +81,7 @@ def checkpoint_config_spark(spark_session: SparkSession) -> CheckpointConfig:
 
 @pytest.fixture
 def checkpoint_config_with_schema_spark(
-    spark_session: SparkSession, spark_schema
+    spark_session: pyspark_sql_SparkSession, spark_schema
 ) -> CheckpointConfig:
     return CheckpointConfig(
         name="my_nested_checkpoint",
@@ -109,7 +106,9 @@ def checkpoint_config_with_schema_spark(
 
 
 @pytest.fixture
-def datasource_config_spark(spark_session: SparkSession) -> DatasourceConfig:
+def datasource_config_spark(
+    spark_session: pyspark_sql_SparkSession,
+) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
         class_name="Datasource",
@@ -138,7 +137,7 @@ def datasource_config_spark(spark_session: SparkSession) -> DatasourceConfig:
 
 @pytest.fixture
 def datasource_config_with_schema_at_asset_level_spark(
-    spark_session: SparkSession, spark_schema
+    spark_session: pyspark_sql_SparkSession, spark_schema
 ) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
@@ -171,7 +170,7 @@ def datasource_config_with_schema_at_asset_level_spark(
 
 @pytest.fixture
 def datasource_config_with_schema_at_data_connector_level_spark(
-    spark_session: SparkSession, spark_schema
+    spark_session: pyspark_sql_SparkSession, spark_schema
 ) -> DatasourceConfig:
     return DatasourceConfig(
         name="taxi_data",
@@ -1041,7 +1040,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(
     checkpoint_config: Union[CheckpointConfig, str],
     expected_serialized_checkpoint_config: dict,
-    spark_session: SparkSession,
+    spark_session: pyspark_sql_SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1191,7 +1190,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
 def test_datasource_config_and_nested_objects_are_serialized_spark(
     datasource_config: Union[DatasourceConfig, str],
     expected_serialized_datasource_config: dict,
-    spark_session: SparkSession,
+    spark_session: pyspark_sql_SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1260,7 +1259,7 @@ def test_datasource_config_and_nested_objects_are_serialized_spark(
 def test_data_connector_and_nested_objects_are_serialized_spark(
     data_connector_config: DataConnectorConfig,
     expected_serialized_data_connector_config: dict,
-    spark_session: SparkSession,
+    spark_session: pyspark_sql_SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call
@@ -1326,7 +1325,7 @@ def test_data_connector_and_nested_objects_are_serialized_spark(
 def test_asset_and_nested_objects_are_serialized_spark(
     asset_config: AssetConfig,
     expected_serialized_asset_config: dict,
-    spark_session: SparkSession,
+    spark_session: pyspark_sql_SparkSession,
     request: FixtureRequest,
 ):
     # when using a fixture value in a parmeterized test, we need to call

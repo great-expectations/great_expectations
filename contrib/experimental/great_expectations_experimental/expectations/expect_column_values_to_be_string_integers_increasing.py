@@ -3,6 +3,15 @@ from typing import Callable, Dict, Optional
 
 import numpy as np
 
+from great_expectations.compatibility.pyspark import (
+    Window,
+)
+from great_expectations.compatibility.pyspark import (
+    functions as F,
+)
+from great_expectations.compatibility.pyspark import (
+    types as sparktypes,
+)
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -25,11 +34,6 @@ from great_expectations.expectations.metrics import (
 )
 from great_expectations.expectations.metrics.metric_provider import metric_partial
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.optional_imports import (
-    F,
-    pyspark_sql_Window,
-    sparktypes,
-)
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import ValidationDependencies
 
@@ -99,9 +103,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
                 "Column must be a string-type capable of being cast to int."
             )
 
-        diff = column - F.lag(column).over(
-            pyspark_sql_Window.orderBy(F.lit("constant"))
-        )
+        diff = column - F.lag(column).over(Window.orderBy(F.lit("constant")))
         diff = F.when(diff.isNull(), 1).otherwise(diff)
 
         if metric_value_kwargs["strictly"] is True:

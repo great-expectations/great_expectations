@@ -22,7 +22,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.optional_imports import pyspark_sql_Column, quoted_name
+from great_expectations.compatibility.pyspark import Column as pyspark_sql_Column
+from great_expectations.compatibility.sqlalchemy import quoted_name
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
@@ -1230,7 +1231,7 @@ def test_column_partition_metric_spark(spark_session):
 
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
-    from great_expectations.optional_imports import sparktypes
+    from great_expectations.compatibility.pyspark import types as sparktypes
 
     week_idx: int
     engine: SparkDFExecutionEngine = build_spark_engine(
@@ -4329,7 +4330,7 @@ def test_value_counts_metric_sa(sa):
 
 @pytest.mark.integration
 def test_value_counts_metric_spark(spark_session):
-    from great_expectations.optional_imports import sparktypes
+    from great_expectations.compatibility.pyspark import types as sparktypes
 
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
