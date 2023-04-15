@@ -44,11 +44,10 @@ from great_expectations.compatibility.pyspark import (
     types as sparktypes,
 )
 from great_expectations.compatibility.sqlalchemy import (
-    SQLALCHEMY_NOT_IMPORTED,
-    SQLAlchemyError,
+    Engine as sqlalchemy_engine_Engine,
 )
 from great_expectations.compatibility.sqlalchemy import (
-    Engine as sqlalchemy_engine_Engine,
+    SQLAlchemyError,
 )
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -118,14 +117,15 @@ MAX_TABLE_NAME_LENGTH: int = 63
 
 logger = logging.getLogger(__name__)
 
-try:
-    from great_expectations.compatibility.sqlalchemy import dialects
+from great_expectations.compatibility.sqlalchemy import (
+    registry,
+    sqlalchemy,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlite as sqlitetypes,
+)
 
-    sqlitetypes = dialects.sqlite
-
-    # noinspection PyPep8Naming
-    from sqlalchemy.dialects.sqlite import dialect as sqliteDialect  # noqa: TID251
-
+if sqlitetypes:
     SQLITE_TYPES = {
         "VARCHAR": sqlitetypes.VARCHAR,
         "CHAR": sqlitetypes.CHAR,
@@ -137,10 +137,7 @@ try:
         "BOOLEAN": sqlitetypes.BOOLEAN,
         "TIMESTAMP": sqlitetypes.TIMESTAMP,
     }
-except (ImportError, KeyError, AttributeError):
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
-    sqlitetypes = SQLALCHEMY_NOT_IMPORTED
-    sqliteDialect = SQLALCHEMY_NOT_IMPORTED
+else:
     SQLITE_TYPES = {}
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
@@ -149,7 +146,7 @@ try:
     import sqlalchemy_bigquery as BigQueryDialect
     import sqlalchemy_bigquery as sqla_bigquery
 
-    sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+    registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     # noinspection PyTypeChecker
     bigquery_types_tuple = None
     BIGQUERY_TYPES = {

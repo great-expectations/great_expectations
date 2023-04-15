@@ -74,7 +74,11 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
                         )
                     elif "info" in self.gcs_options:
                         info: Any = self.gcs_options.pop("info")
-                        credentials = Credentials.from_service_account_info(info=info)
+                        credentials = (
+                            service_account.Credentials.from_service_account_info(
+                                info=info
+                            )
+                        )
 
                     gcs_client = cloud_storage.Client(
                         credentials=credentials, **self.gcs_options

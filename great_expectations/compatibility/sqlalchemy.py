@@ -46,6 +46,11 @@ except (ImportError, AttributeError):
     dialects = SQLALCHEMY_NOT_IMPORTED
 
 try:
+    from sqlalchemy.dialects import sqlite  # noqa: TID251
+except (ImportError, AttributeError):
+    sqlite = SQLALCHEMY_NOT_IMPORTED
+
+try:
     from sqlalchemy.dialects import registry  # noqa: TID251
 except (ImportError, AttributeError):
     registry = SQLALCHEMY_NOT_IMPORTED
