@@ -1599,10 +1599,11 @@ def build_test_backends_list(  # noqa: C901 - 48
         test_backends += ["pandas"]
 
     if include_spark:
-        try:
-            import pyspark  # noqa: F401
-            from pyspark.sql import SparkSession  # noqa: F401
-        except ImportError:
+        from great_expectations.compatibility.pyspark import (
+            SparkSession as pyspark_sql_SparkSession,
+        )
+
+        if not pyspark_sql_SparkSession:
             if raise_exceptions_for_backends is True:
                 raise ValueError(
                     "spark tests are requested, but pyspark is not installed"
