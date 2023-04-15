@@ -16,8 +16,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
-    from azure.storage.blob import BlobServiceClient
-
+    from great_expectations.compatibility.azure import BlobServiceClient
     from great_expectations.core.batch import BatchDefinition
 
 
