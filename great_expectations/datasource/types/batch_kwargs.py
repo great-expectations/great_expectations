@@ -94,13 +94,14 @@ class PandasDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
 class SparkDFDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        try:
-            import pyspark
-        except ImportError:
+        from great_expectations.compatibility.pyspark import DataFrame, pyspark
+
+        if not pyspark:
             raise InvalidBatchKwargsError(
                 "SparkDFDatasourceInMemoryBatchKwargs requires a valid pyspark installation, but pyspark import failed."
             )
-        if not isinstance(self["dataset"], pyspark.sql.DataFrame):
+
+        if not (DataFrame and isinstance(self["dataset"], DataFrame)):
             raise InvalidBatchKwargsError(
                 "SparkDFDatasourceInMemoryBatchKwargs 'dataset' must be a spark DataFrame"
             )

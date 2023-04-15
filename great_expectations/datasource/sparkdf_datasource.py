@@ -2,6 +2,7 @@ import datetime
 import logging
 import uuid
 
+from great_expectations.compatibility.pyspark import DataFrame
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.dataset import SparkDFDataset
@@ -11,16 +12,6 @@ from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
-
-try:
-    from pyspark.sql import DataFrame, SparkSession
-except ImportError:
-    DataFrame = None  # type: ignore[assignment,misc]
-    SparkSession = None  # type: ignore[assignment,misc]
-    # TODO: review logging more detail here
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
 
 
 class SparkDFDatasource(LegacyDatasource):
