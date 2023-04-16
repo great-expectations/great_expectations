@@ -12,6 +12,10 @@ from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchD
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from great_expectations.compatibility.sqlalchemy import (
+    sqlite as sqlitetypes,
+    SQLALCHEMY_NOT_IMPORTED,
+)
 from great_expectations.self_check.util import (
     BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list_v3_api,
@@ -23,13 +27,17 @@ from great_expectations.self_check.util import (
     mysqlDialect,
     pgDialect,
     snowflakeDialect,
-    sqliteDialect,
     trinoDialect,
 )
 from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
 
 pytestmark = pytest.mark.sqlalchemy_version_compatibility
+
+try:
+    sqliteDialect = sqlitetypes.dialect
+except (ImportError, AttributeError):
+    sqliteDialect = SQLALCHEMY_NOT_IMPORTED
 
 
 def pytest_generate_tests(metafunc):  # noqa C901 - 35
