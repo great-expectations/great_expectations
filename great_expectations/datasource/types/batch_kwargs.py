@@ -101,7 +101,7 @@ class SparkDFDatasourceInMemoryBatchKwargs(InMemoryBatchKwargs):
                 "SparkDFDatasourceInMemoryBatchKwargs requires a valid pyspark installation, but pyspark import failed."
             )
 
-        if not (DataFrame and isinstance(self["dataset"], DataFrame)):
+        if not (DataFrame and isinstance(self["dataset"], DataFrame)):  # type: ignore[truthy-function]
             raise InvalidBatchKwargsError(
                 "SparkDFDatasourceInMemoryBatchKwargs 'dataset' must be a spark DataFrame"
             )

@@ -1600,7 +1600,7 @@ def build_test_backends_list(  # noqa: C901 - 48
             SparkSession as pyspark_sql_SparkSession,
         )
 
-        if not pyspark_sql_SparkSession:
+        if not pyspark_sql_SparkSession:  # type: ignore[truthy-function]
             if raise_exceptions_for_backends is True:
                 raise ValueError(
                     "spark tests are requested, but pyspark is not installed"

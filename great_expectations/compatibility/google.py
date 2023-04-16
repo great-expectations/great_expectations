@@ -9,7 +9,7 @@ GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
 try:
     from google.cloud import secretmanager  # noqa: TID251
 except (ImportError, AttributeError):
-    secretmanager = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
+    secretmanager = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from google.api_core.exceptions import GoogleAPIError  # noqa: TID251
@@ -24,7 +24,7 @@ except (ImportError, AttributeError):
 try:
     from google.cloud.exceptions import NotFound  # noqa: TID251
 except (ImportError, AttributeError):
-    NotFound = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED
+    NotFound = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
     from google.cloud import storage  # noqa: TID251
