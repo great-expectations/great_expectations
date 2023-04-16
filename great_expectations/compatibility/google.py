@@ -24,7 +24,7 @@ except (ImportError, AttributeError):
 try:
     from google.cloud.exceptions import NotFound  # noqa: TID251
 except (ImportError, AttributeError):
-    NotFound = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
+    NotFound = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
     from google.cloud import storage  # noqa: TID251
