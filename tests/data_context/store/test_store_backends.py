@@ -1232,7 +1232,7 @@ def test_TupleAzureBlobStoreBackend_connection_string():
     )
 
     with mock.patch(
-        "azure.storage.blob.BlobServiceClient", autospec=True
+        "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
 
         mock_container_client = my_store._container_client
@@ -1275,10 +1275,11 @@ def test_TupleAzureBlobStoreBackend_account_url():
     )
 
     with mock.patch(
-        "azure.storage.blob.BlobServiceClient", autospec=True
+        "great_expectations.compatibility.azure.BlobServiceClient", autospec=True
     ) as mock_azure_blob_client:
         with mock.patch(
-            "azure.identity.DefaultAzureCredential", autospec=True
+            "great_expectations.compatibility.azure.DefaultAzureCredential",
+            autospec=True,
         ) as mock_azure_credential:
             mock_container_client = my_store._container_client
             mock_azure_blob_client.assert_called_once()

@@ -1027,17 +1027,30 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
             DefaultAzureCredential,
         )
 
-        if self.connection_string:
-            blob_service_client: BlobServiceClient = (
-                BlobServiceClient.from_connection_string(self.connection_string)
-            )
-        elif self.account_url:
-            blob_service_client = BlobServiceClient(
-                account_url=self.account_url, credential=DefaultAzureCredential()
-            )
+        # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
+        if BlobServiceClient:
+            try:
+                if self.connection_string:
+                    blob_service_client: BlobServiceClient = (
+                        BlobServiceClient.from_connection_string(self.connection_string)
+                    )
+                elif self.account_url:
+                    blob_service_client = BlobServiceClient(
+                        account_url=self.account_url,
+                        credential=DefaultAzureCredential(),
+                    )
+                else:
+                    raise StoreBackendError(
+                        "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
+                    )
+            except Exception as e:
+                # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
+                raise StoreBackendError(
+                    f'Due to exception: "{str(e)}", "azure_client" could not be created.'
+                ) from e
         else:
             raise StoreBackendError(
-                "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
+                'Unable to create azure "BlobServiceClient" due to missing azure.storage.blob dependency.'
             )
 
         return blob_service_client.get_container_client(self.container)
