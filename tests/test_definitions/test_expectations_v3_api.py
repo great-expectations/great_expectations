@@ -7,14 +7,16 @@ import pandas as pd
 import pytest
 
 from great_expectations import DataContext
+from great_expectations.compatibility.sqlalchemy import (
+    SQLALCHEMY_NOT_IMPORTED,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlite as sqlitetypes,
+)
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    sqlite as sqlitetypes,
-    SQLALCHEMY_NOT_IMPORTED,
 )
 from great_expectations.self_check.util import (
     BigQueryDialect,
