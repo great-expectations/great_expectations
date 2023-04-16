@@ -118,7 +118,7 @@ class MockedSecretManagerServiceClient:
 
 
 @pytest.mark.skipif(
-    secretmanager is None,
+    not secretmanager,
     reason="Could not import 'secretmanager' from google.cloud in data_context.util",
 )
 @pytest.mark.parametrize(
