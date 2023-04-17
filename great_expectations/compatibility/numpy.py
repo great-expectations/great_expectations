@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from typing import Optional, Union
 
 import numpy as np
@@ -16,36 +15,19 @@ def numpy_quantile(
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
     """
     quantile: npt.NDArray
-    if sys.version_info >= (3, 8):
-        if version.parse(np.__version__) >= version.parse("1.22.0"):
-            quantile = np.quantile(
-                a=a,
-                q=q,
-                axis=axis,
-                method=method,
-            )
-        else:
-            quantile = np.quantile(
-                a=a,
-                q=q,
-                axis=axis,
-                interpolation=method,
-            )
+    if version.parse(np.__version__) >= version.parse("1.22.0"):
+        quantile = np.quantile(
+            a=a,
+            q=q,
+            axis=axis,
+            method=method,
+        )
     else:
-        # Handle type checking differently in python 3.7
-        if version.parse(np.__version__) >= version.parse("1.22.0"):
-            quantile = np.quantile(  # type: ignore[call-arg]
-                a=a,
-                q=q,
-                axis=axis,
-                method=method,
-            )
-        else:
-            quantile = np.quantile(
-                a=a,
-                q=q,
-                axis=axis,
-                interpolation=method,
-            )
+        quantile = np.quantile(
+            a=a,
+            q=q,
+            axis=axis,
+            interpolation=method,
+        )
 
     return quantile

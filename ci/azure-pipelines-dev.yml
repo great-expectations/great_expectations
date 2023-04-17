@@ -146,8 +146,8 @@ stages:
     - job: static_type_check
       strategy:
         matrix:
-          Python37:
-            python.version: '3.7'
+#          Python37:
+#            python.version: '3.7'
           Python38:
             python.version: '3.8'
       steps:
