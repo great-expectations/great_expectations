@@ -233,7 +233,7 @@ def type_check(
     report: bool = False,
     check_stub_sources: bool = False,
     ci: bool = False,
-    python_version: str = "3.8"
+    python_version: str = "3.8",
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -253,7 +253,7 @@ def type_check(
             report=report,
             check_stub_sources=check_stub_sources,
             ci=False,
-            python_version=python_version
+            python_version=python_version,
         )
         return  # don't run twice
 
