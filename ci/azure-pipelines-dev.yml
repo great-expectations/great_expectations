@@ -159,11 +159,11 @@ stages:
         displayName: 'Update pip'
       - script: |
           pip install --requirement requirements-types.txt
-          invoke type-check --ci --pretty
+          invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
       - script: |
           # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources
+          invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
         name: TypeCheckStubSourceFiles
 
     - job: docstring_linter
