@@ -88,7 +88,7 @@ def test_instantiation_without_args(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.service_account.Credentials.from_service_account_file"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_service_account.Credentials.from_service_account_file"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
@@ -131,7 +131,7 @@ def test_instantiation_with_filename_arg(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.service_account.Credentials.from_service_account_info"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_service_account.Credentials.from_service_account_info"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
