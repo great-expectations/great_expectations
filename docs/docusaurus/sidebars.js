@@ -486,15 +486,6 @@ module.exports = {
             { type: 'doc', id: 'contributing/contributing_package' }
           ]
         },
-        {
-          type: 'category',
-          label: 'Style guides',
-          items: [
-            { type: 'doc', id: 'contributing/style_guides/docs_style' },
-            { type: 'doc', id: 'contributing/style_guides/code_style' },
-            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' }
-          ]
-        },
         'contributing/index'
       ]
     },
