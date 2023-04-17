@@ -5,22 +5,20 @@ from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
 
+from great_expectations.optional_imports import (
+    SPARK_NOT_IMPORTED,
+    pyspark,
+    pyspark_sql_DataFrame,
+)
+
 from ..alias_types import JSONValues  # noqa: TCH001
-from ..core._docs_decorators import public_api
+from ..core._docs_decorators import public_api  # noqa: F401
 from .base import SerializableDotDict
 from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
 from .fonts import FontFamily, FontFamilyURL
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
 
 
 class DictDot:
@@ -258,7 +256,7 @@ def safe_deep_copy(data, memo=None):
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
     """
     if isinstance(data, (pd.Series, pd.DataFrame)) or (
-        pyspark and isinstance(data, pyspark.sql.DataFrame)
+        pyspark and isinstance(data, pyspark_sql_DataFrame)
     ):
         return data
 

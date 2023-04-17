@@ -1,9 +1,6 @@
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports">
+# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports and data context">
 import great_expectations as gx
 
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_context">
 context = gx.get_context()
 # </snippet>
 

@@ -55,14 +55,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
-try:
-    import pyspark
-    from pyspark.sql import Row as pyspark_sql_Row
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    pyspark_sql_Row = None  # type: ignore[assignment,misc]
-    logger.debug("No spark sql dataframe module available.")
-
 
 class TestConnectionError(Exception):
     pass

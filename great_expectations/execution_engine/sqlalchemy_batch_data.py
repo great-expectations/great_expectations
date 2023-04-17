@@ -3,20 +3,16 @@ from typing import Optional
 
 from great_expectations.core.batch import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
+from great_expectations.optional_imports import (
+    quoted_name,
+    sqlalchemy_DatabaseError,
+    sqlalchemy_engine_DefaultDialect,
+    sqlalchemy_engine_Engine,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 from great_expectations.util import generate_temporary_table_name
-
-try:
-    import sqlalchemy as sa  # noqa: TID251
-    from sqlalchemy.engine import Engine  # noqa: TID251
-    from sqlalchemy.engine.default import DefaultDialect  # noqa: TID251
-    from sqlalchemy.exc import DatabaseError  # noqa: TID251
-    from sqlalchemy.sql.elements import quoted_name  # noqa: TID251
-except ImportError:
-    sa = None
-    quoted_name = None
-    DefaultDialect = None
-    DatabaseError = None
-    Engine = None
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +177,7 @@ class SqlAlchemyBatchData(BatchData):
         return self._dialect
 
     @property
-    def sql_engine_dialect(self) -> DefaultDialect:
+    def sql_engine_dialect(self) -> sqlalchemy_engine_DefaultDialect:
         """Returns the Batches' current engine dialect"""
         return self._engine.dialect
 
@@ -293,13 +289,13 @@ class SqlAlchemyBatchData(BatchData):
                 with connection.begin():
                     try:
                         connection.execute(sa.text(stmt_1))
-                    except DatabaseError:
+                    except sqlalchemy_DatabaseError:
                         connection.execute(sa.text(stmt_2))
         else:
             # Since currently self._engine can also be a connection we need to
             # check first that it is an engine before creating a connection from it.
             # Otherwise, we use the connection.
-            if isinstance(self._engine, Engine):
+            if isinstance(self._engine, sqlalchemy_engine_Engine):
                 with self._engine.connect() as connection:
                     with connection.begin():
                         connection.execute(sa.text(stmt))
