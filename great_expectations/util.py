@@ -74,11 +74,9 @@ try:
 except ImportError:
     black = None  # type: ignore[assignment]
 
-try:
-    # This library moved in python 3.8
+if sys.version_info >= (3, 8):
     import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:
-    # Fallback for python < 3.8
+else:
     import importlib_metadata
 
 logger = logging.getLogger(__name__)
