@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional
 
 from great_expectations.compatibility.google import (
-    service_account,
+    service_account as google_service_account,
 )
 from great_expectations.compatibility.google import (
     storage as google_cloud_storage,
@@ -92,13 +92,17 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             credentials = None  # If configured with gcloud CLI / env vars
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
-                credentials = service_account.Credentials.from_service_account_file(
-                    filename=filename
+                credentials = (
+                    google_service_account.Credentials.from_service_account_file(
+                        filename=filename
+                    )
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
-                credentials = service_account.Credentials.from_service_account_info(
-                    info=info
+                credentials = (
+                    google_service_account.Credentials.from_service_account_info(
+                        info=info
+                    )
                 )
             self._gcs = google_cloud_storage.Client(
                 credentials=credentials, **gcs_options
