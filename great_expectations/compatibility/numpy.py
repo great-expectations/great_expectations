@@ -16,10 +16,9 @@ def numpy_quantile(
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
     """
     quantile: npt.NDArray
-    if sys.version_info == (3, 7):
-        # Handle type checking differently in python 3.7
+    if sys.version_info >= (3, 8):
         if version.parse(np.__version__) >= version.parse("1.22.0"):
-            quantile = np.quantile(  # type: ignore[call-arg]
+            quantile = np.quantile(
                 a=a,
                 q=q,
                 axis=axis,
@@ -33,15 +32,16 @@ def numpy_quantile(
                 interpolation=method,
             )
     else:
+        # Handle type checking differently in python 3.7
         if version.parse(np.__version__) >= version.parse("1.22.0"):
-            quantile = np.quantile(
+            quantile = np.quantile(  # type: ignore[call-arg]
                 a=a,
                 q=q,
                 axis=axis,
                 method=method,
             )
         else:
-            quantile = np.quantile(  # type: ignore[call-overload]
+            quantile = np.quantile(
                 a=a,
                 q=q,
                 axis=axis,
