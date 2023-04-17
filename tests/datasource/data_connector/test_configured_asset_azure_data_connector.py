@@ -18,7 +18,6 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.optional_imports import azure_storage
 
-
 yaml = YAMLHandler()
 
 
