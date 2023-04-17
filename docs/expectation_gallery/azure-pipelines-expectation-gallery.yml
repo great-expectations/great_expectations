@@ -384,7 +384,7 @@ stages:
           python.version: '3.8'
 
         services:
-          postgres: postgres
+          mssql: mssql
 
         steps:
           - task: UsePythonVersion@0
@@ -454,7 +454,7 @@ stages:
 
           - script: |
               pip install \
-                "google-cloud-bigquery-storage" \   # Different than whats in requirements-dev-bigquery.txt
+                "google-cloud-bigquery-storage" \
                 "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, bigquery]" \
