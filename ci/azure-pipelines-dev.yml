@@ -146,8 +146,6 @@ stages:
     - job: static_type_check
       strategy:
         matrix:
-#          Python37:
-#            python.version: '3.7'
           Python38:
             python.version: '3.8'
       steps:
@@ -155,9 +153,8 @@ stages:
         inputs:
           versionSpec: $(python.version)
         displayName: 'Use Python $(python.version)'
-      - bash: python -m pip install --upgrade pip
-        displayName: 'Update pip'
       - script: |
+          python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
