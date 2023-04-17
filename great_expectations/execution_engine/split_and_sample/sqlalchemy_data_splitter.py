@@ -20,10 +20,22 @@ from typing import TYPE_CHECKING, List, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import (
-    BinaryExpression,
-    BooleanClauseList,
-    Label,
-    LegacyRow,
+    BinaryExpression as sa_sql_expression_BinaryExpression,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    BooleanClauseList as sa_sql_expression_BooleanClauseList,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Label as sa_sql_expression_Label,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    LegacyRow as sqlalchemy_engine_LegacyRow,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Row as sqlalchemy_engine_Row,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Selectable as sa_sql_expression_Selectable,
 )
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
@@ -37,9 +49,10 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.sqlalchemy import (
-        Cast,
-        ColumnOperators,
-        Selectable,
+        Cast as sa_sql_expression_Cast,
+    )
+    from great_expectations.compatibility.sqlalchemy import (
+        ColumnOperators as sa_sql_expression_ColumnOperators,
     )
     from great_expectations.execution_engine.sqlalchemy_execution_engine import (
         SqlAlchemyExecutionEngine,
@@ -77,7 +90,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         column_name: str,
         batch_identifiers: dict,
-    ) -> Union[BinaryExpression, BooleanClauseList]:
+    ) -> Union[sa_sql_expression_BinaryExpression, sa_sql_expression_BooleanClauseList]:
         """Split on year values in column_name.
 
         Args:
@@ -100,7 +113,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         column_name: str,
         batch_identifiers: dict,
-    ) -> Union[BinaryExpression, BooleanClauseList]:
+    ) -> Union[sa_sql_expression_BinaryExpression, sa_sql_expression_BooleanClauseList]:
         """Split on year and month values in column_name.
 
         Args:
@@ -123,7 +136,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         column_name: str,
         batch_identifiers: dict,
-    ) -> Union[BinaryExpression, BooleanClauseList]:
+    ) -> Union[sa_sql_expression_BinaryExpression, sa_sql_expression_BooleanClauseList]:
         """Split on year and month and day values in column_name.
 
         Args:
@@ -147,7 +160,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         column_name: str,
         batch_identifiers: dict,
         date_parts: Union[List[DatePart], List[str]],
-    ) -> Union[BinaryExpression, BooleanClauseList]:
+    ) -> Union[sa_sql_expression_BinaryExpression, sa_sql_expression_BooleanClauseList]:
         """Split on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
@@ -179,7 +192,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         )
 
-        query: Union[BinaryExpression, BooleanClauseList] = sa.and_(
+        query: Union[
+            sa_sql_expression_BinaryExpression, sa_sql_expression_BooleanClauseList
+        ] = sa.and_(
             *[
                 sa.extract(date_part.value, sa.column(column_name))
                 == date_parts_dict[date_part.value]
@@ -334,7 +349,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def get_data_for_batch_identifiers(
         self,
         execution_engine: SqlAlchemyExecutionEngine,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         splitter_method_name: str,
         splitter_kwargs: dict,
     ) -> List[dict]:
@@ -390,7 +405,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def get_data_for_batch_identifiers_year(
         self,
         execution_engine: SqlAlchemyExecutionEngine,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
     ) -> List[dict]:
         """Build batch_identifiers from a column split on year.
@@ -416,7 +431,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def get_data_for_batch_identifiers_year_and_month(
         self,
         execution_engine: SqlAlchemyExecutionEngine,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
     ) -> List[dict]:
         """Build batch_identifiers from a column split on year and month.
@@ -442,7 +457,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def get_data_for_batch_identifiers_year_and_month_and_day(
         self,
         execution_engine: SqlAlchemyExecutionEngine,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
     ) -> List[dict]:
         """Build batch_identifiers from a column split on year and month and day.
@@ -467,10 +482,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
         self,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
         date_parts: Union[List[DatePart], List[str]],
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Build a split query to retrieve batch_identifiers info from a column split on a list of date parts.
 
         This method builds a query to select the unique date_parts from the
@@ -494,8 +509,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
         # future improvements.
         # NOTE: AJB 20220511 for awsathena we need to cast extracted date parts
         # to string first before concatenating them.
-        concat_clause: list[Label]
-        concat_date_parts: Cast | ColumnOperators
+        concat_clause: list[sa_sql_expression_Label]
+        concat_date_parts: sa_sql_expression_Cast | sa_sql_expression_ColumnOperators
         if len(date_parts) == 1:
             # MSSql does not accept single item concatenation
             concat_clause = sa.func.distinct(
@@ -549,7 +564,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
                     "concat_distinct_values"
                 )
 
-        split_query: Selectable = sa.select(
+        split_query: sa_sql_expression_Selectable = sa.select(
             concat_clause,
             *[
                 sa.cast(
@@ -564,7 +579,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def get_data_for_batch_identifiers_for_split_on_date_parts(
         self,
         execution_engine: SqlAlchemyExecutionEngine,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
         date_parts: Union[List[DatePart], List[str]],
     ) -> List[dict]:
@@ -584,15 +599,15 @@ class SqlAlchemyDataSplitter(DataSplitter):
             List of dicts of the form [{column_name: {date_part_name: date_part_value}}]
         """
 
-        split_query: Selectable = (
+        split_query: sa_sql_expression_Selectable = (
             self.get_split_query_for_data_for_batch_identifiers_for_split_on_date_parts(
                 selectable, column_name, date_parts
             )
         )
 
-        result: List[LegacyRow] = self._execute_split_query(
-            execution_engine, split_query
-        )
+        result: List[
+            sqlalchemy_engine_Row | sqlalchemy_engine_LegacyRow
+        ] = self._execute_split_query(execution_engine, split_query)
 
         return self._get_params_for_batch_identifiers_from_date_part_splitter(
             column_name, result, date_parts
@@ -601,8 +616,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
     @staticmethod
     def _execute_split_query(
         execution_engine: SqlAlchemyExecutionEngine,
-        split_query: Selectable,
-    ) -> List[LegacyRow]:
+        split_query: sa_sql_expression_Selectable,
+    ) -> List[sqlalchemy_engine_Row | sqlalchemy_engine_LegacyRow]:
         """Use the provided execution engine to run the split query and fetch all of the results.
 
         Args:
@@ -617,7 +632,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def _get_params_for_batch_identifiers_from_date_part_splitter(
         self,
         column_name: str,
-        result: List[LegacyRow],
+        result: List[sqlalchemy_engine_LegacyRow],
         date_parts: List[DatePart] | List[str],
     ) -> List[dict]:
         """Get parameters used to build BatchIdentifiers from the results of a get_data_for_batch_identifiers_for_split_on_date_parts
@@ -658,7 +673,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def get_data_for_batch_identifiers_for_non_date_part_splitters(
         self,
         execution_engine: SqlAlchemyExecutionEngine,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         splitter_method_name: str,
         splitter_kwargs: dict,
     ) -> List[dict]:
@@ -681,10 +696,12 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         )
 
-        split_query: Selectable = getattr(self, get_split_query_method_name)(
-            selectable=selectable, **splitter_kwargs
+        split_query: sa_sql_expression_Selectable = getattr(
+            self, get_split_query_method_name
+        )(selectable=selectable, **splitter_kwargs)
+        rows: List[sqlalchemy_engine_LegacyRow] = self._execute_split_query(
+            execution_engine, split_query
         )
-        rows: List[LegacyRow] = self._execute_split_query(execution_engine, split_query)
         column_names: List[str] = self._get_column_names_from_splitter_kwargs(
             splitter_kwargs
         )
@@ -718,7 +735,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
     @staticmethod
     def _get_params_for_batch_identifiers_from_non_date_part_splitters(
         column_names: List[str],
-        rows: List[LegacyRow],
+        rows: List[sqlalchemy_engine_LegacyRow],
     ) -> List[dict]:
         """Get params used in batch identifiers from output of executing query for non date part splitters.
 
@@ -733,8 +750,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_whole_table(
-        selectable: Selectable,
-    ) -> Selectable:
+        selectable: sa_sql_expression_Selectable,
+    ) -> sa_sql_expression_Selectable:
         """
         'Split' by returning the whole table
 
@@ -744,9 +761,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_column_value(
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Split using the values in the named column"""
         return (
             sa.select(sa.func.distinct(sa.column(column_name)))
@@ -756,10 +773,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_split_query_for_data_for_batch_identifiers_for_split_on_converted_datetime(
         self,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
         date_format_string: str = "%Y-%m-%d",
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Convert the values in the named column to the given date_format, and split on that"""
         if self._dialect == "sqlite":
             return sa.select(
@@ -777,10 +794,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_split_query_for_data_for_batch_identifiers_for_split_on_divided_integer(
         self,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
         divisor: int,
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Divide the values in the named column by `divisor`, and split on that"""
         if self._dialect == GXSqlDialect.SQLITE:
             return sa.select(
@@ -844,10 +861,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_split_query_for_data_for_batch_identifiers_for_split_on_mod_integer(
         self,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
         mod: int,
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Divide the values in the named column by `mod`, and split on that"""
         if self._dialect in [
             GXSqlDialect.SQLITE,
@@ -865,9 +882,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_multi_column_values(
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_names: List[str],
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Split on the joint values in the named columns"""
         return (
             sa.select(*[sa.column(column_name) for column_name in column_names])
@@ -877,10 +894,10 @@ class SqlAlchemyDataSplitter(DataSplitter):
 
     def get_split_query_for_data_for_batch_identifiers_for_split_on_hashed_column(
         self,
-        selectable: Selectable,
+        selectable: sa_sql_expression_Selectable,
         column_name: str,
         hash_digits: int,
-    ) -> Selectable:
+    ) -> sa_sql_expression_Selectable:
         """Note: this method is experimental. It does not work with all SQL dialects."""
         if self._dialect == GXSqlDialect.SQLITE:
             return sa.select(

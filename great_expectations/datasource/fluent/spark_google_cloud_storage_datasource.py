@@ -7,10 +7,10 @@ import pydantic
 from typing_extensions import Literal
 
 from great_expectations.compatibility.google import (
-    service_account,
+    service_account as google_service_account,
 )
 from great_expectations.compatibility.google import (
-    storage as cloud_storage,
+    storage as google_cloud_storage,
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import GCSUrl
@@ -32,8 +32,10 @@ from great_expectations.datasource.fluent.spark_datasource import (
 
 if TYPE_CHECKING:
     from great_expectations.compatibility.google import (
-        Client,
-        Credentials,
+        Client as GoogleCloudStorageClient,
+    )
+    from great_expectations.compatibility.google import (
+        Credentials as GoogleServiceAccountCredentials,
     )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
@@ -61,33 +63,31 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     bucket_or_name: str
     gcs_options: Dict[str, Union[ConfigStr, Any]] = {}
 
-    _gcs_client: Union[Client, None] = pydantic.PrivateAttr(default=None)
+    _gcs_client: Union[GoogleCloudStorageClient, None] = pydantic.PrivateAttr(
+        default=None
+    )
 
-    def _get_gcs_client(self) -> Client:
-        gcs_client: Union[Client, None] = self._gcs_client
+    def _get_gcs_client(self) -> GoogleCloudStorageClient:
+        gcs_client: Union[GoogleCloudStorageClient, None] = self._gcs_client
         if not gcs_client:
             # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
-            if service_account and cloud_storage:
+            if google_service_account and google_cloud_storage:
                 try:
                     credentials: Union[
-                        Credentials, None
+                        GoogleServiceAccountCredentials, None
                     ] = None  # If configured with gcloud CLI / env vars
                     if "filename" in self.gcs_options:
                         filename: str = str(self.gcs_options.pop("filename"))
-                        credentials = (
-                            service_account.Credentials.from_service_account_file(
-                                filename=filename
-                            )
+                        credentials = google_service_account.Credentials.from_service_account_file(
+                            filename=filename
                         )
                     elif "info" in self.gcs_options:
                         info: Any = self.gcs_options.pop("info")
-                        credentials = (
-                            service_account.Credentials.from_service_account_info(
-                                info=info
-                            )
+                        credentials = google_service_account.Credentials.from_service_account_info(
+                            info=info
                         )
 
-                    gcs_client = cloud_storage.Client(
+                    gcs_client = google_cloud_storage.Client(
                         credentials=credentials, **self.gcs_options
                     )
                 except Exception as e:

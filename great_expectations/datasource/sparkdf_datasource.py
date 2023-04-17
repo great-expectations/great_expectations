@@ -2,7 +2,7 @@ import datetime
 import logging
 import uuid
 
-from great_expectations.compatibility.pyspark import DataFrame
+from great_expectations.compatibility.pyspark import DataFrame as pyspark_sql_DataFrame
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.dataset import SparkDFDataset
@@ -197,8 +197,12 @@ class SparkDFDatasource(LegacyDatasource):
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs["query"])
 
-        elif "dataset" in batch_kwargs and isinstance(
-            batch_kwargs["dataset"], (DataFrame, SparkDFDataset)
+        elif "dataset" in batch_kwargs and (
+            (
+                pyspark_sql_DataFrame
+                and isinstance(batch_kwargs["dataset"], pyspark_sql_DataFrame)
+            )
+            or isinstance(batch_kwargs["dataset"], SparkDFDataset)
         ):
             df = batch_kwargs.get("dataset")
             # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs

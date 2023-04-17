@@ -5,7 +5,7 @@ import pytest
 
 from great_expectations.core.config_substitutor import (
     _ConfigurationSubstitutor,
-    secretmanager,
+    google_cloud_secretmanager,
 )
 
 
@@ -118,7 +118,7 @@ class MockedSecretManagerServiceClient:
 
 
 @pytest.mark.skipif(
-    not secretmanager,
+    not google_cloud_secretmanager,
     reason="Could not import 'secretmanager' from google.cloud in data_context.util",
 )
 @pytest.mark.parametrize(
@@ -156,7 +156,7 @@ def test_substitute_value_from_gcp_secret_manager(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.core.config_substitutor.secretmanager.SecretManagerServiceClient",
+            "great_expectations.core.config_substitutor.google_cloud_secretmanager.SecretManagerServiceClient",
             return_value=MockedSecretManagerServiceClient(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,

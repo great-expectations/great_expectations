@@ -84,7 +84,7 @@ class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
 #         if level is not None and type(level) != int:
 #             raise TypeError("level must be of type int.")
 #
-#         is_parseable_udf = F.udf(is_parseable, types.BooleanType())
+#         is_parseable_udf = F.udf(is_parseable, sparktypes.BooleanType())
 #         return is_parseable_udf(column)
 
 

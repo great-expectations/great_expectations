@@ -2,9 +2,15 @@ import logging
 from typing import Optional
 
 from great_expectations.compatibility.sqlalchemy import (
-    DatabaseError,
-    DefaultDialect,
-    Engine,
+    DatabaseError as sqlalchemy_DatabaseError,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    DefaultDialect as sqlalchemy_engine_DefaultDialect,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Engine as sqlalchemy_engine_Engine,
+)
+from great_expectations.compatibility.sqlalchemy import (
     quoted_name,
 )
 from great_expectations.compatibility.sqlalchemy import (
@@ -177,7 +183,7 @@ class SqlAlchemyBatchData(BatchData):
         return self._dialect
 
     @property
-    def sql_engine_dialect(self) -> DefaultDialect:
+    def sql_engine_dialect(self) -> sqlalchemy_engine_DefaultDialect:
         """Returns the Batches' current engine dialect"""
         return self._engine.dialect
 
@@ -289,13 +295,13 @@ class SqlAlchemyBatchData(BatchData):
                 with connection.begin():
                     try:
                         connection.execute(sa.text(stmt_1))
-                    except DatabaseError:
+                    except sqlalchemy_DatabaseError:
                         connection.execute(sa.text(stmt_2))
         else:
             # Since currently self._engine can also be a connection we need to
             # check first that it is an engine before creating a connection from it.
             # Otherwise, we use the connection.
-            if isinstance(self._engine, Engine):
+            if isinstance(self._engine, sqlalchemy_engine_Engine):
                 with self._engine.connect() as connection:
                     with connection.begin():
                         connection.execute(sa.text(stmt))

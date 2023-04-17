@@ -10,7 +10,9 @@ from typing_extensions import Final
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.azure import DefaultAzureCredential, SecretClient
-from great_expectations.compatibility.google import secretmanager
+from great_expectations.compatibility.google import (
+    secretmanager as google_cloud_secretmanager,
+)
 from great_expectations.data_context.types.base import BaseYamlConfig
 
 try:
@@ -271,14 +273,14 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
         )
-        if not secretmanager:
+        if not google_cloud_secretmanager:
             logger.error(
                 "secretmanager is not installed, please install great_expectations with gcp extra > "
                 "pip install great_expectations[gcp]"
             )
             raise ImportError("Could not import secretmanager from google.cloud")
 
-        client = secretmanager.SecretManagerServiceClient()
+        client = google_cloud_secretmanager.SecretManagerServiceClient()
         matches = regex.match(value)
 
         if not matches:

@@ -23,7 +23,7 @@ from tests.test_utils import create_files_in_directory
 from great_expectations.compatibility.pyspark import (
     functions as F,
     types as sparktypes,
-    Row,
+    Row as pyspark_sql_Row,
 )
 
 
@@ -57,7 +57,7 @@ def test_reader_fn_parameters(
     test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
     ).dataframe
-    assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
+    assert test_sparkdf_with_no_header_param.head() == pyspark_sql_Row(_c0="x", _c1="y")
 
     test_sparkdf_with_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
@@ -66,12 +66,12 @@ def test_reader_fn_parameters(
             reader_options={"header": True},
         )
     ).dataframe
-    assert test_sparkdf_with_header_param.head() == Row(x="1", y="2")
+    assert test_sparkdf_with_header_param.head() == pyspark_sql_Row(x="1", y="2")
 
     test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
     ).dataframe
-    assert test_sparkdf_with_no_header_param.head() == Row(_c0="x", _c1="y")
+    assert test_sparkdf_with_no_header_param.head() == pyspark_sql_Row(_c0="x", _c1="y")
 
     # defining schema
     schema: sparktypes.StructType = sparktypes.StructType(
@@ -91,7 +91,7 @@ def test_reader_fn_parameters(
             )
         ).dataframe
     )
-    assert test_sparkdf_with_header_param_and_schema.head() == Row(x=1, y=2)
+    assert test_sparkdf_with_header_param_and_schema.head() == pyspark_sql_Row(x=1, y=2)
     assert test_sparkdf_with_header_param_and_schema.schema == schema_dict
 
 

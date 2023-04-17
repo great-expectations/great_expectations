@@ -7,9 +7,13 @@ import scipy.stats as stats
 
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import (
-    ProgrammingError,
-    Row,
-    Select,
+    ProgrammingError as sqlalchemy_ProgrammingError,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Row as sqlalchemy_engine_Row,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    Select as sa_sql_expression_Select,
 )
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
@@ -110,12 +114,14 @@ class ColumnSkew(ColumnAggregateMetricProvider):
 
 
 def _get_query_result(func, selectable, sqlalchemy_engine):
-    simple_query: Select = sa.select(func).select_from(selectable)
+    simple_query: sa_sql_expression_Select = sa.select(func).select_from(selectable)
 
     try:
-        result: Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
+        result: sqlalchemy_engine_Row = sqlalchemy_engine.execute(
+            simple_query
+        ).fetchone()[0]
         return result
-    except ProgrammingError as pe:
+    except sqlalchemy_ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (

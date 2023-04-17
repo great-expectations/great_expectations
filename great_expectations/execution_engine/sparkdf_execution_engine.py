@@ -20,11 +20,19 @@ from typing import (
 from dateutil.parser import parse
 
 from great_expectations.compatibility.pyspark import (
-    AnalysisException,
-    DataFrame,
-    DataFrameReader,
-    Row,
-    SparkSession,
+    AnalysisException as pyspark_sql_utils_AnalysisException,
+)
+from great_expectations.compatibility.pyspark import (
+    DataFrame as pyspark_sql_DataFrame,
+)
+from great_expectations.compatibility.pyspark import (
+    DataFrameReader as pyspark_DataFrameReader,
+)
+from great_expectations.compatibility.pyspark import (
+    Row as pyspark_sql_Row,
+)
+from great_expectations.compatibility.pyspark import (
+    SparkSession as pyspark_sql_SparkSession,
 )
 from great_expectations.compatibility.pyspark import (
     functions as F,
@@ -206,7 +214,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if spark_config is None:
             spark_config = {}
 
-        spark: SparkSession = get_or_create_spark_application(
+        spark: pyspark_sql_SparkSession = get_or_create_spark_application(
             spark_config=spark_config,
             force_reuse_spark_context=force_reuse_spark_context,
         )
@@ -234,7 +242,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         self._data_sampler = SparkDataSampler()
 
     @property
-    def dataframe(self) -> DataFrame:
+    def dataframe(self) -> pyspark_sql_DataFrame:
         """If a batch has been loaded, returns a Spark Dataframe containing the data within the loaded batch"""
         if self.batch_manager.active_batch_data is None:
             raise ValueError(
@@ -244,9 +252,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
     def load_batch_data(  # type: ignore[override]
-        self, batch_id: str, batch_data: Union[SparkDFBatchData, DataFrame]
+        self, batch_id: str, batch_data: Union[SparkDFBatchData, pyspark_sql_DataFrame]
     ) -> None:
-        if DataFrame and isinstance(batch_data, DataFrame):  # type: ignore[truthy-function]
+        if pyspark_sql_DataFrame and isinstance(batch_data, pyspark_sql_DataFrame):  # type: ignore[truthy-function]
             batch_data = SparkDFBatchData(self, batch_data)
         elif not isinstance(batch_data, SparkDFBatchData):
             raise GreatExpectationsError(
@@ -280,7 +288,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         reader_options: dict
         path: str
         schema: Optional[Union[sparktypes.StructType, dict, str]]
-        reader: DataFrameReader
+        reader: pyspark_DataFrameReader
         reader_fn: Callable
         if isinstance(batch_spec, RuntimeDataBatchSpec):
             # batch_data != None is already checked when RuntimeDataBatchSpec is instantiated
@@ -363,7 +371,7 @@ illegal.  Please check your config."""
                     """
                 )
             # pyspark will raise an AnalysisException error if path is incorrect
-            except AnalysisException:
+            except pyspark_sql_utils_AnalysisException:
                 raise ExecutionEngineError(
                     f"""Unable to read in batch from the following path: {path}. Please check your configuration."""
                 )
@@ -479,7 +487,7 @@ illegal.  Please check your config."""
     def get_domain_records(  # noqa: C901 - 18
         self,
         domain_kwargs: dict,
-    ) -> "DataFrame":  # noqa F821
+    ) -> "pyspark_sql_DataFrame":  # noqa F821
         """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 
         Args:
@@ -489,7 +497,7 @@ illegal.  Please check your config."""
             A DataFrame (the data on which to compute returned in the format of a Spark DataFrame)
         """
         """
-        # TODO: <Alex>Docusaurus run fails, unless "DataFrame" type hint above is enclosed in quotes.
+        # TODO: <Alex>Docusaurus run fails, unless "pyspark_sql_DataFrame" type hint above is enclosed in quotes.
         This may be caused by it becoming great_expectations.compatibility.not_imported.NotImported when pyspark is not installed.
         </Alex>
         """
@@ -630,7 +638,7 @@ illegal.  Please check your config."""
         domain_kwargs: dict,
         domain_type: Union[str, MetricDomainTypes],
         accessor_keys: Optional[Iterable[str]] = None,
-    ) -> Tuple["DataFrame", dict, dict]:  # noqa F821
+    ) -> Tuple["pyspark_sql_DataFrame", dict, dict]:  # noqa F821
         """Uses a DataFrame and Domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
 
         Returns in the format of a Spark DataFrame along with Domain arguments required for computing.  If the Domain \
@@ -653,7 +661,7 @@ illegal.  Please check your config."""
                 identify the Domain within the compute domain
         """
         """
-        # TODO: <Alex>Docusaurus run fails, unless "DataFrame" type hint above is enclosed in quotes.
+        # TODO: <Alex>Docusaurus run fails, unless "pyspark_sql_DataFrame" type hint above is enclosed in quotes.
         This may be caused by it becoming great_expectations.compatibility.not_imported.NotImported when pyspark is not installed.
         </Alex>
         """
@@ -663,7 +671,9 @@ illegal.  Please check your config."""
                 "SparkDFExecutionEngine does not currently support multiple named tables."
             )
 
-        data: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+        data: pyspark_sql_DataFrame = self.get_domain_records(
+            domain_kwargs=domain_kwargs
+        )
 
         split_domain_kwargs: SplitDomainKwargs = self._split_domain_kwargs(
             domain_kwargs, domain_type, accessor_keys
@@ -727,7 +737,7 @@ illegal.  Please check your config."""
         """
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
-        res: List[Row]
+        res: List[pyspark_sql_Row]
 
         aggregates: Dict[Tuple[str, str, str], dict] = {}
 
@@ -760,7 +770,9 @@ illegal.  Please check your config."""
 
         for aggregate in aggregates.values():
             domain_kwargs: dict = aggregate["domain_kwargs"]
-            df: DataFrame = self.get_domain_records(domain_kwargs=domain_kwargs)
+            df: pyspark_sql_DataFrame = self.get_domain_records(
+                domain_kwargs=domain_kwargs
+            )
 
             assert len(aggregate["column_aggregates"]) == len(aggregate["metric_ids"])
 
