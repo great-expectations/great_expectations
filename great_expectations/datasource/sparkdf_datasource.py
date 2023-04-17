@@ -199,7 +199,7 @@ class SparkDFDatasource(LegacyDatasource):
 
         elif "dataset" in batch_kwargs and (
             (
-                pyspark_sql_DataFrame
+                pyspark_sql_DataFrame  # type: ignore[truthy-function]
                 and isinstance(batch_kwargs["dataset"], pyspark_sql_DataFrame)
             )
             or isinstance(batch_kwargs["dataset"], SparkDFDataset)
