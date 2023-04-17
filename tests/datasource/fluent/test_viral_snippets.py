@@ -237,5 +237,25 @@ def test_context_add_and_save_fluent_datasource(
     assert datasource_name in context.datasources
 
 
+def test_context_add_or_update_datasource(
+    empty_contexts: CloudDataContext | FileDataContext,
+    db_file: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource = context.sources.add_sqlite(
+        name="save_ds_test", connection_string=f"sqlite:///{db_file}"
+    )
+
+    assert datasource.connection_string == f"sqlite:///{db_file}"
+
+    # modify the datasource
+    datasource.connection_string = "sqlite:///"
+    context.sources.add_or_update_sqlite(datasource)
+
+    updated_datasource = context.datasources[datasource.name]
+    assert updated_datasource.connection_string == "sqlite:///"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-vv"])
