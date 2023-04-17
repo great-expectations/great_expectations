@@ -19,6 +19,7 @@ from great_expectations.datasource.fluent.interfaces import (
 
 if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
+    from great_expectations.datasource.fluent import SqliteDatasource
 
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
@@ -242,7 +243,7 @@ def test_context_add_or_update_datasource(
 ):
     context = empty_contexts
 
-    datasource = context.sources.add_sqlite(
+    datasource: SqliteDatasource = context.sources.add_sqlite(
         name="save_ds_test", connection_string=f"sqlite:///{db_file}"
     )
 
@@ -252,7 +253,7 @@ def test_context_add_or_update_datasource(
     datasource.connection_string = "sqlite:///"
     context.sources.add_or_update_sqlite(datasource)
 
-    updated_datasource = context.datasources[datasource.name]
+    updated_datasource: SqliteDatasource = context.datasources[datasource.name]
     assert updated_datasource.connection_string == "sqlite:///"
 
 

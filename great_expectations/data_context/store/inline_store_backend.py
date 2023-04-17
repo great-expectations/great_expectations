@@ -102,8 +102,8 @@ class InlineStoreBackend(StoreBackend):
             config_commented_map_from_yaml = yaml.load(value)
             # TODO: instead prevent these from being set??
             # TODO: revert this before merge
-            for name in config_commented_map_from_yaml.get("fluent_datasources", {}):
-                config_commented_map_from_yaml["datasources"].pop(name)
+            for name in config_commented_map_from_yaml.get("fluent_datasources", {}):  # type: ignore[union-attr]
+                config_commented_map_from_yaml["datasources"].pop(name)  # type: ignore[union-attr]
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
