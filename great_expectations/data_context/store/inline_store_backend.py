@@ -100,6 +100,10 @@ class InlineStoreBackend(StoreBackend):
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             config_commented_map_from_yaml = yaml.load(value)
+            # TODO: instead prevent these from being set??
+            # TODO: revert this before merge
+            for name in config_commented_map_from_yaml.get("fluent_datasources", {}):
+                config_commented_map_from_yaml["datasources"].pop(name)
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
