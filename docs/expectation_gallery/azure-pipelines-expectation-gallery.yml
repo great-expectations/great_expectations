@@ -744,13 +744,13 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show gallery tracebacks'
 
-           - bash: cut -d " " -f 3,4 gallery-exp-types.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types.txt | sort
-             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-             displayName: 'Show Expectation types and counts'
+          - bash: cut -d " " -f 3,4 gallery-exp-types.txt | uniq -c | sort -nr; echo; cut -d " " -f 3,4,6 gallery-exp-types.txt | sort
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show Expectation types and counts'
 
-           - bash: grep -o "Implemented engines.*" output--build_gallery.txt
-             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
-             displayName: 'Show implemented engines'
+          - bash: grep -o "Implemented engines.*" output--build_gallery.txt
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Show implemented engines'
 
           - bash: cat expectation_library_v2--PLAY.json
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
