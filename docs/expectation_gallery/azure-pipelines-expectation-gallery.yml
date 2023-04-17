@@ -100,6 +100,7 @@ stages:
           - script: |
               pip install \
                 "cryptography==38.0.4" \
+                "awscli" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark]" \
                 --constraint constraints-dev.txt
@@ -116,6 +117,15 @@ stages:
               # Azure credentials
               AZURE_CREDENTIAL: $(AZURE_CREDENTIAL)
               AZURE_ACCESS_KEY: $(AZURE_ACCESS_KEY)
+
+          - bash: bash ./upload_json_files_to_s3.sh
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Copy JSON files to S3'
+            env:
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
           - bash: ls -ltr; for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
@@ -165,15 +175,15 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'Show testing times for individual tests'
 
-          - task: S3Upload@1
-            inputs:
-              regionName: 'us-east-2'
-              awsCredentials: 'aws-ci-great-expectations'
-              bucketName: 'superconductive-public'
-              sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
-              globExpressions: '*.json'
-              targetFolder: 'static/gallery/'
-              filesAcl: 'public-read'
+#         - task: S3Upload@1
+#           inputs:
+#             regionName: 'us-east-2'
+#             awsCredentials: 'aws-ci-great-expectations'
+#             bucketName: 'superconductive-public'
+#             sourceFolder: '$(Build.SourcesDirectory)/assets/scripts'
+#             globExpressions: '*.json'
+#             targetFolder: 'static/gallery/'
+#             filesAcl: 'public-read'
 
 
       - job: non_cloud_sql
@@ -199,6 +209,7 @@ stages:
           - script: |
               pip install \
                 "cryptography==38.0.4" \
+                "awscli" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, postgresql, mysql, trino]" \
                 --constraint constraints-dev.txt
@@ -318,6 +329,7 @@ stages:
           - script: |
               pip install \
                 "cryptography==38.0.4" \
+                "awscli" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, mssql]" \
                 --constraint constraints-dev.txt
@@ -417,6 +429,7 @@ stages:
               pip install \
                 "google-cloud-bigquery-storage" \
                 "cryptography==38.0.4" \
+                "awscli" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, bigquery]" \
                 --constraint constraints-dev.txt
@@ -522,6 +535,7 @@ stages:
           - script: |
               pip install \
                 "cryptography==38.0.4" \
+                "awscli" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, snowflake]" \
                 --constraint constraints-dev.txt
@@ -624,6 +638,7 @@ stages:
           - script: |
               pip install \
                 "cryptography==38.0.4" \
+                "awscli" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, redshift, athena]" \
                 --constraint constraints-dev.txt
@@ -739,6 +754,7 @@ stages:
           - script: |
               pip install \
                 "cryptography==38.0.4" \
+                "awscli" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, sqlalchemy]" \
                 --constraint constraints-dev.txt
