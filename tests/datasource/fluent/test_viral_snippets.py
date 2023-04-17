@@ -160,7 +160,6 @@ def test_save_project_does_not_break(fluent_file_context: FileDataContext):
     fluent_file_context._save_project_config()
 
 
-@pytest.mark.xfail(reason="TODO deal with this")
 def test_variables_save_config_does_not_break(fluent_file_context: FileDataContext):
     print(fluent_file_context.fluent_config)
     print(fluent_file_context.variables)
