@@ -2,8 +2,8 @@ from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
 from great_expectations.compatibility.docstring_parser import (
-    docstring_parser,
     DocstringStyle,
+    docstring_parser,
 )
 
 WHITELISTED_TAG = "--Public API--"
