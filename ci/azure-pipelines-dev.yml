@@ -155,6 +155,8 @@ stages:
         inputs:
           versionSpec: $(python.version)
         displayName: 'Use Python $(python.version)'
+      - bash: python -m pip install --upgrade pip
+        displayName: 'Update pip'
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
