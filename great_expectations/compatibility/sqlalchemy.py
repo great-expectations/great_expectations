@@ -32,17 +32,17 @@ try:
     import sqlalchemy  # noqa: TID251
 
     sqlalchemy_version_check(sqlalchemy.__version__)
-except (ImportError, AttributeError):
+except ImportError:
     sqlalchemy = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy import engine  # noqa: TID251
-except (ImportError, AttributeError):
+except ImportError:
     engine = SQLALCHEMY_NOT_IMPORTED
 
 try:
     from sqlalchemy import dialects  # noqa: TID251
-except (ImportError, AttributeError):
+except ImportError:
     dialects = SQLALCHEMY_NOT_IMPORTED
 
 try:

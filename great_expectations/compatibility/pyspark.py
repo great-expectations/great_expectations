@@ -8,7 +8,7 @@ SPARK_NOT_IMPORTED = NotImported(
 
 try:
     import pyspark  # noqa: TID251
-except (ImportError, AttributeError):
+except ImportError:
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
@@ -23,7 +23,7 @@ except (ImportError, AttributeError):
 
 try:
     from pyspark import SparkContext  # noqa: TID251
-except (ImportError, AttributeError):
+except ImportError:
     SparkContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:

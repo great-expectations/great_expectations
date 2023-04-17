@@ -8,12 +8,12 @@ AZURE_BLOB_STORAGE_NOT_IMPORTED = NotImported(
 
 try:
     from azure import storage  # noqa: TID251
-except (ImportError, AttributeError):
+except ImportError:
     storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
     from azure.identity import DefaultAzureCredential  # noqa: TID251
-except (ImportError, AttributeError):
+except ImportError:
     DefaultAzureCredential = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:

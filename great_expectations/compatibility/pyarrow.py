@@ -8,5 +8,5 @@ PYARROW_NOT_IMPORTED = NotImported(
 
 try:
     import pyarrow  # noqa: TID251
-except (ImportError, AttributeError):
+except ImportError:
     pyarrow = PYARROW_NOT_IMPORTED
