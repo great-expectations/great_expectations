@@ -7,35 +7,35 @@ AZURE_BLOB_STORAGE_NOT_IMPORTED = NotImported(
 )
 
 try:
-    from azure import storage  # noqa: TID251
+    from azure import storage
 except ImportError:
     storage = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
-    from azure.identity import DefaultAzureCredential  # noqa: TID251
+    from azure.identity import DefaultAzureCredential
 except ImportError:
     DefaultAzureCredential = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
-    from azure.keyvault.secrets import SecretClient  # noqa: TID251
+    from azure.keyvault.secrets import SecretClient
 except (ImportError, AttributeError):
     SecretClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
-    from azure.storage.blob import ContentSettings  # noqa: TID251
+    from azure.storage.blob import ContentSettings
 except (ImportError, AttributeError):
     ContentSettings = AZURE_BLOB_STORAGE_NOT_IMPORTED
 try:
-    from azure.storage.blob import BlobPrefix  # noqa: TID251
+    from azure.storage.blob import BlobPrefix
 except (ImportError, AttributeError):
     BlobPrefix = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
-    from azure.storage.blob import BlobServiceClient  # noqa: TID251
+    from azure.storage.blob import BlobServiceClient
 except (ImportError, AttributeError):
     BlobServiceClient = AZURE_BLOB_STORAGE_NOT_IMPORTED
 
 try:
-    from azure.storage.blob import ContainerClient  # noqa: TID251
+    from azure.storage.blob import ContainerClient
 except (ImportError, AttributeError):
     ContainerClient = AZURE_BLOB_STORAGE_NOT_IMPORTED

@@ -7,6 +7,6 @@ PYARROW_NOT_IMPORTED = NotImported(
 )
 
 try:
-    import pyarrow  # noqa: TID251
+    import pyarrow
 except ImportError:
     pyarrow = PYARROW_NOT_IMPORTED

@@ -7,66 +7,66 @@ SPARK_NOT_IMPORTED = NotImported(
 )
 
 try:
-    import pyspark  # noqa: TID251
+    import pyspark
 except ImportError:
     pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
-    from pyspark.sql import functions  # noqa: TID251
+    from pyspark.sql import functions
 except (ImportError, AttributeError):
     functions = SPARK_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
-    from pyspark.sql import types  # noqa: TID251
+    from pyspark.sql import types
 except (ImportError, AttributeError):
     types = SPARK_NOT_IMPORTED  # type: ignore[assignment]
 
 try:
-    from pyspark import SparkContext  # noqa: TID251
+    from pyspark import SparkContext
 except ImportError:
     SparkContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.ml.feature import Bucketizer  # noqa: TID251
+    from pyspark.ml.feature import Bucketizer
 except (ImportError, AttributeError):
     Bucketizer = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql import Column  # noqa: TID251
+    from pyspark.sql import Column
 except (ImportError, AttributeError):
     Column = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql import DataFrame  # noqa: TID251
+    from pyspark.sql import DataFrame
 except (ImportError, AttributeError):
     DataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql import Row  # noqa: TID251
+    from pyspark.sql import Row
 except (ImportError, AttributeError):
     Row = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql import SparkSession  # noqa: TID251
+    from pyspark.sql import SparkSession
 except (ImportError, AttributeError):
     SparkSession = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql import SQLContext  # noqa: TID251
+    from pyspark.sql import SQLContext
 except (ImportError, AttributeError):
     SQLContext = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql import Window  # noqa: TID251
+    from pyspark.sql import Window
 except (ImportError, AttributeError):
     Window = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql.readwriter import DataFrameReader  # noqa: TID251
+    from pyspark.sql.readwriter import DataFrameReader
 except (ImportError, AttributeError):
     DataFrameReader = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 try:
-    from pyspark.sql.utils import AnalysisException  # noqa: TID251
+    from pyspark.sql.utils import AnalysisException
 except (ImportError, AttributeError):
     AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
