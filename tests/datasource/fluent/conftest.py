@@ -53,8 +53,8 @@ if TYPE_CHECKING:
     from great_expectations.data_context import CloudDataContext
 
 
-EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
-PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
+FLUENT_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
+PG_CONFIG_YAML_FILE: Final = FLUENT_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
 
 
 GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
