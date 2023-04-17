@@ -739,10 +739,20 @@ stages:
           - script: |
               pip install \
                 "cryptography==38.0.4" \
+                "awscli" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, sqlalchemy]" \
                 --constraint constraints-dev.txt
             displayName: 'Install dependencies'
+
+          - bash: bash ./download_json_from_s3.sh
+            workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
+            displayName: 'Copy JSON files from S3'
+            env:
+              # AWS credentials
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
           - bash: ls -ltr; for fname in $(ls -1 *_full.json); do echo -e "\n\n==========\n$fname"; cat "$fname"; done
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
