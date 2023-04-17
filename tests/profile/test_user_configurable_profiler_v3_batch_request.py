@@ -11,6 +11,8 @@ import pytest
 import great_expectations as gx
 from great_expectations.compatibility.sqlalchemy import (
     OperationalError as sqlalchemy_OperationalError,
+)
+from great_expectations.compatibility.sqlalchemy import (
     dialects as sqlalchemy_dialects,
 )
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
