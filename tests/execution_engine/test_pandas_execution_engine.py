@@ -8,7 +8,7 @@ import pytest
 # noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.optional_imports import google_cloud_storage
+from great_expectations.optional_imports import google_cloud_storage, azure_storage
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import (
@@ -513,6 +513,10 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 
 # noinspection PyUnusedLocal
+@pytest.mark.skipif(
+    not azure_storage,
+    reason="azure blob storage components are not installed",
+)
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.BlobServiceClient",
 )
@@ -553,6 +557,10 @@ def test_get_batch_data_with_azure_batch_spec(
     assert df.dataframe.shape == (3, 3)
 
 
+@pytest.mark.skipif(
+    not azure_storage,
+    reason="azure blob storage components are not installed",
+)
 def test_get_batch_with_no_azure_configured(azure_batch_spec):
     # if Azure BlobServiceClient was not configured
     execution_engine_no_azure = PandasExecutionEngine()
