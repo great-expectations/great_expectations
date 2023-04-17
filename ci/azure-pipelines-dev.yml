@@ -156,6 +156,7 @@ stages:
       - script: |
           python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
+          pip install pandas==2.0.0  # TODO: Remove this temporary pin for testing
           invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
       - script: |
