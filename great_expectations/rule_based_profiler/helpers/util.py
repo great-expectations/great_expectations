@@ -26,6 +26,7 @@ import scipy.stats as stats
 from typing_extensions import Protocol, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.numpy import numpy_quantile
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
@@ -60,7 +61,6 @@ from great_expectations.util import (
     convert_ndarray_float_to_datetime_dtype,
     convert_ndarray_to_datetime_dtype_best_effort,
 )
-from great_expectations.compatibility.numpy import numpy_quantile
 from great_expectations.validator.computed_metric import MetricValue  # noqa: TCH001
 from great_expectations.validator.metric_configuration import (
     MetricConfiguration,  # noqa: TCH001
