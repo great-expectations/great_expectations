@@ -281,7 +281,6 @@ stages:
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
-              pip install --requirement reqs/requirements-dev-azure.txt
             displayName: 'Install dependencies'
 
           - script: |
