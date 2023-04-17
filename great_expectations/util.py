@@ -1569,16 +1569,29 @@ def isclose(
         operand_a = operand_a.total_seconds()  # type: ignore[assignment]
         operand_b = operand_b.total_seconds()  # type: ignore[assignment]
 
-    return cast(
-        bool,
-        np.isclose(
-            a=np.float64(operand_a),
-            b=np.float64(operand_b),
-            rtol=rtol,
-            atol=atol,
-            equal_nan=equal_nan,
-        ),
-    )
+    if sys.version_info == (3, 7):
+        # Handle type checking differently in python 3.7
+        return cast(
+            bool,
+            np.isclose(
+                a=np.float64(operand_a),  # type:ignore[arg-type]
+                b=np.float64(operand_b),  # type:ignore[arg-type]
+                rtol=rtol,
+                atol=atol,
+                equal_nan=equal_nan,
+            ),
+        )
+    else:
+        return cast(
+            bool,
+            np.isclose(
+                a=np.float64(operand_a),
+                b=np.float64(operand_b),
+                rtol=rtol,
+                atol=atol,
+                equal_nan=equal_nan,
+            ),
+        )
 
 
 def is_candidate_subset_of_target(candidate: Any, target: Any) -> bool:
