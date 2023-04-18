@@ -70,9 +70,7 @@ class DatasourceStore(Store):
         """
         See parent 'Store.serialize()' for more information
         """
-        if isinstance(
-            value, FluentDatasource
-        ):  # TODO: this is gross, do something else (or do it somewhere else)
+        if isinstance(value, FluentDatasource):
             return value._json_dict()
         return self._serializer.serialize(value)
 
@@ -143,7 +141,7 @@ class DatasourceStore(Store):
         self.remove_key(self._build_key_from_config(datasource_config))
 
     def _build_key_from_config(  # type: ignore[override]
-        self, datasource_config: DatasourceConfig
+        self, datasource_config: DatasourceConfig | FluentDatasource
     ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
         return self.store_backend.build_key(
             name=datasource_config.name,
@@ -165,11 +163,11 @@ class DatasourceStore(Store):
             DatasourceConfig retrieved from the DatasourceStore.
         """
         if not key:
-            key = self._build_key_from_config(value)  # type: ignore[arg-type]
-        return self._persist_datasource(key=key, config=value)  # type: ignore[arg-type]
+            key = self._build_key_from_config(value)
+        return self._persist_datasource(key=key, config=value)
 
     def _persist_datasource(
-        self, key: DataContextKey, config: DatasourceConfig
+        self, key: DataContextKey, config: DatasourceConfig | FluentDatasource
     ) -> DatasourceConfig:
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)

@@ -709,12 +709,10 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"Can not write the fluent datasource {datasource.name} because a datasource of that "
                 "name already exists in the data context."
             )
-        # store update here?
         self.datasources[datasource.name] = datasource
         self._datasource_store.set(key=None, value=datasource)
 
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
-        # store update here?
         self.datasources[datasource.name] = datasource
 
     def _delete_fluent_datasource(self, datasource_name: str) -> None:
