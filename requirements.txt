@@ -33,4 +33,4 @@ scipy>=1.6.0
 tqdm>=4.59.0
 typing-extensions>=3.10.0.0 # Leverage type annotations from recent Python releases
 tzlocal>=1.2
-urllib3>=1.25.4,<1.27
+urllib3>=1.26,<1.27
