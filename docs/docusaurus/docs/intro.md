@@ -79,7 +79,7 @@ We integrate seamlessly with DAG execution tools such as [Airflow](https://airfl
 
 Great Expectations is NOT a data versioning tool.
 
-Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, Validation Results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt), and [lakeFS](https://github.com/treeverse/lakeFS/).
+Great Expectations does not store data itself. Instead, it deals in metadata about data: Expectations, Validation Results, etc. If you want to bring your data itself under version control, check out tools like: [DVC](https://dvc.org/), [Quilt](https://github.com/quiltdata/quilt), and [lakeFS](https://github.com/treeverse/lakeFS/).
 
 Great Expectations currently works best in a Python environment.
 
