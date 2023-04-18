@@ -2,8 +2,8 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.compatibility import google
 import great_expectations.exceptions.exceptions as gx_exceptions
+from great_expectations.compatibility import google
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 
 # noinspection PyProtectedMember
