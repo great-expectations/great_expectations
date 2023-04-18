@@ -454,10 +454,7 @@ module.exports = {
           type: 'category',
           label: 'Contributing basics',
           items: [
-            { type: 'doc', id: 'contributing/contributing_setup' },
             { type: 'doc', id: 'contributing/contributing_checklist' },
-            { type: 'doc', id: 'contributing/contributing_github' },
-            { type: 'doc', id: 'contributing/contributing_test' },
             { type: 'doc', id: 'contributing/contributing_maturity' },
             { type: 'doc', id: 'contributing/contributing_misc' }
           ]
