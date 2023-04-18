@@ -7,13 +7,6 @@ from unittest import mock
 
 import pytest
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # noqa: F401,F403  # registers this DataAssistant and prevents removal of "unused" import
-    DataProfilerStructuredDataAssistant,
-)
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
-    DataProfilerStructuredDataAssistantResult,
-)
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -24,6 +17,14 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 from great_expectations.rule_based_profiler.parameter_container import (
     FULLY_QUALIFIED_PARAMETER_NAME_ATTRIBUTED_VALUE_KEY,
     ParameterNode,
+)
+
+from ....metrics import *  # noqa: F401,F403
+from ....rule_based_profiler.data_assistant.data_profiler_structured_data_assistant import (  # noqa: F401,F403  # registers this DataAssistant and prevents removal of "unused" import
+    DataProfilerStructuredDataAssistant,
+)
+from ....rule_based_profiler.data_assistant_result import (
+    DataProfilerStructuredDataAssistantResult,
 )
 
 if TYPE_CHECKING:

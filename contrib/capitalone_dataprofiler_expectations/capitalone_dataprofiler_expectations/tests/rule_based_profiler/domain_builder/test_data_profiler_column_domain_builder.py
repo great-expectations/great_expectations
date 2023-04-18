@@ -6,10 +6,6 @@ from unittest import mock
 
 import pytest
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.domain_builder.data_profiler_column_domain_builder import (
-    DataProfilerColumnDomainBuilder,
-)
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
     Domain,
@@ -24,8 +20,13 @@ from great_expectations.rule_based_profiler.parameter_container import (
     build_parameter_container_for_variables,
 )
 
+from ....metrics import *  # noqa: F401,F403
+from ....rule_based_profiler.domain_builder.data_profiler_column_domain_builder import (
+    DataProfilerColumnDomainBuilder,
+)
+
 if TYPE_CHECKING:
-    from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.tests.conftest import (
+    from ...conftest import (
         BaseProfiler,
     )
 

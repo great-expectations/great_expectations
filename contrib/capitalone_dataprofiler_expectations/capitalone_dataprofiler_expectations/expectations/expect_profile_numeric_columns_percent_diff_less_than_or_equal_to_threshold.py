@@ -6,21 +6,22 @@ from typing import Any, Dict, Optional
 
 import dataprofiler as dp
 import pandas as pd
-from capitalone_dataprofiler_expectations.expectations.profile_numeric_columns_diff_expectation import (
-    ProfileNumericColumnsDiffExpectation,
-)
-from capitalone_dataprofiler_expectations.expectations.util import (
-    is_value_less_than_or_equal_to_threshold,
-    replace_generic_operator_in_report_keys,
-)
-from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
-    DataProfilerProfileMetricProvider,
-)
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
+
+from ..metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
+    DataProfilerProfileMetricProvider,
+)
+from .profile_numeric_columns_diff_expectation import (
+    ProfileNumericColumnsDiffExpectation,
+)
+from .util import (
+    is_value_less_than_or_equal_to_threshold,
+    replace_generic_operator_in_report_keys,
+)
 
 
 class DataProfilerProfileNumericColumnsPercentDiffLessThanOrEqualToThreshold(

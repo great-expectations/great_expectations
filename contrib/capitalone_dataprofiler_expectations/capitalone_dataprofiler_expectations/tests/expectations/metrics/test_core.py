@@ -7,13 +7,14 @@ from unittest import mock
 import dataprofiler as dp
 import pandas as pd
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics import *  # noqa: F401,F403
+from great_expectations.expectations.metrics.util import get_table_columns_metric
 from great_expectations.self_check.util import build_pandas_engine
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from tests.expectations.test_util import get_table_columns_metric
+
+from ....metrics import *  # noqa: F401,F403
 
 if TYPE_CHECKING:
-    from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.tests.conftest import (
+    from ...conftest import (
         BaseProfiler,
     )
 
