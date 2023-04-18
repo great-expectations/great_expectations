@@ -145,7 +145,7 @@ class DatasourceStore(Store):
     ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
         return self.store_backend.build_key(
             name=datasource_config.name,
-            id=datasource_config.id,
+            id=str(datasource_config.id),
         )
 
     def set(  # type: ignore[override]
