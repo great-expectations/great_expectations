@@ -100,10 +100,10 @@ class InlineStoreBackend(StoreBackend):
 
         if resource_type is DataContextVariableSchema.ALL_VARIABLES:
             config_commented_map_from_yaml = yaml.load(value)
-            # TODO: instead prevent these from being set??
-            # TODO: revert this before merge
+            # NOTE: fluent datasources may be present under both the `fluent_datasources` & `datasources` key
+            # if fluent datasource is part of `datasources` it will attempt to validate using a marshmallow Datasource schema and fail
             for name in config_commented_map_from_yaml.get("fluent_datasources", {}):  # type: ignore[union-attr]
-                config_commented_map_from_yaml["datasources"].pop(name)  # type: ignore[union-attr,arg-type]
+                config_commented_map_from_yaml.get("datasources", {}).pop(name, None)  # type: ignore[union-attr,arg-type,call-arg]
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )
