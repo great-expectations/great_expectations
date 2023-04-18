@@ -30,7 +30,7 @@ from tests.test_utils import (
 # The following class allows for declarative instantiation of base class for SqlAlchemy. Adopted from
 # https://docs.sqlalchemy.org/en/14/faq/sqlexpressions.html#rendering-postcompile-parameters-as-bound-parameters
 
-Base = declarative_base()
+Base = sqlalchemy.declarative_base()
 
 
 class A(Base):
