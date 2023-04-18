@@ -10,6 +10,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Sequence,
     Tuple,
     Type,
     Union,
@@ -474,12 +475,14 @@ class CloudDataContext(SerializableDataContext):
         self,
         expectation_suite_name: str | None = None,
         id: str | None = None,
-        expectations: list[dict | ExpectationConfiguration] | None = None,
+        expectations: Sequence[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
+        overwrite_existing: bool = False,
         expectation_suite: ExpectationSuite | None = None,
+        **kwargs,
     ) -> ExpectationSuite:
         return self._create_expectation_suite(
             expectation_suite_name=expectation_suite_name,
@@ -490,13 +493,15 @@ class CloudDataContext(SerializableDataContext):
             execution_engine_type=execution_engine_type,
             meta=meta,
             expectation_suite=expectation_suite,
+            overwrite_existing=overwrite_existing,
+            **kwargs,
         )
 
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
+        **kwargs,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -522,16 +527,16 @@ class CloudDataContext(SerializableDataContext):
 
     def _create_expectation_suite(
         self,
-        expectation_suite_name: str | None,
+        expectation_suite_name: str | None = None,
         id: str | None = None,
-        expectations: list[dict | ExpectationConfiguration] | None = None,
+        expectations: Sequence[dict | ExpectationConfiguration] | None = None,
         evaluation_parameters: dict | None = None,
         data_asset_type: str | None = None,
         execution_engine_type: Type[ExecutionEngine] | None = None,
         meta: dict | None = None,
-        expectation_suite: ExpectationSuite | None = None,
         overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
+        expectation_suite: ExpectationSuite | None = None,
+        **kwargs,
     ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
