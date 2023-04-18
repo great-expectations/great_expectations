@@ -125,7 +125,9 @@ if TYPE_CHECKING:
     import sqlalchemy  # noqa: TID251
 
 
-def get_table_columns_metric(engine: ExecutionEngine) -> tuple[MetricConfiguration, dict]:
+def get_table_columns_metric(
+    engine: ExecutionEngine,
+) -> tuple[MetricConfiguration, dict]:
     resolved_metrics: dict = {}
 
     results: dict
