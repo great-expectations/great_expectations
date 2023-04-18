@@ -16,7 +16,7 @@ import AdditionalResources from './components_how_to_create_a_new_checkpoint/_ad
 
 <StepsForCheckpoints />
 
-## Steps (for Checkpoints in Great Expectations version >=0.13.12)
+## Steps
 
 ### 1. Use the CLI to open a Jupyter Notebook for creating a new Checkpoint
 <UseTheCliToOpenAJupyterNotebookForCreatingANewCheckpoint />
