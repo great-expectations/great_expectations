@@ -65,6 +65,13 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
                 "profile.pkl",
             ),
         },
+        float_rule={
+            "profile_path": os.path.join(
+                test_root_path,
+                "data_profiler_files",
+                "profile.pkl",
+            ),
+        },
         exclude_column_names=exclude_column_names,
         estimation="flag_outliers",
     )
@@ -98,6 +105,13 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
         batch_request=batch_request,
         exclude_column_names=exclude_column_names,
         numeric_rule={
+            "profile_path": os.path.join(  # noqa: PTH118
+                test_root_path,
+                "data_profiler_files",
+                "profile.pkl",
+            ),
+        },
+        float_rule={
             "profile_path": os.path.join(  # noqa: PTH118
                 test_root_path,
                 "data_profiler_files",
@@ -193,7 +207,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
         bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
     ):
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
-
+    import pdb; pdb.set_trace()
     assert num_metrics == 28
 
 
