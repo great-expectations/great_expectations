@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import enum
 from dataclasses import dataclass
-from typing import Union, cast
+from typing import cast
 
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import ProfilerConfigurationError
@@ -131,7 +131,7 @@ class CardinalityChecker:
     ) -> AbsoluteCardinalityLimit | RelativeCardinalityLimit:
         return self._cardinality_limit_mode
 
-    def cardinality_within_limit(self, metric_value: Union[int, float]) -> bool:
+    def cardinality_within_limit(self, metric_value: int | float) -> bool:
         """Determine if the cardinality is within configured limit.
 
         The metric_value supplied should be either a proportion of unique values
@@ -159,7 +159,7 @@ class CardinalityChecker:
         )
 
     @staticmethod
-    def _validate_metric_value(metric_value: Union[int, float]) -> None:
+    def _validate_metric_value(metric_value: int | float) -> None:
         if not isinstance(metric_value, (int, float)):
             raise ProfilerConfigurationError(
                 f"Value of measured cardinality must be of type int or float, you provided {type(metric_value)}"

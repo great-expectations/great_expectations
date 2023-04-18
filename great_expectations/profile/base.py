@@ -4,7 +4,7 @@ import abc
 import logging
 import time
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
@@ -148,7 +148,7 @@ class Profiler(metaclass=abc.ABCMeta):
       kind of object. You should raise an appropriate Exception if the object is not valid.
     """
 
-    def __init__(self, configuration: Optional[dict] = None) -> None:
+    def __init__(self, configuration: dict | None = None) -> None:
         self.configuration = configuration
 
     @public_api
@@ -161,7 +161,7 @@ class Profiler(metaclass=abc.ABCMeta):
         pass
 
     def profile(
-        self, item_to_profile: Any, suite_name: Optional[str] = None
+        self, item_to_profile: Any, suite_name: str | None = None
     ) -> ExpectationSuite:
         self.validate(item_to_profile)
         expectation_suite = self._profile(item_to_profile, suite_name=suite_name)
@@ -169,7 +169,7 @@ class Profiler(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def _profile(
-        self, item_to_profile: Any, suite_name: Optional[str] = None
+        self, item_to_profile: Any, suite_name: str | None = None
     ) -> ExpectationSuite:
         pass
 

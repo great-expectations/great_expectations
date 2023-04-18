@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Mapping, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, Mapping, cast
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.serializer import DictConfigSerializer
@@ -33,8 +33,8 @@ class EphemeralDataContext(AbstractDataContext):
 
     def __init__(
         self,
-        project_config: Union[DataContextConfig, Mapping],
-        runtime_environment: Optional[dict] = None,
+        project_config: DataContextConfig | Mapping,
+        runtime_environment: dict | None = None,
     ) -> None:
         """EphemeralDataContext constructor
 
@@ -47,7 +47,7 @@ class EphemeralDataContext(AbstractDataContext):
         super().__init__(runtime_environment=runtime_environment)
 
     def _init_project_config(
-        self, project_config: Union[DataContextConfig, Mapping]
+        self, project_config: DataContextConfig | Mapping
     ) -> DataContextConfig:
         project_config = EphemeralDataContext.get_or_create_data_context_config(
             project_config

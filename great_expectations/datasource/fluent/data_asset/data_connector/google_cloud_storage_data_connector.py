@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Type
 
 import pydantic
 
@@ -64,12 +64,12 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
-        max_results: Optional[int] = None,
+        max_results: int | None = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> None:
         self._gcs_client: GoogleCloudStorageClient = gcs_client
 
@@ -99,12 +99,12 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
-        max_results: Optional[int] = None,
+        max_results: int | None = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> GoogleCloudStorageDataConnector:
         """Builds "GoogleCloudStorageDataConnector", which links named DataAsset to Google Cloud Storage.
 

@@ -11,9 +11,7 @@ from typing import (
     Dict,
     List,
     Mapping,
-    Optional,
     Type,
-    Union,
 )
 
 import jsonpatch
@@ -58,7 +56,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def parse_result_format(result_format: Union[str, dict]) -> dict:
+def parse_result_format(result_format: str | dict) -> dict:
     """This is a simple helper utility that can be used to parse a string result_format into the dict format used
     internally by great_expectations. It is not necessary but allows shorthand for result_format in cases where
     there is no need to specify a custom partial_unexpected_count."""
@@ -87,7 +85,7 @@ def parse_result_format(result_format: Union[str, dict]) -> dict:
 
 
 class ExpectationContext(SerializableDictDot):
-    def __init__(self, description: Optional[str] = None) -> None:
+    def __init__(self, description: str | None = None) -> None:
         self._description = description
 
     @property
@@ -1009,11 +1007,11 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         expectation_type: str,
         kwargs: dict,
-        meta: Optional[dict] = None,
-        success_on_last_run: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_context: Optional[ExpectationContext] = None,
-        rendered_content: Optional[List[RenderedAtomicContent]] = None,
+        meta: dict | None = None,
+        success_on_last_run: bool | None = None,
+        ge_cloud_id: str | None = None,
+        expectation_context: ExpectationContext | None = None,
+        rendered_content: List[RenderedAtomicContent] | None = None,
     ) -> None:
         if not isinstance(expectation_type, str):
             raise InvalidExpectationConfigurationError(
@@ -1041,7 +1039,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self,
         evaluation_parameters,
         interactive_evaluation: bool = True,
-        data_context: Optional[AbstractDataContext] = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         if not self._raw_kwargs:
             evaluation_args, _ = build_evaluation_parameters(
@@ -1099,7 +1097,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return self
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
+    def ge_cloud_id(self) -> str | None:
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
@@ -1107,7 +1105,7 @@ class ExpectationConfiguration(SerializableDictDot):
         self._ge_cloud_id = value
 
     @property
-    def expectation_context(self) -> Optional[ExpectationContext]:
+    def expectation_context(self) -> ExpectationContext | None:
         return self._expectation_context
 
     @expectation_context.setter
@@ -1127,11 +1125,11 @@ class ExpectationConfiguration(SerializableDictDot):
         self._kwargs = value
 
     @property
-    def rendered_content(self) -> Optional[List[RenderedAtomicContent]]:
+    def rendered_content(self) -> List[RenderedAtomicContent] | None:
         return self._rendered_content
 
     @rendered_content.setter
-    def rendered_content(self, value: Optional[List[RenderedAtomicContent]]) -> None:
+    def rendered_content(self, value: List[RenderedAtomicContent] | None) -> None:
         self._rendered_content = value
 
     def _get_default_custom_kwargs(self) -> KWargDetailsDict:
@@ -1248,7 +1246,7 @@ class ExpectationConfiguration(SerializableDictDot):
 
         return success_kwargs
 
-    def get_runtime_kwargs(self, runtime_configuration: Optional[dict] = None) -> dict:
+    def get_runtime_kwargs(self, runtime_configuration: dict | None = None) -> dict:
         expectation_kwargs_dict = self.kwarg_lookup_dict.get(
             self.expectation_type, None
         )
@@ -1303,7 +1301,7 @@ class ExpectationConfiguration(SerializableDictDot):
     # noinspection PyPep8Naming
     def isEquivalentTo(
         self,
-        other: Union[dict, ExpectationConfiguration],
+        other: dict | ExpectationConfiguration,
         match_type: str = "success",
     ) -> bool:
         """ExpectationConfiguration equivalence does not include meta, and relies on *equivalence* of kwargs."""
@@ -1456,7 +1454,7 @@ class ExpectationConfiguration(SerializableDictDot):
     def validate(
         self,
         validator: Validator,
-        runtime_configuration: Optional[dict] = None,
+        runtime_configuration: dict | None = None,
     ) -> ExpectationValidationResult:
         """Runs the expectation against a `Validator`.
 
@@ -1480,8 +1478,8 @@ class ExpectationConfiguration(SerializableDictDot):
     def metrics_validate(
         self,
         metrics: Dict,
-        runtime_configuration: Optional[dict] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
+        runtime_configuration: dict | None = None,
+        execution_engine: ExecutionEngine | None = None,
         **kwargs: dict,
     ):
         expectation_impl: Type[Expectation] = self._get_expectation_impl()

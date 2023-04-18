@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import TYPE_CHECKING, Any, ClassVar, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, ClassVar, List, Set
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
@@ -33,22 +33,22 @@ class Builder(SerializableDictDot):
 
     def __init__(
         self,
-        data_context: Optional[AbstractDataContext] = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
             data_context: AbstractDataContext associated with this Builder
         """
-        self._batch_list: Optional[List[Batch]] = None
-        self._batch_request: Union[BatchRequestBase, dict, None] = None
-        self._data_context: Optional[AbstractDataContext] = data_context
+        self._batch_list: List[Batch] | None = None
+        self._batch_request: BatchRequestBase | dict | None = None
+        self._data_context: AbstractDataContext | None = data_context
 
     """
     Full getter/setter accessors for "batch_request" and "batch_list" are for configuring Builder dynamically.
     """
 
     @property
-    def batch_list(self) -> Optional[List[Batch]]:
+    def batch_list(self) -> List[Batch] | None:
         return self._batch_list
 
     @batch_list.setter
@@ -56,24 +56,24 @@ class Builder(SerializableDictDot):
         self._batch_list = value
 
     @property
-    def batch_request(self) -> Union[BatchRequestBase, dict, None]:
+    def batch_request(self) -> BatchRequestBase | dict | None:
         return self._batch_request
 
     @batch_request.setter
-    def batch_request(self, value: Optional[Union[BatchRequestBase, dict]]) -> None:
+    def batch_request(self, value: BatchRequestBase | dict | None) -> None:
         if not (value is None or isinstance(value, dict)):
             value = get_batch_request_as_dict(batch_request=value)
 
         self._batch_request = value
 
     @property
-    def data_context(self) -> Optional[AbstractDataContext]:
+    def data_context(self) -> AbstractDataContext | None:
         return self._data_context
 
     def set_batch_list_if_null_batch_request(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_list: List[Batch] | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
     ) -> None:
         """
         If "batch_request" is already set on "Builder" object, then it is not overwritten.  However, if "batch_request"
@@ -87,8 +87,8 @@ class Builder(SerializableDictDot):
 
     def set_batch_data(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_list: List[Batch] | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
     ) -> None:
         arg: Any
         num_supplied_batch_specification_args: int = sum(

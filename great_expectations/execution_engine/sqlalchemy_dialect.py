@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, List, Union
+from typing import Any, List
 
 
 class GXSqlDialect(Enum):
@@ -25,7 +25,7 @@ class GXSqlDialect(Enum):
     VERTICA = "vertica"
     OTHER = "other"
 
-    def __eq__(self, other: Union[str, bytes, GXSqlDialect]):  # type: ignore[override] # supertype uses `object`
+    def __eq__(self, other: str | bytes | GXSqlDialect):  # type: ignore[override] # supertype uses `object`
         if isinstance(other, str):
             return self.value.lower() == other.lower()
         # Comparison against byte string, e.g. `b"hive"` should be treated as unicode

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import importlib
 import logging
-from typing import List, Optional
+from typing import List
 
 import click
 
@@ -25,8 +25,8 @@ except ImportError:
 class CLIState:
     def __init__(
         self,
-        config_file_location: Optional[str] = None,
-        data_context: Optional[FileDataContext] = None,
+        config_file_location: str | None = None,
+        data_context: FileDataContext | None = None,
         assume_yes: bool = False,
     ) -> None:
         self.config_file_location = config_file_location
@@ -46,7 +46,7 @@ class CLIState:
         return context
 
     @property
-    def data_context(self) -> Optional[FileDataContext]:
+    def data_context(self) -> FileDataContext | None:
         return self._data_context
 
     @data_context.setter
@@ -76,7 +76,7 @@ class CLI(click.MultiCommand):
 
         return commands
 
-    def get_command(self, ctx: click.Context, name: str) -> Optional[str]:  # type: ignore[override] # MultiCommand returns `Optional[Command]`
+    def get_command(self, ctx: click.Context, name: str) -> str | None:  # type: ignore[override] # MultiCommand returns `Optional[Command]`
         module_name = name.replace("-", "_")
         legacy_module = ""
         try:
@@ -119,7 +119,7 @@ class CLI(click.MultiCommand):
 def cli(
     ctx: click.Context,
     verbose: bool,
-    config_file_location: Optional[str],
+    config_file_location: str | None,
     assume_yes: bool,
 ) -> None:
     """

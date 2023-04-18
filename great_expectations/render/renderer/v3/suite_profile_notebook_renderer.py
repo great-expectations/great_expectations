@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import nbformat
 
@@ -25,7 +25,7 @@ class SuiteProfileNotebookRenderer(SuiteEditNotebookRenderer):
         context: AbstractDataContext,
         expectation_suite_name: str,
         profiler_name: str,
-        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+        batch_request: str | Dict[str, Any] | None = None,
     ) -> None:
         super().__init__(context=context)
 
@@ -85,7 +85,7 @@ This process helps you avoid writing lots of boilerplate when authoring suites b
 
     def add_footer(
         self,
-        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+        batch_request: str | Dict[str, Any] | None = None,
     ) -> None:
         self.add_markdown_cell(
             markdown="""# Save & review your new Expectation Suite

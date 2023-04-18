@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List
 
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
@@ -49,15 +49,13 @@ class RuleBasedProfilerResult(SerializableDictDot):
     """
 
     fully_qualified_parameter_names_by_domain: Dict[Domain, List[str]]
-    parameter_values_for_fully_qualified_parameter_names_by_domain: Optional[
-        Dict[Domain, Dict[str, ParameterNode]]
-    ]
+    parameter_values_for_fully_qualified_parameter_names_by_domain: Dict[Domain, Dict[str, ParameterNode]] | None
     expectation_configurations: List[ExpectationConfiguration]
     citation: dict
     rule_domain_builder_execution_time: Dict[str, float]
     rule_execution_time: Dict[str, float]
     # Reference to  "UsageStatisticsHandler" object for this "RuleBasedProfilerResult" object (if configured).
-    _usage_statistics_handler: Optional[UsageStatisticsHandler] = field(default=None)
+    _usage_statistics_handler: UsageStatisticsHandler | None = field(default=None)
 
     def to_dict(self) -> dict:
         """

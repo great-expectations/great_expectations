@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Type
 
 from typing_extensions import Literal
 
@@ -39,12 +39,12 @@ class SparkS3Datasource(_SparkFilePathDatasource):
         self,
         name: str,
         *,
-        batch_metadata: Optional[BatchMetadata] = ...,
+        batch_metadata: BatchMetadata | None = ...,
         batching_regex: re.Pattern | str = r".*",
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,
         header: bool = ...,
         infer_schema: bool = ...,
-        order_by: Optional[SortersDefinition] = ...,
+        order_by: SortersDefinition | None = ...,
     ) -> CSVAsset: ...

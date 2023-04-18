@@ -9,7 +9,6 @@ from typing import (
     ClassVar,
     Dict,
     List,
-    Optional,
     Type,
     Union,
     cast,
@@ -398,7 +397,7 @@ Splitter = Union[
 class _SQLAsset(DataAsset):
     # Instance fields
     type: str = pydantic.Field("_sql_asset")
-    splitter: Optional[Splitter] = None
+    splitter: Splitter | None = None
     name: str
 
     @property
@@ -674,7 +673,7 @@ class _SQLAsset(DataAsset):
 
     @public_api
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self, options: BatchRequestOptions | None = None
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -784,7 +783,7 @@ class TableAsset(_SQLAsset):
     # Instance fields
     type: Literal["table"] = "table"
     table_name: str
-    schema_name: Optional[str] = None
+    schema_name: str | None = None
 
     @property
     def qualified_name(self) -> str:
@@ -874,20 +873,20 @@ class SQLDatasource(Datasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sql"] = "sql"
-    connection_string: Union[ConfigStr, str]
+    connection_string: ConfigStr | str
     create_temp_table: bool = True
-    kwargs: Dict[str, Union[ConfigStr, Any]] = pydantic.Field(
+    kwargs: Dict[str, ConfigStr | Any] = pydantic.Field(
         default={},
         description="Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine"
         " as part of `create_engine(connection_string, **kwargs)`",
     )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
-    assets: List[Union[TableAsset, QueryAsset]] = []
+    assets: List[TableAsset | QueryAsset] = []
 
     # private attrs
-    _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
-    _engine: Union[sqlalchemy_engine_Engine, None] = pydantic.PrivateAttr(None)
+    _cached_connection_string: str | ConfigStr = pydantic.PrivateAttr("")
+    _engine: sqlalchemy_engine_Engine | None = pydantic.PrivateAttr(None)
 
     # These are instance var because ClassVars can't contain Type variables. See
     # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
@@ -947,9 +946,9 @@ class SQLDatasource(Datasource):
         self,
         name: str,
         table_name: str,
-        schema_name: Optional[str] = None,
-        order_by: Optional[SortersDefinition] = None,
-        batch_metadata: Optional[BatchMetadata] = None,
+        schema_name: str | None = None,
+        order_by: SortersDefinition | None = None,
+        batch_metadata: BatchMetadata | None = None,
     ) -> TableAsset:
         """Adds a table asset to this datasource.
 
@@ -980,8 +979,8 @@ class SQLDatasource(Datasource):
         self,
         name: str,
         query: str,
-        order_by: Optional[SortersDefinition] = None,
-        batch_metadata: Optional[BatchMetadata] = None,
+        order_by: SortersDefinition | None = None,
+        batch_metadata: BatchMetadata | None = None,
     ) -> QueryAsset:
         """Adds a query asset to this datasource.
 

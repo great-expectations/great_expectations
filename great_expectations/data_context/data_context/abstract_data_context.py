@@ -19,12 +19,10 @@ from typing import (
     Dict,
     List,
     Mapping,
-    Optional,
     Sequence,
     Tuple,
     Type,
     TypeVar,
-    Union,
     cast,
     overload,
 )
@@ -249,7 +247,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @usage_statistics_enabled_method(
         event_name=UsageStatsEvents.DATA_CONTEXT___INIT__,
     )
-    def __init__(self, runtime_environment: Optional[dict] = None) -> None:
+    def __init__(self, runtime_environment: dict | None = None) -> None:
         """
         Constructor for AbstractDataContext. Will handle instantiation logic that is common to all DataContext objects
 
@@ -401,10 +399,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     def save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
+        expectation_suite_name: str | None = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
-        **kwargs: Optional[dict],
+        include_rendered_content: bool | None = None,
+        **kwargs: dict | None,
     ) -> None:
         """Save the provided ExpectationSuite into the DataContext using the configured ExpectationStore.
 
@@ -439,10 +437,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
+        expectation_suite_name: str | None = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
-        **kwargs: Optional[dict],
+        include_rendered_content: bool | None = None,
+        **kwargs: dict | None,
     ) -> None:
         if expectation_suite_name is None:
             key = ExpectationSuiteIdentifier(
@@ -476,7 +474,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     # Properties
     @property
     def instance_id(self) -> str:
-        instance_id: Optional[str] = self.config_variables.get("instance_id")
+        instance_id: str | None = self.config_variables.get("instance_id")
         if instance_id is None:
             if self._in_memory_instance_id is not None:
                 return self._in_memory_instance_id
@@ -508,7 +506,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._config_provider
 
     @property
-    def root_directory(self) -> Optional[str]:  # TODO: This should be a `pathlib.Path`
+    def root_directory(self) -> str | None:  # TODO: This should be a `pathlib.Path`
         """The root directory for configuration objects in the data context; the location in which
         ``great_expectations.yml`` is located.
         """
@@ -521,7 +519,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.get_config_with_variables_substituted()
 
     @property
-    def plugins_directory(self) -> Optional[str]:
+    def plugins_directory(self) -> str | None:
         """The directory in which custom plugin modules should be placed."""
         # NOTE: <DataContextRefactor>  Why does this exist in AbstractDataContext? CloudDataContext and
         # FileDataContext both use it. Determine whether this should stay here or in child classes
@@ -535,7 +533,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self._stores
 
     @property
-    def expectations_store_name(self) -> Optional[str]:
+    def expectations_store_name(self) -> str | None:
         return self.variables.expectations_store_name
 
     @property
@@ -543,7 +541,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.expectations_store_name]
 
     @property
-    def evaluation_parameter_store_name(self) -> Optional[str]:
+    def evaluation_parameter_store_name(self) -> str | None:
         return self.variables.evaluation_parameter_store_name
 
     @property
@@ -551,7 +549,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.evaluation_parameter_store_name]
 
     @property
-    def validations_store_name(self) -> Optional[str]:
+    def validations_store_name(self) -> str | None:
         return self.variables.validations_store_name
 
     @property
@@ -559,7 +557,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return self.stores[self.validations_store_name]
 
     @property
-    def checkpoint_store_name(self) -> Optional[str]:
+    def checkpoint_store_name(self) -> str | None:
         try:
             return self.variables.checkpoint_store_name
         except AttributeError:
@@ -629,7 +627,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
     @property
-    def profiler_store_name(self) -> Optional[str]:
+    def profiler_store_name(self) -> str | None:
         try:
             return self.variables.profiler_store_name
         except AttributeError:
@@ -667,7 +665,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @property
     def profiler_store(self) -> ProfilerStore:
-        profiler_store_name: Optional[str] = self.profiler_store_name
+        profiler_store_name: str | None = self.profiler_store_name
         try:
             return self.stores[profiler_store_name]
         except KeyError:
@@ -691,7 +689,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             )
 
     @property
-    def concurrency(self) -> Optional[ConcurrencyConfig]:
+    def concurrency(self) -> ConcurrencyConfig | None:
         return self.variables.concurrency
 
     @property
@@ -725,8 +723,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48", message="Part of the deprecated DataContext CRUD API"
     )
     def save_datasource(
-        self, datasource: Union[LegacyDatasource, BaseDatasource]
-    ) -> Union[LegacyDatasource, BaseDatasource]:
+        self, datasource: LegacyDatasource | BaseDatasource
+    ) -> LegacyDatasource | BaseDatasource:
         """Save a Datasource to the configured DatasourceStore.
 
         Stores the underlying DatasourceConfig in the store and Data Context config,
@@ -768,9 +766,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         substituted_config = self._perform_substitutions_on_datasource_config(
             updated_datasource_config_from_store
         )
-        updated_datasource: Union[
-            LegacyDatasource, BaseDatasource
-        ] = self._instantiate_datasource_from_config(
+        updated_datasource: LegacyDatasource | BaseDatasource = self._instantiate_datasource_from_config(
             raw_config=updated_datasource_config_from_store,
             substituted_config=substituted_config,
         )
@@ -909,7 +905,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def update_datasource(
         self,
-        datasource: Union[LegacyDatasource, BaseDatasource],
+        datasource: LegacyDatasource | BaseDatasource,
         save_changes: bool | None = None,
     ) -> Datasource:
         """Updates a Datasource that already exists in the store.
@@ -1015,7 +1011,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         return list(self.variables.data_docs_sites.keys())  # type: ignore[union-attr]
 
     def get_config_with_variables_substituted(
-        self, config: Optional[DataContextConfig] = None
+        self, config: DataContextConfig | None = None
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
@@ -1030,7 +1026,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def get_batch(
         self, arg1: Any = None, arg2: Any = None, arg3: Any = None, **kwargs
-    ) -> Union[Batch, DataAsset]:
+    ) -> Batch | DataAsset:
         """Get exactly one batch, based on a variety of flexible input types.
 
         The method `get_batch` is the main user-facing method for getting batches; it supports both the new (V3) and the
@@ -1057,7 +1053,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             Batch (V3) or DataAsset (V2) -- the requested batch
         """
 
-        api_version: Optional[str] = self._get_data_context_version(arg1=arg1, **kwargs)
+        api_version: str | None = self._get_data_context_version(arg1=arg1, **kwargs)
         if api_version == "v3":
             if "datasource_name" in kwargs:
                 datasource_name = kwargs.pop("datasource_name", None)
@@ -1097,7 +1093,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_parameters=batch_parameters,
         )
 
-    def _get_data_context_version(self, arg1: Any, **kwargs) -> Optional[str]:
+    def _get_data_context_version(self, arg1: Any, **kwargs) -> str | None:
         """
         arg1: the first positional argument (can take on various types)
 
@@ -1124,7 +1120,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not self.datasources:
             return None
 
-        api_version: Optional[str] = None
+        api_version: str | None = None
         datasource_name: Any
         if "datasource_name" in kwargs:
             datasource_name = kwargs.pop("datasource_name", None)
@@ -1145,9 +1141,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 datasource_name = batch_kwargs.get("datasource")
                 if datasource_name is not None:
                     try:
-                        datasource: Union[  # type: ignore[no-redef]
-                            LegacyDatasource, BaseDatasource
-                        ] = self.get_datasource(datasource_name=datasource_name)
+                        datasource: LegacyDatasource | BaseDatasource = self.get_datasource(datasource_name=datasource_name)
                         if isinstance(datasource, LegacyDatasource):
                             api_version = "v2"
                     except (ValueError, TypeError):
@@ -1156,8 +1150,8 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _get_batch_v2(
         self,
-        batch_kwargs: Union[dict, BatchKwargs],
-        expectation_suite_name: Union[str, ExpectationSuite],
+        batch_kwargs: dict | BatchKwargs,
+        expectation_suite_name: str | ExpectationSuite,
         data_asset_type=None,
         batch_parameters=None,
     ) -> DataAsset:
@@ -1198,7 +1192,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             expectation_suite = self.get_expectation_suite(expectation_suite_name)
 
-        datasource_name: Optional[Any] = batch_kwargs.get("datasource")
+        datasource_name: Any | None = batch_kwargs.get("datasource")
         datasource: LegacyDatasource | BaseDatasource | FluentDatasource
         if isinstance(datasource_name, str):
             datasource = self.get_datasource(datasource_name)
@@ -1222,28 +1216,28 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _get_batch_v3(
         self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
+        datasource_name: str | None = None,
+        data_connector_name: str | None = None,
+        data_asset_name: str | None = None,
         *,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[IDDict, dict]] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
+        batch_request: BatchRequestBase | None = None,
+        batch_data: Any | None = None,
+        data_connector_query: IDDict | dict | None = None,
+        batch_identifiers: dict | None = None,
+        limit: int | None = None,
+        index: int | list | tuple | slice | str | None = None,
+        custom_filter_function: Callable | None = None,
+        batch_spec_passthrough: dict | None = None,
+        sampling_method: str | None = None,
+        sampling_kwargs: dict | None = None,
+        splitter_method: str | None = None,
+        splitter_kwargs: dict | None = None,
+        runtime_parameters: dict | None = None,
+        query: str | None = None,
+        path: str | None = None,
+        batch_filter_parameters: dict | None = None,
         **kwargs,
-    ) -> Union[Batch, DataAsset]:
+    ) -> Batch | DataAsset:
         """Get exactly one batch, based on a variety of flexible input types.
 
         Args:
@@ -1365,7 +1359,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         ]
 
     @public_api
-    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def list_checkpoints(self) -> List[str] | List[ConfigurationIdentifier]:
         """List existing Checkpoint identifiers on this context.
 
         Returns:
@@ -1373,7 +1367,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         return self.checkpoint_store.list_checkpoints()
 
-    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def list_profilers(self) -> List[str] | List[ConfigurationIdentifier]:
         """List existing Profiler identifiers on this context.
 
         Returns:
@@ -1418,14 +1412,14 @@ class AbstractDataContext(ConfigPeer, ABC):
         return profiler
 
     def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
-    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
+        self, name: str, id: str | None
+    ) -> ConfigurationIdentifier | GXCloudIdentifier:
         return ConfigurationIdentifier(configuration_key=name)
 
     @public_api
     def get_datasource(
         self, datasource_name: str = "default"
-    ) -> Union[LegacyDatasource, BaseDatasource, FluentDatasource]:
+    ) -> LegacyDatasource | BaseDatasource | FluentDatasource:
         """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
         Args:
@@ -1456,9 +1450,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource: Union[
-            LegacyDatasource, BaseDatasource, FluentDatasource
-        ] = self._instantiate_datasource_from_config(
+        datasource: LegacyDatasource | BaseDatasource | FluentDatasource = self._instantiate_datasource_from_config(
             raw_config=raw_config, substituted_config=substituted_config
         )
         if isinstance(datasource, FluentDatasource):
@@ -1541,7 +1533,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasources: List[dict] = []
 
         datasource_name: str
-        datasource_config: Union[dict, DatasourceConfig]
+        datasource_config: dict | DatasourceConfig
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
         for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
@@ -1560,7 +1552,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     @deprecated_argument(argument_name="save_changes", version="0.15.32")
     def delete_datasource(
-        self, datasource_name: Optional[str], save_changes: Optional[bool] = None
+        self, datasource_name: str | None, save_changes: bool | None = None
     ) -> None:
         """Delete a given Datasource by name.
 
@@ -2256,7 +2248,7 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def list_expectation_suites(
         self,
-    ) -> Optional[Union[List[str], List[GXCloudIdentifier]]]:
+    ) -> List[str] | List[GXCloudIdentifier] | None:
         """Return a list of available expectation suite keys."""
         try:
             keys = self.expectations_store.list_keys()
@@ -2269,34 +2261,34 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def get_validator(
         self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
-        batch: Optional[Batch] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_request_list: Optional[List[BatchRequestBase]] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[Union[IDDict, dict]] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        expectation_suite_name: Optional[str] = None,
-        expectation_suite: Optional[ExpectationSuite] = None,
-        create_expectation_suite_with_name: Optional[str] = None,
-        include_rendered_content: Optional[bool] = None,
-        expectation_suite_id: Optional[str] = None,
+        datasource_name: str | None = None,
+        data_connector_name: str | None = None,
+        data_asset_name: str | None = None,
+        batch: Batch | None = None,
+        batch_list: List[Batch] | None = None,
+        batch_request: BatchRequestBase | None = None,
+        batch_request_list: List[BatchRequestBase] | None = None,
+        batch_data: Any | None = None,
+        data_connector_query: IDDict | dict | None = None,
+        batch_identifiers: dict | None = None,
+        limit: int | None = None,
+        index: int | list | tuple | slice | str | None = None,
+        custom_filter_function: Callable | None = None,
+        sampling_method: str | None = None,
+        sampling_kwargs: dict | None = None,
+        splitter_method: str | None = None,
+        splitter_kwargs: dict | None = None,
+        runtime_parameters: dict | None = None,
+        query: str | None = None,
+        path: str | None = None,
+        batch_filter_parameters: dict | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        batch_spec_passthrough: dict | None = None,
+        expectation_suite_name: str | None = None,
+        expectation_suite: ExpectationSuite | None = None,
+        create_expectation_suite_with_name: str | None = None,
+        include_rendered_content: bool | None = None,
+        expectation_suite_id: str | None = None,
         **kwargs,
     ) -> Validator:
         """Retrieve a Validator with a batch list and an `ExpectationSuite`.
@@ -2464,9 +2456,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def get_validator_using_batch_list(
         self,
         expectation_suite: ExpectationSuite,
-        batch_list: Sequence[Union[Batch, FluentBatch]],
-        include_rendered_content: Optional[bool] = None,
-        **kwargs: Optional[dict],
+        batch_list: Sequence[Batch | FluentBatch],
+        include_rendered_content: bool | None = None,
+        **kwargs: dict | None,
     ) -> Validator:
         """
 
@@ -2528,26 +2520,26 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     def get_batch_list(
         self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[dict] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        **kwargs: Optional[dict],
+        datasource_name: str | None = None,
+        data_connector_name: str | None = None,
+        data_asset_name: str | None = None,
+        batch_request: BatchRequestBase | None = None,
+        batch_data: Any | None = None,
+        data_connector_query: dict | None = None,
+        batch_identifiers: dict | None = None,
+        limit: int | None = None,
+        index: int | list | tuple | slice | str | None = None,
+        custom_filter_function: Callable | None = None,
+        sampling_method: str | None = None,
+        sampling_kwargs: dict | None = None,
+        splitter_method: str | None = None,
+        splitter_kwargs: dict | None = None,
+        runtime_parameters: dict | None = None,
+        query: str | None = None,
+        path: str | None = None,
+        batch_filter_parameters: dict | None = None,
+        batch_spec_passthrough: dict | None = None,
+        **kwargs: dict | None,
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
 
@@ -2622,26 +2614,26 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _get_batch_list(
         self,
-        datasource_name: Optional[str] = None,
-        data_connector_name: Optional[str] = None,
-        data_asset_name: Optional[str] = None,
-        batch_request: Optional[BatchRequestBase] = None,
-        batch_data: Optional[Any] = None,
-        data_connector_query: Optional[dict] = None,
-        batch_identifiers: Optional[dict] = None,
-        limit: Optional[int] = None,
-        index: Optional[Union[int, list, tuple, slice, str]] = None,
-        custom_filter_function: Optional[Callable] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[dict] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[dict] = None,
-        runtime_parameters: Optional[dict] = None,
-        query: Optional[str] = None,
-        path: Optional[str] = None,
-        batch_filter_parameters: Optional[dict] = None,
-        batch_spec_passthrough: Optional[dict] = None,
-        **kwargs: Optional[dict],
+        datasource_name: str | None = None,
+        data_connector_name: str | None = None,
+        data_asset_name: str | None = None,
+        batch_request: BatchRequestBase | None = None,
+        batch_data: Any | None = None,
+        data_connector_query: dict | None = None,
+        batch_identifiers: dict | None = None,
+        limit: int | None = None,
+        index: int | list | tuple | slice | str | None = None,
+        custom_filter_function: Callable | None = None,
+        sampling_method: str | None = None,
+        sampling_kwargs: dict | None = None,
+        splitter_method: str | None = None,
+        splitter_kwargs: dict | None = None,
+        runtime_parameters: dict | None = None,
+        query: str | None = None,
+        path: str | None = None,
+        batch_filter_parameters: dict | None = None,
+        batch_spec_passthrough: dict | None = None,
+        **kwargs: dict | None,
     ) -> List[Batch]:
         batch_request = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
@@ -2684,7 +2676,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
+        **kwargs: dict | None,
     ) -> ExpectationSuite:
         """Build a new ExpectationSuite and save it utilizing the context's underlying ExpectationsStore.
 
@@ -3063,7 +3055,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 DeprecationWarning,
             )
 
-        key: Optional[ExpectationSuiteIdentifier] = ExpectationSuiteIdentifier(
+        key: ExpectationSuiteIdentifier | None = ExpectationSuiteIdentifier(
             expectation_suite_name=expectation_suite_name  # type: ignore[arg-type]
         )
 
@@ -3370,12 +3362,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _run_profiler_with_dynamic_arguments(
         self,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
-        variables: Optional[dict] = None,
-        rules: Optional[dict] = None,
+        batch_list: List[Batch] | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
+        name: str | None = None,
+        id: str | None = None,
+        variables: dict | None = None,
+        rules: dict | None = None,
     ) -> RuleBasedProfilerResult:
         return RuleBasedProfiler.run_profiler(
             data_context=self,
@@ -3485,11 +3477,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         validation_operator_name: str,
         assets_to_validate: List,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
+        run_id: str | RunIdentifier | None = None,
+        evaluation_parameters: dict | None = None,
+        run_name: str | None = None,
+        run_time: str | datetime.datetime | None = None,
+        result_format: str | dict | None = None,
         **kwargs,
     ):
         """
@@ -3526,11 +3518,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         validation_operator_name: str,
         assets_to_validate: List,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
+        run_id: str | RunIdentifier | None = None,
+        evaluation_parameters: dict | None = None,
+        run_name: str | None = None,
+        run_time: str | datetime.datetime | None = None,
+        result_format: str | dict | None = None,
         **kwargs,
     ):
         result_format = result_format or {"result_format": "SUMMARY"}
@@ -3909,8 +3901,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     )
     def open_data_docs(
         self,
-        resource_identifier: Optional[str] = None,
-        site_name: Optional[str] = None,
+        resource_identifier: str | None = None,
+        site_name: str | None = None,
         only_if_exists: bool = True,
     ) -> None:
         """
@@ -3933,8 +3925,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     def _open_data_docs(
         self,
-        resource_identifier: Optional[str] = None,
-        site_name: Optional[str] = None,
+        resource_identifier: str | None = None,
+        site_name: str | None = None,
         only_if_exists: bool = True,
     ) -> None:
         data_docs_urls: List[Dict[str, str]] = self.get_docs_sites_urls(
@@ -3952,9 +3944,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def get_docs_sites_urls(
         self,
         resource_identifier=None,
-        site_name: Optional[str] = None,
+        site_name: str | None = None,
         only_if_exists=True,
-        site_names: Optional[List[str]] = None,
+        site_names: List[str] | None = None,
     ) -> List[Dict[str, str]]:
         """
         Get URLs for a resource for all data docs sites.
@@ -4079,7 +4071,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return True
 
     @staticmethod
-    def _default_profilers_exist(directory_path: Optional[str]) -> bool:
+    def _default_profilers_exist(directory_path: str | None) -> bool:
         """
         Helper method. Do default profilers exist in directory_path?
         """
@@ -4095,9 +4087,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @staticmethod
     def _get_global_config_value(
         environment_variable: str,
-        conf_file_section: Optional[str] = None,
-        conf_file_option: Optional[str] = None,
-    ) -> Optional[str]:
+        conf_file_section: str | None = None,
+        conf_file_option: str | None = None,
+    ) -> str | None:
         """
         Method to retrieve config value.
         Looks for config value in environment_variable and config file section
@@ -4119,7 +4111,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             for config_path in AbstractDataContext.GLOBAL_CONFIG_PATHS:
                 config: configparser.ConfigParser = configparser.ConfigParser()
                 config.read(config_path)
-                config_value: Optional[str] = config.get(
+                config_value: str | None = config.get(
                     conf_file_section, conf_file_option, fallback=None
                 )
                 if config_value:
@@ -4128,8 +4120,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
     @staticmethod
     def _get_metric_configuration_tuples(
-        metric_configuration: Union[str, dict], base_kwargs: Optional[dict] = None
-    ) -> List[Tuple[str, Union[dict, Any]]]:
+        metric_configuration: str | dict, base_kwargs: dict | None = None
+    ) -> List[Tuple[str, dict | Any]]:
         if base_kwargs is None:
             base_kwargs = {}
 
@@ -4215,8 +4207,8 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             raise
 
     def _normalize_absolute_or_relative_path(
-        self, path: Optional[str]
-    ) -> Optional[str]:
+        self, path: str | None
+    ) -> str | None:
         """
         Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
         """
@@ -4253,7 +4245,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             config_with_global_config_overrides.anonymous_usage_statistics.enabled = (
                 False
             )
-        global_data_context_id: Optional[str] = self._get_data_context_id_override()
+        global_data_context_id: str | None = self._get_data_context_id_override()
         # data_context_id
         if global_data_context_id:
             data_context_id_errors = anonymizedUsageStatisticsSchema.validate(
@@ -4270,9 +4262,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 validation_errors.update(data_context_id_errors)
 
         # usage statistics url
-        global_usage_statistics_url: Optional[
-            str
-        ] = self._get_usage_stats_url_override()
+        global_usage_statistics_url: str | None = self._get_usage_stats_url_override()
         if global_usage_statistics_url:
             usage_statistics_url_errors = anonymizedUsageStatisticsSchema.validate(
                 {"usage_statistics_url": global_usage_statistics_url}
@@ -4346,7 +4336,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 pass
         return usage_statistics_enabled
 
-    def _get_data_context_id_override(self) -> Optional[str]:
+    def _get_data_context_id_override(self) -> str | None:
         """
         Return data_context_id from environment variable.
 
@@ -4359,7 +4349,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             conf_file_option="data_context_id",
         )
 
-    def _get_usage_stats_url_override(self) -> Optional[str]:
+    def _get_usage_stats_url_override(self) -> str | None:
         """
         Return GE_USAGE_STATISTICS_URL from environment variable if it exists
 
@@ -4415,7 +4405,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self._variables
 
     @property
-    def usage_statistics_handler(self) -> Optional[UsageStatisticsHandler]:
+    def usage_statistics_handler(self) -> UsageStatisticsHandler | None:
         return self._usage_statistics_handler
 
     @property
@@ -4423,7 +4413,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return self.variables.anonymous_usage_statistics  # type: ignore[return-value]
 
     @property
-    def progress_bars(self) -> Optional[ProgressBarsConfig]:
+    def progress_bars(self) -> ProgressBarsConfig | None:
         return self.variables.progress_bars
 
     @property
@@ -4437,7 +4427,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     @property
     def datasources(
         self,
-    ) -> Dict[str, Union[LegacyDatasource, BaseDatasource, FluentDatasource]]:
+    ) -> Dict[str, LegacyDatasource | BaseDatasource | FluentDatasource]:
         """A single holder for all Datasources in this context"""
         return self._cached_datasources
 
@@ -4635,7 +4625,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         config: DatasourceConfig,
         initialize: bool,
         save_changes: bool,
-    ) -> Optional[Datasource]:
+    ) -> Datasource | None:
         """Perform substitutions and optionally initialize the Datasource and/or store the config.
 
         Args:
@@ -4661,7 +4651,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         if save_changes:
             config = self._datasource_store.set(key=None, value=config)
 
-        datasource: Optional[Datasource] = None
+        datasource: Datasource | None = None
         if initialize:
             try:
                 substituted_config = self._perform_substitutions_on_datasource_config(
@@ -4871,7 +4861,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                         )
 
     def send_usage_message(
-        self, event: str, event_payload: Optional[dict], success: Optional[bool] = None
+        self, event: str, event_payload: dict | None, success: bool | None = None
     ) -> None:
         """helper method to send a usage method using DataContext. Used when sending usage events from
             classes like ExpectationSuite.
@@ -4886,7 +4876,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         send_usage_message(self, event, event_payload, success)
 
     def _determine_if_expectation_suite_include_rendered_content(
-        self, include_rendered_content: Optional[bool] = None
+        self, include_rendered_content: bool | None = None
     ) -> bool:
         if include_rendered_content is None:
             if (
@@ -4899,7 +4889,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return include_rendered_content
 
     def _determine_if_expectation_validation_result_include_rendered_content(
-        self, include_rendered_content: Optional[bool] = None
+        self, include_rendered_content: bool | None = None
     ) -> bool:
         if include_rendered_content is None:
             if (
@@ -4912,7 +4902,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         return include_rendered_content
 
     @staticmethod
-    def _determine_save_changes_flag(save_changes: Optional[bool]) -> bool:
+    def _determine_save_changes_flag(save_changes: bool | None) -> bool:
         """
         This method is meant to enable the gradual deprecation of the `save_changes` boolean
         flag on various Datasource CRUD methods. Moving forward, we will always persist changes
@@ -4937,9 +4927,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
-        name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        runtime_environment: Optional[dict] = None,
+        name: str | None = None,
+        class_name: str | None = None,
+        runtime_environment: dict | None = None,
         pretty_print: bool = True,
         return_mode: Literal[
             "instantiated_class", "report_object"

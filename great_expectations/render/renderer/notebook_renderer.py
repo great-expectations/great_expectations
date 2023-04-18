@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import nbformat
 
@@ -21,12 +21,12 @@ class BaseNotebookRenderer(Renderer):
     Abstract base class for methods that help with rendering a jupyter notebook.
     """
 
-    def __init__(self, context: Optional[AbstractDataContext] = None) -> None:
+    def __init__(self, context: AbstractDataContext | None = None) -> None:
         super().__init__()
         self.context = context
         # Add cells to this notebook, then render by implementing a
         # self.render() and/or self.render_to_disk() method(s):
-        self._notebook: Optional[nbformat.NotebookNode] = None
+        self._notebook: nbformat.NotebookNode | None = None
 
     def add_code_cell(
         self, code: str, lint: bool = False, enforce_py_syntax: bool = True

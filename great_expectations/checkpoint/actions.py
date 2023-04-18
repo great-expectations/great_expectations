@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List
 
 import requests
 from typing_extensions import Final
@@ -22,7 +22,6 @@ try:
 except ImportError:
     pypd = None
 
-from typing import Optional
 
 from great_expectations.checkpoint.util import (
     send_email,
@@ -77,11 +76,9 @@ class ValidationAction:
     def run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset,
-        expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
+        expectation_suite_identifier: ExpectationSuiteIdentifier | None = None,
         checkpoint_identifier=None,
         **kwargs,
     ):
@@ -114,9 +111,7 @@ class ValidationAction:
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -152,9 +147,7 @@ class NoOpAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset,
         expectation_suite_identifier=None,
         checkpoint_identifier=None,
@@ -208,11 +201,11 @@ class SlackNotificationAction(ValidationAction):
         self,
         data_context: DataContext,
         renderer: dict,
-        slack_webhook: Optional[str] = None,
-        slack_token: Optional[str] = None,
-        slack_channel: Optional[str] = None,
+        slack_webhook: str | None = None,
+        slack_token: str | None = None,
+        slack_channel: str | None = None,
         notify_on: str = "all",
-        notify_with: Optional[list[str]] = None,
+        notify_with: list[str] | None = None,
         show_failed_expectations: bool = False,
     ) -> None:
         """Create a SlackNotificationAction"""
@@ -245,9 +238,7 @@ class SlackNotificationAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -366,9 +357,7 @@ class PagerdutyAlertAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -484,9 +473,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -568,10 +555,10 @@ class OpsgenieAlertAction(ValidationAction):
         data_context: DataContext,
         renderer: dict,
         api_key: str,
-        region: Optional[str] = None,
+        region: str | None = None,
         priority: str = "P3",
         notify_on: str = "failure",
-        tags: Optional[list[str]] = None,
+        tags: list[str] | None = None,
     ) -> None:
         """Create an OpsgenieAlertAction"""
         super().__init__(data_context)
@@ -598,9 +585,7 @@ class OpsgenieAlertAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -712,11 +697,11 @@ class EmailAction(ValidationAction):
         sender_login: str,
         sender_password: str,
         receiver_emails: str,
-        sender_alias: Optional[str] = None,
-        use_tls: Optional[bool] = None,
-        use_ssl: Optional[bool] = None,
+        sender_alias: str | None = None,
+        use_tls: bool | None = None,
+        use_ssl: bool | None = None,
         notify_on: str = "all",
-        notify_with: Optional[list[str]] = None,
+        notify_with: list[str] | None = None,
     ) -> None:
         """Create an EmailAction"""
         super().__init__(data_context)
@@ -760,9 +745,7 @@ class EmailAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset=None,
         payload=None,
         expectation_suite_identifier=None,
@@ -850,7 +833,7 @@ class StoreValidationResultAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
-        target_store_name: Optional[str] = None,
+        target_store_name: str | None = None,
     ) -> None:
         super().__init__(data_context)
         if target_store_name is None:
@@ -861,13 +844,11 @@ class StoreValidationResultAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
-        checkpoint_identifier: Optional[GXCloudIdentifier] = None,
+        checkpoint_identifier: GXCloudIdentifier | None = None,
     ):
         logger.debug("StoreValidationResultAction.run")
 
@@ -931,7 +912,7 @@ class StoreEvaluationParametersAction(ValidationAction):
     """
 
     def __init__(
-        self, data_context: AbstractDataContext, target_store_name: Optional[str] = None
+        self, data_context: AbstractDataContext, target_store_name: str | None = None
     ) -> None:
         super().__init__(data_context)
 
@@ -943,9 +924,7 @@ class StoreEvaluationParametersAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1009,7 +988,7 @@ class StoreMetricsAction(ValidationAction):
         self,
         data_context: AbstractDataContext,
         requested_metrics: dict,
-        target_store_name: Optional[str] = "metrics_store",
+        target_store_name: str | None = "metrics_store",
     ) -> None:
         super().__init__(data_context)
         self._requested_metrics = requested_metrics
@@ -1030,9 +1009,7 @@ class StoreMetricsAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1094,7 +1071,7 @@ class UpdateDataDocsAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
-        site_names: Optional[Union[List[str], str]] = None,
+        site_names: List[str] | str | None = None,
     ) -> None:
         """
         :param data_context: Data Context
@@ -1106,9 +1083,7 @@ class UpdateDataDocsAction(ValidationAction):
     def _run(
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
-        validation_result_suite_identifier: Union[
-            ValidationResultIdentifier, GXCloudIdentifier
-        ],
+        validation_result_suite_identifier: ValidationResultIdentifier | GXCloudIdentifier,
         data_asset,
         payload=None,
         expectation_suite_identifier=None,
@@ -1189,7 +1164,7 @@ class SNSNotificationAction(ValidationAction):
         self,
         data_context: DataContext,
         sns_topic_arn: str,
-        sns_message_subject: Optional[str],
+        sns_message_subject: str | None,
     ) -> None:
         """Inits SNSNotificationAction."""
         super().__init__(data_context)
@@ -1242,7 +1217,7 @@ class APINotificationAction(ValidationAction):
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
         data_asset,
-        expectation_suite_identifier: Optional[ExpectationSuiteIdentifier] = None,
+        expectation_suite_identifier: ExpectationSuiteIdentifier | None = None,
         checkpoint_identifier=None,
         **kwargs,
     ):

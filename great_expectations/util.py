@@ -39,11 +39,9 @@ from typing import (
     Dict,
     List,
     Mapping,
-    Optional,
     Set,
     SupportsFloat,
     Tuple,
-    Union,
     cast,
     overload,
 )
@@ -329,14 +327,14 @@ def get_currently_executing_function_call_arguments(
 
 
 def verify_dynamic_loading_support(
-    module_name: str, package_name: Optional[str] = None
+    module_name: str, package_name: str | None = None
 ) -> None:
     """
     :param module_name: a possibly-relative name of a module
     :param package_name: the name of a package, to which the given module belongs
     """
     # noinspection PyUnresolvedReferences
-    module_spec: Optional[importlib.machinery.ModuleSpec]
+    module_spec: importlib.machinery.ModuleSpec | None
     try:
         # noinspection PyUnresolvedReferences
         module_spec = importlib.util.find_spec(module_name, package=package_name)
@@ -354,12 +352,12 @@ templates, and assets is supported in your execution environment.  This error is
         raise FileNotFoundError(message)
 
 
-def import_library_module(module_name: str) -> Optional[ModuleType]:
+def import_library_module(module_name: str) -> ModuleType | None:
     """
     :param module_name: a fully-qualified name of a module (e.g., "great_expectations.dataset.sqlalchemy_dataset")
     :return: raw source code of the module (if can be retrieved)
     """
-    module_obj: Optional[ModuleType]
+    module_obj: ModuleType | None
 
     try:
         module_obj = importlib.import_module(module_name)
@@ -370,7 +368,7 @@ def import_library_module(module_name: str) -> Optional[ModuleType]:
 
 
 def is_library_loadable(library_name: str) -> bool:
-    module_obj: Optional[ModuleType] = import_library_module(module_name=library_name)
+    module_obj: ModuleType | None = import_library_module(module_name=library_name)
     return module_obj is not None
 
 
@@ -388,7 +386,7 @@ def load_class(class_name: str, module_name: str) -> Any:
     except FileNotFoundError:
         raise PluginModuleNotFoundError(module_name)
 
-    module_obj: Optional[ModuleType] = import_library_module(module_name=module_name)
+    module_obj: ModuleType | None = import_library_module(module_name=module_name)
 
     if module_obj is None:
         raise PluginModuleNotFoundError(module_name)
@@ -1140,14 +1138,14 @@ def _convert_json_bools_to_python_bools(code: str) -> str:
 
 
 def filter_properties_dict(
-    properties: Optional[dict] = None,
-    keep_fields: Optional[Set[str]] = None,
-    delete_fields: Optional[Set[str]] = None,
+    properties: dict | None = None,
+    keep_fields: Set[str] | None = None,
+    delete_fields: Set[str] | None = None,
     clean_nulls: bool = True,
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Optional[dict]:
+) -> dict | None:
     """Filter the entries of the source dictionary according to directives concerning the existing keys and values.
 
     Args:
@@ -1257,8 +1255,8 @@ def filter_properties_dict(
 @overload
 def deep_filter_properties_iterable(
     properties: dict,
-    keep_fields: Optional[Set[str]] = ...,
-    delete_fields: Optional[Set[str]] = ...,
+    keep_fields: Set[str] | None = ...,
+    delete_fields: Set[str] | None = ...,
     clean_nulls: bool = ...,
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
@@ -1270,8 +1268,8 @@ def deep_filter_properties_iterable(
 @overload
 def deep_filter_properties_iterable(
     properties: list,
-    keep_fields: Optional[Set[str]] = ...,
-    delete_fields: Optional[Set[str]] = ...,
+    keep_fields: Set[str] | None = ...,
+    delete_fields: Set[str] | None = ...,
     clean_nulls: bool = ...,
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
@@ -1283,8 +1281,8 @@ def deep_filter_properties_iterable(
 @overload
 def deep_filter_properties_iterable(
     properties: set,
-    keep_fields: Optional[Set[str]] = ...,
-    delete_fields: Optional[Set[str]] = ...,
+    keep_fields: Set[str] | None = ...,
+    delete_fields: Set[str] | None = ...,
     clean_nulls: bool = ...,
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
@@ -1296,8 +1294,8 @@ def deep_filter_properties_iterable(
 @overload
 def deep_filter_properties_iterable(
     properties: tuple,
-    keep_fields: Optional[Set[str]] = ...,
-    delete_fields: Optional[Set[str]] = ...,
+    keep_fields: Set[str] | None = ...,
+    delete_fields: Set[str] | None = ...,
     clean_nulls: bool = ...,
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
@@ -1309,8 +1307,8 @@ def deep_filter_properties_iterable(
 @overload
 def deep_filter_properties_iterable(
     properties: None,
-    keep_fields: Optional[Set[str]] = ...,
-    delete_fields: Optional[Set[str]] = ...,
+    keep_fields: Set[str] | None = ...,
+    delete_fields: Set[str] | None = ...,
     clean_nulls: bool = ...,
     clean_falsy: bool = ...,
     keep_falsy_numerics: bool = ...,
@@ -1320,14 +1318,14 @@ def deep_filter_properties_iterable(
 
 
 def deep_filter_properties_iterable(
-    properties: Union[dict, list, set, tuple, None] = None,
-    keep_fields: Optional[Set[str]] = None,
-    delete_fields: Optional[Set[str]] = None,
+    properties: dict | list | set | tuple | None = None,
+    keep_fields: Set[str] | None = None,
+    delete_fields: Set[str] | None = None,
     clean_nulls: bool = True,
     clean_falsy: bool = False,
     keep_falsy_numerics: bool = True,
     inplace: bool = False,
-) -> Union[dict, list, set, tuple, None]:
+) -> dict | list | set | tuple | None:
     if keep_fields is None:
         keep_fields = set()
 
@@ -1509,8 +1507,8 @@ def requires_lossy_conversion(d: decimal.Decimal) -> bool:
 
 
 def isclose(
-    operand_a: Union[datetime.datetime, datetime.timedelta, Number],
-    operand_b: Union[datetime.datetime, datetime.timedelta, Number],
+    operand_a: datetime.datetime | datetime.timedelta | Number,
+    operand_b: datetime.datetime | datetime.timedelta | Number,
     rtol: float = 1.0e-5,  # controls relative weight of "operand_b" (when its magnitude is large)
     atol: float = 1.0e-8,  # controls absolute accuracy (based on floating point machine precision)
     equal_nan: bool = False,
@@ -1705,36 +1703,36 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 @overload
 def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr = ...,
-    runtime_environment: Optional[dict] = ...,
+    runtime_environment: dict | None = ...,
     cloud_base_url: None = ...,
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
-    cloud_mode: Optional[Literal[False]] = ...,
+    cloud_mode: Literal[False] | None = ...,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: None = ...,
     ge_cloud_access_token: None = ...,
     ge_cloud_organization_id: None = ...,
-    ge_cloud_mode: Optional[Literal[False]] = ...,
+    ge_cloud_mode: Literal[False] | None = ...,
 ) -> FileDataContext:
     ...
 
 
 @overload
 def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
-    context_root_dir: Optional[PathStr] = ...,
-    runtime_environment: Optional[dict] = ...,
-    cloud_base_url: Optional[str] = ...,
-    cloud_access_token: Optional[str] = ...,
-    cloud_organization_id: Optional[str] = ...,
-    cloud_mode: Optional[bool] = ...,
+    project_config: DataContextConfig | Mapping | None = ...,
+    context_root_dir: PathStr | None = ...,
+    runtime_environment: dict | None = ...,
+    cloud_base_url: str | None = ...,
+    cloud_access_token: str | None = ...,
+    cloud_organization_id: str | None = ...,
+    cloud_mode: bool | None = ...,
     # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = ...,
-    ge_cloud_access_token: Optional[str] = ...,
-    ge_cloud_organization_id: Optional[str] = ...,
-    ge_cloud_mode: Optional[bool] = ...,
+    ge_cloud_base_url: str | None = ...,
+    ge_cloud_access_token: str | None = ...,
+    ge_cloud_organization_id: str | None = ...,
+    ge_cloud_mode: bool | None = ...,
 ) -> AbstractDataContext:
     ...
 
@@ -1745,18 +1743,18 @@ def get_context(
 @deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
 def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = None,
-    context_root_dir: Optional[PathStr] = None,
-    runtime_environment: Optional[dict] = None,
-    cloud_base_url: Optional[str] = None,
-    cloud_access_token: Optional[str] = None,
-    cloud_organization_id: Optional[str] = None,
-    cloud_mode: Optional[bool] = None,
+    project_config: DataContextConfig | Mapping | None = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = None,
-    ge_cloud_access_token: Optional[str] = None,
-    ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_mode: Optional[bool] = None,
+    ge_cloud_base_url: str | None = None,
+    ge_cloud_access_token: str | None = None,
+    ge_cloud_organization_id: str | None = None,
+    ge_cloud_mode: bool | None = None,
 ) -> AbstractDataContext:
     """Method to return the appropriate Data Context depending on parameters and environment.
 
@@ -1930,16 +1928,16 @@ def get_context(
 
 
 def _resolve_cloud_args(
-    cloud_base_url: Optional[str] = None,
-    cloud_access_token: Optional[str] = None,
-    cloud_organization_id: Optional[str] = None,
-    cloud_mode: Optional[bool] = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = None,
-    ge_cloud_access_token: Optional[str] = None,
-    ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_mode: Optional[bool] = None,
-) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[bool]]:
+    ge_cloud_base_url: str | None = None,
+    ge_cloud_access_token: str | None = None,
+    ge_cloud_organization_id: str | None = None,
+    ge_cloud_mode: bool | None = None,
+) -> Tuple[str | None, str | None, str | None, bool | None]:
     cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
     cloud_access_token = (
         cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
@@ -2009,8 +2007,8 @@ def get_sqlalchemy_url(drivername, **credentials):
 
 
 def get_sqlalchemy_selectable(
-    selectable: Union[sa.Table, sa_sql_expression_Select]
-) -> Union[sa.Table, sa_sql_expression_Select]:
+    selectable: sa.Table | sa_sql_expression_Select
+) -> sa.Table | sa_sql_expression_Select:
     """
     Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this

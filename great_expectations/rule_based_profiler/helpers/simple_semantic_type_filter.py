@@ -5,11 +5,9 @@ from typing import (
     Any,
     Dict,
     List,
-    Optional,
     Sequence,
     Type,
     TypeVar,
-    Union,
 )
 
 from typing_extensions import TypeGuard
@@ -42,9 +40,9 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
 
     def __init__(
         self,
-        batch_ids: Optional[List[str]] = None,
-        validator: Optional[Validator] = None,
-        column_names: Optional[List[str]] = None,
+        batch_ids: List[str] | None = None,
+        validator: Validator | None = None,
+        column_names: List[str] | None = None,
     ) -> None:
         self._build_table_column_name_to_inferred_semantic_domain_type_map(
             batch_ids=batch_ids,  # type: ignore[arg-type] # could be None
@@ -60,14 +58,12 @@ class SimpleSemanticTypeFilter(SemanticTypeFilter):
 
     def parse_semantic_domain_type_argument(
         self,
-        semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
+        semantic_types: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
     ) -> List[SemanticDomainTypes]:
         if semantic_types is None:
             return []
 
-        semantic_type: Union[str, SemanticDomainTypes]
+        semantic_type: str | SemanticDomainTypes
         if isinstance(semantic_types, str):
             semantic_types = semantic_types.lower()
             return [

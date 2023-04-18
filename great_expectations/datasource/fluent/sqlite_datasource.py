@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Optional, Type, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, List, Type, Union, cast
 
 import pydantic
 from typing_extensions import Literal
@@ -144,12 +144,12 @@ class _SQLiteAssetMixin:
 
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
     type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]  # override superclass value
-    splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
+    splitter: SqliteSplitter | None = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
     type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]  # override superclass value
-    splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
+    splitter: SqliteSplitter | None = None  # type: ignore[assignment]  # override superclass type
 
 
 @public_api
@@ -172,7 +172,7 @@ class SqliteDatasource(SQLDatasource):
     # right side of the operator determines the type name
     # left side enforces the names on instance creation
     type: Literal["sqlite"] = "sqlite"  # type: ignore[assignment]
-    connection_string: Union[ConfigStr, SqliteDsn]
+    connection_string: ConfigStr | SqliteDsn
 
     _TableAsset: Type[SqlTableAsset] = pydantic.PrivateAttr(SqliteTableAsset)
     _QueryAsset: Type[SqlQueryAsset] = pydantic.PrivateAttr(SqliteQueryAsset)
@@ -182,9 +182,9 @@ class SqliteDatasource(SQLDatasource):
         self,
         name: str,
         table_name: str,
-        schema_name: Optional[str] = None,
-        order_by: Optional[SortersDefinition] = None,
-        batch_metadata: Optional[BatchMetadata] = None,
+        schema_name: str | None = None,
+        order_by: SortersDefinition | None = None,
+        batch_metadata: BatchMetadata | None = None,
     ) -> SqliteTableAsset:
         return cast(
             SqliteTableAsset,
@@ -204,8 +204,8 @@ class SqliteDatasource(SQLDatasource):
         self,
         name: str,
         query: str,
-        order_by: Optional[SortersDefinition] = None,
-        batch_metadata: Optional[BatchMetadata] = None,
+        order_by: SortersDefinition | None = None,
+        batch_metadata: BatchMetadata | None = None,
     ) -> SqliteQueryAsset:
         return cast(
             SqliteQueryAsset,

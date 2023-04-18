@@ -6,11 +6,9 @@ from typing import (
     Dict,
     Iterable,
     List,
-    Optional,
     Set,
     Tuple,
     Type,
-    Union,
 )
 
 import great_expectations.exceptions as gx_exceptions
@@ -56,25 +54,19 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
 
     def __init__(
         self,
-        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        semantic_type_filter_module_name: Optional[str] = None,
-        semantic_type_filter_class_name: Optional[str] = None,
-        include_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        allowed_semantic_types_passthrough: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        cardinality_limit_mode: Optional[Union[str, CardinalityLimitMode, dict]] = None,
-        max_unique_values: Optional[Union[str, int]] = None,
-        max_proportion_unique: Optional[Union[str, float]] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        include_column_names: str | List[str] | None | None = None,
+        exclude_column_names: str | List[str] | None | None = None,
+        include_column_name_suffixes: str | Iterable | List[str] | None = None,
+        exclude_column_name_suffixes: str | Iterable | List[str] | None = None,
+        semantic_type_filter_module_name: str | None = None,
+        semantic_type_filter_class_name: str | None = None,
+        include_semantic_types: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
+        exclude_semantic_types: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
+        allowed_semantic_types_passthrough: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
+        cardinality_limit_mode: str | CardinalityLimitMode | dict | None = None,
+        max_unique_values: str | int | None = None,
+        max_proportion_unique: str | float | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """Create column domains where cardinality is within the specified limit.
 
@@ -137,9 +129,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
                 SemanticDomainTypes.LOGIC,
             ]
 
-        self._allowed_semantic_types_passthrough: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = allowed_semantic_types_passthrough
+        self._allowed_semantic_types_passthrough: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = allowed_semantic_types_passthrough
 
         super().__init__(
             include_column_names=include_column_names,
@@ -157,7 +147,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self._max_unique_values = max_unique_values
         self._max_proportion_unique = max_proportion_unique
 
-        self._cardinality_checker: Optional[CardinalityChecker] = None
+        self._cardinality_checker: CardinalityChecker | None = None
 
     @property
     def domain_type(self) -> MetricDomainTypes:
@@ -166,49 +156,45 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     @property
     def allowed_semantic_types_passthrough(
         self,
-    ) -> Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-    ]:
+    ) -> str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None:
         return self._allowed_semantic_types_passthrough
 
     @allowed_semantic_types_passthrough.setter
     def allowed_semantic_types_passthrough(
         self,
-        value: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ],
+        value: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None,
     ) -> None:
         self._allowed_semantic_types_passthrough = value
 
     @property
     def cardinality_limit_mode(
         self,
-    ) -> Optional[Union[str, CardinalityLimitMode, dict]]:
+    ) -> str | CardinalityLimitMode | dict | None:
         return self._cardinality_limit_mode
 
     @cardinality_limit_mode.setter
     def cardinality_limit_mode(
-        self, value: Optional[Union[str, CardinalityLimitMode, dict]]
+        self, value: str | CardinalityLimitMode | dict | None
     ) -> None:
         self._cardinality_limit_mode = value
 
     @property
-    def max_unique_values(self) -> Optional[Union[str, int]]:
+    def max_unique_values(self) -> str | int | None:
         return self._max_unique_values
 
     @property
-    def max_proportion_unique(self) -> Optional[Union[str, float]]:
+    def max_proportion_unique(self) -> str | float | None:
         return self._max_proportion_unique
 
     @property
-    def cardinality_checker(self) -> Optional[CardinalityChecker]:
+    def cardinality_checker(self) -> CardinalityChecker | None:
         return self._cardinality_checker
 
     def _get_domains(
         self,
         rule_name: str,
-        variables: Optional[ParameterContainer] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        runtime_configuration: dict | None = None,
     ) -> List[Domain]:
         """Return domains matching the selected cardinality_limit_mode.
 
@@ -220,9 +206,9 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         Returns:
             List of domains that match the desired cardinality.
         """
-        batch_ids: Optional[List[str]] = self.get_batch_ids(variables=variables)
+        batch_ids: List[str] | None = self.get_batch_ids(variables=variables)
 
-        validator: Optional[Validator] = self.get_validator(variables=variables)
+        validator: Validator | None = self.get_validator(variables=variables)
 
         effective_column_names: List[str] = self.get_effective_column_names(
             batch_ids=batch_ids,
@@ -231,9 +217,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         # Obtain cardinality_limit_mode from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        cardinality_limit_mode: Optional[
-            Union[str, CardinalityLimitMode, dict]
-        ] = get_parameter_value_and_validate_return_type(
+        cardinality_limit_mode: str | CardinalityLimitMode | dict | None = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.cardinality_limit_mode,
             expected_return_type=None,
@@ -242,7 +226,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         # Obtain max_unique_values from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        max_unique_values: Optional[int] = get_parameter_value_and_validate_return_type(
+        max_unique_values: int | None = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.max_unique_values,
             expected_return_type=None,
@@ -251,9 +235,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         # Obtain max_proportion_unique from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        max_proportion_unique: Optional[
-            float
-        ] = get_parameter_value_and_validate_return_type(
+        max_proportion_unique: float | None = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.max_proportion_unique,
             expected_return_type=None,
@@ -274,9 +256,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         # Obtain allowed_semantic_types_passthrough from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        allowed_semantic_types_passthrough: Union[
-            str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]
-        ] = get_parameter_value_and_validate_return_type(
+        allowed_semantic_types_passthrough: str | SemanticDomainTypes | List[str | SemanticDomainTypes] = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.allowed_semantic_types_passthrough,
             expected_return_type=None,
@@ -336,7 +316,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
     def _generate_metric_configurations_to_check_cardinality(
         self,
         column_names: List[str],
-        batch_ids: Optional[List[str]] = None,
+        batch_ids: List[str] | None = None,
     ) -> Dict[str, List[MetricConfiguration]]:
         """Generate metric configurations used to compute metrics for checking cardinality.
 
@@ -351,9 +331,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         """
         batch_ids = batch_ids or []
 
-        cardinality_limit_mode: Union[
-            AbsoluteCardinalityLimit, RelativeCardinalityLimit
-        ] = self.cardinality_checker.cardinality_limit_mode  # type: ignore[union-attr] # could be None
+        cardinality_limit_mode: AbsoluteCardinalityLimit | RelativeCardinalityLimit = self.cardinality_checker.cardinality_limit_mode  # type: ignore[union-attr] # could be None
 
         batch_id: str
         metric_configurations: Dict[str, List[MetricConfiguration]] = {
@@ -377,7 +355,7 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
         self,
         validator: Validator,
         metrics_for_cardinality_check: Dict[str, List[MetricConfiguration]],
-        runtime_configuration: Optional[dict] = None,
+        runtime_configuration: dict | None = None,
     ) -> List[str]:
         """Compute cardinality and return column names meeting cardinality limit.
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Set
 
 import numpy as np
 
@@ -50,10 +50,8 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -115,9 +113,9 @@ class ValueCountsSingleBatchParameterBuilder(MetricSingleBatchParameterBuilder):
     def _build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.

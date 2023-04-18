@@ -6,7 +6,7 @@ import logging
 import pathlib
 import re
 import warnings
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 import pyparsing as pp
@@ -133,7 +133,7 @@ def file_relative_path(
     return str(abs_path)
 
 
-def parse_substitution_variable(substitution_variable: str) -> Optional[str]:
+def parse_substitution_variable(substitution_variable: str) -> str | None:
     """
     Parse and check whether the string contains a substitution variable of the case insensitive form ${SOME_VAR} or $SOME_VAR
     Args:

@@ -20,10 +20,8 @@ from typing import (
     Dict,
     Iterable,
     List,
-    Optional,
     Tuple,
     Type,
-    Union,
     cast,
 )
 
@@ -856,7 +854,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                 type_ = schema[col]
                 if type_ in ["IntegerType", "LongType"]:
                     # Ints cannot be None...but None can be valid in Spark (as Null)
-                    vals: List[Union[str, int, float, None]] = []
+                    vals: List[str | int | float | None] = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
@@ -928,8 +926,8 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
 
 def build_pandas_validator_with_data(
     df: pd.DataFrame,
-    batch_definition: Optional[BatchDefinition] = None,
-    context: Optional[AbstractDataContext] = None,
+    batch_definition: BatchDefinition | None = None,
+    context: AbstractDataContext | None = None,
 ) -> Validator:
     batch = Batch(data=df, batch_definition=batch_definition)
 
@@ -953,9 +951,9 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     caching=True,
     sqlite_db_path=None,
     extra_debug_info="",
-    batch_definition: Optional[BatchDefinition] = None,
-    debug_logger: Optional[logging.Logger] = None,
-    context: Optional[AbstractDataContext] = None,
+    batch_definition: BatchDefinition | None = None,
+    debug_logger: logging.Logger | None = None,
+    context: AbstractDataContext | None = None,
     pk_column: bool = False,
 ):
     _debug = lambda x: x  # noqa: E731
@@ -1212,10 +1210,10 @@ def modify_locale(func):
 
 
 def build_spark_validator_with_data(
-    df: Union[pd.DataFrame, pyspark_sql_DataFrame],
+    df: pd.DataFrame | pyspark_sql_DataFrame,
     spark: pyspark_sql_SparkSession,
-    batch_definition: Optional[BatchDefinition] = None,
-    context: Optional[AbstractDataContext] = None,
+    batch_definition: BatchDefinition | None = None,
+    context: AbstractDataContext | None = None,
 ) -> Validator:
     if isinstance(df, pd.DataFrame):
         df = spark.createDataFrame(
@@ -1259,11 +1257,11 @@ def build_pandas_engine(
 def build_sa_engine(
     df: pd.DataFrame,
     sa: ModuleType,
-    schema: Optional[str] = None,
-    batch_id: Optional[str] = None,
+    schema: str | None = None,
+    batch_id: str | None = None,
     if_exists: str = "fail",
     index: bool = False,
-    dtype: Optional[dict] = None,
+    dtype: dict | None = None,
 ) -> SqlAlchemyExecutionEngine:
     table_name: str = "test"
 
@@ -1302,10 +1300,10 @@ def build_sa_engine(
 # Builds a Spark Execution Engine
 def build_spark_engine(
     spark: pyspark_sql_SparkSession,
-    df: Union[pd.DataFrame, pyspark_sql_DataFrame],
-    schema: Optional[sparktypes.StructType] = None,
-    batch_id: Optional[str] = None,
-    batch_definition: Optional[BatchDefinition] = None,
+    df: pd.DataFrame | pyspark_sql_DataFrame,
+    schema: sparktypes.StructType | None = None,
+    batch_id: str | None = None,
+    batch_definition: BatchDefinition | None = None,
 ) -> SparkDFExecutionEngine:
     if (
         sum(
@@ -1326,7 +1324,7 @@ def build_spark_engine(
 
     if isinstance(df, pd.DataFrame):
         if schema is None:
-            data: Union[pd.DataFrame, List[tuple]] = [
+            data: pd.DataFrame | List[tuple] = [
                 tuple(
                     None if isinstance(x, (float, int)) and np.isnan(x) else x
                     for x in record.tolist()
@@ -1610,7 +1608,7 @@ def build_test_backends_list(  # noqa: C901 - 48
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if include_sqlalchemy:
 
-        sa: Optional[ModuleType] = import_library_module(module_name="sqlalchemy")
+        sa: ModuleType | None = import_library_module(module_name="sqlalchemy")
         if sa is None:
             if raise_exceptions_for_backends is True:
                 raise ImportError(
@@ -1719,10 +1717,10 @@ def build_test_backends_list(  # noqa: C901 - 48
         if include_aws:
             # TODO need to come up with a better way to do this check.
             # currently this checks the 3 default EVN variables that boto3 looks for
-            aws_access_key_id: Optional[str] = os.getenv("AWS_ACCESS_KEY_ID")
-            aws_secret_access_key: Optional[str] = os.getenv("AWS_SECRET_ACCESS_KEY")
-            aws_session_token: Optional[str] = os.getenv("AWS_SESSION_TOKEN")
-            aws_config_file: Optional[str] = os.getenv("AWS_CONFIG_FILE")
+            aws_access_key_id: str | None = os.getenv("AWS_ACCESS_KEY_ID")
+            aws_secret_access_key: str | None = os.getenv("AWS_SECRET_ACCESS_KEY")
+            aws_session_token: str | None = os.getenv("AWS_SESSION_TOKEN")
+            aws_config_file: str | None = os.getenv("AWS_CONFIG_FILE")
             if (
                 not aws_access_key_id
                 and not aws_secret_access_key
@@ -1757,8 +1755,8 @@ def build_test_backends_list(  # noqa: C901 - 48
                 test_backends += ["trino"]
 
         if include_azure:
-            azure_credential: Optional[str] = os.getenv("AZURE_CREDENTIAL")
-            azure_access_key: Optional[str] = os.getenv("AZURE_ACCESS_KEY")
+            azure_credential: str | None = os.getenv("AZURE_CREDENTIAL")
+            azure_access_key: str | None = os.getenv("AZURE_ACCESS_KEY")
             if not azure_access_key and not azure_credential:
                 if raise_exceptions_for_backends is True:
                     raise ImportError(
@@ -1834,9 +1832,9 @@ def generate_expectation_tests(  # noqa: C901 - 43
     raise_exceptions_for_backends: bool = False,
     ignore_suppress: bool = False,
     ignore_only_for: bool = False,
-    debug_logger: Optional[logging.Logger] = None,
-    only_consider_these_backends: Optional[List[str]] = None,
-    context: Optional[AbstractDataContext] = None,  # noqa: F821
+    debug_logger: logging.Logger | None = None,
+    only_consider_these_backends: List[str] | None = None,
+    context: AbstractDataContext | None = None,  # noqa: F821
 ):
     """Determine tests to run
 
@@ -2180,7 +2178,7 @@ def should_we_generate_this_test(
     ignore_suppress: bool = False,
     ignore_only_for: bool = False,
     extra_debug_info: str = "",
-    debug_logger: Optional[logging.Logger] = None,
+    debug_logger: logging.Logger | None = None,
 ):
 
     _debug = lambda x: x  # noqa: E731
@@ -2342,7 +2340,7 @@ def evaluate_json_test_v3_api(  # noqa: C901 - 16
     expectation_type: str,
     test: Dict[str, Any],
     raise_exception: bool = True,
-    debug_logger: Optional[Logger] = None,
+    debug_logger: Logger | None = None,
     pk_column: bool = False,
 ):
     """
@@ -2947,8 +2945,8 @@ def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> st
     Copied get_awsathena_connection_url and get_awsathena_db_name funcs from
     tests/test_utils.py
     """
-    ATHENA_DB_NAME: Optional[str] = os.getenv(db_name_env_var)
-    ATHENA_STAGING_S3: Optional[str] = os.getenv("ATHENA_STAGING_S3")
+    ATHENA_DB_NAME: str | None = os.getenv(db_name_env_var)
+    ATHENA_STAGING_S3: str | None = os.getenv("ATHENA_STAGING_S3")
 
     if not ATHENA_DB_NAME:
         raise ValueError(

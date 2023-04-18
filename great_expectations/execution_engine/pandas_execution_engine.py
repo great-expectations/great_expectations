@@ -6,7 +6,7 @@ import logging
 import pickle
 from functools import partial
 from io import BytesIO
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple, Union, cast, overload
+from typing import Any, Callable, Dict, Iterable, Tuple, cast, overload
 
 import pandas as pd
 from typing_extensions import TypeAlias
@@ -199,7 +199,7 @@ class PandasExecutionEngine(ExecutionEngine):
         validator.expose_dataframe_methods = True
 
     def load_batch_data(
-        self, batch_id: str, batch_data: Union[PandasBatchData, pd.DataFrame]
+        self, batch_id: str, batch_data: PandasBatchData | pd.DataFrame
     ) -> None:
         if isinstance(batch_data, pd.DataFrame):
             batch_data = PandasBatchData(self, batch_data)
@@ -373,7 +373,7 @@ not {batch_spec.__class__.__name__}"""
         return typed_batch_data, batch_markers
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
-        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
+        splitter_method_name: str | None = batch_spec.get("splitter_method")
         if splitter_method_name:
             splitter_fn: Callable = self._data_splitter.get_splitter_method(
                 splitter_method_name
@@ -381,7 +381,7 @@ not {batch_spec.__class__.__name__}"""
             splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
-        sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
+        sampler_method_name: str | None = batch_spec.get("sampling_method")
         if sampler_method_name:
             sampling_fn: Callable = self._data_sampler.get_sampler_method(
                 sampler_method_name
@@ -445,7 +445,7 @@ not {batch_spec.__class__.__name__}"""
 
     @overload
     def _get_reader_fn(
-        self, reader_method: str = ..., path: Optional[str] = ...
+        self, reader_method: str = ..., path: str | None = ...
     ) -> DataFrameFactoryFn:
         ...
 
@@ -456,7 +456,7 @@ not {batch_spec.__class__.__name__}"""
         ...
 
     def _get_reader_fn(
-        self, reader_method: Optional[str] = None, path: Optional[str] = None
+        self, reader_method: str | None = None, path: str | None = None
     ) -> DataFrameFactoryFn:
         """Static helper for parsing reader types. If reader_method is not provided, path will be used to guess the
         correct reader_method.
@@ -619,8 +619,8 @@ not {batch_spec.__class__.__name__}"""
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
+        domain_type: str | MetricDomainTypes,
+        accessor_keys: Iterable[str] | None = None,
     ) -> Tuple[pd.DataFrame, dict, dict]:
         """Uses the given Domain kwargs (which include row_condition, condition_parser, and ignore_row_if directives) to obtain and/or query a batch.
 

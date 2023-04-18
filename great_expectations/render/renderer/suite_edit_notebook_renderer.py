@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import jinja2
 import nbformat
@@ -35,20 +35,20 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def __init__(
         self,
-        custom_templates_module: Optional[str] = None,
-        header_markdown: Optional[NotebookTemplateConfig] = None,
-        footer_markdown: Optional[NotebookTemplateConfig] = None,
-        table_expectations_header_markdown: Optional[NotebookTemplateConfig] = None,
-        column_expectations_header_markdown: Optional[NotebookTemplateConfig] = None,
-        table_expectations_not_found_markdown: Optional[NotebookTemplateConfig] = None,
-        column_expectations_not_found_markdown: Optional[NotebookTemplateConfig] = None,
-        authoring_intro_markdown: Optional[NotebookTemplateConfig] = None,
-        column_expectations_markdown: Optional[NotebookTemplateConfig] = None,
-        header_code: Optional[NotebookTemplateConfig] = None,
-        footer_code: Optional[NotebookTemplateConfig] = None,
-        column_expectation_code: Optional[NotebookTemplateConfig] = None,
-        table_expectation_code: Optional[NotebookTemplateConfig] = None,
-        context: Optional[AbstractDataContext] = None,
+        custom_templates_module: str | None = None,
+        header_markdown: NotebookTemplateConfig | None = None,
+        footer_markdown: NotebookTemplateConfig | None = None,
+        table_expectations_header_markdown: NotebookTemplateConfig | None = None,
+        column_expectations_header_markdown: NotebookTemplateConfig | None = None,
+        table_expectations_not_found_markdown: NotebookTemplateConfig | None = None,
+        column_expectations_not_found_markdown: NotebookTemplateConfig | None = None,
+        authoring_intro_markdown: NotebookTemplateConfig | None = None,
+        column_expectations_markdown: NotebookTemplateConfig | None = None,
+        header_code: NotebookTemplateConfig | None = None,
+        footer_code: NotebookTemplateConfig | None = None,
+        column_expectation_code: NotebookTemplateConfig | None = None,
+        table_expectation_code: NotebookTemplateConfig | None = None,
+        context: AbstractDataContext | None = None,
     ) -> None:
         super().__init__()
         custom_loader = []
@@ -93,7 +93,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     @staticmethod
     def from_data_context(data_context):
-        suite_edit_notebook_config: Optional[NotebookConfig] = None
+        suite_edit_notebook_config: NotebookConfig | None = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
             suite_edit_notebook_config = data_context.notebooks.get("suite_edit")
 
@@ -143,7 +143,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def render_with_overwrite(
         self,
-        notebook_config: Optional[NotebookTemplateConfig],
+        notebook_config: NotebookTemplateConfig | None,
         default_file_name: str,
         **default_kwargs,
     ):
@@ -158,7 +158,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         return rendered
 
     def add_header(
-        self, suite_name: str, batch_kwargs, suite_notes: Optional[dict]
+        self, suite_name: str, batch_kwargs, suite_notes: dict | None
     ) -> None:
         markdown = self.render_with_overwrite(
             self.header_markdown, "HEADER.md", suite_name=suite_name
@@ -316,7 +316,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         self.add_markdown_cell(markdown)
 
     def get_batch_kwargs(
-        self, suite: ExpectationSuite, batch_kwargs: Union[dict, BatchKwargs]
+        self, suite: ExpectationSuite, batch_kwargs: dict | BatchKwargs
     ):
         if isinstance(batch_kwargs, dict):
             return self._fix_path_in_batch_kwargs(batch_kwargs)

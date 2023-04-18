@@ -9,9 +9,7 @@ from typing import (
     Dict,
     List,
     Mapping,
-    Optional,
     Tuple,
-    Union,
     cast,
 )
 
@@ -68,16 +66,16 @@ class CloudDataContext(SerializableDataContext):
 
     def __init__(
         self,
-        project_config: Optional[Union[DataContextConfig, Mapping]] = None,
-        context_root_dir: Optional[PathStr] = None,
-        runtime_environment: Optional[dict] = None,
-        cloud_base_url: Optional[str] = None,
-        cloud_access_token: Optional[str] = None,
-        cloud_organization_id: Optional[str] = None,
+        project_config: DataContextConfig | Mapping | None = None,
+        context_root_dir: PathStr | None = None,
+        runtime_environment: dict | None = None,
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
         # <GX_RENAME> Deprecated as of 0.15.37
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
+        ge_cloud_base_url: str | None = None,
+        ge_cloud_access_token: str | None = None,
+        ge_cloud_organization_id: str | None = None,
     ) -> None:
         """
         CloudDataContext constructor
@@ -118,7 +116,7 @@ class CloudDataContext(SerializableDataContext):
         )
 
     def _init_project_config(
-        self, project_config: Optional[Union[DataContextConfig, Mapping]]
+        self, project_config: DataContextConfig | Mapping | None
     ) -> DataContextConfig:
         if project_config is None:
             project_config = self.retrieve_data_context_config_from_cloud(
@@ -133,14 +131,14 @@ class CloudDataContext(SerializableDataContext):
 
     @staticmethod
     def _resolve_cloud_args(
-        cloud_base_url: Optional[str] = None,
-        cloud_access_token: Optional[str] = None,
-        cloud_organization_id: Optional[str] = None,
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
         # <GX_RENAME> Deprecated as of 0.15.37
-        ge_cloud_base_url: Optional[str] = None,
-        ge_cloud_access_token: Optional[str] = None,
-        ge_cloud_organization_id: Optional[str] = None,
-    ) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+        ge_cloud_base_url: str | None = None,
+        ge_cloud_access_token: str | None = None,
+        ge_cloud_organization_id: str | None = None,
+    ) -> Tuple[str | None, str | None, str | None]:
         cloud_base_url = (
             cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
         )
@@ -171,9 +169,9 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def is_cloud_config_available(
         cls,
-        cloud_base_url: Optional[str] = None,
-        cloud_access_token: Optional[str] = None,
-        cloud_organization_id: Optional[str] = None,
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
     ) -> bool:
         """
         Helper method called by gx.get_context() method to determine whether all the information needed
@@ -204,7 +202,7 @@ class CloudDataContext(SerializableDataContext):
 
     @classmethod
     def determine_context_root_directory(
-        cls, context_root_dir: Optional[PathStr]
+        cls, context_root_dir: PathStr | None
     ) -> str:
         if context_root_dir is None:
             context_root_dir = os.getcwd()  # noqa: PTH109
@@ -252,9 +250,9 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def get_cloud_config(
         cls,
-        cloud_base_url: Optional[str] = None,
-        cloud_access_token: Optional[str] = None,
-        cloud_organization_id: Optional[str] = None,
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
     ) -> GXCloudConfig:
         """
         Build a GXCloudConfig object. Config attributes are collected from any combination of args passed in at
@@ -311,10 +309,10 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def _get_cloud_config_dict(
         cls,
-        cloud_base_url: Optional[str] = None,
-        cloud_access_token: Optional[str] = None,
-        cloud_organization_id: Optional[str] = None,
-    ) -> Dict[GXCloudEnvironmentVariable, Optional[str]]:
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
+    ) -> Dict[GXCloudEnvironmentVariable, str | None]:
         cloud_base_url = (
             cloud_base_url
             or cls._get_cloud_env_var(
@@ -350,7 +348,7 @@ class CloudDataContext(SerializableDataContext):
         deprecated_environment_variable: GXCloudEnvironmentVariable,
         conf_file_section: str,
         conf_file_option: str,
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Utility to gradually deprecate environment variables prefixed with `GE`.
 
@@ -405,7 +403,7 @@ class CloudDataContext(SerializableDataContext):
         return [suite_key.resource_name for suite_key in self.list_expectation_suites()]  # type: ignore[union-attr]
 
     @property
-    def ge_cloud_config(self) -> Optional[GXCloudConfig]:
+    def ge_cloud_config(self) -> GXCloudConfig | None:
         return self._cloud_config
 
     def _init_variables(self) -> CloudDataContextVariables:
@@ -432,7 +430,7 @@ class CloudDataContext(SerializableDataContext):
         return self.ge_cloud_config.organization_id  # type: ignore[return-value,union-attr]
 
     def get_config_with_variables_substituted(
-        self, config: Optional[DataContextConfig] = None
+        self, config: DataContextConfig | None = None
     ) -> DataContextConfig:
         """
         Substitute vars in config of form ${var} or $(var) with values found in the following places,
@@ -469,7 +467,7 @@ class CloudDataContext(SerializableDataContext):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
+        **kwargs: dict | None,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -495,16 +493,14 @@ class CloudDataContext(SerializableDataContext):
         )
 
         existing_suite_names = self.list_expectation_suite_names()
-        cloud_id: Optional[str] = None
+        cloud_id: str | None = None
         if expectation_suite_name in existing_suite_names and not overwrite_existing:
             raise gx_exceptions.DataContextError(
                 f"expectation_suite '{expectation_suite_name}' already exists. If you would like to overwrite this "
                 "expectation_suite, set overwrite_existing=True."
             )
         elif expectation_suite_name in existing_suite_names and overwrite_existing:
-            identifiers: Optional[
-                Union[List[str], List[GXCloudIdentifier]]
-            ] = self.list_expectation_suites()
+            identifiers: List[str] | List[GXCloudIdentifier] | None = self.list_expectation_suites()
             if identifiers:
                 for cloud_identifier in identifiers:
                     if isinstance(cloud_identifier, GXCloudIdentifier):
@@ -519,7 +515,7 @@ class CloudDataContext(SerializableDataContext):
             id=cloud_id,
         )
 
-        response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
+        response: bool | GXCloudResourceRef = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
             expectation_suite.ge_cloud_id = response.id
 
@@ -552,9 +548,9 @@ class CloudDataContext(SerializableDataContext):
 
     def get_expectation_suite(
         self,
-        expectation_suite_name: Optional[str] = None,
-        include_rendered_content: Optional[bool] = None,
-        ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: str | None = None,
+        include_rendered_content: bool | None = None,
+        ge_cloud_id: str | None = None,
     ) -> ExpectationSuite:
         """Get an Expectation Suite by name or GX Cloud ID
         Args:
@@ -595,10 +591,10 @@ class CloudDataContext(SerializableDataContext):
     def _save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
-        expectation_suite_name: Optional[str] = None,
+        expectation_suite_name: str | None = None,
         overwrite_existing: bool = True,
-        include_rendered_content: Optional[bool] = None,
-        **kwargs: Optional[dict],
+        include_rendered_content: bool | None = None,
+        **kwargs: dict | None,
     ) -> None:
         id = expectation_suite.ge_cloud_id
         key = GXCloudIdentifier(
@@ -719,10 +715,10 @@ class CloudDataContext(SerializableDataContext):
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
 
-    def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def list_checkpoints(self) -> List[str] | List[ConfigurationIdentifier]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
 
-    def list_profilers(self) -> Union[List[str], List[ConfigurationIdentifier]]:
+    def list_profilers(self) -> List[str] | List[ConfigurationIdentifier]:
         return RuleBasedProfiler.list_profilers(
             profiler_store=self.profiler_store,
             ge_cloud_mode=True,
@@ -753,8 +749,8 @@ class CloudDataContext(SerializableDataContext):
         return site_builder
 
     def _determine_key_for_profiler_save(
-        self, name: str, id: Optional[str]
-    ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
+        self, name: str, id: str | None
+    ) -> ConfigurationIdentifier | GXCloudIdentifier:
         """
         Note that this explicitly overriding the `AbstractDataContext` helper method called
         in `self.save_profiler()`.
@@ -767,7 +763,7 @@ class CloudDataContext(SerializableDataContext):
     @classmethod
     def _load_cloud_backed_project_config(
         cls,
-        cloud_config: Optional[GXCloudConfig],
+        cloud_config: GXCloudConfig | None,
     ):
         assert cloud_config is not None
         config = cls.retrieve_data_context_config_from_cloud(cloud_config=cloud_config)

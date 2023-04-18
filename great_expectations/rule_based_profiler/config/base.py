@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Type
 
 from marshmallow import INCLUDE, Schema, ValidationError, fields, post_dump, post_load
 from ruamel.yaml.comments import CommentedMap
@@ -108,7 +108,7 @@ class DomainBuilderConfig(SerializableDictDot):
     def __init__(
         self,
         class_name: str,
-        module_name: Optional[str] = None,
+        module_name: str | None = None,
         **kwargs,
     ) -> None:
         self.module_name = module_name
@@ -186,8 +186,8 @@ class ParameterBuilderConfig(SerializableDictDot):
         self,
         name: str,
         class_name: str,
-        module_name: Optional[str] = None,
-        evaluation_parameter_builder_configs: Optional[list] = None,
+        module_name: str | None = None,
+        evaluation_parameter_builder_configs: list | None = None,
         **kwargs,
     ) -> None:
         self.module_name = module_name
@@ -282,9 +282,9 @@ class ExpectationConfigurationBuilderConfig(SerializableDictDot):
         self,
         expectation_type: str,
         class_name: str,
-        module_name: Optional[str] = None,
-        meta: Optional[dict] = None,
-        validation_parameter_builder_configs: Optional[list] = None,
+        module_name: str | None = None,
+        meta: dict | None = None,
+        validation_parameter_builder_configs: list | None = None,
         **kwargs,
     ) -> None:
         self.module_name = module_name
@@ -389,12 +389,10 @@ class ExpectationConfigurationBuilderConfigSchema(NotNullSchema):
 class RuleConfig(SerializableDictDot):
     def __init__(
         self,
-        variables: Optional[Dict[str, Any]] = None,
-        domain_builder: Optional[dict] = None,  # see DomainBuilderConfig
-        parameter_builders: Optional[List[dict]] = None,  # see ParameterBuilderConfig
-        expectation_configuration_builders: Optional[
-            List[dict]
-        ] = None,  # see ExpectationConfigurationBuilderConfig
+        variables: Dict[str, Any] | None = None,
+        domain_builder: dict | None = None,  # see DomainBuilderConfig
+        parameter_builders: List[dict] | None = None,  # see ParameterBuilderConfig
+        expectation_configuration_builders: List[dict] | None = None,  # see ExpectationConfigurationBuilderConfig
     ) -> None:
         self.variables = variables
         self.domain_builder = domain_builder
@@ -490,9 +488,9 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         name: str,
         config_version: float,
         rules: Dict[str, dict],  # see RuleConfig
-        id: Optional[str] = None,
-        variables: Optional[Dict[str, Any]] = None,
-        commented_map: Optional[CommentedMap] = None,
+        id: str | None = None,
+        variables: Dict[str, Any] | None = None,
+        commented_map: CommentedMap | None = None,
     ) -> None:
         self.module_name = "great_expectations.rule_based_profiler"
         self.class_name = "RuleBasedProfiler"
@@ -513,7 +511,7 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         """
         try:
             schema_instance: Schema = cls._get_schema_instance()
-            config: Union[dict, BaseYamlConfig] = schema_instance.load(commented_map)
+            config: dict | BaseYamlConfig = schema_instance.load(commented_map)
             config.pop("class_name", None)  # type: ignore[union-attr] # BaseYamlConfig has no `.pop()`
             config.pop("module_name", None)  # type: ignore[union-attr] # BaseYamlConfig has no `.pop()`
             if isinstance(config, dict):
@@ -581,8 +579,8 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
     def resolve_config_using_acceptable_arguments(
         cls,
         profiler: RuleBasedProfiler,
-        variables: Optional[Dict[str, Any]] = None,
-        rules: Optional[Dict[str, Dict[str, Any]]] = None,
+        variables: Dict[str, Any] | None = None,
+        rules: Dict[str, Dict[str, Any]] | None = None,
     ) -> RuleBasedProfilerConfig:
         """Reconciles variables/rules by taking into account runtime overrides and variable substitution.
 
@@ -598,12 +596,10 @@ class RuleBasedProfilerConfig(AbstractConfig, BaseYamlConfig):
         Returns:
             An instance of RuleBasedProfilerConfig that represents the reconciled profiler.
         """
-        effective_variables: Optional[
-            ParameterContainer
-        ] = profiler.reconcile_profiler_variables(
+        effective_variables: ParameterContainer | None = profiler.reconcile_profiler_variables(
             variables=variables,
         )
-        runtime_variables: Optional[Dict[str, Any]] = convert_variables_to_dict(
+        runtime_variables: Dict[str, Any] | None = convert_variables_to_dict(
             variables=effective_variables
         )
 

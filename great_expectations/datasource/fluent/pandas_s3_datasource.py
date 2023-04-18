@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type
 
 import pydantic
 from typing_extensions import Literal
@@ -52,12 +52,12 @@ class PandasS3Datasource(_PandasFilePathDatasource):
 
     # S3 specific attributes
     bucket: str
-    boto3_options: Dict[str, Union[ConfigStr, Any]] = {}
+    boto3_options: Dict[str, ConfigStr | Any] = {}
 
-    _s3_client: Union[BaseClient, None] = pydantic.PrivateAttr(default=None)
+    _s3_client: BaseClient | None = pydantic.PrivateAttr(default=None)
 
     def _get_s3_client(self) -> BaseClient:
-        s3_client: Union[BaseClient, None] = self._s3_client
+        s3_client: BaseClient | None = self._s3_client
         if not s3_client:
             # Validate that "boto3" libarary was successfully imported and attempt to create "s3_client" handle.
             if BOTO3_IMPORTED:

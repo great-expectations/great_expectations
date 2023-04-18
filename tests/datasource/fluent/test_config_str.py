@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, List, Union
+from typing import Callable, List
 
 import pydantic
 import pytest
@@ -58,7 +58,7 @@ def test_config_str_validation():
 )
 def test_as_union_file_type(input_value, expected):
     class MyClass(FluentBaseModel):
-        my_field: Union[ConfigStr, pydantic.networks.PostgresDsn]
+        my_field: ConfigStr | pydantic.networks.PostgresDsn
 
     m = MyClass(my_field=input_value)
     print(m)
@@ -163,7 +163,7 @@ class TestSecretMasking:
         class MyUnionFields(FluentBaseModel):
             config_field: ConfigStr
             dsn_field: pydantic.PostgresDsn
-            union_field: Union[ConfigStr, pydantic.PostgresDsn]
+            union_field: ConfigStr | pydantic.PostgresDsn
 
         with pytest.raises(pydantic.ValidationError) as exc_info:
             m = MyUnionFields(

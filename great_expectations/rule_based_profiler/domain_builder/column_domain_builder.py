@@ -5,7 +5,6 @@ from typing import (
     ClassVar,
     Iterable,
     List,
-    Optional,
     Set,
     Tuple,
     Union,
@@ -48,19 +47,15 @@ class ColumnDomainBuilder(DomainBuilder):
 
     def __init__(
         self,
-        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        semantic_type_filter_module_name: Optional[str] = None,
-        semantic_type_filter_class_name: Optional[str] = None,
-        include_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        include_column_names: str | List[str] | None | None = None,
+        exclude_column_names: str | List[str] | None | None = None,
+        include_column_name_suffixes: str | Iterable | List[str] | None = None,
+        exclude_column_name_suffixes: str | Iterable | List[str] | None = None,
+        semantic_type_filter_module_name: str | None = None,
+        semantic_type_filter_class_name: str | None = None,
+        include_semantic_types: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
+        exclude_semantic_types: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         A semantic type is distinguished from the structured column type;
@@ -110,100 +105,92 @@ class ColumnDomainBuilder(DomainBuilder):
     """
 
     @property
-    def include_column_names(self) -> Optional[Union[str, Optional[List[str]]]]:
+    def include_column_names(self) -> str | List[str] | None | None:
         return self._include_column_names
 
     @include_column_names.setter
     def include_column_names(
-        self, value: Optional[Union[str, Optional[List[str]]]]
+        self, value: str | List[str] | None | None
     ) -> None:
         self._include_column_names = value
 
     @property
-    def exclude_column_names(self) -> Optional[Union[str, Optional[List[str]]]]:
+    def exclude_column_names(self) -> str | List[str] | None | None:
         return self._exclude_column_names
 
     @exclude_column_names.setter
     def exclude_column_names(
-        self, value: Optional[Union[str, Optional[List[str]]]]
+        self, value: str | List[str] | None | None
     ) -> None:
         self._exclude_column_names = value
 
     @property
     def include_column_name_suffixes(
         self,
-    ) -> Optional[Union[str, Iterable, List[str]]]:
+    ) -> str | Iterable | List[str] | None:
         return self._include_column_name_suffixes
 
     @include_column_name_suffixes.setter
     def include_column_name_suffixes(
-        self, value: Optional[Union[str, Iterable, List[str]]]
+        self, value: str | Iterable | List[str] | None
     ) -> None:
         self._include_column_name_suffixes = value
 
     @property
     def exclude_column_name_suffixes(
         self,
-    ) -> Optional[Union[str, Iterable, List[str]]]:
+    ) -> str | Iterable | List[str] | None:
         return self._exclude_column_name_suffixes
 
     @exclude_column_name_suffixes.setter
     def exclude_column_name_suffixes(
-        self, value: Optional[Union[str, Iterable, List[str]]]
+        self, value: str | Iterable | List[str] | None
     ) -> None:
         self._exclude_column_name_suffixes = value
 
     @property
-    def semantic_type_filter_module_name(self) -> Optional[str]:
+    def semantic_type_filter_module_name(self) -> str | None:
         return self._semantic_type_filter_module_name
 
     @property
-    def semantic_type_filter_class_name(self) -> Optional[str]:
+    def semantic_type_filter_class_name(self) -> str | None:
         return self._semantic_type_filter_class_name
 
     @property
     def include_semantic_types(
         self,
-    ) -> Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-    ]:
+    ) -> str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None:
         return self._include_semantic_types
 
     @include_semantic_types.setter
     def include_semantic_types(
         self,
-        value: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ],
+        value: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None,
     ) -> None:
         self._include_semantic_types = value
 
     @property
     def exclude_semantic_types(
         self,
-    ) -> Optional[
-        Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-    ]:
+    ) -> str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None:
         return self._exclude_semantic_types
 
     @exclude_semantic_types.setter
     def exclude_semantic_types(
         self,
-        value: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ],
+        value: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None,
     ) -> None:
         self._exclude_semantic_types = value
 
     @property
-    def semantic_type_filter(self) -> Optional[SemanticTypeFilter]:
+    def semantic_type_filter(self) -> SemanticTypeFilter | None:
         return self._semantic_type_filter
 
     def get_table_column_names(
         self,
-        batch_ids: Optional[List[str]] = None,
-        validator: Optional[Validator] = None,
-        variables: Optional[ParameterContainer] = None,
+        batch_ids: List[str] | None = None,
+        validator: Validator | None = None,
+        variables: ParameterContainer | None = None,
     ) -> List[str]:
         """
         This method returns all column names available (i.e., prior to any inclusions/exclusions filtering is applied).
@@ -234,9 +221,9 @@ class ColumnDomainBuilder(DomainBuilder):
     def get_filtered_column_names(
         self,
         column_names: List[str],
-        batch_ids: Optional[List[str]] = None,
-        validator: Optional[Validator] = None,
-        variables: Optional[ParameterContainer] = None,
+        batch_ids: List[str] | None = None,
+        validator: Validator | None = None,
+        variables: ParameterContainer | None = None,
     ) -> List[str]:
         """
         This method returns list of column names, filtered according to directives supplied via instance attributes.
@@ -312,9 +299,7 @@ class ColumnDomainBuilder(DomainBuilder):
             )
 
         # Obtain semantic_type_filter_module_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        semantic_type_filter_module_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
+        semantic_type_filter_module_name: str | None = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.semantic_type_filter_module_name,
             expected_return_type=None,
@@ -325,9 +310,7 @@ class ColumnDomainBuilder(DomainBuilder):
             semantic_type_filter_module_name = "great_expectations.rule_based_profiler.helpers.simple_semantic_type_filter"
 
         # Obtain semantic_type_filter_class_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        semantic_type_filter_class_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
+        semantic_type_filter_class_name: str | None = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.semantic_type_filter_class_name,
             expected_return_type=None,
@@ -351,7 +334,7 @@ class ColumnDomainBuilder(DomainBuilder):
         )
         self._semantic_type_filter = semantic_type_filter  # type: ignore[assignment] # could be None
 
-        include_semantic_types: List[Union[str, SemanticDomainTypes]] = cast(
+        include_semantic_types: List[str | SemanticDomainTypes] = cast(
             List[Union[str, SemanticDomainTypes]],
             self._resolve_list_type_property(
                 property_name="include_semantic_types",
@@ -374,7 +357,7 @@ class ColumnDomainBuilder(DomainBuilder):
                 )
             )
 
-        exclude_semantic_types: List[Union[str, SemanticDomainTypes]] = cast(
+        exclude_semantic_types: List[str | SemanticDomainTypes] = cast(
             List[Union[str, SemanticDomainTypes]],
             self._resolve_list_type_property(
                 property_name="exclude_semantic_types",
@@ -401,9 +384,9 @@ class ColumnDomainBuilder(DomainBuilder):
 
     def get_effective_column_names(
         self,
-        batch_ids: Optional[List[str]] = None,
-        validator: Optional[Validator] = None,
-        variables: Optional[ParameterContainer] = None,
+        batch_ids: List[str] | None = None,
+        validator: Validator | None = None,
+        variables: ParameterContainer | None = None,
     ) -> List[str]:
         """
         This method applies multiple directives to obtain columns to be included as part of returned "Domain" objects.
@@ -432,8 +415,8 @@ class ColumnDomainBuilder(DomainBuilder):
     def _get_domains(
         self,
         rule_name: str,
-        variables: Optional[ParameterContainer] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        runtime_configuration: dict | None = None,
     ) -> List[Domain]:
         """
         Obtains and returns domains for all columns of a table (or for configured columns, if they exist in the table).
@@ -468,8 +451,8 @@ class ColumnDomainBuilder(DomainBuilder):
     def _resolve_list_type_property(
         self,
         property_name: str,
-        property_value_type: Union[type, Tuple[type, ...]],
-        variables: Optional[ParameterContainer] = None,
+        property_value_type: type | Tuple[type, ...],
+        variables: ParameterContainer | None = None,
     ) -> List[type]:
         property_value = getattr(self, property_name, [])
         if property_value is None:

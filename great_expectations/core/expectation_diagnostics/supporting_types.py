@@ -4,7 +4,7 @@ import inspect
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Optional, Sequence, Union
+from typing import List, Sequence
 
 from typing_extensions import TypedDict
 
@@ -85,9 +85,9 @@ class RendererTestDiagnostics(SerializableDictDot):
 
     test_title: str
     rendered_successfully: bool
-    renderered_str: Union[str, None]
-    error_message: Union[str, None] = None
-    stack_trace: Union[str, None] = None
+    renderered_str: str | None
+    error_message: str | None = None
+    stack_trace: str | None = None
 
 
 @dataclass
@@ -121,8 +121,8 @@ class ExpectationExecutionEngineDiagnostics(SerializableDictDot):
 class ExpectationErrorDiagnostics(SerializableDictDot):
     error_msg: str
     stack_trace: str
-    test_title: Optional[str] = None
-    test_backend: Optional[str] = None
+    test_title: str | None = None
+    test_backend: str | None = None
 
 
 @dataclass
@@ -133,8 +133,8 @@ class ExpectationTestDiagnostics(SerializableDictDot):
     backend: str
     test_passed: bool
     include_in_gallery: bool
-    validation_result: Optional[ExpectationValidationResult]
-    error_diagnostics: Optional[ExpectationErrorDiagnostics]
+    validation_result: ExpectationValidationResult | None
+    error_diagnostics: ExpectationErrorDiagnostics | None
 
 
 @dataclass
@@ -144,7 +144,7 @@ class ExpectationBackendTestResultCounts(SerializableDictDot):
     backend: str
     num_passed: int
     num_failed: int
-    failing_names: Optional[List[str]]
+    failing_names: List[str] | None
 
 
 class ExpectationDiagnosticCheckMessageDict(TypedDict):
@@ -158,7 +158,7 @@ class ExpectationDiagnosticCheckMessage(SerializableDictDot):
 
     message: str
     passed: bool
-    doc_url: Optional[str] = None
+    doc_url: str | None = None
     sub_messages: Sequence[
         ExpectationDiagnosticCheckMessage | ExpectationDiagnosticCheckMessageDict
     ] = field(default_factory=list)

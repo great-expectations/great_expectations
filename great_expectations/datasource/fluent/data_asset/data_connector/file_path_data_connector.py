@@ -4,7 +4,7 @@ import copy
 import logging
 import re
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Set, Tuple
 
 from great_expectations.core import IDDict
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
@@ -72,7 +72,7 @@ class FilePathDataConnector(DataConnector):
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> None:
         super().__init__(
             datasource_name=datasource_name,
@@ -88,7 +88,7 @@ class FilePathDataConnector(DataConnector):
             unnamed_regex_group_prefix=self._unnamed_regex_group_prefix,
         )
 
-        self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
+        self._file_path_template_map_fn: Callable | None = file_path_template_map_fn
 
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict[str, List[BatchDefinition] | None] = {}
@@ -248,7 +248,7 @@ class FilePathDataConnector(DataConnector):
         """
 
         def _matching_criterion(
-            batch_definition_list: Union[List[BatchDefinition], None]
+            batch_definition_list: List[BatchDefinition] | None
         ) -> bool:
             return (
                 (batch_definition_list is not None)
@@ -256,7 +256,7 @@ class FilePathDataConnector(DataConnector):
                 else (batch_definition_list is None)
             )
 
-        data_reference_mapped_element: Tuple[str, Union[List[BatchDefinition], None]]
+        data_reference_mapped_element: Tuple[str, List[BatchDefinition] | None]
         # noinspection PyTypeChecker
         unmatched_data_references: List[str] = list(
             dict(
@@ -386,9 +386,7 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     def _map_data_reference_string_to_batch_definition_list_using_regex(
         self, data_reference: str
     ) -> List[BatchDefinition] | None:
-        batch_identifiers: Optional[
-            IDDict
-        ] = self._convert_data_reference_string_to_batch_identifiers_using_regex(
+        batch_identifiers: IDDict | None = self._convert_data_reference_string_to_batch_identifiers_using_regex(
             data_reference=data_reference
         )
         if batch_identifiers is None:
@@ -408,9 +406,9 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
 
     def _convert_data_reference_string_to_batch_identifiers_using_regex(
         self, data_reference: str
-    ) -> Optional[IDDict]:
+    ) -> IDDict | None:
         # noinspection PyUnresolvedReferences
-        matches: Optional[re.Match] = self._regex_parser.get_matches(
+        matches: re.Match | None = self._regex_parser.get_matches(
             target=data_reference
         )
         if matches is None:

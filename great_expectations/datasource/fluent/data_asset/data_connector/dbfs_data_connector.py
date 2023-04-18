@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import Callable, Optional
+from typing import Callable
 
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
@@ -36,12 +36,12 @@ class DBFSDataConnector(FilesystemDataConnector):
         batching_regex: re.Pattern,
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
-        data_context_root_directory: Optional[pathlib.Path] = None,
+        data_context_root_directory: pathlib.Path | None = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> None:
         super().__init__(
             datasource_name=datasource_name,
@@ -65,12 +65,12 @@ class DBFSDataConnector(FilesystemDataConnector):
         batching_regex: re.Pattern,
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
-        data_context_root_directory: Optional[pathlib.Path] = None,
+        data_context_root_directory: pathlib.Path | None = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> DBFSDataConnector:
         """Builds "DBFSDataConnector", which links named DataAsset to DBFS.
 

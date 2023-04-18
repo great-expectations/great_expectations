@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Tuple, Union
+from typing import Tuple
 
 
 class DataContextKey(metaclass=ABCMeta):
@@ -82,12 +82,12 @@ class StringKey(DataContextKey):
 class DataContextVariableKey(DataContextKey):
     def __init__(
         self,
-        resource_name: Optional[str] = None,
+        resource_name: str | None = None,
     ) -> None:
         self._resource_name = resource_name
 
     @property
-    def resource_name(self) -> Union[str, None]:
+    def resource_name(self) -> str | None:
         return self._resource_name
 
     def to_tuple(self) -> Tuple[str]:

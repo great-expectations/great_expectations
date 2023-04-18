@@ -7,7 +7,6 @@ from typing import (
     TYPE_CHECKING,
     Dict,
     List,
-    Optional,
     Tuple,
 )
 
@@ -564,9 +563,9 @@ class MapMetricProvider(MetricProvider):
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
+        configuration: ExpectationConfiguration | None = None,
+        execution_engine: ExecutionEngine | None = None,
+        runtime_configuration: dict | None = None,
     ):
         dependencies: Dict[str, MetricConfiguration] = {}
 

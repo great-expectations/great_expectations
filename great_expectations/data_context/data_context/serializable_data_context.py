@@ -5,7 +5,7 @@ import os
 import pathlib
 import shutil
 import warnings
-from typing import TYPE_CHECKING, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, ClassVar
 
 from ruamel.yaml import YAML
 
@@ -58,7 +58,7 @@ class SerializableDataContext(AbstractDataContext):
     def __init__(
         self,
         context_root_dir: PathStr,
-        runtime_environment: Optional[dict] = None,
+        runtime_environment: dict | None = None,
     ) -> None:
         if isinstance(context_root_dir, pathlib.Path):
             # TODO: (kilo59) 122022 should be saving and passing around `pathlib.Path` not str
@@ -134,12 +134,8 @@ class SerializableDataContext(AbstractDataContext):
             A boolean signifying whether or not the current DataContext's config needs
             to be persisted in order to recognize changes made to usage statistics.
         """
-        project_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = project_config.anonymous_usage_statistics
-        context_config_usage_stats: Optional[
-            AnonymizedUsageStatisticsConfig
-        ] = self.config.anonymous_usage_statistics
+        project_config_usage_stats: AnonymizedUsageStatisticsConfig | None = project_config.anonymous_usage_statistics
+        context_config_usage_stats: AnonymizedUsageStatisticsConfig | None = self.config.anonymous_usage_statistics
 
         if (
             project_config_usage_stats.enabled is False  # type: ignore[union-attr]
@@ -157,7 +153,7 @@ class SerializableDataContext(AbstractDataContext):
             return True
 
         # If the data_context_id differs and that difference is not a result of a global override, a sync is necessary.
-        global_data_context_id: Optional[str] = self._get_data_context_id_override()
+        global_data_context_id: str | None = self._get_data_context_id_override()
         if (
             project_config_usage_stats.data_context_id
             != context_config_usage_stats.data_context_id
@@ -166,7 +162,7 @@ class SerializableDataContext(AbstractDataContext):
             return True
 
         # If the usage_statistics_url differs and that difference is not a result of a global override, a sync is necessary.
-        global_usage_stats_url: Optional[str] = self._get_usage_stats_url_override()
+        global_usage_stats_url: str | None = self._get_usage_stats_url_override()
         if (
             project_config_usage_stats.usage_statistics_url
             != context_config_usage_stats.usage_statistics_url
@@ -180,9 +176,9 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def create(
         cls,
-        project_root_dir: Optional[PathStr] = None,
+        project_root_dir: PathStr | None = None,
         usage_statistics_enabled: bool = True,
-        runtime_environment: Optional[dict] = None,
+        runtime_environment: dict | None = None,
     ) -> SerializableDataContext:
         """
         Build a new great_expectations directory and DataContext object in the provided project_root_dir.
@@ -372,8 +368,8 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def get_ge_config_version(
-        cls, context_root_dir: Optional[PathStr] = None
-    ) -> Optional[float]:
+        cls, context_root_dir: PathStr | None = None
+    ) -> float | None:
         """
         TODO
         """
@@ -390,8 +386,8 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def set_ge_config_version(
         cls,
-        config_version: Union[int, float],
-        context_root_dir: Optional[str] = None,
+        config_version: int | float,
+        context_root_dir: str | None = None,
         validate_config_version: bool = True,
     ) -> bool:
         """
@@ -431,8 +427,8 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def _find_context_yml_file(
-        cls, search_start_dir: Optional[PathStr] = None
-    ) -> Optional[str]:
+        cls, search_start_dir: PathStr | None = None
+    ) -> str | None:
         """Search for the yml file starting here and moving upward."""
         yml_path = None
         if search_start_dir is None:
@@ -510,7 +506,7 @@ class SerializableDataContext(AbstractDataContext):
     @classmethod
     def _attempt_context_instantiation(
         cls, ge_dir: PathStr
-    ) -> Optional[SerializableDataContext]:
+    ) -> SerializableDataContext | None:
         try:
             context = cls(context_root_dir=ge_dir)
             return context

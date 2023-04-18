@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Type
 
 import pydantic
 
@@ -71,7 +71,7 @@ class S3DataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> None:
         self._s3_client: BaseClient = s3_client
 
@@ -106,7 +106,7 @@ class S3DataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> S3DataConnector:
         """Builds "S3DataConnector", which links named DataAsset to AWS S3.
 

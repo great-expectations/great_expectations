@@ -19,9 +19,7 @@ from typing import (
     Dict,
     Iterable,
     List,
-    Optional,
     Tuple,
-    Union,
     cast,
 )
 
@@ -294,15 +292,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     # noinspection PyUnusedLocal
     def __init__(  # noqa: C901 - 17
         self,
-        name: Optional[str] = None,
-        credentials: Optional[dict] = None,
-        data_context: Optional[Any] = None,
-        engine: Optional[SaEngine] = None,
-        connection_string: Optional[str] = None,
-        url: Optional[str] = None,
-        batch_data_dict: Optional[dict] = None,
+        name: str | None = None,
+        credentials: dict | None = None,
+        data_context: Any | None = None,
+        engine: SaEngine | None = None,
+        connection_string: str | None = None,
+        url: str | None = None,
+        batch_data_dict: dict | None = None,
         create_temp_table: bool = True,
-        concurrency: Optional[ConcurrencyConfig] = None,
+        concurrency: ConcurrencyConfig | None = None,
         **kwargs,  # These will be passed as optional parameters to the SQLAlchemy engine, **not** the ExecutionEngine
     ) -> None:
         super().__init__(name=name, batch_data_dict=batch_data_dict)
@@ -471,15 +469,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         self._data_sampler = SqlAlchemyDataSampler()
 
     @property
-    def credentials(self) -> Optional[dict]:
+    def credentials(self) -> dict | None:
         return self._credentials
 
     @property
-    def connection_string(self) -> Optional[str]:
+    def connection_string(self) -> str | None:
         return self._connection_string
 
     @property
-    def url(self) -> Optional[str]:
+    def url(self) -> str | None:
         return self._url
 
     @property
@@ -592,7 +590,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         """
         data_object: SqlAlchemyBatchData
 
-        batch_id: Optional[str] = domain_kwargs.get("batch_id")
+        batch_id: str | None = domain_kwargs.get("batch_id")
         if batch_id is None:
             # We allow no batch id specified if there is only one batch
             if self.batch_manager.active_batch_data:
@@ -797,8 +795,8 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
+        domain_type: str | MetricDomainTypes,
+        accessor_keys: Iterable[str] | None = None,
     ) -> Tuple[sa_sql_expression_Selectable, dict, dict]:
         """Uses a given batch dictionary and Domain kwargs to obtain a SqlAlchemy column object.
 
@@ -1185,7 +1183,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
 
     def _build_selectable_from_batch_spec(
         self, batch_spec: BatchSpec
-    ) -> Union[sa_sql_expression_Selectable, str]:
+    ) -> sa_sql_expression_Selectable | str:
         if (
             batch_spec.get("query") is not None
             and batch_spec.get("sampling_method") is not None
@@ -1211,7 +1209,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 split_clause = sa.true()
 
         selectable: sa_sql_expression_Selectable = self._subselectable(batch_spec)
-        sampling_method: Optional[str] = batch_spec.get("sampling_method")
+        sampling_method: str | None = batch_spec.get("sampling_method")
         if sampling_method is not None:
             if sampling_method in [
                 "_sample_using_limit",
@@ -1280,7 +1278,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 f"table_name={batch_spec.get('table_name')}, query={batch_spec.get('query')}"
             )
 
-        batch_data: Optional[SqlAlchemyBatchData] = None
+        batch_data: SqlAlchemyBatchData | None = None
         batch_markers = BatchMarkers(
             {
                 "ge_load_time": datetime.datetime.now(datetime.timezone.utc).strftime(
@@ -1292,7 +1290,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         source_schema_name: str = batch_spec.get("schema_name", None)
         source_table_name: str = batch_spec.get("table_name", None)
 
-        temp_table_schema_name: Optional[str] = batch_spec.get("temp_table_schema_name")
+        temp_table_schema_name: str | None = batch_spec.get("temp_table_schema_name")
 
         if batch_spec.get("bigquery_temp_table"):
             # deprecated-v0.15.3
@@ -1321,9 +1319,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 source_schema_name=source_schema_name,
             )
         elif isinstance(batch_spec, SqlAlchemyDatasourceBatchSpec):
-            selectable: Union[
-                sa_sql_expression_Selectable, str
-            ] = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
+            selectable: sa_sql_expression_Selectable | str = self._build_selectable_from_batch_spec(batch_spec=batch_spec)
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
                 selectable=selectable,

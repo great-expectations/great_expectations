@@ -7,7 +7,7 @@ import subprocess
 import sys
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, cast
 
 import click
 
@@ -83,14 +83,12 @@ When you run this notebook, Great Expectations will store these expectations in 
 
 
 def get_or_create_expectation_suite(
-    expectation_suite_name: Optional[str],
+    expectation_suite_name: str | None,
     data_context: FileDataContext,
-    data_asset_name: Optional[str] = None,
-    usage_event: Optional[str] = None,
+    data_asset_name: str | None = None,
+    usage_event: str | None = None,
     suppress_usage_message: bool = False,
-    batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-    ] = None,
+    batch_request: str | Dict[str, str | int | Dict[str, Any]] | None = None,
     create_if_not_exist: bool = True,
 ) -> ExpectationSuite:
     if expectation_suite_name is None:
@@ -137,10 +135,8 @@ def get_or_create_expectation_suite(
 
 
 def get_default_expectation_suite_name(
-    data_asset_name: Optional[str],
-    batch_request: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-    ] = None,
+    data_asset_name: str | None,
+    batch_request: str | Dict[str, str | int | Dict[str, Any]] | None = None,
 ) -> str:
     suite_name: str
     if data_asset_name:
@@ -155,7 +151,7 @@ def get_default_expectation_suite_name(
 def tell_user_suite_exists(
     data_context: FileDataContext,
     expectation_suite_name: str,
-    usage_event: Optional[str],
+    usage_event: str | None,
     suppress_usage_message: bool = False,
 ) -> None:
     exit_with_failure_message_and_stats(
@@ -168,7 +164,7 @@ def tell_user_suite_exists(
 
 
 def launch_jupyter_notebook(notebook_path: str) -> None:
-    jupyter_command_override: Optional[str] = os.getenv("GE_JUPYTER_CMD", None)
+    jupyter_command_override: str | None = os.getenv("GE_JUPYTER_CMD", None)
     if jupyter_command_override:
         subprocess.call(f"{jupyter_command_override} {notebook_path}", shell=True)
     else:
@@ -177,8 +173,8 @@ def launch_jupyter_notebook(notebook_path: str) -> None:
 
 def get_validator(
     context: FileDataContext,
-    batch_request: Union[dict, BatchRequest],
-    suite: Union[str, ExpectationSuite],
+    batch_request: dict | BatchRequest,
+    suite: str | ExpectationSuite,
 ) -> Validator:
     assert isinstance(
         suite, (str, ExpectationSuite)
@@ -202,7 +198,7 @@ def get_validator(
 def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
     data_context: FileDataContext,
     expectation_suite_name: str,
-    usage_event: Optional[str],
+    usage_event: str | None,
     suppress_usage_message: bool = False,
     create_if_not_exist: bool = True,
 ) -> ExpectationSuite:
@@ -219,7 +215,7 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
     if expectation_suite_name.endswith(".json"):
         expectation_suite_name = expectation_suite_name[:-5]
 
-    suite: Optional[ExpectationSuite] = None
+    suite: ExpectationSuite | None = None
     try:
         suite = data_context.get_expectation_suite(
             expectation_suite_name=expectation_suite_name
@@ -243,9 +239,9 @@ def load_expectation_suite(  # type: ignore[return] # sys.exit if no suite
 
 def exit_with_failure_message_and_stats(
     data_context: FileDataContext,
-    usage_event: Optional[str],
+    usage_event: str | None,
     suppress_usage_message: bool = False,
-    message: Optional[str] = None,
+    message: str | None = None,
 ) -> None:
     if message:
         cli_message(string=message)
@@ -316,7 +312,7 @@ def validate_checkpoint(
     context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
-    failure_message: Optional[str] = None,
+    failure_message: str | None = None,
 ) -> None:
     try:
         _ = load_checkpoint(
@@ -336,10 +332,10 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
     context: FileDataContext,
     checkpoint_name: str,
     usage_event: str,
-) -> Union[Checkpoint, LegacyCheckpoint]:
+) -> Checkpoint | LegacyCheckpoint:
     """Load a Checkpoint or raise helpful errors."""
     try:
-        checkpoint: Union[Checkpoint, LegacyCheckpoint] = context.get_checkpoint(
+        checkpoint: Checkpoint | LegacyCheckpoint = context.get_checkpoint(
             name=checkpoint_name
         )
         return checkpoint
@@ -358,11 +354,11 @@ def load_checkpoint(  # type: ignore[return] # sys.exit if no checkpoint
 
 
 def select_datasource(
-    context: FileDataContext, datasource_name: Optional[str] = None
-) -> Union[BaseDatasource, LegacyDatasource, FluentDatasource, None]:
+    context: FileDataContext, datasource_name: str | None = None
+) -> BaseDatasource | LegacyDatasource | FluentDatasource | None:
     """Select a datasource interactively."""
     # TODO consolidate all the myriad CLI tests into this
-    data_source: Union[BaseDatasource, LegacyDatasource, FluentDatasource, None] = None
+    data_source: BaseDatasource | LegacyDatasource | FluentDatasource | None = None
 
     if datasource_name is None:
         data_sources: List[BaseDatasource] = cast(
@@ -402,10 +398,10 @@ def select_datasource(
 
 
 def load_data_context_with_error_handling(
-    directory: Optional[str], from_cli_upgrade_command: bool = False
-) -> Optional[FileDataContext]:
+    directory: str | None, from_cli_upgrade_command: bool = False
+) -> FileDataContext | None:
     """Return a DataContext with good error handling and exit codes."""
-    context: Optional[FileDataContext]
+    context: FileDataContext | None
     ge_config_version: float
     try:
         directory = directory or FileDataContext.find_context_root_dir()
@@ -469,13 +465,13 @@ def load_data_context_with_error_handling(
 
 def upgrade_project_strictly_multiple_versions_increment(
     directory: str, ge_config_version: float, from_cli_upgrade_command: bool = False
-) -> Optional[FileDataContext]:
+) -> FileDataContext | None:
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
         else None
     )
-    context: Optional[FileDataContext]
+    context: FileDataContext | None
     if upgrade_helper_class and int(ge_config_version) < CURRENT_GX_CONFIG_VERSION:
         upgrade_project(
             context_root_dir=directory,
@@ -591,7 +587,7 @@ def upgrade_project_one_or_multiple_versions_increment(
     context: FileDataContext,
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
-) -> Optional[FileDataContext]:
+) -> FileDataContext | None:
     # noinspection PyBroadException
     try:
         send_usage_message(
@@ -674,7 +670,7 @@ def upgrade_project_zero_versions_increment(
     context: FileDataContext,
     ge_config_version: float,
     from_cli_upgrade_command: bool = False,
-) -> Optional[FileDataContext]:
+) -> FileDataContext | None:
     upgrade_helper_class = (
         GE_UPGRADE_HELPER_VERSION_MAP.get(int(ge_config_version))
         if ge_config_version
@@ -829,8 +825,8 @@ def confirm_proceed_or_exit(
     continuation_message: str = "Ok, exiting now. You can always read more at https://docs.greatexpectations.io/ !",
     exit_on_no: bool = True,
     exit_code: int = 0,
-    data_context: Optional[FileDataContext] = None,
-    usage_stats_event: Optional[str] = None,
+    data_context: FileDataContext | None = None,
+    usage_stats_event: str | None = None,
 ) -> bool:
     """
     Every CLI command that starts a potentially lengthy (>1 sec) computation
@@ -890,8 +886,8 @@ def parse_cli_config_file_location(config_file_location: str) -> dict:
 
         # If the file or directory exists, treat it appropriately
         # This handles files without extensions
-        filename: Optional[str]
-        directory: Optional[str]
+        filename: str | None
+        directory: str | None
         if config_file_location_path.is_file():
             filename = rf"{str(config_file_location_path.name)}"
             directory = rf"{str(config_file_location_path.parent)}"
@@ -945,8 +941,8 @@ def get_relative_path_from_config_file_to_base_path(
 def load_json_file_into_dict(
     filepath: str,
     data_context: FileDataContext,
-    usage_event: Optional[str] = None,
-) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
+    usage_event: str | None = None,
+) -> Dict[str, str | int | Dict[str, Any]] | None:
     suppress_usage_message: bool = (usage_event is None) or (data_context is None)
 
     error_message: str
@@ -969,7 +965,7 @@ def load_json_file_into_dict(
             message=f"<red>{error_message}</red>",
         )
 
-    contents: Optional[str] = None
+    contents: str | None = None
     try:
         with open(filepath) as json_file:
             contents = json_file.read()
@@ -982,7 +978,7 @@ def load_json_file_into_dict(
             message=f"<red>{error_message}</red>",
         )
 
-    batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None
+    batch_request: Dict[str, str | int | Dict[str, Any]] | None = None
     if contents:
         try:
             batch_request = json.loads(contents)
@@ -1009,11 +1005,9 @@ def load_json_file_into_dict(
 
 
 def get_batch_request_from_citations(
-    expectation_suite: Optional[ExpectationSuite] = None,
-) -> Optional[Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]]:
-    batch_request_from_citation: Optional[
-        Union[str, Dict[str, Union[str, int, Dict[str, Any]]]]
-    ] = None
+    expectation_suite: ExpectationSuite | None = None,
+) -> str | Dict[str, str | int | Dict[str, Any]] | None:
+    batch_request_from_citation: str | Dict[str, str | int | Dict[str, Any]] | None = None
 
     if expectation_suite is not None:
         citations: List[Dict[str, Any]] = expectation_suite.get_citations(
@@ -1029,7 +1023,7 @@ def get_batch_request_from_citations(
 def add_citation_with_batch_request(
     data_context: FileDataContext,
     expectation_suite: ExpectationSuite,
-    batch_request: Optional[Dict[str, Union[str, int, Dict[str, Any]]]] = None,
+    batch_request: Dict[str, str | int | Dict[str, Any]] | None = None,
 ) -> None:
     if (
         expectation_suite is not None
@@ -1047,12 +1041,10 @@ def add_citation_with_batch_request(
 def get_batch_request_from_json_file(
     batch_request_json_file_path: str,
     data_context: FileDataContext,
-    usage_event: Optional[str] = None,
+    usage_event: str | None = None,
     suppress_usage_message: bool = False,
 ) -> dict[str, JSONValues]:
-    batch_request_or_error_message: Optional[
-        str | dict[str, str | int | dict[str, Any]]
-    ] = load_json_file_into_dict(
+    batch_request_or_error_message: str | dict[str, str | int | dict[str, Any]] | None = load_json_file_into_dict(
         filepath=batch_request_json_file_path,
         data_context=data_context,
         usage_event=usage_event,
@@ -1084,13 +1076,11 @@ def get_batch_request_from_json_file(
 
 def get_batch_request_using_datasource_name(
     data_context: FileDataContext,
-    datasource_name: Optional[str] = None,
-    usage_event: Optional[str] = None,
+    datasource_name: str | None = None,
+    usage_event: str | None = None,
     suppress_usage_message: bool = False,
-    additional_batch_request_args: Optional[
-        Dict[str, Union[str, int, Dict[str, Any]]]
-    ] = None,
-) -> Optional[Dict[str, Union[str, int, Dict[str, Any]]]]:
+    additional_batch_request_args: Dict[str, str | int | Dict[str, Any]] | None = None,
+) -> Dict[str, str | int | Dict[str, Any]] | None:
     cli_message(
         string="\nA batch of data is required to edit the suite - let's help you to specify it.\n"
     )
@@ -1109,7 +1099,7 @@ def get_batch_request_using_datasource_name(
             )
         sys.exit(1)
 
-    batch_request: Dict[str, Union[str, int, Dict[str, Any]]] = get_batch_request(
+    batch_request: Dict[str, str | int | Dict[str, Any]] = get_batch_request(
         datasource=datasource,  # type: ignore[arg-type] # could be LegacyDatasource
         additional_batch_request_args=additional_batch_request_args,
     )

@@ -18,7 +18,6 @@ from typing import (
     List,
     Mapping,
     MutableMapping,
-    Optional,
     Tuple,
     TypeVar,
     Union,
@@ -539,8 +538,8 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
 
 
 def substitute_all_strftime_format_strings(
-    data: Union[dict, list, str, Any], datetime_obj: Optional[datetime.datetime] = None
-) -> Union[str, Any]:
+    data: dict | list | str | Any, datetime_obj: datetime.datetime | None = None
+) -> str | Any:
     """
     This utility function will iterate over input data and for all strings, replace any strftime format
     elements using either the provided datetime_obj or the current datetime
@@ -564,7 +563,7 @@ def substitute_all_strftime_format_strings(
 
 
 def parse_string_to_datetime(
-    datetime_string: str, datetime_format_string: Optional[str] = None
+    datetime_string: str, datetime_format_string: str | None = None
 ) -> datetime.datetime:
     if not isinstance(datetime_string, str):
         raise gx_exceptions.SorterError(
@@ -732,7 +731,7 @@ class S3Url:
             return self._parsed.path.lstrip("/")
 
     @property
-    def suffix(self) -> Optional[str]:
+    def suffix(self) -> str | None:
         """
         Attempts to get a file suffix from the S3 key.
         If can't find one returns `None`.
@@ -783,14 +782,14 @@ class DBFSPath:
         raise ValueError("Path should start with either /dbfs or dbfs:")
 
 
-def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
+def sniff_s3_compression(s3_url: S3Url) -> str | None:
     """Attempts to get read_csv compression from s3_url"""
     return _SUFFIX_TO_PD_KWARG.get(s3_url.suffix) if s3_url.suffix else None
 
 
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
-    spark_config: Optional[Dict[str, str]] = None,
+    spark_config: Dict[str, str] | None = None,
     force_reuse_spark_context: bool = True,
 ) -> pyspark_sql_SparkSession:
     """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
@@ -812,13 +811,13 @@ def get_or_create_spark_application(
     else:
         spark_config = copy.deepcopy(spark_config)
 
-    name: Optional[str] = spark_config.get("spark.app.name")
+    name: str | None = spark_config.get("spark.app.name")
     if not name:
         name = "default_great_expectations_spark_application"
 
     spark_config.update({"spark.app.name": name})
 
-    spark_session: Optional[pyspark_sql_SparkSession] = get_or_create_spark_session(
+    spark_session: pyspark_sql_SparkSession | None = get_or_create_spark_session(
         spark_config=spark_config
     )
     if spark_session is None:
@@ -853,7 +852,7 @@ def get_or_create_spark_application(
 
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
-    spark_config: Optional[Dict[str, str]] = None,
+    spark_config: Dict[str, str] | None = None,
 ) -> pyspark_sql_SparkSession | None:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
@@ -869,7 +868,7 @@ def get_or_create_spark_session(
     Returns:
 
     """
-    spark_session: Optional[pyspark_sql_SparkSession]
+    spark_session: pyspark_sql_SparkSession | None
     try:
         if spark_config is None:
             spark_config = {}
@@ -878,7 +877,7 @@ def get_or_create_spark_session(
 
         builder = pyspark_sql_SparkSession.builder
 
-        app_name: Optional[str] = spark_config.get("spark.app.name")
+        app_name: str | None = spark_config.get("spark.app.name")
         if app_name:
             builder.appName(app_name)
 
@@ -935,7 +934,7 @@ def spark_restart_required(
 def get_sql_dialect_floating_point_infinity_value(
     schema: str, negative: bool = False
 ) -> float:
-    res: Optional[dict] = SCHEMAS.get(schema)
+    res: dict | None = SCHEMAS.get(schema)
     if res is None:
         if negative:
             return -np.inf

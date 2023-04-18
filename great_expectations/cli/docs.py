@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 import click
 
@@ -60,7 +60,7 @@ def docs(ctx: click.Context) -> None:
 )
 @click.pass_context
 def docs_build(
-    ctx: click.Context, site_name: Optional[str] = None, no_view: bool = False
+    ctx: click.Context, site_name: str | None = None, no_view: bool = False
 ) -> None:
     """Build Data Docs for a project."""
     context: FileDataContext = ctx.obj.data_context
@@ -144,7 +144,7 @@ def docs_list(ctx: click.Context):
 )
 @click.pass_context
 def docs_clean(
-    ctx: click.Context, site_name: Optional[str] = None, all_sites: bool = False
+    ctx: click.Context, site_name: str | None = None, all_sites: bool = False
 ) -> None:
     """
     Remove all files from a Data Docs site.

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import OrderedDict
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List
 
 from great_expectations.core.batch import (
     Batch,
@@ -24,7 +24,7 @@ class BatchManager:
     def __init__(
         self,
         execution_engine: ExecutionEngine,
-        batch_list: Optional[List[Batch]] = None,
+        batch_list: List[Batch] | None = None,
     ) -> None:
         """
         Args:
@@ -33,8 +33,8 @@ class BatchManager:
         """
         self._execution_engine: ExecutionEngine = execution_engine
 
-        self._active_batch_id: Optional[str] = None
-        self._active_batch_data_id: Optional[str] = None
+        self._active_batch_id: str | None = None
+        self._active_batch_data_id: str | None = None
 
         self._batch_cache: Dict[str, Batch] = OrderedDict()
         self._batch_data_cache: Dict[str, BatchDataType] = {}
@@ -53,7 +53,7 @@ class BatchManager:
         return list(self._batch_data_cache.keys())
 
     @property
-    def active_batch_data_id(self) -> Optional[str]:
+    def active_batch_data_id(self) -> str | None:
         """
         The Batch ID for the default "BatchData" object.
 
@@ -73,7 +73,7 @@ class BatchManager:
         return None
 
     @property
-    def active_batch_data(self) -> Optional[BatchDataType]:
+    def active_batch_data(self) -> BatchDataType | None:
         """The BatchData object from the currently-active Batch object."""
         if self.active_batch_data_id is None:
             return None
@@ -86,7 +86,7 @@ class BatchManager:
         return self._batch_cache
 
     @property
-    def active_batch_id(self) -> Optional[str]:
+    def active_batch_id(self) -> str | None:
         """
         Getter for active Batch ID.
 
@@ -96,7 +96,7 @@ class BatchManager:
         the list of "Batch" objects, each of whose BatchData has already been loaded (and cached).  Since BatchData IDs
         are from the same name space as Batch IDs, this helps avoid unnecessary loading of data from different backends.
         """
-        active_batch_data_id: Optional[str] = self.active_batch_data_id
+        active_batch_data_id: str | None = self.active_batch_data_id
         if active_batch_data_id != self._active_batch_id:
             logger.warning(
                 "ID of active Batch and ID of active loaded BatchData differ."
@@ -105,16 +105,16 @@ class BatchManager:
         return self._active_batch_id
 
     @property
-    def active_batch(self) -> Optional[Batch]:
+    def active_batch(self) -> Batch | None:
         """Getter for active Batch"""
-        active_batch_id: Optional[str] = self.active_batch_id
-        batch: Optional[Batch] = (
+        active_batch_id: str | None = self.active_batch_id
+        batch: Batch | None = (
             None if active_batch_id is None else self.batch_cache.get(active_batch_id)
         )
         return batch
 
     @property
-    def active_batch_spec(self) -> Optional[BatchSpec]:
+    def active_batch_spec(self) -> BatchSpec | None:
         """Getter for active batch's batch_spec"""
         if not self.active_batch:
             return None
@@ -122,7 +122,7 @@ class BatchManager:
         return self.active_batch.batch_spec
 
     @property
-    def active_batch_markers(self) -> Optional[BatchMarkers]:
+    def active_batch_markers(self) -> BatchMarkers | None:
         """Getter for active batch's batch markers"""
         if not self.active_batch:
             return None
@@ -130,7 +130,7 @@ class BatchManager:
         return self.active_batch.batch_markers
 
     @property
-    def active_batch_definition(self) -> Optional[BatchDefinition]:
+    def active_batch_definition(self) -> BatchDefinition | None:
         """Getter for the active batch's batch definition"""
         if not self.active_batch:
             return None

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import TypedDict
@@ -71,7 +71,7 @@ class SimpleCheckpointConfigurator:
         name: str,
         data_context,
         site_names: str | list[str] | None = "all",
-        slack_webhook: Optional[str] = None,
+        slack_webhook: str | None = None,
         notify_on: str = "all",
         notify_with: str | list[str] | None = "all",
         **kwargs,

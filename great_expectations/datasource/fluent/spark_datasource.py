@@ -8,7 +8,6 @@ from typing import (
     ClassVar,
     Generic,
     List,
-    Optional,
     Type,
     TypeVar,
 )
@@ -209,7 +208,7 @@ class SparkDatasource(_SparkDatasource):
         self,
         name: str,
         dataframe: pyspark_sql_DataFrame,
-        batch_metadata: Optional[BatchMetadata] = None,
+        batch_metadata: BatchMetadata | None = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this SparkDatasource object.
 

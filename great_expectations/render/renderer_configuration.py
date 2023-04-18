@@ -73,10 +73,10 @@ class _RendererValueBase(BaseModel):
 
     def dict(
         self,
-        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
         by_alias: bool = True,
-        skip_defaults: Optional[bool] = None,
+        skip_defaults: bool | None = None,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
         exclude_none: bool = True,
@@ -112,7 +112,7 @@ class RendererTableValue(_RendererValueBase):
     """Represents each value within a row of a header_row or a table."""
 
     renderer_schema: RendererSchema = Field(alias="schema")
-    value: Optional[Any]
+    value: Any | None
 
 
 class MetaNotesFormat(str, Enum):
@@ -135,11 +135,11 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         implementation-level.
     """
 
-    configuration: Optional[ExpectationConfiguration] = Field(
+    configuration: ExpectationConfiguration | None = Field(
         None, allow_mutation=False
     )
-    result: Optional[ExpectationValidationResult] = Field(None, allow_mutation=False)
-    runtime_configuration: Optional[dict] = Field({}, allow_mutation=False)
+    result: ExpectationValidationResult | None = Field(None, allow_mutation=False)
+    runtime_configuration: dict | None = Field({}, allow_mutation=False)
     expectation_type: str = Field("", allow_mutation=False)
     kwargs: dict = Field({}, allow_mutation=False)
     meta_notes: MetaNotes = Field(
@@ -192,7 +192,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
         renderer_schema: RendererSchema = Field(alias="schema")
         value: Any
-        evaluation_parameter: Optional[Dict[str, Any]]
+        evaluation_parameter: Dict[str, Any] | None
 
         class Config:
             validate_assignment = True
@@ -370,7 +370,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
 
     @root_validator()
     def _validate_for_meta_notes(cls, values: dict) -> dict:
-        meta_notes: Optional[MetaNotes]
+        meta_notes: MetaNotes | None
         if (
             "result" in values
             and values["result"] is not None
@@ -384,9 +384,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
     @root_validator()
     def _validate_for_params(cls, values: dict) -> dict:
         if not values["params"]:
-            _params: Optional[
-                Dict[str, Dict[str, Union[str, Dict[str, RendererValueType]]]]
-            ] = values.get("_params")
+            _params: Dict[str, Dict[str, str | Dict[str, RendererValueType]]] | None = values.get("_params")
             if _params:
                 renderer_param_definitions: Dict[str, Any] = {}
                 for name in _params:
@@ -494,7 +492,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
         self,
         name: str,
         param_type: RendererValueTypes,
-        value: Optional[Any] = None,
+        value: Any | None = None,
     ) -> None:
         """Adds a param that can be substituted into a template string during rendering.
 
@@ -541,7 +539,7 @@ class RendererConfiguration(GenericModel, Generic[RendererParams]):
                 param_types=param_type, value=value
             )
 
-        renderer_params_args: Dict[str, Optional[Any]]
+        renderer_params_args: Dict[str, Any | None]
         if value is None:
             renderer_params_args = {
                 **self.params.dict(exclude_none=False),

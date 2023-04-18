@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import Callable, ClassVar, List, Optional, Type
+from typing import Callable, ClassVar, List, Type
 
 import pydantic
 
@@ -49,18 +49,16 @@ class FilesystemDataConnector(FilePathDataConnector):
         batching_regex: re.Pattern,
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
-        data_context_root_directory: Optional[pathlib.Path] = None,
+        data_context_root_directory: pathlib.Path | None = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> None:
         self._base_directory = base_directory
         self._glob_directive: str = glob_directive
-        self._data_context_root_directory: Optional[
-            pathlib.Path
-        ] = data_context_root_directory
+        self._data_context_root_directory: pathlib.Path | None = data_context_root_directory
 
         super().__init__(
             datasource_name=datasource_name,
@@ -92,12 +90,12 @@ class FilesystemDataConnector(FilePathDataConnector):
         batching_regex: re.Pattern,
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
-        data_context_root_directory: Optional[pathlib.Path] = None,
+        data_context_root_directory: pathlib.Path | None = None,
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> FilesystemDataConnector:
         """Builds "FilesystemDataConnector", which links named DataAsset to filesystem.
 
@@ -138,7 +136,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         batching_regex: re.Pattern,
         base_directory: pathlib.Path,
         glob_directive: str = "**/*",
-        data_context_root_directory: Optional[pathlib.Path] = None,
+        data_context_root_directory: pathlib.Path | None = None,
     ) -> str:
         """Builds helpful error message for reporting issues when linking named DataAsset to filesystem.
 

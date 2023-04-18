@@ -4,7 +4,7 @@ import inspect
 import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
-from typing import List, Sequence, Tuple, Union
+from typing import List, Sequence, Tuple
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
@@ -51,7 +51,7 @@ class ExpectationDiagnostics(SerializableDictDot):
     # introspection alone, but in order to see what they return, we need to
     # instantiate the Expectation and actually run the method.
 
-    library_metadata: Union[AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics]
+    library_metadata: AugmentedLibraryMetadata | ExpectationDescriptionDiagnostics
     description: ExpectationDescriptionDiagnostics
     execution_engines: ExpectationExecutionEngineDiagnostics
 
@@ -85,9 +85,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_library_metadata(
-        library_metadata: Union[
-            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
-        ],
+        library_metadata: AugmentedLibraryMetadata | ExpectationDescriptionDiagnostics,
     ) -> ExpectationDiagnosticCheckMessage:
         """Check whether the Expectation has a library_metadata object"""
         sub_messages: list[ExpectationDiagnosticCheckMessageDict] = []
@@ -438,9 +436,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_full_test_suite(
-        library_metadata: Union[
-            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
-        ],
+        library_metadata: AugmentedLibraryMetadata | ExpectationDescriptionDiagnostics,
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if Expectation has a full test suite"""
         return ExpectationDiagnosticCheckMessage(
@@ -450,9 +446,7 @@ class ExpectationDiagnostics(SerializableDictDot):
 
     @staticmethod
     def _check_manual_code_review(
-        library_metadata: Union[
-            AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
-        ],
+        library_metadata: AugmentedLibraryMetadata | ExpectationDescriptionDiagnostics,
     ) -> ExpectationDiagnosticCheckMessage:
         """Check library_metadata to see if a manual code review has been performed"""
         return ExpectationDiagnosticCheckMessage(

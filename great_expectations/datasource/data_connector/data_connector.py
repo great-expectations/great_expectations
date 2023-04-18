@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import pandas as pd
 
@@ -56,8 +56,8 @@ class DataConnector:
         name: str,
         datasource_name: str,
         execution_engine: ExecutionEngine,
-        batch_spec_passthrough: Optional[dict] = None,
-        id: Optional[str] = None,
+        batch_spec_passthrough: dict | None = None,
+        id: str | None = None,
     ) -> None:
         if execution_engine is None:
             raise gx_exceptions.DataConnectorError(
@@ -72,7 +72,7 @@ class DataConnector:
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict = {}
 
-        self._data_context_root_directory: Optional[str] = None
+        self._data_context_root_directory: str | None = None
         self._batch_spec_passthrough = batch_spec_passthrough or {}
 
     @property
@@ -84,7 +84,7 @@ class DataConnector:
         return self._name
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         return self._id
 
     @property
@@ -158,7 +158,7 @@ class DataConnector:
         raise NotImplementedError
 
     def _get_data_reference_list(
-        self, data_asset_name: Optional[str] = None
+        self, data_asset_name: str | None = None
     ) -> List[str]:
         """
         List objects in the underlying data store to create a list of data_references.
@@ -210,8 +210,8 @@ class DataConnector:
         raise NotImplementedError
 
     def _map_data_reference_to_batch_definition_list(
-        self, data_reference: Any, data_asset_name: Optional[str] = None
-    ) -> Optional[List[BatchDefinition]]:
+        self, data_reference: Any, data_asset_name: str | None = None
+    ) -> List[BatchDefinition] | None:
         raise NotImplementedError
 
     def _map_batch_definition_to_data_reference(

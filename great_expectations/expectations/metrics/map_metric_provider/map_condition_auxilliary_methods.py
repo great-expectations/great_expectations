@@ -6,8 +6,6 @@ from typing import (
     Any,
     Dict,
     List,
-    Optional,
-    Union,
 )
 
 import numpy as np
@@ -77,7 +75,7 @@ def _pandas_map_condition_index(
     metric_value_kwargs: dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> Union[List[int], List[Dict[str, Any]]]:
+) -> List[int] | List[Dict[str, Any]]:
     (
         boolean_mapped_unexpected_values,
         compute_domain_kwargs,
@@ -94,7 +92,7 @@ def _pandas_map_condition_index(
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
@@ -117,7 +115,7 @@ def _pandas_map_condition_index(
 
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[str | quoted_name] = accessor_domain_kwargs[
             "column_list"
         ]
         verify_column_names_exist(
@@ -127,7 +125,7 @@ def _pandas_map_condition_index(
 
     # column pair expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = list()
+        column_list: List[str | quoted_name] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         verify_column_names_exist(
@@ -138,9 +136,7 @@ def _pandas_map_condition_index(
     result_format = metric_value_kwargs["result_format"]
     domain_records_df = domain_records_df[boolean_mapped_unexpected_values]
 
-    unexpected_index_list: Union[
-        List[int], List[Dict[str, Any]]
-    ] = compute_unexpected_pandas_indices(
+    unexpected_index_list: List[int] | List[Dict[str, Any]] = compute_unexpected_pandas_indices(
         domain_records_df=domain_records_df,
         result_format=result_format,
         execution_engine=execution_engine,
@@ -159,7 +155,7 @@ def _pandas_map_condition_query(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> Optional[List[Any]]:
+) -> List[Any] | None:
     """
     Returns query that will return all rows which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation. For Pandas, this is currently the full set of unexpected_indices.
@@ -186,7 +182,7 @@ def _pandas_map_condition_query(
         domain_kwargs=domain_kwargs
     )
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
@@ -201,7 +197,7 @@ def _pandas_map_condition_query(
             ]
 
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[str | quoted_name] = accessor_domain_kwargs[
             "column_list"
         ]
         verify_column_names_exist(
@@ -233,7 +229,7 @@ def _pandas_map_condition_rows(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
@@ -252,7 +248,7 @@ def _pandas_map_condition_rows(
             df = df[df[column_name].notnull()]
 
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[str | quoted_name] = accessor_domain_kwargs[
             "column_list"
         ]
         verify_column_names_exist(
@@ -370,7 +366,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         else:
             # execution_engine.engine is already a Connection. Use it directly
             connection = execution_engine.engine
-        unexpected_count: Union[float, int] = connection.execute(
+        unexpected_count: float | int = connection.execute(
             sa.select(
                 unexpected_count_query.c[
                     f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
@@ -441,7 +437,7 @@ def _sqlalchemy_map_condition_query(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> Optional[str]:
+) -> str | None:
     """
     Returns query that will return all rows which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -466,17 +462,17 @@ def _sqlalchemy_map_condition_query(
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: str | quoted_name = accessor_domain_kwargs["column"]
         domain_column_name_list.append(column_name)
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[str | quoted_name] = accessor_domain_kwargs[
             "column_list"
         ]
         domain_column_name_list = column_list
     # column-map expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = list()
+        column_list: List[str | quoted_name] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         domain_column_name_list = column_list
@@ -507,9 +503,7 @@ def _sqlalchemy_map_condition_query(
         execution_engine
     )
 
-    source_table_and_schema_as_selectable: Union[
-        sa.Table, sa.Select
-    ] = get_sqlalchemy_selectable(source_table_and_schema)
+    source_table_and_schema_as_selectable: sa.Table | sa.Select = get_sqlalchemy_selectable(source_table_and_schema)
     final_select_statement: sa.select = (
         unexpected_condition_query_with_selected_columns.select_from(
             source_table_and_schema_as_selectable
@@ -550,17 +544,17 @@ def _sqlalchemy_map_condition_index(
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: str | quoted_name = accessor_domain_kwargs["column"]
         domain_column_name_list.append(column_name)
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[str | quoted_name] = accessor_domain_kwargs[
             "column_list"
         ]
         domain_column_name_list = column_list
     # column-map expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = list()
+        column_list: List[str | quoted_name] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         domain_column_name_list = column_list
@@ -568,7 +562,7 @@ def _sqlalchemy_map_condition_index(
     domain_kwargs: dict = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     all_table_columns: List[str] = metrics.get("table.columns")
 
-    unexpected_index_column_names: Optional[List[str]] = result_format.get(
+    unexpected_index_column_names: List[str] | None = result_format.get(
         "unexpected_index_column_names"
     )
 
@@ -593,9 +587,7 @@ def _sqlalchemy_map_condition_index(
     ).where(unexpected_condition)
 
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        domain_records_as_selectable: Union[
-            sa.Table, sa.Select
-        ] = get_sqlalchemy_selectable(domain_records_as_selectable)
+        domain_records_as_selectable: sa.Table | sa.Select = get_sqlalchemy_selectable(domain_records_as_selectable)
 
     # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`
     final_query: sa.select = (
@@ -605,7 +597,7 @@ def _sqlalchemy_map_condition_index(
     )
     query_result: List[tuple] = execution_engine.engine.execute(final_query).fetchall()
 
-    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+    unexpected_index_list: List[Dict[str, Any]] | None = []
 
     for row in query_result:
         primary_key_dict: Dict[str, Any] = {}
@@ -704,7 +696,7 @@ def _spark_map_condition_index(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> Union[List[Dict[str, Any]], None]:
+) -> List[Dict[str, Any]] | None:
     """
     Returns indices of the metric values which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.
@@ -728,18 +720,18 @@ def _spark_map_condition_index(
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: str | quoted_name = accessor_domain_kwargs["column"]
         domain_column_name_list.append(column_name)
 
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[str | quoted_name] = accessor_domain_kwargs[
             "column_list"
         ]
         domain_column_name_list = column_list
     # column-map expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = list()
+        column_list: List[str | quoted_name] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         domain_column_name_list = column_list
@@ -759,7 +751,7 @@ def _spark_map_condition_index(
     filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
         F.col("__unexpected")
     )
-    unexpected_index_list: Optional[List[Dict[str, Any]]] = []
+    unexpected_index_list: List[Dict[str, Any]] | None = []
 
     unexpected_index_column_names: List[str] = result_format[
         "unexpected_index_column_names"
@@ -796,7 +788,7 @@ def _spark_map_condition_query(
     metric_value_kwargs: Dict,
     metrics: Dict[str, Any],
     **kwargs,
-) -> Union[str, None]:
+) -> str | None:
     """
     Returns query that will return all rows which do not meet an expected Expectation condition for instances
     of ColumnMapExpectation.

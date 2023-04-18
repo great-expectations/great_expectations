@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import (
     TYPE_CHECKING,
-    Optional,
     Tuple,
 )
 
@@ -53,9 +52,9 @@ class ColumnPairMapMetricProvider(MapMetricProvider):
     def _get_evaluation_dependencies(
         cls,
         metric: MetricConfiguration,
-        configuration: Optional[ExpectationConfiguration] = None,
-        execution_engine: Optional[ExecutionEngine] = None,
-        runtime_configuration: Optional[dict] = None,
+        configuration: ExpectationConfiguration | None = None,
+        execution_engine: ExecutionEngine | None = None,
+        runtime_configuration: dict | None = None,
     ):
         dependencies: dict = super()._get_evaluation_dependencies(
             metric=metric,

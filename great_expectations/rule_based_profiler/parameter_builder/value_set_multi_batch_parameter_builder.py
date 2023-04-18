@@ -7,10 +7,8 @@ from typing import (
     Collection,
     Dict,
     List,
-    Optional,
     Set,
     TypeVar,
-    Union,
 )
 
 import numpy as np
@@ -80,12 +78,10 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     def __init__(
         self,
         name: str,
-        metric_domain_kwargs: Optional[Union[str, dict]] = None,
-        metric_value_kwargs: Optional[Union[str, dict]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        metric_domain_kwargs: str | dict | None = None,
+        metric_value_kwargs: str | dict | None = None,
+        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -114,9 +110,9 @@ class ValueSetMultiBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     def _build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -188,7 +184,7 @@ def _get_unique_values_from_nested_collection_of_sets(
         Single flattened set containing unique values.
     """
 
-    flattened: Union[List[Set[V]], Set[V]] = list(
+    flattened: List[Set[V]] | Set[V] = list(
         itertools.chain.from_iterable(collection)
     )
     element: V

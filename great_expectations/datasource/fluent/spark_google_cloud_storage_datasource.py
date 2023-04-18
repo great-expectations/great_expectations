@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type
 
 import pydantic
 from typing_extensions import Literal
@@ -57,21 +57,19 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
 
     # Google Cloud Storage specific attributes
     bucket_or_name: str
-    gcs_options: Dict[str, Union[ConfigStr, Any]] = {}
+    gcs_options: Dict[str, ConfigStr | Any] = {}
 
-    _gcs_client: Union[GoogleCloudStorageClient, None] = pydantic.PrivateAttr(
+    _gcs_client: GoogleCloudStorageClient | None = pydantic.PrivateAttr(
         default=None
     )
 
     def _get_gcs_client(self) -> GoogleCloudStorageClient:
-        gcs_client: Union[GoogleCloudStorageClient, None] = self._gcs_client
+        gcs_client: GoogleCloudStorageClient | None = self._gcs_client
         if not gcs_client:
             # Validate that "google" libararies were successfully imported and attempt to create "gcs_client" handle.
             if google_cloud_storage and google_service_account:
                 try:
-                    credentials: Union[
-                        GoogleServiceAccountCredentials, None
-                    ] = None  # If configured with gcloud CLI / env vars
+                    credentials: GoogleServiceAccountCredentials | None = None  # If configured with gcloud CLI / env vars
                     if "filename" in self.gcs_options:
                         filename: str = str(self.gcs_options.pop("filename"))
                         credentials = google_service_account.Credentials.from_service_account_file(

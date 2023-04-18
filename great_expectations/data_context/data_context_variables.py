@@ -5,7 +5,7 @@ import enum
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
+from typing import TYPE_CHECKING, Any, Dict, Generator
 
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
@@ -84,7 +84,7 @@ class DataContextVariables(ABC):
 
     config: DataContextConfig
     config_provider: _ConfigurationProvider
-    _store: Optional[DataContextStore] = None
+    _store: DataContextStore | None = None
 
     def __str__(self) -> str:
         return str(self.config)
@@ -129,7 +129,7 @@ class DataContextVariables(ABC):
         return self.store.set(key=key, value=self.config)
 
     @property
-    def config_version(self) -> Optional[float]:
+    def config_version(self) -> float | None:
         return self._get(DataContextVariableSchema.CONFIG_VERSION)
 
     @config_version.setter
@@ -137,7 +137,7 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.CONFIG_VERSION, config_version)
 
     @property
-    def config_variables_file_path(self) -> Optional[str]:
+    def config_variables_file_path(self) -> str | None:
         return self._get(DataContextVariableSchema.CONFIG_VARIABLES_FILE_PATH)
 
     @config_variables_file_path.setter
@@ -148,7 +148,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def plugins_directory(self) -> Optional[str]:
+    def plugins_directory(self) -> str | None:
         return self._get(DataContextVariableSchema.PLUGINS_DIRECTORY)
 
     @plugins_directory.setter
@@ -156,7 +156,7 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.PLUGINS_DIRECTORY, plugins_directory)
 
     @property
-    def validation_operators(self) -> Optional[dict]:
+    def validation_operators(self) -> dict | None:
         return self._get(DataContextVariableSchema.VALIDATION_OPERATORS)
 
     @validation_operators.setter
@@ -164,7 +164,7 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.VALIDATION_OPERATORS, validation_operators)
 
     @property
-    def expectations_store_name(self) -> Optional[str]:
+    def expectations_store_name(self) -> str | None:
         return self._get(DataContextVariableSchema.EXPECTATIONS_STORE_NAME)
 
     @expectations_store_name.setter
@@ -174,7 +174,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def validations_store_name(self) -> Optional[str]:
+    def validations_store_name(self) -> str | None:
         return self._get(DataContextVariableSchema.VALIDATIONS_STORE_NAME)
 
     @validations_store_name.setter
@@ -184,7 +184,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def evaluation_parameter_store_name(self) -> Optional[str]:
+    def evaluation_parameter_store_name(self) -> str | None:
         return self._get(DataContextVariableSchema.EVALUATION_PARAMETER_STORE_NAME)
 
     @evaluation_parameter_store_name.setter
@@ -197,7 +197,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def checkpoint_store_name(self) -> Optional[str]:
+    def checkpoint_store_name(self) -> str | None:
         return self._get(DataContextVariableSchema.CHECKPOINT_STORE_NAME)
 
     @checkpoint_store_name.setter
@@ -208,7 +208,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def profiler_store_name(self) -> Optional[str]:
+    def profiler_store_name(self) -> str | None:
         return self._get(DataContextVariableSchema.PROFILER_STORE_NAME)
 
     @profiler_store_name.setter
@@ -219,7 +219,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def stores(self) -> Optional[dict]:
+    def stores(self) -> dict | None:
         return self._get(DataContextVariableSchema.STORES)
 
     @stores.setter
@@ -227,7 +227,7 @@ class DataContextVariables(ABC):
         self._set(DataContextVariableSchema.STORES, stores)
 
     @property
-    def data_docs_sites(self) -> Optional[dict]:
+    def data_docs_sites(self) -> dict | None:
         return self._get(DataContextVariableSchema.DATA_DOCS_SITES)
 
     @data_docs_sites.setter
@@ -237,7 +237,7 @@ class DataContextVariables(ABC):
     @property
     def anonymous_usage_statistics(
         self,
-    ) -> Optional[AnonymizedUsageStatisticsConfig]:
+    ) -> AnonymizedUsageStatisticsConfig | None:
         return self._get(DataContextVariableSchema.ANONYMOUS_USAGE_STATISTICS)
 
     @anonymous_usage_statistics.setter
@@ -250,7 +250,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def notebooks(self) -> Optional[NotebookConfig]:
+    def notebooks(self) -> NotebookConfig | None:
         return self._get(DataContextVariableSchema.NOTEBOOKS)
 
     @notebooks.setter
@@ -261,7 +261,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def concurrency(self) -> Optional[ConcurrencyConfig]:
+    def concurrency(self) -> ConcurrencyConfig | None:
         return self._get(DataContextVariableSchema.CONCURRENCY)
 
     @concurrency.setter
@@ -272,7 +272,7 @@ class DataContextVariables(ABC):
         )
 
     @property
-    def progress_bars(self) -> Optional[ProgressBarsConfig]:
+    def progress_bars(self) -> ProgressBarsConfig | None:
         return self._get(DataContextVariableSchema.PROGRESS_BARS)
 
     @progress_bars.setter

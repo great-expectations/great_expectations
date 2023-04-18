@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import re
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, overload
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, overload
 
 import numpy as np
 import pandas as pd
@@ -356,7 +356,7 @@ def is_column_present_in_table(
     engine: sqlalchemy_engine_Engine,
     table_selectable: sa_sql_expression_Select,
     column_name: str,
-    schema_name: Optional[str] = None,
+    schema_name: str | None = None,
 ) -> bool:
     all_columns_metadata: List[Dict[str, Any]] = (
         get_sqlalchemy_column_metadata(
@@ -372,8 +372,8 @@ def is_column_present_in_table(
 def get_sqlalchemy_column_metadata(
     engine: sqlalchemy_engine_Engine,
     table_selectable: sa_sql_expression_Select,
-    schema_name: Optional[str] = None,
-) -> Optional[List[Dict[str, Any]]]:
+    schema_name: str | None = None,
+) -> List[Dict[str, Any]] | None:
     try:
         columns: List[Dict[str, Any]]
 

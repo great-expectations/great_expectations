@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pathlib
 from contextlib import _GeneratorContextManager, contextmanager
-from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
+from typing import TYPE_CHECKING, Any, Callable, Generator
 
 import pytest
 from pydantic import ValidationError
@@ -83,8 +83,8 @@ def test_non_select_query_asset(sqlite_datasource):
 # Test double used to return canned responses for splitter queries.
 @contextmanager
 def _create_sqlite_source(
-    data_context: Optional[AbstractDataContext] = None,
-    splitter_query_response: Optional[list[tuple[str]]] = None,
+    data_context: AbstractDataContext | None = None,
+    splitter_query_response: list[tuple[str]] | None = None,
     create_temp_table: bool = True,
 ) -> Generator[Any, Any, Any]:
     execution_eng_cls = sqlachemy_execution_engine_mock_cls(
@@ -112,7 +112,7 @@ def _create_sqlite_source(
 
 @pytest.fixture
 def create_sqlite_source() -> Callable[
-    [Optional[AbstractDataContext], list[tuple[str]]], _GeneratorContextManager[Any]
+    [AbstractDataContext | None, list[tuple[str]]], _GeneratorContextManager[Any]
 ]:
     return _create_sqlite_source
 

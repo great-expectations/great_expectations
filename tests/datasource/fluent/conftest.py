@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
+from typing import Any, Callable, Dict, Generator, List, Type
 
 import pytest
 from pytest import MonkeyPatch
@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 def sqlachemy_execution_engine_mock_cls(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
-    splitter_query_response: Optional[Union[List[Dict[str, Any]], List[Any]]] = None,
+    splitter_query_response: List[Dict[str, Any]] | List[Any] | None = None,
 ):
     """Creates a mock gx sql alchemy engine class
 

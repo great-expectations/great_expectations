@@ -14,10 +14,8 @@ from typing import (
     ClassVar,
     Dict,
     List,
-    Optional,
     Set,
     Tuple,
-    Union,
 )
 
 import numpy as np
@@ -100,10 +98,8 @@ class ParameterBuilder(ABC, Builder):
     def __init__(
         self,
         name: str,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         The ParameterBuilder will build ParameterNode objects for a Domain from the Rule.
@@ -133,12 +129,12 @@ class ParameterBuilder(ABC, Builder):
     def build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        parameter_computation_impl: Optional[Callable] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        parameter_computation_impl: Callable | None = None,
+        batch_list: List[Batch] | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
+        runtime_configuration: dict | None = None,
     ) -> None:
         """
         Args:
@@ -210,10 +206,10 @@ class ParameterBuilder(ABC, Builder):
     def resolve_evaluation_dependencies(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        fully_qualified_parameter_names: Optional[List[str]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        fully_qualified_parameter_names: List[str] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> None:
         """
         This method computes ("resolves") pre-requisite ("evaluation") dependencies (i.e., results of executing other
@@ -264,9 +260,9 @@ class ParameterBuilder(ABC, Builder):
     def _build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -283,13 +279,13 @@ class ParameterBuilder(ABC, Builder):
     @property
     def evaluation_parameter_builders(
         self,
-    ) -> Optional[List[ParameterBuilder]]:
+    ) -> List[ParameterBuilder] | None:
         return self._evaluation_parameter_builders
 
     @property
     def evaluation_parameter_builder_configs(
         self,
-    ) -> Optional[List[ParameterBuilderConfig]]:
+    ) -> List[ParameterBuilderConfig] | None:
         return self._evaluation_parameter_builder_configs
 
     @property
@@ -308,10 +304,10 @@ class ParameterBuilder(ABC, Builder):
 
     def get_validator(
         self,
-        domain: Optional[Domain] = None,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Optional[Validator]:
+        domain: Domain | None = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+    ) -> Validator | None:
         return get_validator_using_batch_list_or_batch_request(
             purpose="parameter_builder",
             data_context=self.data_context,
@@ -324,11 +320,11 @@ class ParameterBuilder(ABC, Builder):
 
     def get_batch_ids(
         self,
-        limit: Optional[int] = None,
-        domain: Optional[Domain] = None,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Optional[List[str]]:
+        limit: int | None = None,
+        domain: Domain | None = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+    ) -> List[str] | None:
         return get_batch_ids_from_batch_list_or_batch_request(
             data_context=self.data_context,
             batch_list=self.batch_list,
@@ -342,19 +338,15 @@ class ParameterBuilder(ABC, Builder):
     def get_metrics(
         self,
         metric_name: str,
-        metric_domain_kwargs: Optional[
-            Union[Union[str, dict], List[Union[str, dict]]]
-        ] = None,
-        metric_value_kwargs: Optional[
-            Union[Union[str, dict], List[Union[str, dict]]]
-        ] = None,
-        limit: Optional[int] = None,
-        enforce_numeric_metric: Union[str, bool] = False,
-        replace_nan_with_zero: Union[str, bool] = False,
-        runtime_configuration: Optional[dict] = None,
-        domain: Optional[Domain] = None,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        metric_domain_kwargs: str | dict | List[str | dict] | None = None,
+        metric_value_kwargs: str | dict | List[str | dict] | None = None,
+        limit: int | None = None,
+        enforce_numeric_metric: str | bool = False,
+        replace_nan_with_zero: str | bool = False,
+        runtime_configuration: dict | None = None,
+        domain: Domain | None = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
     ) -> MetricComputationResult:
         """
         General multi-batch metric computation facility.
@@ -381,7 +373,7 @@ class ParameterBuilder(ABC, Builder):
 specified (empty "metric_name" value detected)."""
             )
 
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
+        batch_ids: List[str] | None = self.get_batch_ids(
             limit=limit,
             domain=domain,
             variables=variables,
@@ -486,7 +478,7 @@ specified (empty "metric_name" value detected)."""
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            Dict[str, MetricConfiguration | Set[ExceptionInfo] | int],
         ]
         (
             resolved_metrics,
@@ -593,11 +585,11 @@ specified (empty "metric_name" value detected)."""
         parameter_builder: ParameterBuilder,
         metric_name: str,
         attributed_resolved_metrics: AttributedResolvedMetrics,
-        enforce_numeric_metric: Union[str, bool] = False,
-        replace_nan_with_zero: Union[str, bool] = False,
-        domain: Optional[Domain] = None,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        enforce_numeric_metric: str | bool = False,
+        replace_nan_with_zero: str | bool = False,
+        domain: Domain | None = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
     ) -> None:
         """
         This method conditions (or "sanitizes") data samples in the format "N x R^m", where "N" (most significant
@@ -696,12 +688,12 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(t
     def _get_best_candidate_above_threshold(
         candidate_ratio_dict: Dict[str, float],
         threshold: float,
-    ) -> Tuple[Optional[str], float]:
+    ) -> Tuple[str | None, float]:
         """
         Helper method to calculate which candidate strings or patterns are the best match (ie. highest ratio),
         provided they are also above the threshold.
         """
-        best_candidate: Optional[str] = None
+        best_candidate: str | None = None
         best_ratio: float = 0.0
 
         candidate: str
@@ -733,9 +725,9 @@ numeric-valued and datetime-valued metrics (value {metric_value} of type "{str(t
 
 
 def init_rule_parameter_builders(
-    parameter_builder_configs: Optional[List[dict]] = None,
-    data_context: Optional[AbstractDataContext] = None,
-) -> Optional[List[ParameterBuilder]]:
+    parameter_builder_configs: List[dict] | None = None,
+    data_context: AbstractDataContext | None = None,
+) -> List[ParameterBuilder] | None:
     if parameter_builder_configs is None:
         return None
 
@@ -749,8 +741,8 @@ def init_rule_parameter_builders(
 
 
 def init_parameter_builder(
-    parameter_builder_config: Union[ParameterBuilderConfig, dict],
-    data_context: Optional[AbstractDataContext] = None,
+    parameter_builder_config: ParameterBuilderConfig | dict,
+    data_context: AbstractDataContext | None = None,
 ) -> ParameterBuilder:
     if not isinstance(parameter_builder_config, dict):
         parameter_builder_config = parameter_builder_config.to_dict()

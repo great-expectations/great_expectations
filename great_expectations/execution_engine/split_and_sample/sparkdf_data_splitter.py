@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from typing import List, Union
+from typing import List
 
 from great_expectations.exceptions import exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
@@ -104,7 +104,7 @@ class SparkDataSplitter(DataSplitter):
         df: pyspark_sql_DataFrame,
         column_name: str,
         batch_identifiers: dict,
-        date_parts: Union[List[DatePart], List[str]],
+        date_parts: List[DatePart] | List[str],
     ) -> pyspark_sql_DataFrame:
         """Split on date_part values in column_name.
 

@@ -8,7 +8,7 @@ import re
 import sre_constants
 import sre_parse
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Generator, List, Tuple
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
@@ -96,11 +96,9 @@ def map_data_reference_string_to_batch_definition_list_using_regex(
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
-    data_asset_name: Optional[str] = None,
-) -> Optional[List[BatchDefinition]]:
-    processed_data_reference: Optional[
-        Tuple[str, IDDict]
-    ] = convert_data_reference_string_to_batch_identifiers_using_regex(
+    data_asset_name: str | None = None,
+) -> List[BatchDefinition] | None:
+    processed_data_reference: Tuple[str, IDDict] | None = convert_data_reference_string_to_batch_identifiers_using_regex(
         data_reference=data_reference,
         regex_pattern=regex_pattern,
         group_names=group_names,
@@ -128,10 +126,10 @@ def convert_data_reference_string_to_batch_identifiers_using_regex(
     data_reference: str,
     regex_pattern: str,
     group_names: List[str],
-) -> Optional[Tuple[str, IDDict]]:
+) -> Tuple[str, IDDict] | None:
     # noinspection PyUnresolvedReferences
     pattern = re.compile(regex_pattern)
-    matches: Optional[re.Match] = pattern.match(data_reference)
+    matches: re.Match | None = pattern.match(data_reference)
     if matches is None:
         return None
 
@@ -197,7 +195,7 @@ def convert_batch_identifiers_to_data_reference_string_using_regex(
     batch_identifiers: IDDict,
     regex_pattern: re.Pattern,
     group_names: List[str],
-    data_asset_name: Optional[str] = None,
+    data_asset_name: str | None = None,
 ) -> str:
     if not isinstance(batch_identifiers, IDDict):
         raise TypeError("batch_identifiers is not " "an instance of type IDDict")
@@ -326,8 +324,8 @@ def sanitize_prefix_for_s3(text: str) -> str:
 
 
 def normalize_directory_path(
-    dir_path: Union[PathStr],
-    root_directory_path: Optional[PathStr] = None,
+    dir_path: PathStr,
+    root_directory_path: PathStr | None = None,
 ) -> pathlib.Path:
     dir_path = pathlib.Path(dir_path)
 
@@ -341,7 +339,7 @@ def normalize_directory_path(
 
 
 def get_filesystem_one_level_directory_glob_path_list(
-    base_directory_path: Union[PathStr], glob_directive: str
+    base_directory_path: PathStr, glob_directive: str
 ) -> List[str]:
     """
     List file names, relative to base_directory_path one level deep, with expansion specified by glob_directive.
@@ -537,7 +535,7 @@ def list_s3_keys(
 # As a rule, this method should not be in "util", but in the specific high-level "DataConnector" class, where it is
 # called (and declared as private in that class).  Currently, this is "FilePathDataConnector".  However, since this
 # method is also used in tests, it can remain in the present "util" module (as an exception to the above stated rule).
-def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> Optional[dict]:
+def build_sorters_from_config(config_list: List[Dict[str, Any]]) -> dict | None:
     sorter_dict: Dict[str, Sorter] = {}
     if config_list is not None:
         for sorter_config in config_list:

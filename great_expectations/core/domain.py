@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, TypeVar, Union
+from typing import Any, Dict, TypeVar
 
 from great_expectations.core.id_dict import IDDict
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -33,8 +33,8 @@ class SemanticDomainTypes(Enum):
 
 @dataclass
 class InferredSemanticDomainType(SerializableDictDot):
-    semantic_domain_type: Optional[Union[str, SemanticDomainTypes]] = None
-    details: Optional[Dict[str, Any]] = None
+    semantic_domain_type: str | SemanticDomainTypes | None = None
+    details: Dict[str, Any] | None = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -55,10 +55,10 @@ class Domain(SerializableDotDict):
     # Adding an explicit constructor to highlight the specific properties that will be used.
     def __init__(
         self,
-        domain_type: Union[str, MetricDomainTypes],
-        domain_kwargs: Optional[Union[Dict[str, Any], DomainKwargs]] = None,
-        details: Optional[Dict[str, Any]] = None,
-        rule_name: Optional[str] = None,
+        domain_type: str | MetricDomainTypes,
+        domain_kwargs: Dict[str, Any] | DomainKwargs | None = None,
+        details: Dict[str, Any] | None = None,
+        rule_name: str | None = None,
     ) -> None:
         if isinstance(domain_type, str):
             try:
@@ -88,9 +88,7 @@ not supported).
         if details is None:
             details = {}
 
-        inferred_semantic_domain_type: Optional[
-            Dict[str, Union[str, SemanticDomainTypes]]
-        ] = details.get(INFERRED_SEMANTIC_TYPE_KEY)
+        inferred_semantic_domain_type: Dict[str, str | SemanticDomainTypes] | None = details.get(INFERRED_SEMANTIC_TYPE_KEY)
         if inferred_semantic_domain_type:
             semantic_domain_key: str
             metric_domain_key: str
@@ -187,7 +185,7 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
             if value:
                 if key == INFERRED_SEMANTIC_TYPE_KEY:
                     column_name: str
-                    semantic_type: Union[str, SemanticDomainTypes]
+                    semantic_type: str | SemanticDomainTypes
                     value = {
                         column_name: SemanticDomainTypes(semantic_type.lower()).value
                         if isinstance(semantic_type, str)
@@ -209,8 +207,8 @@ not exist as value of appropriate key in "domain_kwargs" dictionary.
 
 
 def deep_convert_properties_iterable_to_domain_kwargs(
-    source: Union[T, dict]
-) -> Union[T, DomainKwargs]:
+    source: T | dict
+) -> T | DomainKwargs:
     if isinstance(source, dict):
         return _deep_convert_properties_iterable_to_domain_kwargs(
             source=DomainKwargs(source)

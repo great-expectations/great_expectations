@@ -12,7 +12,7 @@ This validator evaluates YAML configurations of core Great Expectations componen
 from __future__ import annotations
 
 import traceback
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union, cast
+from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
@@ -125,13 +125,11 @@ class _YamlConfigValidator:
     def test_yaml_config(  # noqa: C901 - complexity 17
         self,
         yaml_config: str,
-        name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        runtime_environment: Optional[dict] = None,
+        name: str | None = None,
+        class_name: str | None = None,
+        runtime_environment: dict | None = None,
         pretty_print: bool = True,
-        return_mode: Union[
-            Literal["instantiated_class"], Literal["report_object"]
-        ] = "instantiated_class",
+        return_mode: Literal["instantiated_class"] | Literal["report_object"] = "instantiated_class",
         shorten_tracebacks: bool = False,
     ):
         """Convenience method for testing yaml configs
@@ -197,7 +195,7 @@ class _YamlConfigValidator:
             class_name = config["class_name"]
 
         instantiated_class: Any = None
-        usage_stats_event_payload: dict[str, Union[str, List[str]]] = {}
+        usage_stats_event_payload: dict[str, str | List[str]] = {}
 
         if pretty_print:
             print("Attempting to instantiate class from config...")
@@ -374,7 +372,7 @@ class _YamlConfigValidator:
             raise e
 
     def _test_instantiation_of_store_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
+        self, name: str | None, class_name: str, config: CommentedMap
     ) -> Tuple[Store, dict]:
         """
         Helper to create store instance and update usage stats payload.
@@ -396,7 +394,7 @@ class _YamlConfigValidator:
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_datasource_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
+        self, name: str | None, class_name: str, config: CommentedMap
     ) -> Tuple[Datasource, dict]:
         """
         Helper to create datasource instance and update usage stats payload.
@@ -434,7 +432,7 @@ class _YamlConfigValidator:
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_checkpoint_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
+        self, name: str | None, class_name: str, config: CommentedMap
     ) -> Tuple[Checkpoint, dict]:
         """
         Helper to create checkpoint instance and update usage stats payload.
@@ -444,7 +442,7 @@ class _YamlConfigValidator:
 
         checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
 
-        checkpoint_config: Union[CheckpointConfig, dict]
+        checkpoint_config: CheckpointConfig | dict
 
         checkpoint_config = CheckpointConfig.from_commented_map(commented_map=config)
         checkpoint_config_dict: dict[str, JSONValues] = checkpoint_config.to_json_dict()
@@ -477,7 +475,7 @@ class _YamlConfigValidator:
 
     def _test_instantiation_of_data_connector_from_yaml_config(
         self,
-        name: Optional[str],
+        name: str | None,
         class_name: str,
         config: CommentedMap,
         runtime_environment: dict,
@@ -509,7 +507,7 @@ class _YamlConfigValidator:
         return instantiated_class, usage_stats_event_payload
 
     def _test_instantiation_of_profiler_from_yaml_config(
-        self, name: Optional[str], class_name: str, config: CommentedMap
+        self, name: str | None, class_name: str, config: CommentedMap
     ) -> Tuple[RuleBasedProfiler, dict]:
         """
         Helper to create profiler instance and update usage stats payload.
@@ -519,9 +517,7 @@ class _YamlConfigValidator:
 
         profiler_name: str = name or config.get("name") or "my_temp_profiler"
 
-        profiler_config: Union[
-            RuleBasedProfilerConfig, dict
-        ] = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
+        profiler_config: RuleBasedProfilerConfig | dict = RuleBasedProfilerConfig.from_commented_map(commented_map=config)
         profiler_config = profiler_config.to_json_dict()  # type: ignore[union-attr]
         profiler_config.update({"name": profiler_name})
 
@@ -544,7 +540,7 @@ class _YamlConfigValidator:
 
     def _test_instantiation_of_misc_class_from_yaml_config(
         self,
-        name: Optional[str],
+        name: str | None,
         config: CommentedMap,
         runtime_environment: dict,
         usage_stats_event_payload: dict,
@@ -614,7 +610,7 @@ class _YamlConfigValidator:
         ):
             checkpoint_name: str = name or config.get("name") or "my_temp_checkpoint"
             # Roundtrip through schema validation to remove any illegal fields add/or restore any missing fields.
-            checkpoint_config: Union[CheckpointConfig, dict]
+            checkpoint_config: CheckpointConfig | dict
             checkpoint_config = CheckpointConfig.from_commented_map(
                 commented_map=config
             )

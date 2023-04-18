@@ -5,7 +5,7 @@ import copy
 import decimal
 import locale
 import re
-from typing import Any, List, Optional, Sequence, Tuple, Union
+from typing import Any, List, Sequence, Tuple
 
 import pandas as pd
 
@@ -257,8 +257,8 @@ def build_count_table(
     total_count: int = 0
 
     for unexpected_count_dict in partial_unexpected_counts:
-        value: Optional[Any] = unexpected_count_dict.get("value")
-        count: Optional[int] = unexpected_count_dict.get("count")
+        value: Any | None = unexpected_count_dict.get("value")
+        count: int | None = unexpected_count_dict.get("count")
         if count:
             total_count += count
         if value is not None and value != "":
@@ -281,8 +281,8 @@ def build_count_and_index_table(
     partial_unexpected_counts: List[dict],
     unexpected_index_list: List[dict],
     unexpected_count: int,
-    unexpected_list: Optional[List[dict]] = None,
-    unexpected_index_column_names: Optional[List[str]] = None,
+    unexpected_list: List[dict] | None = None,
+    unexpected_index_column_names: List[str] | None = None,
 ) -> Tuple[List[str], List[List[Any]]]:
     """
         Used by _diagnostic_unexpected_table_renderer() method in Expectation to render
@@ -319,7 +319,7 @@ def build_count_and_index_table(
 
     for index, row in unexpected_index_df.iterrows():
 
-        row_list: List[Union[str, int]] = []
+        row_list: List[str | int] = []
 
         unexpected_value = index
         count = int(row.Count)
@@ -356,10 +356,10 @@ def build_count_and_index_table(
 
 
 def _convert_unexpected_indices_to_df(
-    unexpected_index_list: List[Union[dict, int]],
+    unexpected_index_list: List[dict | int],
     partial_unexpected_counts: List[dict],
-    unexpected_index_column_names: Optional[List[str]] = None,
-    unexpected_list: Optional[List[Any]] = None,
+    unexpected_index_column_names: List[str] | None = None,
+    unexpected_list: List[Any] | None = None,
 ) -> pd.DataFrame:
     """
     Helper method to convert the list of unexpected indices into a DataFrame that can be used to
@@ -435,7 +435,7 @@ def _convert_unexpected_indices_to_df(
 
 
 def truncate_list_of_indices(
-    indices: List[Union[int, str]], max_index: int = 10
+    indices: List[int | str], max_index: int = 10
 ) -> str:
     """
     Lambda function used to take unexpected_indices and turn into a string that can be rendered in DataDocs.

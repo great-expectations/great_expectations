@@ -9,7 +9,6 @@ from typing import (
     Hashable,
     Iterable,
     Mapping,
-    Optional,
     Set,
     Type,
     Union,
@@ -45,7 +44,7 @@ class TypeLookup(
 
     def __init__(
         self,
-        __dict: Optional[Mapping[ValidTypes, ValidTypes]] = None,
+        __dict: Mapping[ValidTypes, ValidTypes] | None = None,
         **kwargs: Hashable,
     ):
         __dict = __dict or {}
@@ -132,7 +131,7 @@ class TypeLookup(
         >>> print(tuple in t)
         False
         """
-        txn_exc: Union[Exception, None] = None
+        txn_exc: Exception | None = None
 
         backup_data = copy.copy(self.data)
         logger.debug("Beginning TypeLookup transaction")

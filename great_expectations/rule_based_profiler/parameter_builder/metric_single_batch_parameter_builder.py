@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Set
 
 from great_expectations.core.domain import Domain  # noqa: TCH001
 from great_expectations.rule_based_profiler.config import (
@@ -41,16 +41,14 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     def __init__(
         self,
         name: str,
-        metric_name: Optional[str] = None,
-        metric_domain_kwargs: Optional[Union[str, dict]] = None,
-        metric_value_kwargs: Optional[Union[str, dict]] = None,
-        enforce_numeric_metric: Union[str, bool] = False,
-        replace_nan_with_zero: Union[str, bool] = False,
-        reduce_scalar_metric: Union[str, bool] = True,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        metric_name: str | None = None,
+        metric_domain_kwargs: str | dict | None = None,
+        metric_value_kwargs: str | dict | None = None,
+        enforce_numeric_metric: str | bool = False,
+        replace_nan_with_zero: str | bool = False,
+        reduce_scalar_metric: str | bool = True,
+        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -85,9 +83,9 @@ class MetricSingleBatchParameterBuilder(MetricMultiBatchParameterBuilder):
     def _build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.

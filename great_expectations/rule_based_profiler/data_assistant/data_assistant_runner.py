@@ -83,7 +83,7 @@ class DataAssistantRunner:
     def get_profiler_config(
         self,
         mode: ConfigOutputModes = ConfigOutputModes.JSON_DICT,
-    ) -> Union[BaseYamlConfig, dict, str]:
+    ) -> BaseYamlConfig | dict | str:
         """
         This method returns configuration of effective "BaseRuleBasedProfiler", corresponding to this instance's
         "DataAssistant", according to specified "mode" (formatting) directive.
@@ -107,8 +107,8 @@ class DataAssistantRunner:
         """
 
         def run(
-            batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-            estimation: Optional[Union[str, NumericRangeEstimatorType]] = None,
+            batch_request: BatchRequestBase | dict | None = None,
+            estimation: str | NumericRangeEstimatorType | None = None,
             **kwargs,
         ) -> DataAssistantResult:
             """
@@ -212,7 +212,7 @@ class DataAssistantRunner:
 
     def _build_data_assistant(
         self,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: BatchRequestBase | dict | None = None,
     ) -> DataAssistant:
         """
         This method builds specified "DataAssistant" object and returns its effective "BaseRuleBasedProfiler" object.
@@ -276,13 +276,13 @@ class DataAssistantRunner:
         conflicting_domain_type_attribute_names: List[str] = []
 
         rule: Rule
-        domain_builder: Optional[DomainBuilder]
+        domain_builder: DomainBuilder | None
         domain_builder_attributes: List[str]
         key: str
         accessor_method: Callable
         accessor_method_return_type: Type
         property_value: Any
-        parameter: Optional[Parameter]
+        parameter: Parameter | None
         for rule in self._profiler.rules:
             domain_builder = rule.domain_builder
             assert (
@@ -328,7 +328,7 @@ class DataAssistantRunner:
         return parameters
 
     def _get_rule_based_profiler_domain_type_attributes(
-        self, rule: Optional[Rule] = None
+        self, rule: Rule | None = None
     ) -> List[str]:
         if rule is None:
             domain_type_attributes: List[str] = []

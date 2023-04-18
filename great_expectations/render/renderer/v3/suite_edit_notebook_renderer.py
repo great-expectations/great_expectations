@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List
 
 import jinja2
 import nbformat
@@ -43,20 +43,20 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def __init__(
         self,
-        custom_templates_module: Optional[str] = None,
-        header_markdown: Optional[NotebookTemplateConfig] = None,
-        footer_markdown: Optional[NotebookTemplateConfig] = None,
-        table_expectations_header_markdown: Optional[NotebookTemplateConfig] = None,
-        column_expectations_header_markdown: Optional[NotebookTemplateConfig] = None,
-        table_expectations_not_found_markdown: Optional[NotebookTemplateConfig] = None,
-        column_expectations_not_found_markdown: Optional[NotebookTemplateConfig] = None,
-        authoring_intro_markdown: Optional[NotebookTemplateConfig] = None,
-        column_expectations_markdown: Optional[NotebookTemplateConfig] = None,
-        header_code: Optional[NotebookTemplateConfig] = None,
-        footer_code: Optional[NotebookTemplateConfig] = None,
-        table_expectation_code: Optional[NotebookTemplateConfig] = None,
-        column_expectation_code: Optional[NotebookTemplateConfig] = None,
-        context: Optional[AbstractDataContext] = None,
+        custom_templates_module: str | None = None,
+        header_markdown: NotebookTemplateConfig | None = None,
+        footer_markdown: NotebookTemplateConfig | None = None,
+        table_expectations_header_markdown: NotebookTemplateConfig | None = None,
+        column_expectations_header_markdown: NotebookTemplateConfig | None = None,
+        table_expectations_not_found_markdown: NotebookTemplateConfig | None = None,
+        column_expectations_not_found_markdown: NotebookTemplateConfig | None = None,
+        authoring_intro_markdown: NotebookTemplateConfig | None = None,
+        column_expectations_markdown: NotebookTemplateConfig | None = None,
+        header_code: NotebookTemplateConfig | None = None,
+        footer_code: NotebookTemplateConfig | None = None,
+        table_expectation_code: NotebookTemplateConfig | None = None,
+        column_expectation_code: NotebookTemplateConfig | None = None,
+        context: AbstractDataContext | None = None,
     ) -> None:
         super().__init__(context=context)
         custom_loader: list = []
@@ -109,7 +109,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     @staticmethod
     def from_data_context(data_context: AbstractDataContext):
-        suite_edit_notebook_config: Optional[NotebookConfig] = None
+        suite_edit_notebook_config: NotebookConfig | None = None
         if data_context.notebooks and data_context.notebooks.get("suite_edit"):
             suite_edit_notebook_config = data_context.notebooks.get("suite_edit")
 
@@ -152,7 +152,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def render_with_overwrite(
         self,
-        notebook_config: Optional[NotebookTemplateConfig],
+        notebook_config: NotebookTemplateConfig | None,
         default_file_name: str,
         **default_kwargs,
     ):
@@ -172,7 +172,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def add_header(
         self,
         suite_name: str,
-        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+        batch_request: str | Dict[str, Any] | None = None,
     ) -> None:
         markdown: str = self.render_with_overwrite(
             notebook_config=self.header_markdown,
@@ -195,7 +195,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def add_footer(
         self,
-        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+        batch_request: str | Dict[str, Any] | None = None,
     ) -> None:
         markdown: str = self.render_with_overwrite(
             notebook_config=self.footer_markdown,
@@ -213,7 +213,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def add_expectation_cells_from_suite(
         self,
         expectations: List[ExpectationConfiguration],
-        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+        batch_request: str | Dict[str, Any] | None = None,
     ) -> None:
         expectations_by_column: Dict[
             str, List[ExpectationConfiguration]
@@ -245,7 +245,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def _add_table_level_expectations(
         self,
         expectations_by_column: Dict[str, List[ExpectationConfiguration]],
-        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+        batch_request: str | Dict[str, Any] | None = None,
     ) -> None:
         if not expectations_by_column["table_expectations"]:
             markdown: str = self.render_with_overwrite(
@@ -276,7 +276,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
     def _add_column_level_expectations(
         self,
         expectations_by_column: Dict[str, List[ExpectationConfiguration]],
-        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+        batch_request: str | Dict[str, Any] | None = None,
     ) -> None:
         if not expectations_by_column:
             markdown: str = self.render_with_overwrite(
@@ -353,7 +353,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         """
         # noinspection PyTypeChecker
         suite: ExpectationSuite = kwargs.get("suite")
-        batch_request: Optional[Union[str, Dict[str, Any]]] = kwargs.get(
+        batch_request: str | Dict[str, Any] | None = kwargs.get(
             "batch_request"
         )
 
@@ -392,7 +392,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
         """
         # noinspection PyTypeChecker
         suite: ExpectationSuite = kwargs.get("suite")
-        batch_request: Optional[Union[str, Dict[str, Any]]] = kwargs.get(
+        batch_request: str | Dict[str, Any] | None = kwargs.get(
             "batch_request"
         )
 
@@ -411,7 +411,7 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
 
     def add_authoring_intro(
         self,
-        batch_request: Optional[Union[str, Dict[str, Any]]] = None,
+        batch_request: str | Dict[str, Any] | None = None,
     ) -> None:
         markdown: str = self.render_with_overwrite(
             notebook_config=self.authoring_intro_markdown,

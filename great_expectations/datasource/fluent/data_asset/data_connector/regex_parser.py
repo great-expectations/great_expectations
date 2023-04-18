@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Dict, List, Match, Optional, Tuple
+from typing import Dict, List, Match, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -32,14 +32,14 @@ class RegExParser:
     def get_named_group_name_to_group_index_mapping(self) -> Dict[str, int]:
         return self._named_group_name_to_group_index_mapping
 
-    def get_matches(self, target: str) -> Optional[Match[str]]:
+    def get_matches(self, target: str) -> Match[str] | None:
         return self._regex_pattern.match(target)
 
     def get_named_group_name_to_group_value_mapping(
         self, target: str
     ) -> Dict[str, str] | None:
         # Check for `(?P<name>)` named group syntax
-        matches: Optional[Match[str]] = self.get_matches(target=target)
+        matches: Match[str] | None = self.get_matches(target=target)
         if matches is None:
             return None
 
@@ -47,7 +47,7 @@ class RegExParser:
 
     def get_all_matched_group_values(self, target: str) -> List[str] | None:
         # Check for `(?P<name>)` named group syntax
-        matches: Optional[Match[str]] = self.get_matches(target=target)
+        matches: Match[str] | None = self.get_matches(target=target)
         if matches is None:
             return None
 

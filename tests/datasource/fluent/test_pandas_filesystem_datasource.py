@@ -7,7 +7,7 @@ import pathlib
 import re
 from dataclasses import dataclass
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, Any, Optional, Type
+from typing import TYPE_CHECKING, Any, Type
 
 import pydantic
 import pytest
@@ -533,9 +533,9 @@ def test_get_batch_list_from_fully_specified_batch_request(
     ],
 )
 def test_get_batch_list_batch_count(
-    year: Optional[str],
-    month: Optional[str],
-    path: Optional[str],
+    year: str | None,
+    month: str | None,
+    path: str | None,
     batch_count: int,
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):

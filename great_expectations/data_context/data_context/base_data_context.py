@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Mapping, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Mapping, Tuple
 
 from great_expectations.util import get_context
 
@@ -21,14 +21,14 @@ from great_expectations.data_context.types.base import (
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_config", version="0.15.37")
 def BaseDataContext(
-    project_config: Union[DataContextConfig, Mapping],
-    context_root_dir: Optional[PathStr] = None,
-    runtime_environment: Optional[dict] = None,
+    project_config: DataContextConfig | Mapping,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
     cloud_mode: bool = False,
-    cloud_config: Optional[GXCloudConfig] = None,
+    cloud_config: GXCloudConfig | None = None,
     # Deprecated as of 0.15.37
     ge_cloud_mode: bool = False,
-    ge_cloud_config: Optional[GXCloudConfig] = None,
+    ge_cloud_config: GXCloudConfig | None = None,
 ) -> AbstractDataContext:
     """A lightweight wrapper around `get_context()`.
 
@@ -176,9 +176,9 @@ def BaseDataContext(
     # initialize runtime_environment as empty dict if None
     runtime_environment = runtime_environment or {}
 
-    cloud_base_url: Optional[str] = None
-    cloud_access_token: Optional[str] = None
-    cloud_organization_id: Optional[str] = None
+    cloud_base_url: str | None = None
+    cloud_access_token: str | None = None
+    cloud_organization_id: str | None = None
     if cloud_config:
         cloud_base_url = cloud_config.base_url
         cloud_access_token = cloud_config.access_token
@@ -197,11 +197,11 @@ def BaseDataContext(
 
 def _resolve_cloud_args(
     cloud_mode: bool = False,
-    cloud_config: Optional[GXCloudConfig] = None,
+    cloud_config: GXCloudConfig | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_mode: bool = False,
-    ge_cloud_config: Optional[GXCloudConfig] = None,
-) -> Tuple[bool, Optional[GXCloudConfig]]:
+    ge_cloud_config: GXCloudConfig | None = None,
+) -> Tuple[bool, GXCloudConfig | None]:
     cloud_mode = True if cloud_mode or ge_cloud_mode else False
     cloud_config = cloud_config if cloud_config is not None else ge_cloud_config
     return cloud_mode, cloud_config

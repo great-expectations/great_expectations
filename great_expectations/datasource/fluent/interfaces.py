@@ -16,7 +16,6 @@ from typing import (
     List,
     MutableMapping,
     MutableSequence,
-    Optional,
     Sequence,
     Set,
     Type,
@@ -150,15 +149,15 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # * type: Literal["csv"] = "csv"
     name: str
     type: str
-    id: Optional[uuid.UUID] = Field(default=None, description="DataAsset id")
+    id: uuid.UUID | None = Field(default=None, description="DataAsset id")
 
     order_by: List[Sorter] = Field(default_factory=list)
     batch_metadata: BatchMetadata = pydantic.Field(default_factory=dict)
 
     # non-field private attributes
     _datasource: _DatasourceT = pydantic.PrivateAttr()
-    _data_connector: Optional[DataConnector] = pydantic.PrivateAttr(default=None)
-    _test_connection_error_message: Optional[str] = pydantic.PrivateAttr(default=None)
+    _data_connector: DataConnector | None = pydantic.PrivateAttr(default=None)
+    _test_connection_error_message: str | None = pydantic.PrivateAttr(default=None)
 
     @property
     def datasource(self) -> _DatasourceT:
@@ -200,7 +199,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError
 
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self, options: BatchRequestOptions | None = None
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -249,7 +248,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
     def _parse_order_by_sorters(
-        cls, order_by: Optional[List[Union[Sorter, str, dict]]] = None
+        cls, order_by: List[Sorter | str | dict] | None = None
     ) -> List[Sorter]:
         return Datasource.parse_order_by_sorters(order_by=order_by)
 
@@ -364,7 +363,7 @@ class Datasource(
     # class attrs
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
     # Not all Datasources require a DataConnector
-    data_connector_type: ClassVar[Optional[Type[DataConnector]]] = None
+    data_connector_type: ClassVar[Type[DataConnector] | None] = None
     # Datasource instance attrs but these will be fed into the `execution_engine` constructor
     _EXCLUDED_EXEC_ENG_ARGS: ClassVar[Set[str]] = {
         "name",
@@ -389,19 +388,19 @@ class Datasource(
     ]
     # Setting this in a Datasource subclass will override the execution engine type.
     # The primary use case is to inject an execution engine for testing.
-    execution_engine_override: ClassVar[Optional[Type[_ExecutionEngineT]]] = None  # type: ignore[misc]  # ClassVar cannot contain type variables
+    execution_engine_override: ClassVar[Type[_ExecutionEngineT] | None] = None  # type: ignore[misc]  # ClassVar cannot contain type variables
 
     # instance attrs
     type: str
     name: str
-    id: Optional[uuid.UUID] = Field(default=None, description="Datasource id")
+    id: uuid.UUID | None = Field(default=None, description="Datasource id")
     assets: MutableSequence[_DataAssetT] = []
 
     # private attrs
     _data_context: GXDataContext = pydantic.PrivateAttr()
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
-    _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
-    _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
+    _execution_engine: _ExecutionEngineT | None = pydantic.PrivateAttr(None)
+    _config_provider: _ConfigurationProvider | None = pydantic.PrivateAttr(None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
@@ -546,7 +545,7 @@ class Datasource(
 
     @staticmethod
     def parse_order_by_sorters(
-        order_by: Optional[List[Union[Sorter, str, dict]]] = None
+        order_by: List[Sorter | str | dict] | None = None
     ) -> List[Sorter]:
         order_by_sorters: list[Sorter] = []
         if order_by:
@@ -558,8 +557,8 @@ class Datasource(
                         )
                     order_by_sorters.append(_sorter_from_str(sorter))
                 elif isinstance(sorter, dict):
-                    key: Optional[Any] = sorter.get("key")
-                    reverse: Optional[Any] = sorter.get("reverse")
+                    key: Any | None = sorter.get("key")
+                    reverse: Any | None = sorter.get("reverse")
                     if key and reverse:
                         order_by_sorters.append(Sorter(key=key, reverse=reverse))
                     elif key:

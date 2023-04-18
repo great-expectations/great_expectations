@@ -14,7 +14,7 @@ import json
 import os
 import pathlib
 import shutil
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 
 import invoke
 from typing_extensions import Final
@@ -619,7 +619,7 @@ def public_api_task(ctx):
 
 
 def _exit_with_error_if_not_run_from_correct_dir(
-    task_name: str, correct_dir: Union[pathlib.Path, None] = None
+    task_name: str, correct_dir: pathlib.Path | None = None
 ) -> None:
     """Exit if the command was not run from the correct directory."""
     if not correct_dir:

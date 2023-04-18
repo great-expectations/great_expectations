@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
@@ -22,10 +22,10 @@ class RuleState:
 
     def __init__(
         self,
-        rule: Optional[Rule] = None,
-        domains: Optional[List[Domain]] = None,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        rule: Rule | None = None,
+        domains: List[Domain] | None = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
     ) -> None:
         """
         Args:
@@ -52,7 +52,7 @@ class RuleState:
         self._rule_execution_time = 0.0
 
     @property
-    def rule(self) -> Optional[Rule]:
+    def rule(self) -> Rule | None:
         return self._rule
 
     @rule.setter
@@ -68,11 +68,11 @@ class RuleState:
         self._domains = value
 
     @property
-    def variables(self) -> Optional[ParameterContainer]:
+    def variables(self) -> ParameterContainer | None:
         return self._variables
 
     @variables.setter
-    def variables(self, value: Optional[ParameterContainer]) -> None:
+    def variables(self, value: ParameterContainer | None) -> None:
         self._variables = value
 
     @property

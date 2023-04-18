@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
@@ -28,10 +28,8 @@ class SqlAlchemyDataSampler(DataSampler):
         self,
         execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
-        where_clause: Optional[sa_sql_expression_Selectable] = None,
-    ) -> Union[
-        str, sa_sql_expression_BinaryExpression, sa_sql_expression_BooleanClauseList
-    ]:
+        where_clause: sa_sql_expression_Selectable | None = None,
+    ) -> str | sa_sql_expression_BinaryExpression | sa_sql_expression_BooleanClauseList:
         """Sample using a limit with configuration provided via the batch_spec.
 
         Note: where_clause needs to be included at this stage since SqlAlchemy's semantics
@@ -96,7 +94,7 @@ class SqlAlchemyDataSampler(DataSampler):
                     compile_kwargs={"literal_binds": True},
                 )
             )
-            n: Union[str, int] = batch_spec["sampling_kwargs"]["n"]
+            n: str | int = batch_spec["sampling_kwargs"]["n"]
             self._validate_mssql_limit_param(n)
             # This string replacement is here because the limit parameter is not substituted during query.compile()
             string_of_query = string_of_query.replace("?", str(n))
@@ -112,7 +110,7 @@ class SqlAlchemyDataSampler(DataSampler):
             )
 
     @staticmethod
-    def _validate_mssql_limit_param(n: Union[str, int]) -> None:
+    def _validate_mssql_limit_param(n: str | int) -> None:
         """Validate that the mssql limit param is passed as an int or a string representation of an int.
 
         Args:
@@ -135,7 +133,7 @@ class SqlAlchemyDataSampler(DataSampler):
     def sample_using_random(
         execution_engine: SqlAlchemyExecutionEngine,
         batch_spec: BatchSpec,
-        where_clause: Optional[sa_sql_expression_Selectable] = None,
+        where_clause: sa_sql_expression_Selectable | None = None,
     ) -> sa_sql_expression_Selectable:
         """Sample using random data with configuration provided via the batch_spec.
 

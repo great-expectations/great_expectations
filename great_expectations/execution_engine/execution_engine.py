@@ -11,10 +11,8 @@ from typing import (
     Dict,
     Iterable,
     List,
-    Optional,
     Set,
     Tuple,
-    Union,
 )
 
 import great_expectations.exceptions as gx_exceptions
@@ -72,8 +70,8 @@ class MetricComputationConfiguration(DictDot):
     metric_configuration: MetricConfiguration
     metric_fn: sa.func | F  # type: ignore[valid-type]
     metric_provider_kwargs: dict
-    compute_domain_kwargs: Optional[dict] = None
-    accessor_domain_kwargs: Optional[dict] = None
+    compute_domain_kwargs: dict | None = None
+    accessor_domain_kwargs: dict | None = None
 
     @public_api
     def to_dict(self) -> dict:
@@ -141,11 +139,11 @@ class ExecutionEngine(ABC):
 
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: str | None = None,
         caching: bool = True,
-        batch_spec_defaults: Optional[dict] = None,
-        batch_data_dict: Optional[dict] = None,
-        validator: Optional[Validator] = None,
+        batch_spec_defaults: dict | None = None,
+        batch_data_dict: dict | None = None,
+        validator: Validator | None = None,
     ) -> None:
         self.name = name
         self._validator = validator
@@ -155,7 +153,7 @@ class ExecutionEngine(ABC):
         self._caching = caching
         # NOTE: 20200918 - this is a naive cache; update.
         if self._caching:
-            self._metric_cache: Union[Dict, NoOpDict] = {}
+            self._metric_cache: Dict | NoOpDict = {}
         else:
             self._metric_cache = NoOpDict()
 
@@ -250,8 +248,8 @@ class ExecutionEngine(ABC):
     def resolve_metrics(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
-        runtime_configuration: Optional[dict] = None,
+        metrics: Dict[Tuple[str, str, str], MetricValue] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Dict[Tuple[str, str, str], MetricValue]:
         """resolve_metrics is the main entrypoint for an execution engine. The execution engine will compute the value
         of the provided metrics.
@@ -308,8 +306,8 @@ class ExecutionEngine(ABC):
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
+        domain_type: str | MetricDomainTypes,
+        accessor_keys: Iterable[str] | None = None,
     ) -> Tuple[Any, dict, dict]:
         """get_compute_domain() is an interface method, which computes the optimal domain_kwargs for computing metrics based on the given domain_kwargs and specific engine semantics.
 
@@ -380,8 +378,8 @@ class ExecutionEngine(ABC):
     def _build_direct_and_bundled_metric_computation_configurations(
         self,
         metrics_to_resolve: Iterable[MetricConfiguration],
-        metrics: Optional[Dict[Tuple[str, str, str], MetricValue]] = None,
-        runtime_configuration: Optional[dict] = None,
+        metrics: Dict[Tuple[str, str, str], MetricValue] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Tuple[
         List[MetricComputationConfiguration],
         List[MetricComputationConfiguration],
@@ -414,10 +412,10 @@ class ExecutionEngine(ABC):
             metrics = {}
 
         resolved_metric_dependencies_by_metric_name: Dict[
-            str, Union[MetricValue, Tuple[Any, dict, dict]]
+            str, MetricValue | Tuple[Any, dict, dict]
         ]
         metric_class: MetricProvider
-        metric_fn: Union[Callable, None]
+        metric_fn: Callable | None
         metric_aggregate_fn: sa.func | F  # type: ignore[valid-type]
         metric_provider_kwargs: dict
         compute_domain_kwargs: dict
@@ -482,7 +480,7 @@ class ExecutionEngine(ABC):
         self,
         metric_to_resolve: MetricConfiguration,
         metrics: Dict[Tuple[str, str, str], MetricValue],
-    ) -> Dict[str, Union[MetricValue, Tuple[Any, dict, dict]]]:
+    ) -> Dict[str, MetricValue | Tuple[Any, dict, dict]]:
         """
         Gathers resolved (already computed) evaluation dependencies of metric-to-resolve (not yet computed)
         "MetricConfiguration" object by "metric_name" property of resolved "MetricConfiguration" objects.
@@ -495,7 +493,7 @@ class ExecutionEngine(ABC):
             Dictionary keyed by "metric_name" with values as computed metric or partial bundling information tuple
         """
         metric_dependencies_by_metric_name: Dict[
-            str, Union[MetricValue, Tuple[Any, dict, dict]]
+            str, MetricValue | Tuple[Any, dict, dict]
         ] = {}
 
         metric_name: str
@@ -578,8 +576,8 @@ class ExecutionEngine(ABC):
     def _split_domain_kwargs(
         self,
         domain_kwargs: Dict[str, Any],
-        domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
+        domain_type: str | MetricDomainTypes,
+        accessor_keys: Iterable[str] | None = None,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for all Domain types into compute and accessor Domain kwargs.
 
@@ -645,7 +643,7 @@ class ExecutionEngine(ABC):
     def _split_table_metric_domain_kwargs(
         domain_kwargs: dict,
         domain_type: MetricDomainTypes,
-        accessor_keys: Optional[Iterable[str]] = None,
+        accessor_keys: Iterable[str] | None = None,
     ) -> SplitDomainKwargs:
         """Split domain_kwargs for table Domain types into compute and accessor Domain kwargs.
 

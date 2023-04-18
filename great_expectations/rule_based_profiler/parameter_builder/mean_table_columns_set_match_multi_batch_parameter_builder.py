@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Set
 
 import numpy as np
 
@@ -57,12 +57,10 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
     def __init__(
         self,
         name: str,
-        metric_domain_kwargs: Optional[Union[str, dict]] = None,
-        metric_value_kwargs: Optional[Union[str, dict]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        metric_domain_kwargs: str | dict | None = None,
+        metric_value_kwargs: str | dict | None = None,
+        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -91,9 +89,9 @@ class MeanTableColumnsSetMatchMultiBatchParameterBuilder(
     def _build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.

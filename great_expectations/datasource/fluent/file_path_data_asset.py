@@ -11,7 +11,6 @@ from typing import (
     Dict,
     List,
     Mapping,
-    Optional,
     Pattern,
     Set,
 )
@@ -133,7 +132,7 @@ class _FilePathDataAsset(DataAsset):
 
     @public_api
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self, options: BatchRequestOptions | None = None
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 

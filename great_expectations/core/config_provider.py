@@ -4,7 +4,7 @@ import errno
 import os
 from abc import ABC, abstractmethod
 from collections import OrderedDict
-from typing import Any, Dict, Optional, Type, cast
+from typing import Any, Dict, Type, cast
 
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -25,7 +25,7 @@ class _AbstractConfigurationProvider(ABC):
         pass
 
     def substitute_config(
-        self, config: Any, config_values: Optional[Dict[str, str]] = None
+        self, config: Any, config_values: Dict[str, str] | None = None
     ) -> Any:
         """
         Utilizes the underlying ConfigurationSubstitutor instance to substitute any
@@ -76,7 +76,7 @@ class _ConfigurationProvider(_AbstractConfigurationProvider):
 
     def get_provider(
         self, type_: Type[_AbstractConfigurationProvider]
-    ) -> Optional[_AbstractConfigurationProvider]:
+    ) -> _AbstractConfigurationProvider | None:
         """
         Retrieves a registered configuration provider (if available).
 
@@ -135,7 +135,7 @@ class _ConfigurationVariablesConfigurationProvider(_AbstractConfigurationProvide
     """
 
     def __init__(
-        self, config_variables_file_path: str, root_directory: Optional[str] = None
+        self, config_variables_file_path: str, root_directory: str | None = None
     ) -> None:
         self._config_variables_file_path = config_variables_file_path
         self._root_directory = root_directory

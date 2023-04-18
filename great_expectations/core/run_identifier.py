@@ -4,7 +4,7 @@ import datetime
 import json
 import warnings
 from copy import deepcopy
-from typing import Dict, Optional, Union
+from typing import Dict
 
 from dateutil.parser import parse
 from marshmallow import Schema, fields, post_load, pre_dump
@@ -25,8 +25,8 @@ class RunIdentifier(DataContextKey):
 
     def __init__(
         self,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[datetime.datetime, str]] = None,
+        run_name: str | None = None,
+        run_time: datetime.datetime | str | None = None,
     ) -> None:
         super().__init__()
         assert run_name is None or isinstance(

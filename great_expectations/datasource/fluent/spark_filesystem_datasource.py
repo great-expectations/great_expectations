@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, Optional, Type
+from typing import TYPE_CHECKING, ClassVar, Type
 
 from typing_extensions import Literal
 
@@ -35,7 +35,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
     type: Literal["spark_filesystem"] = "spark_filesystem"
 
     base_directory: pathlib.Path
-    data_context_root_directory: Optional[pathlib.Path] = None
+    data_context_root_directory: pathlib.Path | None = None
 
     def test_connection(self, test_assets: bool = True) -> None:
         """Test the connection for the SparkDatasource.

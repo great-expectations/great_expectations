@@ -14,7 +14,6 @@ from typing import (
     List,
     Mapping,
     MutableSequence,
-    Optional,
     Sequence,
     Set,
     Type,
@@ -531,7 +530,7 @@ class PandasDatasource(_PandasDatasource):
         ...
 
     @staticmethod
-    def _validate_asset_name(asset_name: Optional[str] = None) -> str:
+    def _validate_asset_name(asset_name: str | None = None) -> str:
         if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
             raise PandasDatasourceError(
                 f"""An asset_name of {DEFAULT_PANDAS_DATA_ASSET_NAME} cannot be passed because it is a reserved name."""
@@ -560,7 +559,7 @@ class PandasDatasource(_PandasDatasource):
     def read_dataframe(
         self,
         dataframe: pd.DataFrame,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -584,7 +583,7 @@ class PandasDatasource(_PandasDatasource):
 
     def read_clipboard(
         self,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -610,7 +609,7 @@ class PandasDatasource(_PandasDatasource):
     def read_csv(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -637,7 +636,7 @@ class PandasDatasource(_PandasDatasource):
     def read_excel(
         self,
         io: os.PathLike | str | bytes,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -664,7 +663,7 @@ class PandasDatasource(_PandasDatasource):
     def read_feather(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -691,7 +690,7 @@ class PandasDatasource(_PandasDatasource):
     def read_gbq(
         self,
         query: str,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -718,7 +717,7 @@ class PandasDatasource(_PandasDatasource):
     def read_hdf(
         self,
         path_or_buf: pd.HDFStore | os.PathLike | str,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -745,7 +744,7 @@ class PandasDatasource(_PandasDatasource):
     def read_html(
         self,
         io: os.PathLike | str,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -772,7 +771,7 @@ class PandasDatasource(_PandasDatasource):
     def read_json(
         self,
         path_or_buf: pydantic.Json | pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -799,7 +798,7 @@ class PandasDatasource(_PandasDatasource):
     def read_orc(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -826,7 +825,7 @@ class PandasDatasource(_PandasDatasource):
     def read_parquet(
         self,
         path: pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -853,7 +852,7 @@ class PandasDatasource(_PandasDatasource):
     def read_pickle(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -880,7 +879,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sas(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -907,7 +906,7 @@ class PandasDatasource(_PandasDatasource):
     def read_spss(
         self,
         path: pydantic.FilePath,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -937,7 +936,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -968,7 +967,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         sql: sqlalchemy.select | sqlalchemy.text | str,
         con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -999,7 +998,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         table_name: str,
         con: sqlalchemy.engine.Engine | str,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -1027,7 +1026,7 @@ class PandasDatasource(_PandasDatasource):
     def read_stata(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -1054,7 +1053,7 @@ class PandasDatasource(_PandasDatasource):
     def read_table(
         self,
         filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)
@@ -1081,7 +1080,7 @@ class PandasDatasource(_PandasDatasource):
     def read_xml(
         self,
         path_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-        asset_name: Optional[str] = None,
+        asset_name: str | None = None,
         **kwargs,
     ) -> Validator:
         name: str = self._validate_asset_name(asset_name=asset_name)

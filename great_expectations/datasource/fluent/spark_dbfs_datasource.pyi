@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from typing_extensions import Literal
 
@@ -35,10 +35,10 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
         self,
         name: str,
         *,
-        batch_metadata: Optional[BatchMetadata] = ...,
+        batch_metadata: BatchMetadata | None = ...,
         batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
         header: bool = ...,
         infer_schema: bool = ...,
-        order_by: Optional[SortersDefinition] = ...,
+        order_by: SortersDefinition | None = ...,
     ) -> CSVAsset: ...

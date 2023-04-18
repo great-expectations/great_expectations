@@ -14,7 +14,7 @@ from __future__ import annotations
 import enum
 import sys
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, cast
+from typing import Iterable, List, cast
 
 from marshmallow import Schema, fields
 from packaging import version
@@ -40,7 +40,7 @@ class PackageInfo:
     package_name: str
     installed: bool
     install_environment: InstallEnvironment
-    version: Optional[version.Version]
+    version: version.Version | None
 
 
 class PackageInfoSchema(Schema):
@@ -129,7 +129,7 @@ class GXExecutionEnvironment:
         dependencies: List[PackageInfo] = []
         for dependency_name in dependency_names:
 
-            package_version: Optional[version.Version]
+            package_version: version.Version | None
             installed: bool
             if dependency_name in self._get_all_installed_packages():
                 installed = True

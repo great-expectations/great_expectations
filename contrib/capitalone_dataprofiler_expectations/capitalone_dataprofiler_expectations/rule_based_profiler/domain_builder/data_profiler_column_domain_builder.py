@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, List, Optional, Union
+from typing import TYPE_CHECKING, Iterable, List
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
@@ -34,19 +34,15 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
     def __init__(
         self,
         profile_path: str = f"{VARIABLES_KEY}profile_path",
-        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        semantic_type_filter_module_name: Optional[str] = None,
-        semantic_type_filter_class_name: Optional[str] = None,
-        include_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        include_column_names: str | List[str] | None | None = None,
+        exclude_column_names: str | List[str] | None | None = None,
+        include_column_name_suffixes: str | Iterable | List[str] | None = None,
+        exclude_column_name_suffixes: str | Iterable | List[str] | None = None,
+        semantic_type_filter_module_name: str | None = None,
+        semantic_type_filter_class_name: str | None = None,
+        include_semantic_types: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
+        exclude_semantic_types: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -84,8 +80,8 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
     def _get_domains(
         self,
         rule_name: str,
-        variables: Optional[ParameterContainer] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        runtime_configuration: dict | None = None,
     ) -> List[Domain]:
         """Return domains matching the specified tolerance limits.
 

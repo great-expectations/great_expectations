@@ -6,7 +6,6 @@ from typing import (
     Any,
     Dict,
     Tuple,
-    Union,
 )
 
 import great_expectations.exceptions as gx_exceptions
@@ -58,7 +57,7 @@ def _pandas_column_map_condition_values(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -125,7 +124,7 @@ def _pandas_column_map_series_and_domain_values(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -180,7 +179,7 @@ def _pandas_column_map_condition_value_counts(
     ) = metrics.get("unexpected_condition")
     df = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
     if "column" not in accessor_domain_kwargs:
         raise ValueError(
@@ -256,7 +255,7 @@ def _sqlalchemy_column_map_condition_values(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -314,7 +313,7 @@ def _sqlalchemy_column_map_condition_value_counts(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -355,7 +354,7 @@ def _spark_column_map_condition_values(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
@@ -402,7 +401,7 @@ def _spark_column_map_condition_value_counts(
 """
         )
 
-    column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+    column_name: str | quoted_name = accessor_domain_kwargs["column"]
     column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=metrics["table.columns"],

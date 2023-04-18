@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Callable, Dict, List, cast
 
 from dateutil.parser import parse
 from tqdm.auto import tqdm
@@ -104,12 +104,12 @@ class UserConfigurableProfiler:
 
     def __init__(
         self,
-        profile_dataset: Union[Batch, Dataset, Validator],
-        excluded_expectations: Optional[List[str]] = None,
-        ignored_columns: Optional[List[str]] = None,
+        profile_dataset: Batch | Dataset | Validator,
+        excluded_expectations: List[str] | None = None,
+        ignored_columns: List[str] | None = None,
         not_null_only: bool = False,
-        primary_or_compound_key: Optional[List[str]] = None,
-        semantic_types_dict: Optional[Dict[str, List[str]]] = None,
+        primary_or_compound_key: List[str] | None = None,
+        semantic_types_dict: Dict[str, List[str]] | None = None,
         table_expectations_only: bool = False,
         value_set_threshold: str = "MANY",
     ) -> None:
@@ -119,7 +119,7 @@ class UserConfigurableProfiler:
         self.profile_dataset = profile_dataset
         assert isinstance(self.profile_dataset, (Batch, Dataset, Validator))
 
-        context: Optional[AbstractDataContext] = None
+        context: AbstractDataContext | None = None
         if isinstance(self.profile_dataset, Batch):
             context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
@@ -932,7 +932,7 @@ type detected is "{str(type(self.profile_dataset))}", which is illegal.
                     f"Skipping expect_column_median_to_be_between because observed value is nan: {observed_median}"
                 )
 
-        allow_relative_error: Union[bool, str, float] = False
+        allow_relative_error: bool | str | float = False
         if (
             "expect_column_quantile_values_to_be_between"
             not in self.excluded_expectations

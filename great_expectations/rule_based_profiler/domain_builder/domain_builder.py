@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain  # noqa: TCH001
@@ -38,7 +38,7 @@ class DomainBuilder(ABC, Builder):
 
     def __init__(
         self,
-        data_context: Optional[AbstractDataContext] = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -49,10 +49,10 @@ class DomainBuilder(ABC, Builder):
     def get_domains(
         self,
         rule_name: str,
-        variables: Optional[ParameterContainer] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        batch_list: List[Batch] | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
+        runtime_configuration: dict | None = None,
     ) -> List[Domain]:
         """
         Args:
@@ -88,8 +88,8 @@ class DomainBuilder(ABC, Builder):
     def _get_domains(
         self,
         rule_name: str,
-        variables: Optional[ParameterContainer] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        runtime_configuration: dict | None = None,
     ) -> List[Domain]:
         """
         _get_domains is the primary workhorse for the DomainBuilder
@@ -99,10 +99,10 @@ class DomainBuilder(ABC, Builder):
 
     def get_table_row_counts(
         self,
-        validator: Optional[Validator] = None,
-        batch_ids: Optional[List[str]] = None,
-        variables: Optional[ParameterContainer] = None,
-        runtime_configuration: Optional[dict] = None,
+        validator: Validator | None = None,
+        batch_ids: List[str] | None = None,
+        variables: ParameterContainer | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Dict[str, int]:
         if validator is None:
             validator = self.get_validator(variables=variables)
@@ -150,8 +150,8 @@ class DomainBuilder(ABC, Builder):
 
     def get_validator(
         self,
-        variables: Optional[ParameterContainer] = None,
-    ) -> Optional[Validator]:
+        variables: ParameterContainer | None = None,
+    ) -> Validator | None:
         return get_validator_using_batch_list_or_batch_request(
             purpose="domain_builder",
             data_context=self.data_context,
@@ -164,8 +164,8 @@ class DomainBuilder(ABC, Builder):
 
     def get_batch_ids(
         self,
-        variables: Optional[ParameterContainer] = None,
-    ) -> Optional[List[str]]:
+        variables: ParameterContainer | None = None,
+    ) -> List[str] | None:
         return get_batch_ids_from_batch_list_or_batch_request(
             data_context=self.data_context,
             batch_list=self.batch_list,

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, List, Optional, Set, Union
+from typing import TYPE_CHECKING, List, Set
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 def send_usage_message(
-    data_context: Optional[AbstractDataContext],
-    event: Union[str, None],
-    event_payload: Optional[dict] = None,
+    data_context: AbstractDataContext | None,
+    event: str | None,
+    event_payload: dict | None = None,
     api_version: str = "v3",
     success: bool = False,
 ) -> None:

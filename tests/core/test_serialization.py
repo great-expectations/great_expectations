@@ -4,7 +4,7 @@ import copy
 import inspect
 import logging
 from decimal import Decimal
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 from unittest import mock
 
 import pandas as pd
@@ -1039,7 +1039,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized(
 )
 @pytest.mark.integration
 def test_checkpoint_config_and_nested_objects_are_serialized_spark(
-    checkpoint_config: Union[CheckpointConfig, str],
+    checkpoint_config: CheckpointConfig | str,
     expected_serialized_checkpoint_config: dict,
     spark_session: SparkSession,
     request: FixtureRequest,
@@ -1189,7 +1189,7 @@ def test_checkpoint_config_and_nested_objects_are_serialized_spark(
 )
 @pytest.mark.integration
 def test_datasource_config_and_nested_objects_are_serialized_spark(
-    datasource_config: Union[DatasourceConfig, str],
+    datasource_config: DatasourceConfig | str,
     expected_serialized_datasource_config: dict,
     spark_session: SparkSession,
     request: FixtureRequest,

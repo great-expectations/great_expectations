@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Set
 
 import numpy as np
 
@@ -58,13 +58,11 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         name: str,
         map_metric_name: str,
         total_count_parameter_builder_name: str,
-        null_count_parameter_builder_name: Optional[str] = None,
-        metric_domain_kwargs: Optional[Union[str, dict]] = None,
-        metric_value_kwargs: Optional[Union[str, dict]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        null_count_parameter_builder_name: str | None = None,
+        metric_domain_kwargs: str | dict | None = None,
+        metric_value_kwargs: str | dict | None = None,
+        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -107,15 +105,15 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         return self._total_count_parameter_builder_name
 
     @property
-    def null_count_parameter_builder_name(self) -> Optional[str]:
+    def null_count_parameter_builder_name(self) -> str | None:
         return self._null_count_parameter_builder_name
 
     def _build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -152,9 +150,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
         ]
 
         # Obtain null_count_parameter_builder_name from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        null_count_parameter_builder_name: Optional[
-            str
-        ] = get_parameter_value_and_validate_return_type(
+        null_count_parameter_builder_name: str | None = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.null_count_parameter_builder_name,
             expected_return_type=None,
@@ -162,7 +158,7 @@ class MeanUnexpectedMapMetricMultiBatchParameterBuilder(
             parameters=parameters,
         )
 
-        batch_ids: Optional[List[str]] = self.get_batch_ids(
+        batch_ids: List[str] | None = self.get_batch_ids(
             domain=domain,
             variables=variables,
             parameters=parameters,

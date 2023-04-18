@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Dict, Iterable, List, Set
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import Domain  # noqa: TCH001
@@ -65,14 +65,12 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
     def __init__(
         self,
         name: str,
-        metric_domain_kwargs: Optional[Union[str, dict]] = None,
-        metric_value_kwargs: Optional[Union[str, dict]] = None,
-        threshold: Union[str, float] = 1.0,
-        candidate_regexes: Optional[Union[str, Iterable[str]]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        metric_domain_kwargs: str | dict | None = None,
+        metric_value_kwargs: str | dict | None = None,
+        threshold: str | float = 1.0,
+        candidate_regexes: str | Iterable[str] | None = None,
+        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Configure this RegexPatternStringParameterBuilder
@@ -101,33 +99,33 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         self._candidate_regexes = candidate_regexes
 
     @property
-    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+    def metric_domain_kwargs(self) -> str | dict | None:
         return self._metric_domain_kwargs
 
     @property
-    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+    def metric_value_kwargs(self) -> str | dict | None:
         return self._metric_value_kwargs
 
     @metric_value_kwargs.setter
-    def metric_value_kwargs(self, value: Optional[Union[str, dict]]) -> None:
+    def metric_value_kwargs(self, value: str | dict | None) -> None:
         self._metric_value_kwargs = value
 
     @property
-    def threshold(self) -> Union[str, float]:
+    def threshold(self) -> str | float:
         return self._threshold
 
     @property
     def candidate_regexes(
         self,
-    ) -> Union[str, Union[List[str], Set[str]]]:
+    ) -> str | List[str] | Set[str]:
         return self._candidate_regexes
 
     def _build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -179,10 +177,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
         nonnull_count: int = sum(metric_values)
 
         # Obtain candidate_regexes from "rule state" (i.e, variables and parameters); from instance variable otherwise.
-        candidate_regexes: Union[
-            List[str],
-            Set[str],
-        ] = get_parameter_value_and_validate_return_type(
+        candidate_regexes: List[str] | Set[str] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.candidate_regexes,
             expected_return_type=None,

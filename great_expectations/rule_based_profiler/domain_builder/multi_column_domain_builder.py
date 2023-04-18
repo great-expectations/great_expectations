@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Set
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.domain import (
@@ -40,8 +40,8 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
 
     def __init__(
         self,
-        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        include_column_names: str | List[str] | None | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -67,8 +67,8 @@ class MultiColumnDomainBuilder(ColumnDomainBuilder):
     def _get_domains(
         self,
         rule_name: str,
-        variables: Optional[ParameterContainer] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        runtime_configuration: dict | None = None,
     ) -> List[Domain]:
         """Obtains and returns Domain object, whose domain_kwargs consists of "column_list" (order-non-preserving).
 

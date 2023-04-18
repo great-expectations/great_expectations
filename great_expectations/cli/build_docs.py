@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List
 
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_logging import logger
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 def build_docs(
     context: FileDataContext,
     usage_stats_event: str,
-    site_names: Optional[List[str]] = None,
+    site_names: List[str] | None = None,
     view: bool = True,
     assume_yes: bool = False,
 ) -> None:

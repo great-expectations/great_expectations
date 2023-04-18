@@ -7,9 +7,7 @@ from typing import (
     Callable,
     Dict,
     List,
-    Optional,
     Type,
-    Union,
 )
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -41,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 def column_pair_condition_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
-    partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
+    partial_fn_type: str | MetricPartialFunctionTypes | None = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature. A
@@ -101,7 +99,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: List[str | quoted_name] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -172,7 +170,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: List[str | quoted_name] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -251,7 +249,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: List[str | quoted_name] = [
                     column_A_name,
                     column_B_name,
                 ]

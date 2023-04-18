@@ -10,9 +10,7 @@ from typing import (
     Dict,
     Iterable,
     List,
-    Optional,
     Tuple,
-    Union,
     cast,
     overload,
 )
@@ -240,7 +238,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         return cast(SparkDFBatchData, self.batch_manager.active_batch_data).dataframe
 
     def load_batch_data(  # type: ignore[override]
-        self, batch_id: str, batch_data: Union[SparkDFBatchData, pyspark_sql_DataFrame]
+        self, batch_id: str, batch_data: SparkDFBatchData | pyspark_sql_DataFrame
     ) -> None:
         if pyspark_sql_DataFrame and isinstance(batch_data, pyspark_sql_DataFrame):  # type: ignore[truthy-function]
             batch_data = SparkDFBatchData(self, batch_data)
@@ -275,7 +273,7 @@ class SparkDFExecutionEngine(ExecutionEngine):
         reader_method: str
         reader_options: dict
         path: str
-        schema: Optional[Union[sparktypes.StructType, dict, str]]
+        schema: sparktypes.StructType | dict | str | None
         reader: pyspark_DataFrameReader
         reader_fn: Callable
         if isinstance(batch_spec, RuntimeDataBatchSpec):
@@ -378,7 +376,7 @@ illegal.  Please check your config."""
 
     def _apply_splitting_and_sampling_methods(self, batch_spec, batch_data):
         # Note this is to get a batch from tables in AWS Glue Data Catalog by its partitions
-        partitions: Optional[List[str]] = batch_spec.get("partitions")
+        partitions: List[str] | None = batch_spec.get("partitions")
         if partitions:
             batch_data = self._data_splitter.split_on_multi_column_values(
                 df=batch_data,
@@ -386,7 +384,7 @@ illegal.  Please check your config."""
                 batch_identifiers=batch_spec.get("batch_identifiers"),
             )
 
-        splitter_method_name: Optional[str] = batch_spec.get("splitter_method")
+        splitter_method_name: str | None = batch_spec.get("splitter_method")
         if splitter_method_name:
             splitter_fn: Callable = self._data_splitter.get_splitter_method(
                 splitter_method_name
@@ -394,7 +392,7 @@ illegal.  Please check your config."""
             splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
-        sampler_method_name: Optional[str] = batch_spec.get("sampling_method")
+        sampler_method_name: str | None = batch_spec.get("sampling_method")
         if sampler_method_name:
             sampling_fn: Callable = self._data_sampler.get_sampler_method(
                 sampler_method_name
@@ -431,7 +429,7 @@ illegal.  Please check your config."""
 
     @overload
     def _get_reader_fn(
-        self, reader, reader_method: str = ..., path: Optional[str] = ...
+        self, reader, reader_method: str = ..., path: str | None = ...
     ) -> Callable:
         ...
 
@@ -624,8 +622,8 @@ illegal.  Please check your config."""
     def get_compute_domain(
         self,
         domain_kwargs: dict,
-        domain_type: Union[str, MetricDomainTypes],
-        accessor_keys: Optional[Iterable[str]] = None,
+        domain_type: str | MetricDomainTypes,
+        accessor_keys: Iterable[str] | None = None,
     ) -> Tuple["pyspark_sql_DataFrame", dict, dict]:  # noqa F821
         """Uses a DataFrame and Domain kwargs (which include a row condition and a condition parser) to obtain and/or query a Batch of data.
 

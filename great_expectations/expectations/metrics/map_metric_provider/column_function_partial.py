@@ -6,9 +6,7 @@ from typing import (
     Any,
     Callable,
     Dict,
-    Optional,
     Type,
-    Union,
 )
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -35,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 def column_function_partial(  # noqa: C901 - 19
     engine: Type[ExecutionEngine],
-    partial_fn_type: Optional[str] = None,
+    partial_fn_type: str | None = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -88,7 +86,7 @@ def column_function_partial(  # noqa: C901 - 19
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+                column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
@@ -159,7 +157,7 @@ def column_function_partial(  # noqa: C901 - 19
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+                column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,
@@ -230,7 +228,7 @@ def column_function_partial(  # noqa: C901 - 19
                     domain_kwargs=compute_domain_kwargs, domain_type=domain_type
                 )
 
-                column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+                column_name: str | quoted_name = accessor_domain_kwargs["column"]
 
                 column_name = get_dbms_compatible_column_names(
                     column_names=column_name,

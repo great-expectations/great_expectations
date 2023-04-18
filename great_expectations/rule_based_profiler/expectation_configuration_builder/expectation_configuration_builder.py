@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Set, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Set
 
 from great_expectations.core.batch import Batch, BatchRequestBase  # noqa: TCH001
 from great_expectations.core.domain import Domain  # noqa: TCH001
@@ -39,10 +39,8 @@ class ExpectationConfigurationBuilder(ABC, Builder):
     def __init__(
         self,
         expectation_type: str,
-        validation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        validation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
         **kwargs,
     ) -> None:
         """
@@ -80,11 +78,11 @@ class ExpectationConfigurationBuilder(ABC, Builder):
     def build_expectation_configuration(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        batch_list: List[Batch] | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
+        runtime_configuration: dict | None = None,
     ) -> ExpectationConfiguration:
         """
         Args:
@@ -114,11 +112,11 @@ class ExpectationConfigurationBuilder(ABC, Builder):
     def resolve_validation_dependencies(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        batch_list: List[Batch] | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
+        runtime_configuration: dict | None = None,
     ) -> None:
         validation_parameter_builders: List[ParameterBuilder] = (
             self.validation_parameter_builders or []
@@ -140,9 +138,9 @@ class ExpectationConfigurationBuilder(ABC, Builder):
     def _build_expectation_configuration(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> ExpectationConfiguration:
         pass
 
@@ -151,13 +149,13 @@ class ExpectationConfigurationBuilder(ABC, Builder):
         return self._expectation_type
 
     @property
-    def validation_parameter_builders(self) -> Optional[List[ParameterBuilder]]:
+    def validation_parameter_builders(self) -> List[ParameterBuilder] | None:
         return self._validation_parameter_builders
 
 
 def init_rule_expectation_configuration_builders(
     expectation_configuration_builder_configs: List[dict],
-    data_context: Optional[AbstractDataContext] = None,
+    data_context: AbstractDataContext | None = None,
 ) -> List[ExpectationConfigurationBuilder]:
     expectation_configuration_builder_config: dict
     return [
@@ -170,10 +168,8 @@ def init_rule_expectation_configuration_builders(
 
 
 def init_expectation_configuration_builder(
-    expectation_configuration_builder_config: Union[
-        ExpectationConfigurationBuilder, dict
-    ],
-    data_context: Optional[AbstractDataContext] = None,
+    expectation_configuration_builder_config: ExpectationConfigurationBuilder | dict,
+    data_context: AbstractDataContext | None = None,
 ) -> ExpectationConfigurationBuilder:
     if not isinstance(expectation_configuration_builder_config, dict):
         expectation_configuration_builder_config = (

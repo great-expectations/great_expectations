@@ -16,7 +16,7 @@ not by itself.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine.split_and_sample.data_splitter import (
@@ -88,7 +88,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         column_name: str,
         batch_identifiers: dict,
-    ) -> Union[BinaryExpression, BooleanClauseList]:
+    ) -> BinaryExpression | BooleanClauseList:
         """Split on year values in column_name.
 
         Args:
@@ -111,7 +111,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         column_name: str,
         batch_identifiers: dict,
-    ) -> Union[BinaryExpression, BooleanClauseList]:
+    ) -> BinaryExpression | BooleanClauseList:
         """Split on year and month values in column_name.
 
         Args:
@@ -134,7 +134,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         column_name: str,
         batch_identifiers: dict,
-    ) -> Union[BinaryExpression, BooleanClauseList]:
+    ) -> BinaryExpression | BooleanClauseList:
         """Split on year and month and day values in column_name.
 
         Args:
@@ -157,8 +157,8 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         column_name: str,
         batch_identifiers: dict,
-        date_parts: Union[List[DatePart], List[str]],
-    ) -> Union[BinaryExpression, BooleanClauseList]:
+        date_parts: List[DatePart] | List[str],
+    ) -> BinaryExpression | BooleanClauseList:
         """Split on date_part values in column_name.
 
         Values are NOT truncated, for example this will return data for a
@@ -190,7 +190,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
             )
         )
 
-        query: Union[BinaryExpression, BooleanClauseList] = sa.and_(
+        query: BinaryExpression | BooleanClauseList = sa.and_(
             *[
                 sa.extract(date_part.value, sa.column(column_name))
                 == date_parts_dict[date_part.value]
@@ -480,7 +480,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         self,
         selectable: Selectable,
         column_name: str,
-        date_parts: Union[List[DatePart], List[str]],
+        date_parts: List[DatePart] | List[str],
     ) -> Selectable:
         """Build a split query to retrieve batch_identifiers info from a column split on a list of date parts.
 
@@ -577,7 +577,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         execution_engine: SqlAlchemyExecutionEngine,
         selectable: Selectable,
         column_name: str,
-        date_parts: Union[List[DatePart], List[str]],
+        date_parts: List[DatePart] | List[str],
     ) -> List[dict]:
         """Build batch_identifiers from a column split on a list of date parts.
 

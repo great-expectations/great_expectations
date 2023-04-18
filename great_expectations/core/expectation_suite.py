@@ -12,11 +12,9 @@ from typing import (
     Callable,
     Dict,
     List,
-    Optional,
     Sequence,
     Tuple,
     Type,
-    Union,
 )
 
 from marshmallow import Schema, ValidationError, fields, post_load, pre_dump
@@ -92,13 +90,13 @@ class ExpectationSuite(SerializableDictDot):
     def __init__(
         self,
         expectation_suite_name: str,
-        data_context: Optional[AbstractDataContext] = None,
-        expectations: Optional[Sequence[Union[dict, ExpectationConfiguration]]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        data_asset_type: Optional[str] = None,
-        execution_engine_type: Optional[Type[ExecutionEngine]] = None,
-        meta: Optional[dict] = None,
-        ge_cloud_id: Optional[str] = None,
+        data_context: AbstractDataContext | None = None,
+        expectations: Sequence[dict | ExpectationConfiguration] | None = None,
+        evaluation_parameters: dict | None = None,
+        data_asset_type: str | None = None,
+        execution_engine_type: Type[ExecutionEngine] | None = None,
+        meta: dict | None = None,
+        ge_cloud_id: str | None = None,
     ) -> None:
         self.expectation_suite_name = expectation_suite_name
         self.ge_cloud_id = ge_cloud_id
@@ -135,16 +133,14 @@ class ExpectationSuite(SerializableDictDot):
     def add_citation(
         self,
         comment: str,
-        batch_request: Optional[
-            Union[str, Dict[str, Union[str, Dict[str, Any]]]]
-        ] = None,
-        batch_definition: Optional[dict] = None,
-        batch_spec: Optional[dict] = None,
-        batch_kwargs: Optional[dict] = None,
-        batch_markers: Optional[dict] = None,
-        batch_parameters: Optional[dict] = None,
-        profiler_config: Optional[dict] = None,
-        citation_date: Optional[Union[str, datetime.datetime]] = None,
+        batch_request: str | Dict[str, str | Dict[str, Any]] | None = None,
+        batch_definition: dict | None = None,
+        batch_spec: dict | None = None,
+        batch_kwargs: dict | None = None,
+        batch_markers: dict | None = None,
+        batch_parameters: dict | None = None,
+        profiler_config: dict | None = None,
+        citation_date: str | datetime.datetime | None = None,
     ) -> None:
         if "citations" not in self.meta:
             self.meta["citations"] = []
@@ -342,10 +338,10 @@ class ExpectationSuite(SerializableDictDot):
     )
     def remove_expectation(
         self,
-        expectation_configuration: Optional[ExpectationConfiguration] = None,
+        expectation_configuration: ExpectationConfiguration | None = None,
         match_type: str = "domain",
         remove_multiple_matches: bool = False,
-        ge_cloud_id: Optional[Union[str, uuid.UUID]] = None,
+        ge_cloud_id: str | uuid.UUID | None = None,
     ) -> List[ExpectationConfiguration]:
         """Remove an ExpectationConfiguration from the ExpectationSuite.
 
@@ -394,7 +390,7 @@ class ExpectationSuite(SerializableDictDot):
             return [self.expectations.pop(found_expectation_indexes[0])]
 
     def remove_all_expectations_of_type(
-        self, expectation_types: Union[List[str], str]
+        self, expectation_types: List[str] | str
     ) -> List[ExpectationConfiguration]:
         if isinstance(expectation_types, str):
             expectation_types = [expectation_types]
@@ -414,9 +410,9 @@ class ExpectationSuite(SerializableDictDot):
 
     def find_expectation_indexes(
         self,
-        expectation_configuration: Optional[ExpectationConfiguration] = None,
+        expectation_configuration: ExpectationConfiguration | None = None,
         match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None,
+        ge_cloud_id: str | None = None,
     ) -> List[int]:
         """
         Find indexes of Expectations matching the given ExpectationConfiguration on the given match_type.
@@ -465,9 +461,9 @@ class ExpectationSuite(SerializableDictDot):
 
     def find_expectations(
         self,
-        expectation_configuration: Optional[ExpectationConfiguration] = None,
+        expectation_configuration: ExpectationConfiguration | None = None,
         match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None,
+        ge_cloud_id: str | None = None,
     ) -> List[ExpectationConfiguration]:
         """
         Find Expectations matching the given ExpectationConfiguration on the given match_type.
@@ -502,10 +498,10 @@ class ExpectationSuite(SerializableDictDot):
 
     def replace_expectation(
         self,
-        new_expectation_configuration: Union[ExpectationConfiguration, dict],
-        existing_expectation_configuration: Optional[ExpectationConfiguration] = None,
+        new_expectation_configuration: ExpectationConfiguration | dict,
+        existing_expectation_configuration: ExpectationConfiguration | None = None,
         match_type: str = "domain",
-        ge_cloud_id: Optional[str] = None,
+        ge_cloud_id: str | None = None,
     ) -> None:
         """
         Find Expectations matching the given ExpectationConfiguration on the given match_type.
@@ -786,7 +782,7 @@ class ExpectationSuite(SerializableDictDot):
 
     def show_expectations_by_expectation_type(
         self,
-        expectation_configurations: Optional[List[ExpectationConfiguration]] = None,
+        expectation_configurations: List[ExpectationConfiguration] | None = None,
     ) -> None:
         """Displays "ExpectationConfiguration" list, grouped by "expectation_type", in predetermined designated order.
 
@@ -969,7 +965,7 @@ class ExpectationSuite(SerializableDictDot):
         return expectation_configurations
 
     def get_grouped_and_ordered_expectations_by_column(
-        self, expectation_type_filter: Optional[str] = None
+        self, expectation_type_filter: str | None = None
     ) -> Tuple[Dict[str, List[ExpectationConfiguration]], List[str]]:
         expectations_by_column: Dict[str, List[ExpectationConfiguration]] = {}
         ordered_columns: List[str] = []

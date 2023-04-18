@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List
 from unittest import mock
 
 import numpy as np
@@ -7109,9 +7109,9 @@ def multibatch_generic_csv_generator():
 
     def _multibatch_generic_csv_generator(
         data_path: str,
-        start_date: Optional[datetime.datetime] = None,
-        num_event_batches: Optional[int] = 20,
-        num_events_per_batch: Optional[int] = 5,
+        start_date: datetime.datetime | None = None,
+        num_event_batches: int | None = 20,
+        num_events_per_batch: int | None = 5,
     ) -> List[str]:
 
         if start_date is None:

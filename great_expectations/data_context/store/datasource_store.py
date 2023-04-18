@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import (
@@ -33,9 +33,9 @@ class DatasourceStore(Store):
     def __init__(
         self,
         serializer: AbstractConfigSerializer,
-        store_name: Optional[str] = None,
-        store_backend: Optional[dict] = None,
-        runtime_environment: Optional[dict] = None,
+        store_name: str | None = None,
+        store_backend: dict | None = None,
+        runtime_environment: dict | None = None,
     ) -> None:
         self._schema = datasourceConfigSchema
         self._serializer = serializer
@@ -56,19 +56,19 @@ class DatasourceStore(Store):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def remove_key(self, key: Union[DataContextVariableKey, GXCloudIdentifier]) -> None:
+    def remove_key(self, key: DataContextVariableKey | GXCloudIdentifier) -> None:
         """
         See parent `Store.remove_key()` for more information
         """
         return self._store_backend.remove_key(key.to_tuple())
 
-    def serialize(self, value: DatasourceConfig) -> Union[str, dict, DatasourceConfig]:
+    def serialize(self, value: DatasourceConfig) -> str | dict | DatasourceConfig:
         """
         See parent 'Store.serialize()' for more information
         """
         return self._serializer.serialize(value)
 
-    def deserialize(self, value: Union[dict, DatasourceConfig]) -> DatasourceConfig:
+    def deserialize(self, value: dict | DatasourceConfig) -> DatasourceConfig:
         """
         See parent 'Store.deserialize()' for more information
         """
@@ -106,9 +106,7 @@ class DatasourceStore(Store):
         Raises:
             ValueError if a DatasourceConfig is not found.
         """
-        datasource_key: Union[
-            DataContextVariableKey, GXCloudIdentifier
-        ] = self.store_backend.build_key(name=datasource_name)
+        datasource_key: DataContextVariableKey | GXCloudIdentifier = self.store_backend.build_key(name=datasource_name)
         if not self.has_key(datasource_key):  # noqa: W601
             raise ValueError(
                 f"Unable to load datasource `{datasource_name}` -- no configuration found or invalid configuration."
@@ -128,14 +126,14 @@ class DatasourceStore(Store):
 
     def _build_key_from_config(  # type: ignore[override]
         self, datasource_config: DatasourceConfig
-    ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
+    ) -> GXCloudIdentifier | DataContextVariableKey:
         return self.store_backend.build_key(
             name=datasource_config.name,
             id=datasource_config.id,
         )
 
     def set(  # type: ignore[override]
-        self, key: Union[DataContextKey, None], value: DatasourceConfig, **kwargs
+        self, key: DataContextKey | None, value: DatasourceConfig, **kwargs
     ) -> DatasourceConfig:
         """Create a datasource config in the store using a store_backend-specific key.
         Args:
@@ -154,7 +152,7 @@ class DatasourceStore(Store):
     ) -> DatasourceConfig:
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GXCloudResourceRef]] = super().set(
+        ref: bool | GXCloudResourceRef | None = super().set(
             key=key, value=config
         )
         if ref and isinstance(ref, GXCloudResourceRef):

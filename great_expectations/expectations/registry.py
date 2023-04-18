@@ -8,10 +8,8 @@ from typing import (
     Dict,
     List,
     NamedTuple,
-    Optional,
     Tuple,
     Type,
-    Union,
 )
 
 import great_expectations.exceptions as gx_exceptions
@@ -56,13 +54,13 @@ _registered_renderers: dict = {}
 
 class RendererImpl(NamedTuple):
     expectation: str
-    renderer: Callable[..., Union[RenderedAtomicContent, RenderedContent]]
+    renderer: Callable[..., RenderedAtomicContent | RenderedContent]
 
 
 def register_renderer(
     object_name: str,
-    parent_class: Union[Type[Expectation], Type[MetricProvider]],
-    renderer_fn: Callable[..., Union[RenderedAtomicContent, RenderedContent]],
+    parent_class: Type[Expectation] | Type[MetricProvider],
+    renderer_fn: Callable[..., RenderedAtomicContent | RenderedContent],
 ):
     # noinspection PyUnresolvedReferences
     renderer_name = renderer_fn._renderer_type  # type: ignore[attr-defined]
@@ -114,7 +112,7 @@ def get_renderer_names(expectation_or_metric_type: str) -> List[str]:
 def get_renderer_names_with_renderer_types(
     expectation_or_metric_type: str,
     renderer_types: List[AtomicRendererType],
-) -> List[Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType]]:
+) -> List[str | AtomicDiagnosticRendererType | AtomicPrescriptiveRendererType]:
     """Gets renderer names of a given type, for a given Expectation or Metric.
 
     Args:
@@ -139,11 +137,11 @@ def get_renderer_impls(object_name: str) -> List[str]:
     return list(_registered_renderers.get(object_name, {}).values())
 
 
-def get_renderer_impl(object_name: str, renderer_type: str) -> Optional[RendererImpl]:
-    renderer_tuple: Optional[tuple] = _registered_renderers.get(object_name, {}).get(
+def get_renderer_impl(object_name: str, renderer_type: str) -> RendererImpl | None:
+    renderer_tuple: tuple | None = _registered_renderers.get(object_name, {}).get(
         renderer_type
     )
-    renderer_impl: Optional[RendererImpl] = None
+    renderer_impl: RendererImpl | None = None
     if renderer_tuple:
         renderer_impl = RendererImpl(
             expectation=renderer_tuple[0], renderer=renderer_tuple[1]
@@ -184,10 +182,8 @@ def register_metric(
     metric_value_keys: Tuple[str, ...],
     execution_engine: Type[ExecutionEngine],
     metric_class: Type[MetricProvider],
-    metric_provider: Optional[Callable],
-    metric_fn_type: Optional[
-        Union[MetricFunctionTypes, MetricPartialFunctionTypes]
-    ] = None,
+    metric_provider: Callable | None,
+    metric_fn_type: MetricFunctionTypes | MetricPartialFunctionTypes | None = None,
 ) -> dict:
     """Register a Metric class for use as a callable metric within Expectations.
 
@@ -285,7 +281,7 @@ def get_metric_provider(
 
 def get_metric_function_type(
     metric_name: str, execution_engine: ExecutionEngine
-) -> Optional[Union[MetricPartialFunctionTypes, MetricFunctionTypes]]:
+) -> MetricPartialFunctionTypes | MetricFunctionTypes | None:
     try:
         metric_definition = _registered_metrics[metric_name]
         provider_fn, provider_class = metric_definition["providers"][
@@ -300,8 +296,8 @@ def get_metric_function_type(
 
 def get_metric_kwargs(
     metric_name: str,
-    configuration: Optional[ExpectationConfiguration] = None,
-    runtime_configuration: Optional[dict] = None,
+    configuration: ExpectationConfiguration | None = None,
+    runtime_configuration: dict | None = None,
 ) -> dict:
     try:
         metric_definition = _registered_metrics.get(metric_name)
@@ -383,7 +379,7 @@ def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
 
 
 def list_registered_expectation_implementations(
-    expectation_root: Optional[Type[Expectation]] = None,
+    expectation_root: Type[Expectation] | None = None,
 ) -> List[str]:
     registered_expectation_implementations = []
     for (

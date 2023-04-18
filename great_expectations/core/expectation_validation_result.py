@@ -4,7 +4,7 @@ import datetime
 import json
 import logging
 from copy import deepcopy
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 from marshmallow import Schema, fields, post_dump, post_load, pre_dump
 from typing_extensions import TypedDict
@@ -88,12 +88,12 @@ class ExpectationValidationResult(SerializableDictDot):
 
     def __init__(
         self,
-        success: Optional[bool] = None,
-        expectation_config: Optional[ExpectationConfiguration] = None,
-        result: Optional[dict] = None,
-        meta: Optional[dict] = None,
-        exception_info: Optional[dict] = None,
-        rendered_content: Optional[RenderedAtomicContent] = None,
+        success: bool | None = None,
+        expectation_config: ExpectationConfiguration | None = None,
+        result: dict | None = None,
+        meta: dict | None = None,
+        exception_info: dict | None = None,
+        rendered_content: RenderedAtomicContent | None = None,
         **kwargs: dict,
     ) -> None:
         if result and not self.validate_result_dict(result):
@@ -428,12 +428,12 @@ class ExpectationSuiteValidationResultMeta(TypedDict):
     active_batch_definition: BatchDefinition
     batch_markers: BatchMarkers
     batch_spec: BatchSpec
-    checkpoint_id: Optional[str]
+    checkpoint_id: str | None
     checkpoint_name: str
     expectation_suite_name: str
     great_expectations_version: str
     run_id: RunIdentifier
-    validation_id: Optional[str]
+    validation_id: str | None
     validation_time: str
 
 
@@ -498,12 +498,12 @@ class ExpectationSuiteValidationResult(SerializableDictDot):
 
     def __init__(
         self,
-        success: Optional[bool] = None,
-        results: Optional[list] = None,
-        evaluation_parameters: Optional[dict] = None,
-        statistics: Optional[dict] = None,
-        meta: Optional[ExpectationSuiteValidationResult | dict] = None,
-        ge_cloud_id: Optional[str] = None,
+        success: bool | None = None,
+        results: list | None = None,
+        evaluation_parameters: dict | None = None,
+        statistics: dict | None = None,
+        meta: ExpectationSuiteValidationResult | dict | None = None,
+        ge_cloud_id: str | None = None,
     ) -> None:
         self.success = success
         if results is None:

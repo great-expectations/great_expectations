@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Optional, TypeVar
+from typing import Any, Callable, TypeVar
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
@@ -79,7 +79,7 @@ class DataSampler(abc.ABC):
     def get_sampling_kwargs_value_or_default(
         batch_spec: BatchSpec,
         sampling_kwargs_key: str,
-        default_value: Optional[T] = None,
+        default_value: T | None = None,
     ) -> T | Any:
         """Get value from batch_spec or default if provided and key doesn't exist.
 

@@ -12,9 +12,7 @@ from typing import (
     ClassVar,
     Dict,
     List,
-    Optional,
     Set,
-    Union,
 )
 
 import numpy as np
@@ -125,30 +123,26 @@ class NumericMetricRangeMultiBatchParameterBuilder(MetricMultiBatchParameterBuil
     def __init__(
         self,
         name: str,
-        metric_name: Optional[str] = None,
-        metric_multi_batch_parameter_builder_name: Optional[str] = None,
-        metric_domain_kwargs: Optional[Union[str, dict]] = None,
-        metric_value_kwargs: Optional[Union[str, dict]] = None,
-        enforce_numeric_metric: Union[str, bool] = True,
-        replace_nan_with_zero: Union[str, bool] = True,
-        reduce_scalar_metric: Union[str, bool] = True,
-        false_positive_rate: Optional[Union[str, float]] = None,
+        metric_name: str | None = None,
+        metric_multi_batch_parameter_builder_name: str | None = None,
+        metric_domain_kwargs: str | dict | None = None,
+        metric_value_kwargs: str | dict | None = None,
+        enforce_numeric_metric: str | bool = True,
+        replace_nan_with_zero: str | bool = True,
+        reduce_scalar_metric: str | bool = True,
+        false_positive_rate: str | float | None = None,
         estimator: str = "bootstrap",
-        n_resamples: Optional[Union[str, int]] = None,
-        random_seed: Optional[Union[str, int]] = None,
+        n_resamples: str | int | None = None,
+        random_seed: str | int | None = None,
         quantile_statistic_interpolation_method: str = "auto",
-        quantile_bias_correction: Union[str, bool] = False,
-        quantile_bias_std_error_ratio_threshold: Optional[Union[str, float]] = None,
-        bw_method: Optional[Union[str, float, Callable]] = None,
-        include_estimator_samples_histogram_in_details: Union[str, bool] = False,
-        truncate_values: Optional[
-            Union[str, Dict[str, Union[Optional[int], Optional[float]]]]
-        ] = None,
-        round_decimals: Optional[Union[str, int]] = None,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        quantile_bias_correction: str | bool = False,
+        quantile_bias_std_error_ratio_threshold: str | float | None = None,
+        bw_method: str | float | Callable | None = None,
+        include_estimator_samples_histogram_in_details: str | bool = False,
+        truncate_values: str | Dict[str, int | None | float | None] | None = None,
+        round_decimals: str | int | None = None,
+        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -266,7 +260,7 @@ detected.
         return self._metric_multi_batch_parameter_builder_name
 
     @property
-    def false_positive_rate(self) -> Union[str, float]:
+    def false_positive_rate(self) -> str | float:
         return self._false_positive_rate
 
     @property
@@ -274,11 +268,11 @@ detected.
         return self._estimator
 
     @property
-    def n_resamples(self) -> Optional[Union[str, int]]:
+    def n_resamples(self) -> str | int | None:
         return self._n_resamples
 
     @property
-    def random_seed(self) -> Optional[Union[str, int]]:
+    def random_seed(self) -> str | int | None:
         return self._random_seed
 
     @property
@@ -286,37 +280,37 @@ detected.
         return self._quantile_statistic_interpolation_method
 
     @property
-    def quantile_bias_correction(self) -> Union[str, bool]:
+    def quantile_bias_correction(self) -> str | bool:
         return self._quantile_bias_correction
 
     @property
-    def quantile_bias_std_error_ratio_threshold(self) -> Optional[Union[str, float]]:
+    def quantile_bias_std_error_ratio_threshold(self) -> str | float | None:
         return self._quantile_bias_std_error_ratio_threshold
 
     @property
-    def bw_method(self) -> Optional[Union[str, float, Callable]]:
+    def bw_method(self) -> str | float | Callable | None:
         return self._bw_method
 
     @property
-    def include_estimator_samples_histogram_in_details(self) -> Union[str, bool]:
+    def include_estimator_samples_histogram_in_details(self) -> str | bool:
         return self._include_estimator_samples_histogram_in_details
 
     @property
     def truncate_values(
         self,
-    ) -> Optional[Union[str, Dict[str, Union[Optional[int], Optional[float]]]]]:
+    ) -> str | Dict[str, int | None | float | None] | None:
         return self._truncate_values
 
     @property
-    def round_decimals(self) -> Optional[Union[str, int]]:
+    def round_decimals(self) -> str | int | None:
         return self._round_decimals
 
     def _build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -441,8 +435,8 @@ detected.
         self,
         round_decimals: int,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
     ) -> NumericRangeEstimator:
         """
         Determines "estimator" name and returns appropriate configured "NumericRangeEstimator" subclass instance.
@@ -530,9 +524,9 @@ detected.
         metric_values: np.ndarray,
         numeric_range_estimator: NumericRangeEstimator,
         round_decimals: int,
-        domain: Optional[Domain] = None,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        domain: Domain | None = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
     ) -> NumericRangeEstimationResult:
         """
         This method accepts "NumericRangeEstimator" and data samples in format "N x R^m", where "N" (most significant
@@ -547,8 +541,8 @@ detected.
             variables=variables,
             parameters=parameters,
         )
-        lower_bound: Optional[float] = truncate_values.get("lower_bound")
-        upper_bound: Optional[float] = truncate_values.get("upper_bound")
+        lower_bound: float | None = truncate_values.get("lower_bound")
+        upper_bound: float | None = truncate_values.get("upper_bound")
 
         min_value: Number
         max_value: Number
@@ -734,12 +728,12 @@ detected.
         metric_values: np.ndarray,
         domain: Domain,
         *,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-    ) -> Dict[str, Union[Optional[int], Optional[float]]]:
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+    ) -> Dict[str, int | None | float | None]:
         # Obtain truncate_values directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         truncate_values: Dict[
-            str, Optional[Number]
+            str, Number | None
         ] = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.truncate_values,
@@ -748,7 +742,7 @@ detected.
             parameters=parameters,
         )
 
-        distribution_boundary: Optional[Union[int, float]]
+        distribution_boundary: int | float | None
         if not all(
             [
                 (
@@ -765,8 +759,8 @@ detected.
 """
             )
 
-        lower_bound: Optional[Number] = truncate_values.get("lower_bound")
-        upper_bound: Optional[Number] = truncate_values.get("upper_bound")
+        lower_bound: Number | None = truncate_values.get("lower_bound")
+        upper_bound: Number | None = truncate_values.get("upper_bound")
 
         if metric_values.shape == 1 and np.issubdtype(metric_values.dtype, np.number):
             if lower_bound is None and np.all(np.greater(metric_values, NP_EPSILON)):
@@ -784,11 +778,11 @@ detected.
         self,
         metric_values: np.ndarray,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
     ) -> int:
         # Obtain round_decimals directive from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        round_decimals: Optional[int] = get_parameter_value_and_validate_return_type(
+        round_decimals: int | None = get_parameter_value_and_validate_return_type(
             domain=domain,
             parameter_reference=self.round_decimals,
             expected_return_type=None,

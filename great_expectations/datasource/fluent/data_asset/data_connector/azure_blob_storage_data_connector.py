@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Type
 
 import pydantic
 
@@ -70,7 +70,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> None:
         self._azure_client: BlobServiceClient = azure_client
 
@@ -105,7 +105,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
-        file_path_template_map_fn: Optional[Callable] = None,
+        file_path_template_map_fn: Callable | None = None,
     ) -> AzureBlobStorageDataConnector:
         """Builds "AzureBlobStorageDataConnector", which links named DataAsset to Microsoft Azure Blob Storage.
 

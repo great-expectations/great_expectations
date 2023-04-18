@@ -15,7 +15,6 @@ from typing import (
     Set,
     Tuple,
     Type,
-    Union,
     overload,
 )
 
@@ -198,7 +197,7 @@ class GxConfig(FluentBaseModel):
 
     @classmethod
     def parse_yaml(
-        cls: Type[GxConfig], f: Union[pathlib.Path, str], _allow_empty: bool = False
+        cls: Type[GxConfig], f: pathlib.Path | str, _allow_empty: bool = False
     ) -> GxConfig:
         """
         Overriding base method to allow an empty/missing `fluent_datasources` field.
@@ -222,15 +221,15 @@ class GxConfig(FluentBaseModel):
     @overload
     def yaml(
         self,
-        stream_or_path: Union[StringIO, None] = None,
+        stream_or_path: StringIO | None = None,
         *,
-        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
-        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        include: AbstractSetIntStr | MappingIntStrAny | None = ...,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = ...,
         by_alias: bool = ...,
         exclude_unset: bool = ...,
         exclude_defaults: bool = ...,
         exclude_none: bool = ...,
-        encoder: Union[Callable[[Any], Any], None] = ...,
+        encoder: Callable[[Any], Any] | None = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
     ) -> str:
@@ -241,13 +240,13 @@ class GxConfig(FluentBaseModel):
         self,
         stream_or_path: pathlib.Path,
         *,
-        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
-        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = ...,
+        include: AbstractSetIntStr | MappingIntStrAny | None = ...,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = ...,
         by_alias: bool = ...,
         exclude_unset: bool = ...,
         exclude_defaults: bool = ...,
         exclude_none: bool = ...,
-        encoder: Union[Callable[[Any], Any], None] = ...,
+        encoder: Callable[[Any], Any] | None = ...,
         models_as_dict: bool = ...,
         **yaml_kwargs,
     ) -> pathlib.Path:
@@ -255,18 +254,18 @@ class GxConfig(FluentBaseModel):
 
     def yaml(
         self,
-        stream_or_path: Union[StringIO, pathlib.Path, None] = None,
+        stream_or_path: StringIO | pathlib.Path | None = None,
         *,
-        include: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
-        exclude: Union[AbstractSetIntStr, MappingIntStrAny, None] = None,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
         by_alias: bool = False,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
-        encoder: Union[Callable[[Any], Any], None] = None,
+        encoder: Callable[[Any], Any] | None = None,
         models_as_dict: bool = True,
         **yaml_kwargs,
-    ) -> Union[str, pathlib.Path]:
+    ) -> str | pathlib.Path:
         """
         Serialize the config object as yaml.
         Writes to a file if a `pathlib.Path` is provided.

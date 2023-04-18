@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from logging import Logger
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Type
+from typing import TYPE_CHECKING, Any, ClassVar, Type
 
 from typing_extensions import Literal
 
@@ -47,12 +47,12 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
         self,
         name: str,
         *,
-        batch_metadata: Optional[BatchMetadata] = ...,
+        batch_metadata: BatchMetadata | None = ...,
         batching_regex: re.Pattern | str = r".*",
         abs_container: str = ...,
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
         header: bool = ...,
         infer_schema: bool = ...,
-        order_by: Optional[SortersDefinition] = ...,
+        order_by: SortersDefinition | None = ...,
     ) -> CSVAsset: ...

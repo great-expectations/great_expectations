@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 import nbformat
 
@@ -54,7 +54,7 @@ Give your datasource a unique name:"""
         datasource_type: DatasourceTypes,
         datasource_yaml: str,
         datasource_name: str = "my_datasource",
-        sql_credentials_snippet: Optional[str] = None,
+        sql_credentials_snippet: str | None = None,
     ) -> None:
         super().__init__(context=context)
         self.datasource_type = datasource_type

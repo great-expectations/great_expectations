@@ -12,11 +12,9 @@ from typing import (
     Generator,
     List,
     NamedTuple,
-    Optional,
     Sequence,
     Tuple,
     Type,
-    Union,
 )
 
 from typing_extensions import Final, TypeAlias
@@ -384,13 +382,13 @@ class _SourceFactories:
     def _datasource_passed_in_as_only_argument(
         self,
         datasource_type: Type[Datasource],
-        name_or_datasource: Optional[Union[str, Datasource]],
+        name_or_datasource: str | Datasource | None,
         **kwargs,
-    ) -> Optional[Datasource]:
+    ) -> Datasource | None:
         """Returns a datasource if one is passed in, otherwise None."""
         from great_expectations.datasource.fluent.interfaces import Datasource
 
-        datasource: Optional[Datasource] = None
+        datasource: Datasource | None = None
         if name_or_datasource and isinstance(name_or_datasource, Datasource):
             if len(kwargs) != 0:
                 raise ValueError(
@@ -413,9 +411,9 @@ class _SourceFactories:
     def _datasource_passed_in(
         self,
         datasource_type: Type[Datasource],
-        name_or_datasource: Optional[Union[str, Datasource]],
+        name_or_datasource: str | Datasource | None,
         **kwargs,
-    ) -> Optional[Datasource]:
+    ) -> Datasource | None:
         """Validates the input is a datasource or a set of constructor parameters
 
         The first argument can be a non-keyword argument. If present it is a datasource
@@ -460,7 +458,7 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def add_datasource(
-            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
+            name_or_datasource: str | Datasource | None = None, **kwargs
         ) -> Datasource:
             # Because of the precedence of `or` and `if`, these grouping paranthesis are necessary.
             datasource = (
@@ -497,9 +495,9 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def update_datasource(
-            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs: str
+            name_or_datasource: str | Datasource | None = None, **kwargs: str
         ) -> Datasource:
-            new_datasource: Optional[Datasource] = self._datasource_passed_in(
+            new_datasource: Datasource | None = self._datasource_passed_in(
                 datasource_type, name_or_datasource, **kwargs
             )
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg
@@ -538,9 +536,9 @@ class _SourceFactories:
         doc_string: str = "",
     ) -> SourceFactoryFn:
         def add_or_update_datasource(
-            name_or_datasource: Optional[Union[str, Datasource]] = None, **kwargs
+            name_or_datasource: str | Datasource | None = None, **kwargs
         ) -> Datasource:
-            new_datasource: Optional[Datasource] = self._datasource_passed_in(
+            new_datasource: Datasource | None = self._datasource_passed_in(
                 datasource_type, name_or_datasource, **kwargs
             )
             # if new_datasource is None that means name is defined as name_or_datasource or as a kwarg

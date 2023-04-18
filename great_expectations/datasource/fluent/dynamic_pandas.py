@@ -214,7 +214,7 @@ _TYPE_REF_LOCALS: Final[Dict[str, Type]] = {
 
 
 def _extract_io_methods(
-    blacklist: Optional[Sequence[str]] = None,
+    blacklist: Sequence[str] | None = None,
 ) -> List[Tuple[str, DataFrameFactoryFn]]:
     # suppress pandas future warnings that may be emitted by collecting
     # pandas io methods
@@ -260,7 +260,7 @@ def _get_default_value(
     return default
 
 
-def _get_annotation_type(param: inspect.Parameter) -> Union[Type, str, object]:
+def _get_annotation_type(param: inspect.Parameter) -> Type | str | object:
     """
     https://docs.python.org/3/howto/annotations.html#manually-un-stringizing-stringized-annotations
     """
@@ -347,7 +347,7 @@ M = TypeVar("M", bound=Type[DataAsset])
 def _create_pandas_asset_model(
     model_name: str,
     model_base: M,
-    type_field: Tuple[Union[Type, str], str],
+    type_field: Tuple[Type | str, str],
     fields_dict: Dict[str, _FieldSpec],
     extra: pydantic.Extra,
     model_docstring: str = "",
@@ -378,7 +378,7 @@ def _create_pandas_asset_model(
 
 def _generate_pandas_data_asset_models(
     base_model_class: M,
-    blacklist: Optional[Sequence[str]] = None,
+    blacklist: Sequence[str] | None = None,
     use_docstring_from_method: bool = False,
     skip_first_param: bool = False,
 ) -> Dict[str, M]:

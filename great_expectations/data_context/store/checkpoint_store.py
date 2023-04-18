@@ -5,7 +5,7 @@ import logging
 import os
 import random
 import uuid
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List
 
 from marshmallow import ValidationError
 
@@ -110,8 +110,8 @@ class CheckpointStore(ConfigurationStore):
 
     def list_checkpoints(
         self, ge_cloud_mode: bool = False
-    ) -> Union[List[str], List[ConfigurationIdentifier]]:
-        keys: Union[List[str], List[ConfigurationIdentifier]] = self.list_keys()  # type: ignore[assignment]
+    ) -> List[str] | List[ConfigurationIdentifier]:
+        keys: List[str] | List[ConfigurationIdentifier] = self.list_keys()  # type: ignore[assignment]
         if ge_cloud_mode:
             return keys
         return [k.configuration_key for k in keys]  # type: ignore[union-attr]
@@ -121,7 +121,7 @@ class CheckpointStore(ConfigurationStore):
         name: str | None = None,
         id: str | None = None,
     ) -> None:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+        key: GXCloudIdentifier | ConfigurationIdentifier = self._determine_key(
             name=name, id=id
         )
         try:
@@ -132,7 +132,7 @@ class CheckpointStore(ConfigurationStore):
             )
 
     def get_checkpoint(
-        self, name: Optional[ConfigurationIdentifier | str], id: Optional[str]
+        self, name: ConfigurationIdentifier | str | None, id: str | None
     ) -> CheckpointConfig:
         key: GXCloudIdentifier | ConfigurationIdentifier
         if not isinstance(name, ConfigurationIdentifier):
@@ -141,7 +141,7 @@ class CheckpointStore(ConfigurationStore):
             key = name
 
         try:
-            checkpoint_config: Optional[Any] = self.get(key=key)
+            checkpoint_config: Any | None = self.get(key=key)
             assert isinstance(
                 checkpoint_config, CheckpointConfig
             ), "checkpoint_config retrieved was not of type CheckpointConfig"
@@ -156,7 +156,7 @@ class CheckpointStore(ConfigurationStore):
 
         if checkpoint_config.config_version is None:
             config_dict: dict = checkpoint_config.to_json_dict()
-            batches: Optional[dict] = config_dict.get("batches")
+            batches: dict | None = config_dict.get("batches")
             if not (
                 batches is not None
                 and (
@@ -255,7 +255,7 @@ class CheckpointStore(ConfigurationStore):
             checkpoint.config.ge_cloud_id = cloud_id
         return checkpoint
 
-    def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
+    def create(self, checkpoint_config: CheckpointConfig) -> DataContextKey | None:
         """Create a checkpoint config in the store using a store_backend-specific key.
 
         Args:
@@ -271,7 +271,7 @@ class CheckpointStore(ConfigurationStore):
 
         # Make two separate requests to set and get in order to obtain any additional
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
-        ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
+        ref: bool | GXCloudResourceRef | None = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
         if ref and isinstance(ref, GXCloudResourceRef):
             key.id = ref.id  # type: ignore[attr-defined]
 

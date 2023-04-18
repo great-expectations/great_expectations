@@ -16,9 +16,7 @@ from typing import (
     Dict,
     Iterable,
     List,
-    Optional,
     Tuple,
-    Union,
 )
 
 import numpy as np
@@ -75,7 +73,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-NP_EPSILON: Union[Number, np.float64] = np.finfo(float).eps
+NP_EPSILON: Number | np.float64 = np.finfo(float).eps
 
 TEMPORARY_EXPECTATION_SUITE_NAME_PREFIX: str = "tmp"
 TEMPORARY_EXPECTATION_SUITE_NAME_STEM: str = "suite"
@@ -93,14 +91,14 @@ RECOGNIZED_QUANTILE_STATISTIC_INTERPOLATION_METHODS: set = {
 def get_validator(
     purpose: str,
     *,
-    data_context: Optional[AbstractDataContext] = None,
-    batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
-    domain: Optional[Domain] = None,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Validator]:
-    validator: Optional[Validator]
+    data_context: AbstractDataContext | None = None,
+    batch_list: List[Batch] | None = None,
+    batch_request: str | BatchRequestBase | dict | None = None,
+    domain: Domain | None = None,
+    variables: ParameterContainer | None = None,
+    parameters: Dict[str, ParameterContainer] | None = None,
+) -> Validator | None:
+    validator: Validator | None
 
     expectation_suite_name: str = f"tmp.{purpose}"
     if domain is None:
@@ -148,14 +146,14 @@ def get_validator(
 
 
 def get_batch_ids(
-    data_context: Optional[AbstractDataContext] = None,
-    batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
-    limit: Optional[int] = None,
-    domain: Optional[Domain] = None,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[List[str]]:
+    data_context: AbstractDataContext | None = None,
+    batch_list: List[Batch] | None = None,
+    batch_request: str | BatchRequestBase | dict | None = None,
+    limit: int | None = None,
+    domain: Domain | None = None,
+    variables: ParameterContainer | None = None,
+    parameters: Dict[str, ParameterContainer] | None = None,
+) -> List[str] | None:
     batch: Batch
     if batch_list is None or all([batch is None for batch in batch_list]):
         if batch_request is None:
@@ -194,37 +192,33 @@ def get_batch_ids(
 
 
 def build_batch_request(
-    batch_request: Optional[Union[str, BatchRequestBase, dict]] = None,
-    domain: Optional[Domain] = None,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Union[BatchRequest, RuntimeBatchRequest]]:
+    batch_request: str | BatchRequestBase | dict | None = None,
+    domain: Domain | None = None,
+    variables: ParameterContainer | None = None,
+    parameters: Dict[str, ParameterContainer] | None = None,
+) -> BatchRequest | RuntimeBatchRequest | None:
     if batch_request is None:
         return None
 
     # Obtain BatchRequest from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-    effective_batch_request: Optional[
-        Union[BatchRequestBase, dict]
-    ] = get_parameter_value_and_validate_return_type(
+    effective_batch_request: BatchRequestBase | dict | None = get_parameter_value_and_validate_return_type(
         domain=domain,
         parameter_reference=batch_request,
         expected_return_type=(BatchRequestBase, dict),
         variables=variables,
         parameters=parameters,
     )
-    materialized_batch_request: Optional[
-        Union[BatchRequest, RuntimeBatchRequest]
-    ] = materialize_batch_request(batch_request=effective_batch_request)
+    materialized_batch_request: BatchRequest | RuntimeBatchRequest | None = materialize_batch_request(batch_request=effective_batch_request)
 
     return materialized_batch_request
 
 
 def build_metric_domain_kwargs(
-    batch_id: Optional[str] = None,
-    metric_domain_kwargs: Optional[Union[str, dict]] = None,
-    domain: Optional[Domain] = None,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    batch_id: str | None = None,
+    metric_domain_kwargs: str | dict | None = None,
+    domain: Domain | None = None,
+    variables: ParameterContainer | None = None,
+    parameters: Dict[str, ParameterContainer] | None = None,
 ):
     # Obtain domain kwargs from "rule state" (i.e., variables and parameters); from instance variable otherwise.
     metric_domain_kwargs = get_parameter_value_and_validate_return_type(
@@ -246,11 +240,11 @@ def build_metric_domain_kwargs(
 
 
 def get_parameter_value_and_validate_return_type(
-    domain: Optional[Domain] = None,
-    parameter_reference: Optional[Union[Any, str]] = None,
-    expected_return_type: Optional[Union[type, tuple]] = None,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    domain: Domain | None = None,
+    parameter_reference: Any | str | None = None,
+    expected_return_type: type | tuple | None = None,
+    variables: ParameterContainer | None = None,
+    parameters: Dict[str, ParameterContainer] | None = None,
 ) -> Any:
     """
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
@@ -278,11 +272,11 @@ def get_parameter_value_and_validate_return_type(
 
 
 def get_parameter_value(
-    domain: Optional[Domain] = None,
-    parameter_reference: Optional[Union[Any, str]] = None,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Optional[Any]:
+    domain: Domain | None = None,
+    parameter_reference: Any | str | None = None,
+    variables: ParameterContainer | None = None,
+    parameters: Dict[str, ParameterContainer] | None = None,
+) -> Any | None:
     """
     This method allows for the parameter_reference to be specified as an object (literal, dict, any typed object, etc.)
     or as a fully-qualified parameter name.  Moreover, if the parameter_reference argument is an object of type "dict",
@@ -334,7 +328,7 @@ def get_parameter_value(
 def get_resolved_metrics_by_key(
     validator: Validator,
     metric_configurations_by_key: Dict[str, List[MetricConfiguration]],
-    runtime_configuration: Optional[dict] = None,
+    runtime_configuration: dict | None = None,
 ) -> Dict[str, Dict[Tuple[str, str, str], MetricValue]]:
     """
     Compute (resolve) metrics for every column name supplied on input.
@@ -432,9 +426,7 @@ def build_domains_from_column_names(
     rule_name: str,
     column_names: List[str],
     domain_type: MetricDomainTypes,
-    table_column_name_to_inferred_semantic_domain_type_map: Optional[
-        Dict[str, SemanticDomainTypes]
-    ] = None,
+    table_column_name_to_inferred_semantic_domain_type_map: Dict[str, SemanticDomainTypes] | None = None,
 ) -> List[Domain]:
     """
     This utility method builds "simple" Domain objects (i.e., required fields only, no "details" metadata accepted).
@@ -470,11 +462,9 @@ def build_domains_from_column_names(
 
 
 def convert_variables_to_dict(
-    variables: Optional[ParameterContainer] = None,
+    variables: ParameterContainer | None = None,
 ) -> Dict[str, Any]:
-    variables_as_dict: Optional[
-        Union[ParameterNode, Dict[str, Any]]
-    ] = get_parameter_value_and_validate_return_type(
+    variables_as_dict: ParameterNode | Dict[str, Any] | None = get_parameter_value_and_validate_return_type(
         domain=None,
         parameter_reference=VARIABLES_PREFIX,
         expected_return_type=None,
@@ -553,11 +543,11 @@ def datetime_semantic_domain_type(domain: Domain) -> bool:
 
 
 def get_false_positive_rate_from_rule_state(
-    false_positive_rate: Union[str, float],
+    false_positive_rate: str | float,
     domain: Domain,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
-) -> Union[float, np.float64]:
+    variables: ParameterContainer | None = None,
+    parameters: Dict[str, ParameterContainer] | None = None,
+) -> float | np.float64:
     """
     This method obtains false_positive_rate from "rule state" (i.e., variables and parameters) and validates the result.
     """
@@ -600,8 +590,8 @@ def get_quantile_statistic_interpolation_method_from_rule_state(
     quantile_statistic_interpolation_method: str,
     round_decimals: int,
     domain: Domain,
-    variables: Optional[ParameterContainer] = None,
-    parameters: Optional[Dict[str, ParameterContainer]] = None,
+    variables: ParameterContainer | None = None,
+    parameters: Dict[str, ParameterContainer] | None = None,
 ) -> str:
     """
     This method obtains quantile_statistic_interpolation_method from "rule state" (i.e., variables and parameters) and
@@ -665,8 +655,8 @@ def compute_kde_quantiles_point_estimate(
     false_positive_rate: np.float64,
     n_resamples: int,
     quantile_statistic_interpolation_method: str,
-    bw_method: Union[str, float, Callable],
-    random_seed: Optional[int] = None,
+    bw_method: str | float | Callable,
+    random_seed: int | None = None,
 ) -> NumericRangeEstimationResult:
     """
     ML Flow Experiment: parameter_builders_bootstrap/kde_quantiles
@@ -710,16 +700,12 @@ def compute_kde_quantiles_point_estimate(
             n_resamples,
         )
 
-    lower_quantile_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = numpy.numpy_quantile(
+    lower_quantile_point_estimate: np.float64 | datetime.datetime = numpy.numpy_quantile(
         metric_values_gaussian_sample,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
-    upper_quantile_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = numpy.numpy_quantile(
+    upper_quantile_point_estimate: np.float64 | datetime.datetime = numpy.numpy_quantile(
         metric_values_gaussian_sample,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
@@ -739,7 +725,7 @@ def compute_bootstrap_quantiles_point_estimate(
     quantile_statistic_interpolation_method: str,
     quantile_bias_correction: bool,
     quantile_bias_std_error_ratio_threshold: float,
-    random_seed: Optional[int] = None,
+    random_seed: int | None = None,
 ) -> NumericRangeEstimationResult:
     """
     ML Flow Experiment: parameter_builders_bootstrap/bootstrap_quantiles
@@ -822,9 +808,7 @@ def compute_bootstrap_quantiles_point_estimate(
             metric_values, size=(n_resamples, metric_values.size)
         )
 
-    lower_quantile_bias_corrected_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = _determine_quantile_bias_corrected_point_estimate(
+    lower_quantile_bias_corrected_point_estimate: np.float64 | datetime.datetime = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=lower_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
@@ -832,9 +816,7 @@ def compute_bootstrap_quantiles_point_estimate(
         quantile_bias_std_error_ratio_threshold=quantile_bias_std_error_ratio_threshold,
         sample_quantile=sample_lower_quantile,
     )
-    upper_quantile_bias_corrected_point_estimate: Union[
-        np.float64, datetime.datetime
-    ] = _determine_quantile_bias_corrected_point_estimate(
+    upper_quantile_bias_corrected_point_estimate: np.float64 | datetime.datetime = _determine_quantile_bias_corrected_point_estimate(
         bootstraps=bootstraps,
         quantile_pct=upper_quantile_pct,
         quantile_statistic_interpolation_method=quantile_statistic_interpolation_method,
@@ -907,7 +889,7 @@ def _determine_quantile_bias_corrected_point_estimate(
     quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
 ) -> np.float64:
-    bootstrap_quantiles: Union[np.ndarray, np.float64] = numpy.numpy_quantile(
+    bootstrap_quantiles: np.ndarray | np.float64 = numpy.numpy_quantile(
         bootstraps,
         q=quantile_pct,
         axis=1,
@@ -978,10 +960,10 @@ def convert_metric_values_to_float_dtype_best_effort(
 
 def get_validator_with_expectation_suite(
     data_context: AbstractDataContext,
-    batch_list: Optional[List[Batch]] = None,
-    batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-    expectation_suite: Optional[ExpectationSuite] = None,
-    expectation_suite_name: Optional[str] = None,
+    batch_list: List[Batch] | None = None,
+    batch_request: BatchRequestBase | dict | None = None,
+    expectation_suite: ExpectationSuite | None = None,
+    expectation_suite_name: str | None = None,
     component_name: str = "test",
     persist: bool = False,
 ) -> Validator:
@@ -1011,10 +993,10 @@ def get_validator_with_expectation_suite(
 
 
 def get_or_create_expectation_suite(
-    data_context: Optional[AbstractDataContext],
-    expectation_suite: Optional[ExpectationSuite] = None,
-    expectation_suite_name: Optional[str] = None,
-    component_name: Optional[str] = None,
+    data_context: AbstractDataContext | None,
+    expectation_suite: ExpectationSuite | None = None,
+    expectation_suite_name: str | None = None,
+    component_name: str | None = None,
     persist: bool = False,
 ) -> ExpectationSuite:
     """
@@ -1072,7 +1054,7 @@ def get_or_create_expectation_suite(
 
 def sanitize_parameter_name(
     name: str,
-    suffix: Optional[str] = None,
+    suffix: str | None = None,
 ) -> str:
     """
     This method provides display-friendly version of "name" argument (with optional "suffix" argument).

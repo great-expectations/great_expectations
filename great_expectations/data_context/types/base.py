@@ -17,11 +17,9 @@ from typing import (
     List,
     Mapping,
     MutableMapping,
-    Optional,
     Set,
     Type,
     TypeVar,
-    Union,
 )
 
 from marshmallow import (
@@ -92,13 +90,13 @@ BYC = TypeVar("BYC", bound="BaseYamlConfig")
 
 
 class BaseYamlConfig(SerializableDictDot):
-    _config_schema_class: ClassVar[Optional[Type[Schema]]] = None
+    _config_schema_class: ClassVar[Type[Schema] | None] = None
 
     exclude_field_names: ClassVar[Set[str]] = {
         "commented_map",
     }
 
-    def __init__(self, commented_map: Optional[CommentedMap] = None) -> None:
+    def __init__(self, commented_map: CommentedMap | None = None) -> None:
         if commented_map is None:
             commented_map = CommentedMap()
         self._commented_map = commented_map
@@ -117,7 +115,7 @@ class BaseYamlConfig(SerializableDictDot):
 
         if hasattr(cls.get_config_class(), "_schema_instance"):
             # noinspection PyProtectedMember
-            schema_instance: Optional[Schema] = cls.get_config_class()._schema_instance
+            schema_instance: Schema | None = cls.get_config_class()._schema_instance
             if schema_instance is None:
                 cls.get_config_class()._schema_instance = (cls.get_schema_class())()
                 return cls.get_config_class().schema_instance
@@ -129,11 +127,11 @@ class BaseYamlConfig(SerializableDictDot):
 
     @classmethod
     def from_commented_map(
-        cls: Type[BYC], commented_map: Union[CommentedMap, Dict]
+        cls: Type[BYC], commented_map: CommentedMap | Dict
     ) -> BYC:
         try:
             schema_instance: Schema = cls._get_schema_instance()
-            config: Union[dict, BYC] = schema_instance.load(commented_map)
+            config: dict | BYC = schema_instance.load(commented_map)
             if isinstance(config, dict):
                 return cls.get_config_class()(commented_map=commented_map, **config)
 
@@ -150,7 +148,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile: Union[str, TextIOWrapper]) -> None:
+    def to_yaml(self, outfile: str | TextIOWrapper) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -306,23 +304,23 @@ class SorterConfigSchema(Schema):
 class AssetConfig(SerializableDictDot):
     def __init__(  # noqa: C901 - complexity 16
         self,
-        name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        module_name: Optional[str] = None,
-        bucket: Optional[str] = None,
-        prefix: Optional[str] = None,
-        delimiter: Optional[str] = None,
-        max_keys: Optional[int] = None,
-        schema_name: Optional[str] = None,
-        batch_spec_passthrough: Optional[Dict[str, Any]] = None,
-        batch_identifiers: Optional[List[str]] = None,
-        splitter_method: Optional[str] = None,
-        splitter_kwargs: Optional[Dict[str, str]] = None,
-        sorters: Optional[dict] = None,
-        sampling_method: Optional[str] = None,
-        sampling_kwargs: Optional[Dict[str, str]] = None,
-        reader_options: Optional[Dict[str, Any]] = None,
-        **kwargs: Optional[dict],
+        name: str | None = None,
+        class_name: str | None = None,
+        module_name: str | None = None,
+        bucket: str | None = None,
+        prefix: str | None = None,
+        delimiter: str | None = None,
+        max_keys: int | None = None,
+        schema_name: str | None = None,
+        batch_spec_passthrough: Dict[str, Any] | None = None,
+        batch_identifiers: List[str] | None = None,
+        splitter_method: str | None = None,
+        splitter_kwargs: Dict[str, str] | None = None,
+        sorters: dict | None = None,
+        sampling_method: str | None = None,
+        sampling_kwargs: Dict[str, str] | None = None,
+        reader_options: Dict[str, Any] | None = None,
+        **kwargs: dict | None,
     ) -> None:
         if name is not None:
             self.name = name
@@ -358,11 +356,11 @@ class AssetConfig(SerializableDictDot):
             setattr(self, k, v)
 
     @property
-    def class_name(self) -> Optional[str]:
+    def class_name(self) -> str | None:
         return self._class_name
 
     @property
-    def module_name(self) -> Optional[str]:
+    def module_name(self) -> str | None:
         return self._module_name
 
     @public_api
@@ -484,8 +482,8 @@ class DataConnectorConfig(AbstractConfig):
     def __init__(  # noqa: C901 - 20
         self,
         class_name,
-        name: Optional[str] = None,
-        id: Optional[str] = None,
+        name: str | None = None,
+        id: str | None = None,
         module_name=None,
         credentials=None,
         assets=None,
@@ -1074,12 +1072,10 @@ configuration to continue.
 class DatasourceConfig(AbstractConfig):
     def __init__(  # noqa: C901 - 21
         self,
-        name: Optional[
-            str
-        ] = None,  # Note: name is optional currently to avoid updating all documentation within
+        name: str | None = None,  # Note: name is optional currently to avoid updating all documentation within
         # the scope of this work.
-        id: Optional[str] = None,
-        class_name: Optional[str] = None,
+        id: str | None = None,
+        class_name: str | None = None,
         module_name: str = "great_expectations.datasource",
         execution_engine=None,
         data_connectors=None,
@@ -1589,8 +1585,8 @@ class GXCloudConfig(DictDot):
     def __init__(
         self,
         base_url: str,
-        access_token: Optional[str] = None,
-        organization_id: Optional[str] = None,
+        access_token: str | None = None,
+        organization_id: str | None = None,
     ) -> None:
         # access_token was given a default value to maintain arg position of organization_id
         if access_token is None:
@@ -1904,9 +1900,9 @@ class BaseStoreBackendDefaults(DictDot):
         checkpoint_store_name: str = DataContextConfigDefaults.DEFAULT_CHECKPOINT_STORE_NAME.value,
         profiler_store_name: str = DataContextConfigDefaults.DEFAULT_PROFILER_STORE_NAME.value,
         data_docs_site_name: str = DataContextConfigDefaults.DEFAULT_DATA_DOCS_SITE_NAME.value,
-        validation_operators: Optional[dict] = None,
-        stores: Optional[dict] = None,
-        data_docs_sites: Optional[dict] = None,
+        validation_operators: dict | None = None,
+        stores: dict | None = None,
+        data_docs_sites: dict | None = None,
     ) -> None:
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
@@ -1952,12 +1948,12 @@ class S3StoreBackendDefaults(BaseStoreBackendDefaults):
 
     def __init__(
         self,
-        default_bucket_name: Optional[str] = None,
-        expectations_store_bucket_name: Optional[str] = None,
-        validations_store_bucket_name: Optional[str] = None,
-        data_docs_bucket_name: Optional[str] = None,
-        checkpoint_store_bucket_name: Optional[str] = None,
-        profiler_store_bucket_name: Optional[str] = None,
+        default_bucket_name: str | None = None,
+        expectations_store_bucket_name: str | None = None,
+        validations_store_bucket_name: str | None = None,
+        data_docs_bucket_name: str | None = None,
+        checkpoint_store_bucket_name: str | None = None,
+        profiler_store_bucket_name: str | None = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
@@ -2052,8 +2048,8 @@ class FilesystemStoreBackendDefaults(BaseStoreBackendDefaults):
 
     def __init__(
         self,
-        root_directory: Optional[str] = None,
-        plugins_directory: Optional[str] = None,
+        root_directory: str | None = None,
+        plugins_directory: str | None = None,
     ) -> None:
         # Initialize base defaults
         super().__init__()
@@ -2165,18 +2161,18 @@ class GCSStoreBackendDefaults(BaseStoreBackendDefaults):
 
     def __init__(
         self,
-        default_bucket_name: Optional[str] = None,
-        default_project_name: Optional[str] = None,
-        expectations_store_bucket_name: Optional[str] = None,
-        validations_store_bucket_name: Optional[str] = None,
-        data_docs_bucket_name: Optional[str] = None,
-        checkpoint_store_bucket_name: Optional[str] = None,
-        profiler_store_bucket_name: Optional[str] = None,
-        expectations_store_project_name: Optional[str] = None,
-        validations_store_project_name: Optional[str] = None,
-        data_docs_project_name: Optional[str] = None,
-        checkpoint_store_project_name: Optional[str] = None,
-        profiler_store_project_name: Optional[str] = None,
+        default_bucket_name: str | None = None,
+        default_project_name: str | None = None,
+        expectations_store_bucket_name: str | None = None,
+        validations_store_bucket_name: str | None = None,
+        data_docs_bucket_name: str | None = None,
+        checkpoint_store_bucket_name: str | None = None,
+        profiler_store_bucket_name: str | None = None,
+        expectations_store_project_name: str | None = None,
+        validations_store_project_name: str | None = None,
+        data_docs_project_name: str | None = None,
+        checkpoint_store_project_name: str | None = None,
+        profiler_store_project_name: str | None = None,
         expectations_store_prefix: str = "expectations",
         validations_store_prefix: str = "validations",
         data_docs_prefix: str = "data_docs",
@@ -2295,11 +2291,11 @@ class DatabaseStoreBackendDefaults(BaseStoreBackendDefaults):
 
     def __init__(
         self,
-        default_credentials: Optional[Dict] = None,
-        expectations_store_credentials: Optional[Dict] = None,
-        validations_store_credentials: Optional[Dict] = None,
-        checkpoint_store_credentials: Optional[Dict] = None,
-        profiler_store_credentials: Optional[Dict] = None,
+        default_credentials: Dict | None = None,
+        expectations_store_credentials: Dict | None = None,
+        validations_store_credentials: Dict | None = None,
+        checkpoint_store_credentials: Dict | None = None,
+        profiler_store_credentials: Dict | None = None,
         expectations_store_name: str = "expectations_database_store",
         validations_store_name: str = "validations_database_store",
         evaluation_parameter_store_name: str = "evaluation_parameter_store",
@@ -2409,31 +2405,26 @@ class DataContextConfig(BaseYamlConfig):
 
     def __init__(  # noqa: C901 - 21
         self,
-        config_version: Optional[float] = None,
-        datasources: Optional[
-            Union[
-                Dict[str, DatasourceConfig],
-                Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
-            ]
-        ] = None,
-        fluent_datasources: Optional[dict] = None,
-        expectations_store_name: Optional[str] = None,
-        validations_store_name: Optional[str] = None,
-        evaluation_parameter_store_name: Optional[str] = None,
-        checkpoint_store_name: Optional[str] = None,
-        profiler_store_name: Optional[str] = None,
-        plugins_directory: Optional[str] = None,
+        config_version: float | None = None,
+        datasources: Dict[str, DatasourceConfig] | Dict[str, Dict[str, Dict[str, str] | str | dict]] | None = None,
+        fluent_datasources: dict | None = None,
+        expectations_store_name: str | None = None,
+        validations_store_name: str | None = None,
+        evaluation_parameter_store_name: str | None = None,
+        checkpoint_store_name: str | None = None,
+        profiler_store_name: str | None = None,
+        plugins_directory: str | None = None,
         validation_operators=None,
-        stores: Optional[Dict] = None,
-        data_docs_sites: Optional[Dict] = None,
-        notebooks: Optional[NotebookConfig] = None,
-        config_variables_file_path: Optional[str] = None,
-        anonymous_usage_statistics: Optional[AnonymizedUsageStatisticsConfig] = None,
-        store_backend_defaults: Optional[BaseStoreBackendDefaults] = None,
-        commented_map: Optional[CommentedMap] = None,
-        concurrency: Optional[Union[ConcurrencyConfig, Dict]] = None,
-        progress_bars: Optional[ProgressBarsConfig] = None,
-        include_rendered_content: Optional[IncludeRenderedContentConfig] = None,
+        stores: Dict | None = None,
+        data_docs_sites: Dict | None = None,
+        notebooks: NotebookConfig | None = None,
+        config_variables_file_path: str | None = None,
+        anonymous_usage_statistics: AnonymizedUsageStatisticsConfig | None = None,
+        store_backend_defaults: BaseStoreBackendDefaults | None = None,
+        commented_map: CommentedMap | None = None,
+        concurrency: ConcurrencyConfig | Dict | None = None,
+        progress_bars: ProgressBarsConfig | None = None,
+        include_rendered_content: IncludeRenderedContentConfig | None = None,
     ) -> None:
         # Set defaults
         if config_version is None:
@@ -2578,7 +2569,7 @@ class DataContextConfig(BaseYamlConfig):
 
 
 class CheckpointValidationConfig(AbstractConfig):
-    def __init__(self, id: Optional[str] = None, **kwargs: dict) -> None:
+    def __init__(self, id: str | None = None, **kwargs: dict) -> None:
         super().__init__(id=id)
 
         for k, v in kwargs.items():
@@ -2591,7 +2582,7 @@ class CheckpointValidationConfigSchema(AbstractConfigSchema):
 
     id = fields.String(required=False, allow_none=False)
 
-    def dump(self, obj: dict, *, many: Optional[bool] = None) -> dict:
+    def dump(self, obj: dict, *, many: bool | None = None) -> dict:
         """
         Chetan - 20220803 - By design, Marshmallow accepts unknown fields through the
         `unknown = INCLUDE` directive but only upon load. When dumping, it validates
@@ -2795,30 +2786,30 @@ class CheckpointConfig(BaseYamlConfig):
 
     def __init__(
         self,
-        name: Optional[str] = None,
-        config_version: Optional[Union[int, float]] = None,
-        template_name: Optional[str] = None,
-        module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
-        default_validation_id: Optional[str] = None,
-        profilers: Optional[List[dict]] = None,
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
-        commented_map: Optional[CommentedMap] = None,
-        ge_cloud_id: Optional[str] = None,
+        name: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: List[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: List[CheckpointValidationConfig] | None = None,
+        default_validation_id: str | None = None,
+        profilers: List[dict] | None = None,
+        validation_operator_name: str | None = None,
+        batches: List[dict] | None = None,
+        commented_map: CommentedMap | None = None,
+        ge_cloud_id: str | None = None,
         # the following four args are used by SimpleCheckpoint
-        site_names: Optional[Union[list, str]] = None,
-        slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = None,
-        notify_with: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        site_names: list | str | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
     ) -> None:
         self._name = name
         self._config_version = config_version
@@ -2878,7 +2869,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._batches = value  # type: ignore[has-type]
 
     @property
-    def ge_cloud_id(self) -> Optional[str]:
+    def ge_cloud_id(self) -> str | None:
         return self._ge_cloud_id
 
     @ge_cloud_id.setter
@@ -2886,7 +2877,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._ge_cloud_id = value
 
     @property
-    def expectation_suite_ge_cloud_id(self) -> Optional[str]:
+    def expectation_suite_ge_cloud_id(self) -> str | None:
         return self._expectation_suite_ge_cloud_id
 
     @expectation_suite_ge_cloud_id.setter
@@ -2926,7 +2917,7 @@ class CheckpointConfig(BaseYamlConfig):
         self._validations = value
 
     @property
-    def default_validation_id(self) -> Optional[str]:
+    def default_validation_id(self) -> str | None:
         return self._default_validation_id
 
     @default_validation_id.setter
@@ -3105,20 +3096,20 @@ class CheckpointConfig(BaseYamlConfig):
     @staticmethod
     def resolve_config_using_acceptable_arguments(
         checkpoint: Checkpoint,
-        template_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
-        profilers: Optional[List[dict]] = None,
-        run_id: Optional[Union[str, RunIdentifier]] = None,
-        run_name: Optional[str] = None,
-        run_time: Optional[Union[str, datetime.datetime]] = None,
-        result_format: Optional[Union[str, dict]] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
+        template_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
+        action_list: List[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: List[CheckpointValidationConfig] | None = None,
+        profilers: List[dict] | None = None,
+        run_id: str | RunIdentifier | None = None,
+        run_name: str | None = None,
+        run_time: str | datetime.datetime | None = None,
+        result_format: str | dict | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
     ) -> dict:
         """
         This method reconciles the Checkpoint configuration (e.g., obtained from the Checkpoint store) with dynamically

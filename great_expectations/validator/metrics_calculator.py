@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Set, Tuple
 
 import pandas as pd
 
@@ -41,7 +41,7 @@ class MetricsCalculator:
     def show_progress_bars(self, enable: bool) -> None:
         self._show_progress_bars = enable
 
-    def columns(self, domain_kwargs: Optional[Dict[str, Any]] = None) -> List[str]:
+    def columns(self, domain_kwargs: Dict[str, Any] | None = None) -> List[str]:
         """
         Convenience method to run "table.columns" metric.
         """
@@ -62,7 +62,7 @@ class MetricsCalculator:
     def head(
         self,
         n_rows: int = 5,
-        domain_kwargs: Optional[Dict[str, Any]] = None,
+        domain_kwargs: Dict[str, Any] | None = None,
         fetch_all: bool = False,
     ) -> pd.DataFrame:
         """
@@ -124,7 +124,7 @@ class MetricsCalculator:
     def compute_metrics(
         self,
         metric_configurations: List[MetricConfiguration],
-        runtime_configuration: Optional[dict] = None,
+        runtime_configuration: dict | None = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Dict[Tuple[str, str, str], MetricValue]:
@@ -144,7 +144,7 @@ class MetricsCalculator:
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            Dict[str, MetricConfiguration | Set[ExceptionInfo] | int],
         ]
         (
             resolved_metrics,
@@ -159,7 +159,7 @@ class MetricsCalculator:
     def build_metric_dependency_graph(
         self,
         metric_configurations: List[MetricConfiguration],
-        runtime_configuration: Optional[dict] = None,
+        runtime_configuration: dict | None = None,
     ) -> ValidationGraph:
         """
         Obtain domain and value keys for metrics and proceeds to add these metrics to the validation graph
@@ -188,14 +188,14 @@ class MetricsCalculator:
     def resolve_validation_graph_and_handle_aborted_metrics_info(
         self,
         graph: ValidationGraph,
-        runtime_configuration: Optional[dict] = None,
+        runtime_configuration: dict | None = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Tuple[
         Dict[Tuple[str, str, str], MetricValue],
         Dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            Dict[str, MetricConfiguration | Set[ExceptionInfo] | int],
         ],
     ]:
         """
@@ -210,7 +210,7 @@ class MetricsCalculator:
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            Dict[str, MetricConfiguration | Set[ExceptionInfo] | int],
         ]
         (resolved_metrics, aborted_metrics_info,) = self.resolve_validation_graph(
             graph=graph,
@@ -231,14 +231,14 @@ class MetricsCalculator:
     def resolve_validation_graph(
         self,
         graph: ValidationGraph,
-        runtime_configuration: Optional[dict] = None,
+        runtime_configuration: dict | None = None,
         min_graph_edges_pbar_enable: int = 0,
         # Set to low number (e.g., 3) to suppress progress bar for small graphs.
     ) -> Tuple[
         Dict[Tuple[str, str, str], MetricValue],
         Dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            Dict[str, MetricConfiguration | Set[ExceptionInfo] | int],
         ],
     ]:
         """
@@ -256,7 +256,7 @@ class MetricsCalculator:
         resolved_metrics: Dict[Tuple[str, str, str], MetricValue]
         aborted_metrics_info: Dict[
             Tuple[str, str, str],
-            Dict[str, Union[MetricConfiguration, Set[ExceptionInfo], int]],
+            Dict[str, MetricConfiguration | Set[ExceptionInfo] | int],
         ]
         resolved_metrics, aborted_metrics_info = graph.resolve(
             runtime_configuration=runtime_configuration,

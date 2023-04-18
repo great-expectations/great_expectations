@@ -5,7 +5,7 @@ import inspect
 import logging
 import pathlib
 from pprint import pformat as pf
-from typing import TYPE_CHECKING, ClassVar, Dict, List, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, ClassVar, Dict, List, Tuple, Type
 
 import pytest
 from pydantic import DirectoryPath, validate_arguments
@@ -47,16 +47,16 @@ class DataContext:
     Use `great_expectations.get_context()` for a real DataContext.
     """
 
-    _context: ClassVar[Optional[DataContext]] = None
-    _config: ClassVar[Optional[GxConfig]] = None  # (kilo59) should this live  here?
+    _context: ClassVar[DataContext | None] = None
+    _config: ClassVar[GxConfig | None] = None  # (kilo59) should this live  here?
 
     _datasources: Dict[str, Datasource]
-    root_directory: Union[DirectoryPath, str, None]
+    root_directory: DirectoryPath | str | None
 
     @classmethod
     def get_context(
         cls,
-        context_root_dir: Optional[DirectoryPath] = None,
+        context_root_dir: DirectoryPath | None = None,
         _config_file: str = "config.yaml",  # for ease of use during POC
     ) -> DataContext:
         if not cls._context:
@@ -75,7 +75,7 @@ class DataContext:
         return cls._context
 
     @validate_arguments
-    def __init__(self, context_root_dir: Optional[DirectoryPath] = None) -> None:
+    def __init__(self, context_root_dir: DirectoryPath | None = None) -> None:
         self.root_directory = context_root_dir
         self._sources: _SourceFactories = _SourceFactories(self)
         self._datasources: Dict[str, Datasource] = {}
@@ -105,7 +105,7 @@ class DataContext:
 
 
 def get_context(
-    context_root_dir: Optional[DirectoryPath] = None, **kwargs
+    context_root_dir: DirectoryPath | None = None, **kwargs
 ) -> DataContext:
     """Experimental get_context placeholder function."""
     logger.info(f"Getting context {context_root_dir or ''}")
@@ -117,7 +117,7 @@ class DummyDataAsset(DataAsset):
     """Minimal Concrete DataAsset Implementation"""
 
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions]
+        self, options: BatchRequestOptions | None
     ) -> BatchRequest:
         return BatchRequest("datasource_name", "data_asset_name", options or {})
 

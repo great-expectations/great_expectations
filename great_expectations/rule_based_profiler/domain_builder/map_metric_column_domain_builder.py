@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple
 
 from great_expectations.core.domain import Domain, SemanticDomainTypes  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
@@ -34,22 +34,18 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
     def __init__(
         self,
         map_metric_name: str,
-        include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
-        include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        exclude_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
-        semantic_type_filter_module_name: Optional[str] = None,
-        semantic_type_filter_class_name: Optional[str] = None,
-        include_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        exclude_semantic_types: Optional[
-            Union[str, SemanticDomainTypes, List[Union[str, SemanticDomainTypes]]]
-        ] = None,
-        max_unexpected_values: Union[str, int] = 0,
-        max_unexpected_ratio: Optional[Union[str, float]] = None,
-        min_max_unexpected_values_proportion: Union[str, float] = 9.75e-1,
-        data_context: Optional[AbstractDataContext] = None,
+        include_column_names: str | List[str] | None | None = None,
+        exclude_column_names: str | List[str] | None | None = None,
+        include_column_name_suffixes: str | Iterable | List[str] | None = None,
+        exclude_column_name_suffixes: str | Iterable | List[str] | None = None,
+        semantic_type_filter_module_name: str | None = None,
+        semantic_type_filter_class_name: str | None = None,
+        include_semantic_types: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
+        exclude_semantic_types: str | SemanticDomainTypes | List[str | SemanticDomainTypes] | None = None,
+        max_unexpected_values: str | int = 0,
+        max_unexpected_ratio: str | float | None = None,
+        min_max_unexpected_values_proportion: str | float = 9.75e-1,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Create column domains using tolerance for inter-Batch proportion of adherence to intra-Batch "unexpected_count"
@@ -123,22 +119,22 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         return self._map_metric_name
 
     @property
-    def max_unexpected_values(self) -> Union[str, int]:
+    def max_unexpected_values(self) -> str | int:
         return self._max_unexpected_values
 
     @property
-    def max_unexpected_ratio(self) -> Optional[Union[str, float]]:
+    def max_unexpected_ratio(self) -> str | float | None:
         return self._max_unexpected_ratio
 
     @property
-    def min_max_unexpected_values_proportion(self) -> Optional[Union[str, float]]:
+    def min_max_unexpected_values_proportion(self) -> str | float | None:
         return self._min_max_unexpected_values_proportion
 
     def _get_domains(
         self,
         rule_name: str,
-        variables: Optional[ParameterContainer] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        runtime_configuration: dict | None = None,
     ) -> List[Domain]:
         """Return domains matching the specified tolerance limits.
 
@@ -169,9 +165,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         )
 
         # Obtain max_unexpected_ratio from "rule state" (i.e., variables and parameters); from instance variable otherwise.
-        max_unexpected_ratio: Optional[
-            float
-        ] = get_parameter_value_and_validate_return_type(
+        max_unexpected_ratio: float | None = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=self.max_unexpected_ratio,
             expected_return_type=None,
@@ -291,7 +285,7 @@ class MapMetricColumnDomainBuilder(ColumnDomainBuilder):
         mean_table_row_count_as_float: float,
         max_unexpected_ratio: float,
         min_max_unexpected_values_proportion: float,
-        runtime_configuration: Optional[dict] = None,
+        runtime_configuration: dict | None = None,
     ) -> List[str]:
         """
         Compute figures of merit and return column names satisfying tolerance limits.

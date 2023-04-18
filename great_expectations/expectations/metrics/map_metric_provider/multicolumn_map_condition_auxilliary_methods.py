@@ -6,7 +6,6 @@ from typing import (
     Any,
     Dict,
     List,
-    Union,
 )
 
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
@@ -61,7 +60,7 @@ def _pandas_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[str | quoted_name] = accessor_domain_kwargs["column_list"]
 
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
@@ -106,7 +105,7 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[str | quoted_name] = accessor_domain_kwargs["column_list"]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
@@ -142,7 +141,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[str | quoted_name] = accessor_domain_kwargs["column_list"]
 
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
@@ -186,7 +185,7 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[str | quoted_name] = accessor_domain_kwargs["column_list"]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
@@ -226,7 +225,7 @@ def _spark_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[str | quoted_name] = accessor_domain_kwargs["column_list"]
 
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
@@ -285,7 +284,7 @@ def _spark_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[str | quoted_name] = accessor_domain_kwargs["column_list"]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )

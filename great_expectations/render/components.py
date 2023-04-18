@@ -4,7 +4,7 @@ import json
 from copy import deepcopy
 from enum import Enum
 from string import Template as pTemplate
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, List
 
 from marshmallow import Schema, fields, post_dump, post_load
 from typing_extensions import Final
@@ -304,13 +304,13 @@ class RenderedTableContent(RenderedComponentContent):
     def __init__(
         self,
         table: list[RenderedContent],
-        header: Optional[Union[RenderedContent, dict]] = None,
-        subheader: Optional[Union[RenderedContent, dict]] = None,
-        header_row: Optional[list[RenderedContent]] = None,
-        styling: Optional[dict] = None,
+        header: RenderedContent | dict | None = None,
+        subheader: RenderedContent | dict | None = None,
+        header_row: list[RenderedContent] | None = None,
+        styling: dict | None = None,
         content_block_type: str = "table",
-        table_options: Optional[dict] = None,
-        header_row_options: Optional[dict] = None,
+        table_options: dict | None = None,
+        header_row_options: dict | None = None,
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
         self.header = header
@@ -494,7 +494,7 @@ class RenderedStringTemplateContent(RenderedComponentContent):
     def __init__(
         self,
         string_template: dict,
-        styling: Optional[dict] = None,
+        styling: dict | None = None,
         content_block_type: str = "string_template",
     ) -> None:
         super().__init__(content_block_type=content_block_type, styling=styling)
@@ -643,11 +643,11 @@ class CollapseContent(RenderedComponentContent):
 
     def __init__(
         self,
-        collapse: Union[RenderedContent, list],
-        collapse_toggle_link: Optional[Union[RenderedContent, dict]] = None,
-        header: Optional[Union[RenderedContent, dict]] = None,
-        subheader: Optional[Union[RenderedContent, dict]] = None,
-        styling: Optional[dict] = None,
+        collapse: RenderedContent | list,
+        collapse_toggle_link: RenderedContent | dict | None = None,
+        header: RenderedContent | dict | None = None,
+        subheader: RenderedContent | dict | None = None,
+        styling: dict | None = None,
         content_block_type: str = "collapse",
         inline_link: bool = False,
     ) -> None:
@@ -777,30 +777,30 @@ class RenderedSectionContent(RenderedContent):
 class RenderedAtomicValue(DictDot):
     def __init__(
         self,
-        schema: Optional[dict] = None,
-        header: Optional[RenderedAtomicValue] = None,
-        template: Optional[str] = None,
-        params: Optional[dict] = None,
-        header_row: Optional[List[RendererTableValue]] = None,
-        table: Optional[List[List[RendererTableValue]]] = None,
-        graph: Optional[dict] = None,
-        meta_notes: Optional[MetaNotes] = None,
+        schema: dict | None = None,
+        header: RenderedAtomicValue | None = None,
+        template: str | None = None,
+        params: dict | None = None,
+        header_row: List[RendererTableValue] | None = None,
+        table: List[List[RendererTableValue]] | None = None,
+        graph: dict | None = None,
+        meta_notes: MetaNotes | None = None,
     ) -> None:
-        self.schema: Optional[dict] = schema
-        self.header: Optional[RenderedAtomicValue] = header
+        self.schema: dict | None = schema
+        self.header: RenderedAtomicValue | None = header
 
         # StringValueType
-        self.template: Optional[str] = template
-        self.params: Optional[dict] = params
+        self.template: str | None = template
+        self.params: dict | None = params
 
         # TableType
-        self.header_row: Optional[List[RendererTableValue]] = header_row
-        self.table: Optional[List[List[RendererTableValue]]] = table
+        self.header_row: List[RendererTableValue] | None = header_row
+        self.table: List[List[RendererTableValue]] | None = table
 
         # GraphType
         self.graph = RenderedAtomicValueGraph(graph=graph)
 
-        self.meta_notes: Optional[MetaNotes] = meta_notes
+        self.meta_notes: MetaNotes | None = meta_notes
 
     def __repr__(self) -> str:
         return json.dumps(self.to_json_dict(), indent=2)
@@ -834,7 +834,7 @@ class RenderedAtomicValue(DictDot):
 class RenderedAtomicValueGraph(DictDot):
     def __init__(
         self,
-        graph: Optional[dict] = None,
+        graph: dict | None = None,
     ):
         self.graph = graph
 
@@ -845,7 +845,7 @@ class RenderedAtomicValueGraph(DictDot):
         return json.dumps(self.to_json_dict(), indent=2)
 
     @public_api
-    def to_json_dict(self) -> Optional[dict[str, JSONValues]]:
+    def to_json_dict(self) -> dict[str, JSONValues] | None:
         """Returns a JSON-serializable dict representation of this RenderedAtomicValueGraph.
 
         Returns:
@@ -912,10 +912,10 @@ class RenderedAtomicValueSchema(Schema):
 class RenderedAtomicContent(RenderedContent):
     def __init__(
         self,
-        name: Union[str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType],
+        name: str | AtomicDiagnosticRendererType | AtomicPrescriptiveRendererType,
         value: RenderedAtomicValue,
-        value_type: Optional[str] = None,
-        exception: Optional[str] = None,
+        value_type: str | None = None,
+        exception: str | None = None,
     ) -> None:
         # str conversion is performed to ensure Enum value is what is serialized
         self.name = str(name)

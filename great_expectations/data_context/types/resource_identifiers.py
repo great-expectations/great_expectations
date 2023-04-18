@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING
 
 from marshmallow import Schema, fields, post_load
 
@@ -62,8 +62,8 @@ class BatchIdentifier(DataContextKey):
 
     def __init__(
         self,
-        batch_identifier: Union[BatchKwargs, dict, str],
-        data_asset_name: Optional[str] = None,
+        batch_identifier: BatchKwargs | dict | str,
+        data_asset_name: str | None = None,
     ) -> None:
         super().__init__()
         # if isinstance(batch_identifier, (BatchKwargs, dict)):
@@ -344,8 +344,8 @@ class GXCloudIdentifier(DataContextKey):
     def __init__(
         self,
         resource_type: GXCloudRESTResource,
-        id: Optional[str] = None,
-        resource_name: Optional[str] = None,
+        id: str | None = None,
+        resource_name: str | None = None,
     ) -> None:
         super().__init__()
 

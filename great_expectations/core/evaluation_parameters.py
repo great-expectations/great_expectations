@@ -7,7 +7,7 @@ import math
 import operator
 import traceback
 from collections import namedtuple
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Tuple
 
 import dateutil
 from pyparsing import (
@@ -195,7 +195,7 @@ class EvaluationParameterParser:
             # Require that the *entire* expression evaluates to number or datetime UNLESS there is *exactly one*
             # expression to substitute (see cases where len(parse_results) == 1 in the parse_evaluation_parameter
             # method).
-            evaluated: Union[int, float, datetime.datetime]
+            evaluated: int | float | datetime.datetime
             try:
                 evaluated = int(op)
                 logger.info(
@@ -225,7 +225,7 @@ class EvaluationParameterParser:
 
 def build_evaluation_parameters(
     expectation_args: dict,
-    evaluation_parameters: Optional[dict] = None,
+    evaluation_parameters: dict | None = None,
     interactive_evaluation: bool = True,
     data_context=None,
 ) -> Tuple[dict, dict]:
@@ -333,8 +333,8 @@ def find_evaluation_parameter_dependencies(parameter_expression):
 
 def parse_evaluation_parameter(  # noqa: C901 - complexity 19
     parameter_expression: str,
-    evaluation_parameters: Optional[Dict[str, Any]] = None,
-    data_context: Optional[AbstractDataContext] = None,
+    evaluation_parameters: Dict[str, Any] | None = None,
+    data_context: AbstractDataContext | None = None,
 ) -> Any:
     """Use the provided evaluation_parameters dict to parse a given parameter expression.
 
@@ -354,7 +354,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
     if evaluation_parameters is None:
         evaluation_parameters = {}
 
-    parse_results: Union[ParseResults, list] = _get_parse_results(parameter_expression)
+    parse_results: ParseResults | list = _get_parse_results(parameter_expression)
 
     if _is_single_function_no_args(parse_results):
         # Necessary to catch `now()` (which only needs to be evaluated with `expr.exprStack`)
@@ -451,7 +451,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
 
 def _get_parse_results(
     parameter_expression: str,
-) -> Union[ParseResults, Union[ParseResults, list]]:
+) -> ParseResults | ParseResults | list:
     # Calling get_parser clears the stack
     parser = EXPR.get_parser()
     try:
@@ -465,7 +465,7 @@ def _get_parse_results(
     return parse_results
 
 
-def _is_single_function_no_args(parse_results: Union[ParseResults, list]) -> bool:
+def _is_single_function_no_args(parse_results: ParseResults | list) -> bool:
     # Represents a valid parser result of a single function that has no arguments
     return (
         len(parse_results) == 1

@@ -20,7 +20,7 @@ migrator.retry_migrate_validation_results()
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, NamedTuple, Optional
+from typing import TYPE_CHECKING, Dict, List, NamedTuple
 
 import requests
 
@@ -63,9 +63,9 @@ class CloudMigrator:
     def __init__(
         self,
         context: AbstractDataContext,
-        cloud_base_url: Optional[str] = None,
-        cloud_access_token: Optional[str] = None,
-        cloud_organization_id: Optional[str] = None,
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
     ) -> None:
         self._context = context
 
@@ -98,9 +98,9 @@ class CloudMigrator:
         cls,
         context: AbstractDataContext,
         test_migrate: bool,
-        cloud_base_url: Optional[str] = None,
-        cloud_access_token: Optional[str] = None,
-        cloud_organization_id: Optional[str] = None,
+        cloud_base_url: str | None = None,
+        cloud_access_token: str | None = None,
+        cloud_organization_id: str | None = None,
     ) -> CloudMigrator:
         """Migrate your Data Context to GX Cloud.
 

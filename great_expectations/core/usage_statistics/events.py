@@ -33,7 +33,7 @@ programmatically create new enum values if run as a module.
 from __future__ import annotations
 
 import enum
-from typing import List, Optional
+from typing import List
 
 
 class UsageStatsEvents(str, enum.Enum):
@@ -148,7 +148,7 @@ class UsageStatsEvents(str, enum.Enum):
 
     @classmethod
     def get_cli_event_name(
-        cls, noun: str, verb: str, other_items: Optional[List[str]] = None
+        cls, noun: str, verb: str, other_items: List[str] | None = None
     ) -> str:
         """Return the appropriate event name from the appropriate enum based on inputs.
 

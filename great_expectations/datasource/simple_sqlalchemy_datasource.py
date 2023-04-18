@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,  # noqa: TCH001
@@ -34,12 +34,12 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
     def __init__(
         self,
         name: str,
-        connection_string: Optional[str] = None,
-        url: Optional[str] = None,
-        credentials: Optional[dict] = None,
-        engine: Optional[SaEngine] = None,  # sqlalchemy.engine.Engine
-        introspection: Optional[dict] = None,
-        tables: Optional[dict] = None,
+        connection_string: str | None = None,
+        url: str | None = None,
+        credentials: dict | None = None,
+        engine: SaEngine | None = None,  # sqlalchemy.engine.Engine
+        introspection: dict | None = None,
+        tables: dict | None = None,
         **kwargs,
     ) -> None:
         introspection = introspection or {}

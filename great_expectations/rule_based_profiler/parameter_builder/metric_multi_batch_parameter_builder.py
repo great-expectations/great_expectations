@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List
 
 import numpy as np
 
@@ -40,16 +40,14 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self,
         name: str,
         metric_name: str,
-        metric_domain_kwargs: Optional[Union[str, dict]] = None,
-        metric_value_kwargs: Optional[Union[str, dict]] = None,
-        single_batch_mode: Union[str, bool] = False,
-        enforce_numeric_metric: Union[str, bool] = False,
-        replace_nan_with_zero: Union[str, bool] = False,
-        reduce_scalar_metric: Union[str, bool] = True,
-        evaluation_parameter_builder_configs: Optional[
-            List[ParameterBuilderConfig]
-        ] = None,
-        data_context: Optional[AbstractDataContext] = None,
+        metric_domain_kwargs: str | dict | None = None,
+        metric_value_kwargs: str | dict | None = None,
+        single_batch_mode: str | bool = False,
+        enforce_numeric_metric: str | bool = False,
+        replace_nan_with_zero: str | bool = False,
+        reduce_scalar_metric: str | bool = True,
+        evaluation_parameter_builder_configs: List[ParameterBuilderConfig] | None = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -95,39 +93,39 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
         self._metric_name = value
 
     @property
-    def metric_domain_kwargs(self) -> Optional[Union[str, dict]]:
+    def metric_domain_kwargs(self) -> str | dict | None:
         return self._metric_domain_kwargs
 
     @property
-    def metric_value_kwargs(self) -> Optional[Union[str, dict]]:
+    def metric_value_kwargs(self) -> str | dict | None:
         return self._metric_value_kwargs
 
     @metric_value_kwargs.setter
-    def metric_value_kwargs(self, value: Optional[Union[str, dict]]) -> None:
+    def metric_value_kwargs(self, value: str | dict | None) -> None:
         self._metric_value_kwargs = value
 
     @property
-    def single_batch_mode(self) -> Union[str, bool]:
+    def single_batch_mode(self) -> str | bool:
         return self._single_batch_mode
 
     @property
-    def enforce_numeric_metric(self) -> Union[str, bool]:
+    def enforce_numeric_metric(self) -> str | bool:
         return self._enforce_numeric_metric
 
     @property
-    def replace_nan_with_zero(self) -> Union[str, bool]:
+    def replace_nan_with_zero(self) -> str | bool:
         return self._replace_nan_with_zero
 
     @property
-    def reduce_scalar_metric(self) -> Union[str, bool]:
+    def reduce_scalar_metric(self) -> str | bool:
         return self._reduce_scalar_metric
 
     def _build_parameters(
         self,
         domain: Domain,
-        variables: Optional[ParameterContainer] = None,
-        parameters: Optional[Dict[str, ParameterContainer]] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        parameters: Dict[str, ParameterContainer] | None = None,
+        runtime_configuration: dict | None = None,
     ) -> Attributes:
         """
         Builds ParameterContainer object that holds ParameterNode objects with attribute name-value pairs and details.
@@ -144,7 +142,7 @@ class MetricMultiBatchParameterBuilder(ParameterBuilder):
             parameters=parameters,
         )
 
-        limit: Optional[int] = 1 if single_batch_mode else None
+        limit: int | None = 1 if single_batch_mode else None
 
         metric_computation_result: MetricComputationResult = self.get_metrics(
             metric_name=self.metric_name,

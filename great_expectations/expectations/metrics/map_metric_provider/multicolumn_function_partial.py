@@ -7,9 +7,7 @@ from typing import (
     Callable,
     Dict,
     List,
-    Optional,
     Type,
-    Union,
 )
 
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -41,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 def multicolumn_function_partial(  # noqa: C901 - 16
     engine: Type[ExecutionEngine],
-    partial_fn_type: Optional[Union[str, MetricPartialFunctionTypes]] = None,
+    partial_fn_type: str | MetricPartialFunctionTypes | None = None,
     **kwargs,
 ):
     """Provides engine-specific support for authoring a metric_fn with a simplified signature.
@@ -93,7 +91,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                column_list: List[str | quoted_name] = accessor_domain_kwargs[
                     "column_list"
                 ]
 
@@ -149,7 +147,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                column_list: List[str | quoted_name] = accessor_domain_kwargs[
                     "column_list"
                 ]
 
@@ -222,7 +220,7 @@ def multicolumn_function_partial(  # noqa: C901 - 16
                     domain_kwargs=metric_domain_kwargs, domain_type=domain_type
                 )
 
-                column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+                column_list: List[str | quoted_name] = accessor_domain_kwargs[
                     "column_list"
                 ]
 

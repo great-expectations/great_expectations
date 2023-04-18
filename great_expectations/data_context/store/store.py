@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple, Type
 
 from typing_extensions import TypedDict
 
@@ -53,8 +53,8 @@ class Store:
 
     def __init__(
         self,
-        store_backend: Optional[dict] = None,
-        runtime_environment: Optional[dict] = None,
+        store_backend: dict | None = None,
+        runtime_environment: dict | None = None,
         store_name: str = "no_store_name",
     ) -> None:
         """
@@ -171,7 +171,7 @@ class Store:
 
     def get(
         self, key: DataContextKey | GXCloudIdentifier | ConfigurationIdentifier
-    ) -> Optional[Any]:
+    ) -> Any | None:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
 
@@ -250,7 +250,7 @@ class Store:
         )
 
     def _build_key_from_config(self, config: AbstractConfig) -> DataContextKey:
-        id: Optional[str] = None
+        id: str | None = None
         # Chetan - 20220831 - Explicit fork in logic to cover legacy behavior (particularly around Checkpoints).
         # Will be removed as part of the effort to rename `ge_cloud_id` to `id` across the codebase.
         if hasattr(config, "ge_cloud_id"):
@@ -258,7 +258,7 @@ class Store:
         if hasattr(config, "id"):
             id = config.id
 
-        name: Optional[str] = None
+        name: str | None = None
         if hasattr(config, "name"):
             name = config.name
 
@@ -266,10 +266,10 @@ class Store:
 
     @staticmethod
     def build_store_from_config(
-        store_name: Optional[str] = None,
+        store_name: str | None = None,
         store_config: StoreConfigTypedDict | dict | None = None,
         module_name: str = "great_expectations.data_context.store",
-        runtime_environment: Optional[dict] = None,
+        runtime_environment: dict | None = None,
     ) -> Store:
         if store_config is None or module_name is None:
             raise gx_exceptions.StoreConfigurationError(

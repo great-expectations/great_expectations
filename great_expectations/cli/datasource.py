@@ -4,7 +4,7 @@ import enum
 import logging
 import os
 import sys
-from typing import TYPE_CHECKING, Dict, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Dict, List, Type, Union
 
 import click
 from typing_extensions import TypeAlias
@@ -180,7 +180,7 @@ def _build_datasource_intro_string(datasources: List[dict]) -> str:
 def _datasource_new_flow(
     context: FileDataContext,
     usage_event_end: str,
-    datasource_name: Optional[str] = None,
+    datasource_name: str | None = None,
     jupyter: bool = True,
 ) -> None:
     helper: BaseDatasourceNewYamlHelper
@@ -250,10 +250,10 @@ class BaseDatasourceNewYamlHelper:
         self,
         datasource_type: DatasourceTypes,
         usage_stats_payload: dict,
-        datasource_name: Optional[str] = None,
+        datasource_name: str | None = None,
     ) -> None:
         self.datasource_type: DatasourceTypes = datasource_type
-        self.datasource_name: Optional[str] = datasource_name
+        self.datasource_name: str | None = datasource_name
         self.usage_stats_payload: dict = usage_stats_payload
 
     def verify_libraries_installed(self) -> bool:
@@ -306,7 +306,7 @@ class FilesYamlHelper(BaseDatasourceNewYamlHelper):
         usage_stats_payload: dict,
         class_name: str,
         context_root_dir: str,
-        datasource_name: Optional[str] = None,
+        datasource_name: str | None = None,
     ) -> None:
         super().__init__(datasource_type, usage_stats_payload, datasource_name)
         self.class_name: str = class_name
@@ -363,7 +363,7 @@ class PandasYamlHelper(FilesYamlHelper):
     def __init__(
         self,
         context_root_dir: str,
-        datasource_name: Optional[str] = None,
+        datasource_name: str | None = None,
     ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.PANDAS,
@@ -384,7 +384,7 @@ class SparkYamlHelper(FilesYamlHelper):
     def __init__(
         self,
         context_root_dir: str,
-        datasource_name: Optional[str] = None,
+        datasource_name: str | None = None,
     ) -> None:
         super().__init__(
             datasource_type=DatasourceTypes.SPARK,
@@ -409,9 +409,9 @@ class SQLCredentialYamlHelper(BaseDatasourceNewYamlHelper):
     def __init__(
         self,
         usage_stats_payload: dict,
-        datasource_name: Optional[str] = None,
+        datasource_name: str | None = None,
         driver: str = "",
-        port: Union[int, str] = "YOUR_PORT",
+        port: int | str = "YOUR_PORT",
         host: str = "YOUR_HOST",
         username: str = "YOUR_USERNAME",
         password: str = "YOUR_PASSWORD",
@@ -500,7 +500,7 @@ data_connectors:
 
 
 class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]) -> None:
+    def __init__(self, datasource_name: str | None) -> None:
         # We are insisting on pymysql driver when adding a MySQL datasource
         # through the CLI to avoid over-complication of this flow. If user wants
         # to use another driver, they must use a sqlalchemy connection string.
@@ -524,7 +524,7 @@ class MySQLCredentialYamlHelper(SQLCredentialYamlHelper):
 
 
 class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]) -> None:
+    def __init__(self, datasource_name: str | None) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -552,7 +552,7 @@ class PostgresCredentialYamlHelper(SQLCredentialYamlHelper):
 
 
 class RedshiftCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]) -> None:
+    def __init__(self, datasource_name: str | None) -> None:
         # We are insisting on psycopg2 driver when adding a Redshift datasource
         # through the CLI to avoid over-complication of this flow. If user wants
         # to use another driver, they must use a sqlalchemy connection string.
@@ -604,7 +604,7 @@ class SnowflakeAuthMethod(enum.IntEnum):
 
 
 class SnowflakeCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]) -> None:
+    def __init__(self, datasource_name: str | None) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -674,7 +674,7 @@ private_key_passphrase = ""   # Passphrase for the private key used for authenti
 
 
 class BigqueryCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]) -> None:
+    def __init__(self, datasource_name: str | None) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -706,7 +706,7 @@ table_name = ""'''
 
 
 class TrinoCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]) -> None:
+    def __init__(self, datasource_name: str | None) -> None:
         super().__init__(
             database="YOUR_TRINO_CATALOG",
             datasource_name=datasource_name,
@@ -741,7 +741,7 @@ table_name = "{self.table_name}"'''
 
 
 class AthenaCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]) -> None:
+    def __init__(self, datasource_name: str | None) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -778,7 +778,7 @@ connection_string = f"awsathena+rest://@athena.{region}.amazonaws.com/{schema_na
 
 
 class ConnectionStringCredentialYamlHelper(SQLCredentialYamlHelper):
-    def __init__(self, datasource_name: Optional[str]) -> None:
+    def __init__(self, datasource_name: str | None) -> None:
         super().__init__(
             datasource_name=datasource_name,
             usage_stats_payload={
@@ -821,7 +821,7 @@ SQLYAMLHelpers: TypeAlias = Union[
 
 
 def _get_sql_yaml_helper_class(
-    selected_database: SupportedDatabaseBackends, datasource_name: Optional[str]
+    selected_database: SupportedDatabaseBackends, datasource_name: str | None
 ) -> SQLYAMLHelpers:
     helper_class_by_backend: Dict[SupportedDatabaseBackends, Type[SQLYAMLHelpers]] = {
         SupportedDatabaseBackends.POSTGRES: PostgresCredentialYamlHelper,
@@ -853,10 +853,10 @@ What are you processing your files with?
 
 
 def _get_files_helper(
-    selection: str, context_root_dir: str, datasource_name: Optional[str] = None
-) -> Union[PandasYamlHelper, SparkYamlHelper]:
+    selection: str, context_root_dir: str, datasource_name: str | None = None
+) -> PandasYamlHelper | SparkYamlHelper:
     helper_class_by_selection: Dict[
-        str, Union[Type[PandasYamlHelper], Type[SparkYamlHelper]]
+        str, Type[PandasYamlHelper] | Type[SparkYamlHelper]
     ] = {
         "1": PandasYamlHelper,
         "2": SparkYamlHelper,

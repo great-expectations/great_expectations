@@ -11,7 +11,6 @@ from typing import (
     Dict,
     Generator,
     List,
-    Optional,
     Tuple,
 )
 
@@ -53,8 +52,8 @@ def _source(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
-    data_context: Optional[AbstractDataContext] = None,
-    splitter_query_response: Optional[List[Dict[str, Any]]] = None,
+    data_context: AbstractDataContext | None = None,
+    splitter_query_response: List[Dict[str, Any]] | None = None,
     create_temp_table: bool = True,
 ) -> Generator[PostgresDatasource, None, None]:
     splitter_response = splitter_query_response or (
@@ -212,7 +211,7 @@ def create_and_add_table_asset_without_testing_connection(
     source: PostgresDatasource,
     name: str,
     table_name: str,
-    splitter: Optional[Splitter] = None,
+    splitter: Splitter | None = None,
 ) -> Tuple[PostgresDatasource, TableAsset]:
     table_asset = TableAsset(
         name=name,

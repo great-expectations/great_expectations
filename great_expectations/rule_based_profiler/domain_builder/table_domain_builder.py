@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 from great_expectations.core.domain import Domain
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class TableDomainBuilder(DomainBuilder):
     def __init__(
         self,
-        data_context: Optional[AbstractDataContext] = None,
+        data_context: AbstractDataContext | None = None,
     ) -> None:
         """
         Args:
@@ -44,10 +44,10 @@ class TableDomainBuilder(DomainBuilder):
     def _get_domains(
         self,
         rule_name: str,
-        variables: Optional[ParameterContainer] = None,
-        runtime_configuration: Optional[dict] = None,
+        variables: ParameterContainer | None = None,
+        runtime_configuration: dict | None = None,
     ) -> List[Domain]:
-        other_table_name: Optional[str]
+        other_table_name: str | None
         try:
             # Obtain table from "rule state" (i.e., variables and parameters); from instance variable otherwise.
             other_table_name = get_parameter_value_and_validate_return_type(
