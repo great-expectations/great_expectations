@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Optional, Union, overload
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.data_context_key import (
@@ -74,7 +74,14 @@ class DatasourceStore(Store):
             return value._json_dict()
         return self._serializer.serialize(value)
 
-    # TODO: overloads
+    @overload
+    def deserialize(self, value: DatasourceConfig) -> DatasourceConfig:
+        ...
+
+    @overload
+    def deserialize(self, value: FluentDatasource) -> FluentDatasource:
+        ...
+
     def deserialize(
         self, value: dict | DatasourceConfig | FluentDatasource
     ) -> DatasourceConfig | FluentDatasource:
