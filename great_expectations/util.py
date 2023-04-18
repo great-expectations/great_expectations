@@ -74,10 +74,6 @@ try:
 except ImportError:
     black = None  # type: ignore[assignment]
 
-if sys.version_info >= (3, 8):
-    import importlib.metadata as importlib_metadata
-else:
-    import importlib_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +81,6 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
-    from pkg_resources import Distribution
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import FileDataContext
