@@ -62,9 +62,11 @@ GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
 DUMMY_JWT_TOKEN: Final[
     str
 ] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-DUMMY_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
-
-DUMMY_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
+# Can replace hardcoded ids with dynamic ones if using a regex url with responses.add_callback()
+# https://github.com/getsentry/responses/tree/master#dynamic-responses
+FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
+FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
+FAKE_DATASOURCE_ID: Final[str] = str(uuid.uuid4())
 
 MISSING: Final = object()
 
@@ -152,7 +154,6 @@ def inject_engine_lookup_double(
 
 _CLOUD_API_FAKE_DB: dict = {}
 _DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
-DATASOURCE_ID: Final[str] = str(uuid.uuid4())
 
 
 class _CallbackResult(NamedTuple):
@@ -194,10 +195,10 @@ def _post_fake_db_datasources_callback(
 
         datasource_id = payload.get("data", {}).get("id")
         if not datasource_id:
-            datasource_id = DATASOURCE_ID
+            datasource_id = FAKE_DATASOURCE_ID
             payload["data"]["id"] = datasource_id
 
-        _CLOUD_API_FAKE_DB[f"{url}/{DATASOURCE_ID}"] = payload
+        _CLOUD_API_FAKE_DB[f"{url}/{FAKE_DATASOURCE_ID}"] = payload
 
         result = _CallbackResult(
             201, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
@@ -212,7 +213,7 @@ def _post_fake_db_datasources_callback(
 
 @pytest.fixture
 def cloud_api_fake():
-    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{DUMMY_ORG_ID}"
+    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
     dc_config_url = f"{org_url_base}/data-context-configuration"
     datasources_url = f"{org_url_base}/datasources"
 
@@ -221,7 +222,7 @@ def cloud_api_fake():
         {
             dc_config_url: {
                 "anonymous_usage_statistics": {
-                    "data_context_id": DUMMY_DATA_CONTEXT_ID,
+                    "data_context_id": FAKE_DATA_CONTEXT_ID,
                     "enabled": False,
                 },
                 "datasources": {},
@@ -235,7 +236,9 @@ def cloud_api_fake():
     with responses.RequestsMock() as resp_mocker:
         resp_mocker.add_callback(responses.GET, dc_config_url, _get_fake_db_callback)
         resp_mocker.add_callback(
-            responses.GET, f"{datasources_url}/{DATASOURCE_ID}", _get_fake_db_callback
+            responses.GET,
+            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
+            _get_fake_db_callback,
         )
         resp_mocker.add_callback(
             responses.POST, datasources_url, _post_fake_db_datasources_callback
@@ -251,7 +254,7 @@ def cloud_api_fake():
 def empty_cloud_context_fluent(cloud_api_fake) -> CloudDataContext:
     context = gx.get_context(
         cloud_access_token=DUMMY_JWT_TOKEN,
-        cloud_organization_id=DUMMY_ORG_ID,
+        cloud_organization_id=FAKE_ORG_ID,
         cloud_base_url=GX_CLOUD_MOCK_BASE_URL,
         cloud_mode=True,
     )
