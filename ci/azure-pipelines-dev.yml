@@ -144,10 +144,8 @@ stages:
 
     jobs:
     - job: static_type_check
-      strategy:
-        matrix:
-          Python38:
-            python.version: '3.8'
+      variables:
+        python.version: '3.8'
       steps:
       - task: UsePythonVersion@0
         inputs:
