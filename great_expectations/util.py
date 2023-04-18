@@ -1726,7 +1726,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 @overload
-def get_context(
+def get_context(  # type: ignore[misc]
     project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
     context_root_dir: PathStr = ...,
     runtime_environment: Optional[dict] = ...,
@@ -1746,7 +1746,7 @@ def get_context(
 @overload
 def get_context(
     project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
-    context_root_dir: PathStr = ...,
+    context_root_dir: None = ...,
     runtime_environment: Optional[dict] = ...,
     cloud_base_url: Optional[str] = ...,
     cloud_access_token: Optional[str] = ...,

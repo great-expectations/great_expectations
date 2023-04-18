@@ -103,7 +103,7 @@ class InlineStoreBackend(StoreBackend):
             # TODO: instead prevent these from being set??
             # TODO: revert this before merge
             for name in config_commented_map_from_yaml.get("fluent_datasources", {}):  # type: ignore[union-attr]
-                config_commented_map_from_yaml["datasources"].pop(name)  # type: ignore[union-attr]
+                config_commented_map_from_yaml["datasources"].pop(name)  # type: ignore[union-attr,arg-type]
             value = DataContextConfig.from_commented_map(
                 commented_map=config_commented_map_from_yaml
             )

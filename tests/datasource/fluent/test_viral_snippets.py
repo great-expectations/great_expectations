@@ -250,10 +250,10 @@ def test_context_add_or_update_datasource(
     assert datasource.connection_string == f"sqlite:///{db_file}"
 
     # modify the datasource
-    datasource.connection_string = "sqlite:///"
+    datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
     context.sources.add_or_update_sqlite(datasource)
 
-    updated_datasource: SqliteDatasource = context.datasources[datasource.name]
+    updated_datasource: SqliteDatasource = context.datasources[datasource.name]  # type: ignore[assignment]
     assert updated_datasource.connection_string == "sqlite:///"
 
 
