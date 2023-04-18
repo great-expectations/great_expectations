@@ -481,6 +481,7 @@ def build_gallery(
                 f"All expected *_full.json files were found. Going to combine and write to {outfile_name}"
             )
 
+            bad_key_names = []
             for fname in found_full_backend_files:
                 with open(fname, "r") as fp:
                     text = fp.read()
@@ -502,6 +503,7 @@ def build_gallery(
                     diagnostic_object = diagnostic_objects[expectation_name]
                 except KeyError:
                     logger.error(f"No diagnostic obj for {expectation_name}")
+                    bad_key_names.append(expectation_name)
                     continue
                 expectation_instance = expectation_instances[expectation_name]
                 try:
@@ -515,6 +517,7 @@ def build_gallery(
                     logger.error(
                         f"No backend_test_result_counts for {expectation_name}"
                     )
+                    bad_key_names.append(expectation_name)
                     continue
                 maturity_checklist_object = Expectation._get_maturity_checklist(
                     expectation_instance=expectation_instance,
@@ -540,6 +543,8 @@ def build_gallery(
                     maturity_checklist=maturity_checklist_object
                 )
 
+            for bad_key_name in bad_key_names:
+                expectation_file_info.pop(bad_key_name)
             with open(f"./{outfile_name}", "w") as outfile:
                 json.dump(expectation_file_info, outfile, indent=4)
 
