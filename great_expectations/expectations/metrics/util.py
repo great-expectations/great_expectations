@@ -147,7 +147,7 @@ def get_table_columns_metric(
         metric_domain_kwargs={},
         metric_value_kwargs=None,
     )
-    table_columns_metric.metric_dependencies = {
+    table_columns_metric.metric_dependencies = {  # type: ignore[assignment]
         "table.column_types": table_column_types_metric,
     }
     results = engine.resolve_metrics(
