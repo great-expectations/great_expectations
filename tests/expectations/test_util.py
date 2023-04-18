@@ -19,7 +19,6 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 )
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import (
-    ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
@@ -56,37 +55,6 @@ except ImportError:
     Select = None
     SQLAlchemyError = None
     logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-
-
-def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, dict]:
-    resolved_metrics: dict = {}
-
-    results: dict
-
-    table_column_types_metric: MetricConfiguration = MetricConfiguration(
-        metric_name="table.column_types",
-        metric_domain_kwargs={},
-        metric_value_kwargs={
-            "include_nested": True,
-        },
-    )
-    results = engine.resolve_metrics(metrics_to_resolve=(table_column_types_metric,))
-    resolved_metrics.update(results)
-
-    table_columns_metric: MetricConfiguration = MetricConfiguration(
-        metric_name="table.columns",
-        metric_domain_kwargs={},
-        metric_value_kwargs=None,
-    )
-    table_columns_metric.metric_dependencies = {
-        "table.column_types": table_column_types_metric,
-    }
-    results = engine.resolve_metrics(
-        metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
-    )
-    resolved_metrics.update(results)
-
-    return table_columns_metric, resolved_metrics
 
 
 @pytest.fixture(scope="module")

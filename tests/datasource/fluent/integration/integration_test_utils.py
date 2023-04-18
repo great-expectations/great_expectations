@@ -17,6 +17,7 @@ from great_expectations.datasource.fluent.interfaces import (
     HeadData,
 )
 from great_expectations.execution_engine import ExecutionEngine
+from great_expectations.expectations.metrics.util import get_table_columns_metric
 from great_expectations.render import (
     AtomicDiagnosticRendererType,
     AtomicPrescriptiveRendererType,
@@ -27,7 +28,6 @@ from great_expectations.rule_based_profiler.data_assistant_result import (
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.metrics_calculator import MetricsCalculator
-from tests.expectations.test_util import get_table_columns_metric
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import Batch

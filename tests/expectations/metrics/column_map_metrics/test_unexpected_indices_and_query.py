@@ -13,6 +13,7 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
     SparkDFExecutionEngine,
 )
+from great_expectations.expectations.metrics.util import get_table_columns_metric
 from great_expectations.self_check.util import (
     build_pandas_engine,
     build_sa_engine,
@@ -20,7 +21,6 @@ from great_expectations.self_check.util import (
 )
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from tests.expectations.test_util import get_table_columns_metric
 
 
 @pytest.fixture

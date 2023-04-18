@@ -7,6 +7,7 @@ import pytest
 
 # noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
+from great_expectations.expectations.metrics.util import get_table_columns_metric
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.optional_imports import google_cloud_storage
 import great_expectations.exceptions as gx_exceptions
@@ -16,7 +17,6 @@ from great_expectations.execution_engine.pandas_execution_engine import (
 )
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from tests.expectations.test_util import get_table_columns_metric
 
 
 def test_constructor_with_boto3_options():

@@ -10,6 +10,7 @@ from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.metrics.util import get_table_columns_metric
 from great_expectations.expectations.row_conditions import (
     RowCondition,
     RowConditionParserType,
@@ -18,7 +19,6 @@ from great_expectations.expectations.row_conditions import (
 # Testing ordinary process of adding column row condition
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from tests.expectations.test_util import get_table_columns_metric
 
 
 @pytest.fixture

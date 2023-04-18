@@ -22,6 +22,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.metrics.util import get_table_columns_metric
 from great_expectations.optional_imports import pyspark_sql_Column, quoted_name
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
@@ -35,7 +36,6 @@ from great_expectations.self_check.util import (
 from great_expectations.util import isclose
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from tests.expectations.test_util import get_table_columns_metric
 
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,

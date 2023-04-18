@@ -24,6 +24,7 @@ from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
+from great_expectations.expectations.metrics.util import get_table_columns_metric
 
 # Function to test for spark dataframe equality
 from great_expectations.expectations.row_conditions import (
@@ -39,7 +40,6 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
-from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import get_sqlite_table_names, get_sqlite_temp_table_names
 
 try:

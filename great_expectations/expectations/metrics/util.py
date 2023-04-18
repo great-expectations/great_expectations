@@ -12,6 +12,7 @@ from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import (
+    ExecutionEngine,  # noqa: TCH001
     PandasExecutionEngine,  # noqa: TCH001
     SqlAlchemyExecutionEngine,  # noqa: TCH001
 )
@@ -36,6 +37,7 @@ from great_expectations.optional_imports import (
     sqlalchemy as sa,
 )
 from great_expectations.util import get_sqlalchemy_inspector
+from great_expectations.validator.metric_configuration import MetricConfiguration
 
 try:
     import psycopg2  # noqa: F401
@@ -121,6 +123,37 @@ except ImportError:
 
 if TYPE_CHECKING:
     import sqlalchemy  # noqa: TID251
+
+
+def get_table_columns_metric(engine: ExecutionEngine) -> [MetricConfiguration, dict]:
+    resolved_metrics: dict = {}
+
+    results: dict
+
+    table_column_types_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="table.column_types",
+        metric_domain_kwargs={},
+        metric_value_kwargs={
+            "include_nested": True,
+        },
+    )
+    results = engine.resolve_metrics(metrics_to_resolve=(table_column_types_metric,))
+    resolved_metrics.update(results)
+
+    table_columns_metric: MetricConfiguration = MetricConfiguration(
+        metric_name="table.columns",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    table_columns_metric.metric_dependencies = {
+        "table.column_types": table_column_types_metric,
+    }
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(table_columns_metric,), metrics=resolved_metrics
+    )
+    resolved_metrics.update(results)
+
+    return table_columns_metric, resolved_metrics
 
 
 def get_dialect_regex_expression(  # noqa: C901 - 36
