@@ -1,10 +1,7 @@
 from textwrap import dedent
 from typing import Any, Callable, TypeVar
 
-from great_expectations.compatibility.docstring_parser import (
-    DocstringStyle,
-    docstring_parser,
-)
+from great_expectations.compatibility import docstring_parser
 
 WHITELISTED_TAG = "--Public API--"
 
@@ -131,7 +128,7 @@ def deprecated_argument(
 
     def wrapper(func: F) -> F:
         """Wrapper method that accepts func, so we can modify the docstring."""
-        if not docstring_parser:
+        if not docstring_parser.docstring_parser:
             return func
 
         return _add_text_below_function_docstring_argument(
@@ -174,7 +171,7 @@ def new_argument(
 
     def wrapper(func: F) -> F:
         """Wrapper method that accepts func, so we can modify the docstring."""
-        if not docstring_parser:
+        if not docstring_parser.docstring_parser:
             return func
 
         return _add_text_below_function_docstring_argument(
@@ -263,9 +260,9 @@ def _add_text_below_string_docstring_argument(
     Returns:
         Modified docstring.
     """
-    parsed_docstring = docstring_parser.parse(
+    parsed_docstring = docstring_parser.docstring_parser.parse(
         text=docstring,
-        style=DocstringStyle.GOOGLE,
+        style=docstring_parser.DocstringStyle.GOOGLE,
     )
 
     arg_list = list(param.arg_name for param in parsed_docstring.params)
@@ -290,10 +287,10 @@ def _add_text_below_string_docstring_argument(
 
     # RenderingStyle.EXPANDED used to make sure any line breaks before and
     # after the added text are included (for Sphinx html rendering).
-    composed_docstring = docstring_parser.compose(
+    composed_docstring = docstring_parser.docstring_parser.compose(
         docstring=parsed_docstring,
-        style=DocstringStyle.GOOGLE,
-        rendering_style=docstring_parser.RenderingStyle.EXPANDED,
+        style=docstring_parser.DocstringStyle.GOOGLE,
+        rendering_style=docstring_parser.docstring_parser.RenderingStyle.EXPANDED,
     )
 
     return composed_docstring
