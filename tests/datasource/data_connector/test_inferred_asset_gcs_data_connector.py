@@ -4,7 +4,7 @@ import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
 from great_expectations import DataContext
-from great_expectations.compatibility.google import storage as google_cloud_storage
+from great_expectations.compatibility import google
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -38,7 +38,7 @@ def expected_config_dict():
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -75,7 +75,7 @@ def test_instantiation_without_args(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -118,7 +118,7 @@ def test_instantiation_with_filename_arg(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -161,7 +161,7 @@ def test_instantiation_with_info_arg(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -206,7 +206,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -256,7 +256,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -317,7 +317,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -407,7 +407,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -461,7 +461,7 @@ def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -536,7 +536,7 @@ default_regex:
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -603,7 +603,7 @@ default_regex:
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -682,7 +682,7 @@ default_regex:
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -758,7 +758,7 @@ def test_nested_directory_data_asset_name_in_folder(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -826,7 +826,7 @@ def test_redundant_information_in_naming_convention_random_hash(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -893,7 +893,7 @@ def test_redundant_information_in_naming_convention_timestamp(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -961,7 +961,7 @@ def test_redundant_information_in_naming_convention_bucket(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1089,7 +1089,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1151,7 +1151,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1216,7 +1216,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(

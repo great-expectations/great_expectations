@@ -4,7 +4,7 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
-from great_expectations.compatibility.google import storage as google_cloud_storage
+from great_expectations.compatibility import google
 from great_expectations.core import IDDict
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -228,7 +228,7 @@ def expected_batch_definitions_sorted():
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -261,7 +261,7 @@ def test_instantiation_without_args(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -301,7 +301,7 @@ def test_instantiation_with_filename_arg(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -341,7 +341,7 @@ def test_instantiation_with_info_arg(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -388,7 +388,7 @@ def test_instantiation_with_test_yaml_config(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -447,7 +447,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -505,7 +505,7 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -546,7 +546,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -610,7 +610,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -663,7 +663,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -741,7 +741,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -819,7 +819,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -908,7 +908,7 @@ def test_return_all_batch_definitions_basic_sorted(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1019,7 +1019,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1108,7 +1108,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1181,7 +1181,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1250,7 +1250,7 @@ def test_return_all_batch_definitions_too_many_sorters(
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(
@@ -1385,7 +1385,7 @@ assets:
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in configured_asset_gcs_data_connector.py",
 )
 @mock.patch(

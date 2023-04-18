@@ -18,7 +18,7 @@ from great_expectations.datasource.fluent.spark_datasource import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.azure import BlobServiceClient
+    from great_expectations.compatibility import azure
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
         SortersDefinition,
@@ -41,7 +41,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     # Azure Blob Storage specific attributes
     azure_options: dict[str, ConfigStr | Any] = {}
     # private
-    _azure_client: BlobServiceClient | None
+    _azure_client: azure.BlobServiceClient | None
     def add_csv_asset(
         self,
         name: str,

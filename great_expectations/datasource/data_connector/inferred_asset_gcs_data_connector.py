@@ -1,12 +1,7 @@
 import logging
 from typing import List, Optional
 
-from great_expectations.compatibility.google import (
-    service_account as google_service_account,
-)
-from great_expectations.compatibility.google import (
-    storage as google_cloud_storage,
-)
+from great_expectations.compatibility import google
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
@@ -93,20 +88,18 @@ class InferredAssetGCSDataConnector(InferredAssetFilePathDataConnector):
             if "filename" in gcs_options:
                 filename = gcs_options.pop("filename")
                 credentials = (
-                    google_service_account.Credentials.from_service_account_file(
+                    google.service_account.Credentials.from_service_account_file(
                         filename=filename
                     )
                 )
             elif "info" in gcs_options:
                 info = gcs_options.pop("info")
                 credentials = (
-                    google_service_account.Credentials.from_service_account_info(
+                    google.service_account.Credentials.from_service_account_info(
                         info=info
                     )
                 )
-            self._gcs = google_cloud_storage.Client(
-                credentials=credentials, **gcs_options
-            )
+            self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
         except (TypeError, AttributeError, ModuleNotFoundError):
             raise ImportError(
                 "Unable to load GCS Client (it is required for InferredAssetGCSDataConnector)."

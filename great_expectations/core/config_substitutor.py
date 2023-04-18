@@ -9,10 +9,7 @@ from typing import Any, Dict, Optional
 from typing_extensions import Final
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.azure import DefaultAzureCredential, SecretClient
-from great_expectations.compatibility.google import (
-    secretmanager as google_cloud_secretmanager,
-)
+from great_expectations.compatibility import azure, google
 from great_expectations.data_context.types.base import BaseYamlConfig
 
 try:
@@ -273,14 +270,14 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
         )
-        if not google_cloud_secretmanager:
+        if not google.secretmanager:
             logger.error(
                 "secretmanager is not installed, please install great_expectations with gcp extra > "
                 "pip install great_expectations[gcp]"
             )
             raise ImportError("Could not import secretmanager from google.cloud")
 
-        client = google_cloud_secretmanager.SecretManagerServiceClient()
+        client = google.secretmanager.SecretManagerServiceClient()
         matches = regex.match(value)
 
         if not matches:
@@ -330,7 +327,7 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
         )
-        if not SecretClient:
+        if not azure.SecretClient:
             logger.error(
                 "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
                 "pip install great_expectations[azure_secrets]"
@@ -347,8 +344,8 @@ class _ConfigurationSubstitutor:
         secret_name = matches.group(2)
         secret_version = matches.group(3)
         secret_key = matches.group(4)
-        credential = DefaultAzureCredential()
-        client = SecretClient(vault_url=keyvault_uri, credential=credential)
+        credential = azure.DefaultAzureCredential()
+        client = azure.SecretClient(vault_url=keyvault_uri, credential=credential)
         secret = client.get_secret(name=secret_name, version=secret_version).value
         if secret_key:
             secret = json.loads(secret)[secret_key]

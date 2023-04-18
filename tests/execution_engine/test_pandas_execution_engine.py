@@ -8,7 +8,7 @@ import pytest
 # noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.compatibility.google import storage as google_cloud_storage
+from great_expectations.compatibility import google
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import (
@@ -564,7 +564,7 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
@@ -588,7 +588,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
@@ -626,7 +626,7 @@ def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monke
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 def test_get_batch_with_gcs_misconfigured(gcs_batch_spec):

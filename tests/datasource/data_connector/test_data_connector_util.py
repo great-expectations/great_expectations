@@ -2,8 +2,8 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.compatibility import google
 import great_expectations.exceptions.exceptions as gx_exceptions
-from great_expectations.compatibility.google import storage as google_cloud_storage
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 
 # noinspection PyProtectedMember
@@ -513,7 +513,7 @@ def test_build_sorters_from_config_bad_config():
 
 
 @pytest.mark.skipif(
-    not google_cloud_storage,
+    not google.storage,
     reason="Could not import 'storage' from google.cloud",
 )
 @mock.patch("great_expectations.compatibility.google.Client")

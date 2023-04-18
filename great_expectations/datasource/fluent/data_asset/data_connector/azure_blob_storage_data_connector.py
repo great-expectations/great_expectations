@@ -16,7 +16,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.azure import BlobServiceClient
+    from great_expectations.compatibility import azure
     from great_expectations.core.batch import BatchDefinition
 
 
@@ -60,7 +60,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         datasource_name: str,
         data_asset_name: str,
         batching_regex: re.Pattern,
-        azure_client: BlobServiceClient,
+        azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
         name_starts_with: str = "",
@@ -71,7 +71,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
-        self._azure_client: BlobServiceClient = azure_client
+        self._azure_client: azure.BlobServiceClient = azure_client
 
         self._account_name = account_name
         self._container = container
@@ -95,7 +95,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         datasource_name: str,
         data_asset_name: str,
         batching_regex: re.Pattern,
-        azure_client: BlobServiceClient,
+        azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
         name_starts_with: str = "",

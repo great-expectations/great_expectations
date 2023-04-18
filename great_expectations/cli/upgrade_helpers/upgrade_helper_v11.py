@@ -400,11 +400,9 @@ class UpgradeHelperV11(BaseUpgradeHelper):
     def _get_tuple_gcs_store_backend_run_time(
         self, source_key: tuple, store_backend: Type[StoreBackend]
     ) -> None:
-        from great_expectations.compatibility.google import (
-            storage as google_cloud_storage,
-        )
+        from great_expectations.compatibility import google
 
-        gcs = google_cloud_storage.Client(project=store_backend.project)
+        gcs = google.storage.Client(project=store_backend.project)
         bucket = gcs.get_bucket(store_backend.bucket)
         run_name = source_key[-2]
 

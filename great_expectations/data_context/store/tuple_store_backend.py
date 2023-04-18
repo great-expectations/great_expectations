@@ -839,11 +839,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def _get(self, key):
         gcs_object_key = self._build_gcs_object_key(key)
 
-        from great_expectations.compatibility.google import (
-            storage as google_cloud_storage,
-        )
+        from great_expectations.compatibility import google
 
-        gcs = google_cloud_storage.Client(project=self.project)
+        gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
@@ -863,11 +861,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     ):
         gcs_object_key = self._build_gcs_object_key(key)
 
-        from great_expectations.compatibility.google import (
-            storage as google_cloud_storage,
-        )
+        from great_expectations.compatibility import google
 
-        gcs = google_cloud_storage.Client(project=self.project)
+        gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
 
@@ -881,11 +877,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return gcs_object_key
 
     def _move(self, source_key, dest_key, **kwargs) -> None:
-        from great_expectations.compatibility.google import (
-            storage as google_cloud_storage,
-        )
+        from great_expectations.compatibility import google
 
-        gcs = google_cloud_storage.Client(project=self.project)
+        gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
 
         source_filepath = self._convert_key_to_filepath(source_key)
@@ -902,11 +896,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
-        from great_expectations.compatibility.google import (
-            storage as google_cloud_storage,
-        )
+        from great_expectations.compatibility import google
 
-        gcs = google_cloud_storage.Client(self.project)
+        gcs = google.storage.Client(self.project)
 
         for blob in gcs.list_blobs(self.bucket, prefix=self.prefix):
             gcs_object_name = blob.name
@@ -965,18 +957,13 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return path_url
 
     def remove_key(self, key):
-        from great_expectations.compatibility.google import (
-            NotFound as GoogleNotFoundError,
-        )
-        from great_expectations.compatibility.google import (
-            storage as google_cloud_storage,
-        )
+        from great_expectations.compatibility import google
 
-        gcs = google_cloud_storage.Client(project=self.project)
+        gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
         try:
             bucket.delete_blobs(blobs=list(bucket.list_blobs(prefix=self.prefix)))
-        except GoogleNotFoundError:
+        except google.NotFound:
             return False
         return True
 
@@ -1035,22 +1022,21 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     @property
     @functools.lru_cache()
     def _container_client(self) -> Any:
-        from great_expectations.compatibility.azure import (
-            BlobServiceClient,
-            DefaultAzureCredential,
-        )
+        from great_expectations.compatibility import azure
 
         # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-        if BlobServiceClient:
+        if azure.BlobServiceClient:
             try:
                 if self.connection_string:
-                    blob_service_client: BlobServiceClient = (
-                        BlobServiceClient.from_connection_string(self.connection_string)
+                    blob_service_client: azure.BlobServiceClient = (
+                        azure.BlobServiceClient.from_connection_string(
+                            self.connection_string
+                        )
                     )
                 elif self.account_url:
-                    blob_service_client = BlobServiceClient(
+                    blob_service_client = azure.BlobServiceClient(
                         account_url=self.account_url,
-                        credential=DefaultAzureCredential(),
+                        credential=azure.DefaultAzureCredential(),
                     )
                 else:
                     raise StoreBackendError(

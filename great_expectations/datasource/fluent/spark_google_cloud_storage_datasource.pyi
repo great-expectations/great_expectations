@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Optional, Type
 
 from typing_extensions import Literal
 
+from great_expectations.compatibility import google
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed at runtime
@@ -15,9 +16,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.google import (
-        Client as GoogleCloudStorageClient,
-    )
     from great_expectations.datasource.fluent import BatchMetadata
     from great_expectations.datasource.fluent.interfaces import (
         SortersDefinition,
@@ -41,7 +39,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     bucket_or_name: str
     gcs_options: dict[str, ConfigStr | Any] = {}
 
-    _gcs_client: GoogleCloudStorageClient | None
+    _gcs_client: google.Client | None
     def add_csv_asset(
         self,
         name: str,
