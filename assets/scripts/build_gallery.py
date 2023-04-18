@@ -755,8 +755,7 @@ def _disable_progress_bars() -> Tuple[str, DataContext]:
     "--outfile-name",
     "-o",
     "outfile_name",
-    # default="expectation_library_v2--staging.json",
-    default="expectation_library_v2--PLAY.json",
+    default="expectation_library_v2--staging.json",
     help="Name for the generated JSON file assembled from full backend files (no partials)",
 )
 @click.option(
