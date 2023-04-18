@@ -2,6 +2,7 @@ import operator
 
 import pandas
 
+# from great_expectations.compatibility.pyspark import functions as F, types as sparktypes
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import PandasExecutionEngine

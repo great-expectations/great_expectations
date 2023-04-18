@@ -81,7 +81,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
             0
         ]
 
-        if isinstance(column_metadata["type"], (sparktypes.StringType)):
+        if sparktypes and isinstance(column_metadata["type"], sparktypes.StringType):
             column = F.col(column_name).cast(sparktypes.IntegerType())
         else:
             raise TypeError(
