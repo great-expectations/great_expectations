@@ -250,21 +250,6 @@ seconds."""
     return execution_time_decorator
 
 
-# noinspection SpellCheckingInspection
-def get_project_distribution() -> Optional[Distribution]:
-    ditr: Distribution
-    for distr in importlib_metadata.distributions():
-        relative_path: Path
-        try:
-            relative_path = Path(__file__).relative_to(distr.locate_file(""))
-        except ValueError:
-            pass
-        else:
-            if relative_path in distr.files:
-                return distr
-    return None
-
-
 # Returns the object reference to the currently running function (i.e., the immediate function under execution).
 def get_currently_executing_function() -> Callable:
     cf = cast(FrameType, currentframe())
