@@ -26,7 +26,7 @@ import scipy.stats as stats
 from typing_extensions import Protocol, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.numpy import numpy_quantile
+from great_expectations.compatibility import numpy
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import (
     Batch,
@@ -641,13 +641,13 @@ def compute_quantiles(
     false_positive_rate: np.float64,
     quantile_statistic_interpolation_method: str,
 ) -> NumericRangeEstimationResult:
-    lower_quantile = numpy_quantile(
+    lower_quantile = numpy.numpy_quantile(
         a=metric_values,
         q=(false_positive_rate / 2.0),
         axis=0,
         method=quantile_statistic_interpolation_method,
     )
-    upper_quantile = numpy_quantile(
+    upper_quantile = numpy.numpy_quantile(
         a=metric_values,
         q=1.0 - (false_positive_rate / 2.0),
         axis=0,
@@ -712,14 +712,14 @@ def compute_kde_quantiles_point_estimate(
 
     lower_quantile_point_estimate: Union[
         np.float64, datetime.datetime
-    ] = numpy_quantile(
+    ] = numpy.numpy_quantile(
         metric_values_gaussian_sample,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
     upper_quantile_point_estimate: Union[
         np.float64, datetime.datetime
-    ] = numpy_quantile(
+    ] = numpy.numpy_quantile(
         metric_values_gaussian_sample,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
@@ -798,12 +798,12 @@ def compute_bootstrap_quantiles_point_estimate(
     lower_quantile_pct: float = false_positive_rate / 2.0
     upper_quantile_pct: float = 1.0 - false_positive_rate / 2.0
 
-    sample_lower_quantile: np.ndarray = numpy_quantile(
+    sample_lower_quantile: np.ndarray = numpy.numpy_quantile(
         a=metric_values,
         q=lower_quantile_pct,
         method=quantile_statistic_interpolation_method,
     )
-    sample_upper_quantile: np.ndarray = numpy_quantile(
+    sample_upper_quantile: np.ndarray = numpy.numpy_quantile(
         a=metric_values,
         q=upper_quantile_pct,
         method=quantile_statistic_interpolation_method,
@@ -907,7 +907,7 @@ def _determine_quantile_bias_corrected_point_estimate(
     quantile_bias_std_error_ratio_threshold: float,
     sample_quantile: np.ndarray,
 ) -> np.float64:
-    bootstrap_quantiles: Union[np.ndarray, np.float64] = numpy_quantile(
+    bootstrap_quantiles: Union[np.ndarray, np.float64] = numpy.numpy_quantile(
         bootstraps,
         q=quantile_pct,
         axis=1,
