@@ -1555,8 +1555,8 @@ def isclose(
     return cast(
         bool,
         np.isclose(
-            a=np.float64(operand_a),
-            b=np.float64(operand_b),
+            a=np.float64(operand_a),  # type: ignore[arg-type]
+            b=np.float64(operand_b),  # type: ignore[arg-type]
             rtol=rtol,
             atol=atol,
             equal_nan=equal_nan,
