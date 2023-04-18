@@ -24,6 +24,13 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
+from great_expectations.optional_imports import (
+    sparktypes,
+    sqlalchemy_dialects_registry,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -46,24 +53,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pyspark.sql.types as sparktypes
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
-
-try:
-    import sqlalchemy as sa  # noqa: TID251
-    from sqlalchemy.dialects import registry  # noqa: TID251
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    registry = None
 
 try:
     import sqlalchemy_redshift.dialect
@@ -75,7 +64,9 @@ BIGQUERY_GEO_SUPPORT = False
 try:
     import sqlalchemy_bigquery as sqla_bigquery
 
-    registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
+    sqlalchemy_dialects_registry.register(
+        "bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect"
+    )
     bigquery_types_tuple = None
     try:
         from sqlalchemy_bigquery import GEOGRAPHY  # noqa: F401
@@ -97,7 +88,9 @@ except ImportError:
 
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        sqlalchemy_dialects_registry.register(
+            "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
+        )
         try:
             getattr(sqla_bigquery, "INTEGER")
             bigquery_types_tuple = None
@@ -149,7 +142,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
             whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
             in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
-            'StringType', 'BooleanType' and other pyspark-defined type names.
+            'StringType', 'BooleanType' and other pyspark-defined type names. Note that the strings representing these \
+            types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` will be unrecognized and
+            fail the expectation, while `Timestamp` would pass with valid data.
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \

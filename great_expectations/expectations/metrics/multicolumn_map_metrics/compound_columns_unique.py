@@ -10,7 +10,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
 )
@@ -20,6 +19,11 @@ from great_expectations.expectations.metrics.map_metric_provider.multicolumn_con
 from great_expectations.expectations.metrics.map_metric_provider.multicolumn_function_partial import (
     multicolumn_function_partial,
 )
+from great_expectations.optional_imports import (
+    F,
+    pyspark_sql_Window,
+)
+from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.validation_graph import MetricConfiguration
 
 
@@ -157,7 +161,10 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     def _spark(cls, column_list, **kwargs):
         column_names = column_list.columns
         row_wise_cond = (
-            F.count(F.lit(1)).over(Window.partitionBy(F.struct(*column_names))) <= 1
+            F.count(F.lit(1)).over(
+                pyspark_sql_Window.partitionBy(F.struct(*column_names))
+            )
+            <= 1
         )
         return row_wise_cond
 

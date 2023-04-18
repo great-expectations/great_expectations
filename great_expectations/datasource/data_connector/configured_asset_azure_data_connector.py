@@ -14,16 +14,9 @@ from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
 )
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
+from great_expectations.optional_imports import BlobServiceClient
 
 logger = logging.getLogger(__name__)
-
-try:
-    from azure.storage.blob import BlobServiceClient
-except ImportError:
-    BlobServiceClient = None
-    logger.debug(
-        "Unable to load BlobServiceClient connection object; install optional Azure Storage Blob dependency for support"
-    )
 
 
 @public_api
@@ -102,7 +95,7 @@ class ConfiguredAssetAzureDataConnector(ConfiguredAssetFilePathDataConnector):
                     r"(?:https?://)?(.+?).blob.core.windows.net", account_url
                 ).group(1)
                 self._azure = BlobServiceClient(**azure_options)
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError, ModuleNotFoundError):
             raise ImportError(
                 "Unable to load Azure BlobServiceClient (it is required for ConfiguredAssetAzureDataConnector). \
                 Please ensure that you have provided the appropriate keys to `azure_options` for authentication."

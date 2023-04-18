@@ -43,11 +43,16 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import D
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.optional_imports import sqlalchemy
+from great_expectations.optional_imports import (
+    sa_sql_expression_Selectable,
+    sqlalchemy_engine_Engine,
+    sqlalchemy_engine_Inspector,
+)
+from great_expectations.optional_imports import (
+    sqlalchemy as sa,
+)
 
 if TYPE_CHECKING:
-    # min version of typing_extension missing `Self`, so it can't be imported at runtime
-    import sqlalchemy as sa  # noqa: TID251
     from typing_extensions import Self
 
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
@@ -729,7 +734,7 @@ class _SQLAsset(DataAsset):
         """
         raise NotImplementedError
 
-    def as_selectable(self) -> sqlalchemy.sql.Selectable:
+    def as_selectable(self) -> sa_sql_expression_Selectable:
         """Returns a Selectable that can be used to query this data
 
         Returns:
@@ -750,12 +755,12 @@ class QueryAsset(_SQLAsset):
             raise ValueError("query must start with 'SELECT' followed by a whitespace.")
         return v
 
-    def as_selectable(self) -> sqlalchemy.sql.Selectable:
+    def as_selectable(self) -> sa_sql_expression_Selectable:
         """Returns the Selectable that is used to retrieve the data.
 
         This can be used in a subselect FROM clause for queries against this data.
         """
-        return sqlalchemy.select(sqlalchemy.text(self.query.lstrip()[6:])).subquery()
+        return sa.select(sa.text(self.query.lstrip()[6:])).subquery()
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
@@ -796,8 +801,8 @@ class TableAsset(_SQLAsset):
             TestConnectionError: If the connection test fails.
         """
         datasource: SQLDatasource = self.datasource
-        engine: sqlalchemy.engine.Engine = datasource.get_engine()
-        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+        engine: sqlalchemy_engine_Engine = datasource.get_engine()
+        inspector: sqlalchemy_engine_Inspector = sa.inspect(engine)
 
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
             raise TestConnectionError(
@@ -805,7 +810,7 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
-        table_exists = sqlalchemy.inspect(engine).has_table(
+        table_exists = sa.inspect(engine).has_table(
             table_name=self.table_name,
             schema=self.schema_name,
         )
@@ -818,8 +823,8 @@ class TableAsset(_SQLAsset):
     def test_splitter_connection(self) -> None:
         if self.splitter:
             datasource: SQLDatasource = self.datasource
-            engine: sqlalchemy.engine.Engine = datasource.get_engine()
-            inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+            engine: sqlalchemy_engine_Engine = datasource.get_engine()
+            inspector: sqlalchemy_engine_Inspector = sa.inspect(engine)
 
             columns: list[dict[str, Any]] = inspector.get_columns(
                 table_name=self.table_name, schema=self.schema_name
@@ -831,12 +836,12 @@ class TableAsset(_SQLAsset):
                         f'The column "{splitter_column_name}" was not found in table "{self.qualified_name}"'
                     )
 
-    def as_selectable(self) -> sqlalchemy.sql.Selectable:
+    def as_selectable(self) -> sa_sql_expression_Selectable:
         """Returns the table as a sqlalchemy Selectable.
 
         This can be used in a from clause for a query against this data.
         """
-        return sqlalchemy.text(self.table_name)
+        return sa.text(self.table_name)
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
@@ -882,7 +887,7 @@ class SQLDatasource(Datasource):
 
     # private attrs
     _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
-    _engine: Union[sa.engine.Engine, None] = pydantic.PrivateAttr(None)
+    _engine: Union[sqlalchemy_engine_Engine, None] = pydantic.PrivateAttr(None)
 
     # These are instance var because ClassVars can't contain Type variables. See
     # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
@@ -894,7 +899,7 @@ class SQLDatasource(Datasource):
         """Returns the default execution engine type."""
         return SqlAlchemyExecutionEngine
 
-    def get_engine(self) -> sqlalchemy.engine.Engine:
+    def get_engine(self) -> sqlalchemy_engine_Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 model_dict = self.dict(
@@ -903,7 +908,7 @@ class SQLDatasource(Datasource):
                 )
                 connection_string = model_dict.pop("connection_string")
                 kwargs = model_dict.pop("kwargs", {})
-                self._engine = sqlalchemy.create_engine(connection_string, **kwargs)
+                self._engine = sa.create_engine(connection_string, **kwargs)
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
@@ -925,7 +930,7 @@ class SQLDatasource(Datasource):
             TestConnectionError: If the connection test fails.
         """
         try:
-            engine: sqlalchemy.engine.Engine = self.get_engine()
+            engine: sqlalchemy_engine_Engine = self.get_engine()
             engine.connect()
         except Exception as e:
             raise TestConnectionError(
