@@ -34,7 +34,7 @@ Once you have completed this guide you will have a foundation in the basics of u
 
 #### 1.1 Generate access token
 
-Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate an Access Token. Both `admin` and `editor` roles will suffice for this guide.
+Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate an access token. Both `admin` and `editor` roles will suffice for this guide.
 These tokens are view-once and stored as a hash in Great Expectation Cloud's backend database. Once you copy the API key and close the dialog, the Cloud UI will never show the token value again.
 
 #### 1.2 Import modules
