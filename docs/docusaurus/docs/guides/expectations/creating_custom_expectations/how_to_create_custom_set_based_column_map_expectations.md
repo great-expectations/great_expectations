@@ -79,7 +79,7 @@ Completeness checklist for ExpectColumnValuesToBeInSomeSet:
     Has both Statement Renderers: prescriptive and diagnostic
     Has core logic that passes tests for all applicable Execution Engines and SQL dialects
     Has a robust suite of tests, as determined by a code owner
-    Has passed a manual review by a code owner for code standards and style guides
+    Has passed a manual review by a code owner for code standards
 ```
 
 When in doubt, the next step to implement is the first one that doesn't have a ✔ next to it. This guide covers the first five steps on the checklist.

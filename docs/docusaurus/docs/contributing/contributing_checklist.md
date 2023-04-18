@@ -18,8 +18,6 @@ Once your code is ready, please go through the following checklist before submit
 
 #### 2. Have you followed the Style Guide for code and comments?
 
-* The [Style Guide](./style_guides/code_style.md) is here.
-
 * Thanks for helping us keep the codebase and documentation clean and consistent, so that it’s easier to maintain it as a community!
 
 * If your PR contains only changes to `contrib` directory (community contributed Expectations), review your PR against this Acceptance Checklist

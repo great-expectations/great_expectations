@@ -10,7 +10,7 @@ To avoid forking the repository, Great Expectations recommends using the GitHub 
 
 3. Click the file and then click **Edit this file**.
 
-4. Add your edits. See the Great Expectations [Style Guide](./style_guides/docs_style.md) for formatting recommendations.
+4. Add your edits.
 
 5. Optional. Click the **Preview** tab to preview your changes.
 

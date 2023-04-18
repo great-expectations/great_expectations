@@ -27,8 +27,7 @@ Our goal is to make your experience as great as possible. Please follow these st
 * Our [Levels of Maturity grid](./contributing_maturity.md) provides guidelines for how the maintainers of Great Expectations evaluate levels of maturity of a feature.
 
 #### 5. Start developing
-* Make sure to reference the style guides for [code](./style_guides/code_style.md) and
-[docs](./style_guides/docs_style.md) and instructions on [Testing](./contributing_test.md) when developing your code.  When your changes are ready, run through our
+* Make sure to review the [Testing](./contributing_test.md) instructions when developing your code.  When your changes are ready, run through our
 [Contribution checklist](./contributing_checklist.md) for pull requests.
 
 Note that if it’s your first contribution, there is a standard Contributor license agreement (CLA) you will need to sign :
