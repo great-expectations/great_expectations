@@ -162,8 +162,8 @@ def test_save_project_does_not_break(fluent_file_context: FileDataContext):
 
 
 def test_variables_save_config_does_not_break(fluent_file_context: FileDataContext):
-    print(fluent_file_context.fluent_config)
-    print(fluent_file_context.variables)
+    print(f"\tcontext.fluent_config ->\n{fluent_file_context.fluent_config}\n")
+    print(f"\tcontext.variables ->\n{fluent_file_context.variables}")
     fluent_file_context.variables.save_config()
 
 
