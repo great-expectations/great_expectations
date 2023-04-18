@@ -231,7 +231,7 @@ def expected_batch_definitions_sorted():
 
 @pytest.mark.skipif(
     not azure_storage,
-    reason="Could not import 'storage' from azure in configured_asset_gcs_data_connector.py",
+    reason="Could not import 'storage' from azure in configured_asset_azure_data_connector.py",
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
@@ -268,7 +268,7 @@ def test_instantiation_with_account_url_and_credential(
 
 @pytest.mark.skipif(
     not azure_storage,
-    reason="Could not import 'storage' from azure in configured_asset_gcs_data_connector.py",
+    reason="Could not import 'storage' from azure in configured_asset_azure_data_connector.py",
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.configured_asset_azure_data_connector.list_azure_keys",
