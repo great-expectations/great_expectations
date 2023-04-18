@@ -149,8 +149,6 @@ stages:
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.8
-        displayName: 'Use Python 3.8'
           versionSpec: $(python.version)
         displayName: 'Use Python $(python.version)'
       - script: |
@@ -158,7 +156,7 @@ stages:
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
-          #- script: |
+      - script: |
           # initial run doesn't check `.pyi` source files
           invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
         name: TypeCheckStubSourceFiles
