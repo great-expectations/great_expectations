@@ -85,10 +85,11 @@ class DatasourceStore(Store):
         if isinstance(value, (DatasourceConfig, FluentDatasource)):
             return value
         elif isinstance(value, dict):
-            # TODO: do this better... or elsewhere
+            # presence of a 'type' field means it's a fluent datasource
             type_ = value.get("type")
             if type_:
-                datasource_model = _SourceFactories.type_lookup[type_]
+                datasource_model = _SourceFactories.type_lookup.get(type_)
+                assert datasource_model, f"Unknown Datasource 'type': '{type_}'"
                 return datasource_model(**value)
             return self._schema.load(value)
         else:
