@@ -450,7 +450,7 @@ Great Expectations is _not_ a pipeline execution framework. Instead, it integrat
 
 Great Expectations is _not_ a database or storage software. It processes your data in place, on your existing systems. Expectations and Validation Results that GX produces are metadata about your data.
 
-Great Expectations is _not_ a data versioning tool. If you want to bring your data itself under version control, check out tools like [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt).
+Great Expectations is _not_ a data versioning tool. If you want to bring your data itself under version control, check out tools like [DVC](https://dvc.org/) and [Quilt](https://github.com/quiltdata/quilt), and [lakeFS](https://github.com/treeverse/lakeFS/).
 
 Great Expectations is _not_ a language-agnostic platform. Instead, it follows the philosophy of “take the compute to the data” by using the popular Python language to support native execution of Expectations in pandas, SQL (via SQLAlchemy), and Spark environments.
 
