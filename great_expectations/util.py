@@ -74,12 +74,6 @@ try:
 except ImportError:
     black = None  # type: ignore[assignment]
 
-try:
-    # This library moved in python 3.8
-    import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:
-    # Fallback for python < 3.8
-    import importlib_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +81,6 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
-    from pkg_resources import Distribution
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import FileDataContext
@@ -250,21 +243,6 @@ seconds."""
         return compute_delta_t
 
     return execution_time_decorator
-
-
-# noinspection SpellCheckingInspection
-def get_project_distribution() -> Optional[Distribution]:
-    ditr: Distribution
-    for distr in importlib_metadata.distributions():
-        relative_path: Path
-        try:
-            relative_path = Path(__file__).relative_to(distr.locate_file(""))
-        except ValueError:
-            pass
-        else:
-            if relative_path in distr.files:
-                return distr
-    return None
 
 
 # Returns the object reference to the currently running function (i.e., the immediate function under execution).
@@ -1572,8 +1550,8 @@ def isclose(
     return cast(
         bool,
         np.isclose(
-            a=np.float64(operand_a),  # type:ignore[arg-type]
-            b=np.float64(operand_b),  # type:ignore[arg-type]
+            a=np.float64(operand_a),  # type: ignore[arg-type]
+            b=np.float64(operand_b),  # type: ignore[arg-type]
             rtol=rtol,
             atol=atol,
             equal_nan=equal_nan,
@@ -2122,29 +2100,3 @@ def pandas_series_between_inclusive(
         metric_series = series.between(min_value, max_value)
 
     return metric_series
-
-
-def numpy_quantile(
-    a: npt.NDArray, q: float, method: str, axis: Optional[int] = None
-) -> Union[np.float64, npt.NDArray]:
-    """
-    As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
-    Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
-    """
-    quantile: npt.NDArray
-    if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(  # type: ignore[call-arg]
-            a=a,
-            q=q,
-            axis=axis,
-            method=method,
-        )
-    else:
-        quantile = np.quantile(
-            a=a,
-            q=q,
-            axis=axis,
-            interpolation=method,
-        )
-
-    return quantile
