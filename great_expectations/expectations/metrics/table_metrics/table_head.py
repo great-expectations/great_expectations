@@ -27,7 +27,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.pyspark import Row as pyspark_sql_Row
+    from great_expectations.compatibility import pyspark
 
 
 class TableHead(TableMetricProvider):
@@ -211,7 +211,7 @@ class TableHead(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        rows: list[pyspark_sql_Row] | pyspark_sql_Row | list[dict]
+        rows: list[pyspark.Row] | pyspark.Row | list[dict]
         if metric_value_kwargs["fetch_all"]:
             rows = df.collect()
         else:

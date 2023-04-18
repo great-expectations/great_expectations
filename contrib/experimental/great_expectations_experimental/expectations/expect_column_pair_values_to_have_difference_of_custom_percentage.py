@@ -1,6 +1,6 @@
 from typing import Optional
 
-from great_expectations.compatibility.pyspark import F
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,

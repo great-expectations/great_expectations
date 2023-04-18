@@ -2,8 +2,8 @@ from typing import Optional
 
 from lxml import etree
 
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.pyspark import types as sparktypes
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -57,7 +57,7 @@ class ColumnValuesXmlParseable(ColumnMapMetricProvider):
             except Exception:
                 return False
 
-        is_xml_udf = F.udf(is_xml, sparktypes.BooleanType())
+        is_xml_udf = F.udf(is_xml, pyspark.types.BooleanType())
 
         return is_xml_udf(column)
 

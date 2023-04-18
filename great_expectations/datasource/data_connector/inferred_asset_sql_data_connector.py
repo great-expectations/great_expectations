@@ -1,10 +1,6 @@
 from typing import Dict, List, Optional, Union
 
-from great_expectations.compatibility.sqlalchemy import (
-    Engine,
-    Inspector,
-    OperationalError,
-)
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -160,7 +156,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     data_asset_name=data_asset_name,
                     data_asset_config=data_asset_config,
                 )
-            except OperationalError as e:
+            except sqlalchemy.OperationalError as e:
                 # If it doesn't work, then...
                 if self._skip_inapplicable_tables:
                     # No harm done. Just don't include this table in the list of assets.
@@ -195,8 +191,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         if system_tables is None:
             system_tables = ["sqlite_master"]  # sqlite
 
-        engine: Engine = self.execution_engine.engine
-        inspector: Inspector = sa.inspect(engine)
+        engine: sqlalchemy.Engine = self.execution_engine.engine
+        inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
         selected_schema_name = schema_name
 

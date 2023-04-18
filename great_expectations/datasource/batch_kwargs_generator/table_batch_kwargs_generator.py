@@ -3,7 +3,7 @@ from string import Template
 
 from marshmallow import Schema, ValidationError, fields, post_load
 
-from great_expectations.compatibility.sqlalchemy import sqlalchemy
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )

@@ -10,7 +10,6 @@ from typing import (
 )
 
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.sqlalchemy import quoted_name
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
@@ -24,6 +23,7 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -67,7 +67,7 @@ def _pandas_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [
+    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
         column_A_name,
         column_B_name,
     ]
@@ -126,7 +126,10 @@ def _pandas_column_pair_map_condition_filtered_row_count(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
+    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+        column_A_name,
+        column_B_name,
+    ]
     verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
@@ -160,7 +163,7 @@ def _sqlalchemy_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [
+    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
         column_A_name,
         column_B_name,
     ]
@@ -211,7 +214,10 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
+    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+        column_A_name,
+        column_B_name,
+    ]
     verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )
@@ -247,7 +253,7 @@ def _spark_column_pair_map_condition_values(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [
+    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
         column_A_name,
         column_B_name,
     ]
@@ -309,7 +315,10 @@ def _spark_column_pair_map_condition_filtered_row_count(
     # noinspection PyPep8Naming
     column_B_name = accessor_domain_kwargs["column_B"]
 
-    column_names: List[Union[str, quoted_name]] = [column_A_name, column_B_name]
+    column_names: List[Union[str, sqlalchemy.quoted_name]] = [
+        column_A_name,
+        column_B_name,
+    ]
     verify_column_names_exist(
         column_names=column_names, batch_columns_list=metrics["table.columns"]
     )

@@ -6,9 +6,7 @@ from typing import Callable, Iterator, Sequence
 
 import pandas as pd
 
-from great_expectations.compatibility.sqlalchemy import (
-    Engine as sqlalchemy_engine_Engine,
-)
+from great_expectations.compatibility import sqlalchemy
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +47,7 @@ def read_sql_table_as_df(
         chunksize: If specified, returns an iterator where `chunksize` is the number of
             rows to include in each chunk.
     """
-    if sqlalchemy_engine_Engine and isinstance(con, sqlalchemy_engine_Engine):
+    if sqlalchemy.Engine and isinstance(con, sqlalchemy.Engine):
         con = con.connect()
     with warnings.catch_warnings():
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -113,7 +111,7 @@ def add_dataframe_to_db(
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
     """
-    if sqlalchemy_engine_Engine and isinstance(con, sqlalchemy_engine_Engine):
+    if sqlalchemy.Engine and isinstance(con, sqlalchemy.Engine):
         con = con.connect()
     with warnings.catch_warnings():
         # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy

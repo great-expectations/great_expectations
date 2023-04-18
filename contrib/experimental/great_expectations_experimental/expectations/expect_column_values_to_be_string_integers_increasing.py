@@ -3,15 +3,8 @@ from typing import Callable, Dict, Optional
 
 import numpy as np
 
-from great_expectations.compatibility.pyspark import (
-    Window as pyspark_sql_Window,
-)
-from great_expectations.compatibility.pyspark import (
-    functions as F,
-)
-from great_expectations.compatibility.pyspark import (
-    types as sparktypes,
-)
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_validation_result import (
     ExpectationValidationResult,
@@ -81,8 +74,10 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
             0
         ]
 
-        if sparktypes and isinstance(column_metadata["type"], sparktypes.StringType):
-            column = F.col(column_name).cast(sparktypes.IntegerType())
+        if pyspark.types and isinstance(
+            column_metadata["type"], pyspark.types.StringType
+        ):
+            column = F.col(column_name).cast(pyspark.types.IntegerType())
         else:
             raise TypeError(
                 "Column must be a string-type capable of being cast to int."
@@ -103,9 +98,7 @@ class ColumnValuesStringIntegersIncreasing(ColumnMapMetricProvider):
                 "Column must be a string-type capable of being cast to int."
             )
 
-        diff = column - F.lag(column).over(
-            pyspark_sql_Window.orderBy(F.lit("constant"))
-        )
+        diff = column - F.lag(column).over(pyspark.Window.orderBy(F.lit("constant")))
         diff = F.when(diff.isNull(), 1).otherwise(diff)
 
         if metric_value_kwargs["strictly"] is True:

@@ -25,10 +25,7 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.types import SerializableDictDot
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.pyspark import Column as pyspark_sql_Column
-    from great_expectations.compatibility.sqlalchemy import (
-        ColumnElement as sa_sql_expression_ColumnElement,
-    )
+    from great_expectations.compatibility import pyspark, sqlalchemy
 
 
 def _set_notnull(s, l, t) -> None:  # noqa: E741 # ambiguous name `l`
@@ -129,7 +126,7 @@ def _parse_great_expectations_condition(row_condition: str):
 # noinspection PyUnresolvedReferences
 def parse_condition_to_spark(
     row_condition: str,
-) -> pyspark_sql_Column:
+) -> pyspark.Column:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "condition_value" in parsed:
@@ -175,7 +172,7 @@ def generate_condition_by_operator(column, op, value):
 
 def parse_condition_to_sqlalchemy(
     row_condition: str,
-) -> sa_sql_expression_ColumnElement:
+) -> sqlalchemy.ColumnElement:
     parsed = _parse_great_expectations_condition(row_condition)
     column = parsed["column"]
     if "date" in parsed:

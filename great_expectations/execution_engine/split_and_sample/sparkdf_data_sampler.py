@@ -2,15 +2,8 @@ import hashlib
 import logging
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.pyspark import (
-    DataFrame as pyspark_sql_DataFrame,
-)
-from great_expectations.compatibility.pyspark import (
-    functions as F,
-)
-from great_expectations.compatibility.pyspark import (
-    types as sparktypes,
-)
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.execution_engine.split_and_sample.data_sampler import (
     DataSampler,
@@ -23,8 +16,8 @@ class SparkDataSampler(DataSampler):
     """Methods for sampling a Spark dataframe."""
 
     def sample_using_limit(
-        self, df: pyspark_sql_DataFrame, batch_spec: BatchSpec
-    ) -> pyspark_sql_DataFrame:
+        self, df: pyspark.DataFrame, batch_spec: BatchSpec
+    ) -> pyspark.DataFrame:
         """Sample the first n rows of data.
 
         Args:
@@ -45,8 +38,8 @@ class SparkDataSampler(DataSampler):
         return df.limit(n)
 
     def sample_using_random(
-        self, df: pyspark_sql_DataFrame, batch_spec: BatchSpec
-    ) -> pyspark_sql_DataFrame:
+        self, df: pyspark.DataFrame, batch_spec: BatchSpec
+    ) -> pyspark.DataFrame:
         """Take a random sample of rows, retaining proportion p.
 
         Args:
@@ -74,8 +67,8 @@ class SparkDataSampler(DataSampler):
         return res
 
     def sample_using_mod(
-        self, df: pyspark_sql_DataFrame, batch_spec: BatchSpec
-    ) -> pyspark_sql_DataFrame:
+        self, df: pyspark.DataFrame, batch_spec: BatchSpec
+    ) -> pyspark.DataFrame:
         """Take the mod of named column, and only keep rows that match the given value.
 
         Args:
@@ -99,7 +92,7 @@ class SparkDataSampler(DataSampler):
         value: int = self.get_sampling_kwargs_value_or_default(batch_spec, "value")
         res = (
             df.withColumn(
-                "mod_temp", (F.col(column_name) % mod).cast(sparktypes.IntegerType())
+                "mod_temp", (F.col(column_name) % mod).cast(pyspark.types.IntegerType())
             )
             .filter(F.col("mod_temp") == value)
             .drop("mod_temp")
@@ -108,9 +101,9 @@ class SparkDataSampler(DataSampler):
 
     def sample_using_a_list(
         self,
-        df: pyspark_sql_DataFrame,
+        df: pyspark.DataFrame,
         batch_spec: BatchSpec,
-    ) -> pyspark_sql_DataFrame:
+    ) -> pyspark.DataFrame:
         """Match the values in the named column against value_list, and only keep the matches.
 
         Args:
@@ -137,9 +130,9 @@ class SparkDataSampler(DataSampler):
 
     def sample_using_hash(
         self,
-        df: pyspark_sql_DataFrame,
+        df: pyspark.DataFrame,
         batch_spec: BatchSpec,
-    ) -> pyspark_sql_DataFrame:
+    ) -> pyspark.DataFrame:
         """Hash the values in the named column, and only keep rows that match the given hash_value.
 
         Args:
@@ -190,7 +183,7 @@ class SparkDataSampler(DataSampler):
             ]
             return hashed_value
 
-        encrypt_udf = F.udf(_encrypt_value, sparktypes.StringType())
+        encrypt_udf = F.udf(_encrypt_value, pyspark.types.StringType())
         res = (
             df.withColumn("encrypted_value", encrypt_udf(column_name))
             .filter(F.col("encrypted_value") == hash_value)

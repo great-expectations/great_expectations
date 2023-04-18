@@ -27,9 +27,7 @@ import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.sqlalchemy import (
-    Engine as sqlalchemy_engine_Engine,
-)
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -57,7 +55,7 @@ from great_expectations.datasource.fluent.sources import (
 _EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
 
 if sa:
-    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy_engine_Engine]
+    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.Engine]
 
 
 if TYPE_CHECKING:
@@ -927,7 +925,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         sql: sa.select | sa.text | str,
-        con: sqlalchemy_engine_Engine | sqlite3.Connection | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
         asset = SQLAsset(
@@ -941,7 +939,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql(
         self,
         sql: sa.select | sa.text | str,
-        con: sqlalchemy_engine_Engine | sqlite3.Connection | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -958,7 +956,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         sql: sa.select | sa.text | str,
-        con: sqlalchemy_engine_Engine | sqlite3.Connection | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
         asset = SQLQueryAsset(
@@ -972,7 +970,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql_query(
         self,
         sql: sa.select | sa.text | str,
-        con: sqlalchemy_engine_Engine | sqlite3.Connection | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -989,7 +987,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         table_name: str,
-        con: sqlalchemy_engine_Engine | str,
+        con: sqlalchemy.Engine | str,
         **kwargs,
     ) -> SQLTableAsset:  # type: ignore[valid-type]
         asset = SQLTableAsset(
@@ -1003,7 +1001,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql_table(
         self,
         table_name: str,
-        con: sqlalchemy_engine_Engine | str,
+        con: sqlalchemy.Engine | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:

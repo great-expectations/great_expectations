@@ -5,16 +5,8 @@ from typing import Any, Dict, Tuple
 import numpy as np
 import scipy.stats as stats
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.sqlalchemy import (
-    ProgrammingError as sqlalchemy_ProgrammingError,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Row as sqlalchemy_engine_Row,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Select as sa_sql_expression_Select,
-)
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -114,14 +106,12 @@ class ColumnSkew(ColumnAggregateMetricProvider):
 
 
 def _get_query_result(func, selectable, sqlalchemy_engine):
-    simple_query: sa_sql_expression_Select = sa.select(func).select_from(selectable)
+    simple_query: sqlalchemy.Select = sa.select(func).select_from(selectable)
 
     try:
-        result: sqlalchemy_engine_Row = sqlalchemy_engine.execute(
-            simple_query
-        ).fetchone()[0]
+        result: sqlalchemy.Row = sqlalchemy_engine.execute(simple_query).fetchone()[0]
         return result
-    except sqlalchemy_ProgrammingError as pe:
+    except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
         exception_traceback: str = traceback.format_exc()
         exception_message += (

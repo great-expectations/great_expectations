@@ -150,9 +150,9 @@ def test_spark_happy_path_onboarding_data_assistant(
     This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Spark.ipynb`
 
     """
-    from great_expectations.compatibility.pyspark import types as sparktypes
+    from great_expectations.compatibility import pyspark
 
-    schema: sparktypes.StructType = spark_df_taxi_data_schema
+    schema: pyspark.types.StructType = spark_df_taxi_data_schema
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")

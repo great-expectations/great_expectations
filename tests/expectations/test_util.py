@@ -37,11 +37,12 @@ from great_expectations.self_check.util import (
     should_we_generate_this_test,
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.validator.validator import Validator
 from great_expectations.compatibility.sqlalchemy import (
-    Engine as sqlalchemy_engine_Engine,
     sqlalchemy as sa,
 )
+from great_expectations.compatibility import sqlalchemy
 
 logger = logging.getLogger(__name__)
 
@@ -373,7 +374,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
             if validator is not None:
                 validators_config[table_name] = validator
 
-    engine: sqlalchemy_engine_Engine
+    engine: sqlalchemy.Engine
 
     metrics: dict = {}
 
@@ -394,7 +395,7 @@ def test_table_column_reflection_fallback(test_backends, sa):
         )
         metrics.update(results)
         assert set(metrics[table_columns_metric.id]) == {"name", "age", "pet"}
-        selectable: sa_sql_expression_Select = sa.Table(
+        selectable: sqlalchemy.Select = sa.Table(
             table_name,
             sa.MetaData(),
             schema=None,

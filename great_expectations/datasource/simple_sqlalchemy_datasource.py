@@ -10,9 +10,7 @@ from great_expectations.datasource.data_connector.configured_asset_sql_data_conn
 from great_expectations.datasource.new_datasource import BaseDatasource
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.sqlalchemy import (
-        Engine as sqlalchemy_engine_Engine,
-    )
+    from great_expectations.compatibility import sqlalchemy
     from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 
 logger = logging.getLogger(__name__)
@@ -38,7 +36,7 @@ class SimpleSqlalchemyDatasource(BaseDatasource):
         connection_string: Optional[str] = None,
         url: Optional[str] = None,
         credentials: Optional[dict] = None,
-        engine: Optional[sqlalchemy_engine_Engine] = None,  # sqlalchemy.engine.Engine
+        engine: Optional[sqlalchemy.Engine] = None,  # sqlalchemy.engine.Engine
         introspection: Optional[dict] = None,
         tables: Optional[dict] = None,
         **kwargs,

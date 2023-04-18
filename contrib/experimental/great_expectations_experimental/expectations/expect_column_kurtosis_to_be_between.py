@@ -2,7 +2,7 @@ from typing import Dict
 
 import scipy.stats as stats
 
-from great_expectations.compatibility.pyspark import F
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.execution_engine import (
     ExecutionEngine,

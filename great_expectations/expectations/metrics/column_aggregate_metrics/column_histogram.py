@@ -5,9 +5,7 @@ from typing import Any, Dict
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility.pyspark import (
-    Bucketizer as pyspark_ml_Bucketizer,
-)
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
@@ -261,7 +259,7 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
             bins.append(float("inf"))
 
         temp_column = df.select(column).where(F.col(column).isNotNull())
-        bucketizer = pyspark_ml_Bucketizer(
+        bucketizer = pyspark.Bucketizer(
             splits=bins, inputCol=column, outputCol="buckets"
         )
         bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)

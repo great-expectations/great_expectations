@@ -12,16 +12,9 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
-from great_expectations.compatibility.pyspark import (
-    Bucketizer,
-    SQLContext,
-    Window,
-)
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import (
     functions as F,
-)
-from great_expectations.compatibility.pyspark import (
-    types as sparktypes,
 )
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_asset.util import DocInherit, parse_result_format
@@ -749,7 +742,9 @@ class SparkDFDataset(MetaSparkDFDataset):
             bins.append(float("inf"))
 
         temp_column = self.spark_df.select(column).where(F.col(column).isNotNull())
-        bucketizer = Bucketizer(splits=bins, inputCol=column, outputCol="buckets")
+        bucketizer = pyspark.Bucketizer(
+            splits=bins, inputCol=column, outputCol="buckets"
+        )
         bucketed = bucketizer.setHandleInvalid("skip").transform(temp_column)
 
         # This is painful to do, but: bucketizer cannot handle values outside of a range
@@ -817,7 +812,7 @@ class SparkDFDataset(MetaSparkDFDataset):
     def _apply_dateutil_parse(column):
         assert len(column.columns) == 1, "Expected DataFrame with 1 column"
         col_name = column.columns[0]
-        _udf = F.udf(parse, sparktypes.TimestampType())
+        _udf = F.udf(parse, pyspark.types.TimestampType())
         return column.withColumn(col_name, _udf(col_name))
 
     # Expectations
@@ -1012,7 +1007,8 @@ class SparkDFDataset(MetaSparkDFDataset):
         meta=None,
     ):
         return column.withColumn(
-            "__success", F.count(F.lit(1)).over(Window.partitionBy(column[0])) <= 1
+            "__success",
+            F.count(F.lit(1)).over(pyspark.Window.partitionBy(column[0])) <= 1,
         )
 
     @DocInherit
@@ -1119,7 +1115,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             except:
                 raise
 
-        matches_json_schema_udf = F.udf(matches_json_schema, sparktypes.StringType())
+        matches_json_schema_udf = F.udf(matches_json_schema, pyspark.types.StringType())
 
         return column.withColumn("__success", matches_json_schema_udf(column[0]))
 
@@ -1141,7 +1137,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             except:
                 return False
 
-        is_json_udf = F.udf(is_json, sparktypes.StringType())
+        is_json_udf = F.udf(is_json, pyspark.types.StringType())
 
         return column.withColumn("__success", is_json_udf(column[0]))
 
@@ -1179,7 +1175,7 @@ class SparkDFDataset(MetaSparkDFDataset):
                 # vacuously true
                 success = True
             else:
-                success = issubclass(col_type, getattr(sparktypes, type_))
+                success = issubclass(col_type, getattr(pyspark.types, type_))
 
             return {"success": success, "result": {"observed_value": col_type.__name__}}
 
@@ -1343,7 +1339,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         column_B_name = column_B.schema.names[1]
 
         if parse_strings_as_datetimes:
-            _udf = F.udf(parse, sparktypes.TimestampType())
+            _udf = F.udf(parse, pyspark.types.TimestampType())
             # Create new columns for comparison without replacing original values.
             (timestamp_column_A, timestamp_column_B) = (
                 f"__ts_{column_A_name}",
@@ -1402,7 +1398,7 @@ class SparkDFDataset(MetaSparkDFDataset):
         )
 
         value_set_df = (
-            SQLContext(self.spark_df._sc)
+            pyspark.SQLContext(self.spark_df._sc)
             .createDataFrame(value_pairs_set, ["col_A", "col_B"])
             .select(F.array("col_A", "col_B").alias("set_AB"))
         )
@@ -1456,7 +1452,8 @@ class SparkDFDataset(MetaSparkDFDataset):
         column_names = column_list.schema.names[:]
         return column_list.withColumn(
             "__success",
-            F.count(F.lit(1)).over(Window.partitionBy(F.struct(*column_names))) <= 1,
+            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names)))
+            <= 1,
         )
 
     @DocInherit
@@ -1479,9 +1476,9 @@ class SparkDFDataset(MetaSparkDFDataset):
         na_types = [
             isinstance(column.schema[column_name].dataType, typ)
             for typ in [
-                sparktypes.LongType,
-                sparktypes.DoubleType,
-                sparktypes.IntegerType,
+                pyspark.types.LongType,
+                pyspark.types.DoubleType,
+                pyspark.types.IntegerType,
             ]
         ]
 
@@ -1494,7 +1491,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             column = self._apply_dateutil_parse(column)
             # create constant column to order by in window function to preserve order of original df
             column = column.withColumn("constant", F.lit("constant")).withColumn(
-                "lag", F.lag(column[0]).over(Window.orderBy(F.col("constant")))
+                "lag", F.lag(column[0]).over(pyspark.Window.orderBy(F.col("constant")))
             )
 
             column = column.withColumn(
@@ -1505,7 +1502,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             column = (
                 column.withColumn("constant", F.lit("constant"))
                 .withColumn(
-                    "lag", F.lag(column[0]).over(Window.orderBy(F.col("constant")))
+                    "lag",
+                    F.lag(column[0]).over(pyspark.Window.orderBy(F.col("constant"))),
                 )
                 .withColumn("diff", column[0] - F.col("lag"))
             )
@@ -1547,9 +1545,9 @@ class SparkDFDataset(MetaSparkDFDataset):
         na_types = [
             isinstance(column.schema[column_name].dataType, typ)
             for typ in [
-                sparktypes.LongType,
-                sparktypes.DoubleType,
-                sparktypes.IntegerType,
+                pyspark.types.LongType,
+                pyspark.types.DoubleType,
+                pyspark.types.IntegerType,
             ]
         ]
 
@@ -1562,7 +1560,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             column = self._apply_dateutil_parse(column)
             # create constant column to order by in window function to preserve order of original df
             column = column.withColumn("constant", F.lit("constant")).withColumn(
-                "lag", F.lag(column[0]).over(Window.orderBy(F.col("constant")))
+                "lag", F.lag(column[0]).over(pyspark.Window.orderBy(F.col("constant")))
             )
 
             column = column.withColumn(
@@ -1573,7 +1571,8 @@ class SparkDFDataset(MetaSparkDFDataset):
             column = (
                 column.withColumn("constant", F.lit("constant"))
                 .withColumn(
-                    "lag", F.lag(column[0]).over(Window.orderBy(F.col("constant")))
+                    "lag",
+                    F.lag(column[0]).over(pyspark.Window.orderBy(F.col("constant"))),
                 )
                 .withColumn("diff", column[0] - F.col("lag"))
             )

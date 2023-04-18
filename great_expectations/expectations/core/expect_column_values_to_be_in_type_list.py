@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from packaging import version
 
-from great_expectations.compatibility.pyspark import types as sparktypes
+from great_expectations.compatibility import pyspark
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationValidationResult,  # noqa: TCH001
@@ -438,7 +438,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             types = []
             for type_ in expected_types_list:
                 try:
-                    type_class = getattr(sparktypes, type_)
+                    type_class = getattr(pyspark.types, type_)
                     types.append(type_class)
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")

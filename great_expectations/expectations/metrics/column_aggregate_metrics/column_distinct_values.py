@@ -2,30 +2,11 @@ from typing import Any, Dict, List, Optional, Set
 
 import pandas as pd
 
-from great_expectations.compatibility.pyspark import (
-    Column as pyspark_sql_Column,
-)
-from great_expectations.compatibility.pyspark import (
-    DataFrame as pyspark_sql_DataFrame,
-)
-from great_expectations.compatibility.pyspark import (
-    Row as pyspark_sql_Row,
-)
+from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.compatibility.pyspark import (
     functions as F,
 )
-from great_expectations.compatibility.sqlalchemy import (
-    ColumnClause as sa_sql_expression_ColumnClause,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Engine as sqlalchemy_engine_Engine,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Selectable as sa_sql_expression_Selectable,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -62,16 +43,16 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
         """
-        selectable: sa_sql_expression_Selectable
+        selectable: sqlalchemy.Selectable
         accessor_domain_kwargs: Dict[str, str]
         (selectable, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]
-        column: sa_sql_expression_ColumnClause = sa.column(column_name)
+        column: sqlalchemy.ColumnClause = sa.column(column_name)
         sqlalchemy_engine = execution_engine.engine
 
-        distinct_values: List[sqlalchemy_engine_Engine]
+        distinct_values: List[sqlalchemy.Engine]
         if hasattr(column, "is_not"):
             distinct_values = sqlalchemy_engine.execute(
                 sa.select(column)
@@ -101,13 +82,13 @@ class ColumnDistinctValues(ColumnAggregateMetricProvider):
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
         in-memory operations.
         """
-        df: pyspark_sql_DataFrame
+        df: pyspark.DataFrame
         accessor_domain_kwargs: Dict[str, str]
         (df, _, accessor_domain_kwargs,) = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column_name: str = accessor_domain_kwargs["column"]
-        distinct_values: List[pyspark_sql_Row] = (
+        distinct_values: List[pyspark.Row] = (
             df.select(F.col(column_name))
             .distinct()
             .where(F.col(column_name).isNotNull())
@@ -127,9 +108,9 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     @column_aggregate_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
-        column: sa_sql_expression_ColumnClause,
+        column: sqlalchemy.ColumnClause,
         **kwargs,
-    ) -> sa_sql_expression_Selectable:
+    ) -> sqlalchemy.Selectable:
         """
         Past implementations of column.distinct_values.count depended on column.value_counts and column.distinct_values.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent
@@ -140,9 +121,9 @@ class ColumnDistinctValuesCount(ColumnAggregateMetricProvider):
     @column_aggregate_partial(engine=SparkDFExecutionEngine)
     def _spark(
         cls,
-        column: pyspark_sql_Column,
+        column: pyspark.Column,
         **kwargs,
-    ) -> pyspark_sql_Column:
+    ) -> pyspark.Column:
         """
         Past implementations of column.distinct_values.count depended on column.value_counts and column.distinct_values.
         This was causing performance issues due to the complex query used in column.value_counts and subsequent

@@ -6,18 +6,7 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.sqlalchemy import (
-    IntegrityError as sqlalchemy_IntegrityError,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    NoSuchTableError as sqlalchemy_NoSuchTableError,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Row as sqlalchemy_engine_Row,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    SQLAlchemyError,
-)
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -30,6 +19,7 @@ from great_expectations.util import (
 
 if sa:
     make_url = import_make_url()
+    SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
 
 logger = logging.getLogger(__name__)
@@ -111,7 +101,7 @@ class DatabaseStoreBackend(StoreBackend):
                 raise gx_exceptions.StoreBackendError(
                     f"Unable to use table {table_name}: it exists, but does not have the expected schema."
                 )
-        except sqlalchemy_NoSuchTableError:
+        except sqlalchemy.NoSuchTableError:
             table = sa.Table(table_name, meta, *cols)
             try:
                 if self._schema_name:
@@ -282,7 +272,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             with self.engine.begin() as connection:
                 connection.execute(ins)
-        except sqlalchemy_IntegrityError as e:
+        except sqlalchemy.IntegrityError as e:
             if self._get(key) == value:
                 logger.info(f"Key {str(key)} already exists with the same value.")
             else:
@@ -347,7 +337,7 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         with self.engine.begin() as connection:
-            row_list: list[sqlalchemy_engine_Row] = connection.execute(sel).fetchall()
+            row_list: list[sqlalchemy.Row] = connection.execute(sel).fetchall()
         return [tuple(row) for row in row_list]
 
     def remove_key(self, key):

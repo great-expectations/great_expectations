@@ -10,7 +10,6 @@ from typing import (
 )
 
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.sqlalchemy import quoted_name
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
@@ -24,6 +23,7 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -62,7 +62,9 @@ def _pandas_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+        "column_list"
+    ]
 
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
@@ -107,7 +109,9 @@ def _pandas_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+        "column_list"
+    ]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
@@ -143,7 +147,9 @@ def _sqlalchemy_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+        "column_list"
+    ]
 
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
@@ -187,7 +193,9 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+        "column_list"
+    ]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )
@@ -227,7 +235,9 @@ def _spark_multicolumn_map_condition_values(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+        "column_list"
+    ]
 
     column_list = get_dbms_compatible_column_names(
         column_names=column_list,
@@ -286,7 +296,9 @@ def _spark_multicolumn_map_condition_filtered_row_count(
 """
         )
 
-    column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs["column_list"]
+    column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
+        "column_list"
+    ]
     verify_column_names_exist(
         column_names=column_list, batch_columns_list=metrics["table.columns"]
     )

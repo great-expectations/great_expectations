@@ -1,7 +1,7 @@
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.pyspark import types as sparktypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
@@ -47,7 +47,7 @@ class ColumnValuesAreAscii(ColumnMapMetricProvider):
         def is_ascii(val):
             return str(val).isascii()
 
-        is_ascii_udf = F.udf(is_ascii, sparktypes.BooleanType())
+        is_ascii_udf = F.udf(is_ascii, pyspark.types.BooleanType())
 
         return is_ascii_udf(column)
 

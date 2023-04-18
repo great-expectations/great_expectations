@@ -2,8 +2,8 @@ from typing import Optional
 
 import pytz
 
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.pyspark import types as sparktypes
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -46,7 +46,7 @@ class ColumnValuesIanaTimezone(ColumnMapMetricProvider):
     @column_condition_partial(engine=SparkDFExecutionEngine)
     def _spark(cls, column, **kwargs):
 
-        tz_udf = F.udf(is_valid_timezone, sparktypes.BooleanType())
+        tz_udf = F.udf(is_valid_timezone, pyspark.types.BooleanType())
 
         return tz_udf(column)
 

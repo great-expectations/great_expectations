@@ -1,6 +1,7 @@
 from typing import Optional
 
-# from great_expectations.compatibility.pyspark import functions as F, types as sparktypes
+# from great_expectations.compatibility.pyspark import functions as F
+# from great_expectations.compatibility import pyspark
 from edtf_validate.valid_edtf import (
     conformsLevel0,
     conformsLevel1,
@@ -85,7 +86,7 @@ class ColumnValuesEdtfParseable(ColumnMapMetricProvider):
 #         if level is not None and type(level) != int:
 #             raise TypeError("level must be of type int.")
 #
-#         is_parseable_udf = F.udf(is_parseable, sparktypes.BooleanType())
+#         is_parseable_udf = F.udf(is_parseable, pyspark.types.BooleanType())
 #         return is_parseable_udf(column)
 
 

@@ -20,15 +20,6 @@ from typing_extensions import Literal, Protocol
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility.sqlalchemy import (
-    Engine as sqlalchemy_engine_Engine,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Inspector as sqlalchemy_engine_Inspector,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Selectable as sa_sql_expression_Selectable,
-)
-from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
 from great_expectations.core._docs_decorators import public_api
@@ -59,6 +50,7 @@ from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitt
 if TYPE_CHECKING:
     from typing_extensions import Self
 
+    from great_expectations.compatibility import sqlalchemy
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
 
 
@@ -738,7 +730,7 @@ class _SQLAsset(DataAsset):
         """
         raise NotImplementedError
 
-    def as_selectable(self) -> sa_sql_expression_Selectable:
+    def as_selectable(self) -> sqlalchemy.Selectable:
         """Returns a Selectable that can be used to query this data
 
         Returns:
@@ -759,7 +751,7 @@ class QueryAsset(_SQLAsset):
             raise ValueError("query must start with 'SELECT' followed by a whitespace.")
         return v
 
-    def as_selectable(self) -> sa_sql_expression_Selectable:
+    def as_selectable(self) -> sqlalchemy.Selectable:
         """Returns the Selectable that is used to retrieve the data.
 
         This can be used in a subselect FROM clause for queries against this data.
@@ -805,8 +797,8 @@ class TableAsset(_SQLAsset):
             TestConnectionError: If the connection test fails.
         """
         datasource: SQLDatasource = self.datasource
-        engine: sqlalchemy_engine_Engine = datasource.get_engine()
-        inspector: sqlalchemy_engine_Inspector = sa.inspect(engine)
+        engine: sqlalchemy.Engine = datasource.get_engine()
+        inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
             raise TestConnectionError(
@@ -827,8 +819,8 @@ class TableAsset(_SQLAsset):
     def test_splitter_connection(self) -> None:
         if self.splitter:
             datasource: SQLDatasource = self.datasource
-            engine: sqlalchemy_engine_Engine = datasource.get_engine()
-            inspector: sqlalchemy_engine_Inspector = sa.inspect(engine)
+            engine: sqlalchemy.Engine = datasource.get_engine()
+            inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
             columns: list[dict[str, Any]] = inspector.get_columns(
                 table_name=self.table_name, schema=self.schema_name
@@ -840,7 +832,7 @@ class TableAsset(_SQLAsset):
                         f'The column "{splitter_column_name}" was not found in table "{self.qualified_name}"'
                     )
 
-    def as_selectable(self) -> sa_sql_expression_Selectable:
+    def as_selectable(self) -> sqlalchemy.Selectable:
         """Returns the table as a sqlalchemy Selectable.
 
         This can be used in a from clause for a query against this data.
@@ -891,7 +883,7 @@ class SQLDatasource(Datasource):
 
     # private attrs
     _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
-    _engine: Union[sqlalchemy_engine_Engine, None] = pydantic.PrivateAttr(None)
+    _engine: Union[sqlalchemy.Engine, None] = pydantic.PrivateAttr(None)
 
     # These are instance var because ClassVars can't contain Type variables. See
     # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
@@ -903,7 +895,7 @@ class SQLDatasource(Datasource):
         """Returns the default execution engine type."""
         return SqlAlchemyExecutionEngine
 
-    def get_engine(self) -> sqlalchemy_engine_Engine:
+    def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 model_dict = self.dict(
@@ -934,7 +926,7 @@ class SQLDatasource(Datasource):
             TestConnectionError: If the connection test fails.
         """
         try:
-            engine: sqlalchemy_engine_Engine = self.get_engine()
+            engine: sqlalchemy.Engine = self.get_engine()
             engine.connect()
         except Exception as e:
             raise TestConnectionError(

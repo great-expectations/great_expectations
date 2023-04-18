@@ -23,14 +23,14 @@ yaml = YAMLHandler()
 
 @pytest.fixture
 def schema_for_spark_testset(spark_session):
-    from great_expectations.compatibility.pyspark import types as sparktypes
+    from great_expectations.compatibility import pyspark
 
     # add schema
-    schema = sparktypes.StructType(
+    schema = pyspark.types.StructType(
         [
-            sparktypes.StructField("x", sparktypes.IntegerType(), True),
-            sparktypes.StructField("y", sparktypes.IntegerType(), True),
-            sparktypes.StructField("z", sparktypes.IntegerType(), True),
+            pyspark.types.StructField("x", pyspark.types.IntegerType(), True),
+            pyspark.types.StructField("y", pyspark.types.IntegerType(), True),
+            pyspark.types.StructField("z", pyspark.types.IntegerType(), True),
         ]
     )
     return schema

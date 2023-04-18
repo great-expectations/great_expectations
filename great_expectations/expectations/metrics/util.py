@@ -11,36 +11,7 @@ from dateutil.parser import parse
 from packaging import version
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.sqlalchemy import (
-    BinaryExpression as sa_sql_expression_BinaryExpression,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Dialect as sqlalchemy_engine_Dialect,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Engine as sqlalchemy_engine_Engine,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    Select as sa_sql_expression_Select,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    TableClause as sa_sql_expression_TableClause,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    TextClause as sqlalchemy_TextClause,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    custom_op as sqlalchemy_custom_op,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    literal as sqlalchemy_literal,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    reflection as sqlalchemy_reflection,
-)
-from great_expectations.compatibility.sqlalchemy import (
-    registry as sqlalchemy_dialects_registry,
-)
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -77,9 +48,7 @@ logger = logging.getLogger(__name__)
 try:
     import sqlalchemy_dremio.pyodbc
 
-    sqlalchemy_dialects_registry.register(
-        "dremio", "sqlalchemy_dremio.pyodbc", "dialect"
-    )
+    sqlalchemy.registry.register("dremio", "sqlalchemy_dremio.pyodbc", "dialect")
 except ImportError:
     sqlalchemy_dremio = None
 
@@ -92,9 +61,7 @@ _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
     import sqlalchemy_bigquery as sqla_bigquery
 
-    sqlalchemy_dialects_registry.register(
-        "bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect"
-    )
+    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None
 except ImportError:
     try:
@@ -109,9 +76,7 @@ except ImportError:
         _BIGQUERY_MODULE_NAME = "pybigquery.sqlalchemy_bigquery"
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sqlalchemy_dialects_registry.register(
-            "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
-        )
+        sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
         try:
             getattr(sqla_bigquery, "INTEGER")
             bigquery_types_tuple = None
@@ -148,12 +113,12 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
         # postgres
         if issubclass(dialect.dialect, sa.dialects.postgresql.dialect):
             if positive:
-                return sa_sql_expression_BinaryExpression(
-                    column, sqlalchemy_literal(regex), sqlalchemy_custom_op("~")
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
                 )
             else:
-                return sa_sql_expression_BinaryExpression(
-                    column, sqlalchemy_literal(regex), sqlalchemy_custom_op("!~")
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
                 )
     except AttributeError:
         pass
@@ -165,12 +130,12 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
             dialect.dialect, sqlalchemy_redshift.dialect.RedshiftDialect
         ):
             if positive:
-                return sa_sql_expression_BinaryExpression(
-                    column, sqlalchemy_literal(regex), sqlalchemy_custom_op("~")
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("~")
                 )
             else:
-                return sa_sql_expression_BinaryExpression(
-                    column, sqlalchemy_literal(regex), sqlalchemy_custom_op("!~")
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("!~")
                 )
     except (
         AttributeError,
@@ -182,14 +147,14 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
         # MySQL
         if issubclass(dialect.dialect, sa.dialects.mysql.dialect):
             if positive:
-                return sa_sql_expression_BinaryExpression(
-                    column, sqlalchemy_literal(regex), sqlalchemy_custom_op("REGEXP")
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("REGEXP")
                 )
             else:
-                return sa_sql_expression_BinaryExpression(
+                return sqlalchemy.BinaryExpression(
                     column,
-                    sqlalchemy_literal(regex),
-                    sqlalchemy_custom_op("NOT REGEXP"),
+                    sqlalchemy.literal(regex),
+                    sqlalchemy.custom_op("NOT REGEXP"),
                 )
     except AttributeError:
         pass
@@ -219,10 +184,10 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
         # Bigquery
         if hasattr(dialect, "BigQueryDialect"):
             if positive:
-                return sa.func.REGEXP_CONTAINS(column, sqlalchemy_literal(regex))
+                return sa.func.REGEXP_CONTAINS(column, sqlalchemy.literal(regex))
             else:
                 return sa.not_(
-                    sa.func.REGEXP_CONTAINS(column, sqlalchemy_literal(regex))
+                    sa.func.REGEXP_CONTAINS(column, sqlalchemy.literal(regex))
                 )
     except (
         AttributeError,
@@ -241,9 +206,9 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
             dialect, trino.sqlalchemy.dialect.TrinoDialect
         ):
             if positive:
-                return sa.func.regexp_like(column, sqlalchemy_literal(regex))
+                return sa.func.regexp_like(column, sqlalchemy.literal(regex))
             else:
-                return sa.not_(sa.func.regexp_like(column, sqlalchemy_literal(regex)))
+                return sa.not_(sa.func.regexp_like(column, sqlalchemy.literal(regex)))
     except (
         AttributeError,
         TypeError,
@@ -254,10 +219,10 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
         # Dremio
         if hasattr(dialect, "DremioDialect"):
             if positive:
-                return sa.func.REGEXP_MATCHES(column, sqlalchemy_literal(regex))
+                return sa.func.REGEXP_MATCHES(column, sqlalchemy.literal(regex))
             else:
                 return sa.not_(
-                    sa.func.REGEXP_MATCHES(column, sqlalchemy_literal(regex))
+                    sa.func.REGEXP_MATCHES(column, sqlalchemy.literal(regex))
                 )
     except (
         AttributeError,
@@ -271,14 +236,14 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
             if positive:
                 return (
                     sa.func.REGEXP_SIMILAR(
-                        column, sqlalchemy_literal(regex), sqlalchemy_literal("i")
+                        column, sqlalchemy.literal(regex), sqlalchemy.literal("i")
                     )
                     == 1
                 )
             else:
                 return (
                     sa.func.REGEXP_SIMILAR(
-                        column, sqlalchemy_literal(regex), sqlalchemy_literal("i")
+                        column, sqlalchemy.literal(regex), sqlalchemy.literal("i")
                     )
                     == 0
                 )
@@ -292,9 +257,9 @@ def get_dialect_regex_expression(  # noqa: C901 - 36
             sa.__version__
         ) >= version.parse("1.4"):
             if positive:
-                return column.regexp_match(sqlalchemy_literal(regex))
+                return column.regexp_match(sqlalchemy.literal(regex))
             else:
-                return sa.not_(column.regexp_match(sqlalchemy_literal(regex)))
+                return sa.not_(column.regexp_match(sqlalchemy.literal(regex)))
         else:
             logger.debug(
                 "regex_match is only enabled for sqlite when SQLAlchemy version is >= 1.4",
@@ -371,8 +336,8 @@ def attempt_allowing_relative_error(dialect):
 
 
 def is_column_present_in_table(
-    engine: sqlalchemy_engine_Engine,
-    table_selectable: sa_sql_expression_Select,
+    engine: sqlalchemy.Engine,
+    table_selectable: sqlalchemy.Select,
     column_name: str,
     schema_name: Optional[str] = None,
 ) -> bool:
@@ -388,18 +353,18 @@ def is_column_present_in_table(
 
 
 def get_sqlalchemy_column_metadata(
-    engine: sqlalchemy_engine_Engine,
-    table_selectable: sa_sql_expression_Select,
+    engine: sqlalchemy.Engine,
+    table_selectable: sqlalchemy.Select,
     schema_name: Optional[str] = None,
 ) -> Optional[List[Dict[str, Any]]]:
     try:
         columns: List[Dict[str, Any]]
 
-        inspector: sqlalchemy_reflection.Inspector = get_sqlalchemy_inspector(engine)
+        inspector: sqlalchemy.reflection.Inspector = get_sqlalchemy_inspector(engine)
         try:
             # if a custom query was passed
-            if sqlalchemy_TextClause and isinstance(
-                table_selectable, sqlalchemy_TextClause
+            if sqlalchemy.TextClause and isinstance(
+                table_selectable, sqlalchemy.TextClause
             ):
                 if hasattr(table_selectable, "selected_columns"):
                     columns = table_selectable.selected_columns.columns
@@ -439,13 +404,13 @@ def get_sqlalchemy_column_metadata(
 
 
 def column_reflection_fallback(
-    selectable: sa_sql_expression_Select,
-    dialect: sqlalchemy_engine_Dialect,
-    sqlalchemy_engine: sqlalchemy_engine_Engine,
+    selectable: sqlalchemy.Select,
+    dialect: sqlalchemy.Dialect,
+    sqlalchemy_engine: sqlalchemy.Engine,
 ) -> List[Dict[str, str]]:
     """If we can't reflect the table, use a query to at least get column names."""
 
-    if isinstance(sqlalchemy_engine.engine, sqlalchemy_engine_Engine):
+    if isinstance(sqlalchemy_engine.engine, sqlalchemy.Engine):
         connection = sqlalchemy_engine.engine.connect()
     else:
         connection = sqlalchemy_engine.engine
@@ -458,14 +423,14 @@ def column_reflection_fallback(
         if dialect.name.lower() == "mssql":
             # Get column names and types from the database
             # Reference: https://dataedo.com/kb/query/sql-server/list-table-columns-in-database
-            tables_table_clause: sa_sql_expression_TableClause = sa.table(
+            tables_table_clause: sqlalchemy.TableClause = sa.table(
                 "tables",
                 sa.column("object_id"),
                 sa.column("schema_id"),
                 sa.column("name"),
                 schema="sys",
             ).alias("sys_tables_table_clause")
-            tables_table_query: sa_sql_expression_Select = (
+            tables_table_query: sqlalchemy.Select = (
                 sa.select(
                     tables_table_clause.columns.object_id.label("object_id"),
                     sa.func.schema_name(tables_table_clause.columns.schema_id).label(
@@ -476,7 +441,7 @@ def column_reflection_fallback(
                 .select_from(tables_table_clause)
                 .alias("sys_tables_table_subquery")
             )
-            columns_table_clause: sa_sql_expression_TableClause = sa.table(
+            columns_table_clause: sqlalchemy.TableClause = sa.table(
                 "columns",
                 sa.column("object_id"),
                 sa.column("user_type_id"),
@@ -486,7 +451,7 @@ def column_reflection_fallback(
                 sa.column("precision"),
                 schema="sys",
             ).alias("sys_columns_table_clause")
-            columns_table_query: sa_sql_expression_Select = (
+            columns_table_query: sqlalchemy.Select = (
                 sa.select(
                     columns_table_clause.columns.object_id.label("object_id"),
                     columns_table_clause.columns.user_type_id.label("user_type_id"),
@@ -498,13 +463,13 @@ def column_reflection_fallback(
                 .select_from(columns_table_clause)
                 .alias("sys_columns_table_subquery")
             )
-            types_table_clause: sa_sql_expression_TableClause = sa.table(
+            types_table_clause: sqlalchemy.TableClause = sa.table(
                 "types",
                 sa.column("user_type_id"),
                 sa.column("name"),
                 schema="sys",
             ).alias("sys_types_table_clause")
-            types_table_query: sa_sql_expression_Select = (
+            types_table_query: sqlalchemy.Select = (
                 sa.select(
                     types_table_clause.columns.user_type_id.label("user_type_id"),
                     types_table_clause.columns.name.label("column_data_type"),
@@ -512,10 +477,10 @@ def column_reflection_fallback(
                 .select_from(types_table_clause)
                 .alias("sys_types_table_subquery")
             )
-            inner_join_conditions: sa_sql_expression_BinaryExpression = sa.and_(
+            inner_join_conditions: sqlalchemy.BinaryExpression = sa.and_(
                 *(tables_table_query.c.object_id == columns_table_query.c.object_id,)
             )
-            outer_join_conditions: sa_sql_expression_BinaryExpression = sa.and_(
+            outer_join_conditions: sqlalchemy.BinaryExpression = sa.and_(
                 *(
                     columns_table_query.columns.user_type_id
                     == types_table_query.columns.user_type_id,
@@ -646,8 +611,8 @@ def column_reflection_fallback(
             ]
         else:
             # if a custom query was passed
-            if isinstance(selectable, sqlalchemy_TextClause):
-                query: sqlalchemy_TextClause = selectable
+            if sqlalchemy.TextClause and isinstance(selectable, sqlalchemy.TextClause):
+                query: sqlalchemy.TextClause = selectable
             else:
                 # noinspection PyUnresolvedReferences
                 if dialect.name.lower() == GXSqlDialect.REDSHIFT:
@@ -670,26 +635,26 @@ def column_reflection_fallback(
 @overload
 def get_dbms_compatible_column_names(
     column_names: str,
-    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    batch_columns_list: List[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
-) -> str | sqlalchemy.sql.quoted_name:
+) -> str | sqlalchemy.quoted_name:
     ...
 
 
 @overload
 def get_dbms_compatible_column_names(
     column_names: List[str],
-    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    batch_columns_list: List[str | sqlalchemy.quoted_name],
     error_message_template: str = ...,
-) -> List[str | sqlalchemy.sql.quoted_name]:
+) -> List[str | sqlalchemy.quoted_name]:
     ...
 
 
 def get_dbms_compatible_column_names(
     column_names: List[str] | str,
-    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    batch_columns_list: List[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
-) -> List[str | sqlalchemy.sql.quoted_name] | str | sqlalchemy.sql.quoted_name:
+) -> List[str | sqlalchemy.quoted_name] | str | sqlalchemy.quoted_name:
     """
     Case non-sensitivity is expressed in upper case by common DBMS backends and in lower case by SQLAlchemy, with any
     deviations enclosed with double quotes.
@@ -708,7 +673,7 @@ def get_dbms_compatible_column_names(
         Single property-typed column name object or list of property-typed column name objects (depending on input).
     """
     normalized_typed_batch_columns_mappings: List[
-        Tuple[str, str | sqlalchemy.sql.quoted_name]
+        Tuple[str, str | sqlalchemy.quoted_name]
     ] = (
         _verify_column_names_exist_and_get_normalized_typed_column_names_map(
             column_names=column_names,
@@ -718,8 +683,8 @@ def get_dbms_compatible_column_names(
         or []
     )
 
-    element: Tuple[str, str | sqlalchemy.sql.quoted_name]
-    typed_batch_column_names_list: List[str | sqlalchemy.sql.quoted_name] = [
+    element: Tuple[str, str | sqlalchemy.quoted_name]
+    typed_batch_column_names_list: List[str | sqlalchemy.quoted_name] = [
         element[1] for element in normalized_typed_batch_columns_mappings
     ]
     if isinstance(column_names, list):
@@ -730,7 +695,7 @@ def get_dbms_compatible_column_names(
 
 def verify_column_names_exist(
     column_names: List[str] | str,
-    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    batch_columns_list: List[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
 ) -> None:
     _ = _verify_column_names_exist_and_get_normalized_typed_column_names_map(
@@ -743,10 +708,10 @@ def verify_column_names_exist(
 
 def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
     column_names: List[str] | str,
-    batch_columns_list: List[str | sqlalchemy.sql.quoted_name],
+    batch_columns_list: List[str | sqlalchemy.quoted_name],
     error_message_template: str = 'Error: The column "{column_name:s}" in BatchData does not exist.',
     verify_only: bool = False,
-) -> List[Tuple[str, str | sqlalchemy.sql.quoted_name]] | None:
+) -> List[Tuple[str, str | sqlalchemy.quoted_name]] | None:
     """
     Insures that column name or column names (supplied as argument using "str" representation) exist in "Batch" object.
 
@@ -767,8 +732,8 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
 
     def _get_normalized_column_name_mapping_if_exists(
         column_name: str,
-    ) -> Tuple[str, str | sqlalchemy.sql.quoted_name] | None:
-        typed_column_name_cursor: str | sqlalchemy.sql.quoted_name
+    ) -> Tuple[str, str | sqlalchemy.quoted_name] | None:
+        typed_column_name_cursor: str | sqlalchemy.quoted_name
         for typed_column_name_cursor in batch_columns_list:
             if (
                 (type(typed_column_name_cursor) == str)
@@ -779,10 +744,10 @@ def _verify_column_names_exist_and_get_normalized_typed_column_names_map(
         return None
 
     normalized_batch_columns_mappings: List[
-        Tuple[str, str | sqlalchemy.sql.quoted_name]
+        Tuple[str, str | sqlalchemy.quoted_name]
     ] = []
 
-    normalized_column_name_mapping: Tuple[str, str | sqlalchemy.sql.quoted_name] | None
+    normalized_column_name_mapping: Tuple[str, str | sqlalchemy.quoted_name] | None
     column_name: str
     for column_name in column_names_list:
         normalized_column_name_mapping = _get_normalized_column_name_mapping_if_exists(
@@ -876,9 +841,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901 - 28
     if dialect_supported:
         try:
             if positive:
-                return column.like(sqlalchemy_literal(like_pattern))
+                return column.like(sqlalchemy.literal(like_pattern))
             else:
-                return sa.not_(column.like(sqlalchemy_literal(like_pattern)))
+                return sa.not_(column.like(sqlalchemy.literal(like_pattern)))
         except AttributeError:
             pass
 

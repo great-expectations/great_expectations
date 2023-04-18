@@ -108,12 +108,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility.pyspark import (
-        DataFrame as pyspark_sql_DataFrame,
-    )
-    from great_expectations.compatibility.pyspark import (
-        SparkSession as pyspark_sql_SparkSession,
-    )
+    from great_expectations.compatibility import pyspark
 
 yaml = YAMLHandler()
 ###
@@ -134,7 +129,7 @@ def spark_warehouse_session(tmp_path_factory):
     pyspark = pytest.importorskip("pyspark")  # noqa: F841
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: pyspark_sql_SparkSession = get_or_create_spark_application(
+    spark: pyspark.SparkSession = get_or_create_spark_application(
         spark_config={
             "spark.sql.catalogImplementation": "in-memory",
             "spark.executor.memory": "450m",
@@ -394,15 +389,13 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends) -> pyspark_sql_SparkSession:
+def spark_session(test_backends) -> pyspark.SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    from great_expectations.compatibility.pyspark import (
-        SparkSession as pyspark_sql_SparkSession,
-    )
+    from great_expectations.compatibility import pyspark
 
-    if pyspark_sql_SparkSession:
+    if pyspark.SparkSession:
         return get_or_create_spark_application(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
@@ -434,49 +427,61 @@ def spark_df_taxi_data_schema(spark_session):
     """
 
     # will not import unless we have a spark_session already passed in as fixture
-    from great_expectations.compatibility.pyspark import types as sparktypes
+    from great_expectations.compatibility import pyspark
 
-    schema = sparktypes.StructType(
+    schema = pyspark.types.StructType(
         [
-            sparktypes.StructField("vendor_id", sparktypes.IntegerType(), True, None),
-            sparktypes.StructField(
-                "pickup_datetime", sparktypes.TimestampType(), True, None
+            pyspark.types.StructField(
+                "vendor_id", pyspark.types.IntegerType(), True, None
             ),
-            sparktypes.StructField(
-                "dropoff_datetime", sparktypes.TimestampType(), True, None
+            pyspark.types.StructField(
+                "pickup_datetime", pyspark.types.TimestampType(), True, None
             ),
-            sparktypes.StructField(
-                "passenger_count", sparktypes.IntegerType(), True, None
+            pyspark.types.StructField(
+                "dropoff_datetime", pyspark.types.TimestampType(), True, None
             ),
-            sparktypes.StructField(
-                "trip_distance", sparktypes.DoubleType(), True, None
+            pyspark.types.StructField(
+                "passenger_count", pyspark.types.IntegerType(), True, None
             ),
-            sparktypes.StructField(
-                "rate_code_id", sparktypes.IntegerType(), True, None
+            pyspark.types.StructField(
+                "trip_distance", pyspark.types.DoubleType(), True, None
             ),
-            sparktypes.StructField(
-                "store_and_fwd_flag", sparktypes.StringType(), True, None
+            pyspark.types.StructField(
+                "rate_code_id", pyspark.types.IntegerType(), True, None
             ),
-            sparktypes.StructField(
-                "pickup_location_id", sparktypes.IntegerType(), True, None
+            pyspark.types.StructField(
+                "store_and_fwd_flag", pyspark.types.StringType(), True, None
             ),
-            sparktypes.StructField(
-                "dropoff_location_id", sparktypes.IntegerType(), True, None
+            pyspark.types.StructField(
+                "pickup_location_id", pyspark.types.IntegerType(), True, None
             ),
-            sparktypes.StructField(
-                "payment_type", sparktypes.IntegerType(), True, None
+            pyspark.types.StructField(
+                "dropoff_location_id", pyspark.types.IntegerType(), True, None
             ),
-            sparktypes.StructField("fare_amount", sparktypes.DoubleType(), True, None),
-            sparktypes.StructField("extra", sparktypes.DoubleType(), True, None),
-            sparktypes.StructField("mta_tax", sparktypes.DoubleType(), True, None),
-            sparktypes.StructField("tip_amount", sparktypes.DoubleType(), True, None),
-            sparktypes.StructField("tolls_amount", sparktypes.DoubleType(), True, None),
-            sparktypes.StructField(
-                "improvement_surcharge", sparktypes.DoubleType(), True, None
+            pyspark.types.StructField(
+                "payment_type", pyspark.types.IntegerType(), True, None
             ),
-            sparktypes.StructField("total_amount", sparktypes.DoubleType(), True, None),
-            sparktypes.StructField(
-                "congestion_surcharge", sparktypes.DoubleType(), True, None
+            pyspark.types.StructField(
+                "fare_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField("extra", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField(
+                "mta_tax", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tip_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tolls_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "improvement_surcharge", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "total_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "congestion_surcharge", pyspark.types.DoubleType(), True, None
             ),
         ]
     )
@@ -7478,7 +7483,7 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index() -> pd.DataF
 @pytest.fixture
 def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark_sql_DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7508,7 +7513,7 @@ def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark_sql_DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7525,7 +7530,7 @@ def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> pyspark_sql_DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],

@@ -3,8 +3,8 @@ from typing import Optional
 from schwifty import IBAN
 from schwifty.exceptions import SchwiftyException
 
+from great_expectations.compatibility import pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility.pyspark import types as sparktypes
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -25,7 +25,7 @@ def is_valid_iban(iban: str) -> bool:
         return False
 
 
-@F.udf(sparktypes.BooleanType())
+@F.udf(pyspark.types.BooleanType())
 def is_valid_iban_udf(iban: str) -> bool:
     return is_valid_iban(iban)
 

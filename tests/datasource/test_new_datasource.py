@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.pyspark import Row as pyspark_sql_Row
+from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -942,7 +942,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
         BatchRequest(**batch_request)
     )
     # check that the batch_spec_passthrough has worked
-    assert batch[0].data.dataframe.head() == pyspark_sql_Row(x="1", y="2")
+    assert batch[0].data.dataframe.head() == pyspark.Row(x="1", y="2")
 
 
 @pytest.mark.integration

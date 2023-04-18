@@ -1,11 +1,7 @@
 from typing import Optional
 
-from great_expectations.compatibility.pyspark import (
-    Window as pyspark_sql_Window,
-)
-from great_expectations.compatibility.pyspark import (
-    functions as F,
-)
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_function_types import (
@@ -163,9 +159,7 @@ class CompoundColumnsUnique(MulticolumnMapMetricProvider):
     def _spark(cls, column_list, **kwargs):
         column_names = column_list.columns
         row_wise_cond = (
-            F.count(F.lit(1)).over(
-                pyspark_sql_Window.partitionBy(F.struct(*column_names))
-            )
+            F.count(F.lit(1)).over(pyspark.Window.partitionBy(F.struct(*column_names)))
             <= 1
         )
         return row_wise_cond

@@ -25,9 +25,7 @@ import pandas as pd
 import pydantic
 from typing_extensions import Literal
 
-from great_expectations.compatibility.sqlalchemy import (
-    Engine as sqlalchemy_engine_Engine,
-)
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
@@ -402,7 +400,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         sql: sa.select | sa.text | str,
-        con: sqlalchemy_engine_Engine | sqlite3.Connection | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -416,7 +414,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         sql: sa.select | sa.text | str,
-        con: sqlalchemy_engine_Engine | sqlite3.Connection | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         index_col: typing.Union[str, typing.List[str], None] = ...,
@@ -430,7 +428,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         table_name: str,
-        con: sqlalchemy_engine_Engine | str,
+        con: sqlalchemy.Engine | str,
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         schema: typing.Union[str, None] = ...,
@@ -772,7 +770,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql(
         self,
         sql: sa.select | sa.text | str,
-        con: sqlalchemy_engine_Engine | sqlite3.Connection | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -786,7 +784,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql_query(
         self,
         sql: sa.select | sa.text | str,
-        con: sqlalchemy_engine_Engine | sqlite3.Connection | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,
@@ -800,7 +798,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql_table(
         self,
         table_name: str,
-        con: sqlalchemy_engine_Engine | str,
+        con: sqlalchemy.Engine | str,
         *,
         asset_name: Optional[str] = ...,
         batch_metadata: Optional[BatchMetadata] = ...,

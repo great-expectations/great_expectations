@@ -4,15 +4,8 @@ from typing import Any, Dict
 import pandas as pd
 from dateutil.parser import parse
 
-from great_expectations.compatibility.pyspark import (
-    Window as pyspark_sql_Window,
-)
-from great_expectations.compatibility.pyspark import (
-    functions as F,
-)
-from great_expectations.compatibility.pyspark import (
-    types as sparktypes,
-)
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
@@ -103,9 +96,9 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         if isinstance(
             column_metadata["type"],
             (
-                sparktypes.LongType,
-                sparktypes.DoubleType,
-                sparktypes.IntegerType,
+                pyspark.types.LongType,
+                pyspark.types.DoubleType,
+                pyspark.types.IntegerType,
             ),
         ):
             # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
@@ -131,17 +124,17 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         if isinstance(
             column_metadata["type"],
             (
-                sparktypes.TimestampType,
-                sparktypes.DateType,
+                pyspark.types.TimestampType,
+                pyspark.types.DateType,
             ),
         ):
             diff = F.datediff(
                 column,
-                F.lag(column).over(pyspark_sql_Window.orderBy(F.lit("constant"))),
+                F.lag(column).over(pyspark.Window.orderBy(F.lit("constant"))),
             )
         else:
             diff = column - F.lag(column).over(
-                pyspark_sql_Window.orderBy(F.lit("constant"))
+                pyspark.Window.orderBy(F.lit("constant"))
             )
             diff = F.when(diff.isNull(), 1).otherwise(diff)
 

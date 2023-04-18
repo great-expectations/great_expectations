@@ -2,7 +2,7 @@ import datetime
 import logging
 import uuid
 
-from great_expectations.compatibility.pyspark import DataFrame as pyspark_sql_DataFrame
+from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.dataset import SparkDFDataset
@@ -199,8 +199,8 @@ class SparkDFDatasource(LegacyDatasource):
 
         elif "dataset" in batch_kwargs and (
             (
-                pyspark_sql_DataFrame  # type: ignore[truthy-function]
-                and isinstance(batch_kwargs["dataset"], pyspark_sql_DataFrame)
+                pyspark.DataFrame  # type: ignore[truthy-function]
+                and isinstance(batch_kwargs["dataset"], pyspark.DataFrame)
             )
             or isinstance(batch_kwargs["dataset"], SparkDFDataset)
         ):

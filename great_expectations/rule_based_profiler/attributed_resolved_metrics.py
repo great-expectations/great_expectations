@@ -5,8 +5,7 @@ from typing import Dict, Iterator, List, Optional, Sized
 import numpy as np
 import pandas as pd
 
-from great_expectations.compatibility.pyspark import Row as pyspark_sql_Row
-from great_expectations.compatibility.sqlalchemy import Row as sqlalchemy_engine_Row
+from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.rule_based_profiler.metric_computation_result import (
     MetricValues,  # noqa: TCH001
@@ -28,8 +27,8 @@ def _condition_metric_values(metric_values: MetricValues) -> MetricValues:
                 properties=(
                     pd.DataFrame,
                     pd.Series,
-                    sqlalchemy_engine_Row if sqlalchemy_engine_Row else None,
-                    pyspark_sql_Row if pyspark_sql_Row else None,  # type: ignore[truthy-function]
+                    sqlalchemy.Row if sqlalchemy.Row else None,
+                    pyspark.Row if pyspark.Row else None,  # type: ignore[truthy-function]
                     set,
                 )
             ),

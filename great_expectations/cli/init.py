@@ -18,7 +18,7 @@ from great_expectations.cli.cli_messages import (
     SECTION_SEPARATOR,
 )
 from great_expectations.cli.pretty_printing import cli_message
-from great_expectations.compatibility.sqlalchemy import SQLAlchemyError
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.data_context.data_context.file_data_context import (
@@ -29,6 +29,7 @@ from great_expectations.exceptions import (
     DatasourceInitializationError,
 )
 
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
 if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through

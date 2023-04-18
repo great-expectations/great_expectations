@@ -8,9 +8,8 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import MetricResolutionError
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
-    declarative_base,
-    Select as sa_sql_expression_Select,
 )
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.expectations.metrics.util import (
     get_unexpected_indices_for_multiple_pandas_named_indices,
@@ -40,7 +39,7 @@ class A(Base):
     data = sa.Column(sa.String)
 
 
-def select_with_post_compile_statements() -> sa_sql_expression_Select:
+def select_with_post_compile_statements() -> sqlalchemy.Select:
     test_id: str = "00000000"
     return sa.select(A).where(A.data == test_id)
 
@@ -51,7 +50,7 @@ def _compare_select_statement_with_converted_string(engine) -> None:
     Args:
         engine (ExecutionEngine): SqlAlchemyExecutionEngine with connection to backend under test
     """
-    select_statement: sa_sql_expression_Select = select_with_post_compile_statements()
+    select_statement: sqlalchemy.Select = select_with_post_compile_statements()
     returned_string = sql_statement_with_post_compile_to_string(
         engine=engine, select_statement=select_statement
     )
@@ -133,9 +132,7 @@ def test_sql_statement_conversion_to_string_bigquery(test_backends):
         monkeypatch.setenv("GE_TEST_GCP_PROJECT", "ge-oss")
         connection_string = get_bigquery_connection_url()
         engine = SqlAlchemyExecutionEngine(connection_string=connection_string)
-        select_statement: sa_sql_expression_Select = (
-            select_with_post_compile_statements()
-        )
+        select_statement: sqlalchemy.Select = select_with_post_compile_statements()
         returned_string = sql_statement_with_post_compile_to_string(
             engine=engine, select_statement=select_statement
         )

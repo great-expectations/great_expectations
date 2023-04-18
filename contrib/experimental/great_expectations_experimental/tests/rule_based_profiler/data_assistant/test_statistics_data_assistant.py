@@ -374,9 +374,9 @@ def test_spark_happy_path_statistics_data_assistant(
     3. Running StatisticsDataAssistant and making sure that StatisticsDataAssistantResult contains relevant fields
     4. Configuring BatchRequest to load 2020 January data
     """
-    from great_expectations.compatibility.pyspark import types as sparktypes
+    from great_expectations.compatibility import pyspark
 
-    schema: sparktypes.StructType = spark_df_taxi_data_schema
+    schema: pyspark.types.StructType = spark_df_taxi_data_schema
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,

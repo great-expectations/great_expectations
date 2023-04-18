@@ -1,6 +1,6 @@
 import logging
 
-from great_expectations.compatibility.sqlalchemy import OperationalError
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.core.profiler_types_mapping import ProfilerTypeMapping
 from great_expectations.profile.base import (
     DatasetProfiler,
@@ -8,6 +8,7 @@ from great_expectations.profile.base import (
     ProfilerDataType,
 )
 
+OperationalError = sqlalchemy.OperationalError
 if not OperationalError:
     OperationalError = RuntimeError
 

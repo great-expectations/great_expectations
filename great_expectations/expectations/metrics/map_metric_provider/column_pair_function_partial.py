@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from functools import wraps
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -12,7 +13,6 @@ from typing import (
     Union,
 )
 
-from great_expectations.compatibility.sqlalchemy import quoted_name
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
@@ -33,6 +33,10 @@ from great_expectations.expectations.metrics.util import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
 
 
 @public_api
@@ -93,7 +97,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: List[Union[str, sqlalchemy.quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -156,7 +160,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: List[Union[str, sqlalchemy.quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -223,7 +227,7 @@ def column_pair_function_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: List[Union[str, sqlalchemy.quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
