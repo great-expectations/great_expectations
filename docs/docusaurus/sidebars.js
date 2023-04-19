@@ -454,8 +454,6 @@ module.exports = {
           type: 'category',
           label: 'Contributing basics',
           items: [
-            { type: 'doc', id: 'contributing/contributing_checklist' },
-            { type: 'doc', id: 'contributing/contributing_maturity' },
             { type: 'doc', id: 'contributing/contributing_misc' }
           ]
         },
@@ -500,6 +498,7 @@ module.exports = {
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
+        { type: 'doc', id: 'contributing/contributing_maturity' },
         {
           type: 'category',
           label: 'Supplemental documentation',
