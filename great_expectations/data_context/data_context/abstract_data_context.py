@@ -796,9 +796,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str | None = None,
         initialize: bool = True,
         save_changes: bool | None = None,
-        datasource: LegacyDatasource | BaseDatasource | None = None,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
-    ) -> LegacyDatasource | BaseDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
         """Add a new Datasource to the data context, with configuration provided as kwargs.
 
         --Documentation--
@@ -816,13 +816,20 @@ class AbstractDataContext(ConfigPeer, ABC):
             Datasource instance added.
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
-        return self._add_datasource(
-            name=name,
-            initialize=initialize,
-            save_changes=save_changes,
-            datasource=datasource,
-            **kwargs,
-        )
+        if isinstance(datasource, FluentDatasource):
+            datasource = self._add_fluent_datasource(
+                name=name,
+                datasource=datasource,
+            )
+        else:
+            datasource = self._add_block_config_datasource(
+                name=name,
+                initialize=initialize,
+                save_changes=save_changes,
+                datasource=datasource,
+                **kwargs,
+            )
+        return datasource
 
     @staticmethod
     def _validate_add_datasource_args(
