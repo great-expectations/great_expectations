@@ -96,7 +96,8 @@ class DatasourceStore(Store):
             type_ = value.get("type")
             if type_:
                 datasource_model = _SourceFactories.type_lookup.get(type_)
-                assert datasource_model, f"Unknown Datasource 'type': '{type_}'"
+                if not datasource_model:
+                    raise LookupError(f"Unknown Datasource 'type': '{type_}'")
                 return datasource_model(**value)
             return self._schema.load(value)
         else:
