@@ -1,8 +1,15 @@
+"""Utilities and imports for ensuring compatibility with different versions
+of numpy that are supported by great expectations."""
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
-from numpy import typing as npt
 from packaging import version
+
+if TYPE_CHECKING:
+    # needed until numpy min version 1.20
+    from numpy import typing as npt
 
 
 def numpy_quantile(
