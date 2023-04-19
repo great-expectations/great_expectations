@@ -4,7 +4,7 @@ To request or submit a Great Expectations documentation or code change, the foll
 
 - Join the [Great Expectations Slack community](https://greatexpectations.io/slack) and make your suggestion in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel. 
 
-- If you need a documentation change, or a change that doesn't require local testing, see the `README` in the `docs` repository.
+- If you need a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/tree/contributing-and-style-readme/docs) in the `docs` repository.
 
 - If you want to modify existing Great Expectations code, or you want to submit a new feature or a custom Expectation, you'll need to complete the following tasks:
 
