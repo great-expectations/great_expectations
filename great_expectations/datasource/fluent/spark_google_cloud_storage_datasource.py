@@ -65,12 +65,12 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
                     ] = None  # If configured with gcloud CLI / env vars
                     if "filename" in self.gcs_options:
                         filename: str = str(self.gcs_options.pop("filename"))
-                        credentials = google.service_account.from_service_account_file(
+                        credentials = google.service_account.Credentials.from_service_account_file(
                             filename=filename
                         )
                     elif "info" in self.gcs_options:
                         info: Any = self.gcs_options.pop("info")
-                        credentials = google.service_account.from_service_account_info(
+                        credentials = google.service_account.Credentials.from_service_account_info(
                             info=info
                         )
 

@@ -568,7 +568,7 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.google_service_account",
+    "great_expectations.execution_engine.pandas_execution_engine.google.service_account",
 )
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
