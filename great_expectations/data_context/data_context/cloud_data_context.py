@@ -10,9 +10,7 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Sequence,
     Tuple,
-    Type,
     Union,
     cast,
 )
@@ -55,15 +53,11 @@ from great_expectations.rule_based_profiler.rule_based_profiler import RuleBased
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
-    from great_expectations.core.expectation_configuration import (
-        ExpectationConfiguration,
-    )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
     from great_expectations.data_context.types.resource_identifiers import (
         ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
     )
-    from great_expectations.execution_engine.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
@@ -472,32 +466,6 @@ class CloudDataContext(SerializableDataContext):
 
         return DataContextConfig(**self.config_provider.substitute_config(config))
 
-    def _add_expectation_suite(
-        self,
-        expectation_suite_name: str | None = None,
-        id: str | None = None,
-        expectations: Sequence[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
-        data_asset_type: str | None = None,
-        execution_engine_type: Type[ExecutionEngine] | None = None,
-        meta: dict | None = None,
-        overwrite_existing: bool = False,
-        expectation_suite: ExpectationSuite | None = None,
-        **kwargs,
-    ) -> ExpectationSuite:
-        return self._create_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            id=id,
-            expectations=expectations,
-            evaluation_parameters=evaluation_parameters,
-            data_asset_type=data_asset_type,
-            execution_engine_type=execution_engine_type,
-            meta=meta,
-            expectation_suite=expectation_suite,
-            overwrite_existing=overwrite_existing,
-            **kwargs,
-        )
-
     def create_expectation_suite(
         self,
         expectation_suite_name: str,
@@ -520,46 +488,12 @@ class CloudDataContext(SerializableDataContext):
             "Please use add_expectation_suite or add_or_update_expectation_suite instead.",
             DeprecationWarning,
         )
-        return self._create_expectation_suite(
-            expectation_suite_name=expectation_suite_name,
-            overwrite_existing=overwrite_existing,
-            **kwargs,
-        )
-
-    def _create_expectation_suite(
-        self,
-        expectation_suite_name: str | None = None,
-        id: str | None = None,
-        expectations: Sequence[dict | ExpectationConfiguration] | None = None,
-        evaluation_parameters: dict | None = None,
-        data_asset_type: str | None = None,
-        execution_engine_type: Type[ExecutionEngine] | None = None,
-        meta: dict | None = None,
-        overwrite_existing: bool = False,
-        expectation_suite: ExpectationSuite | None = None,
-        **kwargs,
-    ) -> ExpectationSuite:
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
-        if not ((expectation_suite_name is None) ^ (expectation_suite is None)):
-            raise ValueError(
-                "Must either pass in an existing expectation_suite or individual constructor arguments (but not both)"
-            )
 
-        if not expectation_suite:
-            assert (
-                expectation_suite_name
-            ), "If constructing a suite with individual args, suite name must be guaranteed"
-            expectation_suite = ExpectationSuite(
-                expectation_suite_name=expectation_suite_name,
-                data_context=self,
-                ge_cloud_id=id,
-                expectations=expectations,
-                evaluation_parameters=evaluation_parameters,
-                data_asset_type=data_asset_type,
-                execution_engine_type=execution_engine_type,
-                meta=meta,
-            )
+        expectation_suite = ExpectationSuite(
+            expectation_suite_name=expectation_suite_name, data_context=self
+        )
 
         existing_suite_names = self.list_expectation_suite_names()
         cloud_id: Optional[str] = None
