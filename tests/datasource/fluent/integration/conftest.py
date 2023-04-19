@@ -6,8 +6,8 @@ import pathlib
 import numpy as np
 import pandas as pd
 import pytest
-import sqlalchemy
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -56,11 +56,11 @@ def pandas_sql_data(
             "passenger_count": passenger_count,
         }
     )
-    con = sqlalchemy.create_engine("sqlite://")
+    con = sa.create_engine("sqlite://")
     add_dataframe_to_db(df=df, name="my_table", con=con)
     pandas_ds = context.sources.add_pandas("my_pandas")
     pandas_ds.read_sql(
-        sql=sqlalchemy.sql.text("SELECT * FROM my_table"),
+        sql=sa.text("SELECT * FROM my_table"),
         con=con,
     )
     asset = pandas_ds.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)

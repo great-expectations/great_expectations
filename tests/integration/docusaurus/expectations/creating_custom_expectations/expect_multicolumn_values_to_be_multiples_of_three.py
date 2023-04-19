@@ -14,7 +14,8 @@ from great_expectations.expectations.expectation import (
     ExpectationValidationResult,
     MulticolumnMapExpectation,
 )
-from great_expectations.optional_imports import F, sqlalchemy as sa, sparktypes
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     MulticolumnMapMetricProvider,
     multicolumn_condition_partial,
