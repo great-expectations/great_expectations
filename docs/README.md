@@ -1,4 +1,4 @@
-# Contributing to Great Expectations documentation
+# Contribute to Great Expectations documentation
 
 This repository contains all the source files used to create Great Expectations documentation. 
 

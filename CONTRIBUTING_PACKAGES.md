@@ -114,7 +114,7 @@ After you've enabled the `great_expectations_contrib` CLI tool, you need to init
 ## Contribute to your package
 
 1. Record any dependencies in your `requirements.txt` file, validate your code
-in `tests`, detail your package's capabilities in `README.md`, and update the publishing details in `setup.py`.
+in `tests`, describe your package capabilities in `README.md`, and update publishing details in `setup.py`.
 
 2. Optional. Update package metadata and assign code owners or domain experts. See
 `package_info.yml`.
