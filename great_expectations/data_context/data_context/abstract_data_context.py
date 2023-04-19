@@ -725,8 +725,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48", message="Part of the deprecated DataContext CRUD API"
     )
     def save_datasource(
-        self, datasource: Union[LegacyDatasource, BaseDatasource]
-    ) -> Union[LegacyDatasource, BaseDatasource]:
+        self, datasource: Union[LegacyDatasource, BaseDatasource, FluentDatasource]
+    ) -> Union[LegacyDatasource, BaseDatasource, FluentDatasource]:
         """Save a Datasource to the configured DatasourceStore.
 
         Stores the underlying DatasourceConfig in the store and Data Context config,
@@ -747,35 +747,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             "Please use update_datasource or add_or_update_datasource instead.",
             DeprecationWarning,
         )
-        # Chetan - 20221103 - Directly accessing private attr in order to patch security vulnerabiliy around credential leakage.
-        # This is to be removed once substitution logic is migrated from the context to the individual object level.
-        config = datasource._raw_config
-
-        datasource_config_dict: dict = datasourceConfigSchema.dump(config)
-        # Manually need to add in class name to the config since it is not part of the runtime obj
-        datasource_config_dict["class_name"] = datasource.__class__.__name__
-
-        datasource_config = datasourceConfigSchema.load(datasource_config_dict)
-        datasource_name: str = datasource.name
-
-        updated_datasource_config_from_store: DatasourceConfig = (
-            self._datasource_store.set(key=None, value=datasource_config)
-        )
-        # Use the updated datasource config, since the store may populate additional info on update.
-        self.config.datasources[datasource_name] = updated_datasource_config_from_store  # type: ignore[index,assignment]
-
-        # Also use the updated config to initialize a datasource for the cache and overwrite the existing datasource.
-        substituted_config = self._perform_substitutions_on_datasource_config(
-            updated_datasource_config_from_store
-        )
-        updated_datasource: Union[
-            LegacyDatasource, BaseDatasource
-        ] = self._instantiate_datasource_from_config(
-            raw_config=updated_datasource_config_from_store,
-            substituted_config=substituted_config,
-        )
-        self._cached_datasources[datasource_name] = updated_datasource
-        return updated_datasource
+        return self.add_or_update_datasource(datasource=datasource)
 
     @overload
     def add_datasource(
@@ -853,14 +825,23 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     @staticmethod
     def _validate_add_datasource_args(
-        name: str | None, datasource: LegacyDatasource | BaseDatasource | None
+        name: str | None,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None,
     ) -> None:
         if not ((datasource is None) ^ (name is None)):
             raise ValueError(
                 "Must either pass in an existing datasource or individual constructor arguments (but not both)"
             )
 
-    def _add_datasource(
+    def _add_fluent_datasource(
+        self,
+        name: str | None = None,
+        datasource: FluentDatasource | None = None,
+    ) -> FluentDatasource:
+        datasource.name = name or datasource.name
+        return self.sources.add_datasource(name_or_datasource=datasource)
+
+    def _add_block_config_datasource(
         self,
         name: str | None = None,
         initialize: bool = True,
@@ -894,8 +875,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config: DatasourceConfig = datasourceConfigSchema.load(
             CommentedMap(**config)
         )
-        if name:
-            datasource_config.name = name
+        datasource_config.name = name or datasource_config.name
 
         return_datasource: LegacyDatasource | BaseDatasource | None = (
             self._instantiate_datasource_from_config_and_update_project_config(
@@ -961,7 +941,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str = ...,
         datasource: None = ...,
         **kwargs,
-    ) -> LegacyDatasource | BaseDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
         """
         A `name` is provided.
         `datasource` should not be provided.
@@ -972,9 +952,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_datasource(
         self,
         name: None = ...,
-        datasource: LegacyDatasource | BaseDatasource = ...,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
         **kwargs,
-    ) -> LegacyDatasource | BaseDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
         """
         A `datasource` is provided.
         `name` should not be provided.
@@ -986,9 +966,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_datasource(
         self,
         name: str | None = None,
-        datasource: LegacyDatasource | BaseDatasource | None = None,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
         **kwargs,
-    ) -> LegacyDatasource | BaseDatasource:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """Add a new Datasource or update an existing one on the context depending on whether
         it already exists or not. The configuration is provided as kwargs.
 
@@ -1001,12 +981,18 @@ class AbstractDataContext(ConfigPeer, ABC):
             The Datasource added or updated by the input `kwargs`.
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
-        datasource = self._add_datasource(
-            name=name,
-            datasource=datasource,
-            **kwargs,
-        )
-        assert datasource is not None
+        if isinstance(datasource, FluentDatasource):
+            datasource = self._add_fluent_datasource(
+                name=name,
+                datasource=datasource,
+            )
+        else:
+            datasource = self._add_block_config_datasource(
+                name=name,
+                datasource=datasource,
+                **kwargs,
+            )
+            assert datasource is not None
 
         return datasource
 
