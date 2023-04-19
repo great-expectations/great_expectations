@@ -179,7 +179,7 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
     )
 
     # Polish and ratchet this number down as low as possible
-    assert len(sorted_packages_with_pins_or_upper_bounds) == 73
+    assert len(sorted_packages_with_pins_or_upper_bounds) == 70
 
     assert sorted_packages_with_pins_or_upper_bounds == [
         ("requirements-dev-api-docs-test.txt", "docstring-parser", (("==", "0.15"),)),
@@ -242,7 +242,6 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-dev.txt", "sqlalchemy", (("<", "2.0.0"), (">=", "1.4.0"))),
         ("requirements-dev.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-dev.txt", "teradatasqlalchemy", (("==", "17.0.0.1"),)),
-        ("requirements-dev.txt", "urllib3", (("<", "1.27"), (">=", "1.25.4"))),
         ("requirements-dev.txt", "xlrd", (("<", "2.0.0"), (">=", "1.1.0"))),
         ("requirements-types.txt", "PyMySQL", (("<", "0.10"), (">=", "0.9.3"))),
         ("requirements-types.txt", "adr-tools-python", (("==", "1.0.3"),)),
@@ -260,11 +259,9 @@ def test_polish_and_ratchet_pins_and_upper_bounds():
         ("requirements-types.txt", "sqlalchemy", (("<", "2.0.0"), (">=", "1.4.0"))),
         ("requirements-types.txt", "sqlalchemy-dremio", (("==", "1.2.1"),)),
         ("requirements-types.txt", "teradatasqlalchemy", (("==", "17.0.0.1"),)),
-        ("requirements-types.txt", "urllib3", (("<", "1.27"), (">=", "1.25.4"))),
         ("requirements.txt", "makefun", (("<", "2"), (">=", "1.7.0"))),
         ("requirements.txt", "marshmallow", (("<", "4.0.0"), (">=", "3.7.1"))),
         ("requirements.txt", "pandas", (("<", "2.0.0"), (">=", "1.3.0"))),
         ("requirements.txt", "pydantic", (("<", "2.0"), (">=", "1.9.2"))),
         ("requirements.txt", "ruamel.yaml", (("<", "0.17.18"), (">=", "0.16"))),
-        ("requirements.txt", "urllib3", (("<", "1.27"), (">=", "1.25.4"))),
     ]
