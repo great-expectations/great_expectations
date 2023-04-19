@@ -14,6 +14,7 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.pyspark import pyspark
 from great_expectations.compatibility.sqlalchemy import (
@@ -40,7 +41,6 @@ from great_expectations.util import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.compatibility import sqlalchemy
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
