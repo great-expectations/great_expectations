@@ -717,8 +717,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48", message="Part of the deprecated DataContext CRUD API"
     )
     def save_datasource(
-        self, datasource: Union[LegacyDatasource, BaseDatasource, FluentDatasource]
-    ) -> Union[LegacyDatasource, BaseDatasource, FluentDatasource]:
+        self, datasource: Union[BaseDatasource, FluentDatasource, LegacyDatasource]
+    ) -> Union[BaseDatasource, FluentDatasource, LegacyDatasource]:
         """Save a Datasource to the configured DatasourceStore.
 
         Stores the underlying DatasourceConfig in the store and Data Context config,
@@ -834,8 +834,8 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _add_fluent_datasource(
         self,
+        datasource: FluentDatasource,
         name: str | None = None,
-        datasource: FluentDatasource | None = None,
     ) -> FluentDatasource:
         datasource.name = name or datasource.name
         return self.sources.add_datasource(name_or_datasource=datasource)
@@ -991,7 +991,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 datasource=datasource,
                 **kwargs,
             )
-            assert datasource is not None
+        assert datasource is not None
 
         return datasource
 
@@ -5431,7 +5431,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                     connect_options = getattr(data_asset, "connect_options", {})
                     datasource._build_data_connector(data_asset, **connect_options)
 
-            self._add_fluent_datasource(datasource)
+            self._add_fluent_datasource(datasource=datasource)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
