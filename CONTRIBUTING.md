@@ -498,3 +498,15 @@ Test the performance of code changes to determine they perform as expected. BigQ
 5. Wait for the Continuous Integration (CI) checks to complete and then correct any syntax or formatting issues.
 
     A Great Expectations team member reviews, approves, and merges your PR. Depending on your GitHub notification settings, you'll be notified when there are comments or when your changes are successfully merged.
+
+## Issue tags
+
+Great Expectations uses a `stalebot` to automatically tag issues without activity as `stale`, and closes them when a response is not received within a week. To prevent `stalebot` from closing an issue, you can add the `stalebot-exempt` tag.
+
+Additionally, Great Expectations adds the following tags to indicate issue status:
+
+- The`help wanted` tag identifies useful issues that require help from community contributors to accelerate development.
+
+- The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion. 
+
+- The `good first issue` tag identifies issues that provide an introduction to the Great Expectations contribution process.

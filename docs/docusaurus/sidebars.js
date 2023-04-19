@@ -452,13 +452,6 @@ module.exports = {
       items: [
         {
           type: 'category',
-          label: 'Contributing basics',
-          items: [
-            { type: 'doc', id: 'contributing/contributing_misc' }
-          ]
-        },
-        {
-          type: 'category',
           label: 'Contributing specifics',
           items: [
             {
