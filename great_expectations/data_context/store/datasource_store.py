@@ -139,7 +139,7 @@ class DatasourceStore(Store):
         datasource_config: DatasourceConfig = copy.deepcopy(self.get(datasource_key))  # type: ignore[assignment]
         return datasource_config
 
-    def delete(self, datasource_config: DatasourceConfig) -> None:
+    def delete(self, datasource_config: DatasourceConfig | FluentDatasource) -> None:
         """Deletes a DatasourceConfig persisted in the store using its config.
 
         Args:
@@ -157,12 +157,30 @@ class DatasourceStore(Store):
             id_ = datasource_config.id  # type: ignore[assignment] # None or empty string
         return self.store_backend.build_key(name=datasource_config.name, id=id_)
 
+    @overload  # type: ignore[override]
+    def set(
+        self,
+        key: Union[DataContextKey, None],
+        value: FluentDatasource,
+        **kwargs,
+    ) -> FluentDatasource:
+        ...
+
+    @overload
+    def set(
+        self,
+        key: Union[DataContextKey, None],
+        value: DatasourceConfig,
+        **kwargs,
+    ) -> DatasourceConfig:
+        ...
+
     def set(  # type: ignore[override]
         self,
         key: Union[DataContextKey, None],
         value: DatasourceConfig | FluentDatasource,
         **kwargs,
-    ) -> DatasourceConfig:
+    ) -> DatasourceConfig | FluentDatasource:
         """Create a datasource config in the store using a store_backend-specific key.
         Args:
             key: Optional key to use when setting value.
