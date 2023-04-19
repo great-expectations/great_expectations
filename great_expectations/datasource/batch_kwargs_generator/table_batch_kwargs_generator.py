@@ -88,9 +88,9 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         if datasource is not None:
             self.engine = datasource.engine
             try:
-                self.inspector = sqlalchemy.inspect(self.engine)
+                self.inspector = sqlalchemy.Inspector.inspect(self.engine)
 
-            except sqlalchemy.exc.OperationalError:
+            except sqlalchemy.OperationalError:
                 logger.warning(
                     f"Unable to create inspector from engine in batch kwargs generator '{name}'"
                 )
