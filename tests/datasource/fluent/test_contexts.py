@@ -13,23 +13,27 @@ from tests.datasource.fluent.conftest import (
 )
 
 if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
     from responses import RequestsMock
 
     from great_expectations.datasource.fluent import SqliteDatasource
 
 # apply markers to entire test module
-pytestmark = [pytest.mark.cloud, pytest.mark.integration]
+pytestmark = [pytest.mark.integration]
 
 
 yaml = YAMLHandler()
 
 
+@pytest.mark.cloud
 def test_add_fluent_datasource_are_persisted(
     cloud_api_fake: RequestsMock,
-    empty_contexts: CloudDataContext | FileDataContext,
+    empty_cloud_context_fluent: CloudDataContext,
     db_file: pathlib.Path,
+    mocker: MockerFixture,
 ):
-    context = empty_contexts
+    context = empty_cloud_context_fluent
+    set_spy = mocker.spy(context._datasource_store, "set")
 
     datasource_name = "save_ds_test"
 
@@ -37,21 +41,34 @@ def test_add_fluent_datasource_are_persisted(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
     )
 
-    if isinstance(empty_contexts, CloudDataContext):
-        assert datasource.id
-        cloud_api_fake.assert_call_count(
-            f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
-            1,
-        )
-    else:
-        yaml_path = pathlib.Path(empty_contexts.root_directory, empty_contexts.GX_YML)
-        assert yaml_path.exists()
-        yaml_dict: dict = yaml.load(yaml_path.read_text())
-        assert datasource_name in yaml_dict["fluent_datasources"]  # type: ignore[operator]
-        assert datasource_name not in yaml_dict["datasources"]
+    assert datasource.id
+    assert set_spy.call_count == 1
+    cloud_api_fake.assert_call_count(
+        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
+        1,
+    )
 
 
-@pytest.mark.integration
+@pytest.mark.cloud
+def test_add_fluent_datasource_are_persisted_without_duplicates(
+    empty_file_context: FileDataContext,
+    db_file: pathlib.Path,
+):
+    context = empty_file_context
+    datasource_name = "save_ds_test"
+
+    context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    )
+
+    yaml_path = pathlib.Path(context.root_directory, context.GX_YML)
+    assert yaml_path.exists()
+    yaml_dict: dict = yaml.load(yaml_path.read_text())
+    assert datasource_name in yaml_dict["fluent_datasources"]  # type: ignore[operator]
+    assert datasource_name not in yaml_dict["datasources"]
+
+
+@pytest.mark.cloud
 @pytest.mark.xfail(reason="Fluent logic attempts to delete before updating")
 def test_context_add_or_update_datasource(
     cloud_api_fake: RequestsMock,
