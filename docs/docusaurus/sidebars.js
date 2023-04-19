@@ -498,7 +498,6 @@ module.exports = {
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
-        { type: 'doc', id: 'contributing/contributing_maturity' },
         {
           type: 'category',
           label: 'Supplemental documentation',
@@ -579,6 +578,7 @@ module.exports = {
         }
       ]
     },
+    { type: 'doc', id: 'contributing/contributing_maturity' },
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
   ]
