@@ -2917,7 +2917,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         name = expectation_suite.expectation_suite_name
         id = expectation_suite.ge_cloud_id
-        key = self._determine_key_for_profiler_save(name=name, id=id)
+        key = self._determine_key_for_suite_update(name=name, id=id)
         self.expectations_store.update(key=key, value=expectation_suite)
         return expectation_suite
 
