@@ -1060,7 +1060,7 @@ def is_valid_continuous_partition_object(partition_object):
 
 
 def sql_statement_with_post_compile_to_string(
-    engine: SqlAlchemyExecutionEngine, select_statement: sqlalchemy.sql.Select
+    engine: SqlAlchemyExecutionEngine, select_statement: sqlalchemy.Select
 ) -> str:
     """
     Util method to compile SQL select statement with post-compile parameters into a string. Logic lifted directly
@@ -1100,7 +1100,7 @@ def sql_statement_with_post_compile_to_string(
 
 def get_sqlalchemy_source_table_and_schema(
     engine: SqlAlchemyExecutionEngine,
-) -> sqlalchemy.Table:
+) -> sa.Table:
     """
     Util method to return table name that is associated with current batch.
 
