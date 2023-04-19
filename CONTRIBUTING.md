@@ -1,9 +1,5 @@
----
-title: Contribute a code change
----
+# Contribute a code change
 
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
 
 To request or submit a Great Expectations documentation or code change, the following options are available:
 
@@ -156,21 +152,11 @@ pip install -e
 
 Some Great Expectations features require specific backends for local testing.
 
-<Tabs
-    defaultValue="PostgreSQL"
-    groupId="configure-backends-for-testing-(optional)"
-    values={[
-        {label: 'PostgreSQL', value: 'PostgreSQL'},
-        {label: 'MySQL', value: 'MySQL'},
-        {label: 'Spark', value: 'Spark'},
-    ]}>
-<TabItem value="PostgreSQL">
-
 ### Prerequisites
 
-- Docker. See [Get Docker](https://docs.docker.com/get-docker/).
+- Docker (PostgreSQL and MySQL). See [Get Docker](https://docs.docker.com/get-docker/).
 
-### Start the PostgreSQL container
+### PostgreSQL
 
 1. CD to `assets/docker/postgresql` in your `great_expectations` repository, and then and run the following command:
 
@@ -218,19 +204,11 @@ Errors similar to the following are returned when you try to start the PostgreSQ
 ````
 To resolve these errors, configure Docker to run on another port and confirm the server details are correct.
 
-</TabItem>
-
-<TabItem value="MySQL">
-
-### Prerequisites
-
-- Docker. See [Get Docker](https://docs.docker.com/get-docker/).
-
-### Start the MySQL container
+### MySQL
 
 The `mysql` Docker image can't be used with Mac computers with Apple M1 chips.
 
-If another service is using port 3306, Docker may start the container but silently fail to set up the port.
+If another service is using port 3306, Docker might start the container but silently fail to set up the port.
 
 1. CD to `assets/docker/mysql` in your `great_expectations` repository, and then and run the following command:
 
@@ -261,9 +239,9 @@ If another service is using port 3306, Docker may start the container but silent
     docker-compose down
     ```
 
-</TabItem>
+### Spark
 
-<TabItem value="Spark">
+Use the following information to use Spark for code testing.
 
 ### Prerequisites
 
@@ -283,10 +261,6 @@ version 3.2.0
 
 pip install "pyspark==3.2.0"
 ```
-
-</TabItem>
-
-</Tabs>
 
 ## Test code changes
 
@@ -347,15 +321,7 @@ The following is the test fixture file structure:
 ````
 Below `datasets` are three entries: `data`, `schemas`, and `tests`.
 
-<Tabs
-    defaultValue="Data"
-    groupId="unit-testing-expectations"
-    values={[
-        {label: 'Data', value: 'Data'},
-        {label: 'Schemas', value: 'Schemas'},
-        {label: 'Tests', value: 'Tests'},
-    ]}>
-<TabItem value="Data">
+#### Data
 
 The `data` parameter defines a dataframe of sample data to apply Expectations against. The dataframe is defined as a dictionary of lists, with keys containing column names and values containing lists of data entries. All lists within a dataset must have the same length. For example:
 
@@ -369,9 +335,7 @@ The `data` parameter defines a dataframe of sample data to apply Expectations ag
     "a" : [null, 0, null, null, 1, null, null, 2, null, null],
 },
 ````
-</TabItem>
-
-<TabItem value="Schemas">
+#### Schemas
 
 The schema parameter defines the types to be used when instantiating tests against different execution environments, including different SQL dialects. Each schema is defined as a dictionary with column names and types as key-value pairs. If the schema isn’t specified for a given execution environment, Great Expectations introspects values and attempts to identify the schema. For example:
 
@@ -395,9 +359,7 @@ The schema parameter defines the types to be used when instantiating tests again
     }
 },
 ````
-</TabItem>
-
-<TabItem value="Tests">
+#### Tests
 
 The `tests` parameter defines the tests to be executed against the dataframe. Each item in `tests` must include `title`, `exact_match_out`, `in`, and `out`. The test runner executes the named Expectation once for each item, with the values in `in` supplied as kwargs.
 
@@ -440,10 +402,6 @@ By convention, the name of the file is the name of the Expectation, with a .json
 If you are implementing a new Expectation, but don’t plan to immediately implement it for all execution environments, you should add the new test to the appropriate list(s) in the `candidate_test_is_on_temporary_notimplemented_list_v2_api` method within `tests/test_utils.py`.
 
 You can run just the Expectation tests with `pytest tests/test_definitions/test_expectations.py`.
-
-</TabItem>
-
-</Tabs>
 
 ## Test performance
 
