@@ -115,7 +115,7 @@ class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
     library_metadata = {
         "tags": ["ai/ml", "fair-ai", "hackathon-22"],
         "contributors": ["@austiezr"],
-        "requirements": ["sklearn"],
+        "requirements": ["scikit-learn"],
     }
 
     metric_dependencies = ("table.modeling.linear.feature_importances",)
