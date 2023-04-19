@@ -845,9 +845,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str | None = None,
         initialize: bool = True,
         save_changes: bool | None = None,
-        datasource: LegacyDatasource | BaseDatasource | None = None,
+        datasource: BaseDatasource | LegacyDatasource | None = None,
         **kwargs,
-    ) -> LegacyDatasource | BaseDatasource | None:
+    ) -> BaseDatasource | LegacyDatasource | None:
         save_changes = self._determine_save_changes_flag(save_changes)
 
         logger.debug(f"Starting AbstractDataContext.add_datasource for {name}")
@@ -876,14 +876,11 @@ class AbstractDataContext(ConfigPeer, ABC):
         )
         datasource_config.name = name or datasource_config.name
 
-        return_datasource: LegacyDatasource | BaseDatasource | None = (
-            self._instantiate_datasource_from_config_and_update_project_config(
-                config=datasource_config,
-                initialize=initialize,
-                save_changes=save_changes,
-            )
+        return self._instantiate_datasource_from_config_and_update_project_config(
+            config=datasource_config,
+            initialize=initialize,
+            save_changes=save_changes,
         )
-        return return_datasource
 
     @public_api
     def update_datasource(
@@ -986,12 +983,13 @@ class AbstractDataContext(ConfigPeer, ABC):
                 datasource=datasource,
             )
         else:
-            datasource = self._add_block_config_datasource(
+            block_config_datasource = self._add_block_config_datasource(
                 name=name,
                 datasource=datasource,
                 **kwargs,
             )
-        assert datasource is not None
+            assert block_config_datasource is not None
+            datasource = block_config_datasource
 
         return datasource
 
