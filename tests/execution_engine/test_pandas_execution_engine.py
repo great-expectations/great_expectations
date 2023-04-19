@@ -514,7 +514,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 # noinspection PyUnusedLocal
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.google.BlobServiceClient",
+    "great_expectations.execution_engine.pandas_execution_engine.google.Client",
 )
 def test_constructor_with_azure_options(mock_azure_conn):
     # default instantiation
@@ -531,7 +531,7 @@ def test_constructor_with_azure_options(mock_azure_conn):
 
 
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.google.BlobServiceClient",
+    "great_expectations.execution_engine.pandas_execution_engine.google.Client",
 )
 def test_get_batch_data_with_azure_batch_spec(
     mock_azure_conn,
