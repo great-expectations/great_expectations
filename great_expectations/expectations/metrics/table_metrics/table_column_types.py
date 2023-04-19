@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, cast
 
+from great_expectations.compatibility import pyspark, sqlalchemy
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import GreatExpectationsError
 from great_expectations.execution_engine import (
@@ -15,10 +16,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
 from great_expectations.expectations.metrics.util import get_sqlalchemy_column_metadata
-from great_expectations.optional_imports import (
-    sparktypes,
-    sqlalchemy_TextClause,
-)
 
 
 class ColumnTypes(TableMetricProvider):
@@ -92,10 +89,10 @@ class ColumnTypes(TableMetricProvider):
 
 def _get_sqlalchemy_column_metadata(engine, batch_data: SqlAlchemyBatchData):
     # if a custom query was passed
-    if sqlalchemy_TextClause and isinstance(
-        batch_data.selectable, sqlalchemy_TextClause
+    if sqlalchemy.TextClause and isinstance(
+        batch_data.selectable, sqlalchemy.TextClause
     ):
-        table_selectable: sqlalchemy_TextClause = batch_data.selectable
+        table_selectable: sqlalchemy.TextClause = batch_data.selectable
         schema_name = None
     else:
         table_selectable: str = (  # type: ignore[no-redef]
@@ -115,10 +112,10 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
     if parent_name != "":
         parent_name = f"{parent_name}."
 
-    if sparktypes and isinstance(field, sparktypes.StructType):
+    if pyspark.types and isinstance(field, pyspark.types.StructType):
         for child in field.fields:
             cols += _get_spark_column_metadata(child, parent_name=parent_name)
-    elif sparktypes and isinstance(field, sparktypes.StructField):
+    elif pyspark.types and isinstance(field, pyspark.types.StructField):
         if "." in field.name:
             name = f"{parent_name}`{field.name}`"
         else:
@@ -127,8 +124,8 @@ def _get_spark_column_metadata(field, parent_name="", include_nested=True):
         cols.append(field_metadata)
         if (
             include_nested
-            and sparktypes
-            and isinstance(field.dataType, sparktypes.StructType)
+            and pyspark.types
+            and isinstance(field.dataType, pyspark.types.StructType)
         ):
             for child in field.dataType.fields:
                 cols += _get_spark_column_metadata(

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     pandas_read_sql,
     pandas_read_sql_query,
@@ -22,12 +23,11 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
 )
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.optional_imports import pyspark_sql_Row
+    from great_expectations.compatibility import pyspark
 
 
 class TableHead(TableMetricProvider):
@@ -211,7 +211,7 @@ class TableHead(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        rows: list[pyspark_sql_Row] | pyspark_sql_Row | list[dict]
+        rows: list[pyspark.Row] | pyspark.Row | list[dict]
         if metric_value_kwargs["fetch_all"]:
             rows = df.collect()
         else:
