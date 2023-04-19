@@ -2,6 +2,8 @@ import operator
 
 import pandas
 
+# from great_expectations.compatibility.pyspark import functions as F
+# from great_expectations.compatibility import pyspark
 #!!! This giant block of imports should be something simpler, such as:
 # from great_exepectations.helpers.expectation_creation import *
 from great_expectations.execution_engine import PandasExecutionEngine
@@ -97,9 +99,9 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 #     # if isinstance(
 #     #     column_metadata["type"],
 #     #     (
-#     #         sparktypes.LongType,
-#     #         sparktypes.DoubleType,
-#     #         sparktypes.IntegerType,
+#     #         pyspark.types.LongType,
+#     #         pyspark.types.DoubleType,
+#     #         pyspark.types.IntegerType,
 #     #     ),
 #     # ):
 #     #     # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
@@ -123,7 +125,7 @@ class ColumnValuesAreAlphabetical(ColumnMapMetricProvider):
 #     column = F.col(column_name)
 #     column = F.lower(column)
 #     # if isinstance(
-#     #     column_metadata["type"], (sparktypes.TimestampType, sparktypes.DateType)
+#     #     column_metadata["type"], (pyspark.types.TimestampType, pyspark.types.DateType)
 #     # ):
 #     #     diff = F.datediff(
 #     #         column, F.lag(column).over(Window.orderBy(F.lit("constant")))

@@ -234,7 +234,7 @@ def expected_batch_definitions_sorted():
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_account_url_and_credential(
     mock_azure_conn, mock_list_keys, expected_config_dict
@@ -266,7 +266,7 @@ def test_instantiation_with_account_url_and_credential(
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_conn_str_and_credential(
     mock_azure_conn, mock_list_keys, expected_config_dict
@@ -295,7 +295,7 @@ def test_instantiation_with_conn_str_and_credential(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_conn):
     my_data_connector = InferredAssetAzureDataConnector(
@@ -317,7 +317,7 @@ def test_instantiation_with_valid_account_url_assigns_account_name(mock_azure_co
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn):
     my_data_connector = InferredAssetAzureDataConnector(
@@ -339,7 +339,7 @@ def test_instantiation_with_valid_conn_str_assigns_account_name(mock_azure_conn)
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_multiple_auth_methods_raises_error(
     mock_azure_conn,
@@ -365,7 +365,7 @@ def test_instantiation_with_multiple_auth_methods_raises_error(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_raises_error(
     mock_azure_conn,
@@ -411,7 +411,7 @@ def test_instantiation_with_improperly_formatted_auth_keys_in_azure_options_rais
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_test_yaml_config(
     mock_azure_conn,
@@ -456,7 +456,7 @@ def test_instantiation_with_test_yaml_config(
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_with_test_yaml_config_emits_proper_payload(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -513,7 +513,7 @@ def test_instantiation_with_test_yaml_config_emits_proper_payload(
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_references(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -565,7 +565,7 @@ def test_instantiation_from_a_config_with_nonmatching_regex_creates_unmatched_re
     return_value=["alpha-1.csv", "alpha-2.csv", "alpha-3.csv"],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -604,7 +604,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -664,7 +664,7 @@ def test_get_definition_list_from_batch_request_with_empty_args_raises_error(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_raises_error(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -714,7 +714,7 @@ def test_get_definition_list_from_batch_request_with_unnamed_data_asset_name_rai
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     mock_azure_conn,
@@ -789,7 +789,7 @@ def test_return_all_batch_definitions_unsorted_without_named_data_asset_name(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     mock_azure_conn,
@@ -864,7 +864,7 @@ def test_return_all_batch_definitions_unsorted_with_named_data_asset_name(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_return_all_batch_definitions_basic_sorted(
     mock_azure_conn,
@@ -953,7 +953,7 @@ def test_return_all_batch_definitions_basic_sorted(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 def test_return_all_batch_definitions_returns_specified_partition(
     mock_azure_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -1058,7 +1058,7 @@ def test_return_all_batch_definitions_returns_specified_partition(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
@@ -1147,7 +1147,7 @@ def test_return_all_batch_definitions_sorted_without_data_connector_query(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
@@ -1213,7 +1213,7 @@ def test_return_all_batch_definitions_raises_error_due_to_sorter_that_does_not_m
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys"
@@ -1280,7 +1280,7 @@ def test_return_all_batch_definitions_too_many_sorters(
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
@@ -1354,7 +1354,7 @@ azure_options:
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",
@@ -1432,7 +1432,7 @@ azure_options:
 
 
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.BlobServiceClient"
+    "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.azure.BlobServiceClient"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_azure_data_connector.list_azure_keys",

@@ -1,7 +1,7 @@
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py imports">
 import boto3
-from pyspark import SQLContext
 
+from great_expectations.compatibility import pyspark
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -18,7 +18,7 @@ yaml = YAMLHandler()
 if __name__ == "__main__":
     ### critical part to reinitialize spark context
     sc = gx.core.util.get_or_create_spark_application()
-    spark = SQLContext(sc)
+    spark = pyspark.SQLContext(sc)
 
     spark_file = "pyspark_df.parquet"
     suite_name = "pandas_spark_suite"
