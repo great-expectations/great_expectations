@@ -20,7 +20,8 @@ from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 from tests.test_utils import create_files_in_directory
-from great_expectations.optional_imports import F, sparktypes, pyspark_sql_Row
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility import pyspark
 
 
 def test_reader_fn(spark_session, basic_spark_df_execution_engine):
@@ -53,7 +54,7 @@ def test_reader_fn_parameters(
     test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
     ).dataframe
-    assert test_sparkdf_with_no_header_param.head() == pyspark_sql_Row(_c0="x", _c1="y")
+    assert test_sparkdf_with_no_header_param.head() == pyspark.Row(_c0="x", _c1="y")
 
     test_sparkdf_with_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
@@ -62,18 +63,18 @@ def test_reader_fn_parameters(
             reader_options={"header": True},
         )
     ).dataframe
-    assert test_sparkdf_with_header_param.head() == pyspark_sql_Row(x="1", y="2")
+    assert test_sparkdf_with_header_param.head() == pyspark.Row(x="1", y="2")
 
     test_sparkdf_with_no_header_param = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(path=test_df_small_csv_path, data_asset_name="DATA_ASSET")
     ).dataframe
-    assert test_sparkdf_with_no_header_param.head() == pyspark_sql_Row(_c0="x", _c1="y")
+    assert test_sparkdf_with_no_header_param.head() == pyspark.Row(_c0="x", _c1="y")
 
     # defining schema
-    schema: sparktypes.StructType = sparktypes.StructType(
+    schema: pyspark.types.StructType = pyspark.types.StructType(
         [
-            sparktypes.StructField("x", sparktypes.IntegerType(), True),
-            sparktypes.StructField("y", sparktypes.IntegerType(), True),
+            pyspark.types.StructField("x", pyspark.types.IntegerType(), True),
+            pyspark.types.StructField("y", pyspark.types.IntegerType(), True),
         ]
     )
     schema_dict: dict = schema
@@ -87,7 +88,7 @@ def test_reader_fn_parameters(
             )
         ).dataframe
     )
-    assert test_sparkdf_with_header_param_and_schema.head() == pyspark_sql_Row(x=1, y=2)
+    assert test_sparkdf_with_header_param_and_schema.head() == pyspark.Row(x=1, y=2)
     assert test_sparkdf_with_header_param_and_schema.schema == schema_dict
 
 
@@ -268,7 +269,7 @@ def test_get_domain_records_with_column_pair_domain(
     )
     for column_name in data.columns:
         data = data.withColumn(
-            column_name, data[column_name].cast(sparktypes.LongType())
+            column_name, data[column_name].cast(pyspark.types.LongType())
         )
 
     expected_column_pair_pd_df = pd.DataFrame(
@@ -341,7 +342,7 @@ def test_get_domain_records_with_multicolumn_domain(
     )
     for column_name in data.columns:
         data = data.withColumn(
-            column_name, data[column_name].cast(sparktypes.LongType())
+            column_name, data[column_name].cast(pyspark.types.LongType())
         )
 
     expected_multicolumn_pd_df = pd.DataFrame(
@@ -378,7 +379,7 @@ def test_get_domain_records_with_multicolumn_domain(
     )
     for column_name in data.columns:
         data = data.withColumn(
-            column_name, data[column_name].cast(sparktypes.LongType())
+            column_name, data[column_name].cast(pyspark.types.LongType())
         )
 
     expected_multicolumn_pd_df = pd.DataFrame(
@@ -1176,10 +1177,9 @@ def test_dataframe_property_given_loaded_batch(spark_session):
 
 @pytest.mark.integration
 def test_schema_properly_added(spark_session):
-
-    schema: sparktypes.StructType = sparktypes.StructType(
+    schema: pyspark.types.StructType = pyspark.types.StructType(
         [
-            sparktypes.StructField("a", sparktypes.IntegerType(), True),
+            pyspark.types.StructField("a", pyspark.types.IntegerType(), True),
         ]
     )
     engine: SparkDFExecutionEngine = build_spark_engine(

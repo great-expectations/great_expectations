@@ -2,25 +2,18 @@ import logging
 from string import Template
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import is_version_greater_or_equal
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.data_context_key import StringKey
 from great_expectations.data_context.store.store import Store
-from great_expectations.optional_imports import is_version_greater_or_equal
 from great_expectations.util import filter_properties_dict
 
-try:
-    import sqlalchemy as sa  # noqa: TID251
-    from sqlalchemy import create_engine  # noqa: TID251
-    from sqlalchemy.engine.url import URL  # noqa: TID251
-
+if sa:
     if is_version_greater_or_equal(sa.__version__, "1.4.0"):
-        url_create_fn = URL.create
+        url_create_fn = sqlalchemy.URL.create
     else:
-        url_create_fn = URL
-except ImportError:
-    sa = None
-    create_engine = None
-    URL = None
-    url_create_fn = None
+        url_create_fn = sqlalchemy.URL
 
 
 logger = logging.getLogger(__name__)
@@ -72,13 +65,13 @@ class SqlAlchemyQueryStore(Store):
         if "engine" in credentials:
             self.engine = credentials["engine"]
         elif "url" in credentials:
-            self.engine = create_engine(credentials["url"])
+            self.engine = sa.create_engine(credentials["url"])
         elif "connection_string" in credentials:
-            self.engine = create_engine(credentials["connection_string"])
+            self.engine = sa.create_engine(credentials["connection_string"])
         else:
             drivername = credentials.pop("drivername")
             options = url_create_fn(drivername, **credentials)
-            self.engine = create_engine(options)
+            self.engine = sa.create_engine(options)
 
         # Gather the call arguments of the present function (include the "module_name" and add the "class_name"), filter
         # out the Falsy values, and set the instance "_config" variable equal to the resulting dictionary.

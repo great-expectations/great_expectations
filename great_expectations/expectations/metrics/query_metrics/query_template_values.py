@@ -1,5 +1,8 @@
-from typing import Any, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
@@ -9,17 +12,10 @@ from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.query_metric_provider import (
     QueryMetricProvider,
 )
-from great_expectations.optional_imports import (
-    pyspark_sql_DataFrame,
-    pyspark_sql_Row,
-    pyspark_sql_SparkSession,
-    sqlalchemy_engine_Engine,
-    sqlalchemy_engine_Row,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 from great_expectations.util import get_sqlalchemy_subquery_type
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import pyspark, sqlalchemy
 
 
 class QueryTemplateValues(QueryMetricProvider):
@@ -87,11 +83,9 @@ class QueryTemplateValues(QueryMetricProvider):
         else:
             query = cls.get_query(query, template_dict, f"({selectable})")
 
-        engine: sqlalchemy_engine_Engine = execution_engine.engine
+        engine: sqlalchemy.Engine = execution_engine.engine
         try:
-            result: List[sqlalchemy_engine_Row] = engine.execute(
-                sa.text(query)
-            ).fetchall()
+            result: List[sqlalchemy.Row] = engine.execute(sa.text(query)).fetchall()
         except Exception as e:
             if hasattr(e, "_query_id"):
                 # query_id removed because it duplicates the validation_results
@@ -113,7 +107,7 @@ class QueryTemplateValues(QueryMetricProvider):
             "query"
         )
 
-        df: pyspark_sql_DataFrame
+        df: pyspark.DataFrame
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
@@ -127,7 +121,7 @@ class QueryTemplateValues(QueryMetricProvider):
 
         query = query.format(**template_dict, active_batch="tmp_view")
 
-        engine: pyspark_sql_SparkSession = execution_engine.spark
-        result: List[pyspark_sql_Row] = engine.sql(query).collect()
+        engine: pyspark.SparkSession = execution_engine.spark
+        result: List[pyspark.Row] = engine.sql(query).collect()
 
         return [element.asDict() for element in result]
