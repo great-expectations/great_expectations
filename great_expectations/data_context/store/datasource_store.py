@@ -175,7 +175,7 @@ class DatasourceStore(Store):
     ) -> DatasourceConfig:
         ...
 
-    def set(  # type: ignore[override]
+    def set(
         self,
         key: Union[DataContextKey, None],
         value: DatasourceConfig | FluentDatasource,
