@@ -178,9 +178,32 @@ def _get_fake_db_callback(
     item = _CLOUD_API_FAKE_DB.get(url, MISSING)
     logger.info(f"body -->\n{pf(item, depth=2)}")
     if item is MISSING:
-        return _CallbackResult(404, headers={}, body=f"NotFound at {url}")
+        result = _CallbackResult(404, headers={}, body=f"NotFound at {url}")
+    else:
+        result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(item))
 
-    return _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(item))
+    logger.info(f"Response {result.status}")
+    return result
+
+
+def _delete_fake_db_datasources_callback(
+    request: PreparedRequest,
+) -> _CallbackResult:
+    url = request.url
+    logger.info(f"{request.method} {url}")
+
+    item = _CLOUD_API_FAKE_DB.pop(url, MISSING)
+    if item is MISSING:
+        errors = ErrorPayload(
+            errors=[{"code": "mock 404", "detail": None, "source": None}]
+        )
+        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+    else:
+        errors = ErrorPayload(errors=[{"code": "mock", "detail": None, "source": None}])
+        result = _CallbackResult(204, headers=_DEFAULT_HEADERS, body="")
+
+    logger.info(f"Response {result.status}")
+    return result
 
 
 def _post_fake_db_datasources_callback(
@@ -233,12 +256,17 @@ def cloud_api_fake():
 
     logger.info("Mocking the GX Cloud API")
 
-    with responses.RequestsMock() as resp_mocker:
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_mocker:
         resp_mocker.add_callback(responses.GET, dc_config_url, _get_fake_db_callback)
         resp_mocker.add_callback(
             responses.GET,
             f"{datasources_url}/{FAKE_DATASOURCE_ID}",
             _get_fake_db_callback,
+        )
+        resp_mocker.add_callback(
+            responses.DELETE,
+            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
+            _delete_fake_db_datasources_callback,
         )
         resp_mocker.add_callback(
             responses.POST, datasources_url, _post_fake_db_datasources_callback
