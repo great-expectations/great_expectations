@@ -17,6 +17,7 @@ import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
@@ -28,7 +29,6 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
-from great_expectations.optional_imports import SPARK_NOT_IMPORTED, pyspark
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
@@ -36,12 +36,6 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    DataFrame = pyspark.sql.DataFrame
-except ImportError:
-    DataFrame = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
 
 
 # this enables us to include dataframe in the json schema
@@ -89,8 +83,8 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         extra = pydantic.Extra.forbid
 
     @pydantic.validator("dataframe")
-    def _validate_dataframe(cls, dataframe: DataFrame) -> DataFrame:
-        if not isinstance(dataframe, DataFrame):
+    def _validate_dataframe(cls, dataframe: pyspark.DataFrame) -> pyspark.DataFrame:
+        if not (pyspark.DataFrame and isinstance(dataframe, pyspark.DataFrame)):  # type: ignore[truthy-function]
             raise ValueError("dataframe must be of type pyspark.sql.DataFrame")
 
         return dataframe
@@ -210,7 +204,7 @@ class SparkDatasource(_SparkDatasource):
     def add_dataframe_asset(
         self,
         name: str,
-        dataframe: DataFrame,
+        dataframe: pyspark.DataFrame,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this SparkDatasource object.

@@ -1,5 +1,5 @@
 ---
-title: How to get one or more Batches of data from a configured Datasource
+title: How to get one or more Batches from a Datasource configured with the block-config method
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';

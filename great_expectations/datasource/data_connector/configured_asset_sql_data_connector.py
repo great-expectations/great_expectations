@@ -2,6 +2,7 @@ from copy import deepcopy
 from typing import Dict, Iterator, List, Optional, Tuple, Union, cast
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -34,16 +35,6 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import (
     SplitterMethod,
 )
 from great_expectations.util import deep_filter_properties_iterable
-
-try:
-    import sqlalchemy as sa  # noqa: TID251
-except ImportError:
-    sa = None
-
-try:
-    from sqlalchemy.sql import Selectable  # noqa: TID251
-except ImportError:
-    Selectable = None
 
 
 @public_api

@@ -24,6 +24,7 @@ from typing import (
     Union,
 )
 
+import pandas as pd
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
@@ -74,14 +75,6 @@ from great_expectations.validator.validation_graph import (
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import (
@@ -1977,14 +1970,10 @@ class BridgeValidator:
                     self.expectation_engine = PandasDataset
 
         if self.expectation_engine is None:
-            try:
-                import pyspark
+            from great_expectations.compatibility import pyspark
 
-                if isinstance(batch.data, pyspark.sql.DataFrame):
-                    self.expectation_engine = SparkDFDataset
-            except ImportError:
-                # noinspection PyUnusedLocal
-                pyspark = None
+            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame):
+                self.expectation_engine = SparkDFDataset
 
         if self.expectation_engine is None:
             raise ValueError(
@@ -2016,9 +2005,11 @@ class BridgeValidator:
             )
 
         elif issubclass(self.expectation_engine, SparkDFDataset):
-            import pyspark
+            from great_expectations.compatibility import pyspark
 
-            if not isinstance(self.batch.data, pyspark.sql.DataFrame):
+            if not (
+                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)
+            ):
                 raise ValueError(
                     "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"
                 )

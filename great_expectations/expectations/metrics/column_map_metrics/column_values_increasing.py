@@ -4,13 +4,14 @@ from typing import Any, Dict
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -95,9 +96,9 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         if isinstance(
             column_metadata["type"],
             (
-                sparktypes.LongType,
-                sparktypes.DoubleType,
-                sparktypes.IntegerType,
+                pyspark.types.LongType,
+                pyspark.types.DoubleType,
+                pyspark.types.IntegerType,
             ),
         ):
             # if column is any type that could have NA values, remove them (not filtered by .isNotNull())
@@ -121,13 +122,20 @@ class ColumnValuesIncreasing(ColumnMapMetricProvider):
         # instead detect types naturally
         column = F.col(column_name)
         if isinstance(
-            column_metadata["type"], (sparktypes.TimestampType, sparktypes.DateType)
+            column_metadata["type"],
+            (
+                pyspark.types.TimestampType,
+                pyspark.types.DateType,
+            ),
         ):
             diff = F.datediff(
-                column, F.lag(column).over(Window.orderBy(F.lit("constant")))
+                column,
+                F.lag(column).over(pyspark.Window.orderBy(F.lit("constant"))),
             )
         else:
-            diff = column - F.lag(column).over(Window.orderBy(F.lit("constant")))
+            diff = column - F.lag(column).over(
+                pyspark.Window.orderBy(F.lit("constant"))
+            )
             diff = F.when(diff.isNull(), 1).otherwise(diff)
 
         # NOTE: because in spark we are implementing the window function directly,
