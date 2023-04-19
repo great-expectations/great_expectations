@@ -64,7 +64,7 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     yaml_path = pathlib.Path(context.root_directory, context.GX_YML)
     assert yaml_path.exists()
     yaml_dict: dict = yaml.load(yaml_path.read_text())
-    assert datasource_name in yaml_dict["fluent_datasources"]  # type: ignore[operator]
+    assert datasource_name in yaml_dict["fluent_datasources"]
     assert datasource_name not in yaml_dict["datasources"]
 
 
