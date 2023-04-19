@@ -33,7 +33,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import JSONValues, PathStr
+    from great_expectations.alias_types import PathStr
 
 
 class SerializableDataContext(AbstractDataContext):
@@ -78,43 +78,6 @@ class SerializableDataContext(AbstractDataContext):
         ``great_expectations.yml`` is located.
         """
         return self._context_root_directory
-
-    def _save_project_config(self) -> None:
-        """
-        See parent 'AbstractDataContext._save_project_config()` for more information.
-
-        Explicitly override base class implementation to retain legacy behavior.
-        """
-        config_filepath = os.path.join(self.root_directory, self.GX_YML)  # noqa: PTH118
-
-        logger.debug(
-            f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
-        )
-
-        try:
-            with open(config_filepath, "w") as outfile:
-
-                fluent_datasources = self._synchronize_fluent_datasources()
-                if fluent_datasources:
-                    self.fluent_config.update_datasources(
-                        datasources=fluent_datasources
-                    )
-                    logger.info(
-                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
-                    )
-                    fluent_json_dict: dict[
-                        str, JSONValues
-                    ] = self.fluent_config._json_dict()
-                    fluent_json_dict = (
-                        self.fluent_config._exclude_name_fields_from_fluent_datasources(
-                            config=fluent_json_dict
-                        )
-                    )
-                    self.config._commented_map.update(fluent_json_dict)
-
-                self.config.to_yaml(outfile)
-        except PermissionError as e:
-            logger.warning(f"Could not save project config to disk: {e}")
 
     def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
         """
