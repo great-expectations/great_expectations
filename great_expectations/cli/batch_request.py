@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 if TYPE_CHECKING:
-    from great_expectations.optional_imports import sqlalchemy_engine_Inspector
+    from great_expectations.compatibility import sqlalchemy
 
 
 DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
@@ -436,9 +436,7 @@ Would you like to continue?"""
 
 def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     execution_engine: SqlAlchemyExecutionEngine = datasource.execution_engine
-    inspector: sqlalchemy_engine_Inspector = get_sqlalchemy_inspector(
-        execution_engine.engine
-    )
+    inspector: sqlalchemy.Inspector = get_sqlalchemy_inspector(execution_engine.engine)
     return inspector.default_schema_name
 
 

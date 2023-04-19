@@ -144,20 +144,22 @@ stages:
 
     jobs:
     - job: static_type_check
+      variables:
+        python.version: '3.8'
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.8
-        displayName: 'Use Python 3.8'
+          versionSpec: $(python.version)
+        displayName: 'Use Python $(python.version)'
       - script: |
+          python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
-          #invoke type-check --ci --pretty
+          invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
-          #- script: |
+      - script: |
           # initial run doesn't check `.pyi` source files
-          #invoke type-check --ci --pretty --check-stub-sources
-          #name: TypeCheckStubSourceFiles
-
+          invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
+        name: TypeCheckStubSourceFiles
     - job: docstring_linter
       steps:
       - script: |

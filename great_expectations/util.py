@@ -55,18 +55,15 @@ from packaging import version
 from typing_extensions import Literal, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
-)
-from great_expectations.optional_imports import (
-    sa_sql_expression_Select,
-    sqlalchemy_reflection,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
 )
 
 try:
@@ -74,12 +71,6 @@ try:
 except ImportError:
     black = None  # type: ignore[assignment]
 
-try:
-    # This library moved in python 3.8
-    import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:
-    # Fallback for python < 3.8
-    import importlib_metadata
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +78,6 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     # needed until numpy min version 1.20
     import numpy.typing as npt
-    from pkg_resources import Distribution
 
     from great_expectations.alias_types import PathStr
     from great_expectations.data_context import FileDataContext
@@ -250,21 +240,6 @@ seconds."""
         return compute_delta_t
 
     return execution_time_decorator
-
-
-# noinspection SpellCheckingInspection
-def get_project_distribution() -> Optional[Distribution]:
-    ditr: Distribution
-    for distr in importlib_metadata.distributions():
-        relative_path: Path
-        try:
-            relative_path = Path(__file__).relative_to(distr.locate_file(""))
-        except ValueError:
-            pass
-        else:
-            if relative_path in distr.files:
-                return distr
-    return None
 
 
 # Returns the object reference to the currently running function (i.e., the immediate function under execution).
@@ -1572,8 +1547,8 @@ def isclose(
     return cast(
         bool,
         np.isclose(
-            a=np.float64(operand_a),  # type:ignore[arg-type]
-            b=np.float64(operand_b),  # type:ignore[arg-type]
+            a=np.float64(operand_a),  # type: ignore[arg-type]
+            b=np.float64(operand_b),  # type: ignore[arg-type]
             rtol=rtol,
             atol=atol,
             equal_nan=equal_nan,
@@ -2015,7 +1990,7 @@ def generate_temporary_table_name(
 def get_sqlalchemy_inspector(engine):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
-        insp = sqlalchemy_reflection.Inspector.from_engine(engine)
+        insp = sqlalchemy.reflection.Inspector.from_engine(engine)
     else:
         insp = sa.inspect(engine)
     return insp
@@ -2031,8 +2006,8 @@ def get_sqlalchemy_url(drivername, **credentials):
 
 
 def get_sqlalchemy_selectable(
-    selectable: Union[sa.Table, sa_sql_expression_Select]
-) -> Union[sa.Table, sa_sql_expression_Select]:
+    selectable: Union[sa.Table, sqlalchemy.Select]
+) -> Union[sa.Table, sqlalchemy.Select]:
     """
     Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
@@ -2043,7 +2018,7 @@ def get_sqlalchemy_selectable(
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if sa_sql_expression_Select and isinstance(selectable, sa_sql_expression_Select):
+    if sqlalchemy.Select and isinstance(selectable, sqlalchemy.Select):
         if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
         else:
@@ -2080,9 +2055,9 @@ def import_make_url():
     still be accessed from sqlalchemy.engine.url to avoid import errors.
     """
     if version.parse(sa.__version__) < version.parse("1.4"):
-        from sqlalchemy.engine.url import make_url  # noqa: TID251
+        make_url = sqlalchemy.url.make_url
     else:
-        from sqlalchemy.engine import make_url  # noqa: TID251
+        make_url = sqlalchemy.engine.make_url
 
     return make_url
 
@@ -2122,29 +2097,3 @@ def pandas_series_between_inclusive(
         metric_series = series.between(min_value, max_value)
 
     return metric_series
-
-
-def numpy_quantile(
-    a: npt.NDArray, q: float, method: str, axis: Optional[int] = None
-) -> Union[np.float64, npt.NDArray]:
-    """
-    As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
-    Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
-    """
-    quantile: npt.NDArray
-    if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(  # type: ignore[call-arg]
-            a=a,
-            q=q,
-            axis=axis,
-            method=method,
-        )
-    else:
-        quantile = np.quantile(
-            a=a,
-            q=q,
-            axis=axis,
-            interpolation=method,
-        )
-
-    return quantile
