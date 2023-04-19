@@ -47,11 +47,7 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    ExpectationSuiteIdentifier,
-    GXCloudIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
@@ -63,6 +59,10 @@ if TYPE_CHECKING:
         ExpectationConfiguration,
     )
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.types.resource_identifiers import (
+        ConfigurationIdentifier,
+        ExpectationSuiteIdentifier,
+    )
     from great_expectations.execution_engine.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
