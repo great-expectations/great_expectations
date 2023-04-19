@@ -151,8 +151,9 @@ class DatasourceStore(Store):
     def _build_key_from_config(  # type: ignore[override]
         self, datasource_config: DatasourceConfig | FluentDatasource
     ) -> Union[GXCloudIdentifier, DataContextVariableKey]:
+        id_: str | None
         if datasource_config.id:
-            id_: str | None = str(datasource_config.id)
+            id_ = str(datasource_config.id)
         else:
             id_ = datasource_config.id  # type: ignore[assignment] # None or empty string
         return self.store_backend.build_key(name=datasource_config.name, id=id_)

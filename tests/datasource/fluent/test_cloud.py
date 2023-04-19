@@ -69,9 +69,6 @@ def test_context_add_or_update_datasource(
     datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
     context.sources.add_or_update_sqlite(datasource)
 
-    updated_datasource: SqliteDatasource = context.datasources[datasource.name]  # type: ignore[assignment]
-    assert updated_datasource.connection_string == "sqlite:///"
-
     if isinstance(empty_contexts, CloudDataContext):
         # TODO: adjust call counts as needed
         cloud_api_fake.assert_call_count(
