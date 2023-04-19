@@ -703,15 +703,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _add_fluent_datasource(self, datasource: FluentDatasource) -> None:
-        # We currently don't allow one to overwrite a datasource with this internal method
-        if datasource.name in self.datasources:
-            raise gx_exceptions.DataContextError(
-                f"Can not write the fluent datasource {datasource.name} because a datasource of that "
-                "name already exists in the data context."
-            )
-        self.datasources[datasource.name] = datasource
-
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
         self.datasources[datasource.name] = datasource
 
