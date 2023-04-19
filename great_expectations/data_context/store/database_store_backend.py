@@ -6,16 +6,11 @@ from pathlib import Path
 from typing import Dict, Tuple
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.data_context.store.store_backend import StoreBackend
-from great_expectations.optional_imports import (
-    SQLAlchemyError,
-    sqlalchemy_engine_Row,
-    sqlalchemy_IntegrityError,
-    sqlalchemy_NoSuchTableError,
-)
-from great_expectations.optional_imports import (
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
+from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.util import (
     filter_properties_dict,
     get_sqlalchemy_url,
@@ -24,6 +19,7 @@ from great_expectations.util import (
 
 if sa:
     make_url = import_make_url()
+    SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
 
 logger = logging.getLogger(__name__)
@@ -105,7 +101,7 @@ class DatabaseStoreBackend(StoreBackend):
                 raise gx_exceptions.StoreBackendError(
                     f"Unable to use table {table_name}: it exists, but does not have the expected schema."
                 )
-        except sqlalchemy_NoSuchTableError:
+        except sqlalchemy.NoSuchTableError:
             table = sa.Table(table_name, meta, *cols)
             try:
                 if self._schema_name:
@@ -276,7 +272,7 @@ class DatabaseStoreBackend(StoreBackend):
         try:
             with self.engine.begin() as connection:
                 connection.execute(ins)
-        except sqlalchemy_IntegrityError as e:
+        except sqlalchemy.IntegrityError as e:
             if self._get(key) == value:
                 logger.info(f"Key {str(key)} already exists with the same value.")
             else:
@@ -341,7 +337,7 @@ class DatabaseStoreBackend(StoreBackend):
             )
         )
         with self.engine.begin() as connection:
-            row_list: list[sqlalchemy_engine_Row] = connection.execute(sel).fetchall()
+            row_list: list[sqlalchemy.Row] = connection.execute(sel).fetchall()
         return [tuple(row) for row in row_list]
 
     def remove_key(self, key):
