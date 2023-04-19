@@ -51,7 +51,7 @@ def expected_config_dict():
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_instantiation_without_args(
     mock_gcs_conn, mock_list_keys, expected_config_dict
@@ -91,7 +91,7 @@ def test_instantiation_without_args(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_service_account.Credentials.from_service_account_file"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_instantiation_with_filename_arg(
     mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict
@@ -134,7 +134,7 @@ def test_instantiation_with_filename_arg(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_service_account.Credentials.from_service_account_info"
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_instantiation_with_info_arg(
     mock_gcs_conn, mock_auth_method, mock_list_keys, expected_config_dict
@@ -177,7 +177,7 @@ def test_instantiation_with_info_arg(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasource_name_raises_error(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -225,7 +225,7 @@ def test_get_batch_definition_list_from_batch_request_with_nonexistent_datasourc
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_get_batch_definition_list_from_batch_request_with_unknown_data_connector_raises_error(
     mock_gcs_conn, mock_list_keys, mock_emit
@@ -273,7 +273,7 @@ def test_get_batch_definition_list_from_batch_request_with_unknown_data_connecto
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_simple_regex_example_with_implicit_data_asset_names_self_check(
     mock_gcs_conn, mock_list_keys, mock_emit
@@ -336,7 +336,7 @@ def test_simple_regex_example_with_implicit_data_asset_names_self_check(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_complex_regex_example_with_implicit_data_asset_names(
     mock_gcs_conn, mock_list_keys, mock_emit
@@ -423,7 +423,7 @@ def test_complex_regex_example_with_implicit_data_asset_names(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
     my_data_connector: InferredAssetGCSDataConnector = InferredAssetGCSDataConnector(
@@ -480,7 +480,7 @@ def test_self_check(mock_gcs_conn, mock_list_keys, mock_emit):
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_test_yaml_config(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -555,7 +555,7 @@ default_regex:
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_instantiation_with_test_yaml_config_emits_proper_payload(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -624,7 +624,7 @@ default_regex:
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_yaml_config_excluding_non_regex_matching_files(
     mock_gcs_client, mock_list_keys, mock_emit, empty_data_context_stats_enabled
@@ -706,7 +706,7 @@ default_regex:
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_nested_directory_data_asset_name_in_folder(
     mock_gcs_client, mock_list_keys, mock_emit, empty_data_context
@@ -777,7 +777,7 @@ def test_nested_directory_data_asset_name_in_folder(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_redundant_information_in_naming_convention_random_hash(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context
@@ -845,7 +845,7 @@ def test_redundant_information_in_naming_convention_random_hash(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_redundant_information_in_naming_convention_timestamp(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context
@@ -912,7 +912,7 @@ def test_redundant_information_in_naming_convention_timestamp(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_redundant_information_in_naming_convention_bucket(
     mock_gcs_conn, mock_list_keys, mock_emit, empty_data_context
@@ -980,7 +980,7 @@ def test_redundant_information_in_naming_convention_bucket(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_redundant_information_in_naming_convention_bucket_sorted(
     mock_gcs_conn, mock_list_keys, mock_emit
@@ -1108,7 +1108,7 @@ def test_redundant_information_in_naming_convention_bucket_sorted(
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match_group(
     mock_gcs_conn, mock_list_keys, mock_emit
@@ -1170,7 +1170,7 @@ def test_redundant_information_in_naming_convention_bucket_sorter_does_not_match
     ],
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
     mock_gcs_conn, mock_list_keys, mock_emit
@@ -1220,7 +1220,7 @@ def test_redundant_information_in_naming_convention_bucket_too_many_sorters(
     reason="Could not import 'storage' from google.cloud in inferred_asset_gcs_data_connector.py",
 )
 @mock.patch(
-    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google_cloud_storage.Client"
+    "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.google.storage.Client"
 )
 @mock.patch(
     "great_expectations.datasource.data_connector.inferred_asset_gcs_data_connector.list_gcs_keys",

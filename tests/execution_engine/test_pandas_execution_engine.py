@@ -571,7 +571,7 @@ def test_get_batch_with_no_azure_configured(azure_batch_spec):
     "great_expectations.execution_engine.pandas_execution_engine.google_service_account",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.google_cloud_storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
 def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     # default instantiation
@@ -592,7 +592,7 @@ def test_constructor_with_gcs_options(mock_gcs_conn, mock_auth_method):
     reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
 )
 @mock.patch(
-    "great_expectations.execution_engine.pandas_execution_engine.google_cloud_storage.Client",
+    "great_expectations.execution_engine.pandas_execution_engine.google.storage.Client",
 )
 def test_get_batch_data_with_gcs_batch_spec(
     mock_gcs_conn,
