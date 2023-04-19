@@ -10,7 +10,8 @@ import pytest
 from moto import mock_s3
 
 from great_expectations.core.batch_spec import AzureBatchSpec, GCSBatchSpec
-from great_expectations.optional_imports import sparktypes, F
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility import pyspark
 
 
 @pytest.fixture(scope="function")
@@ -138,7 +139,7 @@ def gcs_batch_spec() -> GCSBatchSpec:
 
 
 @pytest.fixture
-def test_sparkdf(spark_session) -> "pyspark.sql.DataFrame":  # noqa: F821
+def test_sparkdf(spark_session) -> pyspark.DataFrame:
     def generate_ascending_list_of_datetimes(
         n, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
     ) -> List[datetime.datetime]:
@@ -173,7 +174,7 @@ def test_sparkdf(spark_session) -> "pyspark.sql.DataFrame":  # noqa: F821
     session_ids.sort()
 
     # noinspection PyUnusedLocal
-    spark_df: "pyspark.sql.DataFrame" = spark_session.createDataFrame(  # noqa: F821
+    spark_df: pyspark.DataFrame = spark_session.createDataFrame(
         data=pd.DataFrame(
             {
                 "id": range(k),
@@ -199,7 +200,9 @@ def test_sparkdf(spark_session) -> "pyspark.sql.DataFrame":  # noqa: F821
     )
     spark_df = spark_df.withColumn(
         "timestamp",
-        F.col("timestamp").cast(sparktypes.IntegerType()).cast(sparktypes.StringType()),
+        F.col("timestamp")
+        .cast(pyspark.types.IntegerType())
+        .cast(pyspark.types.StringType()),
     )
     return spark_df
 

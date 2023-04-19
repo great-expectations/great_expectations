@@ -13,11 +13,6 @@ from great_expectations.expectations.metrics.table_metric_provider import (
 )
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
-try:
-    import pyspark.sql.types as sparktypes
-except ImportError:
-    sparktypes = None  # type: ignore[assignment]
-
 
 class TableColumns(TableMetricProvider):
     metric_name = "table.columns"
