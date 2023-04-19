@@ -186,7 +186,8 @@ class MockedSecretClient:
 
 
 @mock.patch(
-    "great_expectations.core.config_substitutor.DefaultAzureCredential", new=object
+    "great_expectations.core.config_substitutor.azure.DefaultAzureCredential",
+    new=object,
 )
 @pytest.mark.parametrize(
     "input_value,secret_response,raises,expected",
