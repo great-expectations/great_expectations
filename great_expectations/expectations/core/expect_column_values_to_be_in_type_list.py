@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from packaging import version
 
+from great_expectations.compatibility import pyspark
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationValidationResult,  # noqa: TCH001
@@ -27,7 +28,6 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.optional_imports import sparktypes
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -438,7 +438,7 @@ class ExpectColumnValuesToBeInTypeList(ColumnMapExpectation):
             types = []
             for type_ in expected_types_list:
                 try:
-                    type_class = getattr(sparktypes, type_)
+                    type_class = getattr(pyspark.types, type_)
                     types.append(type_class)
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")

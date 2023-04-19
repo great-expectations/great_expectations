@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from functools import wraps
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -12,6 +13,9 @@ from typing import (
     Union,
 )
 
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
@@ -28,15 +32,11 @@ from great_expectations.expectations.metrics.metric_provider import (
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
-from great_expectations.optional_imports import (
-    quoted_name,
-    sqlalchemy_engine_Engine,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
 
 
 def column_pair_condition_partial(  # noqa: C901 - 16
@@ -101,7 +101,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: List[Union[str, sqlalchemy.quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -172,7 +172,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: List[Union[str, sqlalchemy.quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]
@@ -182,7 +182,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                     batch_columns_list=metrics["table.columns"],
                 )
 
-                sqlalchemy_engine: sqlalchemy_engine_Engine = execution_engine.engine
+                sqlalchemy_engine: sqlalchemy.Engine = execution_engine.engine
 
                 dialect = execution_engine.dialect_module
                 expected_condition = metric_fn(
@@ -251,7 +251,7 @@ def column_pair_condition_partial(  # noqa: C901 - 16
                 # noinspection PyPep8Naming
                 column_B_name = accessor_domain_kwargs["column_B"]
 
-                column_names: List[Union[str, quoted_name]] = [
+                column_names: List[Union[str, sqlalchemy.quoted_name]] = [
                     column_A_name,
                     column_B_name,
                 ]

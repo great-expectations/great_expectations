@@ -1,7 +1,9 @@
-from typing import Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 import pandas as pd
 
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -12,17 +14,9 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
-from great_expectations.optional_imports import (
-    F,
-    pyspark_sql_DataFrame,
-    pyspark_sql_Row,
-    sa_sql_expression_Select,
-    sa_sql_expression_Selectable,
-    sqlalchemy_engine_Row,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import pyspark, sqlalchemy
 
 
 class ColumnValueCounts(ColumnAggregateMetricProvider):
@@ -90,7 +84,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in PandasDataset")
 
-        selectable: sa_sql_expression_Selectable
+        selectable: sqlalchemy.Selectable
         accessor_domain_kwargs: Dict[str, str]
         selectable, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
@@ -98,7 +92,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         column: str = accessor_domain_kwargs["column"]
 
         if hasattr(sa.column(column), "is_not"):
-            query: sa_sql_expression_Select = (
+            query: sqlalchemy.Select = (
                 sa.select(
                     sa.column(column).label("value"),
                     sa.func.count(sa.column(column)).label("count"),
@@ -107,7 +101,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
                 .group_by(sa.column(column))
             )
         else:
-            query: sa_sql_expression_Select = (
+            query: sqlalchemy.Select = (
                 sa.select(
                     sa.column(column).label("value"),
                     sa.func.count(sa.column(column)).label("count"),
@@ -126,7 +120,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
                 query = query.order_by(sa.column(column))
         elif sort == "count":
             query = query.order_by(sa.column("count").desc())
-        results: List[sqlalchemy_engine_Row] = execution_engine.engine.execute(
+        results: List[sqlalchemy.Row] = execution_engine.engine.execute(
             query.select_from(selectable)
         ).fetchall()
         # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
@@ -155,14 +149,14 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         if collate is not None:
             raise ValueError("collate parameter is not supported in SparkDFDataset")
 
-        df: pyspark_sql_DataFrame
+        df: pyspark.DataFrame
         accessor_domain_kwargs: Dict[str, str]
         df, _, accessor_domain_kwargs = execution_engine.get_compute_domain(
             metric_domain_kwargs, MetricDomainTypes.COLUMN
         )
         column: str = accessor_domain_kwargs["column"]
 
-        value_counts_df: pyspark_sql_DataFrame = (
+        value_counts_df: pyspark.DataFrame = (
             df.select(column).where(F.col(column).isNotNull()).groupBy(column).count()
         )
 
@@ -171,7 +165,7 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
         elif sort == "count":
             value_counts_df = value_counts_df.orderBy(F.desc("count"))
 
-        value_counts: List[pyspark_sql_Row] = value_counts_df.collect()
+        value_counts: List[pyspark.Row] = value_counts_df.collect()
 
         # Numpy does not always infer the correct DataTypes for Spark df, so we cannot use vectorized approach.
         values: List[Any]

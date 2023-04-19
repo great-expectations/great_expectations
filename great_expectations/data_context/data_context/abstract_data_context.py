@@ -34,6 +34,7 @@ from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -132,12 +133,12 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     usage_statistics_enabled_method,
 )
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-except ImportError:
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
+if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = gx_exceptions.ProfilerError
+
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint

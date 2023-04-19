@@ -3,10 +3,10 @@ from typing import Union
 import pytest
 
 from great_expectations import DataContext
+from great_expectations.compatibility import pyarrow, pyspark
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
-from great_expectations.optional_imports import pyarrow, pyspark
 
 yaml = YAMLHandler()
 
@@ -50,11 +50,11 @@ def data_source_config_with_aws_glue_catalog_data_connectors():
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not pyspark,
+    not pyspark.pyspark,
     reason='Could not import "pyspark"',
 )
 @pytest.mark.skipif(
-    not pyarrow,
+    not pyarrow.pyarrow,
     reason='Could not import "pyarrow"',
 )
 def test_instantiation_from_config(
@@ -136,11 +136,11 @@ def test_instantiation_from_config(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    not pyspark,
+    not pyspark.pyspark,
     reason='Could not import "pyspark"',
 )
 @pytest.mark.skipif(
-    not pyarrow,
+    not pyarrow.pyarrow,
     reason='Could not import "pyarrow"',
 )
 def test_instantiation_from_datasource(

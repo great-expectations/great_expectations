@@ -3,7 +3,7 @@ from typing import Dict, List
 
 from packaging.version import Version, parse as parse_version
 
-from great_expectations.optional_imports import pyspark_sql_SparkSession, pyspark
+from great_expectations.compatibility import pyspark
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ except ImportError:
 
 
 def test_current_pyspark_version_installed(spark_session):
-    pyspark_version: Version = parse_version(pyspark.__version__)
+    pyspark_version: Version = parse_version(pyspark.pyspark.__version__)
     # Spark versions less than 3.0 are not supported.
     assert pyspark_version.major >= 3, "Spark versions less than 3.0 are not supported."
 
@@ -34,7 +34,7 @@ def test_spark_config_datasource(spark_session_v012):
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
     source: SparkDFDatasource = SparkDFDatasource(spark_config=spark_config)
-    spark_session: pyspark_sql_SparkSession = source.spark
+    spark_session: pyspark.SparkSession = source.spark
     # noinspection PyProtectedMember
     sc_stopped: bool = spark_session.sparkContext._jsc.sc().isStopped()
     assert not sc_stopped
@@ -56,7 +56,7 @@ def test_spark_config_execution_engine(spark_session):
         # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
     }
     execution_engine = SparkDFExecutionEngine(spark_config=new_spark_config)
-    new_spark_session: pyspark_sql_SparkSession = execution_engine.spark
+    new_spark_session: pyspark.SparkSession = execution_engine.spark
 
     # noinspection PyProtectedMember
     sc_stopped: bool = new_spark_session.sparkContext._jsc.sc().isStopped()

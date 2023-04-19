@@ -15,7 +15,8 @@ from great_expectations.expectations.metrics import (
     column_condition_partial,
 )
 
-# from great_expectations.optional_imports import F, sparktypes
+# from great_expectations.compatibility.pyspark import functions as F
+# from great_expectations.compatibility import pyspark
 
 
 def is_valid_bic(bic_code: str) -> bool:
@@ -26,7 +27,7 @@ def is_valid_bic(bic_code: str) -> bool:
         return False
 
 
-# @F.udf(sparktypes.BooleanType())
+# @F.udf(pyspark.types.BooleanType())
 # def is_valid_bic_udf(bic: str) -> bool:
 #     return is_valid_bic(bic)
 

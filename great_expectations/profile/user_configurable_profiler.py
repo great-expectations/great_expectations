@@ -17,6 +17,7 @@ from great_expectations.core.usage_statistics.util import send_usage_message
 from great_expectations.dataset import Dataset, PandasDataset
 from great_expectations.exceptions import ProfilerError
 from great_expectations.execution_engine import (
+    ExecutionEngine,
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
@@ -123,7 +124,9 @@ class UserConfigurableProfiler:
         if isinstance(self.profile_dataset, Batch):
             context = self.profile_dataset.data_context
             self.profile_dataset = Validator(
-                execution_engine=self.profile_dataset.data.execution_engine,
+                execution_engine=cast(
+                    ExecutionEngine, self.profile_dataset.data.execution_engine
+                ),
                 batches=[self.profile_dataset],
             )
             self.all_table_columns = self.profile_dataset.get_metric(

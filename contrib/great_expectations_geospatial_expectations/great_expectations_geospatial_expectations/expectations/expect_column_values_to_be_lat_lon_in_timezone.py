@@ -2,6 +2,8 @@ from typing import Optional
 
 from timezonefinder import TimezoneFinder
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -12,7 +14,6 @@ from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.optional_imports import F, sparktypes
 
 
 # This class defines a Metric to support your Expectation.
@@ -52,7 +53,9 @@ class ColumnValuesLatLonInTimezone(ColumnMapMetricProvider):
             except ValueError:
                 return False
 
-        tz_udf = F.udf(lambda x: is_in_timezone(x, timezone), sparktypes.BooleanType())
+        tz_udf = F.udf(
+            lambda x: is_in_timezone(x, timezone), pyspark.types.BooleanType()
+        )
 
         return tz_udf(column)
 
