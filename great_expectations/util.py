@@ -1701,7 +1701,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 @overload
-def get_context(  # type: ignore[misc]
+def get_context(  # type: ignore[misc] # overlapping overload false positive?
     project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
     context_root_dir: PathStr = ...,
     runtime_environment: Optional[dict] = ...,
