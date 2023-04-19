@@ -49,6 +49,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
+    ExpectationSuiteIdentifier,
     GXCloudIdentifier,
 )
 from great_expectations.data_context.util import instantiate_class_from_config
@@ -817,6 +818,22 @@ class CloudDataContext(SerializableDataContext):
             },
         )
         return site_builder
+
+    def _determine_key_for_suite_update(
+        self, name: str, id: str | None
+    ) -> Union[ExpectationSuiteIdentifier, GXCloudIdentifier]:
+        """
+        Note that this explicitly overriding the `AbstractDataContext` helper method called
+        in `self.update_expectation_suite()`.
+
+        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
+        instead of the usual `ExpectationSuiteIdentifier` for `Store` interaction.
+        """
+        return GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+            id=id,
+            resource_name=name,
+        )
 
     def _determine_key_for_profiler_save(
         self, name: str, id: Optional[str]
