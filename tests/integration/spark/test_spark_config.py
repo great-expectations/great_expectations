@@ -20,7 +20,7 @@ except ImportError:
 
 
 def test_current_pyspark_version_installed(spark_session):
-    pyspark_version: Version = parse_version(pyspark.__version__)
+    pyspark_version: Version = parse_version(pyspark.pyspark.__version__)
     # Spark versions less than 3.0 are not supported.
     assert pyspark_version.major >= 3, "Spark versions less than 3.0 are not supported."
 

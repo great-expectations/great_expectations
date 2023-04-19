@@ -933,7 +933,10 @@ continue.
         This method calls the schema's jsonValue() method, which translates the object into a json
         """
         # check whether spark exists
-        if (not pyspark.types) or (pyspark.types.StructType is None):
+        try:
+            if (not pyspark.types) or (pyspark.types.StructType is None):
+                return data
+        except AttributeError:
             return data
 
         batch_spec_passthrough_config = data.get("batch_spec_passthrough")
