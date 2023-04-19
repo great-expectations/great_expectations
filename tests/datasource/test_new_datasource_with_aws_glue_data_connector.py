@@ -3,8 +3,7 @@ from typing import Union
 import pytest
 
 from great_expectations import DataContext
-from great_expectations.compatibility import pyspark
-from great_expectations.compatibility import pyarrow
+from great_expectations.compatibility import pyarrow, pyspark
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import BaseDatasource, LegacyDatasource
