@@ -12,6 +12,10 @@ To submit a custom Expectation to Great Expectations for consideration, you comp
 
 ## Prerequisites
 
+- Great Expectations installed and configured for your environment. See [Great Expectations Quickstart](https://docs.greatexpectations.io/docs/tutorials/quickstart/).
+
+- A custom Expectation. See [Creating Custom Expectations](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview/).
+
 - A GitHub account.
 
 - A working version of Git on your computer. See [Getting Started - Installing Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
