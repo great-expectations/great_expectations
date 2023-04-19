@@ -18,13 +18,12 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent import SqliteDatasource
 
 # apply markers to entire test module
-pytestmark = [pytest.mark.cloud]
+pytestmark = [pytest.mark.cloud, pytest.mark.integration]
 
 
 yaml = YAMLHandler()
 
 
-@pytest.mark.integration
 def test_add_fluent_datasource_are_persisted(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
@@ -47,7 +46,9 @@ def test_add_fluent_datasource_are_persisted(
     else:
         yaml_path = pathlib.Path(empty_contexts.root_directory, empty_contexts.GX_YML)
         assert yaml_path.exists()
-        assert datasource_name in yaml.load(yaml_path.read_text())["fluent_datasources"]  # type: ignore[operator]
+        yaml_dict: dict = yaml.load(yaml_path.read_text())
+        assert datasource_name in yaml_dict["fluent_datasources"]  # type: ignore[operator]
+        assert datasource_name not in yaml_dict["datasources"]
 
 
 @pytest.mark.integration
