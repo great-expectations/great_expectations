@@ -197,7 +197,6 @@ class GXDependencies:
         "scikit-learn",
         "shapely",
         "simple_icd_10",
-        "sklearn",
         "sympy",
         "tensorflow",
         "timezonefinder",
