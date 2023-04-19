@@ -1,15 +1,20 @@
+"""Utilities and imports for ensuring compatibility with different versions
+of numpy that are supported by great expectations."""
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import TYPE_CHECKING
 
 import numpy as np
-from numpy import typing as npt
 from packaging import version
+
+if TYPE_CHECKING:
+    # needed until numpy min version 1.20
+    from numpy import typing as npt
 
 
 def numpy_quantile(
-    a: npt.NDArray, q: float, method: str, axis: Optional[int] = None
-) -> Union[np.float64, npt.NDArray]:
+    a: npt.NDArray, q: float, method: str, axis: int | None = None
+) -> np.float64 | npt.NDArray:
     """
     As of NumPy 1.21.0, the 'interpolation' arg in quantile() has been renamed to `method`.
     Source: https://numpy.org/doc/stable/reference/generated/numpy.quantile.html
