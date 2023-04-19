@@ -252,7 +252,7 @@ def safe_deep_copy(data, memo=None):
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
     """
     if isinstance(data, (pd.Series, pd.DataFrame)) or (
-        pyspark and isinstance(data, pyspark.DataFrame)
+        pyspark.pyspark and isinstance(data, pyspark.DataFrame)
     ):
         return data
 
