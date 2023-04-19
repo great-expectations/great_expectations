@@ -6,6 +6,7 @@ import enum
 import itertools
 import json
 import logging
+import pathlib
 import tempfile
 import uuid
 import warnings
@@ -150,7 +151,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile: Union[str, TextIOWrapper]) -> None:
+    def to_yaml(self, outfile: Union[str, pathlib.Path, TextIOWrapper]) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
