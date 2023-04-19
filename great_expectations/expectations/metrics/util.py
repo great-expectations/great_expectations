@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import re
 import warnings
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, overload
+from typing import Any, Dict, List, Optional, Tuple, overload
 
 import numpy as np
 import pandas as pd
@@ -101,9 +101,6 @@ try:
 except ImportError:
     teradatasqlalchemy = None
     teradatatypes = None
-
-if TYPE_CHECKING:
-    import sqlalchemy  # noqa: TID251
 
 
 def get_dialect_regex_expression(  # noqa: C901 - 36
