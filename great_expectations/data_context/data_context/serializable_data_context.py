@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import logging
 import os
 import pathlib
@@ -78,6 +79,14 @@ class SerializableDataContext(AbstractDataContext):
         ``great_expectations.yml`` is located.
         """
         return self._context_root_directory
+
+    @abc.abstractmethod
+    def _save_project_config(self) -> None:
+        """
+        See parent 'AbstractDataContext._save_project_config()` for more information.
+        Explicitly override base class implementation to retain legacy behavior.
+        """
+        raise NotImplementedError
 
     def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
         """
