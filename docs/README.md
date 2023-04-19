@@ -2,7 +2,7 @@
 
 This repository contains all the source files used to create Great Expectations documentation. 
 
-If you want to modify existing Great Expectations code, you want to submit a new feature, or you want to submit a custom Expectation, see [CONTRIBUTING](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING.md) in the Great Expectations repository.
+If you want to modify existing Great Expectations code, you want to submit a new feature, or you want to submit a custom Expectation, see [CONTRIBUTING](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md) in the Great Expectations repository.
 
 ## Request a documentation change
 
