@@ -108,10 +108,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.optional_imports import (
-        pyspark_sql_DataFrame,
-        pyspark_sql_SparkSession,
-    )
+    from great_expectations.compatibility import pyspark
 
 yaml = YAMLHandler()
 ###
@@ -132,7 +129,7 @@ def spark_warehouse_session(tmp_path_factory):
     pyspark = pytest.importorskip("pyspark")  # noqa: F841
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: pyspark_sql_SparkSession = get_or_create_spark_application(
+    spark: pyspark.SparkSession = get_or_create_spark_application(
         spark_config={
             "spark.sql.catalogImplementation": "in-memory",
             "spark.executor.memory": "450m",
@@ -383,7 +380,7 @@ def sa(test_backends):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         try:
-            from great_expectations.optional_imports import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             return sa
         except ImportError:
@@ -392,15 +389,13 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends) -> pyspark_sql_SparkSession:
+def spark_session(test_backends) -> pyspark.SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    from great_expectations.optional_imports import (
-        pyspark_sql_SparkSession,
-    )
+    from great_expectations.compatibility import pyspark
 
-    if pyspark_sql_SparkSession:
+    if pyspark.SparkSession:
         return get_or_create_spark_application(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
@@ -432,35 +427,62 @@ def spark_df_taxi_data_schema(spark_session):
     """
 
     # will not import unless we have a spark_session already passed in as fixture
-    from pyspark.sql.types import (
-        DoubleType,
-        IntegerType,
-        StringType,
-        StructField,
-        StructType,
-        TimestampType,
-    )
+    from great_expectations.compatibility import pyspark
 
-    schema = StructType(
+    schema = pyspark.types.StructType(
         [
-            StructField("vendor_id", IntegerType(), True, None),
-            StructField("pickup_datetime", TimestampType(), True, None),
-            StructField("dropoff_datetime", TimestampType(), True, None),
-            StructField("passenger_count", IntegerType(), True, None),
-            StructField("trip_distance", DoubleType(), True, None),
-            StructField("rate_code_id", IntegerType(), True, None),
-            StructField("store_and_fwd_flag", StringType(), True, None),
-            StructField("pickup_location_id", IntegerType(), True, None),
-            StructField("dropoff_location_id", IntegerType(), True, None),
-            StructField("payment_type", IntegerType(), True, None),
-            StructField("fare_amount", DoubleType(), True, None),
-            StructField("extra", DoubleType(), True, None),
-            StructField("mta_tax", DoubleType(), True, None),
-            StructField("tip_amount", DoubleType(), True, None),
-            StructField("tolls_amount", DoubleType(), True, None),
-            StructField("improvement_surcharge", DoubleType(), True, None),
-            StructField("total_amount", DoubleType(), True, None),
-            StructField("congestion_surcharge", DoubleType(), True, None),
+            pyspark.types.StructField(
+                "vendor_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "pickup_datetime", pyspark.types.TimestampType(), True, None
+            ),
+            pyspark.types.StructField(
+                "dropoff_datetime", pyspark.types.TimestampType(), True, None
+            ),
+            pyspark.types.StructField(
+                "passenger_count", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "trip_distance", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "rate_code_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "store_and_fwd_flag", pyspark.types.StringType(), True, None
+            ),
+            pyspark.types.StructField(
+                "pickup_location_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "dropoff_location_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "payment_type", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "fare_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField("extra", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField(
+                "mta_tax", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tip_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tolls_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "improvement_surcharge", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "total_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "congestion_surcharge", pyspark.types.DoubleType(), True, None
+            ),
         ]
     )
     return schema
@@ -871,7 +893,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -7461,7 +7483,7 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index() -> pd.DataF
 @pytest.fixture
 def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark_sql_DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7491,7 +7513,7 @@ def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark_sql_DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7508,7 +7530,7 @@ def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> pyspark_sql_DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],

@@ -13,6 +13,10 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -30,17 +34,11 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.optional_imports import (
-    SQLAlchemyError,
-    sqlalchemy_engine_Connection,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 
 logger = logging.getLogger(__name__)
 yaml_handler = YAMLHandler()
 
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
 
 # Taken from the following stackoverflow:
 # https://stackoverflow.com/questions/23549419/assert-that-two-dictionaries-are-almost-equal
@@ -146,8 +144,8 @@ def get_sqlite_temp_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    if sqlalchemy_engine_Connection and isinstance(
-        execution_engine.engine, sqlalchemy_engine_Connection
+    if sqlalchemy.Connection and isinstance(
+        execution_engine.engine, sqlalchemy.Connection
     ):
         connection = execution_engine.engine
         result = connection.execute(statement)
@@ -163,8 +161,8 @@ def get_sqlite_table_names(execution_engine):
 
     statement = sa.text("SELECT name FROM sqlite_master")
 
-    if sqlalchemy_engine_Connection and isinstance(
-        execution_engine.engine, sqlalchemy_engine_Connection
+    if sqlalchemy.Connection and isinstance(
+        execution_engine.engine, sqlalchemy.Connection
     ):
         connection = execution_engine.engine
         result = connection.execute(statement)

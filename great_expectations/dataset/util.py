@@ -10,15 +10,6 @@ from scipy import stats
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy  # noqa: F401, TID251
-    from sqlalchemy.engine.default import DefaultDialect  # noqa: TID251
-    from sqlalchemy.sql.elements import WithinGroup  # noqa: TID251
-except ImportError:
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-    DefaultDialect = None
-    WithinGroup = None
-
 
 def is_valid_partition_object(partition_object):
     """Tests whether a given object is a valid continuous or categorical partition object.
