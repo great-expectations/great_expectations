@@ -74,7 +74,7 @@ Python dependencies are required to modify Great Expectations code, submit a new
 
     pip install -c constraints-dev.txt -e ".[test]"
     ```
-    To specify other dependencies, add a comma after `test` and enter the dependency name. For example, "[test,postgresql,trino]". The supported dependencies include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `dev`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `sqlalchemy`, `teradata`, `test`, `trino`, `vertica`
+    To specify other dependencies, add a comma after `test` and enter the dependency name. For example, "[test,postgresql,trino]". The supported dependencies include: `arrow`, `athena`, `aws_secrets`, `azure`, `azure_secrets`, `bigquery`, `dev`, `dremio`, `excel`, `gcp`, `hive`, `mssql`, `mysql`, `pagerduty`, `postgresql`, `redshift`, `s3`, `snowflake`, `spark`, `sqlalchemy`, `teradata`, `test`, `trino`, `vertica`.
 
 2. Optional. If you're using Amazon Redshift, run the following command to install the `libpq-dev` package:
 
@@ -140,7 +140,7 @@ A virtual environment allows you to create and test code without affecting the p
    ```
 ## Install dependencies from requirements-dev.txt
 
-You need to install dependencies from the Great Expectations `requirements-dev.txt` file to make sure you have the right libraries installed in your Python environment.
+You need to install dependencies from the Great Expectations `requirements-dev.txt` file to make sure you have the correct libraries installed in your Python environment.
 
 If you're using the macOS operating system, you'll be able to use the `pip` or `pip3` commands to install dependencies from `requirements-dev.txt`. If you're a Windows user using Anaconda, you'll need to install the dependencies in the `requirements-dev.txt` individually.
 
@@ -354,7 +354,7 @@ The `data` parameter defines a DataFrame of sample data to apply Expectations ag
 ````
 #### Schemas
 
-The schema parameter defines the types to be used when instantiating tests against different execution environments, including different SQL dialects. Each schema is defined as a dictionary with column names and types as key-value pairs. If the schema isn’t specified for a given execution environment, Great Expectations introspects values and attempts to identify the schema. For example:
+The `schema` parameter defines the types to be used when instantiating tests against different execution environments, including different SQL dialects. Each schema is defined as a dictionary with column names and types as key-value pairs. If the schema isn’t specified for a given execution environment, Great Expectations introspects values and attempts to identify the schema. For example:
 
 ````console
 "schemas": {
@@ -416,7 +416,7 @@ The test fixture files are stored in subdirectories of `tests/test_definitions/`
 
 By convention, the name of the file is the name of the Expectation, with a .json suffix. Creating a new JSON file automatically adds the new Expectation tests to the test suite.
 
-If you are implementing a new Expectation, but don’t plan to immediately implement it for all execution environments, you should add the new test to the appropriate list(s) in the `candidate_test_is_on_temporary_notimplemented_list_v2_api` method within `tests/test_utils.py`.
+If you are implementing a new Expectation, but don’t plan to immediately implement it for all execution environments, you should add the new test to the appropriate lists in the `candidate_test_is_on_temporary_notimplemented_list_v2_api` method within `tests/test_utils.py`.
 
 You can run just the Expectation tests with `pytest tests/test_definitions/test_expectations.py`.
 
@@ -440,7 +440,7 @@ Test the performance of code changes to determine they perform as expected. BigQ
     -rP -vv
     ```
 
-    Some benchmarks take significant time to complete. In the previous example, only the `test_taxi_trips_benchmark[1-True-V3]` benchmark is run, and the output should appear similar to the following:
+    Some benchmarks take significant time to complete. In the previous example, only the `test_taxi_trips_benchmark[1-True-V3]` benchmark runs. The output should appear similar to the following:
 
     ```console
     --------------------------------------------------- benchmark: 1 tests ------------------------------------------------------
