@@ -1,13 +1,30 @@
 # Contribute a code change
 
-
 To request or submit a Great Expectations documentation or code change, the following options are available:
 
 - Join the [Great Expectations Slack community](https://greatexpectations.io/slack) and make your suggestion in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel. 
 
 - If you need a documentation change, or a change that doesn't require local testing, see the `README` in the `docs` repository.
 
-- If you want to modify existing Great Expectations code, or you want to submit a new feature or a custom Expectation, you'll need to follow the instructions provided here.
+- If you want to modify existing Great Expectations code, or you want to submit a new feature or a custom Expectation, you'll need to complete the following tasks:
+
+    - [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
+
+    - [Install Python dependencies](#install-python-dependencies)
+
+    - [Create a virtual environment (optional)](#create-a-virtual-environment-optional)
+
+    - [Install dependencies from requirements-dev.txt](#install-dependencies-from-requirements-devtxt)
+
+    - [Install great_expectations](#install-great_expectations)
+
+    - [Configure backends for testing (optional)](#configure-backends-for-testing-optional)
+
+    - [Test code changes](#test-code-changes)
+
+    - [Test performance](#test-performance)
+
+    - [Submit a pull request](#submit-a-pull-request)
 
 ## Prerequisites
 
@@ -44,7 +61,7 @@ To request or submit a Great Expectations documentation or code change, the foll
     ```
 ## Install Python dependencies
 
-Python dependencies are required to modify Great Expectations code, or submit a new feature or a custom Expectation. 
+Python dependencies are required to modify Great Expectations code, submit a new feature, or submit a custom Expectation. 
 
 1. Run the following command to create a virtual environment in your local repository using Python versions 3.7 to 3.11, activate the environment, and then install the necessary dependencies:
 
@@ -86,7 +103,7 @@ Python dependencies are required to modify Great Expectations code, or submit a 
 
 5. Add `ulimit -n 4096` to the `~/.zshrc` or `~/.bashrc` files to prevent `OSError: [Errno 24] Too many open files` errors. 
 
-6. Run the following command to confirm pandas and sqlalchemy with sqlite tests are passing:
+6. Run the following command to confirm pandas and SQLAlchemy with SQLite tests are passing:
 
    ```sh
     ulimit -n 4096
@@ -135,12 +152,12 @@ pip install -r requirements-dev.txt -c constraints-dev.txt
 
 To add support for Spark or SQLAlchemy tests, you can substitute `requirements-dev-spark.txt` or `requirements-dev-sqlalchemy.txt` for `requirements-dev.txt`. For some database backends such as MSSQL, you might need to install additional drivers. See the following resources for more information:
 
-- [Installing Microsoft ODBC driver for MacOS](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos)
+- [Installing Microsoft ODBC driver for macOS](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/install-microsoft-odbc-driver-sql-server-macos)
 
 - [Installing Microsoft ODBC driver for Linux](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server)
 
 
-##  Install great_expectations
+##  Install Great Expectations
 
 Run the following command to install Great Expectations in editable mode:
 
@@ -186,7 +203,7 @@ Some Great Expectations features require specific backends for local testing.
      ```sh
     docker-compose down
     ```
-### Troubleshooting
+#### Troubleshooting
 
 Errors similar to the following are returned when you try to start the PostgreSQL container and another service is using port 5432:
 
@@ -243,7 +260,7 @@ If another service is using port 3306, Docker might start the container but sile
 
 Use the following information to use Spark for code testing.
 
-### Prerequisites
+#### Prerequisites
 
 - Java. See [Java downloads](https://www.java.com/en/download/).
 
@@ -251,7 +268,7 @@ Use the following information to use Spark for code testing.
 
 - Apache Spark installed and configured correctly. See [Spark Overview](https://spark.apache.org/docs/latest/index.html#downloading).
 
-### Install PySpark
+#### Install PySpark
 
 Run the following command to install the PySpark version that matches your version of Apache Spark:
 
@@ -268,7 +285,7 @@ Great Expectations production code must be thoroughly tested, and you must perfo
 
 Most contributions do not require new integration tests, unless they change the Great Expectations CLI.
 
-Great Expectations code is not tested against all SQL database types. Continuous Integration (CI) testing for SQL is limited to PostgreSQL, SQLite, MSSQL, and BigQuery.
+Great Expectations code is not tested against all SQL database types. Continuous Integration (CI) testing for SQL is limited to PostgreSQL, SQLite, MS SQL, and BigQuery.
 
 ### Unit testing
 
@@ -285,7 +302,7 @@ The following are the supported `pytest` flags for general testing:
 
 To skip all local backend tests (except pandas), run `pytest --no-sqlalchemy`. 
 
-Testing can generate warning messages. These warnings are often caused by dependencies such as pandas or sqlalchemy. Run `pytest --no-sqlalchemy --disable-pytest-warnings` to suppress these warnings.
+Testing can generate warning messages. These warnings are often caused by dependencies such as pandas or SQLAlchemy. Run `pytest --no-sqlalchemy --disable-pytest-warnings` to suppress these warnings.
 
 ### BigQuery testing
 
@@ -323,7 +340,7 @@ Below `datasets` are three entries: `data`, `schemas`, and `tests`.
 
 #### Data
 
-The `data` parameter defines a dataframe of sample data to apply Expectations against. The dataframe is defined as a dictionary of lists, with keys containing column names and values containing lists of data entries. All lists within a dataset must have the same length. For example:
+The `data` parameter defines a DataFrame of sample data to apply Expectations against. The DataFrame is defined as a dictionary of lists, with keys containing column names and values containing lists of data entries. All lists within a dataset must have the same length. For example:
 
 ````console
 "data" : {
@@ -361,13 +378,13 @@ The schema parameter defines the types to be used when instantiating tests again
 ````
 #### Tests
 
-The `tests` parameter defines the tests to be executed against the dataframe. Each item in `tests` must include `title`, `exact_match_out`, `in`, and `out`. The test runner executes the named Expectation once for each item, with the values in `in` supplied as kwargs.
+The `tests` parameter defines the tests to be executed against the DataFrame. Each item in `tests` must include `title`, `exact_match_out`, `in`, and `out`. The test runner executes the named Expectation once for each item, with the values in `in` supplied as kwargs.
 
 The test passes if the values in the expectation Validation Result correspond with the values in `out`. If `exact_match_out` is true, then every field in the Expectation output must have a corresponding, matching field in `out`. If it’s false, then only the fields specified in `out` need to match. For most use cases, false is a better result, because it allows narrower targeting of the relevant output.
 
 `suppress_test_for` is an optional parameter to disable an Expectation for a specific list of backends. For example:
 
-````console
+````sh
 "tests" : [{
     "title": "Basic negative test case",
     "exact_match_out" : false,
@@ -397,7 +414,7 @@ The test fixture files are stored in subdirectories of `tests/test_definitions/`
 - multicolumn_map_expectations
 - other_expectations
 
-By convention, the name of the file is the name of the Expectation, with a .json suffix. Creating a new json file automatically adds the new Expectation tests to the test suite.
+By convention, the name of the file is the name of the Expectation, with a .json suffix. Creating a new JSON file automatically adds the new Expectation tests to the test suite.
 
 If you are implementing a new Expectation, but don’t plan to immediately implement it for all execution environments, you should add the new test to the appropriate list(s) in the `candidate_test_is_on_temporary_notimplemented_list_v2_api` method within `tests/test_utils.py`.
 
@@ -425,7 +442,7 @@ Test the performance of code changes to determine they perform as expected. BigQ
 
     Some benchmarks take significant time to complete. In the previous example, only the `test_taxi_trips_benchmark[1-True-V3]` benchmark is run, and the output should appear similar to the following:
 
-    ```
+    ```console
     --------------------------------------------------- benchmark: 1 tests ------------------------------------------------------
     Name (time in s)                         Min     Max    Mean  StdDev  Median     IQR  Outliers     OPS  Rounds  Iterations
     -----------------------------------------------------------------------------------------------------------------------------
@@ -440,7 +457,7 @@ Test the performance of code changes to determine they perform as expected. BigQ
 
     The output should appear similar to the following:
 
-    ```
+    ```console
     ---------------------------------------------------------------------------- benchmark 'test_taxi_trips_benchmark[1-True-V3]': 2 tests ---------------------------------------------------------------------------
     Name (time in s)                                        Min               Max              Mean            StdDev            Median               IQR            Outliers     OPS            Rounds  Iterations
     ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
