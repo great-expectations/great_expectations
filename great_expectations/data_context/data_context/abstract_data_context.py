@@ -749,7 +749,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         save_changes: bool | None = ...,
         datasource: None = ...,
         **kwargs,
-    ) -> LegacyDatasource | BaseDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
         """
         A `name` is provided.
         `datasource` should not be provided.
@@ -762,9 +762,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: None = ...,
         initialize: bool = ...,
         save_changes: bool | None = ...,
-        datasource: LegacyDatasource | BaseDatasource = ...,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
         **kwargs,
-    ) -> LegacyDatasource | BaseDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
         """
         A `datasource` is provided.
         `name` should not be provided.
