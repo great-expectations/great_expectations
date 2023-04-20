@@ -144,10 +144,10 @@ def get_expectations_info_dict(
 
     for file_path in sorted(files_found):
         file_path = file_path.replace(f"{repo_path}{os.path.sep}", "")
-        name = os.path.basename(file_path).replace(".py", "")
-        if only_these_expectations and name not in only_these_expectations:
+        expectation = os.path.basename(file_path).replace(".py", "")
+        if only_these_expectations and expectation not in only_these_expectations:
             continue
-        if name in IGNORE_NON_V3_EXPECTATIONS or name in IGNORE_FAULTY_EXPECTATIONS:
+        if expectation in IGNORE_NON_V3_EXPECTATIONS or expectation in IGNORE_FAULTY_EXPECTATIONS:
             continue
 
         package_name = os.path.basename(os.path.dirname(os.path.dirname(file_path)))
@@ -164,7 +164,7 @@ def get_expectations_info_dict(
 
             if package_name == "great_expectations_experimental":
                 import_module_args = (
-                    f"expectations.{name}",
+                    f"expectations.{expectation}",
                     "great_expectations_experimental",
                 )
                 sys_path = os.path.join(f"..{os.path.sep}..", parent_dir)
@@ -176,7 +176,7 @@ def get_expectations_info_dict(
         created_at_cmd = (
             f'git log --diff-filter=A --format="%ai %ar" -- {repr(file_path)}'
         )
-        result[name] = {
+        result[expectation] = {
             "updated_at": check_output(updated_at_cmd, shell=True)
             .decode("utf-8")
             .strip(),
@@ -190,7 +190,7 @@ def get_expectations_info_dict(
             "sys_path": sys_path,
         }
         logger.debug(
-            f"{name} ({package_name}) was created {result[name]['created_at']} and updated {result[name]['updated_at']}"
+            f"{expectation} ({package_name}) was created {result[expectation]['created_at']} and updated {result[expectation]['updated_at']}"
         )
         with open(file_path) as fp:
             text = fp.read()
@@ -205,9 +205,9 @@ def get_expectations_info_dict(
             _prefix = "Core "
         else:
             _prefix = "Contrib "
-        result[name]["exp_type"] = _prefix + sorted(exp_type_set)[0]
+        result[expectation]["exp_type"] = _prefix + sorted(exp_type_set)[0]
         logger.debug(
-            f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {name} in {file_path}"
+            f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {expectation} in {file_path}"
         )
 
     os.chdir(oldpwd)
