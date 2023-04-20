@@ -257,10 +257,18 @@ quickstart = [
     ),
 ]
 
+fluent_datasources = [
+    IntegrationTestFixture(
+        name="how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py",
+    ),
+]
+
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
 docs_test_matrix += quickstart
+docs_test_matrix += fluent_datasources
 docs_test_matrix += spark_integration_tests
 docs_test_matrix += sqlite_integration_tests
 docs_test_matrix += mysql_integration_tests
