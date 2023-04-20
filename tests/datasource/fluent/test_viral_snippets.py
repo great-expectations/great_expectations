@@ -6,11 +6,9 @@ import logging
 import pathlib
 from collections import defaultdict
 from pprint import pformat as pf
+from typing import TYPE_CHECKING
 
 import pytest
-
-# apply markers to entire test module
-pytestmark = [pytest.mark.integration]
 
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
@@ -18,6 +16,14 @@ from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
     Datasource,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import CloudDataContext
+    from great_expectations.datasource.fluent import SqliteDatasource
+
+# apply markers to entire test module
+pytestmark = [pytest.mark.integration]
+
 
 logger = logging.getLogger(__file__)
 
@@ -63,7 +69,7 @@ def fluent_yaml_config_file(
         yaml_string = "\n# Fluent\n" + fluent_gx_config_yml_str
         f_append.write(yaml_string)
 
-    logger.info(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
+    logger.debug(f"  Config File Text\n-----------\n{config_file_path.read_text()}")
     return config_file_path
 
 
@@ -156,8 +162,8 @@ def test_save_project_does_not_break(fluent_file_context: FileDataContext):
 
 
 def test_variables_save_config_does_not_break(fluent_file_context: FileDataContext):
-    print(fluent_file_context.fluent_config)
-    print(fluent_file_context.variables)
+    print(f"\tcontext.fluent_config ->\n{fluent_file_context.fluent_config}\n")
+    print(f"\tcontext.variables ->\n{fluent_file_context.variables}")
     fluent_file_context.variables.save_config()
 
 
@@ -186,7 +192,7 @@ def test_save_datacontext_persists_fluent_config(
         assert ds_name in final_yaml
 
 
-def test_add_and_save_fluent_datasource(
+def test_file_context_add_and_save_fluent_datasource(
     file_dc_config_dir_init: pathlib.Path,
     fluent_only_config: GxConfig,
     db_file: pathlib.Path,
@@ -214,6 +220,41 @@ def test_add_and_save_fluent_datasource(
     assert datasource_name in final_yaml
     # ensure comments preserved
     assert "# Welcome to Great Expectations!" in final_yaml
+
+
+def test_context_add_and_save_fluent_datasource(
+    empty_contexts: CloudDataContext | FileDataContext,
+    db_file: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource_name = "save_ds_test"
+
+    context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    )
+
+    assert datasource_name in context.datasources
+
+
+def test_context_add_or_update_datasource(
+    empty_contexts: CloudDataContext | FileDataContext,
+    db_file: pathlib.Path,
+):
+    context = empty_contexts
+
+    datasource: SqliteDatasource = context.sources.add_sqlite(
+        name="save_ds_test", connection_string=f"sqlite:///{db_file}"
+    )
+
+    assert datasource.connection_string == f"sqlite:///{db_file}"
+
+    # modify the datasource
+    datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
+    context.sources.add_or_update_sqlite(datasource)
+
+    updated_datasource: SqliteDatasource = context.datasources[datasource.name]  # type: ignore[assignment]
+    assert updated_datasource.connection_string == "sqlite:///"
 
 
 if __name__ == "__main__":

@@ -819,3 +819,12 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
+
+    def _save_project_config(self) -> None:
+        """
+        See parent 'AbstractDataContext._save_project_config()` for more information.
+
+        Explicitly override base class implementation to retain legacy behavior.
+        """
+        logger.info(f"{type(self).__name__}._save_project_config() is a NoOp")
+        # TODO: this may be adjusted as part of fluent datasources save flow

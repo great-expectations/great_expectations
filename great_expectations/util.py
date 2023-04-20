@@ -55,18 +55,15 @@ from packaging import version
 from typing_extensions import Literal, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
     PluginClassNotFoundError,
     PluginModuleNotFoundError,
-)
-from great_expectations.optional_imports import (
-    sa_sql_expression_Select,
-    sqlalchemy_reflection,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
 )
 
 try:
@@ -83,7 +80,7 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
     from great_expectations.alias_types import PathStr
-    from great_expectations.data_context import FileDataContext
+    from great_expectations.data_context import CloudDataContext, FileDataContext
     from great_expectations.data_context.data_context.abstract_data_context import (
         AbstractDataContext,
     )
@@ -1704,7 +1701,7 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 
 @overload
-def get_context(
+def get_context(  # type: ignore[misc] # overlapping overload false positive?
     project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
     context_root_dir: PathStr = ...,
     runtime_environment: Optional[dict] = ...,
@@ -1718,6 +1715,24 @@ def get_context(
     ge_cloud_organization_id: None = ...,
     ge_cloud_mode: Optional[Literal[False]] = ...,
 ) -> FileDataContext:
+    ...
+
+
+@overload
+def get_context(
+    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    context_root_dir: None = ...,
+    runtime_environment: Optional[dict] = ...,
+    cloud_base_url: Optional[str] = ...,
+    cloud_access_token: Optional[str] = ...,
+    cloud_organization_id: Optional[str] = ...,
+    cloud_mode: Literal[True] = ...,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: Optional[str] = ...,
+    ge_cloud_access_token: Optional[str] = ...,
+    ge_cloud_organization_id: Optional[str] = ...,
+    ge_cloud_mode: Optional[bool] = ...,
+) -> CloudDataContext:
     ...
 
 
@@ -1993,7 +2008,7 @@ def generate_temporary_table_name(
 def get_sqlalchemy_inspector(engine):
     if version.parse(sa.__version__) < version.parse("1.4"):
         # Inspector.from_engine deprecated since 1.4, sa.inspect() should be used instead
-        insp = sqlalchemy_reflection.Inspector.from_engine(engine)
+        insp = sqlalchemy.reflection.Inspector.from_engine(engine)
     else:
         insp = sa.inspect(engine)
     return insp
@@ -2009,8 +2024,8 @@ def get_sqlalchemy_url(drivername, **credentials):
 
 
 def get_sqlalchemy_selectable(
-    selectable: Union[sa.Table, sa_sql_expression_Select]
-) -> Union[sa.Table, sa_sql_expression_Select]:
+    selectable: Union[sa.Table, sqlalchemy.Select]
+) -> Union[sa.Table, sqlalchemy.Select]:
     """
     Beginning from SQLAlchemy 1.4, a select() can no longer be embedded inside of another select() directly,
     without explicitly turning the inner select() into a subquery first. This helper method ensures that this
@@ -2021,7 +2036,7 @@ def get_sqlalchemy_selectable(
 
     https://docs.sqlalchemy.org/en/14/changelog/migration_14.html#change-4617
     """
-    if sa_sql_expression_Select and isinstance(selectable, sa_sql_expression_Select):
+    if sqlalchemy.Select and isinstance(selectable, sqlalchemy.Select):
         if version.parse(sa.__version__) >= version.parse("1.4"):
             selectable = selectable.subquery()
         else:
@@ -2058,9 +2073,9 @@ def import_make_url():
     still be accessed from sqlalchemy.engine.url to avoid import errors.
     """
     if version.parse(sa.__version__) < version.parse("1.4"):
-        from sqlalchemy.engine.url import make_url  # noqa: TID251
+        make_url = sqlalchemy.url.make_url
     else:
-        from sqlalchemy.engine import make_url  # noqa: TID251
+        make_url = sqlalchemy.engine.make_url
 
     return make_url
 

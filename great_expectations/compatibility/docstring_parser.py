@@ -1,4 +1,4 @@
-from great_expectations.optional_imports import NotImported
+from great_expectations.compatibility.not_imported import NotImported
 
 DOCSTRING_PARSER_NOT_IMPORTED = NotImported(
     "docstring_parser is not installed, please 'pip install docstring-parser'"

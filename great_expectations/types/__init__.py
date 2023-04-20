@@ -5,11 +5,7 @@ from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
 
-from great_expectations.optional_imports import (
-    SPARK_NOT_IMPORTED,
-    pyspark,
-    pyspark_sql_DataFrame,
-)
+from great_expectations.compatibility import pyspark
 
 from ..alias_types import JSONValues  # noqa: TCH001
 from ..core._docs_decorators import public_api  # noqa: F401
@@ -256,7 +252,7 @@ def safe_deep_copy(data, memo=None):
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
     """
     if isinstance(data, (pd.Series, pd.DataFrame)) or (
-        pyspark and isinstance(data, pyspark_sql_DataFrame)
+        pyspark.pyspark and isinstance(data, pyspark.DataFrame)
     ):
         return data
 

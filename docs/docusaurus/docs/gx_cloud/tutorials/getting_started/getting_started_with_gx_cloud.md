@@ -32,9 +32,9 @@ Once you have completed this guide you will have a foundation in the basics of u
 
 ### 1. Setup
 
-#### 1.1 Generate User Token
+#### 1.1 Generate access token
 
-Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate a User Token. Both `admin` and `editor` roles will suffice for this guide.
+Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate an access token. Both `admin` and `editor` roles will suffice for this guide.
 These tokens are view-once and stored as a hash in Great Expectation Cloud's backend database. Once you copy the API key and close the dialog, the Cloud UI will never show the token value again.
 
 #### 1.2 Import modules
@@ -56,11 +56,11 @@ import os
 Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTag tag="data_context" text="Data Context"/>.
 
 :::caution
-Please note that GX Cloud API tokens are sensitive information and should not be committed to version control software. Alternatively, add these as [Data Context config variables](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/)
+Please note that access tokens are sensitive information and should not be committed to version control software. Alternatively, add these as [Data Context config variables](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/)
 :::
 
 ```python title="Jupyter Notebook"
-os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<user_token_you_generated_in_the_app>"
+os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<your_gx_cloud_access_token>"
 # your organization_id is indicated on https://app.greatexpectations.io/tokens page
 os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
 
@@ -70,7 +70,7 @@ context = gx.get_context()
 ### 2. Create Datasource
 
 Modify the following snippet code to connect to your <TechnicalTag tag="datasource" text="Datasource"/>.
-In case you don't have some data handy to test in this guide, we can use the [NYC taxi data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). This is an open data set which is updated every month. Each record in the data corresponds to one taxi ride. You can find a link to it in the sniipet below.
+In case you don't have some data handy to test in this guide, we can use the [NYC taxi data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). This is an open data set which is updated every month. Each record in the data corresponds to one taxi ride. You can find a link to it in the snippet below.
 
 :::caution
 Please note you should not include sensitive info/credentials directly in the config while connecting to your Datasource, since this would be persisted in plain text in the database and presented in Cloud UI. If credentials/full connection string is required, you should use a [config variables file](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
