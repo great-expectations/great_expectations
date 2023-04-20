@@ -42,19 +42,19 @@ Because the underlying data systems are different, configuration for each type o
 
 Datasource configurations can be written in python using our fluent datasource api. The configuration will be persisted as YAML files either locally or in the cloud.  Regardless of variations due to the underlying data systems, your Datasource's configuration will look roughly like this:
 
-```python
-import great_expectations
-
-context = great_expectations.get_context()
-context.sources.add_pandas_filesystem(name="my_pandas_datasource", base_directory="path/to/data", ...)
+```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview add_datasource"
 ```
 
 Please note that this is just a broad outline of the configuration you will be making.  You will find much more detailed examples in our documentation on how to connect to specific source data systems.
 
 The `name` key will be the first you need to define.  The `name` key can be anything you want, but it is best to use a descriptive name as you will use this to reference your Datasource in the future.
-The `add_<datasource>` method will take datasource specific arguments used to configure it. For example, the `context.sources.add_postgres(name, ...)` method takes a `connection_string` that is used to connect to the database.
+The `add_<datasource>` method will take datasource specific arguments used to configure it. 
+For example, the `add_pandas_filesystem` takes a `base_directory` argument in the example above while the 
+`context.sources.add_postgres(name, ...)` method takes a `connection_string` that is used to connect to the database.
 
-Calling the `add_<datasource>` method on your context will run configuration checks. For example, it will make sure the `base_directory` exists for the `pandas_filesystem` datasource and the `connection_string` is valid for a sql database.
+Calling the `add_<datasource>` method on your context will run configuration checks. 
+For example, it will make sure the `base_directory` exists for the `pandas_filesystem` datasource and the `connection_string` is valid for a sql database.
+
 These methods also persist your datasource to the underlying storage. The storage depends on your <TechnicalTag tag="data_context" text="Data Context" />. 
 For a <TechnicalTag tag="file_data_context" text="File Data Context" /> the changes will be persisted to disk; 
 for a <TechnicalTag tag="cloud_data_context" text="Cloud Data Context" /> the changes will be persisted to the cloud;
@@ -63,7 +63,10 @@ for a <TechnicalTag tag="ephemeral_data_context" text="Ephemeral Data Context" /
 ## Accessing your Datasource from your Data Context
 
 If you need to directly access your Datasource in the future, the `context.fluent_datasources` attribute of your Data Context will provide a convenient way to do so.
- you want to view the configuration you can use `context.fluent_datasources['my_datasource_name'].yaml()`.
+ you want to view the configuration you can use:
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config"
+```
 
 ## Retrieving Batches of data with your Datasource
 
