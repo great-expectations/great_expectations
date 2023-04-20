@@ -1564,6 +1564,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
             )
             datasources.append(masked_config)
+
+        for (
+            datasource_name,
+            fluent_datasource_config,
+        ) in self.fluent_datasources.items():
+            datasources.append(fluent_datasource_config.dict())
         return datasources
 
     @public_api
