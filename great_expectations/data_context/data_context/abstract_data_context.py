@@ -703,13 +703,22 @@ class AbstractDataContext(ConfigPeer, ABC):
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _add_fluent_datasource(
-        self,
-        datasource: FluentDatasource,
-        name: str | None = None,
-    ) -> FluentDatasource:
-        datasource.name = name or datasource.name
-        return self.sources.add_datasource(name_or_datasource=datasource)
+    def _add_fluent_datasource(self, datasource: FluentDatasource):
+        # We currently don't allow one to overwrite a datasource with this internal method
+        if datasource.name in self.datasources:
+            raise gx_exceptions.DataContextError(
+                f"Can not write the fluent datasource {datasource.name} because a datasource of that "
+                "name already exists in the data context."
+            )
+        # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
+        # Without this we end up with duplicate entries for datasources in both
+        # "fluent_datasources" and "datasources" config/yaml entries.
+        if self._datasource_store.cloud_mode:
+            set_datasource = self._datasource_store.set(key=None, value=datasource)
+            if set_datasource.id:
+                logger.debug(f"Assigning `id` to '{datasource.name}'")
+                datasource.id = set_datasource.id
+        self.datasources[datasource.name] = datasource
 
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
         self.datasources[datasource.name] = datasource
@@ -813,8 +822,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
         if isinstance(datasource, FluentDatasource):
-            datasource = self._add_fluent_datasource(
-                name=name,
+            self._add_fluent_datasource(
                 datasource=datasource,
             )
         else:
