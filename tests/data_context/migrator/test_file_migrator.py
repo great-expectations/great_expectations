@@ -104,13 +104,13 @@ def test_migrate_transfers_datasources(
     tmp_path: pathlib.Path,
     construct_file_migrator: Callable,
     ephemeral_context_with_defaults: EphemeralDataContext,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
 ):
     # Test setup
     context = ephemeral_context_with_defaults
     datasource_name = "my_datasource_awaiting_migration"
 
-    config_dict = datasource_config.to_dict()
+    config_dict = block_config_datasource_config.to_dict()
     for attr in ("class_name", "module_name"):
         config_dict.pop(attr)
     config_dict["name"] = datasource_name

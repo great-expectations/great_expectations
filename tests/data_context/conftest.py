@@ -21,6 +21,8 @@ from great_expectations.data_context.types.base import (
     DatasourceConfig,
 )
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.fluent import PandasFilesystemDatasource
+from great_expectations.datasource.fluent.pandas_file_path_datasource import CSVAsset
 from tests.integration.usage_statistics.test_integration_usage_statistics import (
     USAGE_STATISTICS_QA_URL,
 )
@@ -482,7 +484,7 @@ def mock_response_factory() -> Callable[
 
 
 @pytest.fixture
-def datasource_config() -> DatasourceConfig:
+def block_config_datasource_config() -> DatasourceConfig:
     return DatasourceConfig(
         class_name="Datasource",
         execution_engine={
@@ -504,6 +506,20 @@ def datasource_config() -> DatasourceConfig:
                 },
             }
         },
+    )
+
+
+@pytest.fixture
+def fluent_datasource_config() -> PandasFilesystemDatasource:
+    return PandasFilesystemDatasource(
+        name="my_fluent_pandas_filesystem_datasource",
+        base_directory="/path/to/trip_data",
+        assets=[
+            CSVAsset(
+                name="my_csv",
+                batching_regex=r"yellow_tripdata_(\d{4})-(\d{2})\.csv$",
+            )
+        ],
     )
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Mapping
+from typing import TYPE_CHECKING, Mapping
 from unittest import mock
 
 import pytest
@@ -27,6 +27,9 @@ from great_expectations.data_context.types.base import (
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+
+if TYPE_CHECKING:
+    from great_expectations.datasource.fluent import PandasFilesystemDatasource
 
 
 class DatasourceStoreSpy(DatasourceStore):
@@ -149,17 +152,25 @@ class EphemeralDataContextSpy(EphemeralDataContext):
 
 
 @pytest.fixture
-def datasource_name() -> str:
+def block_config_datasource_name() -> str:
     return "my_pandas_datasource"
 
 
 @pytest.fixture
+def fluent_datasource_name() -> str:
+    return "my_fluent_pandas_filesystem_datasource"
+
+
+@pytest.fixture
 def in_memory_data_context(
-    datasource_name: str,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_name: str,
+    block_config_datasource_config: DatasourceConfig,
+    fluent_datasource_name: str,
+    fluent_datasource_config: PandasFilesystemDatasource,
 ) -> EphemeralDataContextSpy:
     datasources = {
-        datasource_name: datasource_config,
+        block_config_datasource_name: block_config_datasource_config,
+        fluent_datasource_name: fluent_datasource_config,
     }
     config = DataContextConfig(
         datasources=datasources, store_backend_defaults=InMemoryStoreBackendDefaults()
@@ -254,11 +265,11 @@ def test_update_project_config(
 @pytest.mark.unit
 def test_add_datasource_with_existing_datasource(
     in_memory_data_context: EphemeralDataContextSpy,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
 ):
     context = in_memory_data_context
 
-    config_dict = datasource_config.to_dict()
+    config_dict = block_config_datasource_config.to_dict()
     for attr in ("class_name", "module_name"):
         config_dict.pop(attr)
     config_dict["name"] = "my_datasource"
@@ -311,8 +322,8 @@ def test_add_datasource_conflicting_args_failure(
 @pytest.mark.unit
 def test_add_or_update_datasource_updates_with_individual_args_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
-    datasource_name: str,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_name: str,
+    block_config_datasource_config: DatasourceConfig,
 ):
     context = in_memory_data_context
 
@@ -320,11 +331,11 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
     num_datasource_configs_before = len(context.config.datasources)
 
     assert (
-        datasource_name in context.datasources
-    ), f"Downstream logic in the test relies on {datasource_name} being a datasource; please check your fixtures."
+        block_config_datasource_name in context.datasources
+    ), f"Downstream logic in the test relies on {block_config_datasource_name} being a datasource; please check your fixtures."
 
-    config_dict = datasource_config.to_dict()
-    config_dict["name"] = datasource_name
+    config_dict = block_config_datasource_config.to_dict()
+    config_dict["name"] = block_config_datasource_name
 
     id = "d53c2384-f973-4a0c-9c85-af1d67c06f58"
     config_dict["id"] = id
@@ -344,8 +355,8 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
 @pytest.mark.unit
 def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
-    datasource_name: str,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_name: str,
+    block_config_datasource_config: DatasourceConfig,
 ):
     context = in_memory_data_context
 
@@ -353,11 +364,11 @@ def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
     num_datasource_configs_before = len(context.config.datasources)
 
     assert (
-        datasource_name in context.datasources
-    ), f"Downstream logic in the test relies on {datasource_name} being a datasource; please check your fixtures."
+        block_config_datasource_name in context.datasources
+    ), f"Downstream logic in the test relies on {block_config_datasource_name} being a datasource; please check your fixtures."
 
-    config_dict = datasource_config.to_dict()
-    config_dict["name"] = datasource_name
+    config_dict = block_config_datasource_config.to_dict()
+    config_dict["name"] = block_config_datasource_name
     for attr in ("class_name", "module_name"):
         config_dict.pop(attr)
 
@@ -387,7 +398,7 @@ def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
 @pytest.mark.parametrize("use_existing_datasource", [True, False])
 def test_add_or_update_datasource_adds_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     use_existing_datasource: bool,
 ):
     context = in_memory_data_context
@@ -395,12 +406,12 @@ def test_add_or_update_datasource_adds_successfully(
     num_datasource_before = len(context.datasources)
     num_datasource_configs_before = len(context.config.datasources)
 
-    datasource_name = "my_brand_new_datasource"
+    block_config_datasource_name = "my_brand_new_datasource"
 
-    assert datasource_name not in context.datasources
+    assert block_config_datasource_name not in context.datasources
 
-    config_dict = datasource_config.to_dict()
-    config_dict["name"] = datasource_name
+    config_dict = block_config_datasource_config.to_dict()
+    config_dict["name"] = block_config_datasource_name
 
     if use_existing_datasource:
         for attr in ("class_name", "module_name"):
@@ -413,7 +424,7 @@ def test_add_or_update_datasource_adds_successfully(
     num_datasource_after = len(context.datasources)
     num_datasource_configs_after = len(context.config.datasources)
 
-    assert datasource_name in context.datasources
+    assert block_config_datasource_name in context.datasources
     assert num_datasource_after == num_datasource_before + 1
     assert num_datasource_configs_after == num_datasource_configs_before + 1
     assert context.datasource_store.save_count == 1
