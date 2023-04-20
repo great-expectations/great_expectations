@@ -4,6 +4,37 @@
 Changelog
 #########
 
+0.16.8
+-----------------
+* [FEATURE] add Fluent Datasources to `CloudDataContext` ([#7570](https://github.com/great-expectations/great_expectations/pull/7570))
+* [BUGFIX] fix marshmallow schema for SQLAlchemy `connect_args` passthrough ([#7614](https://github.com/great-expectations/great_expectations/pull/7614))
+* [BUGFIX] MapCondition Memory Inefficiencies in Spark ([#7626](https://github.com/great-expectations/great_expectations/pull/7626))
+* [BUGFIX] Fix capitalone_dataprofiler_expectations imports ([#7658](https://github.com/great-expectations/great_expectations/pull/7658))
+* [BUGFIX] CloudDataContext creates `great_expectations.yml` when adding a Fluent datasource ([#7657](https://github.com/great-expectations/great_expectations/pull/7657))
+* [BUGFIX] Correct GX configuration structure that incorporates both V3 and Fluent Datasources ([#7661](https://github.com/great-expectations/great_expectations/pull/7661))
+* [BUGFIX] Patch broken `include_rendered_content` test in advance of `0.16.8` release ([#7663](https://github.com/great-expectations/great_expectations/pull/7663))
+* [DOCS] Corrects Step Numbering in How to instantiate a specific Filesystem Data Context ([#7612](https://github.com/great-expectations/great_expectations/pull/7612)) (thanks @kwcanuck)
+* [DOCS] Corrects Heading Issue in How to host and share Data Docs on Azure Blob Storage ([#7620](https://github.com/great-expectations/great_expectations/pull/7620)) (thanks @kwcanuck)
+* [DOCS] Update overview.md ([#7627](https://github.com/great-expectations/great_expectations/pull/7627))
+* [DOCS] Updates the "Interactive Mode" guide for creating Expectations ([#7624](https://github.com/great-expectations/great_expectations/pull/7624))
+* [DOCS] Updates the language in the banner linking the legacy site to the current docs. ([#7636](https://github.com/great-expectations/great_expectations/pull/7636))
+* [DOCS] Improve expect_column_values_to_be_of_type docstring ([#7632](https://github.com/great-expectations/great_expectations/pull/7632))
+* [DOCS] Corrects a typo found in the navigation section of the legacy docs ([#7643](https://github.com/great-expectations/great_expectations/pull/7643))
+* [DOCS] Add lakeFS to list of data version control tools ([#7642](https://github.com/great-expectations/great_expectations/pull/7642)) (thanks @rmoff)
+* [DOCS] Standardize language around GX Cloud access tokens ([#7621](https://github.com/great-expectations/great_expectations/pull/7621))
+* [DOCS] Added IAM user and IAM assume role doc ([#7634](https://github.com/great-expectations/great_expectations/pull/7634)) (thanks @Reactor11)
+* [DOCS] update to location of cloud callout in the OSS Quickstart ([#7616](https://github.com/great-expectations/great_expectations/pull/7616))
+* [MAINTENANCE] Update `teams.yml` ([#7623](https://github.com/great-expectations/great_expectations/pull/7623))
+* [MAINTENANCE] Utilize `NotImported` for SQLAlchemy, Google Cloud Services, Azure Blob Storage, and Spark import usage ([#7617](https://github.com/great-expectations/great_expectations/pull/7617))
+* [MAINTENANCE] Remove stray cloud test marker. ([#7639](https://github.com/great-expectations/great_expectations/pull/7639))
+* [MAINTENANCE] Upgrade mypy to 1.2.0 ([#7645](https://github.com/great-expectations/great_expectations/pull/7645))
+* [MAINTENANCE] Static type checking with python 3.8 ([#7637](https://github.com/great-expectations/great_expectations/pull/7637))
+* [MAINTENANCE] Static type checking with python 3.8 followup ([#7647](https://github.com/great-expectations/great_expectations/pull/7647))
+* [MAINTENANCE] The 'sklearn' PyPI package is deprecated, use 'scikit-learn' ([#7651](https://github.com/great-expectations/great_expectations/pull/7651))
+* [MAINTENANCE] numpy.typing only available after v1.20 ([#7654](https://github.com/great-expectations/great_expectations/pull/7654))
+* [MAINTENANCE] Update NotImported mechanism to use scoped compatibility modules ([#7635](https://github.com/great-expectations/great_expectations/pull/7635))
+* [MAINTENANCE] Uncap `altair` version, and bump minimum version to `4.2.1`. Also uncap `urllib3` version, and bump minimum version to `1.26` ([#7650](https://github.com/great-expectations/great_expectations/pull/7650))
+
 0.16.7
 -----------------
 * [FEATURE] Added AssumeRole Feature ([#7547](https://github.com/great-expectations/great_expectations/pull/7547)) (thanks @Reactor11)
