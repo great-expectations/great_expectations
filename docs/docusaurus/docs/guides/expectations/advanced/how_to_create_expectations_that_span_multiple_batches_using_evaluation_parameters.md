@@ -36,21 +36,14 @@ We'll call one of these <TechnicalTag tag="validator" text="Validators" /> the *
 
 ### 3. Disable interactive evaluation for the downstream Validator
 
-```python
-downstream_validator.interactive_evaluation = False
+```python name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py disable interactive_evaluation"
 ```
 
 Disabling interactive evaluation allows you to declare an Expectation even when it cannot be evaluated immediately.
 
 ### 4. Define an Expectation using an Evaluation Parameter on the downstream Validator
 
-```python
-eval_param_urn = 'urn:great_expectations:validations:my_expectation_suite_1:expect_table_row_count_to_be_between.result.observed_value'
-downstream_validator.expect_table_row_count_to_equal(
-   value={
-      '$PARAMETER': eval_param_urn, # this is the actual parameter we're going to use in the validation
-   }
-)
+```python name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py add expectation with evaluation parameter"
 ```
 
 The core of this is a ``$PARAMETER : URN`` pair. When Great Expectations encounters a ``$PARAMETER`` flag during <TechnicalTag tag="validation" text="Validation" />, it will replace the ``URN`` with a value retrieved from an Evaluation Parameter Store or <TechnicalTag tag="metric_store" text="Metrics Store" /> (see also [How to configure a MetricsStore](../../../guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)).
@@ -59,17 +52,7 @@ This declaration above includes two ``$PARAMETERS``. The first is the real param
 
 When executed in the notebook, this Expectation will generate a Validation Result. Most values will be missing, since interactive evaluation was disabled.
 
-```python
-{
-   "result": {},
-   "success": null,
-   "meta": {},
-   "exception_info": {
-      "raised_exception": false,
-      "exception_traceback": null,
-      "exception_message": null
-   }
-}
+```python name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py expected_validation_result"
  ```
 
 :::warning
@@ -80,28 +63,23 @@ Your URN must be exactly correct in order to work in production. Unfortunately, 
 
 ### 5. Save your Expectation Suite
 
- ```python
- downstream_validator.save_expectation_suite(discard_failed_expectations=False)
+ ```python name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py save downstream_expectation_suite"
  ```
 
 This step is necessary because your ``$PARAMETER`` will only function properly when invoked within a Validation operation with multiple Validators. The simplest way to execute such an operation is through a :ref:`Validation Operator <reference__core_concepts__validation__validation_operator>`, and Validation Operators are configured to load Expectation Suites from <TechnicalTag tag="expectation_store" text="Expectation Stores" />, not memory.
 
-### 6. Execute an existing Checkpoint
+### 6. Execute a Checkpoint
 
-You can do this within your notebook by running ``context.run_checkpoint``.
+This will execute both validations and pass the evaluation parameter from the upstream validation to the downstream.
 
-```python
-results = context.run_checkpoint(
-  checkpoint_name="my_checkpoint"
-)
+```python name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py run checkpoint"
 ```
 
 ### 7. Rebuild Data Docs and review results in docs
 
 You can do this within your notebook by running:
 
-```python
-context.build_data_docs()
+```python name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py build data docs"
 ```
 
 Once your <TechnicalTag tag="data_docs" text="Data Docs" /> rebuild, open them in a browser and navigate to the page for the new Validation Result.
