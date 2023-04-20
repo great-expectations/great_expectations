@@ -62,8 +62,8 @@ for a <TechnicalTag tag="ephemeral_data_context" text="Ephemeral Data Context" /
 
 ## Accessing your Datasource from your Data Context
 
-If you need to directly access your Datasource in the future, the `context.datasources` method of your Data Context will provide a convenient way to do so.
-If you want to view the configuration you can use `context.datasources['my_datasource_name'].yaml()`.
+If you need to directly access your Datasource in the future, the `context.fluent_datasources` attribute of your Data Context will provide a convenient way to do so.
+ you want to view the configuration you can use `context.fluent_datasources['my_datasource_name'].yaml()`.
 
 ## Retrieving Batches of data with your Datasource
 
