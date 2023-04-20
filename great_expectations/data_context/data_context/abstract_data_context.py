@@ -892,7 +892,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource,
         save_changes: bool | None = None,
-    ) -> Datasource:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """Updates a Datasource that already exists in the store.
 
         Args:
@@ -915,7 +915,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         self,
         datasource: LegacyDatasource | BaseDatasource,
         save_changes: bool,
-    ) -> Datasource:
+    ) -> BaseDatasource | LegacyDatasource:
         name = datasource.name
         config = datasource.config
         # `instantiate_class_from_config` requires `class_name`
@@ -990,11 +990,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._validate_add_datasource_args(name=name, datasource=datasource)
         return_datasource: BaseDatasource | FluentDatasource | LegacyDatasource
         if isinstance(datasource, FluentDatasource):
-            fluent_datasource = self._add_fluent_datasource(
-                name=name,
+            self._add_fluent_datasource(
                 datasource=datasource,
             )
-            return_datasource = fluent_datasource
+            return_datasource = datasource
         else:
             block_config_datasource = self._add_block_config_datasource(
                 name=name,
