@@ -513,9 +513,7 @@ class _SourceFactories:
                 datasource_name,  # type:ignore[arg-type] # datasource_name is expected to be a str from assignment above
                 datasource_type,
             )
-            self._data_context.delete_datasource(
-                datasource_name=datasource_name  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
-            )
+            self._data_context.delete_datasource(datasource_name=datasource_name)
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
             return self.create_add_crud_method(datasource_type)(
@@ -553,9 +551,7 @@ class _SourceFactories:
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
             )
-            self._data_context.delete_datasource(
-                datasource_name=datasource_name  # type: ignore[arg-type] # expected str only
-            )
+            self._data_context.delete_datasource(datasource_name=datasource_name)
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
             return self.create_add_crud_method(datasource_type)(
