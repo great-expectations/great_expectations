@@ -993,9 +993,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._validate_add_datasource_args(name=name, datasource=datasource)
         return_datasource: BaseDatasource | FluentDatasource | LegacyDatasource
         if isinstance(datasource, FluentDatasource):
-            self._add_fluent_datasource(
-                datasource=datasource,
-            )
+            if datasource.name in self.datasources:
+                self._update_fluent_datasource(datasource=datasource)
+            else:
+                self._add_fluent_datasource(datasource=datasource)
             return_datasource = datasource
         else:
             block_config_datasource = self._add_block_config_datasource(
