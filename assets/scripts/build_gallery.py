@@ -144,12 +144,12 @@ def get_expectations_info_dict(
 
     for file_path in sorted(files_found):
         file_path = file_path.replace(f"{repo_path}{os.path.sep}", "")
-        expectation = os.path.basename(file_path).replace(".py", "")
-        if only_these_expectations and expectation not in only_these_expectations:
+        expectation_name = os.path.basename(file_path).replace(".py", "")
+        if only_these_expectations and expectation_name not in only_these_expectations:
             continue
         if (
-            expectation in IGNORE_NON_V3_EXPECTATIONS
-            or expectation in IGNORE_FAULTY_EXPECTATIONS
+            expectation_name in IGNORE_NON_V3_EXPECTATIONS
+            or expectation_name in IGNORE_FAULTY_EXPECTATIONS
         ):
             continue
 
@@ -167,7 +167,7 @@ def get_expectations_info_dict(
 
             if package_name == "great_expectations_experimental":
                 import_module_args = (
-                    f"expectations.{expectation}",
+                    f"expectations.{expectation_name}",
                     "great_expectations_experimental",
                 )
                 sys_path = os.path.join(f"..{os.path.sep}..", parent_dir)
@@ -179,7 +179,7 @@ def get_expectations_info_dict(
         created_at_cmd = (
             f'git log --diff-filter=A --format="%ai %ar" -- {repr(file_path)}'
         )
-        result[expectation] = {
+        result[expectation_name] = {
             "updated_at": check_output(updated_at_cmd, shell=True)
             .decode("utf-8")
             .strip(),
@@ -193,7 +193,7 @@ def get_expectations_info_dict(
             "sys_path": sys_path,
         }
         logger.debug(
-            f"{expectation} ({package_name}) was created {result[expectation]['created_at']} and updated {result[expectation]['updated_at']}"
+            f"{expectation_name} ({package_name}) was created {result[expectation_name]['created_at']} and updated {result[expectation_name]['updated_at']}"
         )
         with open(file_path) as fp:
             text = fp.read()
@@ -208,9 +208,9 @@ def get_expectations_info_dict(
             _prefix = "Core "
         else:
             _prefix = "Contrib "
-        result[expectation]["exp_type"] = _prefix + sorted(exp_type_set)[0]
+        result[expectation_name]["exp_type"] = _prefix + sorted(exp_type_set)[0]
         logger.debug(
-            f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {expectation} in {file_path}"
+            f"Expectation type {_prefix}{sorted(exp_type_set)[0]} for {expectation_name} in {file_path}"
         )
 
     os.chdir(oldpwd)
@@ -257,26 +257,28 @@ def get_expectation_instances(expectations_info):
     import great_expectations
 
     expectation_instances = {}
-    for expectation in expectations_info:
-        sys_path = expectations_info[expectation]["sys_path"]
+    for expectation_name in expectations_info:
+        sys_path = expectations_info[expectation_name]["sys_path"]
         if sys_path and sys_path not in sys.path:
             sys.path.append(sys_path)
-        import_module_args = expectations_info[expectation]["import_module_args"]
+        import_module_args = expectations_info[expectation_name]["import_module_args"]
         if import_module_args:
             try:
                 importlib.import_module(*import_module_args)
             except (ModuleNotFoundError, ImportError, Exception) as e:
-                logger.error(f"Failed to load expectation: {expectation}")
+                logger.error(f"Failed to load expectation_name: {expectation_name}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
-                    f"\n\n----------------\n{expectation} ({expectations_info[expectation]['package']})\n"
+                    f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
                 )
                 expectation_tracebacks.write(traceback.format_exc())
                 continue
 
         expectation_instances[
-            expectation
-        ] = great_expectations.expectations.registry.get_expectation_impl(expectation)()
+            expectation_name
+        ] = great_expectations.expectations.registry.get_expectation_impl(
+            expectation_name
+        )()
     return expectation_instances
 
 
@@ -466,10 +468,10 @@ def build_gallery(
 
     # Get Expectation instances and run diagnostics
     expectation_instances = get_expectation_instances(expectations_info)
-    for expectation, instance in sorted(expectation_instances.items()):
-        logger.debug(f"Running diagnostics for expectation: {expectation}")
+    for expectation_name, expectation_instance in sorted(expectation_instances.items()):
+        logger.debug(f"Running diagnostics for expectation_name: {expectation_name}")
         try:
-            diagnostics = instance.run_diagnostics(
+            diagnostics = expectation_instance.run_diagnostics(
                 ignore_suppress=ignore_suppress,
                 ignore_only_for=ignore_only_for,
                 for_gallery=True,
@@ -477,17 +479,17 @@ def build_gallery(
                 only_consider_these_backends=only_consider_these_backends,
                 context=context,
             )
-            diagnostic_objects[expectation] = diagnostics
+            diagnostic_objects[expectation_name] = diagnostics
             checklist_string = diagnostics.generate_checklist()
             expectation_checklists.write(
-                f"\n\n----------------\n{expectation} ({expectations_info[expectation]['package']})\n"
+                f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
             )
             expectation_checklists.write(f"{checklist_string}\n")
             if diagnostics["description"]["docstring"]:
                 expectation_docstrings.write(
                     "\n\n"
                     + "=" * 80
-                    + f"\n\n{expectation} ({expectations_info[expectation]['package']})\n"
+                    + f"\n\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
                 )
                 expectation_docstrings.write(
                     f"{diagnostics['description']['docstring']}\n"
@@ -500,10 +502,10 @@ def build_gallery(
                     f"{diagnostics['description']['docstring']}\n"
                 )
         except:
-            logger.error(f"Failed to run diagnostics for: {expectation}")
+            logger.error(f"Failed to run diagnostics for: {expectation_name}")
             print(traceback.format_exc())
             expectation_tracebacks.write(
-                f"\n\n----------------\n{expectation} ({expectations_info[expectation]['package']})\n"
+                f"\n\n----------------\n{expectation_name} ({expectations_info[expectation_name]['package']})\n"
             )
             expectation_tracebacks.write(traceback.format_exc())
         else:
@@ -524,20 +526,20 @@ def build_gallery(
                 diagnostics_json_dict.pop("examples")
 
                 # Add non-backend/test specific info from diagnostics to the in-memory dict
-                expectations_info[expectation].update(diagnostics_json_dict)
+                expectations_info[expectation_name].update(diagnostics_json_dict)
 
                 # Add test results to gallery_info_by_backend
                 for test_result_counts in backend_test_result_counts:
                     _backend = test_result_counts["backend"]
-                    gallery_info_by_backend[_backend][expectation] = {
+                    gallery_info_by_backend[_backend][expectation_name] = {
                         "backend_test_result_counts": [test_result_counts],
                     }
 
             except TypeError as e:
-                logger.error(f"Failed to create JSON for: {expectation}")
+                logger.error(f"Failed to create JSON for: {expectation_name}")
                 print(traceback.format_exc())
                 expectation_tracebacks.write(
-                    f"\n\n----------------\n[JSON write fail] {expectation} ({expectations_info[expectation]['package']})\n"
+                    f"\n\n----------------\n[JSON write fail] {expectation_name} ({expectations_info[expectation_name]['package']})\n"
                 )
                 expectation_tracebacks.write(traceback.format_exc())
 
