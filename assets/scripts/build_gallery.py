@@ -147,7 +147,10 @@ def get_expectations_info_dict(
         expectation = os.path.basename(file_path).replace(".py", "")
         if only_these_expectations and expectation not in only_these_expectations:
             continue
-        if expectation in IGNORE_NON_V3_EXPECTATIONS or expectation in IGNORE_FAULTY_EXPECTATIONS:
+        if (
+            expectation in IGNORE_NON_V3_EXPECTATIONS
+            or expectation in IGNORE_FAULTY_EXPECTATIONS
+        ):
             continue
 
         package_name = os.path.basename(os.path.dirname(os.path.dirname(file_path)))
