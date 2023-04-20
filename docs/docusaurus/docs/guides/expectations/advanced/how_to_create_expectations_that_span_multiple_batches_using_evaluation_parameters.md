@@ -120,12 +120,6 @@ You can do this within your notebook by running:
 context.build_data_docs()
 ```
 
-You can also execute from the command line with:
-
-```bash
-great_expectations docs build
-```
-
 Once your <TechnicalTag tag="data_docs" text="Data Docs" /> rebuild, open them in a browser and navigate to the page for the new Validation Result.
 
 If your Evaluation Parameter was executed successfully, you'll see something like this:
