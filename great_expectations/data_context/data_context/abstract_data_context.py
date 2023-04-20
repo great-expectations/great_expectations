@@ -714,9 +714,6 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
         self.datasources[datasource.name] = datasource
 
-    def _delete_fluent_datasource(self, datasource_name: str) -> None:
-        self.datasources.pop(datasource_name, None)
-
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
         self.variables.config = project_config
@@ -1448,10 +1445,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
         # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource: Union[
-            LegacyDatasource, BaseDatasource, FluentDatasource
-        ] = self._instantiate_datasource_from_config(
-            raw_config=raw_config, substituted_config=substituted_config
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = (
+            self._instantiate_datasource_from_config(
+                raw_config=raw_config, substituted_config=substituted_config
+            )
         )
         if isinstance(datasource, FluentDatasource):
             datasource._data_context = self
