@@ -447,45 +447,6 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Contributing',
-      link: { type: 'doc', id: 'contributing/contributing' },
-      items: [
-        {
-          type: 'category',
-          label: 'Contributing specifics',
-          items: [
-            {
-              type: 'category',
-              label: 'How to contribute how-to guides',
-              items: [
-                { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
-                { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
-              ]
-            },
-            {
-              type: 'category',
-              label: 'How to contribute integration documentation',
-              items: [
-                'integrations/contributing_integration',
-                { type: 'doc', id: 'integrations/integration_template', label: 'TEMPLATE Integration Document' }
-              ]
-            },
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Style guides',
-          items: [
-            { type: 'doc', id: 'contributing/style_guides/docs_style' },
-            { type: 'doc', id: 'contributing/style_guides/code_style' },
-            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' }
-          ]
-        },
-        'contributing/index'
-      ]
-    },
-    {
-      type: 'category',
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [

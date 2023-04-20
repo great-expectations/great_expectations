@@ -15,9 +15,9 @@ The following are the readiness levels for Great Expectations features and code:
     </ul>
 </div>
 
-These readiness levels allow experimentation, without the need for unnecessary changes as features and APIs evolve. These readiness levels also help streamline development, by providing contributors with a clear, incremental path for creating and improving the Great Expectations code base.
+These readiness levels allow experimentation, without the need for unnecessary changes as features and APIs evolve. These readiness levels also help streamline development by providing contributors with a clear, incremental path for creating and improving the Great Expectations code base.
 
-The following table details Great Expectations readiness levels. Great Expectations uses a cautious approach when determining if a feature or code change should be moved to the next readiness level. If you have need a specific feature or code change advanced, open a GitHub issue.
+The following table details Great Expectations readiness levels. Great Expectations uses a cautious approach when determining if a feature or code change should be moved to the next readiness level. If you need a specific feature or code change advanced, open a GitHub issue.
 
 
 | Criteria                                 | <i class="fas fa-circle" style={{color: "#dc3545"}}></i> Experimental <br/>Try, but do not rely | <i class="fas fa-circle" style={{color: "#ffc107"}}></i> Beta <br/>Ready for early adopters | <i class="fas fa-check-circle" style={{color: "#28a745"}}></i> Production <br/>Ready for general use |
@@ -36,7 +36,7 @@ The following table details Great Expectations readiness levels. Great Expectati
 
 ## Expectation contributions
 
-The workflow detailed in [Creating Custom Expectations](../guides/expectations/creating_custom_expectations/overview.md) explains how you can create an Expectation with an experimental status. The `print_diagnostic_checklist()` method provides you with a list of requirements that you must meet to move your Expectation from experimental to beta, and then to production. The first five requirements are required for experimental status, the following three are required for beta status, and the final two are required for production status.
+[Creating Custom Expectations](../guides/expectations/creating_custom_expectations/overview.md) explains how you can create an Expectation with an experimental status. The `print_diagnostic_checklist()` method provides you with a list of requirements that you must meet to move your Expectation from experimental to beta, and then to production. The first five requirements are required for experimental status, the following three are required for beta status, and the final two are required for production status.
 
 | Criteria                                 | <i class="fas fa-circle" style={{color: "#dc3545"}}></i> Experimental <br/>Try, but do not rely | <i class="fas fa-circle" style={{color: "#ffc107"}}></i> Beta <br/>Ready for early adopters | <i class="fas fa-check-circle" style={{color: "#28a745"}}></i> Production <br/>Ready for general use |
 |------------------------------------------|:------------------------------------:|:--------------------------------:|:-----------------------------------:|

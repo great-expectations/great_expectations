@@ -57,7 +57,7 @@ To request or submit a Great Expectations documentation or code change, the foll
 6. Run the following command to create a branch for your changes:
 
     ```sh
-    git remote add upstream git@github.com:great-expectations/great_expectations.git
+    git checkout -b <branch-name>
     ```
 ## Install Python dependencies
 

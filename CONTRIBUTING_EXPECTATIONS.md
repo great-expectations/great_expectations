@@ -45,7 +45,7 @@ To submit a custom Expectation to Great Expectations for consideration, you comp
 6. Run the following command to create a branch for your changes:
 
     ```sh
-    git remote add upstream git@github.com:great-expectations/great_expectations.git
+    git checkout -b <branch-name>
     ```
 
 ## Generate the Expectation validation checklist
