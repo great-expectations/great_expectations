@@ -248,6 +248,7 @@ stages:
 
           - script: |
               pytest -v --no-sqlalchemy --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
+              pytest -v --no-sqlalchemy --docs-tests -m integration -k "test_docs[how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters]" tests/integration/test_script_runner.py
             displayName: 'Run Quickstart'
 
 
