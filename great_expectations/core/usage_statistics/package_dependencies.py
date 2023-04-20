@@ -105,6 +105,7 @@ class GXDependencies:
             "pytest-random-order",
             "pytest-timeout",
             "requirements-parser",
+            "responses",
             "snapshottest",
             "snowflake-connector-python",
             "snowflake-sqlalchemy",
@@ -145,6 +146,7 @@ class GXDependencies:
         "pytest-icdiff",
         "pytest-timeout",
         "requirements-parser",
+        "responses",
         "snapshottest",
         # "sqlalchemy",  # Not excluded from tracking
         "trino",
@@ -195,7 +197,6 @@ class GXDependencies:
         "scikit-learn",
         "shapely",
         "simple_icd_10",
-        "sklearn",
         "sympy",
         "tensorflow",
         "timezonefinder",

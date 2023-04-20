@@ -25,7 +25,9 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
     SINGLE_DATE_PART_BATCH_IDENTIFIERS,
     SINGLE_DATE_PART_DATE_PARTS,
 )
-from great_expectations.optional_imports import F, pyspark_sql_DataFrame, pyarrow
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility import pyarrow
 
 # Here we add SparkDataSplitter specific test cases to the generic test cases:
 SINGLE_DATE_PART_DATE_PARTS += [
@@ -56,7 +58,7 @@ def simple_multi_year_spark_df(spark_session):
         ("2020-12-04 12:00:00.000",),
     ]
 
-    spark_df: pyspark_sql_DataFrame = spark_session.createDataFrame(
+    spark_df: pyspark.DataFrame = spark_session.createDataFrame(
         data=spark_df_data, schema=["input_timestamp"]
     )
     spark_df = spark_df.withColumn("timestamp", F.to_timestamp("input_timestamp"))
@@ -77,10 +79,10 @@ def test_get_batch_with_split_on_year(
     num_values_in_df,
     spark_session,
     basic_spark_df_execution_engine,
-    simple_multi_year_spark_df: pyspark_sql_DataFrame,
+    simple_multi_year_spark_df: pyspark.DataFrame,
 ):
 
-    split_df: pyspark_sql_DataFrame = basic_spark_df_execution_engine.get_batch_data(
+    split_df: pyspark.DataFrame = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_spark_df,
             splitter_method="split_on_year",
@@ -112,10 +114,10 @@ def test_get_batch_with_split_on_date_parts_day(
     num_values_in_df,
     spark_session,
     basic_spark_df_execution_engine,
-    simple_multi_year_spark_df: pyspark_sql_DataFrame,
+    simple_multi_year_spark_df: pyspark.DataFrame,
 ):
 
-    split_df: pyspark_sql_DataFrame = basic_spark_df_execution_engine.get_batch_data(
+    split_df: pyspark.DataFrame = basic_spark_df_execution_engine.get_batch_data(
         RuntimeDataBatchSpec(
             batch_data=simple_multi_year_spark_df,
             splitter_method="split_on_date_parts",
@@ -152,7 +154,7 @@ def test_split_on_date_parts_single_date_parts(
     """
     data_splitter: SparkDataSplitter = SparkDataSplitter()
     column_name: str = "timestamp"
-    result: pyspark_sql_DataFrame = data_splitter.split_on_date_parts(
+    result: pyspark.DataFrame = data_splitter.split_on_date_parts(
         df=simple_multi_year_spark_df,
         column_name=column_name,
         batch_identifiers={column_name: batch_identifiers_for_column},
@@ -181,7 +183,7 @@ def test_split_on_date_parts_multiple_date_parts(
     """
     data_splitter: SparkDataSplitter = SparkDataSplitter()
     column_name: str = "timestamp"
-    result: pyspark_sql_DataFrame = data_splitter.split_on_date_parts(
+    result: pyspark.DataFrame = data_splitter.split_on_date_parts(
         df=simple_multi_year_spark_df,
         column_name=column_name,
         batch_identifiers={column_name: batch_identifiers_for_column},
@@ -208,7 +210,7 @@ def test_named_date_part_methods(
     mock_split_on_date_parts: mock.MagicMock,
     splitter_method_name: str,
     called_with_date_parts: List[DatePart],
-    simple_multi_year_spark_df: pyspark_sql_DataFrame,
+    simple_multi_year_spark_df: pyspark.DataFrame,
 ):
     """Test that a partially pre-filled version of split_on_date_parts() was called with the appropriate params.
     For example, split_on_year.
@@ -301,7 +303,7 @@ def test_get_batch_empty_splitter_tsv(
 
 
 @pytest.mark.skipif(
-    not pyarrow,
+    not pyarrow.pyarrow,
     reason='Could not import "pyarrow"',
 )
 def test_get_batch_empty_splitter_parquet(

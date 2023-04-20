@@ -5,10 +5,10 @@ from typing import Callable
 
 import pandas as pd
 
-from great_expectations.optional_imports import (
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.not_imported import (
     is_version_greater_or_equal,
     is_version_less_than,
-    sqlalchemy,
 )
 from great_expectations.warnings import (
     warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0,
@@ -32,7 +32,9 @@ def execute_pandas_reader_fn(
         dataframe or list of dataframes
     """
     if is_version_less_than(pd.__version__, "2.0.0"):
-        if sqlalchemy and is_version_greater_or_equal(sqlalchemy.__version__, "2.0.0"):
+        if sqlalchemy.sqlalchemy and is_version_greater_or_equal(
+            sqlalchemy.sqlalchemy.__version__, "2.0.0"
+        ):
             warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
@@ -69,7 +71,9 @@ def pandas_read_sql(sql, con, **kwargs) -> pd.DataFrame:
         dataframe
     """
     if is_version_less_than(pd.__version__, "2.0.0"):
-        if sqlalchemy and is_version_greater_or_equal(sqlalchemy.__version__, "2.0.0"):
+        if sqlalchemy.sqlalchemy and is_version_greater_or_equal(
+            sqlalchemy.sqlalchemy.__version__, "2.0.0"
+        ):
             warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
@@ -104,7 +108,9 @@ def pandas_read_sql_query(sql, con, **kwargs) -> pd.DataFrame:
         dataframe
     """
     if is_version_less_than(pd.__version__, "2.0.0"):
-        if sqlalchemy and is_version_greater_or_equal(sqlalchemy.__version__, "2.0.0"):
+        if sqlalchemy.sqlalchemy and is_version_greater_or_equal(
+            sqlalchemy.sqlalchemy.__version__, "2.0.0"
+        ):
             warn_pandas_less_than_2_0_and_sqlalchemy_greater_than_or_equal_2_0()
         with warnings.catch_warnings():
             # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy
