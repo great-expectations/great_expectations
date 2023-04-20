@@ -721,10 +721,15 @@ class AbstractDataContext(ConfigPeer, ABC):
         self.datasources[datasource.name] = datasource
 
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
+        # NOTE: this is not called
         self.datasources[datasource.name] = datasource
 
     def _delete_fluent_datasource(self, datasource_name: str) -> None:
-        self.datasources.pop(datasource_name, None)
+        datasource = self.datasources.get(datasource_name)
+        if datasource:
+            if self._datasource_store.cloud_mode:
+                self._datasource_store.delete(datasource)  # type: ignore[arg-type] # Could be a LegacyDatasource
+            self.datasources.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
