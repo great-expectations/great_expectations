@@ -724,7 +724,7 @@ stages:
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'cat *_full.json files in assets/scripts'
 
-          - bash: python ./build_gallery.py --backends "sqlite" --only-combine --outfile-name "expectation_library_v2--staging.json" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt ; grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt ; touch gallery-tracebacks.txt
+          - bash: python ./build_gallery.py --only-combine --outfile-name "expectation_library_v2--staging.json" 2>&1 | tee output--build_gallery.txt ; grep -o "ERROR - (.*" output--build_gallery.txt | sort > testing-error-messages.txt ; grep -o "Expectation type.*" output--build_gallery.txt | sort > gallery-exp-types.txt ; touch gallery-tracebacks.txt
             workingDirectory: $(Build.SourcesDirectory)/assets/scripts/
             displayName: 'build_gallery.py combining run'
             env:
