@@ -1,8 +1,9 @@
+from unittest.mock import Mock
+
 import pytest
 
 from great_expectations.core import (
     ExpectationSuiteValidationResult,
-    IDDict,
     RunIdentifier,
 )
 from great_expectations.core.batch import BatchDefinition
@@ -32,11 +33,8 @@ from great_expectations.render.renderer import MicrosoftTeamsRenderer
                 "great_expectations_version": "v0.8.0__develop",
                 "expectation_suite_name": "asset.default",
                 "run_id": "test_100",
-                "active_batch_definition": BatchDefinition(
-                    datasource_name="junk",
-                    data_connector_name="junk",
-                    batch_identifiers=IDDict(),
-                    data_asset_name="expected_asset_name",
+                "active_batch_definition": Mock(
+                    BatchDefinition, data_asset_name="expected_asset_name"
                 ),
             },
             "1234",
