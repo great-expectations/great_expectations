@@ -1417,7 +1417,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def get_datasource(
         self, datasource_name: str = "default"
-    ) -> Union[LegacyDatasource, BaseDatasource, FluentDatasource]:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """Retrieve a given Datasource by name from the context's underlying DatasourceStore.
 
         Args:
