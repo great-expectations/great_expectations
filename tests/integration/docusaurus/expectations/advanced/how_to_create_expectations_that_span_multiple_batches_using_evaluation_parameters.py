@@ -1,14 +1,7 @@
 import great_expectations as gx
 
-# TODO: Change to fluent batch request
-from great_expectations.core.batch import BatchRequest
-
 # TODO: Is this causing the public_api issue? It is marked as `@public_api`
 context = gx.get_context()
-
-# Make sure context supports fluent datasources
-# assert context.fluent_datasources
-
 
 # Get validators
 upstream_validator = context.sources.pandas_default.read_csv(
