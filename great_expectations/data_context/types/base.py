@@ -2462,6 +2462,9 @@ class DataContextConfig(BaseYamlConfig):
         if datasources is None:
             datasources = {}  # type: ignore[assignment]
         self.datasources = datasources
+        if fluent_datasources is None:
+            fluent_datasources = {}  # type: ignore[assignment]
+        self.fluent_datasources = fluent_datasources
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name

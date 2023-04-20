@@ -1464,25 +1464,37 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
-    def _serialize_substitute_and_sanitize_datasource_config(
-        self, serializer: AbstractConfigSerializer, datasource_config: DatasourceConfig
+    def _substitute_and_sanitize_datasource_config(
+        self, datasource_dict: dict
     ) -> dict:
-        """Serialize, then make substitutions and sanitize config (mask passwords), return as dict.
+        """Make substitutions and sanitize config (mask passwords), return as dict.
 
         Args:
-            serializer: Serializer to use when converting config to dict for substitutions.
-            datasource_config: Datasource config to process.
+            dict: dict to substitute and serialize.
 
         Returns:
             Dict of config with substitutions and sanitizations applied.
         """
-        datasource_dict: dict = serializer.serialize(datasource_config)
 
         substituted_config = cast(
             dict, self.config_provider.substitute_config(datasource_dict)
         )
         masked_config: dict = PasswordMasker.sanitize_config(substituted_config)
         return masked_config
+
+    def _serialize_datasource_config(
+            self, serializer: AbstractConfigSerializer, datasource_config: DatasourceConfig) -> dict:
+        """Serialize and return as dict.
+
+        Args:
+            serializer: Serializer to use when converting config to dict for substitutions.
+            datasource_config: Datasource config to process.
+
+        Returns:
+            Dict of config serialization applied.
+        """
+        datasource_dict: dict = serializer.serialize(datasource_config)
+        return datasource_dict
 
     @public_api
     def add_store(self, store_name: str, store_config: StoreConfigTypedDict) -> Store:
@@ -1547,11 +1559,16 @@ class AbstractDataContext(ConfigPeer, ABC):
                 datasource_config = DatasourceConfig(**datasource_config)
             datasource_config.name = datasource_name
 
-            masked_config: dict = (
-                self._serialize_substitute_and_sanitize_datasource_config(
+            serialized_config: dict = (
+                self._serialize_datasource_config(
                     serializer, datasource_config
                 )
             )
+            masked_config = self._substitute_and_sanitize_datasource_config(serialized_config)
+            datasources.append(masked_config)
+
+        for datasource_name, datasource_config in self.config.fluent_datasources.items():
+            masked_config = self._substitute_and_sanitize_datasource_config(datasource_config)
             datasources.append(masked_config)
         return datasources
 
