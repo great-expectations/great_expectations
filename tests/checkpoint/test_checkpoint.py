@@ -1579,7 +1579,6 @@ def test_newstyle_checkpoint_raises_error_if_expectation_suite_name_and_validato
 def test_newstyle_checkpoint_raises_error_if_expectation_suite_name_in_validations_and_validator_are_specified_in_constructor(
     dummy_data_context,
     dummy_validator,
-    batch_request_as_dict,
     common_action_list,
 ):
     context = dummy_data_context
@@ -1633,7 +1632,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_validator_is_specified_in_run(
     dummy_data_context,
     dummy_validator,
-    batch_request_as_dict,
     common_action_list,
 ):
     context = dummy_data_context
@@ -1658,10 +1656,9 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
 
 
 @pytest.mark.unit
-def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_batch_request_is_specified_in_run(
+def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_validator_is_specified_in_run(
     dummy_data_context,
     dummy_validator,
-    batch_request_as_dict,
     common_action_list,
 ):
     context = dummy_data_context
@@ -1686,7 +1683,7 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
 
 
 @pytest.mark.unit
-def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_validations_and_validator_is_specified_in_run(
+def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_validations_and_batch_request_and_validator_are_specified_in_run(
     dummy_data_context,
     dummy_validator,
     batch_request_as_dict,
@@ -1720,7 +1717,6 @@ def test_newstyle_checkpoint_raises_error_if_batch_request_is_specified_in_valid
 def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_expectation_suite_name_is_specified_in_run(
     dummy_data_context,
     dummy_validator,
-    batch_request_as_dict,
     common_action_list,
 ):
     context = dummy_data_context
