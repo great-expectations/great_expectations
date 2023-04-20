@@ -5,6 +5,10 @@ title: How to create an Expectation Suite with the Onboarding Data Assistant
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This guide demonstrates how to use the Onboarding Data Assistant to Profile your data and automate the generation of an
 Expectation Suite, which you can then adjust to be suited for your specific needs.
 

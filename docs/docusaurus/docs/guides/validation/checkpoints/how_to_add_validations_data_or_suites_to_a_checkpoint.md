@@ -5,6 +5,10 @@ title: How to add validations data or suites to a Checkpoint
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This guide will help you add validation data or <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" />. This is useful if you want to aggregate individual validations (across Expectation Suites or <TechnicalTag tag="datasource" text="Datasources" />) into a single Checkpoint.
 
 

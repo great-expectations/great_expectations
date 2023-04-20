@@ -12,6 +12,10 @@ import DOptionalCheckYourStoredCheckpointConfig from './components_how_to_create
 import EOptionalTestRunTheNewCheckpointAndOpenDataDocs from './components_how_to_create_a_new_checkpoint/_e_optional_test_run_the_new_checkpoint_and_open_data_docs.mdx'
 import AdditionalResources from './components_how_to_create_a_new_checkpoint/_additional_resources.mdx'
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 <Preface />
 
 <StepsForCheckpoints />
