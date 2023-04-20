@@ -6,6 +6,8 @@ This repository contains all the source files used to create Great Expectations 
 
 - [Create a how-to guide](#create-a-how-to-guide)
 
+- [Create an integrations guide](#create-an-integration-guide)
+
 If you want to modify existing Great Expectations code, you want to submit a new feature, or you want to submit a custom Expectation, see [CONTRIBUTING](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md) in the Great Expectations repository.
 
 ## Request a documentation change
@@ -22,19 +24,7 @@ If you’ve noticed an issue in the documentation, or have recommendations for i
 
 4. Optional. Click the **Preview** tab to preview your changes.
 
-5. When you’ve completed your edits, scroll down to the **Propose changes** section and add a meaningful commit message and an explanation of what you changed and why.  To help identify the type of issue you’re submitting, add one of the following identifiers to the pull request (PR):
-
-    - [BUGFIX] for PRs that address minor bugs without changing behavior.
-
-    - [FEATURE] for significant PRs that add a new feature likely to require being added to our feature maturity matrix.
-
-    - [DOCS] for PRs that focus on documentation improvements.
-
-    - [MAINTENANCE] for PRs that focus on updating repository settings or related changes.
-		
-    - [CONTRIB] for the contribution of custom Expectations and supporting work into the `contrib/` directory.
-      
-    - [HACKATHON] for submissions to an active Great Expectations Hackathon.
+5. When you’ve completed your edits, scroll down to the **Propose changes** section and add a meaningful commit message and an explanation of what you changed and why.  To help identify the type of issue you’re submitting, add the [DOCS] identifier to the pull request (PR). For example, [DOCS] Update Version Reference. 
 
 6. Select **Create a new branch for this commit and start a pull request**. Accept the default name for the branch, or enter a new one.
 
@@ -96,7 +86,7 @@ When you create your how-to guide, you can make the following assumptions:
 
 2. Create a pull request from your fork. See [Creating a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
 
-3. Add a meaningful title and description for your pull request (PR). Add the [HOW-TO] identifier to the PR title. The description should include the purpose of your how-to and why it is necessary.
+3. Add a meaningful title and description for your pull request (PR). Add the [HOW-TO] identifier to the PR title. The description should include the purpose of your how-to and why it is necessary. For example, [HOW-TO] Contribute to Great Expectations Documentation. 
 
 4. If this is your first Great Expectations contribution, you'll be prompted to complete the Contributor License Agreement (CLA). Complete the CLA and add `@cla-bot check` as a comment to the PR to indicate that you’ve completed it.
 
@@ -104,11 +94,11 @@ When you create your how-to guide, you can make the following assumptions:
 
     A Great Expectations team member reviews, approves, and merges your PR. Depending on your GitHub notification settings, you'll be notified when there are comments, your input is required, or when your changes are successfully merged.
 
-## Create an integrations guide
+## Create an integration guide
 
 The objective of an integrations guide is to help users successfully integrate an application with Great Expectations. 
 
-## Contact the Great Expectations Developer Relations team
+### Contact the Great Expectations Developer Relations team
 
 Before you create your integration guide, notify the Great Expectations Developer Relations team of your plans in the [Great Expectations #integrations Slack channel](https://greatexpectationstalk.slack.com/archives/C037YCYNF1Q). A member of the team will discuss your requirements and support you through the review and publication process.
 
@@ -150,7 +140,7 @@ Before you create your integration guide, notify the Great Expectations Develope
 
 2. Create a pull request (PR) from your fork. See [Creating a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
 
-3. Add a meaningful title and description for your PR. Add the [INTEGRATION] identifier to the PR title. The description should include the purpose of your integration.
+3. Add a meaningful title and description for your PR. The description should include the purpose of your integration. Add the [INTEGRATE] identifier to the PR title. For example, [INTEGRATE] Great Expectations with Snowflake.
 
 4. If this is your first Great Expectations contribution, you'll be prompted to complete the Contributor License Agreement (CLA). Complete the CLA and add `@cla-bot check` as a comment to the PR to indicate that you’ve completed it.
 
