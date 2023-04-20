@@ -2,12 +2,11 @@ import logging
 import os
 import pickle
 import unittest
-from typing import Dict, List, Optional, Union, cast
+from typing import Dict, List, Optional, Union, cast, TYPE_CHECKING
 from unittest import mock
 
 import pandas as pd
 import pytest
-from ruamel.yaml.comments import CommentedMap
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
@@ -24,7 +23,6 @@ from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import AbstractDataContext, FileDataContext
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
-    CheckpointValidationConfig,
     checkpointConfigSchema,
 )
 from great_expectations.data_context.types.resource_identifiers import (
@@ -38,6 +36,8 @@ from great_expectations.util import (
 )
 from great_expectations.validator.validator import Validator
 
+if TYPE_CHECKING:
+    from great_expectations.core.data_context_key import DataContextKey
 
 yaml = YAMLHandler()
 
@@ -61,15 +61,6 @@ def dummy_validator() -> Validator:
             return "my_expectation_suite"
 
     return cast(Validator, DummyValidator())
-
-
-@pytest.fixture
-def batch_request_as_dict() -> Dict[str, str]:
-    return {
-        "datasource_name": "my_datasource",
-        "data_connector_name": "my_basic_data_connector",
-        "data_asset_name": "Titanic_1911",
-    }
 
 
 @pytest.fixture
@@ -107,6 +98,7 @@ def common_action_list() -> List[dict]:
 
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
     with pytest.raises(AttributeError):
+        # noinspection PyTypeChecker
         Checkpoint(name="my_checkpoint", data_context="foo", config_version=1)
 
 
@@ -137,7 +129,7 @@ def test_basic_checkpoint_config_validation(
 ):
     context: FileDataContext = empty_data_context_stats_enabled
     yaml_config_erroneous: str
-    config_erroneous: CommentedMap
+    config_erroneous: dict
     checkpoint_config: Union[CheckpointConfig, dict]
     checkpoint: Checkpoint
 
@@ -360,7 +352,7 @@ def test_basic_checkpoint_config_validation(
         ],
     }
 
-    config: CommentedMap = yaml.load(yaml_config)
+    config: dict = yaml.load(yaml_config)
     checkpoint_config = CheckpointConfig(**config)
     checkpoint: Checkpoint = Checkpoint(
         data_context=context,
@@ -1037,10 +1029,12 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
 
     mock_create_quarantine_data = mock.MagicMock()
     mock_create_quarantine_data.run.return_value = True
+    # noinspection PyUnresolvedReferences
     gx.validation_operators.CreateQuarantineData = mock_create_quarantine_data
 
     mock_create_passed_data = mock.MagicMock()
     mock_create_passed_data.run.return_value = True
+    # noinspection PyUnresolvedReferences
     gx.validation_operators.CreatePassedData = mock_create_passed_data
 
     expected_checkpoint_config: dict = {
@@ -1491,7 +1485,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
     assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
 
-    validation_result_identifier: ValidationResultIdentifier = (
+    validation_result_identifier: DataContextKey = (
         context.validations_store.list_keys()[0]
     )
     validation_result: ExpectationSuiteValidationResult = context.validations_store.get(
@@ -2068,6 +2062,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
             }
         )
     ]
+    # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
 
@@ -5104,9 +5099,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    expectation_validation_result: ExpectationValidationResult = result.run_results[
-        validation_result_identifier
-    ]["validation_result"]
+    expectation_validation_result: ExpectationValidationResult | dict = (
+        result.run_results[validation_result_identifier]["validation_result"]
+    )
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -5169,9 +5164,9 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    expectation_validation_result: ExpectationValidationResult = result.run_results[
-        validation_result_identifier
-    ]["validation_result"]
+    expectation_validation_result: ExpectationValidationResult | dict = (
+        result.run_results[validation_result_identifier]["validation_result"]
+    )
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
@@ -5196,13 +5191,13 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                     },
                 ],
                 validations=[
-                    CheckpointValidationConfig(
-                        batch_request={
+                    {
+                        "batch_request": {
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_basic_data_connector",
                             "data_asset_name": "Titanic_1911",
                         },
-                    ),
+                    },
                 ],
             ),
             None,
@@ -5248,14 +5243,14 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                     },
                 ],
                 validations=[
-                    CheckpointValidationConfig(
-                        id="f22601d9-00b7-4d54-beb6-605d87a74e40",
-                        batch_request={
+                    {
+                        "id": "f22601d9-00b7-4d54-beb6-605d87a74e40",
+                        "batch_request": {
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_basic_data_connector",
                             "data_asset_name": "Titanic_1911",
                         },
-                    ),
+                    },
                 ],
             ),
             "f22601d9-00b7-4d54-beb6-605d87a74e40",
@@ -5277,14 +5272,14 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                     },
                 ],
                 validations=[
-                    CheckpointValidationConfig(
-                        id="f22601d9-00b7-4d54-beb6-605d87a74e40",
-                        batch_request={
+                    {
+                        "id": "f22601d9-00b7-4d54-beb6-605d87a74e40",
+                        "batch_request": {
                             "datasource_name": "my_datasource",
                             "data_connector_name": "my_basic_data_connector",
                             "data_asset_name": "Titanic_1911",
                         },
-                    ),
+                    },
                 ],
             ),
             "f22601d9-00b7-4d54-beb6-605d87a74e40",
@@ -5307,9 +5302,9 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     result: CheckpointResult = checkpoint.run()
 
     # Always have a single validation result based on the test's parametrization
-    validation_result: ExpectationValidationResult = tuple(result.run_results.values())[
-        0
-    ]["validation_result"]
+    validation_result: ExpectationValidationResult | dict = tuple(
+        result.run_results.values()
+    )[0]["validation_result"]
 
     actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
     assert expected_validation_id == actual_validation_id
