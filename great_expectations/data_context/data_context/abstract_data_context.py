@@ -703,6 +703,14 @@ class AbstractDataContext(ConfigPeer, ABC):
     def sources(self) -> _SourceFactories:
         return self._sources
 
+    def _add_fluent_datasource(
+        self,
+        datasource: FluentDatasource,
+        name: str | None = None,
+    ) -> FluentDatasource:
+        datasource.name = name or datasource.name
+        return self.sources.add_datasource(name_or_datasource=datasource)
+
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
         self.datasources[datasource.name] = datasource
 
@@ -832,14 +840,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 "Must either pass in an existing datasource or individual constructor arguments (but not both)"
             )
 
-    def _add_fluent_datasource(
-        self,
-        datasource: FluentDatasource,
-        name: str | None = None,
-    ) -> FluentDatasource:
-        datasource.name = name or datasource.name
-        return self.sources.add_datasource(name_or_datasource=datasource)
-
     def _add_block_config_datasource(
         self,
         name: str | None = None,
@@ -885,7 +885,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @public_api
     def update_datasource(
         self,
-        datasource: Union[LegacyDatasource, BaseDatasource],
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource,
         save_changes: bool | None = None,
     ) -> Datasource:
         """Updates a Datasource that already exists in the store.
@@ -898,9 +898,15 @@ class AbstractDataContext(ConfigPeer, ABC):
             The updated Datasource.
         """
         save_changes = self._determine_save_changes_flag(save_changes)
-        return self._update_datasource(datasource=datasource, save_changes=save_changes)
+        if isinstance(datasource, FluentDatasource):
+            self._update_fluent_datasource(datasource=datasource)
+        else:
+            datasource = self._update_block_config_datasource(
+                datasource=datasource, save_changes=save_changes
+            )
+        return datasource
 
-    def _update_datasource(
+    def _update_block_config_datasource(
         self,
         datasource: LegacyDatasource | BaseDatasource,
         save_changes: bool,
