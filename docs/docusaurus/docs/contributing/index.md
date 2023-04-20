@@ -16,7 +16,7 @@ title: "Contributing: Index"
 
 ### How to contribute how-to guides
 - [How to write a how-to-guide](../guides/miscellaneous/how_to_write_a_how_to_guide.md)
-- [TEMPLATE How to guide {stub}](../guides/miscellaneous/how_to_template.md)
+- [TEMPLATE How to guide {stub}](../templates/how_to_template.md)
 - [How to contribute a Custom Expectation to Great Expectations](../guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md)
 
 ## Style guides
