@@ -937,7 +937,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: str = ...,
         datasource: None = ...,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """
         A `name` is provided.
         `datasource` should not be provided.
@@ -950,7 +950,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         name: None = ...,
         datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """
         A `datasource` is provided.
         `name` should not be provided.
@@ -977,21 +977,24 @@ class AbstractDataContext(ConfigPeer, ABC):
             The Datasource added or updated by the input `kwargs`.
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
+        return_datasource: BaseDatasource | FluentDatasource | LegacyDatasource
         if isinstance(datasource, FluentDatasource):
-            datasource = self._add_fluent_datasource(
+            fluent_datasource = self._add_fluent_datasource(
                 name=name,
                 datasource=datasource,
             )
+            return_datasource = fluent_datasource
         else:
             block_config_datasource = self._add_block_config_datasource(
                 name=name,
                 datasource=datasource,
+                initialize=True,
                 **kwargs,
             )
             assert block_config_datasource is not None
-            datasource = block_config_datasource
+            return_datasource = block_config_datasource
 
-        return datasource
+        return return_datasource
 
     def get_site_names(self) -> List[str]:
         """Get a list of configured site names."""
