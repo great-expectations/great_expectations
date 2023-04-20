@@ -7,6 +7,10 @@ import TabItem from '@theme/TabItem';
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '@site/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This guide will help you integrate Great Expectations (GX) with [Google Cloud Platform](https://cloud.google.com/gcp) (GCP) using our recommended workflow.
 
 <Prerequisites>

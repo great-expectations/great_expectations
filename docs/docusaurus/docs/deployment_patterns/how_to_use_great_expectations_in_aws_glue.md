@@ -4,6 +4,10 @@ title: How to Use Great Expectations in AWS Glue
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
 
+import InProgress from '@site/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This Guide demonstrates how to set up, initialize and run validations against your data on AWS Glue Spark Job.
 We will cover case with RuntimeDataConnector and use S3 as metadata store.
 

@@ -8,6 +8,10 @@ import ConnectHeader from '/docs/images/universal_map/_um_connect_header.mdx';
 import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
+import InProgress from '@site/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 
 <UniversalMap setup='inactive' connect='active' create='active' validate='active'/> 
 

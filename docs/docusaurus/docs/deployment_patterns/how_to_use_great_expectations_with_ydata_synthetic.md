@@ -5,6 +5,10 @@ title: How to Use Great Expectations with YData-Synthetic
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '@site/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 _This piece of documentation was authored by [Arunn Thevapalan](https://www.linkedin.com/in/arunn-thevapalan/)._
 
 [YData-Synthetic](https://github.com/ydataai/ydata-synthetic) is an open-source synthetic data engine. Using different kinds of Generative Adversarial Networks (GANS), the engine learns patterns and statistical properties of original data. It can create endless samples of synthetic data that resemble the original data.

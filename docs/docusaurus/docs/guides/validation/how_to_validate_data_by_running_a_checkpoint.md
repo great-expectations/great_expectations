@@ -7,6 +7,10 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '@site/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This guide will help you <TechnicalTag tag="validation" text="Validate" /> your data by running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
 The best way to Validate data in production with Great Expectations is using a <TechnicalTag tag="checkpoint" text="Checkpoint" />. The advantage of using a Checkpoint is ease of use, due to its principal capability of combining the existing configuration in order to set up and perform the Validation:

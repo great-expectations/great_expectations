@@ -120,6 +120,10 @@ import InstantiateDataContext from '@site/docs/guides/connecting_to_your_data/cl
 
 <!-- 2.3 Configure your Datasource -->
 
+import InProgress from '@site/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_configure_your_datasource.mdx'
 
 <!-- 2.4 Save the Datasource configuration to your DataContext -->
