@@ -42,6 +42,7 @@ variables:
 
 stages:
   - stage: scope_check
+    condition: eq(variables.isManual, true)
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
@@ -62,7 +63,7 @@ stages:
             name: CheckDocsDependenciesChanges
 
   - stage: docusaurus_tests
-#   dependsOn: scope_check
+    dependsOn: scope_check
     condition: eq(variables.isManual, true)
     pool:
       vmImage: 'ubuntu-latest'
