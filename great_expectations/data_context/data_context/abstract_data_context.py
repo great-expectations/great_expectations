@@ -710,6 +710,14 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"Can not write the fluent datasource {datasource.name} because a datasource of that "
                 "name already exists in the data context."
             )
+        # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
+        # Without this we end up with duplicate entries for datasources in both
+        # "fluent_datasources" and "datasources" config/yaml entries.
+        if self._datasource_store.cloud_mode:
+            set_datasource = self._datasource_store.set(key=None, value=datasource)
+            if set_datasource.id:
+                logger.debug(f"Assigning `id` to '{datasource.name}'")
+                datasource.id = set_datasource.id
         self.datasources[datasource.name] = datasource
 
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
