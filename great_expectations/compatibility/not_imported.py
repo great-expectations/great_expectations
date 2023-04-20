@@ -9,7 +9,6 @@ We also consolidate logic for warning based on version number in this module.
 """
 from __future__ import annotations
 
-import warnings
 from typing import Any
 
 from packaging.version import Version
@@ -33,22 +32,6 @@ class NotImported:
 
     def __bool__(self):
         return False
-
-
-def sqlalchemy_version_check(version: str | Version) -> None:
-    """Check if the sqlalchemy version is supported or warn if not.
-
-    Args:
-        version: sqlalchemy version as a string or Version.
-    """
-    if isinstance(version, str):
-        version = Version(version)
-
-    if version >= Version("2.0.0"):
-        warnings.warn(
-            "SQLAlchemy v2.0.0 or later is not yet supported by Great Expectations.",
-            UserWarning,
-        )
 
 
 def is_version_greater_or_equal(
@@ -89,43 +72,3 @@ def is_version_less_than(
         compare_version = Version(compare_version)
 
     return version < compare_version
-
-
-# GX optional imports
-SQLALCHEMY_NOT_IMPORTED = NotImported(
-    "sqlalchemy is not installed, please 'pip install sqlalchemy'"
-)
-try:
-    import sqlalchemy
-
-    sqlalchemy_version_check(sqlalchemy.__version__)
-except ImportError:
-    sqlalchemy = SQLALCHEMY_NOT_IMPORTED
-
-try:
-    sqlalchemy_Connection = sqlalchemy.engine.Connection
-except (ImportError, AttributeError):
-    sqlalchemy_Connection = SQLALCHEMY_NOT_IMPORTED
-
-try:
-    sqlalchemy_Engine = sqlalchemy.engine.Engine
-except (ImportError, AttributeError):
-    sqlalchemy_Engine = SQLALCHEMY_NOT_IMPORTED
-
-try:
-    sqlalchemy_Row = sqlalchemy.engine.Row
-except (ImportError, AttributeError):
-    sqlalchemy_Row = SQLALCHEMY_NOT_IMPORTED
-
-try:
-    sqlalchemy_TextClause = sqlalchemy.sql.elements.TextClause
-except (ImportError, AttributeError):
-    sqlalchemy_TextClause = SQLALCHEMY_NOT_IMPORTED
-
-SPARK_NOT_IMPORTED = NotImported(
-    "pyspark is not installed, please 'pip install pyspark'"
-)
-try:
-    import pyspark
-except ImportError:
-    pyspark = SPARK_NOT_IMPORTED  # type: ignore[assignment]

@@ -34,6 +34,7 @@ from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -132,12 +133,12 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     usage_statistics_enabled_method,
 )
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-except ImportError:
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
+if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = gx_exceptions.ProfilerError
+
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -709,6 +710,14 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"Can not write the fluent datasource {datasource.name} because a datasource of that "
                 "name already exists in the data context."
             )
+        # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
+        # Without this we end up with duplicate entries for datasources in both
+        # "fluent_datasources" and "datasources" config/yaml entries.
+        if self._datasource_store.cloud_mode:
+            set_datasource = self._datasource_store.set(key=None, value=datasource)
+            if set_datasource.id:
+                logger.debug(f"Assigning `id` to '{datasource.name}'")
+                datasource.id = set_datasource.id
         self.datasources[datasource.name] = datasource
 
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
@@ -5430,18 +5439,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         logger.info(
             f"{self.__class__.__name__} has not implemented `_load_fluent_config()` returning empty `GxConfig`"
         )
-        return GxConfig(fluent_datasources={})
+        return GxConfig(fluent_datasources=[])
 
     def _attach_fluent_config_datasources_and_build_data_connectors(
         self, config: GxConfig
     ):
         """Called at end of __init__"""
-        for ds_name, datasource in config.datasources.items():
+        for datasource in config.datasources:
+            ds_name = datasource.name
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
             # if Datasource required a data_connector we need to build the data_connector for each asset
             if datasource.data_connector_type:
-                for data_asset in datasource.assets.values():
+                for data_asset in datasource.assets:
                     connect_options = getattr(data_asset, "connect_options", {})
                     datasource._build_data_connector(data_asset, **connect_options)
 
@@ -5454,8 +5464,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """
         fluent_datasources = self.fluent_datasources
         if fluent_datasources:
-            self.fluent_config.fluent_datasources.update(fluent_datasources)
-        return self.fluent_config.fluent_datasources
+            self.fluent_config.update_datasources(datasources=fluent_datasources)
+
+        return self.fluent_config.get_datasources_as_dict()
 
     @staticmethod
     def _resolve_id_and_ge_cloud_id(

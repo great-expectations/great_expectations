@@ -1,20 +1,37 @@
 from __future__ import annotations
 
+import json
 import logging
 import pathlib
+import urllib.parse
+import uuid
 from pprint import pformat as pf
-from typing import Any, Callable, Dict, Generator, List, Optional, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    NamedTuple,
+    Optional,
+    Type,
+    Union,
+)
 
 import pytest
+import responses
 from pytest import MonkeyPatch
 from typing_extensions import Final
 
+import great_expectations as gx
 from great_expectations.core.batch import BatchData
 from great_expectations.core.batch_spec import (
     BatchMarkers,
     SqlAlchemyDatasourceBatchSpec,
 )
 from great_expectations.data_context import FileDataContext
+from great_expectations.data_context.store.gx_cloud_store_backend import ErrorPayload
 from great_expectations.datasource.fluent import (
     PandasAzureBlobStorageDatasource,
     PandasGoogleCloudStorageDatasource,
@@ -29,8 +46,29 @@ from great_expectations.execution_engine import (
 )
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 
-EXPERIMENTAL_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
-PG_CONFIG_YAML_FILE: Final = EXPERIMENTAL_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
+if TYPE_CHECKING:
+    from pytest import FixtureRequest
+    from requests import PreparedRequest
+
+    from great_expectations.data_context import CloudDataContext
+
+
+FLUENT_DATASOURCE_TEST_DIR: Final = pathlib.Path(__file__).parent
+PG_CONFIG_YAML_FILE: Final = FLUENT_DATASOURCE_TEST_DIR / FileDataContext.GX_YML
+
+
+GX_CLOUD_MOCK_BASE_URL: Final[str] = "https://app.greatexpectations.fake.io"
+
+DUMMY_JWT_TOKEN: Final[
+    str
+] = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+# Can replace hardcoded ids with dynamic ones if using a regex url with responses.add_callback()
+# https://github.com/getsentry/responses/tree/master#dynamic-responses
+FAKE_ORG_ID: Final[str] = str(uuid.UUID("12345678123456781234567812345678"))
+FAKE_DATA_CONTEXT_ID: Final[str] = str(uuid.uuid4())
+FAKE_DATASOURCE_ID: Final[str] = str(uuid.uuid4())
+
+MISSING: Final = object()
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +152,176 @@ def inject_engine_lookup_double(
             source.execution_engine_override = engine
 
 
+_CLOUD_API_FAKE_DB: dict = {}
+_DEFAULT_HEADERS: Final[dict[str, str]] = {"content-type": "application/json"}
+
+
+class _CallbackResult(NamedTuple):
+    status: int
+    headers: dict[str, str]
+    body: str
+
+
+def _get_fake_db_callback(
+    request: PreparedRequest,
+) -> _CallbackResult:
+    url = request.url
+    assert url
+    logger.info(f"{request.method} {url}")
+
+    parsed_url = urllib.parse.urlparse(url)
+
+    _ = parsed_url.query
+    # TODO: do something with this
+    url = urllib.parse.urljoin(url, parsed_url.path)
+
+    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
+    logger.info(f"body -->\n{pf(item, depth=2)}")
+    if item is MISSING:
+        result = _CallbackResult(404, headers={}, body=f"NotFound at {url}")
+    else:
+        result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(item))
+
+    logger.info(f"Response {result.status}")
+    return result
+
+
+def _delete_fake_db_datasources_callback(
+    request: PreparedRequest,
+) -> _CallbackResult:
+    url = request.url
+    logger.info(f"{request.method} {url}")
+
+    item = _CLOUD_API_FAKE_DB.pop(url, MISSING)
+    if item is MISSING:
+        errors = ErrorPayload(
+            errors=[{"code": "mock 404", "detail": None, "source": None}]
+        )
+        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+    else:
+        errors = ErrorPayload(errors=[{"code": "mock", "detail": None, "source": None}])
+        result = _CallbackResult(204, headers=_DEFAULT_HEADERS, body="")
+
+    logger.info(f"Response {result.status}")
+    return result
+
+
+def _post_fake_db_datasources_callback(
+    request: PreparedRequest,
+) -> _CallbackResult:
+    url = request.url
+    logger.info(f"{request.method} {url}")
+
+    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
+    if request.body and item is MISSING:
+        payload = json.loads(request.body)
+
+        datasource_id = payload.get("data", {}).get("id")
+        if not datasource_id:
+            datasource_id = FAKE_DATASOURCE_ID
+            payload["data"]["id"] = datasource_id
+
+        _CLOUD_API_FAKE_DB[f"{url}/{FAKE_DATASOURCE_ID}"] = payload
+
+        result = _CallbackResult(
+            201, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
+        )
+    else:
+        errors = ErrorPayload(errors=[{"code": "mock", "detail": None, "source": None}])
+        result = _CallbackResult(409, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+
+    logger.info(f"Response {result.status}")
+    return result
+
+
+def _put_db_datasources_callback(
+    request: PreparedRequest,
+) -> _CallbackResult:
+    url = request.url
+    logger.info(f"{request.method} {url}")
+
+    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
+    if not request.body:
+        errors = ErrorPayload(
+            errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
+        )
+        result = _CallbackResult(400, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+    elif item is not MISSING:
+        payload = json.loads(request.body)
+        _CLOUD_API_FAKE_DB[url] = payload
+        result = _CallbackResult(
+            200, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
+        )
+    else:
+        errors = ErrorPayload(
+            errors=[{"code": "mock 404", "detail": None, "source": None}]
+        )
+        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+
+    logger.info(f"Response {result.status}")
+    return result
+
+
+@pytest.fixture
+def cloud_api_fake():
+    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
+    dc_config_url = f"{org_url_base}/data-context-configuration"
+    datasources_url = f"{org_url_base}/datasources"
+
+    assert not _CLOUD_API_FAKE_DB, "_CLOUD_API_FAKE_DB should be empty"
+    _CLOUD_API_FAKE_DB.update(
+        {
+            dc_config_url: {
+                "anonymous_usage_statistics": {
+                    "data_context_id": FAKE_DATA_CONTEXT_ID,
+                    "enabled": False,
+                },
+                "datasources": {},
+            },
+            datasources_url: MISSING,
+        }
+    )
+
+    logger.info("Mocking the GX Cloud API")
+
+    with responses.RequestsMock(assert_all_requests_are_fired=False) as resp_mocker:
+        resp_mocker.add_callback(responses.GET, dc_config_url, _get_fake_db_callback)
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
+            _get_fake_db_callback,
+        )
+        resp_mocker.add_callback(
+            responses.DELETE,
+            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
+            _delete_fake_db_datasources_callback,
+        )
+        resp_mocker.add_callback(
+            responses.PUT,
+            f"{datasources_url}/{FAKE_DATASOURCE_ID}",
+            _put_db_datasources_callback,
+        )
+        resp_mocker.add_callback(
+            responses.POST, datasources_url, _post_fake_db_datasources_callback
+        )
+
+        yield resp_mocker
+
+    logger.info(f"Ending state ->\n{pf(_CLOUD_API_FAKE_DB, depth=1)}")
+    _CLOUD_API_FAKE_DB.clear()
+
+
+@pytest.fixture
+def empty_cloud_context_fluent(cloud_api_fake) -> CloudDataContext:
+    context = gx.get_context(
+        cloud_access_token=DUMMY_JWT_TOKEN,
+        cloud_organization_id=FAKE_ORG_ID,
+        cloud_base_url=GX_CLOUD_MOCK_BASE_URL,
+        cloud_mode=True,
+    )
+    return context
+
+
 @pytest.fixture
 def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     """
@@ -128,6 +336,22 @@ def file_dc_config_dir_init(tmp_path: pathlib.Path) -> pathlib.Path:
     tmp_gx_dir = gx_yml.parent.absolute()
     logger.info(f"tmp_gx_dir -> {tmp_gx_dir}")
     return tmp_gx_dir
+
+
+@pytest.fixture
+def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
+    context = gx.get_context(context_root_dir=file_dc_config_dir_init, cloud_mode=False)
+    return context
+
+
+@pytest.fixture(
+    params=["empty_cloud_context_fluent", "empty_file_context"], ids=["cloud", "file"]
+)
+def empty_contexts(request: FixtureRequest) -> FileDataContext | CloudDataContext:
+    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
+        request.param
+    )
+    return context_fixture
 
 
 @pytest.fixture(scope="session")

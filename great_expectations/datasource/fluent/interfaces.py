@@ -15,6 +15,7 @@ from typing import (
     Generic,
     List,
     MutableMapping,
+    MutableSequence,
     Optional,
     Sequence,
     Set,
@@ -53,14 +54,6 @@ if TYPE_CHECKING:
         DataConnector,
     )
     from great_expectations.datasource.fluent.type_lookup import TypeLookup
-
-try:
-    import pyspark
-    from pyspark.sql import Row as pyspark_sql_Row
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    pyspark_sql_Row = None  # type: ignore[assignment,misc]
-    logger.debug("No spark sql dataframe module available.")
 
 
 class TestConnectionError(Exception):
@@ -402,7 +395,7 @@ class Datasource(
     type: str
     name: str
     id: Optional[uuid.UUID] = Field(default=None, description="Datasource id")
-    assets: MutableMapping[str, _DataAssetT] = {}
+    assets: MutableSequence[_DataAssetT] = []
 
     # private attrs
     _data_context: GXDataContext = pydantic.PrivateAttr()
@@ -470,16 +463,58 @@ class Datasource(
         data_asset = self.get_asset(batch_request.data_asset_name)
         return data_asset.get_batch_list_from_batch_request(batch_request)
 
+    def get_assets_as_dict(self) -> MutableMapping[str, _DataAssetT]:
+        """Returns available DataAsset objects as dictionary, with corresponding name as key.
+
+        Returns:
+            Dictionary of "_DataAssetT" objects with "name" attribute serving as key.
+        """
+        asset: _DataAssetT
+        assets_as_dict: MutableMapping[str, _DataAssetT] = {
+            asset.name: asset for asset in self.assets
+        }
+
+        return assets_as_dict
+
+    def get_asset_names(self) -> Set[str]:
+        """Returns the set of available DataAsset names
+
+        Returns:
+            Set of available DataAsset names.
+        """
+        asset: _DataAssetT
+        return {asset.name for asset in self.assets}
+
     def get_asset(self, asset_name: str) -> _DataAssetT:
-        """Returns the DataAsset referred to by name"""
+        """Returns the DataAsset referred to by asset_name
+
+        Args:
+            asset_name: name of DataAsset sought.
+
+        Returns:
+            _DataAssetT -- if named "DataAsset" object exists; otherwise, exception is raised.
+        """
         # This default implementation will be used if protocol is inherited
         try:
-            self.assets[asset_name]._datasource = self
-            return self.assets[asset_name]
-        except KeyError as exc:
+            asset: _DataAssetT
+            found_asset: _DataAssetT = list(
+                filter(lambda asset: asset.name == asset_name, self.assets)
+            )[0]
+            found_asset._datasource = self
+            return found_asset
+        except IndexError as exc:
             raise LookupError(
-                f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
+                f'"{asset_name}" not found. Available assets are {", ".join(self.get_asset_names())})'
             ) from exc
+
+    def delete_asset(self, asset_name: str) -> None:
+        """Removes the DataAsset referred to by asset_name from internal list of available DataAsset objects.
+
+        Args:
+            asset_name: name of DataAsset to be deleted.
+        """
+        asset: _DataAssetT
+        self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
 
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
@@ -499,7 +534,13 @@ class Datasource(
 
         asset.test_connection()
 
-        self.assets[asset.name] = asset
+        asset_names: Set[str] = self.get_asset_names()
+        if asset.name in asset_names:
+            raise ValueError(
+                f'"{asset.name}" already exists (all existing assets are {", ".join(asset_names)})'
+            )
+
+        self.assets.append(asset)
 
         return asset
 
