@@ -723,6 +723,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
         self.datasources[datasource.name] = datasource
 
+    def _delete_fluent_datasource(self, datasource_name: str) -> None:
+        self.datasources.pop(datasource_name, None)
+
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
         self.variables.config = project_config
@@ -1582,9 +1585,9 @@ class AbstractDataContext(ConfigPeer, ABC):
             and (datasource_name not in self.fluent_datasources)
         ):
             datasource = self.get_datasource(datasource_name=datasource_name)
+            assert not isinstance(datasource, FluentDatasource)
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
-        self.datasources.pop(datasource_name, None)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
