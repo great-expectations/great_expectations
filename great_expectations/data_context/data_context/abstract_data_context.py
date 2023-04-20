@@ -4566,7 +4566,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 raw_config=raw_config, substituted_config=substituted_config
             )
         except Exception as e:
-            name = substituted_config.name or ""
+            name = getattr(substituted_config, "name", None) or ""
             raise gx_exceptions.DatasourceInitializationError(
                 datasource_name=name, message=str(e)
             )
