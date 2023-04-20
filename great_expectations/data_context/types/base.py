@@ -2814,7 +2814,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
+        validations: Optional[List[dict]] = None,
         default_validation_id: Optional[str] = None,
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
