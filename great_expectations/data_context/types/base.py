@@ -2926,11 +2926,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = value
 
     @property
-    def validations(self) -> List[CheckpointValidationConfig]:
+    def validations(self) -> List[dict]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[CheckpointValidationConfig]) -> None:
+    def validations(self, value: List[dict]) -> None:
         self._validations = value
 
     @property
