@@ -4,6 +4,7 @@
 #
 # The pipeline is run under the following conditions:
 #   - On any PR
+#   - When manually triggered
 
 resources:
   containers:
