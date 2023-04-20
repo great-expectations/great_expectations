@@ -14,6 +14,10 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 :::note Prerequisites
 - Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
 :::

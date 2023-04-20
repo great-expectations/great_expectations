@@ -5,6 +5,10 @@ title: How to create and edit Expectations with the User Configurable Profiler
 import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This guide will help you create a new <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> by profiling your data with the User Configurable <TechnicalTag tag="profiler" text="Profiler" />.
 
 <Prerequisites>
