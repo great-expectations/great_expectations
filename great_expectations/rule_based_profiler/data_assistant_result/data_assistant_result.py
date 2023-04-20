@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import copy
 import datetime
 import json
@@ -22,7 +21,6 @@ from typing import (
 
 import altair as alt
 import ipywidgets as widgets
-import nest_asyncio
 import numpy as np
 import pandas as pd
 from IPython.display import HTML, display
@@ -85,9 +83,6 @@ if TYPE_CHECKING:
     from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 
 ColumnDataFrame = namedtuple("ColumnDataFrame", ["column", "df"])
-
-# This is needed to run the nested async functions using Async IO
-nest_asyncio.apply()
 
 
 @dataclass
@@ -545,14 +540,12 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             PlotResult wrapper object around Altair charts.
         """
-        return asyncio.run(
-            self._plot(
-                plot_mode=PlotMode.DESCRIPTIVE,
-                sequential=sequential,
-                theme=theme,
-                include_column_names=include_column_names,
-                exclude_column_names=exclude_column_names,
-            )
+        return self._plot(
+            plot_mode=PlotMode.DESCRIPTIVE,
+            sequential=sequential,
+            theme=theme,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
 
     @public_api
@@ -577,17 +570,15 @@ class DataAssistantResult(SerializableDictDot):
         Returns:
             PlotResult wrapper object around Altair charts.
         """
-        return asyncio.run(
-            self._plot(
-                plot_mode=PlotMode.DIAGNOSTIC,
-                sequential=sequential,
-                theme=theme,
-                include_column_names=include_column_names,
-                exclude_column_names=exclude_column_names,
-            )
+        return self._plot(
+            plot_mode=PlotMode.DIAGNOSTIC,
+            sequential=sequential,
+            theme=theme,
+            include_column_names=include_column_names,
+            exclude_column_names=exclude_column_names,
         )
 
-    async def _plot(
+    def _plot(
         self,
         plot_mode: PlotMode,
         sequential: bool,
@@ -652,12 +643,12 @@ class DataAssistantResult(SerializableDictDot):
         display_charts.extend(column_domain_display_charts)
         return_charts.extend(column_domain_return_charts)
 
-        await self._display(charts=display_charts, plot_mode=plot_mode, theme=theme)
+        self._display(charts=display_charts, plot_mode=plot_mode, theme=theme)
 
         return_charts = self._apply_theme(charts=return_charts, theme=theme)
         return PlotResult(charts=return_charts)
 
-    async def _display(
+    def _display(
         self,
         charts: Union[List[alt.Chart], List[alt.VConcatChart]],
         plot_mode: PlotMode,
@@ -732,7 +723,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 title_font_weight: int = altair_theme["title"]["fontWeight"]
                 subtitle_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
                 url_font_weights: str = ";".join(
-                    {str(title_font_weight), str(subtitle_font_weight)}
+                    [str(subtitle_font_weight), str(title_font_weight)]
                 )
 
                 font_url = f"{font_family_url}:wght@{url_font_weights}&display=swap"
