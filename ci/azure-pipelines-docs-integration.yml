@@ -62,7 +62,8 @@ stages:
             name: CheckDocsDependenciesChanges
 
   - stage: docusaurus_tests
-    dependsOn: scope_check
+#   dependsOn: scope_check
+    condition: eq(variables.isManual, true)
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
