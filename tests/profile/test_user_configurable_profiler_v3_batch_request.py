@@ -9,6 +9,7 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -36,8 +37,7 @@ from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 try:
-    import sqlalchemy as sqlalchemy
-    import sqlalchemy.dialects.postgresql as postgresqltypes
+    postgresqltypes = sqlalchemy.dialects.postgresql
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -51,8 +51,7 @@ try:
         "BOOLEAN": postgresqltypes.BOOLEAN,
         "NUMERIC": postgresqltypes.NUMERIC,
     }
-except ImportError:
-    sqlalchemy = None
+except (ImportError, AttributeError):
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
@@ -117,7 +116,7 @@ def get_sqlalchemy_runtime_validator_postgresql(
         engine = connection_manager.get_connection(
             f"postgresql://postgres@{db_hostname}/test_ci"
         )
-    except (sqlalchemy.exc.OperationalError, ModuleNotFoundError):
+    except (sqlalchemy.OperationalError, ModuleNotFoundError):
         return None
 
     sql_dtypes = {}

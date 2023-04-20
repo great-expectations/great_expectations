@@ -2,6 +2,7 @@ import datetime
 import logging
 import uuid
 
+from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.dataset import SparkDFDataset
@@ -11,16 +12,6 @@ from great_expectations.types import ClassConfig
 from great_expectations.types.configurations import classConfigSchema
 
 logger = logging.getLogger(__name__)
-
-try:
-    from pyspark.sql import DataFrame, SparkSession
-except ImportError:
-    DataFrame = None  # type: ignore[assignment,misc]
-    SparkSession = None  # type: ignore[assignment,misc]
-    # TODO: review logging more detail here
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency for support."
-    )
 
 
 class SparkDFDatasource(LegacyDatasource):
@@ -206,8 +197,12 @@ class SparkDFDatasource(LegacyDatasource):
         elif "query" in batch_kwargs:
             df = self.spark.sql(batch_kwargs["query"])
 
-        elif "dataset" in batch_kwargs and isinstance(
-            batch_kwargs["dataset"], (DataFrame, SparkDFDataset)
+        elif "dataset" in batch_kwargs and (
+            (
+                pyspark.DataFrame  # type: ignore[truthy-function]
+                and isinstance(batch_kwargs["dataset"], pyspark.DataFrame)
+            )
+            or isinstance(batch_kwargs["dataset"], SparkDFDataset)
         ):
             df = batch_kwargs.get("dataset")
             # We don't want to store the actual dataframe in kwargs; copy the remaining batch_kwargs

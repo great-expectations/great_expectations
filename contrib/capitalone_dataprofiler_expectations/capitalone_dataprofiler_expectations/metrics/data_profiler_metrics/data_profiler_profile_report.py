@@ -1,9 +1,9 @@
 import dataprofiler as dp
-
-import great_expectations.exceptions as gx_exceptions
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
+from capitalone_dataprofiler_expectations.metrics.data_profiler_metrics.data_profiler_profile_metric_provider import (
     DataProfilerProfileMetricProvider,
 )
+
+import great_expectations.exceptions as gx_exceptions
 from great_expectations.execution_engine import PandasExecutionEngine
 from great_expectations.expectations.metrics.metric_provider import metric_value
 

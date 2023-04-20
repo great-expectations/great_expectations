@@ -15,8 +15,8 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility import google
     from great_expectations.core.batch import BatchDefinition
-    from great_expectations.optional_imports import GoogleCloudStorageClient
 
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         data_asset_name: str,
         batching_regex: re.Pattern,
         # TODO: <Alex>ALEX</Alex>
-        gcs_client: GoogleCloudStorageClient,
+        gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
@@ -71,7 +71,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
-        self._gcs_client: GoogleCloudStorageClient = gcs_client
+        self._gcs_client: google.Client = gcs_client
 
         self._bucket_or_name = bucket_or_name
         self._prefix = prefix
@@ -95,7 +95,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         datasource_name: str,
         data_asset_name: str,
         batching_regex: re.Pattern,
-        gcs_client: GoogleCloudStorageClient,
+        gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
