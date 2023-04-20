@@ -98,7 +98,6 @@ stages:
 
           - script: |
               pip install \
-                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark]" \
                 --constraint constraints-dev.txt
@@ -151,7 +150,6 @@ stages:
 
           - script: |
               pip install \
-                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark]" \
                 --constraint constraints-dev.txt
@@ -207,7 +205,6 @@ stages:
 
           - script: |
               pip install \
-                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, postgresql]" \
                 --constraint constraints-dev.txt
@@ -263,7 +260,6 @@ stages:
 
           - script: |
               pip install \
-                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, mysql]" \
                 --constraint constraints-dev.txt
@@ -332,7 +328,6 @@ stages:
 
           - script: |
               pip install \
-                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, trino]" \
                 --constraint constraints-dev.txt
@@ -397,7 +392,6 @@ stages:
 
           - script: |
               pip install \
-                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, mssql]" \
                 --constraint constraints-dev.txt
@@ -455,7 +449,6 @@ stages:
           - script: |
               pip install \
                 "google-cloud-bigquery-storage" \
-                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, bigquery]" \
                 --constraint constraints-dev.txt
@@ -519,7 +512,6 @@ stages:
 
           - script: |
               pip install \
-                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, snowflake]" \
                 --constraint constraints-dev.txt
@@ -580,7 +572,6 @@ stages:
 
           - script: |
               pip install \
-                "cryptography==38.0.4" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, redshift]" \
                 --constraint constraints-dev.txt
@@ -640,7 +631,6 @@ stages:
 #
 #         - script: |
 #             pip install \
-#               "cryptography==38.0.4" \
 #               --requirement reqs/requirements-dev-all-contrib-expectations.txt \
 #               --editable ".[spark, athena]" \
 #               --constraint constraints-dev.txt
@@ -704,7 +694,6 @@ stages:
 
           - script: |
               pip install \
-                "cryptography==38.0.4" \
                 "awscli" \
                 --requirement reqs/requirements-dev-all-contrib-expectations.txt \
                 --editable ".[spark, sqlalchemy]" \
@@ -803,7 +792,6 @@ stages:
 #
 #         - script: |
 #             pip install \
-#               "cryptography==38.0.4" \
 #               --editable "contrib/cli" \
 #               --editable "." \
 #               --constraint constraints-dev.txt
