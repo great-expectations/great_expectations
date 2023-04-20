@@ -7,7 +7,7 @@ import TabItem from '@theme/TabItem';
 import Congratulations from './components/_congratulations_aws_athena.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-import InProgress from '@site/docs/components/warnings/_in_progress.md'
+import InProgress from '/docs/components/warnings/_in_progress.md'
 
 <InProgress />
 

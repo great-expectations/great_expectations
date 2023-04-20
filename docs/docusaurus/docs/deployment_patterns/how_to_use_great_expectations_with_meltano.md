@@ -3,7 +3,7 @@ title: How to Use Great Expectations with Meltano
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
-import InProgress from '@site/docs/components/warnings/_in_progress.md'
+import InProgress from '/docs/components/warnings/_in_progress.md'
 
 <InProgress />
 

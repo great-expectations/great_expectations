@@ -120,7 +120,7 @@ import InstantiateDataContext from '@site/docs/guides/connecting_to_your_data/cl
 
 <!-- 2.3 Configure your Datasource -->
 
-import InProgress from '@site/docs/components/warnings/_in_progress.md'
+import InProgress from '/docs/components/warnings/_in_progress.md'
 
 <InProgress />
 

@@ -11,7 +11,7 @@ import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_stil
 import DataContextInitializeQuickOrFilesystem from '/docs/components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
 import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
 
-import InProgress from '@site/docs/components/warnings/_in_progress.md'
+import InProgress from '/docs/components/warnings/_in_progress.md'
 
 <InProgress />
 

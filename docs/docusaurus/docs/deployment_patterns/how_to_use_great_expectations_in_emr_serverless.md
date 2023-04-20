@@ -4,7 +4,7 @@ title: How to Use Great Expectations in EMR Serverless
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
 
-import InProgress from '@site/docs/components/warnings/_in_progress.md'
+import InProgress from '/docs/components/warnings/_in_progress.md'
 
 <InProgress />
 
