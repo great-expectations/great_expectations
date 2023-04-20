@@ -23,31 +23,15 @@ In a notebook,
 
 ### 1. Import great_expectations and instantiate your Data Context
 
-```python
-import great_expectations as gx
-context = gx.get_context()
+```python name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get_context"
 ```
 
 ### 2. Instantiate two Validators, one for each Data Asset
 
 We'll call one of these <TechnicalTag tag="validator" text="Validators" /> the *upstream* Validator and the other the *downstream* Validator. Evaluation Parameters will allow us to use <TechnicalTag tag="validation_result" text="Validation Results" /> from the upstream Validator as parameters passed into Expectations on the downstream.
 
-It's common (but not required) for both Batch Requests to have the same Datasource and <TechnicalTag tag="data_connector" text="Data Connector" />.
 
- ```python
-batch_request_1 = BatchRequest(
-  datasource_name="my_datasource",
-  data_connector_name="my_data_connector",
-  data_asset_name="my_data_asset_1"
-)
-upstream_validator = context.get_validator(batch_request=batch_request_1, expectation_suite_name="my_expectation_suite_1")
-
-batch_request_2 = BatchRequest(
-  datasource_name="my_datasource",
-  data_connector_name="my_data_connector",
-  data_asset_name="my_data_asset_2"
-)
-downstream_validator = context.get_validator(batch_request=batch_request_2, expectation_suite_name="my_expectation_suite_2")
+ ```python name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get validators"
 ```
 
 ### 3. Disable interactive evaluation for the downstream Validator

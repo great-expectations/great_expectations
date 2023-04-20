@@ -1,12 +1,18 @@
+# <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get_context">
 import great_expectations as gx
 
-# TODO: Is this causing the public_api issue? It is marked as `@public_api`
 context = gx.get_context()
+# </snippet>
 
-# Get validators
+# <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get validators">
 upstream_validator = context.sources.pandas_default.read_csv(
     "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
+downstream_validator = context.sources.pandas_default.read_csv(
+    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+)
+# </snippet>
+
 upstream_validator.expect_table_row_count_to_be_between(min_value=5000, max_value=20000)
 
 upstream_validator.expectation_suite_name = "upstream_expectation_suite"
@@ -15,9 +21,6 @@ upstream_validator.save_expectation_suite(discard_failed_expectations=False)
 
 # TRANSFORM DATA BUT DON'T REMOVE ROWS - CHECK TO MAKE SURE ROWS AREN'T REMOVED
 
-downstream_validator = context.sources.pandas_default.read_csv(
-    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-)
 
 downstream_validator.interactive_evaluation = False
 
@@ -77,3 +80,5 @@ checkpoint_result = checkpoint.run()
 assert checkpoint_result.success
 
 context.build_data_docs()
+
+
