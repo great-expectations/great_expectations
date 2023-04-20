@@ -60,7 +60,7 @@ in Usages section.
 ### 7. Usages
 This section will be where the substance and nitty-gritty of your documentation is written. You should put a lot of
 technical emphasis in this section and making sure you stay focused in fleshing out and explaining users how this integration
-facilitates or enables a dev loop or use case with relevant and replicatable examples (see [template](../integrations/integration_template.md) for suggested format and structure).
+facilitates or enables a dev loop or use case with relevant and replicatable examples.
 
 ### 8. Further discussion
 This section is comprised of four subsections. They are:
