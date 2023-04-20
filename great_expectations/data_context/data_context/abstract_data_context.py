@@ -731,8 +731,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         version="0.15.48", message="Part of the deprecated DataContext CRUD API"
     )
     def save_datasource(
-        self, datasource: Union[BaseDatasource, FluentDatasource, LegacyDatasource]
-    ) -> Union[BaseDatasource, FluentDatasource, LegacyDatasource]:
+        self, datasource: BaseDatasource | FluentDatasource | LegacyDatasource
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
         """Save a Datasource to the configured DatasourceStore.
 
         Stores the underlying DatasourceConfig in the store and Data Context config,

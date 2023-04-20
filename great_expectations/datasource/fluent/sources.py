@@ -513,7 +513,7 @@ class _SourceFactories:
                 datasource_name,  # type:ignore[arg-type] # datasource_name is expected to be a str from assignment above
                 datasource_type,
             )
-            self._data_context._delete_fluent_datasource(
+            self._data_context.delete_datasource(
                 datasource_name=datasource_name  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
             )
             # Now that the input is validated and the old datasource is deleted we pass the
@@ -553,7 +553,7 @@ class _SourceFactories:
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
             )
-            self._data_context._delete_fluent_datasource(
+            self._data_context.delete_datasource(
                 datasource_name=datasource_name  # type: ignore[arg-type] # expected str only
             )
             # Now that the input is validated and the old datasource is deleted we pass the
@@ -580,7 +580,7 @@ class _SourceFactories:
         def delete_datasource(name: str) -> None:
             logger.debug(f"Delete {datasource_type} with {name}")
             self._validate_current_datasource_type(name, datasource_type)
-            self._data_context._delete_fluent_datasource(datasource_name=name)
+            self._data_context.delete_datasource(datasource_name=name)
 
         delete_datasource.__doc__ = doc_string
         # attr-defined issue https://github.com/python/mypy/issues/12472
