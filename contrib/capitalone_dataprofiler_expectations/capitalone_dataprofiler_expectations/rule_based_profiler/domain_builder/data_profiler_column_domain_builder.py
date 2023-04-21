@@ -116,12 +116,31 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             parameters=None,
         )
 
+        metric: str = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=f"{VARIABLES_KEY}metric",
+            expected_return_type=str,
+            variables=variables,
+            parameters=None,
+        )
+
+        metric_values: str = get_parameter_value_and_validate_return_type(
+            domain=None,
+            parameter_reference=f"{VARIABLES_KEY}metric_values",
+            expected_return_type=List,
+            variables=variables,
+            parameters=None,
+        )
+
+        #get metrics and profile path from variables and then pass them into here
         profile_report_column_names: List[str] = validator.get_metric(  # type: ignore[assignment] # could be None
             metric=MetricConfiguration(
                 metric_name="data_profiler.table_column_list",
                 metric_domain_kwargs={},
                 metric_value_kwargs={
                     "profile_path": profile_path,
+                    "metric": metric,
+                    "metric_values": metric_values,
                 },
             )
         )
