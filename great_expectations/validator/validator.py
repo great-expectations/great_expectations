@@ -52,6 +52,7 @@ from great_expectations.execution_engine.pandas_batch_data import PandasBatchDat
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,
+    register_core_expectations,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
@@ -453,7 +454,12 @@ class Validator:
 
     def __getattr__(self, name):
         name = name.lower()
-        if name.startswith("expect_") and get_expectation_impl(name):
+
+        is_expectation = name.startswith("expect_")
+        if is_expectation:
+            register_core_expectations()
+
+        if is_expectation and get_expectation_impl(name):
             return self.validate_expectation(name)
         elif (
             self._expose_dataframe_methods

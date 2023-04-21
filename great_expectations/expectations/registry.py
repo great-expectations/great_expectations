@@ -169,6 +169,21 @@ def register_expectation(expectation: Type[Expectation]) -> None:
     _registered_expectations[expectation_type] = expectation
 
 
+def register_core_expectations() -> None:
+    """As Expectation registration is the responsibility of MetaExpectation.__new__,
+    simply importing a given class will ensure that it is added to the Expectation
+    registry.
+
+    We use this JIT in the Validator to ensure that core Expectations are available
+    for usage when called upon.
+
+    Without this function, we need to hope that core Expectations are imported somewhere
+    in our import graph - if not, our registry will be empty and Validator workflows
+    will fail.
+    """
+    from great_expectations.expectations import core  # noqa: F401
+
+
 def _add_response_key(res, key, value):
     if key in res:
         res[key].append(value)
