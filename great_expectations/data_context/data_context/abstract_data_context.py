@@ -1564,6 +1564,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
             )
             datasources.append(masked_config)
+
+        for (
+            datasource_name,
+            fluent_datasource_config,
+        ) in self.fluent_datasources.items():
+            datasources.append(fluent_datasource_config.dict())
         return datasources
 
     @public_api
@@ -2120,7 +2126,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
         action_list: list[dict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
@@ -2196,7 +2202,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
         action_list: list[dict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
@@ -2924,10 +2930,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: A suite with the given name does not already exist.
         """
-        expectation_suite_name: str = expectation_suite.expectation_suite_name
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        name = expectation_suite.expectation_suite_name
+        id = expectation_suite.ge_cloud_id
+        key = self._determine_key_for_suite_update(name=name, id=id)
         self.expectations_store.update(key=key, value=expectation_suite)
         return expectation_suite
+
+    def _determine_key_for_suite_update(
+        self, name: str, id: str | None
+    ) -> Union[ExpectationSuiteIdentifier, GXCloudIdentifier]:
+        return ExpectationSuiteIdentifier(name)
 
     @overload
     def add_or_update_expectation_suite(

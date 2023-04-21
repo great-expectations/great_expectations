@@ -259,6 +259,12 @@ quickstart = [
 
 fluent_datasources = [
     IntegrationTestFixture(
+        name="connect_to_your_data_overview",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview.py",
+    ),
+    IntegrationTestFixture(
         name="how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py",
     ),

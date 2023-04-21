@@ -4,6 +4,7 @@
 #
 # The pipeline is run under the following conditions:
 #   - On any PR
+#   - When manually triggered
 
 resources:
   containers:
@@ -42,6 +43,7 @@ variables:
 
 stages:
   - stage: scope_check
+    condition: eq(variables.isManual, true)
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
@@ -63,6 +65,7 @@ stages:
 
   - stage: docusaurus_tests
     dependsOn: scope_check
+    condition: eq(variables.isManual, true)
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
