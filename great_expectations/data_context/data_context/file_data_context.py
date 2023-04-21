@@ -208,6 +208,7 @@ class FileDataContext(SerializableDataContext):
                 # attach the config_provider for each loaded datasource
                 for datasource in gx_config.datasources:
                     datasource._config_provider = config_provider
+                    datasource._data_context = self
 
                 return gx_config
             logger.info(f"no fluent config at {path_to_fluent_yaml.absolute()}")

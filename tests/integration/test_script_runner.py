@@ -260,9 +260,15 @@ quickstart = [
 fluent_datasources = [
     IntegrationTestFixture(
         name="connect_to_your_data_overview",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        data_context_dir=None,
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview.py",
+    ),
+    IntegrationTestFixture(
+        name="how_to_create_and_edit_expectations_with_a_profiler",
+        data_context_dir=None,
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        user_flow_script="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler.py",
     ),
 ]
 
