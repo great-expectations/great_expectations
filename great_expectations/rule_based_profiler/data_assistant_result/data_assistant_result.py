@@ -723,7 +723,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 title_font_weight: int = altair_theme["title"]["fontWeight"]
                 subtitle_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
                 url_font_weights: str = ";".join(
-                    {str(title_font_weight), str(subtitle_font_weight)}
+                    [str(subtitle_font_weight), str(title_font_weight)]
                 )
 
                 font_url = f"{font_family_url}:wght@{url_font_weights}&display=swap"
