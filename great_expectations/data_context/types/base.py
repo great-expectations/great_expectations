@@ -2468,7 +2468,9 @@ class DataContextConfig(BaseYamlConfig):
                 profiler_store_name = store_backend_defaults.profiler_store_name
 
         self._config_version = config_version
-        self.datasources = datasources or {}
+        if datasources is None:
+            datasources = {}  # type: ignore[assignment]
+        self.datasources = datasources
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
