@@ -4,7 +4,7 @@ import os
 import shutil
 
 import pytest
-from pyarrow.util import pathlib
+import pathlib
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.data_context.util import file_relative_path
