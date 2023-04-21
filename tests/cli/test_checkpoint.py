@@ -739,7 +739,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     mock_emit,
     caplog,
     monkeypatch,
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
     titanic_expectation_suite,
 ):
     """
@@ -748,7 +748,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     This test builds that notebook and runs it to generate a Checkpoint and then tests the resulting configuration in the Checkpoint file.
     The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the Checkpoint configuration.
     """
-    context = deterministic_asset_dataconnector_context
+    context = deterministic_asset_data_connector_context
 
     root_dir: str = context.root_directory
     monkeypatch.chdir(os.path.dirname(root_dir))
