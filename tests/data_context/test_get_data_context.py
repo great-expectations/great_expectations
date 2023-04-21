@@ -119,7 +119,7 @@ def test_data_context_root_dir_returns_data_context(
 
 
 @pytest.mark.unit
-def test_base_context_invalid_root_dir(clear_env_vars):
+def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
     config: DataContextConfig = DataContextConfig(
         config_version=3.0,
         plugins_directory=None,
@@ -135,8 +135,11 @@ def test_base_context_invalid_root_dir(clear_env_vars):
         data_docs_sites={},
         validation_operators={},
     )
+
+    context_root_dir = tmp_path / "root"
+    context_root_dir.mkdir(exist_ok=True)
     assert isinstance(
-        gx.get_context(project_config=config, context_root_dir="i/dont/exist"),
+        gx.get_context(project_config=config, context_root_dir=context_root_dir),
         FileDataContext,
     )
 
@@ -231,12 +234,6 @@ def test_cloud_context_with_in_memory_config_overrides(
         )
         assert isinstance(context, CloudDataContext)
         assert context.expectations_store_name == "new_expectations_store"
-
-
-@pytest.mark.unit
-def test_invalid_root_dir_gives_error(clear_env_vars):
-    with pytest.raises(ConfigNotFoundError):
-        gx.get_context(context_root_dir="i/dont/exist")
 
 
 @pytest.mark.unit

@@ -234,6 +234,8 @@ class SerializableDataContext(AbstractDataContext):
         with open(path_to_yml) as f:
             config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
+        if not config_var_path:
+            return False
         config_var_path = os.path.join(gx_dir, config_var_path)  # noqa: PTH118
         return os.path.isfile(config_var_path)  # noqa: PTH113
 
