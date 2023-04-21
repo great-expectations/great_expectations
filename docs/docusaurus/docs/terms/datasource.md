@@ -22,7 +22,7 @@ A Datasource provides a standard API for accessing and interacting with data fro
 
 ### Features and promises
 
-Datasources provides a standard API across multiple backends: the Datasource API remains the same for PostgreSQL, CSV Filesystems, and all other supported data backends.
+Datasources provide a standard API across multiple backends: the Datasource API remains the same for PostgreSQL, CSV Filesystems, and all other supported data backends.
 :::note Important: 
 
 Datasources do not modify your data.
