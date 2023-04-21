@@ -182,6 +182,9 @@ def register_core_expectations() -> None:
     will fail.
     """
     before_count = len(_registered_expectations)
+
+    # Implicitly calls MetaExpectation.__new__ as Expectations are loaded from core.__init__.py
+    # As __new__ calls upon register_expectation, this import builds our core registry
     from great_expectations.expectations import core  # noqa: F401
 
     after_count = len(_registered_expectations)
