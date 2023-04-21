@@ -1493,6 +1493,10 @@ class CodeReferenceFilter:
             name="get_batch",
             filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="Deprecated v2 api Dataset is not included in the public API",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
     ]
 
     def __init__(
