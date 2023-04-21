@@ -89,11 +89,10 @@ class FileDataContext(SerializableDataContext):
         """Prepare a `great_expectations` directory with all necessary subdirectories.
         If one already exists, no-op.
         """
-        if self.is_project_scaffolded(self._context_root_directory):
-            return
-        self._scaffold(
-            project_root_dir=project_root_dir,
-        )
+        if not self.is_project_scaffolded(self._context_root_directory):
+            self._scaffold(
+                project_root_dir=project_root_dir,
+            )
 
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
