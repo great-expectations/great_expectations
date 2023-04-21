@@ -62,7 +62,7 @@ for an Ephemeral Data Context the data will remain only in memory.
 
 ## Accessing your Datasource from your Data Context
 
-If you need to directly access your Datasource in the future, the `context.fluent_datasources` attribute of your Data Context will provide a convenient way to do so.
+If you need to directly access your Datasource in the future, the `context.datasources` attribute of your Data Context will provide a convenient way to do so.
 Here is how to view the configuration:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config"
