@@ -22,7 +22,7 @@ In this guide, you will utilize a <TechnicalTag tag="data_assistant" text="Data 
 
 In this workflow, we will be making use of the `OnboardingDataAssistant` to profile against a <TechnicalTag tag="batch_request" text="BatchRequest" /> representing our source data, and validate the resulting suite against a `BatchRequest` representing our second set of data.
 
-To begin, we'll need to set up our imports and instantiate our <TechnicalTag tag="data_context" text="Data Context" />:
+To begin, we'll need to import Great Expectations and instantiate our <TechnicalTag tag="data_context" text="Data Context" />:
 
 ```python name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py imports"
 ```
