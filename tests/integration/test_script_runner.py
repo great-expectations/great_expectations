@@ -265,7 +265,7 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview.py",
     ),
     IntegrationTestFixture(
-        name="how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters",
+        name="RUNME how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py",
