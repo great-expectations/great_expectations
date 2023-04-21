@@ -112,7 +112,7 @@ If you would like to create a new Checkpoint with your fluent style Datasource, 
         if has_fluent_datasource and has_block_datasource:
             cli_message(
                 """<yellow>Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
-If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: <link to doc>
+If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
 If you would like to use a block config style Datasource, you can select it here to proceed.</yellow>
 """
             )
