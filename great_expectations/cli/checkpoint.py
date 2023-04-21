@@ -95,8 +95,28 @@ def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> 
 
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+    has_fluent_datasource: bool = len(context.fluent_datasources) > 0
+    has_block_datasource: bool = (
+        len(context.datasources) - len(context.fluent_datasources)
+    ) > 0
 
     try:
+
+        if has_fluent_datasource and not has_block_datasource:
+            raise Exception(
+                """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
+"""
+            )
+
+        if has_fluent_datasource and has_block_datasource:
+            cli_message(
+                """<yellow>Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: <link to doc>
+If you would like to use a block config style Datasource, you can select it here to proceed.</yellow>
+"""
+            )
+
         _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event_end)
 
         # Create notebook on disk
