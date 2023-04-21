@@ -3,7 +3,7 @@ title: Contribute
 id: contributing
 ---
 
-To contribute to Great Expectations documentation or code, refer to one of the following resources:
+To contribute to Great Expectations documentation or code, see one of the following resources:
 
 - To request a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/tree/contributing-and-style-readme/docs) in the `docs` repository.
 
