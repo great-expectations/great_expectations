@@ -25,10 +25,10 @@ assert "my_pandas_datasource" in context.fluent_datasources
 
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config">
-config = context.fluent_datasources["my_pandas_datasource"].yaml()
-print(config)
+datasource = context.fluent_datasources["my_pandas_datasource"]
+print(datasource)
 # </snippet>
 
-assert "base_directory:" in config
-assert "name: my_pandas_datasource" in config
-assert "type: pandas_filesystem" in config
+assert "base_directory:" in str(datasource)
+assert "name: my_pandas_datasource" in str(datasource)
+assert "type: pandas_filesystem" in str(datasource)

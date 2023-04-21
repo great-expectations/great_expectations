@@ -23,7 +23,6 @@ from pydantic import Extra, Field, validator
 from ruamel.yaml import YAML
 from typing_extensions import Final
 
-from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.constants import (
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
@@ -254,7 +253,6 @@ class GxConfig(FluentBaseModel):
     ) -> pathlib.Path:
         ...
 
-    @public_api
     def yaml(
         self,
         stream_or_path: Union[StringIO, pathlib.Path, None] = None,
@@ -271,7 +269,6 @@ class GxConfig(FluentBaseModel):
     ) -> Union[str, pathlib.Path]:
         """
         Serialize the config object as yaml.
-
         Writes to a file if a `pathlib.Path` is provided.
         Else it writes to a stream and returns a yaml string.
         """
