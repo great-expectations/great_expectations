@@ -257,10 +257,20 @@ quickstart = [
     ),
 ]
 
+fluent_datasources = [
+    IntegrationTestFixture(
+        name="connect_to_your_data_overview",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview.py",
+    ),
+]
+
 
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
 docs_test_matrix += quickstart
+docs_test_matrix += fluent_datasources
 docs_test_matrix += spark_integration_tests
 docs_test_matrix += sqlite_integration_tests
 docs_test_matrix += mysql_integration_tests
