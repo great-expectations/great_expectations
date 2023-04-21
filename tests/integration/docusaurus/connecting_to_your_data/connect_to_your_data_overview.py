@@ -21,11 +21,11 @@ context.sources.add_pandas_filesystem(
 )
 # </snippet>
 
-assert "my_pandas_datasource" in context.fluent_datasources
+assert "my_pandas_datasource" in context.datasources
 
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config">
-datasource = context.fluent_datasources["my_pandas_datasource"]
+datasource = context.datasources["my_pandas_datasource"]
 print(datasource)
 # </snippet>
 

@@ -36,16 +36,16 @@ The majority of the work involved in connecting to data is a simple matter of ad
 
 <!-- The following subsections should be repeated as necessary.  They should give a high level map of the things that need to be done or optionally can be done in this process, preferably in the order that they should be addressed (assuming there is one). If the process crosses multiple steps of the Universal Map, use the <SetupHeader> <ConnectHeader> <CreateHeader> and <ValidateHeader> tags to indicate which Universal Map step the subsections fall under. -->
 
-### Configure your Datasource
+### Configuring your Datasource
 
-Because the underlying data systems are different, configuration for each type of Datasource is slightly different.  We have step by step how-to guides that cover many common cases, and core concepts documentation to help you with more exotic kinds of configuration.  It is strongly advised that you find the guide that pertains to your use case and follow it.  If you are simply interested in learning about the process, however, the following will give you a broad overview of what you will be doing regardless of what your underlying data systems are.
+Because the underlying data systems are different, how you connect to each type of Datasource is slightly different.  We have step by step how-to guides that cover many common cases, and core concepts documentation to help you with more complex scenarios.  It is strongly advised that you find the guide that pertains to your use case and follow it.  The following will give you a broad overview of what you will be doing regardless of what your underlying data systems are.
 
 Datasource configurations can be written in Python using our Fluent Datasource API. Regardless of variations due to the underlying data systems, your Datasource's configuration will look roughly like this:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview add_datasource"
 ```
 
-Please note that this is just a broad outline of the configuration you will be making.  You will find much more detailed examples in our documentation on how to connect to specific source data systems.
+Please note that this is just a broad outline of how to configure a datasource.  You will find much more detailed examples in our documentation on how to connect to specific source data systems.
 
 The `name` key will be the first you need to define.  The `name` key can be anything you want, but it is best to use a descriptive name as you will use this to reference your Datasource in the future.
 The `add_<datasource>` method will take Datasource-specific arguments used to configure it. 
