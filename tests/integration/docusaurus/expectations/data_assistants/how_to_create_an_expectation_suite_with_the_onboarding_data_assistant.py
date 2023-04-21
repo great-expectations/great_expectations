@@ -28,10 +28,10 @@ context = gx.get_context()
 
 context.sources.add_pandas_filesystem(
     "taxi_multi_batch_datasource",
-    base_directory="./data"    # replace with your data directory
+    base_directory="./data",  # replace with your data directory
 ).add_csv_asset(
     "all_years",
-    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
 )
 
 # </snippet>
@@ -49,8 +49,12 @@ expectation_suite = context.add_or_update_expectation_suite(
 # Prepare a Batch Request
 
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py batch_request">
-all_years_asset: DataAsset = context.datasources["taxi_multi_batch_datasource"].get_asset("all_years")
-multi_batch_all_years_batch_request: BatchRequest = all_years_asset.build_batch_request()
+all_years_asset: DataAsset = context.datasources[
+    "taxi_multi_batch_datasource"
+].get_asset("all_years")
+multi_batch_all_years_batch_request: BatchRequest = (
+    all_years_asset.build_batch_request()
+)
 # </snippet>
 
 # Run the Onboarding Assistant
