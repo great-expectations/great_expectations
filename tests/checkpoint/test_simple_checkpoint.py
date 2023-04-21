@@ -1,6 +1,6 @@
 import copy
 import os
-from typing import Dict, List, Union
+from typing import Dict, List, Union, cast
 
 import pandas as pd
 import pytest
@@ -290,7 +290,7 @@ def test_simple_checkpoint_has_slack_action_with_notify_adjustments_slack_webhoo
     ).build()
 
     slack_notification_action["action"]["notify_on"] = "failure"
-    slack_notification_action["action"]["notify_with"] = ["local_site", "s3_prod"]
+    slack_notification_action["action"]["notify_with"] = ["local_site", "s3_prod"]  # type: ignore[return-value]
     expected = [
         store_validation_result_action,
         store_eval_parameter_action,
@@ -429,8 +429,9 @@ def test_simple_checkpoint_persisted_to_store(
         **initial_checkpoint_config.to_json_dict()
     )
     assert context_with_data_source_and_empty_suite.list_checkpoints() == ["foo"]
-    checkpoint: SimpleCheckpoint = (
-        context_with_data_source_and_empty_suite.get_checkpoint(name="foo")
+    checkpoint: SimpleCheckpoint = cast(
+        SimpleCheckpoint,
+        context_with_data_source_and_empty_suite.get_checkpoint(name="foo"),
     )
     assert isinstance(checkpoint, Checkpoint)
     assert isinstance(checkpoint.get_config(mode=ConfigOutputModes.DICT), dict)
@@ -3567,9 +3568,9 @@ def test_simple_checkpoint_result_validations_include_rendered_content(
     validation_result_identifier: ValidationResultIdentifier = (
         result.list_validation_result_identifiers()[0]
     )
-    expectation_validation_result: ExpectationValidationResult = result.run_results[
-        validation_result_identifier
-    ]["validation_result"]
+    expectation_validation_result: ExpectationValidationResult | dict = (
+        result.run_results[validation_result_identifier]["validation_result"]
+    )
     for result in expectation_validation_result.results:
         for rendered_content in result.rendered_content:
             assert isinstance(rendered_content, RenderedAtomicContent)
