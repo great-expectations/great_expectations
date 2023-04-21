@@ -142,6 +142,19 @@ def datasource_list(ctx: click.Context) -> None:
     """List known Datasources."""
     context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    if len(context.fluent_datasources) > 0:
+        cli_message(
+            """<yellow>We've detected that you have at least one fluent style Datasource in your Data Context. The CLI does not work with fluent style Datasources.
+Fluent style Datasources cannot be listed via the CLI.
+If you would like to see a list of you fluent style Datasources, you can run the following code:
+
+context = gx.get_context()
+context.datasources
+</yellow>
+"""
+        )
+
     try:
         datasources = context.list_datasources()
         cli_message(_build_datasource_intro_string(datasources))
@@ -173,8 +186,8 @@ def _build_datasource_intro_string(datasources: List[dict]) -> str:
     if datasource_count == 0:
         return "No Datasources found"
     elif datasource_count == 1:
-        return "1 Datasource found:"
-    return f"{datasource_count} Datasources found:"
+        return "1 block config Datasource found:"
+    return f"{datasource_count} block config Datasources found:"
 
 
 def _datasource_new_flow(
