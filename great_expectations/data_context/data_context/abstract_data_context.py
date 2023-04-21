@@ -729,6 +729,10 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         assert isinstance(datasource, FluentDatasource)
 
+        datasource._data_context = self
+        # config provider needed for config substitution
+        datasource._config_provider = self.config_provider
+
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
         # Without this we end up with duplicate entries for datasources in both
         # "fluent_datasources" and "datasources" config/yaml entries.
@@ -757,6 +761,10 @@ class AbstractDataContext(ConfigPeer, ABC):
             update_datasource = ds_type(**kwargs)
         else:
             update_datasource = datasource
+
+        update_datasource._data_context = self
+        # config provider needed for config substitution
+        update_datasource._config_provider = self.config_provider
 
         self.datasources[datasource_name] = update_datasource
 
