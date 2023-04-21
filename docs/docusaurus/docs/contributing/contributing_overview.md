@@ -1,5 +1,5 @@
 ---
-title: Contributing
+title: Contribute
 id: contributing
 ---
 
