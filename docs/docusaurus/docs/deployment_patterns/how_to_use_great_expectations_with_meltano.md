@@ -3,6 +3,10 @@ title: How to Use Great Expectations with Meltano
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This guide will help you get Great Expectations installed, configured, and running in your Meltano project.
 
 [Meltano](https://meltano.com/) is an Open Source DataOps OS that's used to install and configure data applications (Great Expectations, Singer, dbt, Airflow, etc.) that your team's data platform is built on top of, all in one central repository.
