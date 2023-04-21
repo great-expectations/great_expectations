@@ -145,9 +145,8 @@ def datasource_list(ctx: click.Context) -> None:
 
     if len(context.fluent_datasources) > 0:
         cli_message(
-            """<yellow>We've detected that you have at least one fluent style Datasource in your Data Context. The CLI does not work with fluent style Datasources.
-Fluent style Datasources cannot be listed via the CLI.
-If you would like to see a list of you fluent style Datasources, you can run the following code:
+            """<yellow>We've detected that you have at least one fluent style Datasource in your Data Context. Fluent style Datasources cannot be listed via the CLI.
+If you would like to see a list of your fluent style Datasources, you can run the following code:
 
 context = gx.get_context()
 context.datasources
