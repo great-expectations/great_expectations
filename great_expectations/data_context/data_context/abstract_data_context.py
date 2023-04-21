@@ -1605,7 +1605,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource_config: Union[dict, DatasourceConfig]
         serializer = NamedDatasourceSerializer(schema=datasourceConfigSchema)
 
-        for datasource_name, datasource_config in self.config.datasources.items():
+        for datasource_name, datasource_config in self.config.datasources.items():  # type: ignore[union-attr]
             if isinstance(datasource_config, dict):
                 datasource_config = DatasourceConfig(**datasource_config)
             datasource_config.name = datasource_name
@@ -1647,7 +1647,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)
-        self.config.datasources.pop(datasource_name, None)
+        self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
     @overload
     def add_checkpoint(
