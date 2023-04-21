@@ -16,7 +16,7 @@ title: "Create Expectations: Index"
 ## Advanced skills
 - [How to create Expectations that span multiple Batches using Evaluation Parameters](../../guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.md)
 - [How to dynamically load evaluation parameters from a database](../../guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.md)
-- [How to compare two tables with the UserConfigurableProfiler](../../guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler.md)
+- [How to compare two tables with the OnboardingDataAssistant](../../guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant.md)
 
 ## Creating Custom Expectations
 - [Overview](../../guides/expectations/creating_custom_expectations/overview.md)
