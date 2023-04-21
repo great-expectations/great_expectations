@@ -450,17 +450,11 @@ module.exports = {
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
-        {
-          type: 'category',
-          label: 'Supplemental documentation',
-          link: { type: 'doc', id: 'reference/supplemental_documentation' },
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
-            { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/usage_statistics' }
-          ]
-        },
+    { type: 'doc', id: 'contributing/contributing_maturity' },
+    { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
+    { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
+    { type: 'doc', id: 'reference/customize_your_deployment' },
+    { type: 'doc', id: 'reference/usage_statistics' }
         {
           type: 'category',
           label: 'API documentation',
@@ -530,7 +524,6 @@ module.exports = {
         }
       ]
     },
-    { type: 'doc', id: 'contributing/contributing_maturity' },
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
   ]
