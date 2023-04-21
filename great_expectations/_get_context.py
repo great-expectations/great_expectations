@@ -214,7 +214,7 @@ def get_context(
     if file_context:
         return file_context
 
-    # Third, default to EphemeralDataContext
+    # Finally, default to ephemeral
     return _get_ephemeral_context(
         project_config=project_config,
         runtime_environment=runtime_environment,
@@ -348,7 +348,7 @@ def _get_file_context(
 
 
 def _get_ephemeral_context(
-    project_config: DataContextConfig | Mapping | None = None,
+    project_config: DataContextConfig | None = None,
     runtime_environment: dict | None = None,
 ) -> EphemeralDataContext:
     from great_expectations.data_context.data_context import EphemeralDataContext
