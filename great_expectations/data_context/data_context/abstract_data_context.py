@@ -703,25 +703,57 @@ class AbstractDataContext(ConfigPeer, ABC):
     def sources(self) -> _SourceFactories:
         return self._sources
 
-    def _add_fluent_datasource(self, datasource: FluentDatasource) -> None:
-        # We currently don't allow one to overwrite a datasource with this internal method
-        if datasource.name in self.datasources:
+    def _add_fluent_datasource(
+        self, datasource: Optional[FluentDatasource] = None, **kwargs
+    ) -> None:
+        if datasource:
+            datasource_name = datasource.name
+        else:
+            datasource_name = kwargs.get("name")
+
+        if not datasource_name:
             raise gx_exceptions.DataContextError(
-                f"Can not write the fluent datasource {datasource.name} because a datasource of that "
+                "Can not write the fluent datasource, because no name was provided."
+            )
+
+        # We currently don't allow one to overwrite a datasource with this internal method
+        if datasource_name in self.datasources:
+            raise gx_exceptions.DataContextError(
+                f"Can not write the fluent datasource {datasource_name} because a datasource of that "
                 "name already exists in the data context."
             )
+
+        if not datasource:
+            ds_type = _SourceFactories.type_lookup[kwargs["type"]]
+            datasource = ds_type(**kwargs)
+
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
         # Without this we end up with duplicate entries for datasources in both
         # "fluent_datasources" and "datasources" config/yaml entries.
         if self._datasource_store.cloud_mode:
             set_datasource = self._datasource_store.set(key=None, value=datasource)
             if set_datasource.id:
-                logger.debug(f"Assigning `id` to '{datasource.name}'")
+                logger.debug(f"Assigning `id` to '{datasource_name}'")
                 datasource.id = set_datasource.id
-        self.datasources[datasource.name] = datasource
+        self.datasources[datasource_name] = datasource
 
-    def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
-        self.datasources[datasource.name] = datasource
+    def _update_fluent_datasource(
+        self, datasource: Optional[FluentDatasource] = None, **kwargs
+    ) -> None:
+        if datasource:
+            datasource_name = datasource.name
+        else:
+            datasource_name = kwargs.get("name")
+
+        if not datasource_name:
+            raise gx_exceptions.DataContextError(
+                "Can not write the fluent datasource, because no name was provided."
+            )
+
+        if not datasource:
+            ds_type = _SourceFactories.type_lookup[kwargs["type"]]
+            datasource = ds_type(**kwargs)
+        self.datasources[datasource_name] = datasource
 
     def _delete_fluent_datasource(self, datasource_name: str) -> None:
         self.datasources.pop(datasource_name, None)
@@ -824,7 +856,13 @@ class AbstractDataContext(ConfigPeer, ABC):
             Datasource instance added.
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
-        return self._add_datasource()
+        return self._add_datasource(
+            name=name,
+            initialize=initialize,
+            save_changes=save_changes,
+            datasource=datasource,
+            **kwargs,
+        )
 
     @staticmethod
     def _validate_add_datasource_args(
@@ -1002,11 +1040,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
         return_datasource: BaseDatasource | FluentDatasource | LegacyDatasource
-        if isinstance(datasource, FluentDatasource):
-            if datasource.name in self.datasources:
-                self._update_fluent_datasource(datasource=datasource)
+        if isinstance(datasource, FluentDatasource) or "type" in kwargs:
+            if datasource:
+                datasource_name = datasource.name
             else:
-                self._add_fluent_datasource(datasource=datasource)
+                datasource_name = kwargs["name"] = name
+
+            if datasource_name in self.datasources:
+                self._update_fluent_datasource(datasource=datasource, **kwargs)
+            else:
+                self._add_fluent_datasource(datasource=datasource, **kwargs)
             return_datasource = datasource
         else:
             block_config_datasource = self._add_block_config_datasource(

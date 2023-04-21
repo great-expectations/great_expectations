@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Mapping
+from typing import Mapping
 from unittest import mock
 
 import pytest
@@ -24,7 +24,7 @@ from great_expectations.data_context.types.base import (
     ProgressBarsConfig,
     datasourceConfigSchema,
 )
-from great_expectations.datasource.fluent import PandasFilesystemDatasource
+from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
@@ -165,10 +165,9 @@ def in_memory_data_context(
         store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
     context = EphemeralDataContextSpy(project_config=config)
+    ds_type = _SourceFactories.type_lookup[fluent_datasource_config["type"]]
     fluent_datasources = {
-        fluent_datasource_config["name"]: PandasFilesystemDatasource(
-            **fluent_datasource_config
-        ),
+        fluent_datasource_config["name"]: ds_type(**fluent_datasource_config),
     }
     context.datasources.update(fluent_datasources)
     return context
@@ -378,7 +377,8 @@ def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
         assert actual_config == expected_config
 
     else:
-        datasource = PandasFilesystemDatasource(**parametrized_datasource_configs)
+        ds_type = _SourceFactories.type_lookup[parametrized_datasource_configs["type"]]
+        datasource = ds_type(**parametrized_datasource_configs)
         persisted_datasource = context.add_or_update_datasource(datasource=datasource)
 
         # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
@@ -429,10 +429,14 @@ def test_add_or_update_datasource_adds_successfully(
         assert context.datasource_store.save_count == 1
     else:
         parametrized_datasource_configs["name"] = datasource_name
-        # passing a fluent config dict is not supported as of 04/21/2023
-        # so use_existing_datasource is irrelevant
-        datasource = PandasFilesystemDatasource(**parametrized_datasource_configs)
-        _ = context.add_or_update_datasource(datasource=datasource)
+        if use_existing_datasource:
+            ds_type = _SourceFactories.type_lookup[
+                parametrized_datasource_configs["type"]
+            ]
+            datasource = ds_type(**parametrized_datasource_configs)
+            _ = context.add_or_update_datasource(datasource=datasource)
+        else:
+            _ = context.add_or_update_datasource(**parametrized_datasource_configs)
 
         # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
         assert context.datasource_store.save_count == 0
