@@ -194,6 +194,9 @@ class Validator:
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
+        # Ensure that Expectations are available for __dir__ and __getattr__
+        register_core_expectations()
+
         self._data_context: Optional[AbstractDataContext] = data_context
 
         self._metrics_calculator: MetricsCalculator = MetricsCalculator(
@@ -454,12 +457,7 @@ class Validator:
 
     def __getattr__(self, name):
         name = name.lower()
-
-        is_expectation = name.startswith("expect_")
-        if is_expectation:
-            register_core_expectations()
-
-        if is_expectation and get_expectation_impl(name):
+        if name.startswith("expect_") and get_expectation_impl(name):
             return self.validate_expectation(name)
         elif (
             self._expose_dataframe_methods
