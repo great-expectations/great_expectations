@@ -24,12 +24,10 @@ from great_expectations.data_context.types.base import (
     ProgressBarsConfig,
     datasourceConfigSchema,
 )
+from great_expectations.datasource.fluent import PandasFilesystemDatasource
 from great_expectations.datasource.new_datasource import Datasource
 from great_expectations.exceptions.exceptions import StoreConfigurationError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
-
-if TYPE_CHECKING:
-    from great_expectations.datasource.fluent import PandasFilesystemDatasource
 
 
 class DatasourceStoreSpy(DatasourceStore):
@@ -151,31 +149,28 @@ class EphemeralDataContextSpy(EphemeralDataContext):
         self.save_count += 1
 
 
-@pytest.fixture
-def block_config_datasource_name() -> str:
-    return "my_pandas_datasource"
-
-
-@pytest.fixture
-def fluent_datasource_name() -> str:
-    return "my_fluent_pandas_filesystem_datasource"
+BLOCK_CONFIG_DATASOURCE_NAME = "my_pandas_datasource"
 
 
 @pytest.fixture
 def in_memory_data_context(
-    block_config_datasource_name: str,
     block_config_datasource_config: DatasourceConfig,
-    fluent_datasource_name: str,
-    fluent_datasource_config: PandasFilesystemDatasource,
+    fluent_datasource_config: dict,
 ) -> EphemeralDataContextSpy:
     datasources = {
-        block_config_datasource_name: block_config_datasource_config,
-        fluent_datasource_name: fluent_datasource_config,
+        BLOCK_CONFIG_DATASOURCE_NAME: block_config_datasource_config,
     }
     config = DataContextConfig(
-        datasources=datasources, store_backend_defaults=InMemoryStoreBackendDefaults()
+        datasources=datasources,
+        store_backend_defaults=InMemoryStoreBackendDefaults(),
     )
     context = EphemeralDataContextSpy(project_config=config)
+    fluent_datasources = {
+        fluent_datasource_config["name"]: PandasFilesystemDatasource(
+            **fluent_datasource_config
+        ),
+    }
+    context.datasources.update(fluent_datasources)
     return context
 
 
@@ -322,7 +317,6 @@ def test_add_datasource_conflicting_args_failure(
 @pytest.mark.unit
 def test_add_or_update_datasource_updates_with_individual_args_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
-    block_config_datasource_name: str,
     block_config_datasource_config: DatasourceConfig,
 ):
     context = in_memory_data_context
@@ -331,11 +325,11 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
     num_datasource_configs_before = len(context.config.datasources)
 
     assert (
-        block_config_datasource_name in context.datasources
-    ), f"Downstream logic in the test relies on {block_config_datasource_name} being a datasource; please check your fixtures."
+        BLOCK_CONFIG_DATASOURCE_NAME in context.datasources
+    ), f"Downstream logic in the test relies on {BLOCK_CONFIG_DATASOURCE_NAME} being a datasource; please check your fixtures."
 
     config_dict = block_config_datasource_config.to_dict()
-    config_dict["name"] = block_config_datasource_name
+    config_dict["name"] = BLOCK_CONFIG_DATASOURCE_NAME
 
     id = "d53c2384-f973-4a0c-9c85-af1d67c06f58"
     config_dict["id"] = id
@@ -355,50 +349,55 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
 @pytest.mark.unit
 def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
-    block_config_datasource_name: str,
-    block_config_datasource_config: DatasourceConfig,
+    parametrized_datasource_configs: DatasourceConfig | dict,
 ):
     context = in_memory_data_context
 
     num_datasource_before = len(context.datasources)
     num_datasource_configs_before = len(context.config.datasources)
 
-    assert (
-        block_config_datasource_name in context.datasources
-    ), f"Downstream logic in the test relies on {block_config_datasource_name} being a datasource; please check your fixtures."
+    if isinstance(parametrized_datasource_configs, DatasourceConfig):
+        config_dict = parametrized_datasource_configs.to_dict()
+        for attr in ("class_name", "module_name"):
+            config_dict.pop(attr)
+        config_dict["name"] = BLOCK_CONFIG_DATASOURCE_NAME
+        datasource = Datasource(**config_dict)
+        persisted_datasource = context.add_or_update_datasource(datasource=datasource)
 
-    config_dict = block_config_datasource_config.to_dict()
-    config_dict["name"] = block_config_datasource_name
-    for attr in ("class_name", "module_name"):
-        config_dict.pop(attr)
+        assert context.datasource_store.save_count == 1
 
-    datasource = Datasource(**config_dict)
-    persisted_datasource = context.add_or_update_datasource(datasource=datasource)
+        expected_config = datasource.config
+        actual_config = persisted_datasource.config
+
+        # Name gets injected into data connector as part of serialization hook
+        # Removing for purposes of test assertion
+        data_connectors = actual_config["data_connectors"]
+        data_connector_name = tuple(data_connectors.keys())[0]
+        data_connectors[data_connector_name].pop("name")
+
+        assert actual_config == expected_config
+
+    else:
+        datasource = PandasFilesystemDatasource(**parametrized_datasource_configs)
+        persisted_datasource = context.add_or_update_datasource(datasource=datasource)
+
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        assert context.datasource_store.save_count == 0
+
+        assert datasource == persisted_datasource
 
     num_datasource_after = len(context.datasources)
     num_datasource_configs_after = len(context.config.datasources)
 
     assert num_datasource_after == num_datasource_before
     assert num_datasource_configs_after == num_datasource_configs_before
-    assert context.datasource_store.save_count == 1
-
-    expected_config = datasource.config
-    actual_config = persisted_datasource.config
-
-    # Name gets injected into data connector as part of serialization hook
-    # Removing for purposes of test assertion
-    data_connectors = actual_config["data_connectors"]
-    data_connector_name = tuple(data_connectors.keys())[0]
-    data_connectors[data_connector_name].pop("name")
-
-    assert actual_config == expected_config
 
 
 @pytest.mark.unit
 @pytest.mark.parametrize("use_existing_datasource", [True, False])
 def test_add_or_update_datasource_adds_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
-    block_config_datasource_config: DatasourceConfig,
+    parametrized_datasource_configs: DatasourceConfig | dict,
     use_existing_datasource: bool,
 ):
     context = in_memory_data_context
@@ -406,28 +405,42 @@ def test_add_or_update_datasource_adds_successfully(
     num_datasource_before = len(context.datasources)
     num_datasource_configs_before = len(context.config.datasources)
 
-    block_config_datasource_name = "my_brand_new_datasource"
+    datasource_name = "my_brand_new_datasource"
 
-    assert block_config_datasource_name not in context.datasources
+    assert datasource_name not in context.datasources
 
-    config_dict = block_config_datasource_config.to_dict()
-    config_dict["name"] = block_config_datasource_name
+    if isinstance(parametrized_datasource_configs, DatasourceConfig):
+        config_dict = parametrized_datasource_configs.to_dict()
+        config_dict["name"] = datasource_name
 
-    if use_existing_datasource:
         for attr in ("class_name", "module_name"):
             config_dict.pop(attr)
-        datasource = Datasource(**config_dict)
-        _ = context.add_or_update_datasource(datasource=datasource)
+
+        if use_existing_datasource:
+            datasource = Datasource(**config_dict)
+            _ = context.add_or_update_datasource(datasource=datasource)
+        else:
+            _ = context.add_or_update_datasource(**config_dict)
+
+        # fluent datasources are not loaded into DataContextConfig as of April 21, 2023
+        num_datasource_configs_after = len(context.config.datasources)
+        assert num_datasource_configs_after == num_datasource_configs_before + 1
+
+        assert context.datasource_store.save_count == 1
     else:
-        _ = context.add_or_update_datasource(**config_dict)
+        parametrized_datasource_configs["name"] = datasource_name
+        # passing a fluent config dict is not supported as of 04/21/2023
+        # so use_existing_datasource is irrelevant
+        datasource = PandasFilesystemDatasource(**parametrized_datasource_configs)
+        _ = context.add_or_update_datasource(datasource=datasource)
+
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        assert context.datasource_store.save_count == 0
 
     num_datasource_after = len(context.datasources)
-    num_datasource_configs_after = len(context.config.datasources)
 
-    assert block_config_datasource_name in context.datasources
+    assert datasource_name in context.datasources
     assert num_datasource_after == num_datasource_before + 1
-    assert num_datasource_configs_after == num_datasource_configs_before + 1
-    assert context.datasource_store.save_count == 1
 
 
 @pytest.mark.unit
