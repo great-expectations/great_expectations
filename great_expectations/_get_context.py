@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, Literal, Mapping, overload
+from typing import TYPE_CHECKING, Mapping, overload
+
+from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
