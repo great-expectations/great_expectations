@@ -1,5 +1,6 @@
 import pathlib
 import great_expectations as gx
+
 # <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get_context">
 import great_expectations as gx
 
@@ -17,20 +18,26 @@ data_directory = pathlib.Path(
 
 # <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py get validators">
 datasource = context.sources.add_pandas_filesystem(
-        name="demo_pandas", base_directory=data_directory
-    )
+    name="demo_pandas", base_directory=data_directory
+)
 
 asset = datasource.add_csv_asset(
-        "yellow_tripdata",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-        order_by=["-year", "month"],
-    )
+    "yellow_tripdata",
+    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+    order_by=["-year", "month"],
+)
 
 upstream_batch_request = asset.build_batch_request({"year": "2020", "month": "04"})
 downstream_batch_request = asset.build_batch_request({"year": "2020", "month": "05"})
 
-upstream_validator = context.get_validator(batch_request=upstream_batch_request, create_expectation_suite_with_name="upstream_expectation_suite")
-downstream_validator = context.get_validator(batch_request=downstream_batch_request, create_expectation_suite_with_name="downstream_expectation_suite")
+upstream_validator = context.get_validator(
+    batch_request=upstream_batch_request,
+    create_expectation_suite_with_name="upstream_expectation_suite",
+)
+downstream_validator = context.get_validator(
+    batch_request=downstream_batch_request,
+    create_expectation_suite_with_name="downstream_expectation_suite",
+)
 # </snippet>
 
 
