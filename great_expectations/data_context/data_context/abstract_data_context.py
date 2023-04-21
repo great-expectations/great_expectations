@@ -1050,7 +1050,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 self._update_fluent_datasource(datasource=datasource, **kwargs)
             else:
                 self._add_fluent_datasource(datasource=datasource, **kwargs)
-            return_datasource = datasource
+            return_datasource = self.datasources[datasource_name]
         else:
             block_config_datasource = self._add_block_config_datasource(
                 name=name,

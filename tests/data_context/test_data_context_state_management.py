@@ -316,33 +316,41 @@ def test_add_datasource_conflicting_args_failure(
 @pytest.mark.unit
 def test_add_or_update_datasource_updates_with_individual_args_successfully(
     in_memory_data_context: EphemeralDataContextSpy,
-    block_config_datasource_config: DatasourceConfig,
+    parametrized_datasource_configs: DatasourceConfig | dict,
 ):
     context = in_memory_data_context
 
     num_datasource_before = len(context.datasources)
     num_datasource_configs_before = len(context.config.datasources)
 
-    assert (
-        BLOCK_CONFIG_DATASOURCE_NAME in context.datasources
-    ), f"Downstream logic in the test relies on {BLOCK_CONFIG_DATASOURCE_NAME} being a datasource; please check your fixtures."
+    new_base_directory = "/new/path/to/trip_data"
 
-    config_dict = block_config_datasource_config.to_dict()
-    config_dict["name"] = BLOCK_CONFIG_DATASOURCE_NAME
+    if isinstance(parametrized_datasource_configs, DatasourceConfig):
+        config_dict = parametrized_datasource_configs.to_dict()
+        config_dict["name"] = BLOCK_CONFIG_DATASOURCE_NAME
+        config_dict["data_connectors"]["tripdata_monthly_configured"][
+            "base_directory"
+        ] = new_base_directory
+        datasource = context.add_or_update_datasource(**config_dict)
+        datasource.config["data_connectors"]["tripdata_monthly_configured"][
+            "base_directory"
+        ] = new_base_directory
 
-    id = "d53c2384-f973-4a0c-9c85-af1d67c06f58"
-    config_dict["id"] = id
+        assert context.datasource_store.save_count == 1
+    else:
+        config_dict = parametrized_datasource_configs
+        config_dict["base_directory"] = new_base_directory
+        datasource = context.add_or_update_datasource(**config_dict)
+        datasource.base_directory = new_base_directory
 
-    datasource = context.add_or_update_datasource(**config_dict)
-    # Let's `id` as an example attr to change so we don't need to assert against the whole config
-    assert datasource.config["id"] == id
+        # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
+        assert context.datasource_store.save_count == 0
 
     num_datasource_after = len(context.datasources)
     num_datasource_configs_after = len(context.config.datasources)
 
     assert num_datasource_after == num_datasource_before
     assert num_datasource_configs_after == num_datasource_configs_before
-    assert context.datasource_store.save_count == 1
 
 
 @pytest.mark.unit
