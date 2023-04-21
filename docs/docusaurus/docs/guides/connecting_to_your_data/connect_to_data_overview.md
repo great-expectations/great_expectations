@@ -60,9 +60,9 @@ Calling the `add_<datasource>` method on your context will run configuration che
 For example, it will make sure the `base_directory` exists for the `pandas_filesystem` Datasource and the `connection_string` is valid for a SQL database.
 
 These methods also persist your Datasource to the underlying storage. The storage depends on your <TechnicalTag tag="data_context" text="Data Context" />. 
-For a <TechnicalTag tag="file_data_context" text="File Data Context" /> the changes will be persisted to disk; 
-for a <TechnicalTag tag="cloud_data_context" text="Cloud Data Context" /> the changes will be persisted to the cloud;
-for an <TechnicalTag tag="ephemeral_data_context" text="Ephemeral Data Context" /> the data will remain only in memory.
+For a File Data Context the changes will be persisted to disk; 
+for a Cloud Data Context the changes will be persisted to the cloud;
+for an Ephemeral Data Context the data will remain only in memory.
 
 ## Accessing your Datasource from your Data Context
 

@@ -22,6 +22,7 @@ from typing import (
 import pydantic
 from ruamel.yaml import YAML
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.constants import (
     _ASSETS_KEY,
@@ -104,6 +105,7 @@ class FluentBaseModel(pydantic.BaseModel):
     ) -> pathlib.Path:
         ...
 
+    @public_api
     def yaml(
         self,
         stream_or_path: Union[StringIO, pathlib.Path, None] = None,
