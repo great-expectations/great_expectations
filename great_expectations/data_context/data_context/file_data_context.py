@@ -28,9 +28,7 @@ from great_expectations.datasource.fluent.config import GxConfig
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues, PathStr
     from great_expectations.core.config_provider import _ConfigurationProvider
-    from great_expectations.data_context.store.datasource_store import (
-        DatasourceStore,
-    )
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
 
 logger = logging.getLogger(__name__)
 yaml = YAML()
@@ -60,6 +58,10 @@ class FileDataContext(SerializableDataContext):
         self._context_root_directory = self._init_context_root_directory(
             context_root_dir
         )
+
+        project_root_dir = self._determine_project_root_dir()
+        self._scaffold_project_dir(project_root_dir)
+
         self._project_config = self._init_project_config(project_config)
         super().__init__(
             context_root_dir=self._context_root_directory,
@@ -78,6 +80,20 @@ class FileDataContext(SerializableDataContext):
                 )
 
         return context_root_dir
+
+    def _determine_project_root_dir(self) -> str:
+        context_path = pathlib.Path(self._context_root_directory)
+        return str(context_path.parent)
+
+    def _scaffold_project_dir(self, project_root_dir: Optional[PathStr]) -> None:
+        """Prepare a `great_expectations` directory with all necessary subdirectories.
+        If one already exists, no-op.
+        """
+        if self.is_project_scaffolded(self._context_root_directory):
+            return
+        self._scaffold(
+            project_root_dir=project_root_dir,
+        )
 
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]

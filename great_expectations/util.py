@@ -9,6 +9,7 @@ import io
 import json
 import logging
 import os
+import pathlib
 import pstats
 import re
 import sys
@@ -56,9 +57,7 @@ from typing_extensions import Literal, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -1925,6 +1924,9 @@ def get_context(
             logger.info("Could not find local context root directory")
 
     if context_root_dir:
+        context_root_dir = pathlib.Path(context_root_dir).absolute()
+        if context_root_dir.stem != FileDataContext.GX_DIR:
+            context_root_dir = context_root_dir.joinpath(FileDataContext.GX_DIR)
         return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
