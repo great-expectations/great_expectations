@@ -137,7 +137,7 @@ def test_base_context_invalid_root_dir(clear_env_vars, tmp_path):
     )
 
     context_root_dir = tmp_path / "root"
-    context_root_dir.mkdir(exist_ok=True)
+    context_root_dir.mkdir()
     assert isinstance(
         gx.get_context(project_config=config, context_root_dir=context_root_dir),
         FileDataContext,

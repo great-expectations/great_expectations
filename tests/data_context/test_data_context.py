@@ -694,7 +694,7 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
     project_path.mkdir(parents=True)
 
     context_path = project_path / "great_expectations"
-    context_path.mkdir(exist_ok=True)
+    context_path.mkdir()
     monkeypatch.chdir(str(context_path))
 
     with pytest.raises(gx_exceptions.ConfigNotFoundError):
