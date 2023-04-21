@@ -12,6 +12,12 @@ To submit a custom Great Expectations package, you complete the following tasks:
 
 - [Publish your package](#publish-your-package)
 
+To request a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/docs/README.md) in the `docs` repository.
+
+To create and submit a custom Expectation to Great Expectations for consideration, see [CONTRIBUTING_EXPECTATIONS](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_EXPECTATIONS.md) in the `great_expectations` repository.
+
+To submit a code change to Great Expectations for consideration, see [CONTRIBUTING_CODE](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_CODE.md) in the `great_expectations` repository.
+
 ## Prerequisites
 
 - Great Expectations installed and configured for your environment. See [Great Expectations Quickstart](https://docs.greatexpectations.io/docs/tutorials/quickstart/).

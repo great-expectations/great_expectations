@@ -1,12 +1,6 @@
 # Contribute a code change
 
-To request or submit a Great Expectations documentation or code change, the following options are available:
-
-- Join the [Great Expectations Slack community](https://greatexpectations.io/slack) and make your suggestion in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel. 
-
-- If you need a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/tree/contributing-and-style-readme/docs) in the `docs` repository.
-
-- If you want to modify existing Great Expectations code, or you want to submit a new feature or a custom Expectation, you'll need to complete the following tasks:
+To modify existing Great Expectations code, you complete the following tasks:
 
     - [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
 
@@ -25,6 +19,14 @@ To request or submit a Great Expectations documentation or code change, the foll
     - [Test performance](#test-performance)
 
     - [Submit a pull request](#submit-a-pull-request)
+
+To discuss your code change before you implement it, join the [Great Expectations Slack community](https://greatexpectations.io/slack) and make your suggestion in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel. 
+
+To request a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/tree/contributing-and-style-readme/docs) in the `docs` repository.
+
+To create and submit a custom Expectation to Great Expectations for consideration, see [CONTRIBUTING_EXPECTATIONS](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_EXPECTATIONS.md) in the `great_expectations` repository.
+
+To submit a custom package to Great Expectations for consideration, see [CONTRIBUTING_PACKAGES](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_PACKAGES.md) in the `great_expectations` repository.
 
 ## Prerequisites
 
