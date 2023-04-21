@@ -105,6 +105,21 @@ def delete_datasource(ctx: click.Context, datasource: str) -> None:
     context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
+    if datasource in context.fluent_datasources:
+        toolkit.exit_with_failure_message_and_stats(
+            data_context=context,
+            usage_event=usage_event_end,
+            message="""<red>Fluent style Datasources can not be deleted via the CLI.
+If you would like to delete a fluent style Datasource, you can run the following code:
+
+context = gx.get_context()
+context.delete_datasource(datasource_name)
+
+Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.delete_datasource</red>
+""",
+        )
+        return
+
     if not ctx.obj.assume_yes:
         toolkit.confirm_proceed_or_exit(
             confirm_prompt=f"""\nAre you sure you want to delete the Datasource "{datasource}" (this action is irreversible)?" """,
