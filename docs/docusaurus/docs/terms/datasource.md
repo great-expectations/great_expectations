@@ -10,6 +10,10 @@ import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 <UniversalMap setup='inactive' connect='active' create='active' validate='active'/>
 
 ### Definition
