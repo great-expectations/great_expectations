@@ -903,9 +903,11 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(  # noqa: PTH118
-                "test_fixtures",
-                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
             ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
@@ -1142,9 +1144,11 @@ def deterministic_asset_data_connector_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(  # noqa: PTH118
-                "test_fixtures",
-                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
             ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
