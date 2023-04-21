@@ -824,6 +824,26 @@ class AbstractDataContext(ConfigPeer, ABC):
             Datasource instance added.
         """
         self._validate_add_datasource_args(name=name, datasource=datasource)
+        return self._add_datasource()
+
+    @staticmethod
+    def _validate_add_datasource_args(
+        name: str | None,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None,
+    ) -> None:
+        if not ((datasource is None) ^ (name is None)):
+            raise ValueError(
+                "Must either pass in an existing datasource or individual constructor arguments (but not both)"
+            )
+
+    def _add_datasource(
+        self,
+        name: str | None = None,
+        initialize: bool = True,
+        save_changes: bool | None = None,
+        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None = None,
+        **kwargs,
+    ) -> BaseDatasource | FluentDatasource | LegacyDatasource | None:
         if isinstance(datasource, FluentDatasource):
             self._add_fluent_datasource(
                 datasource=datasource,
@@ -837,16 +857,6 @@ class AbstractDataContext(ConfigPeer, ABC):
                 **kwargs,
             )
         return datasource
-
-    @staticmethod
-    def _validate_add_datasource_args(
-        name: str | None,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource | None,
-    ) -> None:
-        if not ((datasource is None) ^ (name is None)):
-            raise ValueError(
-                "Must either pass in an existing datasource or individual constructor arguments (but not both)"
-            )
 
     def _add_block_config_datasource(
         self,
