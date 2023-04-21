@@ -6,6 +6,10 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 In this guide, you will utilize a <TechnicalTag tag="profiler" text="UserConfigurableProfiler" /> to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> that can be used to gauge whether two tables are identical. This workflow can be used, for example, to validate migrated data.
 
 <Prerequisites>

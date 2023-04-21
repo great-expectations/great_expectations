@@ -903,9 +903,11 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(  # noqa: PTH118
-                "test_fixtures",
-                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
             ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
@@ -1125,7 +1127,7 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
 
 
 @pytest.fixture
-def deterministic_asset_dataconnector_context(
+def deterministic_asset_data_connector_context(
     tmp_path_factory,
     monkeypatch,
 ):
@@ -1142,7 +1144,12 @@ def deterministic_asset_dataconnector_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            "./test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
+            ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
