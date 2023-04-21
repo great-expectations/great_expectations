@@ -1,7 +1,7 @@
 module.exports = {
   docs: [
     'intro',
-    'contributing',
+    'contributing/contributing',
     {
       type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
     },
