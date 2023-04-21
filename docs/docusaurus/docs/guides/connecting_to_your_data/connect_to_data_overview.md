@@ -14,10 +14,6 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-<InProgress />
-
 :::note Prerequisites
 - Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
 :::
@@ -44,7 +40,7 @@ The majority of the work involved in connecting to data is a simple matter of ad
 
 Because the underlying data systems are different, configuration for each type of Datasource is slightly different.  We have step by step how-to guides that cover many common cases, and core concepts documentation to help you with more exotic kinds of configuration.  It is strongly advised that you find the guide that pertains to your use case and follow it.  If you are simply interested in learning about the process, however, the following will give you a broad overview of what you will be doing regardless of what your underlying data systems are.
 
-Datasource configurations can be written in Python using our Fluent Datasource API. The configuration will be persisted as YAML files either locally or in the cloud.  Regardless of variations due to the underlying data systems, your Datasource's configuration will look roughly like this:
+Datasource configurations can be written in Python using our Fluent Datasource API. Regardless of variations due to the underlying data systems, your Datasource's configuration will look roughly like this:
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview add_datasource"
 ```
