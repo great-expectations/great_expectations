@@ -1,10 +1,5 @@
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py imports">
 import great_expectations as gx
-from great_expectations.core.batch import BatchRequest
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.rule_based_profiler.data_assistant.onboarding_data_assistant import (
-    OnboardingDataAssistant,
-)
 
 context = gx.get_context()
 # </snippet>
@@ -29,18 +24,26 @@ load_data_into_test_database(
     connection_string=PG_CONNECTION_STRING,
 )
 
-pg_datasource = context.sources.add_sql(name="pg_datasource", connection_string=PG_CONNECTION_STRING)
-pg_datasource.add_table_asset(name="postgres_taxi_data", table_name="postgres_taxi_data")
+pg_datasource = context.sources.add_sql(
+    name="pg_datasource", connection_string=PG_CONNECTION_STRING
+)
+pg_datasource.add_table_asset(
+    name="postgres_taxi_data", table_name="postgres_taxi_data"
+)
 
-mysql_datasource = context.sources.add_sql(name="mysql_datasource", connection_string=MYSQL_CONNECTION_STRING)
+mysql_datasource = context.sources.add_sql(
+    name="mysql_datasource", connection_string=MYSQL_CONNECTION_STRING
+)
 mysql_datasource.add_table_asset(name="mysql_taxi_data", table_name="mysql_taxi_data")
 
 # Tutorial content resumes here.
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py mysql_batch_request">
-mysql_batch_request = mysql_datasource.get_asset('mysql_taxi_data').build_batch_request()
+mysql_batch_request = mysql_datasource.get_asset(
+    "mysql_taxi_data"
+).build_batch_request()
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py pg_batch_request">
-pg_batch_request = pg_datasource.get_asset('postgres_taxi_data').build_batch_request()
+pg_batch_request = pg_datasource.get_asset("postgres_taxi_data").build_batch_request()
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py run_assistant">
 data_assistant_result = context.assistants.onboarding.run(
@@ -48,7 +51,7 @@ data_assistant_result = context.assistants.onboarding.run(
     excluded_expectations=[
         "expect_column_quantile_values_to_be_between",
         "expect_column_mean_to_be_between",
-    ]
+    ],
 )
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py build_suite">
@@ -64,10 +67,10 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
     data_context=context,
     validations=[
         {
-            "batch_request": batch_request,
-            "expectation_suite_name": expectation_suite_name
+            "batch_request": pg_batch_request,
+            "expectation_suite_name": expectation_suite_name,
         }
-    ]
+    ],
 )
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py run_checkpoint">
@@ -76,10 +79,10 @@ checkpoint_result = checkpoint.run()
 
 # Note to users: code below this line is only for integration testing -- ignore!
 
-assert results["success"] is True
-statistics = results["run_results"][list(results["run_results"].keys())[0]][
-    "validation_result"
-]["statistics"]
+assert checkpoint_result["success"] is True
+statistics = checkpoint_result["run_results"][
+    list(checkpoint_result["run_results"].keys())[0]
+]["validation_result"]["statistics"]
 assert statistics["evaluated_expectations"] != 0
 assert statistics["evaluated_expectations"] == statistics["successful_expectations"]
 assert statistics["unsuccessful_expectations"] == 0
