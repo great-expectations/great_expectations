@@ -1,6 +1,6 @@
 ---
 title: Contribute
-id: contributing_overview
+id: contributing
 ---
 
 To contribute to Great Expectations documentation or code, refer to one of the following resources:
