@@ -1641,13 +1641,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not datasource_name:
             raise ValueError("Datasource names must be a datasource name")
 
-        if (
-            save_changes
-            and (datasource_name in self.datasources)
-            and (datasource_name not in self.fluent_datasources)
-        ):
-            datasource = self.get_datasource(datasource_name=datasource_name)
-            assert not isinstance(datasource, FluentDatasource)
+        datasource = self.get_datasource(datasource_name=datasource_name)
+
+        if save_changes and not isinstance(datasource, FluentDatasource):
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)

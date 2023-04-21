@@ -2424,6 +2424,7 @@ class DataContextConfig(BaseYamlConfig):
                 Dict[str, Dict[str, Union[Dict[str, str], str, dict]]],
             ]
         ] = None,
+        fluent_datasources: Optional[dict] = None,
         expectations_store_name: Optional[str] = None,
         validations_store_name: Optional[str] = None,
         evaluation_parameter_store_name: Optional[str] = None,
@@ -2467,9 +2468,7 @@ class DataContextConfig(BaseYamlConfig):
                 profiler_store_name = store_backend_defaults.profiler_store_name
 
         self._config_version = config_version
-        if datasources is None:
-            datasources = {}  # type: ignore[assignment]
-        self.datasources = datasources
+        self.datasources = datasources or {}
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name

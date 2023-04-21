@@ -137,7 +137,7 @@ def test_migrate_transfers_datasources(
 
 
 @pytest.mark.integration
-def test_migrate_transfers_experimental_datasources(
+def test_migrate_transfers_fluent_datasources(
     tmp_path: pathlib.Path,
     construct_file_migrator: Callable,
     ephemeral_context_with_defaults: EphemeralDataContext,
