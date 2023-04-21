@@ -19,7 +19,6 @@ context = gx.get_context()
 context.sources.add_pandas_filesystem(
     name="my_pandas_datasource", base_directory=data_directory
 )
-###
 # </snippet>
 
 assert "my_pandas_datasource" in context.fluent_datasources
@@ -28,7 +27,6 @@ assert "my_pandas_datasource" in context.fluent_datasources
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config">
 config = context.fluent_datasources["my_pandas_datasource"].yaml()
 print(config)
-###
 # </snippet>
 
 assert "base_directory:" in config
