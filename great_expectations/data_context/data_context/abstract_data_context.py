@@ -709,7 +709,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if datasource:
             datasource_name = datasource.name
         else:
-            datasource_name = kwargs.get("name")
+            datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
             raise gx_exceptions.DataContextError(
@@ -726,6 +726,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         if not datasource:
             ds_type = _SourceFactories.type_lookup[kwargs["type"]]
             datasource = ds_type(**kwargs)
+
+        assert isinstance(datasource, FluentDatasource)
 
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
         # Without this we end up with duplicate entries for datasources in both
@@ -1041,16 +1043,18 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._validate_add_datasource_args(name=name, datasource=datasource)
         return_datasource: BaseDatasource | FluentDatasource | LegacyDatasource
         if isinstance(datasource, FluentDatasource) or "type" in kwargs:
-            if datasource:
-                datasource_name = datasource.name
+            if datasource.name in self.datasources:
+                self._update_fluent_datasource(datasource=datasource)
             else:
-                datasource_name = kwargs["name"] = name
-
-            if datasource_name in self.datasources:
-                self._update_fluent_datasource(datasource=datasource, **kwargs)
+                self._add_fluent_datasource(datasource=datasource)
+            return_datasource = self.datasources[datasource.name]
+        elif "type" in kwargs:
+            kwargs["name"] = name
+            if name in self.datasources:
+                self._update_fluent_datasource(**kwargs)
             else:
-                self._add_fluent_datasource(datasource=datasource, **kwargs)
-            return_datasource = self.datasources[datasource_name]
+                self._add_fluent_datasource(**kwargs)
+            return_datasource = self.datasources[datasource.name]
         else:
             block_config_datasource = self._add_block_config_datasource(
                 name=name,
