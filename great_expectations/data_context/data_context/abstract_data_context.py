@@ -733,6 +733,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         # config provider needed for config substitution
         datasource._config_provider = self.config_provider
 
+        datasource.test_connection()
+        datasource._data_context._save_project_config()
+
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
         # Without this we end up with duplicate entries for datasources in both
         # "fluent_datasources" and "datasources" config/yaml entries.
@@ -765,6 +768,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         update_datasource._data_context = self
         # config provider needed for config substitution
         update_datasource._config_provider = self.config_provider
+
+        update_datasource.test_connection()
+        update_datasource._data_context._save_project_config()
 
         self.datasources[datasource_name] = update_datasource
 
