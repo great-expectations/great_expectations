@@ -1015,9 +1015,35 @@ class AbstractDataContext(ConfigPeer, ABC):
     def add_or_update_datasource(
         self,
         name: None = ...,
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = ...,
+        datasource: BaseDatasource = ...,
         **kwargs,
-    ) -> BaseDatasource | FluentDatasource | LegacyDatasource:
+    ) -> BaseDatasource:
+        """
+        A `datasource` is provided.
+        `name` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_or_update_datasource(
+        self,
+        name: None = ...,
+        datasource: LegacyDatasource = ...,
+        **kwargs,
+    ) -> LegacyDatasource:
+        """
+        A `datasource` is provided.
+        `name` should not be provided.
+        """
+        ...
+
+    @overload
+    def add_or_update_datasource(
+        self,
+        name: None = ...,
+        datasource: FluentDatasource = ...,
+        **kwargs,
+    ) -> FluentDatasource:
         """
         A `datasource` is provided.
         `name` should not be provided.
