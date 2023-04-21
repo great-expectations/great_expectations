@@ -745,7 +745,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         if datasource:
             datasource_name = datasource.name
         else:
-            datasource_name = kwargs.get("name")
+            datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
             raise gx_exceptions.DataContextError(
@@ -754,8 +754,11 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         if not datasource:
             ds_type = _SourceFactories.type_lookup[kwargs["type"]]
-            datasource = ds_type(**kwargs)
-        self.datasources[datasource_name] = datasource
+            update_datasource = ds_type(**kwargs)
+        else:
+            update_datasource = datasource
+
+        self.datasources[datasource_name] = update_datasource
 
     def _delete_fluent_datasource(self, datasource_name: str) -> None:
         self.datasources.pop(datasource_name, None)
@@ -1035,7 +1038,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Args:
             name: The name of the Datasource to add or update.
             datasource: an existing Datasource you wish to persist.
-            kwargs: Any relevant keyword args to use when adding or updating the target Datasource.
+            kwargs: Any relevant keyword args to use when adding or updating the target Datasource named `name`.
 
         Returns:
             The Datasource added or updated by the input `kwargs`.
@@ -1043,12 +1046,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._validate_add_datasource_args(name=name, datasource=datasource)
         return_datasource: BaseDatasource | FluentDatasource | LegacyDatasource
         if "type" in kwargs:
+            assert name, 'Fluent Datasource kwargs must include the keyword "name"'
             kwargs["name"] = name
             if name in self.datasources:
                 self._update_fluent_datasource(**kwargs)
             else:
                 self._add_fluent_datasource(**kwargs)
-            return_datasource = self.datasources[datasource.name]
+            return_datasource = self.datasources[name]
         elif isinstance(datasource, FluentDatasource):
             if datasource.name in self.datasources:
                 self._update_fluent_datasource(datasource=datasource)
