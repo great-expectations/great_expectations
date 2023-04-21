@@ -181,7 +181,15 @@ def register_core_expectations() -> None:
     in our import graph - if not, our registry will be empty and Validator workflows
     will fail.
     """
+    before_count = len(_registered_expectations)
     from great_expectations.expectations import core  # noqa: F401
+
+    after_count = len(_registered_expectations)
+
+    if before_count == after_count:
+        logger.debug("Already registered core expectations; no updates to registry")
+    else:
+        logger.debug(f"Registered {after_count-before_count} core expectations")
 
 
 def _add_response_key(res, key, value):
