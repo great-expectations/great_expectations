@@ -24,6 +24,7 @@ context: gx.DataContext = gx.get_context()
 # Configure your datasource (if you aren't using one that already exists)
 
 # <snippet name="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py datasource_config">
+
 datasource_config = {
     "name": "taxi_multi_batch_datasource",
     "class_name": "Datasource",
