@@ -241,3 +241,6 @@
 /docs/tutorials/getting_started/tutorial_review /docs/tutorials/quickstart
 /docs/tutorials/getting_started/tutorial_setup /docs/tutorials/quickstart
 /docs/tutorials/getting_started/tutorial_validate_data /docs/tutorials/quickstart
+
+# removing CLI-based guide
+/docs/guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit /docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data
