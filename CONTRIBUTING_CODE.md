@@ -2,23 +2,23 @@
 
 To modify existing Great Expectations code, you complete the following tasks:
 
-    - [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
+- [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
 
-    - [Install Python dependencies](#install-python-dependencies)
+- [Install Python dependencies](#install-python-dependencies)
 
-    - [Create a virtual environment (optional)](#create-a-virtual-environment-optional)
+- [Create a virtual environment (optional)](#create-a-virtual-environment-optional)
 
-    - [Install dependencies from requirements-dev.txt](#install-dependencies-from-requirements-devtxt)
+- [Install dependencies from requirements-dev.txt](#install-dependencies-from-requirements-devtxt)
 
-    - [Install great_expectations](#install-great_expectations)
+- [Install great_expectations](#install-great_expectations)
 
-    - [Configure backends for testing (optional)](#configure-backends-for-testing-optional)
+- [Configure backends for testing (optional)](#configure-backends-for-testing-optional)
 
-    - [Test code changes](#test-code-changes)
+- [Test code changes](#test-code-changes)
 
-    - [Test performance](#test-performance)
+- [Test performance](#test-performance)
 
-    - [Submit a pull request](#submit-a-pull-request)
+- [Submit a pull request](#submit-a-pull-request)
 
 To discuss your code change before you implement it, join the [Great Expectations Slack community](https://greatexpectations.io/slack) and make your suggestion in the [#contributing](https://greatexpectationstalk.slack.com/archives/CV828B2UX) channel. 
 
@@ -99,9 +99,9 @@ Python dependencies are required to modify Great Expectations code, submit a new
     ```
     If your Mac computer has an Apple M1 chip, you might need to specify additional compiler or linker options. For example:
 
-    export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"
+    `export LDFLAGS="-L/opt/homebrew/Cellar/unixodbc/[your version]/lib"`
     
-    export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"
+    `export CPPFLAGS="-I/opt/homebrew/Cellar/unixodbc/[your version]/include"`
 
 5. Add `ulimit -n 4096` to the `~/.zshrc` or `~/.bashrc` files to prevent `OSError: [Errno 24] Too many open files` errors. 
 
