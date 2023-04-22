@@ -8,6 +8,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 
 from great_expectations.cli import cli
 from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_LIST_WARNING
+from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_DELETE_ERROR
 from great_expectations.util import get_context
 from tests.cli.utils import assert_no_logging_messages_or_tracebacks, escape_ansi
 
@@ -538,6 +539,34 @@ def test_cli_list_fluent_datasource_warning(
     assert result.exit_code == 0
     assert FLUENT_DATASOURCE_LIST_WARNING in stdout
     assert "1 block config Datasource found" in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+def test_cli_prevent_fluent_datasource_delete(
+    mock_emit,
+    caplog,
+    monkeypatch,
+    data_context_with_fluent_datasource,
+):
+    context = data_context_with_fluent_datasource
+    test_datasource_name = "my_pandas_datasource"
+    assert test_datasource_name in [ds["name"] for ds in context.list_datasources()]
+    assert len(context.list_datasources()) == 1
+
+    runner = CliRunner(mix_stderr=False)
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+    result = runner.invoke(
+        cli,
+        f"datasource delete {test_datasource_name}",
+        input="Y\n",
+        catch_exceptions=False,
+    )
+
+    stdout = result.output
+    assert result.exit_code == 1
+    assert FLUENT_DATASOURCE_DELETE_ERROR in stdout
 
 
 @mock.patch(
