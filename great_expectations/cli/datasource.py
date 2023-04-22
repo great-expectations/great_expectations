@@ -10,6 +10,7 @@ import click
 from typing_extensions import TypeAlias
 
 from great_expectations.cli import toolkit
+from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_DELETE_ERROR
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -109,14 +110,7 @@ def delete_datasource(ctx: click.Context, datasource: str) -> None:
         toolkit.exit_with_failure_message_and_stats(
             data_context=context,
             usage_event=usage_event_end,
-            message="""<red>Fluent style Datasources can not be deleted via the CLI.
-If you would like to delete a fluent style Datasource, you can run the following code:
-
-context = gx.get_context()
-context.delete_datasource(datasource_name)
-
-Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.delete_datasource</red>
-""",
+            message=f"<red>{FLUENT_DATASOURCE_DELETE_ERROR}</red>",
         )
         return
 
