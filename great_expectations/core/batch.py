@@ -28,6 +28,22 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+def _is_fluent_batch_request(args: dict[str, Any]) -> bool:
+    result: bool
+
+    if "datasource_name" in args and "data_asset_name" in args:
+        if "data_connector_name" in args:
+            if str(args["data_connector_name"]).lower() == "fluent":
+                result = True
+            else:
+                result = False
+        else:
+            result = True
+
+    else:
+        result = False
+
+    return result
 
 def _get_fluent_batch_request_class() -> Type[FluentBatchRequest]:
     """Using this function helps work around circular import dependncies."""
@@ -873,10 +889,7 @@ def materialize_batch_request(
         return None
 
     batch_request_class: type
-    if "options" in effective_batch_request:
-        if not effective_batch_request["options"]:
-            effective_batch_request["options"] = {}
-
+    if _is_fluent_batch_request(effective_batch_request):
         batch_request_class = _get_fluent_batch_request_class()
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request

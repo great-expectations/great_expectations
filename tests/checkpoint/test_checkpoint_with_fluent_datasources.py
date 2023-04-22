@@ -48,7 +48,6 @@ def batch_request_as_dict() -> Dict[str, str]:
     return {
         "datasource_name": "my_pandas_filesystem_datasource",
         "data_asset_name": "users",
-        "options": {},
     }
 
 
@@ -102,7 +101,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
       - batch_request:
           datasource_name: my_pandas_filesystem_datasource
           data_asset_name: users
-          options:
         expectation_suite_name: users.delivery
         action_list:
             - name: store_validation_result
@@ -133,7 +131,6 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
                 "batch_request": {
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "users",
-                    "options": None,
                 },
                 "expectation_suite_name": "users.delivery",
                 "action_list": [
@@ -243,11 +240,9 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
       - batch_request:
           datasource_name: my_pandas_filesystem_datasource
           data_asset_name: users
-          options:
       - batch_request:
           datasource_name: my_pandas_filesystem_datasource
           data_asset_name: exploration
-          options:
     expectation_suite_name: users.delivery
     action_list:
         - name: store_validation_result
@@ -278,14 +273,12 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
                 "batch_request": {
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "users",
-                    "options": None,
                 },
             },
             {
                 "batch_request": {
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "exploration",
-                    "options": None,
                 },
             },
         ],
@@ -361,7 +354,6 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
     batch_request:
         datasource_name: my_pandas_filesystem_datasource
         data_asset_name: users
-        options:
     validations:
       - expectation_suite_name: users.warning  # runs the top-level action list against the top-level batch_request
       - expectation_suite_name: users.error  # runs the locally-specified action_list union the top level action-list against the top-level batch_request
@@ -409,7 +401,6 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         "batch_request": {
             "datasource_name": "my_pandas_filesystem_datasource",
             "data_asset_name": "users",
-            "options": None,
         },
         "validations": [
             {"expectation_suite_name": "users.warning"},
@@ -589,7 +580,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                 "batch_request": {
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "users",
-                    "options": None,
                 },
                 "expectation_suite_name": "users.delivery",
             },
@@ -597,7 +587,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                 "batch_request": {
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "exploration",
-                    "options": None,
                 },
                 "expectation_suite_name": "users.delivery",
             },
@@ -616,11 +605,9 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     - batch_request:
         datasource_name: my_pandas_filesystem_datasource
         data_asset_name: users
-        options:
     - batch_request:
         datasource_name: my_pandas_filesystem_datasource
         data_asset_name: exploration
-        options:
     expectation_suite_name: users.delivery
     """
 
@@ -635,14 +622,12 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
                 "batch_request": {
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "users",
-                    "options": None,
                 },
             },
             {
                 "batch_request": {
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "exploration",
-                    "options": None,
                 },
             },
         ],
@@ -702,7 +687,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
                 "batch_request": {
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "users",
-                    "options": None,
                 },
             },
         ],
@@ -754,7 +738,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
                 "batch_request": {
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "users",
-                    "options": None,
                 },
             },
         ],
@@ -856,7 +839,6 @@ def test_newstyle_checkpoint_result_can_be_pickled(
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
         "data_asset_name": "Titanic_1911",
-        "options": {},
     }
 
     # add checkpoint config
@@ -907,7 +889,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
         "data_asset_name": "Titanic_1911",
-        "options": {},
     }
 
     include_rendered_content: bool = True
@@ -972,7 +953,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
     batch_request: dict = {
         "datasource_name": "my_pandas_filesystem_datasource",
         "data_asset_name": "Titanic_1911",
-        "options": {},
     }
 
     data_context.include_rendered_content.globally = True
@@ -1049,7 +1029,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                         "batch_request": {
                             "datasource_name": "my_pandas_filesystem_datasource",
                             "data_asset_name": "Titanic_1911",
-                            "options": {},
                         },
                     },
                 ],
@@ -1067,7 +1046,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                 batch_request={
                     "datasource_name": "my_pandas_filesystem_datasource",
                     "data_asset_name": "Titanic_1911",
-                    "options": {},
                 },
                 action_list=[
                     {
@@ -1102,7 +1080,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                         "batch_request": {
                             "datasource_name": "my_pandas_filesystem_datasource",
                             "data_asset_name": "Titanic_1911",
-                            "options": {},
                         },
                     },
                 ],
@@ -1131,7 +1108,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
                         "batch_request": {
                             "datasource_name": "my_pandas_filesystem_datasource",
                             "data_asset_name": "Titanic_1911",
-                            "options": {},
                         },
                     },
                 ],
