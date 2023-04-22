@@ -10,6 +10,7 @@ import click
 from typing_extensions import TypeAlias
 
 from great_expectations.cli import toolkit
+from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_DELETE_ERROR
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -104,6 +105,14 @@ def delete_datasource(ctx: click.Context, datasource: str) -> None:
     """Delete the datasource specified as an argument"""
     context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    if datasource in context.fluent_datasources:
+        toolkit.exit_with_failure_message_and_stats(
+            data_context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{FLUENT_DATASOURCE_DELETE_ERROR}</red>",
+        )
+        return
 
     if not ctx.obj.assume_yes:
         toolkit.confirm_proceed_or_exit(
