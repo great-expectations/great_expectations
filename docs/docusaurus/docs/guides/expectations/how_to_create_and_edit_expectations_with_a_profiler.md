@@ -8,10 +8,6 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 This guide will help you create a new <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> by profiling your data with the User Configurable <TechnicalTag tag="profiler" text="Profiler" />.
 
 <Prerequisites>
-
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
-- [Configured a Datasource](/docs/guides/connecting_to_your_data/connect_to_data_overview)
-
 </Prerequisites>
 
 :::note
