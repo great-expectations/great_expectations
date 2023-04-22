@@ -2260,6 +2260,17 @@ def filesystem_csv_data_context(
     return empty_data_context
 
 
+@pytest.fixture()
+def data_context_with_fluent_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=str(filesystem_csv_2)
+    )
+    return empty_data_context
+
+
 @pytest.fixture
 def filesystem_csv(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("filesystem_csv")
