@@ -22,6 +22,8 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
     )
     suite.add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
+    # noinspection PyProtectedMember
+    context._save_project_config()
     return context
 
 
@@ -51,6 +53,9 @@ def titanic_pandas_data_context_with_fluent_datasources_stats_enabled_and_expect
     )
     suite.add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
 
     return context
 
@@ -163,8 +168,10 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
+
     # noinspection PyProtectedMember
     context._save_project_config()
+
     return context
 
 
@@ -232,6 +239,10 @@ def context_with_single_taxi_csv_spark(
         "my_datasource",
         **config,
     )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
     return context
 
 
@@ -248,4 +259,6 @@ def context_with_single_csv_spark_and_suite(
     )
     suite.add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
+    # noinspection PyProtectedMember
+    context._save_project_config()
     return context

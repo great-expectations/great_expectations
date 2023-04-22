@@ -2287,6 +2287,7 @@ def data_context_with_fluent_datasource(
     empty_data_context.sources.add_pandas_filesystem(
         name="my_pandas_datasource", base_directory=filesystem_csv_2
     )
+    # noinspection PyProtectedMember
     empty_data_context._save_project_config()
     return empty_data_context
 
