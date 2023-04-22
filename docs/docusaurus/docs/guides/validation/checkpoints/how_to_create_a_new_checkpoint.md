@@ -20,7 +20,7 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 <StepsForCheckpoints />
 
-## Steps (for Checkpoints in Great Expectations version >=0.13.12)
+## Steps
 
 ### 1. Use the CLI to open a Jupyter Notebook for creating a new Checkpoint
 <UseTheCliToOpenAJupyterNotebookForCreatingANewCheckpoint />

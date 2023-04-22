@@ -189,12 +189,6 @@ local_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
     IntegrationTestFixture(
-        name="how_to_create_an_expectation_suite_with_the_onboarding_data_assistant",
-        user_flow_script="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
-    ),
-    IntegrationTestFixture(
         name="is_expectation_auto_initializing",
         user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/is_expectation_auto_initializing.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -248,12 +242,39 @@ local_tests = [
         user_flow_script="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
+    IntegrationTestFixture(
+        name="RUNME how_to_create_an_expectation_suite_with_the_onboarding_data_assistant",
+        user_flow_script="tests/integration/docusaurus/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+    ),
 ]
 
 quickstart = [
     IntegrationTestFixture(
-        name="quickstart",
+        name="RUNME quickstart",
         user_flow_script="tests/integration/docusaurus/tutorials/quickstart/quickstart.py",
+    ),
+]
+
+fluent_datasources = [
+    IntegrationTestFixture(
+        name="RUNME connect_to_your_data_overview",
+        data_context_dir=None,
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview.py",
+    ),
+    IntegrationTestFixture(
+        name="RUNME how_to_create_and_edit_expectations_with_a_profiler",
+        data_context_dir=None,
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        user_flow_script="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler.py",
+    ),
+    IntegrationTestFixture(
+        name="RUNME how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py",
     ),
 ]
 
@@ -261,6 +282,7 @@ quickstart = [
 # populate docs_test_matrix with sub-lists
 docs_test_matrix += local_tests
 docs_test_matrix += quickstart
+docs_test_matrix += fluent_datasources
 docs_test_matrix += spark_integration_tests
 docs_test_matrix += sqlite_integration_tests
 docs_test_matrix += mysql_integration_tests

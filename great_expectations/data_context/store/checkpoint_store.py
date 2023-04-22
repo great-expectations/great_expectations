@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 from marshmallow import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey  # noqa: TCH001
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
@@ -255,6 +256,7 @@ class CheckpointStore(ConfigurationStore):
             checkpoint.config.ge_cloud_id = cloud_id
         return checkpoint
 
+    @public_api
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.
 
