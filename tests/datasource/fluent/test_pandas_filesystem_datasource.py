@@ -305,7 +305,7 @@ class TestDynamicPandasAssets:
             .build_batch_request({"year": "2018"})
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # BatchRequest vs Optional[BatchRequestBase]
+            empty_data_context.get_validator(batch_request=batch_request)
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")
