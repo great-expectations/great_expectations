@@ -2163,12 +2163,53 @@ def filesystem_csv_data_context(
 
 
 @pytest.fixture()
+def data_context_with_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.add_datasource(
+        "rad_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
+
+
+@pytest.fixture()
 def data_context_with_fluent_datasource(
     empty_data_context,
     filesystem_csv_2,
 ) -> FileDataContext:
     empty_data_context.sources.add_pandas_filesystem(
         name="my_pandas_datasource", base_directory=str(filesystem_csv_2)
+    )
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_fluent_datasource_and_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_fluent_datasource", base_directory=str(filesystem_csv_2)
+    )
+    empty_data_context.add_datasource(
+        "my_block_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
     )
     return empty_data_context
 
