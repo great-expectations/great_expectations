@@ -1547,8 +1547,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Note that any sensitive values are obfuscated before being returned.
 
         Returns:
-            A list of dictionaries representing datasource configurations. Each value
-            with contain a "name", "class_name", and "module_name" at a minimum.
+            A list of dictionaries representing datasource configurations.
         """
         datasources: List[dict] = []
 
