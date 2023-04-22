@@ -77,7 +77,7 @@ def test_cli_datasource_list_on_project_with_one_datasource(
         catch_exceptions=False,
     )
 
-    expected_output = """1 Datasource found:
+    expected_output = """1 block config Datasource found:
 
  - name: my_datasource
    class_name: Datasource

@@ -10,8 +10,10 @@ import click
 from typing_extensions import TypeAlias
 
 from great_expectations.cli import toolkit
-from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_LIST_WARNING
-from great_expectations.cli.cli_messages import FLUENT_DATASOURCE_DELETE_ERROR
+from great_expectations.cli.cli_messages import (
+    FLUENT_DATASOURCE_DELETE_ERROR,
+    FLUENT_DATASOURCE_LIST_WARNING,
+)
 from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
 from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
