@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+
 def _is_fluent_batch_request(args: dict[str, Any]) -> bool:
     result: bool
 
@@ -44,6 +45,7 @@ def _is_fluent_batch_request(args: dict[str, Any]) -> bool:
         result = False
 
     return result
+
 
 def _get_fluent_batch_request_class() -> Type[FluentBatchRequest]:
     """Using this function helps work around circular import dependncies."""
