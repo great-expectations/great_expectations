@@ -2266,8 +2266,9 @@ def data_context_with_fluent_datasource(
     filesystem_csv_2,
 ) -> FileDataContext:
     empty_data_context.sources.add_pandas_filesystem(
-        name="my_pandas_datasource", base_directory=str(filesystem_csv_2)
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
     )
+    empty_data_context._save_project_config()
     return empty_data_context
 
 
