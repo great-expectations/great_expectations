@@ -142,7 +142,7 @@ print(expectation_configurations)
 # <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py row_count_rule_suite">
 row_count_rule_suite = """
     {
-        "meta": {"great_expectations_version": "0.13.19+58.gf8a650720.dirty"},
+        "meta": {"great_expectations_version": "0.16.7"},
         "data_asset_type": None,
         "expectations": [
             {

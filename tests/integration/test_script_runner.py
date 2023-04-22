@@ -153,7 +153,7 @@ local_tests = [
         data_dir="tests/test_sets/dataconnector_docs",
     ),
     IntegrationTestFixture(
-        name="rule_base_profiler_multi_batch_example",
+        name="RUNME rule_base_profiler_multi_batch_example",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
