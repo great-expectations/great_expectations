@@ -67,3 +67,11 @@ HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways
 """
 
 SECTION_SEPARATOR = "\n================================================================================\n"
+
+CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
+"""
+
+CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
+"""

@@ -9,6 +9,10 @@ from great_expectations.checkpoint.types.checkpoint_result import (
     CheckpointResult,  # noqa: TCH001
 )
 from great_expectations.cli import toolkit
+from great_expectations.cli.cli_messages import (
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES,
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY,
+)
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
@@ -103,18 +107,11 @@ def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> 
     try:
 
         if has_fluent_datasource and not has_block_datasource:
-            raise Exception(
-                """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
-If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
-"""
-            )
+            raise Exception(CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY)
 
         if has_fluent_datasource and has_block_datasource:
             cli_message(
-                """<yellow>Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
-If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
-If you would like to use a block config style Datasource, you can select it here to proceed.</yellow>
-"""
+                f"<yellow>{CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES}</yellow>"
             )
 
         _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event_end)
