@@ -76,6 +76,15 @@ CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES = """Fluent style Dataso
 If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
 """
 
+FLUENT_DATASOURCE_LIST_WARNING = """We've detected that you have at least one fluent style Datasource in your Data Context. Fluent style Datasources cannot be listed via the CLI.
+If you would like to see a list of your fluent style Datasources, you can run the following code:
+
+context = gx.get_context()
+context.list_datasources()
+
+Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.list_datasources
+"""
+
 FLUENT_DATASOURCE_DELETE_ERROR = """Fluent style Datasources can not be deleted via the CLI.
 If you would like to delete a fluent style Datasource, you can run the following code:
 
