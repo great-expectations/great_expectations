@@ -954,23 +954,38 @@ constructor arguments.
             "runtime_configuration": runtime_configuration,
             "validations": validations,
             "profilers": profilers,
-            # Next two fields are for LegacyCheckpoint configuration
-            "validation_operator_name": validation_operator_name,
-            "batches": batches,
-            # the following four keys are used by SimpleCheckpoint
-            "site_names": site_names,
-            "slack_webhook": slack_webhook,
-            "notify_on": notify_on,
-            "notify_with": notify_with,
             "ge_cloud_id": ge_cloud_id,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "default_validation_id": default_validation_id,
         }
 
-        checkpoint_config = deep_filter_properties_iterable(
-            properties=checkpoint_config,
-            clean_falsy=True,
-        )
+        if class_name == "LegacyCheckpoint":
+            checkpoint_config.update(
+                {
+                    # Next two fields are for LegacyCheckpoint configuration
+                    "validation_operator_name": validation_operator_name,
+                    "batches": batches,
+                }
+            )
+            checkpoint_config = deep_filter_properties_iterable(
+                properties=checkpoint_config,
+                clean_falsy=True,
+            )
+
+        if class_name == "SimpleCheckpoint":
+            checkpoint_config.update(
+                {
+                    # the following four keys are used by SimpleCheckpoint
+                    "site_names": site_names,
+                    "slack_webhook": slack_webhook,
+                    "notify_on": notify_on,
+                    "notify_with": notify_with,
+                }
+            )
+            checkpoint_config = deep_filter_properties_iterable(
+                properties=checkpoint_config,
+                clean_falsy=True,
+            )
 
         new_checkpoint: Checkpoint = instantiate_class_from_config(
             config=checkpoint_config,

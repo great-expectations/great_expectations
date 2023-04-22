@@ -68,6 +68,15 @@ HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways
 
 SECTION_SEPARATOR = "\n================================================================================\n"
 
+FLUENT_DATASOURCE_LIST_WARNING = """We've detected that you have at least one fluent style Datasource in your Data Context. Fluent style Datasources cannot be listed via the CLI.
+If you would like to see a list of your fluent style Datasources, you can run the following code:
+
+context = gx.get_context()
+context.list_datasources()
+
+Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.list_datasources
+"""
+
 FLUENT_DATASOURCE_DELETE_ERROR = """Fluent style Datasources can not be deleted via the CLI.
 If you would like to delete a fluent style Datasource, you can run the following code:
 
