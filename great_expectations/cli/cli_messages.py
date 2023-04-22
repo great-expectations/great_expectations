@@ -67,3 +67,12 @@ HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways
 """
 
 SECTION_SEPARATOR = "\n================================================================================\n"
+
+FLUENT_DATASOURCE_DELETE_ERROR = """Fluent style Datasources can not be deleted via the CLI.
+If you would like to delete a fluent style Datasource, you can run the following code:
+
+context = gx.get_context()
+context.delete_datasource(datasource_name)
+
+Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.delete_datasource
+"""
