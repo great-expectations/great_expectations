@@ -79,7 +79,11 @@ class LinkChecker:
         # links that being with /{site_prefix}/(?:/(?P<version>))?/(?P<path>), may end with #abc
         # ex: ^/docs(?:/(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2}))?/(?P<path>[\w/-]+?)(?:#\S+)?$
         #     /docs/0.15.50/cli#anchor
-        absolute_link_regex = r"^/" + site_prefix + r"(?:/(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2}))?/(?P<path>[\w/-]+?)(?:#\S+)?$"
+        absolute_link_regex = (
+            r"^/"
+            + site_prefix
+            + r"(?:/(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2}))?/(?P<path>[\w/-]+?)(?:#\S+)?$"
+        )
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
         # docroot links start without a . or a slash
@@ -266,7 +270,9 @@ class LinkChecker:
             else:
                 match = self._absolute_link_pattern.match(link)
                 if match:
-                    result = self._check_absolute_link(link, file, match.group("path"), match.group("version"))
+                    result = self._check_absolute_link(
+                        link, file, match.group("path"), match.group("version")
+                    )
                 else:
                     match = self._docroot_link_pattern.match(link)
                     if match:
