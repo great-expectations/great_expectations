@@ -53,6 +53,7 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.util import (
+    deep_filter_properties_iterable,
     filter_properties_dict,
     load_class,
 )
@@ -977,6 +978,11 @@ constructor arguments.
                     "notify_with": notify_with,
                 }
             )
+
+        checkpoint_config = deep_filter_properties_iterable(
+            properties=checkpoint_config,
+            clean_falsy=True,
+        )
 
         new_checkpoint: Checkpoint = instantiate_class_from_config(
             config=checkpoint_config,
