@@ -76,6 +76,10 @@ class LinkChecker:
         absolute_link_regex = r"^\/" + site_prefix + r"\/(?P<path>[\w\/-]+?)(?:#\S+)?$"
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
+        # with versioned docs, an absolute link may contain version information
+        version_info_regex = r"/\d{1,2}\.\d{1,2}\.\d{1,2}/"
+        self._version_info_pattern = re.compile(version_info_regex)
+
         # docroot links start without a . or a slash
         docroot_link_regex = r"^(?P<path>\w[\.\w\/-]+\.md)(?:#\S+)?$"
         self._docroot_link_pattern = re.compile(docroot_link_regex)
@@ -150,6 +154,11 @@ class LinkChecker:
         self, link: str, file: str, path: str
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking absolute link {link} in file {file}")
+
+        # don't check versioned docs links, since there is no way to confirm
+        if self._version_info_pattern.match(link):
+            logger.debug(f"Skipping versioned absolute link: {link} in file {file} found")
+            return None
 
         # absolute links should point to files that exist (with the .md extension added)
         md_file = self._get_absolute_path(path).rstrip("/") + ".md"
@@ -316,7 +325,7 @@ class LinkChecker:
 @click.option(
     "--site-prefix",
     "-s",
-    default=None,
+    default="docs",
     help="Top-most folder in the docs URL for resolving absolute paths",
 )
 @click.option("--skip-external", is_flag=True)
