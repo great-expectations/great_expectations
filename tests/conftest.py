@@ -1491,14 +1491,14 @@ def titanic_pandas_data_context_with_fluent_datasource_with_checkpoints_v1_with_
     batching_regex = r"(?P<name>.+)\.csv"
     glob_directive = "*.csv"
     # noinspection PyUnusedLocal
-    data_asset = datasource.add_csv_asset(
+    datasource.add_csv_asset(
         name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
     batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
     glob_directive = "*.csv"
     # noinspection PyUnusedLocal
-    data_asset = datasource.add_csv_asset(
+    datasource.add_csv_asset(
         name="users", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
