@@ -967,6 +967,10 @@ constructor arguments.
                     "batches": batches,
                 }
             )
+            checkpoint_config = deep_filter_properties_iterable(
+                properties=checkpoint_config,
+                clean_falsy=True,
+            )
 
         if class_name == "SimpleCheckpoint":
             checkpoint_config.update(
@@ -978,11 +982,10 @@ constructor arguments.
                     "notify_with": notify_with,
                 }
             )
-
-        checkpoint_config = deep_filter_properties_iterable(
-            properties=checkpoint_config,
-            clean_falsy=True,
-        )
+            checkpoint_config = deep_filter_properties_iterable(
+                properties=checkpoint_config,
+                clean_falsy=True,
+            )
 
         new_checkpoint: Checkpoint = instantiate_class_from_config(
             config=checkpoint_config,

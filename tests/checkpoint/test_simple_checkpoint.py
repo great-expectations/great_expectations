@@ -3592,9 +3592,9 @@ def test_simple_checkpoint_result_validations_include_rendered_content(
 
 @pytest.mark.integration
 def test_running_spark_simplecheckpoint(
-    data_context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
+    context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
 ):
-    data_context = data_context_with_single_csv_spark_and_suite
+    data_context = context_with_single_csv_spark_and_suite
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="my_datasource",
         data_connector_name="configured_data_connector_multi_batch_asset",
@@ -3623,9 +3623,9 @@ def test_running_spark_simplecheckpoint(
 
 @pytest.mark.integration
 def test_run_spark_checkpoint_with_schema(
-    data_context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
+    context_with_single_csv_spark_and_suite, spark_df_taxi_data_schema
 ):
-    data_context = data_context_with_single_csv_spark_and_suite
+    data_context = context_with_single_csv_spark_and_suite
     single_batch_batch_request: BatchRequest = BatchRequest(
         datasource_name="my_datasource",
         data_connector_name="configured_data_connector_multi_batch_asset",

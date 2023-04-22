@@ -11,7 +11,6 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationSuiteValidationResult
-from great_expectations.core.batch import BatchRequest
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest as FluentBatchRequest,
 )
