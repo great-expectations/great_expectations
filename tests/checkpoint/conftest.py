@@ -26,6 +26,36 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
 
 
 @pytest.fixture
+def titanic_pandas_data_context_with_fluent_datasources_stats_enabled_and_expectation_suite_with_one_expectation(
+    titanic_pandas_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_pandas_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    datasource_name = "my_pandas_filesystem_datasource"
+    datasource = context.get_datasource(datasource_name=datasource_name)
+
+    batching_regex = r"^Titanic_1911\.csv"
+    glob_directive = "*.csv"
+    # noinspection PyUnusedLocal
+    data_asset = datasource.add_csv_asset(
+        name="Titanic_1911",
+        batching_regex=batching_regex,
+        glob_directive=glob_directive,
+    )
+
+    # create expectation suite
+    suite = context.add_expectation_suite("my_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "col1", "min_value": 1, "max_value": 2},
+    )
+    suite.add_expectation(expectation, send_usage_event=False)
+    context.update_expectation_suite(expectation_suite=suite)
+
+    return context
+
+
+@pytest.fixture
 def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
     monkeypatch,

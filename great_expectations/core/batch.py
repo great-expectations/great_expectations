@@ -874,6 +874,9 @@ def materialize_batch_request(
 
     batch_request_class: type
     if "options" in effective_batch_request:
+        if not effective_batch_request["options"]:
+            effective_batch_request["options"] = {}
+
         batch_request_class = _get_fluent_batch_request_class()
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request
