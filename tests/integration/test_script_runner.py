@@ -165,12 +165,6 @@ local_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
     IntegrationTestFixture(
-        name="how_to_pass_an_in_memory_dataframe_to_a_checkpoint",
-        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    ),
-    IntegrationTestFixture(
         name="how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -275,6 +269,12 @@ fluent_datasources = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py",
+    ),
+    IntegrationTestFixture(
+        name="RUNME how_to_pass_an_in_memory_dataframe_to_a_checkpoint",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
 ]
 
