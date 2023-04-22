@@ -1127,6 +1127,88 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
 
 
 @pytest.fixture
+def deterministic_asset_data_connector_context(
+    tmp_path_factory,
+    monkeypatch,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
+    )
+    context = get_context(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    datasource_config = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: PandasExecutionEngine
+
+        data_connectors:
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users: {{}}
+        """
+
+    context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
+    return context
+
+
+@pytest.fixture
 def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoints_v1_with_templates(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
@@ -1505,88 +1587,6 @@ def titanic_pandas_data_context_with_fluent_datasource_with_checkpoints_v1_with_
     # noinspection PyProtectedMember
     context._save_project_config()
 
-    return context
-
-
-@pytest.fixture
-def deterministic_asset_data_connector_context(
-    tmp_path_factory,
-    monkeypatch,
-):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
-    )
-    data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
-    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            str(
-                pathlib.Path(
-                    "test_fixtures",
-                    "great_expectations_v013_no_datasource_stats_enabled.yml",
-                )
-            ),
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
-    )
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_1911.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_1912.csv"
-            )
-        ),
-    )
-    context = get_context(context_root_dir=context_path)
-    assert context.root_directory == context_path
-
-    datasource_config = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users: {{}}
-        """
-
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
-    context._save_project_config()
     return context
 
 
