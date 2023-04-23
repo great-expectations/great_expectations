@@ -153,12 +153,6 @@ local_tests = [
         data_dir="tests/test_sets/dataconnector_docs",
     ),
     IntegrationTestFixture(
-        name="rule_base_profiler_multi_batch_example",
-        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
-    ),
-    IntegrationTestFixture(
         name="checkpoints_and_actions_core_concepts",
         user_flow_script="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -275,6 +269,12 @@ fluent_datasources = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py",
+    ),
+    IntegrationTestFixture(
+        name="RUNME rule_base_profiler_multi_batch_example",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
     ),
 ]
 
