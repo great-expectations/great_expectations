@@ -227,13 +227,13 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
-  - stage: quickstart
+  - stage: runme_script_runner_tests
     dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-20.04'
 
     jobs:
-      - job: quickstart
+      - job: runme_script_runner_tests
 
         steps:
           - task: UsePythonVersion@0
@@ -246,14 +246,15 @@ stages:
               pip uninstall -y sqlalchemy
             displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
+          # tests containing the name "RUNME" are run
           - script: |
-              pytest -v --no-sqlalchemy --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
-            displayName: 'Run Quickstart'
+              pytest -v --no-sqlalchemy --docs-tests -m integration -k "RUNME" tests/integration/test_script_runner.py
+            displayName: 'Run Flagged Tests'
 
 
 
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, quickstart]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
     pool:
       vmImage: 'ubuntu-20.04'
 
