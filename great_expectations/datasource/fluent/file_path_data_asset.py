@@ -134,14 +134,18 @@ class _FilePathDataAsset(DataAsset):
 
     @public_api
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[slice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
+            options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = [-5]` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the

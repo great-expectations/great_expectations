@@ -61,7 +61,7 @@ class TestConnectionError(Exception):
 
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants as returned. The keys represent dimensions one can slice the data along
+# Batches one wants as returned. The keys represent dimensions one can filter the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
 # will capture all data along this dimension. For example, if we have a year and month
 # splitter, and we want to query all months in the year 2020, the batch request options
@@ -78,6 +78,7 @@ class BatchRequest:
     datasource_name: str
     data_asset_name: str
     options: BatchRequestOptions = dataclasses.field(default_factory=dict)
+    batch_slice: slice = dataclasses.field(default_factory=slice)
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -200,14 +201,18 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError
 
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[slice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
+            options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = [-5]` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
