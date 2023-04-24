@@ -79,7 +79,7 @@ def prepend_version_info_to_name_for_href_absolute_links():
 
     for path in paths:
         version = path.name
-        version_only = version_from_path_name_pattern.search(version).group(0)
+        version_only = version_from_path_name_pattern.search(version).group("version")
         if not version_only:
             raise ValueError("Path does not contain a version number")
 
@@ -100,6 +100,6 @@ def prepend_version_info_to_name_for_href_absolute_links():
 
 
 if __name__ == "__main__":
-    change_paths_for_docs_file_references()
-    prepend_version_info_to_name_for_snippet_by_name_references()
+    # change_paths_for_docs_file_references()
+    # prepend_version_info_to_name_for_snippet_by_name_references()
     prepend_version_info_to_name_for_href_absolute_links()
