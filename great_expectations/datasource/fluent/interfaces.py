@@ -70,6 +70,9 @@ class TestConnectionError(Exception):
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
+BatchSlice: TypeAlias = Union[slice, str, list[int], int]
+
+
 BatchMetadata: TypeAlias = Dict[str, Any]
 
 
@@ -78,7 +81,7 @@ class BatchRequest:
     datasource_name: str
     data_asset_name: str
     options: BatchRequestOptions = dataclasses.field(default_factory=dict)
-    batch_slice: slice = dataclasses.field(default=slice(start=0, stop=None, step=None))
+    batch_slice: slice = dataclasses.field(default_factory=slice)
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -136,6 +139,44 @@ def _sorter_from_str(sort_key: str) -> Sorter:
         return Sorter(key=sort_key[1:], reverse=False)
 
     return Sorter(key=sort_key, reverse=False)
+
+
+def _batch_slice_from_string(batch_slice: BatchSlice) -> slice:
+    # trim whitespace
+    batch_slice = batch_slice.strip()
+    if batch_slice[0] == "[":
+        batch_slice = batch_slice[1:]
+    if batch_slice[-1] == "]":
+        batch_slice = batch_slice[:-1]
+    # split and convert string to int
+    slice_params: list[int] = []
+    for param in batch_slice.split(":"):
+        if param:
+            try:
+                slice_params.append(int(param))
+            except ValueError as e:
+                raise ValueError(
+                    f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'
+                )
+        elif param == "":
+            slice_params.append(None)
+    if len(slice_params) == 1:
+        return slice(slice_params[0] - 1, slice_params[0])
+    elif len(slice_params) == 2:
+        return slice(slice_params[0], slice_params[1])
+    elif len(slice_params) == 3:
+        return slice(slice_params[0], slice_params[1], slice_params[2])
+    else:
+        raise ValueError("batch_slice string must take the form of a python slice")
+
+
+def _batch_slice_from_list(batch_slice: BatchSlice) -> slice:
+    if len(batch_slice) == 0:
+        return slice(0)
+    elif len(batch_slice) == 1:
+        return slice(batch_slice[0] - 1, batch_slice[0])
+    else:
+        raise ValueError("batch_slice list must take the form of a python slice")
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
@@ -203,7 +244,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = None,
-        batch_slice: Optional[slice] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -250,6 +291,17 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
         batch_metadata.update(copy.deepcopy(batch_request.options))
         return batch_metadata
+
+    @staticmethod
+    def _parse_batch_slice(batch_slice: BatchSlice) -> slice:
+        if isinstance(batch_slice, slice):
+            return batch_slice
+        elif isinstance(batch_slice, int):
+            return slice(batch_slice - 1, batch_slice)
+        elif isinstance(batch_slice, str):
+            return _batch_slice_from_string(batch_slice=batch_slice)
+        elif isinstance(batch_slice, list):
+            return _batch_slice_from_list(batch_slice=batch_slice)
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)

@@ -41,7 +41,10 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+        BatchSlice,
+    )
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -136,7 +139,7 @@ class _FilePathDataAsset(DataAsset):
     def build_batch_request(
         self,
         options: Optional[BatchRequestOptions] = None,
-        batch_slice: Optional[slice] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
@@ -145,7 +148,7 @@ class _FilePathDataAsset(DataAsset):
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
             batch_slice: A python slice that can be used to limit the sorted batches by index.
-                e.g. `batch_slice = [-5]` will request only the last 5 batches after the options filter is applied.
+                e.g. `batch_slice = [-5:]` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -172,11 +175,17 @@ class _FilePathDataAsset(DataAsset):
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
 
+        parsed_batch_slice: slice
+        if batch_slice:
+            parsed_batch_slice = DataAsset._parse_batch_slice(batch_slice=batch_slice)
+        else:
+            parsed_batch_slice = slice(0)
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
-            batch_slice=batch_slice or slice(start=0, stop=None, step=None),
+            batch_slice=parsed_batch_slice,
         )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
