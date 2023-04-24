@@ -78,7 +78,7 @@ class BatchRequest:
     datasource_name: str
     data_asset_name: str
     options: BatchRequestOptions = dataclasses.field(default_factory=dict)
-    batch_slice: slice = dataclasses.field(default_factory=slice)
+    batch_slice: slice = dataclasses.field(default=slice(start=0, stop=None, step=None))
 
 
 @pydantic_dc.dataclass(frozen=True)
