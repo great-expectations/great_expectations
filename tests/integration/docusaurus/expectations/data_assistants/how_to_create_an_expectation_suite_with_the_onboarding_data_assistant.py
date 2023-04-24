@@ -52,6 +52,7 @@ expectation_suite = context.add_or_update_expectation_suite(
 all_years_asset: DataAsset = context.datasources[
     "taxi_multi_batch_datasource"
 ].get_asset("all_years")
+
 multi_batch_all_years_batch_request: BatchRequest = (
     all_years_asset.build_batch_request()
 )
