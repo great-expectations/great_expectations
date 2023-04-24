@@ -542,6 +542,8 @@ class Datasource(
 
         self.assets.append(asset)
 
+        if self._data_context:
+            self._data_context._save_project_config()
         return asset
 
     @staticmethod
