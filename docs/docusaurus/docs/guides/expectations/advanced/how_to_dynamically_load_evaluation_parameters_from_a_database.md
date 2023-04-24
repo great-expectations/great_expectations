@@ -28,7 +28,7 @@ By default, query results will be returned as a list. If instead you need a scal
 ```yaml name="tests/integration/fixtures/query_store/great_expectations/great_expectations.yml my_query_store"
 ```
 
-Ensure you have added valid credentials to the ``config-variables.yml`` file:
+Ensure you have added valid credentials to the ``config-variables.yml`` file (replacing the values with your database credentials):
 
 ```yaml name="tests/integration/fixtures/query_store/great_expectations/uncommitted/config_variables.yml my_query_store_creds"
 ```

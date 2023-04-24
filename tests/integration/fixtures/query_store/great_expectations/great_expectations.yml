@@ -58,7 +58,8 @@ stores:
     class_name: SqlAlchemyQueryStore
     credentials: ${my_query_store_creds}
     queries:
-      unique_passenger_counts: SELECT DISTINCT passenger_count FROM postgres_taxi_data ORDER BY passenger_count ASC;   # The query name and value can be replaced with your desired query
+      # The query name (e.g. unique_passenger_counts, max_passenger_counts) can be replaced with your desired name
+      unique_passenger_counts: SELECT DISTINCT passenger_count FROM postgres_taxi_data ORDER BY passenger_count ASC;
       max_passenger_counts:
         query: SELECT max(passenger_count) FROM postgres_taxi_data;
         return_type: scalar  # return_type can be either "scalar" or "list" or omitted
