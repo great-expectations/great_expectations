@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -149,6 +150,7 @@ class SerializableDataContext(AbstractDataContext):
 
         return False
 
+    @public_api
     @classmethod
     def create(
         cls,
