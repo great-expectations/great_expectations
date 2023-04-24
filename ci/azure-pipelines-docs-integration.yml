@@ -297,6 +297,10 @@ stages:
             REDSHIFT_PORT: $(REDSHIFT_PORT)
             REDSHIFT_DATABASE: $(REDSHIFT_DATABASE)
             REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
+            # aws credentials
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
     - job: test_docs_aws
       timeoutInMinutes: 30
@@ -391,6 +395,10 @@ stages:
             ATHENA_STAGING_S3: $(ATHENA_STAGING_S3)
             ATHENA_DATA_BUCKET: $(ATHENA_DATA_BUCKET)
             ATHENA_TEN_TRIPS_DB_NAME: $(ATHENA_TEN_TRIPS_DB_NAME)
+            # aws credentials
+            AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+            AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+            AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
     - job: test_docs_multiple_database
       timeoutInMinutes: 30
