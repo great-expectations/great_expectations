@@ -516,7 +516,7 @@ class Datasource(
         asset: _DataAssetT
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
 
-        if self._data_context:
+        if hasattr(self, "_data_context"):
             self._data_context._save_project_config()
 
     def _add_asset(
@@ -545,7 +545,7 @@ class Datasource(
 
         self.assets.append(asset)
 
-        if self._data_context:
+        if hasattr(self, "_data_context"):
             self._data_context._save_project_config()
         return asset
 
