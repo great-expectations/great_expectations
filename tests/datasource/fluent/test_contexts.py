@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
 import pytest
@@ -65,6 +66,29 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     yaml_dict: dict = yaml.load(yaml_path.read_text())
     assert datasource_name in yaml_dict["fluent_datasources"]
     assert datasource_name not in yaml_dict["datasources"]
+
+
+def test_assets_are_persisted_on_creation(
+    empty_file_context: FileDataContext,
+    db_file: pathlib.Path,
+):
+    context = empty_file_context
+
+    # ensure empty initial state
+    yaml_path = pathlib.Path(context.root_directory, context.GX_YML)
+    assert yaml_path.exists()
+    assert not yaml.load(yaml_path.read_text()).get("fluent_datasources")
+
+    datasource_name = "my_datasource"
+    asset_name = "my_asset"
+
+    context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    ).add_query_asset(asset_name, query="SELECT *")
+
+    fluent_datasources: dict = yaml.load(yaml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
+    print(pf(fluent_datasources))
+    assert asset_name in fluent_datasources[datasource_name]["assets"]
 
 
 @pytest.mark.cloud
