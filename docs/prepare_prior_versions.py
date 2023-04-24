@@ -68,6 +68,39 @@ def prepend_version_info_to_name_for_snippet_by_name_references():
             print(f"processed {file_path}")
 
 
+def prepend_version_info_to_name_for_href_absolute_links():
+    """Prepend version info to absolute links: /docs/... becomes /docs/{version}/..."""
+
+    href_pattern = re.compile(r"(?P<href>href=[\"\']/docs/)(?P<link>\S*[\"\'])")
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2}))"
+    )
+    paths = _paths_to_versioned_docs() + _paths_to_versioned_code()
+
+    for path in paths:
+        version = path.name
+        version_only_match = version_from_path_name_pattern.match(version)
+        if not version_only_match:
+            raise ValueError("Path does not contain a version number")
+
+        version_only = version_only_match["version"]
+        files = []
+        for extension in (".md", ".mdx"):
+            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                # href="/docs/link" -> href="/docs/0.14.13/link"
+                contents = re.sub(
+                    href_pattern, rf"\g<href>{version_only}/\g<link>", contents
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            print(f"processed {file_path}")
+
+
 if __name__ == "__main__":
     change_paths_for_docs_file_references()
     prepend_version_info_to_name_for_snippet_by_name_references()
+    prepend_version_info_to_name_for_href_absolute_links()
