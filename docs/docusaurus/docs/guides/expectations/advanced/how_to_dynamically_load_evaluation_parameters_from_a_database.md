@@ -49,5 +49,3 @@ The SqlAlchemyQueryStore that you configured above will execute the defined quer
 
 ```python name="tests/integration/docusaurus/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py expected_validator_results"
 ```
-
-(Note that the above example validator results was converted to python from json)

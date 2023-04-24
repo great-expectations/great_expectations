@@ -1,3 +1,5 @@
+import json
+
 import pandas as pd
 
 # This utility is not for general use. It is only to support testing.
@@ -52,35 +54,45 @@ validator_results = validator.expect_column_values_to_be_in_set(
 
 
 # <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py expected_validator_results">
-expected_validator_results = {
-    "success": True,
-    "result": {
-        "element_count": 10000,
-        "unexpected_count": 0,
-        "unexpected_percent": 0.0,
-        "partial_unexpected_list": [],
-        "missing_count": 0,
-        "missing_percent": 0.0,
-        "unexpected_percent_total": 0.0,
-        "unexpected_percent_nonmissing": 0.0,
-    },
+expected_validator_results = """
+{
+  "expectation_config": {
+    "expectation_type": "expect_column_values_to_be_in_set",
     "meta": {},
-    "expectation_config": {
-        "meta": {},
-        "expectation_type": "expect_column_values_to_be_in_set",
-        "kwargs": {
-            "column": "passenger_count",
-            "value_set": [1, 2, 3, 4, 5, 6],
-            "batch_id": "pg_datasource-postgres_taxi_data",
-        },
-    },
-    "exception_info": {
-        "raised_exception": False,
-        "exception_traceback": None,
-        "exception_message": None,
-    },
+    "kwargs": {
+      "column": "passenger_count",
+      "value_set": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "batch_id": "pg_datasource-postgres_taxi_data"
+    }
+  },
+  "meta": {},
+  "result": {
+    "element_count": 10000,
+    "unexpected_count": 0,
+    "unexpected_percent": 0.0,
+    "partial_unexpected_list": [],
+    "missing_count": 0,
+    "missing_percent": 0.0,
+    "unexpected_percent_total": 0.0,
+    "unexpected_percent_nonmissing": 0.0
+  },
+  "success": true,
+  "exception_info": {
+    "raised_exception": false,
+    "exception_traceback": null,
+    "exception_message": null
+  }
 }
+"""
 # </snippet>
 
+
 # Note to users: code below this line is only for integration testing -- ignore!
-assert validator_results.to_json_dict() == expected_validator_results
+assert validator_results.to_json_dict() == json.loads(expected_validator_results)
