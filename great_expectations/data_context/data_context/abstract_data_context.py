@@ -162,6 +162,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
+    )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -1609,8 +1612,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Note that any sensitive values are obfuscated before being returned.
 
         Returns:
-            A list of dictionaries representing datasource configurations. Each value
-            with contain a "name", "class_name", and "module_name" at a minimum.
+            A list of dictionaries representing datasource configurations.
         """
         datasources: List[dict] = []
 
@@ -1629,6 +1631,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
             )
             datasources.append(masked_config)
+
+        for (
+            datasource_name,
+            fluent_datasource_config,
+        ) in self.fluent_datasources.items():
+            datasources.append(fluent_datasource_config.dict())
         return datasources
 
     @public_api
@@ -2345,7 +2353,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         data_asset_name: Optional[str] = None,
         batch: Optional[Batch] = None,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[BatchRequestBase] = None,
+        batch_request: Optional[Union[BatchRequestBase, FluentBatchRequest]] = None,
         batch_request_list: Optional[List[BatchRequestBase]] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[Union[IDDict, dict]] = None,

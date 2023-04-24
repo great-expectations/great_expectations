@@ -349,7 +349,7 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
     config: Dict[str, Any], _allow_empty: bool = False
 ) -> Dict[str, Any]:
     if _FLUENT_DATASOURCES_KEY in config:
-        fluent_datasources: dict = config[_FLUENT_DATASOURCES_KEY]
+        fluent_datasources: dict = config[_FLUENT_DATASOURCES_KEY] or {}
 
         datasource_name: str
         datasource_config: dict
