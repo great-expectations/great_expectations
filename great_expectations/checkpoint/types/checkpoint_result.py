@@ -78,10 +78,8 @@ class CheckpointResult(SerializableDictDot):
         self._checkpoint_config = checkpoint_config
         if success is None:
             self._success = all(
-                [
-                    run_result["validation_result"].success
-                    for run_result in run_results.values()
-                ]
+                run_result["validation_result"].success
+                for run_result in run_results.values()
             )
         else:
             self._success = success

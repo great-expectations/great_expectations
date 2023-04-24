@@ -750,14 +750,12 @@ detected.
 
         distribution_boundary: Optional[Union[int, float]]
         if not all(
-            [
-                (
-                    distribution_boundary is None
-                    or is_numeric(value=distribution_boundary)
-                    or isinstance(distribution_boundary, datetime.datetime)
-                )
-                for distribution_boundary in truncate_values.values()
-            ]
+            (
+                distribution_boundary is None
+                or is_numeric(value=distribution_boundary)
+                or isinstance(distribution_boundary, datetime.datetime)
+            )
+            for distribution_boundary in truncate_values.values()
         ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "truncate_values" for {self.__class__.__name__} must specify the

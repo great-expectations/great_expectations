@@ -1428,10 +1428,10 @@ class Expectation(metaclass=MetaExpectation):
 
         # Set final maturity level based on status of all checks
         all_experimental = all(
-            [check.passed for check in maturity_checklist.experimental]
+            check.passed for check in maturity_checklist.experimental
         )
-        all_beta = all([check.passed for check in maturity_checklist.beta])
-        all_production = all([check.passed for check in maturity_checklist.production])
+        all_beta = all(check.passed for check in maturity_checklist.beta)
+        all_production = all(check.passed for check in maturity_checklist.production)
         if all_production and all_beta and all_experimental:
             library_metadata.maturity = Maturity.PRODUCTION
         elif all_beta and all_experimental:
@@ -2551,7 +2551,7 @@ class QueryExpectation(BatchExpectation, ABC):
                 "By not parameterizing your query with `{active_batch}`, "
                 "you may not be validating against your intended data asset, or the expectation may fail."
             )
-            assert all([re.match("{.*?}", x) for x in parsed_query]), (
+            assert all(re.match("{.*?}", x) for x in parsed_query), (
                 "Your query appears to have hard-coded references to your data. "
                 "By not parameterizing your query with `{active_batch}`, {col}, etc., "
                 "you may not be validating against your intended data asset, or the expectation may fail."

@@ -4,14 +4,12 @@ import typing
 from logging import Logger
 from typing import (
     TYPE_CHECKING,
-    AbstractSet,
     Any,
     Callable,
     ClassVar,
     Hashable,
     Iterable,
     List,
-    Mapping,
     MutableSequence,
     Optional,
     Sequence,
@@ -53,8 +51,8 @@ if TYPE_CHECKING:
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type]
 
-MappingIntStrAny = Mapping[Union[int, str], Any]
-AbstractSetIntStr = AbstractSet[Union[int, str]]
+MappingIntStrAny = ...
+AbstractSetIntStr = ...
 logger: Logger
 _PandasDataFrameT = TypeVar("_PandasDataFrameT")
 
