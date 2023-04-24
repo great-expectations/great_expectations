@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import copy
 import json
 import os
+import pathlib
+import re
 import shutil
 import unittest.mock
 from typing import Any, Callable, Dict, Optional, Union, cast
@@ -481,8 +485,7 @@ def mock_response_factory() -> Callable[
     return _make_mock_response
 
 
-@pytest.fixture
-def datasource_config() -> DatasourceConfig:
+def basic_block_config_datasource_config() -> DatasourceConfig:
     return DatasourceConfig(
         class_name="Datasource",
         execution_engine={
@@ -505,6 +508,45 @@ def datasource_config() -> DatasourceConfig:
             }
         },
     )
+
+
+@pytest.fixture
+def block_config_datasource_config() -> DatasourceConfig:
+    return basic_block_config_datasource_config()
+
+
+def basic_fluent_datasource_config() -> dict:
+    return {
+        "type": "pandas_filesystem",
+        "name": "my_fluent_pandas_filesystem_datasource",
+        "assets": [
+            {
+                "name": "my_csv",
+                "type": "csv",
+                "batching_regex": re.compile(
+                    r"yellow_tripdata_(\d{4})-(\d{2})\.csv$", re.UNICODE
+                ),
+            }
+        ],
+        "base_directory": pathlib.PosixPath("/path/to/trip_data"),
+    }
+
+
+@pytest.fixture
+def fluent_datasource_config() -> dict:
+    return basic_fluent_datasource_config()
+
+
+@pytest.fixture(
+    params=[
+        basic_block_config_datasource_config,
+        basic_fluent_datasource_config,
+    ]
+)
+def parametrized_datasource_configs(
+    request,
+) -> DatasourceConfig | dict:
+    return request.param()
 
 
 @pytest.fixture
