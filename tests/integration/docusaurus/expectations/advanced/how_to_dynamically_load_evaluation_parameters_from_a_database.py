@@ -1,11 +1,4 @@
-# <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py imports">
 import pandas as pd
-
-import great_expectations as gx
-from great_expectations.data_context.store.store import StoreConfigTypedDict
-
-context = gx.get_context()
-# </snippet>
 
 # This utility is not for general use. It is only to support testing.
 from tests.test_utils import load_data_into_test_database
@@ -27,48 +20,38 @@ df = pd.read_csv(csv_path)
 assert df.passenger_count.unique().tolist() == [1, 2, 3, 4, 5, 6]
 assert len(df) == 10000
 
-# TODO: Does this belong in the doc? Probably:
+# Tutorial content resumes here.
+
+# <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py get_validator">
+import great_expectations as gx
+
+context = gx.get_context()
+
 pg_datasource = context.sources.add_sql(
     name="pg_datasource", connection_string=PG_CONNECTION_STRING
 )
 table_asset = pg_datasource.add_table_asset(
     name="postgres_taxi_data", table_name="postgres_taxi_data"
 )
-
-# TODO: Set up query store (Is module_name required or can it be inferred?) Do we need order by?
-# TODO: Do this in a new data context config with query store in the yaml
-# context.add_store(
-#     "my_query_store",
-#     store_config=StoreConfigTypedDict(
-#         class_name="SqlAlchemyQueryStore",
-#         store_backend={"class_name": "InMemoryStoreBackend"},
-#         connection_string=PG_CONNECTION_STRING,
-#         queries={
-#             "unique_passenger_counts": {
-#                 "query": "SELECT DISTINCT passenger_count FROM postgres_taxi_data ORDER BY passenger_count ASC;",
-#                 "return_type": "list",
-#             }
-#         },
-#     ),
-# )
-
-
-# Tutorial content resumes here.
-
-
 batch_request = table_asset.build_batch_request()
 
 validator = context.get_validator(
     batch_request=batch_request, create_expectation_suite_with_name="my_suite_name"
 )
+# </snippet>
 
+
+# <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py define expectation">
 validator_results = validator.expect_column_values_to_be_in_set(
     column="passenger_count",
     value_set={
         "$PARAMETER": "urn:great_expectations:stores:my_query_store:unique_passenger_counts"
     },
 )
+# </snippet>
 
+
+# <snippet name="tests/integration/docusaurus/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py expected_validator_results">
 expected_validator_results = {
     "success": True,
     "result": {
@@ -97,7 +80,7 @@ expected_validator_results = {
         "exception_message": None,
     },
 }
-
+# </snippet>
 
 # Note to users: code below this line is only for integration testing -- ignore!
 assert validator_results.to_json_dict() == expected_validator_results

@@ -53,13 +53,16 @@ stores:
       suppress_store_backend_id: true
       base_directory: checkpoints/
 
+# <snippet name="tests/integration/fixtures/query_store/great_expectations/great_expectations.yml my_query_store">
   my_query_store:
     class_name: SqlAlchemyQueryStore
     credentials: ${my_query_store_creds}
     queries:
-      unique_passenger_counts:
-        query: SELECT DISTINCT passenger_count FROM postgres_taxi_data ORDER BY passenger_count ASC;
-        return_type: list
+      unique_passenger_counts: SELECT DISTINCT passenger_count FROM postgres_taxi_data ORDER BY passenger_count ASC;   # The query name and value can be replaced with your desired query
+      max_passenger_counts:
+        query: SELECT max(passenger_count) FROM postgres_taxi_data;
+        return_type: scalar  # return_type can be either "scalar" or "list" or omitted
+# </snippet>
 
 expectations_store_name: expectations_store
 validations_store_name: validations_store

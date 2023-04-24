@@ -192,7 +192,7 @@ creating_custom_expectations = [
 
 evaluation_parameters = [
     IntegrationTestFixture(
-        name="dynamically_load_evaluation_parameters_from_a_database",
+        name="RUNME_POSTGRES dynamically_load_evaluation_parameters_from_a_database",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database.py",
         data_context_dir="tests/integration/fixtures/query_store/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
