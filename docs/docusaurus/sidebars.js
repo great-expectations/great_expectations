@@ -1,7 +1,6 @@
 module.exports = {
   docs: [
     'intro',
-    'contributing/contributing',
     {
       type: 'doc', id: 'tutorials/quickstart/quickstart', label: 'Quickstart'
     },
@@ -524,6 +523,7 @@ module.exports = {
       ]
     },
     { type: 'doc', id: 'changelog' },
-    { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
+    { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+    'contributing/contributing',
   ]
 }
