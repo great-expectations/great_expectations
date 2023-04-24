@@ -31,6 +31,9 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 )
 # </snippet>
 
+suite_name = checkpoint.get_config().expectation_suite_name
+context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
+
 # <snippet name="tutorials/quickstart/quickstart.py run_checkpoint">
 checkpoint_result = checkpoint.run()
 # </snippet>

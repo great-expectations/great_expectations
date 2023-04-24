@@ -29,6 +29,7 @@ data_connectors:
 """
 context.test_yaml_config(datasource_yaml)
 context.add_datasource(**yaml.load(datasource_yaml))
+context.add_or_update_expectation_suite(expectation_suite_name="my_expectation_suite")
 
 # <snippet name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py build_batch_request">
 batch_request = BatchRequest(
