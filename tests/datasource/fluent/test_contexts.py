@@ -84,7 +84,9 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
 
     context.sources.add_sqlite(
         name=datasource_name, connection_string=f"sqlite:///{db_file}"
-    ).add_query_asset(asset_name, query="SELECT * FROM tablename;")
+    ).add_query_asset(
+        asset_name, query='SELECT name FROM sqlite_master WHERE type = "table"'
+    )
 
     fds_after_add: dict = yaml.load(yaml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
     print(f"'{asset_name}' added\n-----------------\n{pf(fds_after_add)}")
