@@ -144,7 +144,7 @@ class FilePathDataConnector(DataConnector):
         #     )
         # TODO: <Alex>ALEX</Alex>
 
-        data_connector_query_dict = {}
+        data_connector_query_dict: dict[str, dict | slice] = {}
         if batch_request.options:
             data_connector_query_dict.update(
                 {

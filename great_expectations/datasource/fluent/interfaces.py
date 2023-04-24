@@ -141,16 +141,16 @@ def _sorter_from_str(sort_key: str) -> Sorter:
     return Sorter(key=sort_key, reverse=False)
 
 
-def _batch_slice_from_string(batch_slice: BatchSlice) -> slice:
+def _batch_slice_from_string(batch_slice: str) -> slice:
     # trim whitespace
-    batch_slice = batch_slice.strip()
-    if batch_slice[0] == "[":
-        batch_slice = batch_slice[1:]
-    if batch_slice[-1] == "]":
-        batch_slice = batch_slice[:-1]
+    parsed_batch_slice = batch_slice.strip()
+    if parsed_batch_slice[0] == "[":
+        parsed_batch_slice = parsed_batch_slice[1:]
+    if parsed_batch_slice[-1] == "]":
+        parsed_batch_slice = parsed_batch_slice[:-1]
     # split and convert string to int
-    slice_params: list[int] = []
-    for param in batch_slice.split(":"):
+    slice_params: list[int | None] = []
+    for param in parsed_batch_slice.split(":"):
         if param:
             try:
                 slice_params.append(int(param))
@@ -160,23 +160,27 @@ def _batch_slice_from_string(batch_slice: BatchSlice) -> slice:
                 )
         elif param == "":
             slice_params.append(None)
-    if len(slice_params) == 1:
+    if len(slice_params) == 1 and slice_params[0] is not None:
         return slice(slice_params[0] - 1, slice_params[0])
     elif len(slice_params) == 2:
         return slice(slice_params[0], slice_params[1])
     elif len(slice_params) == 3:
         return slice(slice_params[0], slice_params[1], slice_params[2])
     else:
-        raise ValueError("batch_slice string must take the form of a python slice")
+        raise ValueError(
+            f"batch_slice string must take the form of a python slice, but {batch_slice} was provided."
+        )
 
 
-def _batch_slice_from_list(batch_slice: BatchSlice) -> slice:
+def _batch_slice_from_list(batch_slice: list[int]) -> slice:
     if len(batch_slice) == 0:
         return slice(0)
-    elif len(batch_slice) == 1:
+    elif len(batch_slice) == 1 and batch_slice[0] is not None:
         return slice(batch_slice[0] - 1, batch_slice[0])
     else:
-        raise ValueError("batch_slice list must take the form of a python slice")
+        raise ValueError(
+            f"batch_slice list must take the form of a python index, but {batch_slice} was provided."
+        )
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
