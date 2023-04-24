@@ -13,7 +13,6 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.exceptions import ConfigNotFoundError
 from tests.test_utils import working_directory
 
 GX_CLOUD_PARAMS_ALL = {
@@ -261,3 +260,15 @@ def test_cloud_context_include_rendered_content(
             CloudDataContext,
         )
         assert context.variables.include_rendered_content.globally
+
+
+@pytest.mark.integration
+def test_get_context_with_context_root_dir_scaffolds_filesystem(tmp_path: pathlib.Path):
+    root = tmp_path / "root"
+    context_root_dir = root.joinpath("great_expectations")
+    assert not context_root_dir.exists()
+
+    context = gx.get_context(context_root_dir=context_root_dir)
+
+    assert isinstance(context, FileDataContext)
+    assert context_root_dir.exists()
