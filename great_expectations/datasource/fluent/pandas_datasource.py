@@ -545,7 +545,8 @@ class PandasDatasource(_PandasDatasource):
 
     def _get_validator(self, asset: _PandasDataAsset) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
-        return self._data_context.get_validator(batch_request=batch_request)
+        # TODO: raise error if `_data_context` not set
+        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
     def add_dataframe_asset(
         self,
