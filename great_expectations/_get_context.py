@@ -336,8 +336,6 @@ def _get_file_context(
 
     if context_root_dir:
         context_root_dir = pathlib.Path(context_root_dir).absolute()
-        # if context_root_dir.stem != FileDataContext.GX_DIR:
-        #     context_root_dir = context_root_dir.joinpath(FileDataContext.GX_DIR)
         return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,

@@ -33,7 +33,7 @@ from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
 )
-from great_expectations.data_context.util import PasswordMasker, file_relative_path
+from great_expectations.data_context.util import file_relative_path
 from great_expectations.dataset import Dataset
 from great_expectations.datasource import (
     Datasource,
@@ -53,7 +53,6 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
     gen_directory_tree_str,
     get_context,
-    is_library_loadable,
 )
 from tests.test_utils import create_files_in_directory, safe_remove
 
@@ -316,9 +315,7 @@ def test_data_context_get_validation_result(titanic_data_context):
     Test that validation results can be correctly fetched from the configured results store
     """
     run_id = RunIdentifier(run_name="profiling")
-    profiling_results = titanic_data_context.profile_datasource(
-        "mydatasource", run_id=run_id
-    )
+    titanic_data_context.profile_datasource("mydatasource", run_id=run_id)
 
     all_validation_result = titanic_data_context.get_validation_result(
         "mydatasource.mygenerator.Titanic.BasicDatasetProfiler", run_id=run_id
@@ -821,9 +818,14 @@ def empty_context(tmp_path_factory) -> FileDataContext:
     return context
 
 
+def test_data_context_is_project_scaffolded(empty_context):
+    ge_dir = empty_context.root_directory
+    assert FileDataContext.is_project_scaffolded(ge_dir) is True
+
+
 def test_data_context_does_ge_yml_exist_returns_true_when_it_does_exist(empty_context):
     ge_dir = empty_context.root_directory
-    assert FileDataContext.does_config_exist_on_disk(ge_dir) == True
+    assert FileDataContext.does_config_exist_on_disk(ge_dir) is True
 
 
 def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
@@ -832,7 +834,7 @@ def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
     ge_dir = empty_context.root_directory
     # mangle project
     safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
-    assert FileDataContext.does_config_exist_on_disk(ge_dir) == False
+    assert FileDataContext.does_config_exist_on_disk(ge_dir) is False
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_true_when_it_has_a_datasource_configured_in_yml_file_on_disk(
@@ -841,7 +843,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_true
     ge_dir = empty_context.root_directory
     empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == True
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is True
     )
 
 
@@ -850,7 +852,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
 ):
     ge_dir = empty_context.root_directory
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
     )
 
 
@@ -860,7 +862,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
     )
 
 
@@ -870,7 +872,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     ge_dir = empty_context.root_directory
     safe_remove(os.path.join(ge_dir))
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
     )
 
 
@@ -881,7 +883,7 @@ def test_data_context_does_project_have_a_datasource_in_config_file_returns_fals
     with open(os.path.join(ge_dir, FileDataContext.GX_YML), "w") as yml:
         yml.write("this file: is not a valid ge config")
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) == False
+        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
     )
 
 
@@ -894,7 +896,7 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context.add_expectation_suite("dent")
     assert len(context.list_expectation_suites()) == 1
 
-    assert FileDataContext.is_project_initialized(ge_dir) == True
+    assert FileDataContext.is_project_initialized(ge_dir) is True
 
 
 def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_no_suites(
@@ -905,14 +907,14 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     context.add_datasource("arthur", class_name="PandasDatasource")
     assert len(context.list_expectation_suites()) == 0
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_its_valid_context_has_no_datasource(
     empty_context,
 ):
     ge_dir = empty_context.root_directory
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_yml_is_missing(
@@ -922,7 +924,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_yml_is_mi
     # mangle project
     safe_remove(os.path.join(ge_dir, empty_context.GX_YML))
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_is_missing(
@@ -932,7 +934,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_
     # mangle project
     shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR))
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_data_docs_dir_is_missing(
@@ -942,7 +944,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_data
     # mangle project
     shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs"))
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_validations_dir_is_missing(
@@ -952,7 +954,7 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
     # mangle project
     shutil.rmtree(os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"))
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_variable_yml_is_missing(
@@ -964,7 +966,7 @@ def test_data_context_is_project_initialized_returns_false_when_config_variable_
         os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "config_variables.yml")
     )
 
-    assert FileDataContext.is_project_initialized(ge_dir) == False
+    assert FileDataContext.is_project_initialized(ge_dir) is False
 
 
 def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
