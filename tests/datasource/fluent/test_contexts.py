@@ -49,7 +49,6 @@ def test_add_fluent_datasource_are_persisted(
     )
 
 
-@pytest.mark.cloud
 def test_add_fluent_datasource_are_persisted_without_duplicates(
     empty_file_context: FileDataContext,
     db_file: pathlib.Path,
