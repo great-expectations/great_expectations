@@ -1692,7 +1692,7 @@ class DataContextConfigSchema(Schema):
             exc
             and exc.messages
             and isinstance(exc.messages, dict)
-            and all([key is None for key in exc.messages.keys()])
+            and all(key is None for key in exc.messages.keys())
         ):
             exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
 
@@ -1721,10 +1721,8 @@ class DataContextConfigSchema(Schema):
 
         # When migrating from 0.7.x to 0.8.0
         if data["config_version"] == 0 and any(
-            [
-                store_config["class_name"] == "ValidationsStore"
-                for store_config in data["stores"].values()
-            ]
+            store_config["class_name"] == "ValidationsStore"
+            for store_config in data["stores"].values()
         ):
             raise gx_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
@@ -1749,10 +1747,8 @@ class DataContextConfigSchema(Schema):
         if data["config_version"] < CURRENT_GX_CONFIG_VERSION and (
             "checkpoint_store_name" in data
             or any(
-                [
-                    store_config["class_name"] == "CheckpointStore"
-                    for store_config in data["stores"].values()
-                ]
+                store_config["class_name"] == "CheckpointStore"
+                for store_config in data["stores"].values()
             )
         ):
             raise gx_exceptions.InvalidDataContextConfigError(

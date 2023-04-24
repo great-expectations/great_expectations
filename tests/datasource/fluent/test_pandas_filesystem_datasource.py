@@ -561,7 +561,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
         )
     ]
     # assert there are files that are not csv files
-    assert any([not file_name.endswith("csv") for file_name in all_files])
+    assert any(not file_name.endswith("csv") for file_name in all_files)
     # assert there are 12 files from 2018
     files_for_2018 = [
         file_name for file_name in all_files if file_name.find("2018") >= 0

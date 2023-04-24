@@ -24,7 +24,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -61,8 +61,8 @@ if sa:
 if TYPE_CHECKING:
     import os
 
-    MappingIntStrAny = Mapping[Union[int, str], Any]
-    AbstractSetIntStr = AbstractSet[Union[int, str]]
+    MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
+    AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
