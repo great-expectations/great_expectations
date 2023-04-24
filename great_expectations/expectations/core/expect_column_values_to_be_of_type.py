@@ -6,6 +6,10 @@ from typing import TYPE_CHECKING, Dict, Optional
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core import (
     ExpectationConfiguration,  # noqa: TCH001
     ExpectationValidationResult,  # noqa: TCH001
@@ -24,13 +28,6 @@ from great_expectations.expectations.expectation import (
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.registry import get_metric_kwargs
-from great_expectations.optional_imports import (
-    sparktypes,
-    sqlalchemy_dialects_registry,
-)
-from great_expectations.optional_imports import (
-    sqlalchemy as sa,
-)
 from great_expectations.render import LegacyRendererType, RenderedStringTemplateContent
 from great_expectations.render.renderer.renderer import renderer
 from great_expectations.render.renderer_configuration import (
@@ -64,9 +61,7 @@ BIGQUERY_GEO_SUPPORT = False
 try:
     import sqlalchemy_bigquery as sqla_bigquery
 
-    sqlalchemy_dialects_registry.register(
-        "bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect"
-    )
+    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None
     try:
         from sqlalchemy_bigquery import GEOGRAPHY  # noqa: F401
@@ -88,9 +83,7 @@ except ImportError:
 
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        sqlalchemy_dialects_registry.register(
-            "bigquery", _BIGQUERY_MODULE_NAME, "dialect"
-        )
+        sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
         try:
             getattr(sqla_bigquery, "INTEGER")
             bigquery_types_tuple = None
@@ -420,7 +413,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         else:
             types = []
             try:
-                type_class = getattr(sparktypes, expected_type)
+                type_class = getattr(pyspark.types, expected_type)
                 types.append(type_class)
             except AttributeError:
                 logger.debug(f"Unrecognized type: {expected_type}")

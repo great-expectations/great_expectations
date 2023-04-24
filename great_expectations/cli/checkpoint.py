@@ -19,18 +19,6 @@ from great_expectations.render.renderer.checkpoint_new_notebook_renderer import 
 )
 from great_expectations.util import lint_code
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-except ImportError:
-    SQLAlchemyError = RuntimeError
-
-
-try:
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-except ImportError:
-    SQLAlchemyError = RuntimeError
-
-
 """
 --ge-feature-maturity-info--
 

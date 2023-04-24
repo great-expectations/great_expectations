@@ -34,6 +34,7 @@ from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.core import ExpectationSuite
 from great_expectations.core._docs_decorators import (
     deprecated_argument,
@@ -132,12 +133,12 @@ from great_expectations.core.usage_statistics.usage_statistics import (  # isort
     usage_statistics_enabled_method,
 )
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError  # noqa: TID251
-except ImportError:
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
+if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = gx_exceptions.ProfilerError
+
 
 if TYPE_CHECKING:
     from great_expectations.checkpoint import Checkpoint
@@ -160,6 +161,9 @@ if TYPE_CHECKING:
     from great_expectations.data_context.store.validations_store import ValidationsStore
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
+    )
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
     )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
@@ -709,6 +713,14 @@ class AbstractDataContext(ConfigPeer, ABC):
                 f"Can not write the fluent datasource {datasource.name} because a datasource of that "
                 "name already exists in the data context."
             )
+        # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
+        # Without this we end up with duplicate entries for datasources in both
+        # "fluent_datasources" and "datasources" config/yaml entries.
+        if self._datasource_store.cloud_mode:
+            set_datasource = self._datasource_store.set(key=None, value=datasource)
+            if set_datasource.id:
+                logger.debug(f"Assigning `id` to '{datasource.name}'")
+                datasource.id = set_datasource.id
         self.datasources[datasource.name] = datasource
 
     def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
@@ -1535,8 +1547,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         Note that any sensitive values are obfuscated before being returned.
 
         Returns:
-            A list of dictionaries representing datasource configurations. Each value
-            with contain a "name", "class_name", and "module_name" at a minimum.
+            A list of dictionaries representing datasource configurations.
         """
         datasources: List[dict] = []
 
@@ -1555,6 +1566,12 @@ class AbstractDataContext(ConfigPeer, ABC):
                 )
             )
             datasources.append(masked_config)
+
+        for (
+            datasource_name,
+            fluent_datasource_config,
+        ) in self.fluent_datasources.items():
+            datasources.append(fluent_datasource_config.dict())
         return datasources
 
     @public_api
@@ -2111,7 +2128,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
         action_list: list[dict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
@@ -2187,7 +2204,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | None = None,
+        batch_request: BatchRequestBase | dict | None = None,
         action_list: list[dict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
@@ -2274,7 +2291,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         data_asset_name: Optional[str] = None,
         batch: Optional[Batch] = None,
         batch_list: Optional[List[Batch]] = None,
-        batch_request: Optional[BatchRequestBase] = None,
+        batch_request: Optional[Union[BatchRequestBase, FluentBatchRequest]] = None,
         batch_request_list: Optional[List[BatchRequestBase]] = None,
         batch_data: Optional[Any] = None,
         data_connector_query: Optional[Union[IDDict, dict]] = None,
@@ -2915,10 +2932,16 @@ class AbstractDataContext(ConfigPeer, ABC):
         Raises:
             DataContextError: A suite with the given name does not already exist.
         """
-        expectation_suite_name: str = expectation_suite.expectation_suite_name
-        key = ExpectationSuiteIdentifier(expectation_suite_name=expectation_suite_name)
+        name = expectation_suite.expectation_suite_name
+        id = expectation_suite.ge_cloud_id
+        key = self._determine_key_for_suite_update(name=name, id=id)
         self.expectations_store.update(key=key, value=expectation_suite)
         return expectation_suite
+
+    def _determine_key_for_suite_update(
+        self, name: str, id: str | None
+    ) -> Union[ExpectationSuiteIdentifier, GXCloudIdentifier]:
+        return ExpectationSuiteIdentifier(name)
 
     @overload
     def add_or_update_expectation_suite(

@@ -27,6 +27,10 @@ import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
@@ -47,12 +51,11 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
-from great_expectations.optional_imports import sqlalchemy
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
 
-if sqlalchemy:
-    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.engine.Engine]
+if sa:
+    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.Engine]
 
 
 if TYPE_CHECKING:
@@ -542,7 +545,7 @@ class PandasDatasource(_PandasDatasource):
 
     def _get_validator(self, asset: _PandasDataAsset) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
-        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # got BatchRequest expected BatchRequestBase
+        return self._data_context.get_validator(batch_request=batch_request)
 
     def add_dataframe_asset(
         self,
@@ -921,8 +924,8 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_asset(
         self,
         name: str,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
         asset = SQLAsset(
@@ -935,8 +938,8 @@ class PandasDatasource(_PandasDatasource):
 
     def read_sql(
         self,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -952,8 +955,8 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_query_asset(
         self,
         name: str,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
         asset = SQLQueryAsset(
@@ -966,8 +969,8 @@ class PandasDatasource(_PandasDatasource):
 
     def read_sql_query(
         self,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -984,7 +987,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         table_name: str,
-        con: sqlalchemy.engine.Engine | str,
+        con: sqlalchemy.Engine | str,
         **kwargs,
     ) -> SQLTableAsset:  # type: ignore[valid-type]
         asset = SQLTableAsset(
@@ -998,7 +1001,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql_table(
         self,
         table_name: str,
-        con: sqlalchemy.engine.Engine | str,
+        con: sqlalchemy.Engine | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:

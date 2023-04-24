@@ -45,19 +45,20 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    GXCloudIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
-from great_expectations.render.renderer.site_builder import SiteBuilder  # noqa: TCH001
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
     from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.types.resource_identifiers import (
+        ConfigurationIdentifier,
+        ExpectationSuiteIdentifier,
+    )
+    from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -469,7 +470,7 @@ class CloudDataContext(SerializableDataContext):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
+        **kwargs,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -752,6 +753,22 @@ class CloudDataContext(SerializableDataContext):
         )
         return site_builder
 
+    def _determine_key_for_suite_update(
+        self, name: str, id: str | None
+    ) -> Union[ExpectationSuiteIdentifier, GXCloudIdentifier]:
+        """
+        Note that this explicitly overriding the `AbstractDataContext` helper method called
+        in `self.update_expectation_suite()`.
+
+        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
+        instead of the usual `ExpectationSuiteIdentifier` for `Store` interaction.
+        """
+        return GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+            id=id,
+            resource_name=name,
+        )
+
     def _determine_key_for_profiler_save(
         self, name: str, id: Optional[str]
     ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
@@ -802,3 +819,12 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
+
+    def _save_project_config(self) -> None:
+        """
+        See parent 'AbstractDataContext._save_project_config()` for more information.
+
+        Explicitly override base class implementation to retain legacy behavior.
+        """
+        logger.info(f"{type(self).__name__}._save_project_config() is a NoOp")
+        # TODO: this may be adjusted as part of fluent datasources save flow
