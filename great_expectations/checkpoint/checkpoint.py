@@ -578,14 +578,12 @@ class BaseCheckpoint(ConfigPeer):
         ) or (
             validations_present
             and all(
-                [
-                    (
-                        validation.get("action_list")
-                        and isinstance(validation["action_list"], list)
-                        and len(validation["action_list"]) > 0
-                    )
-                    for validation in self.validations
-                ]
+                (
+                    validation.get("action_list")
+                    and isinstance(validation["action_list"], list)
+                    and len(validation["action_list"]) > 0
+                )
+                for validation in self.validations
             )
         )
         if pretty_print:

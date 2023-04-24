@@ -154,7 +154,7 @@ def test_usage_statistics_handler_build_envelope(
         "data_context_instance_id",
         "event_time",
     ]
-    assert all([key in envelope.keys() for key in required_keys])
+    assert all(key in envelope.keys() for key in required_keys)
 
     assert envelope["version"] == "1.0.1"
     assert envelope["data_context_id"] == "00000000-0000-0000-0000-000000000001"

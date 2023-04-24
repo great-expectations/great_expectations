@@ -33,7 +33,7 @@ class SparkAzureBlobStorageDatasourceError(SparkDatasourceError): ...
 
 class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
+    data_connector_type: ClassVar[Type[S3DataConnector]] = ...
 
     # instance attributes
     type: Literal["spark_abs"] = "spark_abs"
