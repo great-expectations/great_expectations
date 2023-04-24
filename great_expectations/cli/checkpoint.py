@@ -107,7 +107,12 @@ def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> 
     try:
 
         if has_fluent_datasource and not has_block_datasource:
-            raise Exception(CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY)
+            toolkit.exit_with_failure_message_and_stats(
+                data_context=context,
+                usage_event=usage_event_end,
+                message=f"<red>{CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY}</red>",
+            )
+            return
 
         if has_fluent_datasource and has_block_datasource:
             cli_message(
