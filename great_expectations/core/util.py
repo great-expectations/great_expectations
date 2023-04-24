@@ -176,7 +176,7 @@ ToBool: TypeAlias = bool
 ToFloat: TypeAlias = Union[float, np.floating]
 ToInt: TypeAlias = Union[int, np.integer]
 ToStr: TypeAlias = Union[
-    str, bytes, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
+    str, bytes, slice, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
 ]
 
 ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
@@ -328,6 +328,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return str(data)
 
     if isinstance(data, bytes):
+        return str(data)
+
+    if isinstance(data, slice):
         return str(data)
 
     if isinstance(data, pathlib.PurePath):
