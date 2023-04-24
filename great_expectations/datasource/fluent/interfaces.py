@@ -70,7 +70,7 @@ class TestConnectionError(Exception):
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
-BatchSlice: TypeAlias = Union[slice, str, list[int], int]
+BatchSlice: TypeAlias = Union[slice, str, List[int], int]
 
 
 BatchMetadata: TypeAlias = Dict[str, Any]
@@ -81,7 +81,7 @@ class BatchRequest:
     datasource_name: str
     data_asset_name: str
     options: BatchRequestOptions = dataclasses.field(default_factory=dict)
-    batch_slice: slice = dataclasses.field(default_factory=slice)
+    batch_slice: slice = dataclasses.field(default=slice(0))
 
 
 @pydantic_dc.dataclass(frozen=True)
