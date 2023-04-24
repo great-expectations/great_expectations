@@ -100,6 +100,6 @@ def prepend_version_info_to_name_for_href_absolute_links():
 
 
 if __name__ == "__main__":
-    # change_paths_for_docs_file_references()
-    # prepend_version_info_to_name_for_snippet_by_name_references()
+    change_paths_for_docs_file_references()
+    prepend_version_info_to_name_for_snippet_by_name_references()
     prepend_version_info_to_name_for_href_absolute_links()
