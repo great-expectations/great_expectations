@@ -384,10 +384,8 @@ class ConfiguredAssetSqlDataConnector(DataConnector):
                     splitter_group_names = [splitter_kwargs["column_name"]]
 
                 if any(
-                    [
-                        sorter_name not in splitter_group_names
-                        for sorter_name in sorters.keys()
-                    ]
+                    sorter_name not in splitter_group_names
+                    for sorter_name in sorters.keys()
                 ):
                     raise gx_exceptions.DataConnectorError(
                         f"""DataConnector "{self.name}" specifies one or more sort keys that do not appear among the
