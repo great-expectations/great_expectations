@@ -73,17 +73,16 @@ def prepend_version_info_to_name_for_href_absolute_links():
 
     href_pattern = re.compile(r"(?P<href>href=[\"\']/docs/)(?P<link>\S*[\"\'])")
     version_from_path_name_pattern = re.compile(
-        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2}))"
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
     )
     paths = _paths_to_versioned_docs() + _paths_to_versioned_code()
 
     for path in paths:
         version = path.name
-        version_only_match = version_from_path_name_pattern.match(version)
-        if not version_only_match:
+        version_only = version_from_path_name_pattern.search(version).group(0)
+        if not version_only:
             raise ValueError("Path does not contain a version number")
 
-        version_only = version_only_match["version"]
         files = []
         for extension in (".md", ".mdx"):
             files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
