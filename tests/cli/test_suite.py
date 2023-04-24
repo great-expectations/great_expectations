@@ -9,6 +9,7 @@ from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
 
 from great_expectations.cli import cli
+from great_expectations.cli.cli_messages import SUITE_EDIT_FLUENT_DATASOURCE_ERROR
 from great_expectations.cli.suite import (
     _process_suite_edit_flags_and_prompt,
     _process_suite_new_flags_and_prompt,
@@ -40,6 +41,7 @@ from tests.render.test_util import (
     load_notebook_from_path,
     run_notebook,
 )
+import great_expectations as gx
 
 PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER: str = """\
 profiler = UserConfigurableProfiler(
@@ -4480,3 +4482,24 @@ def test__process_suite_edit_flags_and_prompt(
                 }
             ),
         ]
+
+
+def test_suite_edit_fluent_datasources_message(
+    monkeypatch, filesystem_csv_2, empty_data_context
+):
+    context = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert SUITE_EDIT_FLUENT_DATASOURCE_ERROR in result.stdout

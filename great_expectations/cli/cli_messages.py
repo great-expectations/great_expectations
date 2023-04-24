@@ -85,3 +85,7 @@ context.delete_datasource(datasource_name)
 
 Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.delete_datasource
 """
+
+SUITE_EDIT_FLUENT_DATASOURCE_ERROR = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to edit your Expectation Suite with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.add_expectation_suite
+"""
