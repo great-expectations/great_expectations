@@ -1,5 +1,6 @@
 import pathlib
 from unittest import mock
+import great_expectations as gx
 
 import pytest
 
@@ -17,6 +18,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     GXCloudConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import Datasource
 from great_expectations.util import get_context
@@ -427,3 +429,27 @@ def test_BaseDataContext_delete_datasource_updates_cache(
 
     assert not mock_delete.called
     assert name not in context.datasources
+
+
+@pytest.mark.unit
+def test_list_datasources() -> None:
+    project_config = DataContextConfig(
+        store_backend_defaults=InMemoryStoreBackendDefaults()
+    )
+    project_config.datasources = {
+        "my_datasource_name": {
+            "class_name": "Datasource",
+            "data_connectors": {},
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "module_name": "great_expectations.datasource",
+        }
+    }
+    context = gx.get_context(project_config=project_config)
+
+    datasource_name = "my_experimental_datasource_awaiting_migration"
+    context.sources.add_pandas(datasource_name)
+
+    assert len(context.list_datasources()) == 2

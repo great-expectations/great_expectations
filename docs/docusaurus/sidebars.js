@@ -314,8 +314,7 @@ module.exports = {
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
-            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' }
+            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' }
           ]
         },
         {
@@ -323,8 +322,7 @@ module.exports = {
           label: 'Profilers and Data Assistants',
           items: [
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file'
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
           ]
         },
         {
