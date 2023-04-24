@@ -398,7 +398,7 @@ class Datasource(
     assets: MutableSequence[_DataAssetT] = []
 
     # private attrs
-    _data_context: GXDataContext = pydantic.PrivateAttr()
+    _data_context: Optional[GXDataContext] = pydantic.PrivateAttr(None)
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
@@ -516,7 +516,7 @@ class Datasource(
         asset: _DataAssetT
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
 
-        if hasattr(self, "_data_context"):
+        if self._data_context:
             self._data_context._save_project_config()
 
     def _add_asset(
@@ -545,7 +545,7 @@ class Datasource(
 
         self.assets.append(asset)
 
-        if hasattr(self, "_data_context"):
+        if self._data_context:
             self._data_context._save_project_config()
         return asset
 
