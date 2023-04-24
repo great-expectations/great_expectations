@@ -733,7 +733,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         # config provider needed for config substitution
         datasource._config_provider = self.config_provider
 
-        datasource.test_connection()
         datasource._data_context._save_project_config()
 
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts

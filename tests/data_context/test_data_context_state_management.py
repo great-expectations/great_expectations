@@ -340,10 +340,7 @@ def test_add_or_update_datasource_updates_with_individual_args_successfully(
     else:
         config_dict = parametrized_datasource_configs
         config_dict["base_directory"] = new_base_directory
-        with mock.patch(
-            "great_expectations.datasource.fluent.pandas_filesystem_datasource.PandasFilesystemDatasource.test_connection"
-        ):
-            datasource = context.add_or_update_datasource(**config_dict)
+        datasource = context.add_or_update_datasource(**config_dict)
         datasource.base_directory = new_base_directory
 
         # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
@@ -390,12 +387,7 @@ def test_add_or_update_datasource_updates_with_existing_datasource_successfully(
     else:
         ds_type = _SourceFactories.type_lookup[parametrized_datasource_configs["type"]]
         datasource = ds_type(**parametrized_datasource_configs)
-        with mock.patch(
-            "great_expectations.datasource.fluent.pandas_filesystem_datasource.PandasFilesystemDatasource.test_connection"
-        ):
-            persisted_datasource = context.add_or_update_datasource(
-                datasource=datasource
-            )
+        persisted_datasource = context.add_or_update_datasource(datasource=datasource)
 
         # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
         assert context.datasource_store.save_count == 0
@@ -450,15 +442,9 @@ def test_add_or_update_datasource_adds_successfully(
                 parametrized_datasource_configs["type"]
             ]
             datasource = ds_type(**parametrized_datasource_configs)
-            with mock.patch(
-                "great_expectations.datasource.fluent.pandas_filesystem_datasource.PandasFilesystemDatasource.test_connection"
-            ):
-                _ = context.add_or_update_datasource(datasource=datasource)
+            _ = context.add_or_update_datasource(datasource=datasource)
         else:
-            with mock.patch(
-                "great_expectations.datasource.fluent.pandas_filesystem_datasource.PandasFilesystemDatasource.test_connection"
-            ):
-                _ = context.add_or_update_datasource(**parametrized_datasource_configs)
+            _ = context.add_or_update_datasource(**parametrized_datasource_configs)
 
         # saving fluent datasources to ephemeral datasource_store is not supported as of April 21, 2023
         assert context.datasource_store.save_count == 0
