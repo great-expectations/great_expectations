@@ -10,7 +10,10 @@ from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 
 # noinspection PyPep8Naming
-from great_expectations.cli.cli_messages import SUITE_EDIT_FLUENT_DATASOURCE_ERROR
+from great_expectations.cli.cli_messages import (
+    SUITE_EDIT_FLUENT_DATASOURCE_ERROR,
+    SUITE_EDIT_FLUENT_DATASOURCE_WARNING,
+)
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.compatibility import sqlalchemy
@@ -550,9 +553,15 @@ def suite_edit(
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    if len(context.fluent_datasources) == len(context.list_datasources()):
+    # only fluent datasources
+    if len(context.datasources) > 0 and len(context.datasources) == len(
+        context.fluent_datasources
+    ):
         cli_message(f"<red>{SUITE_EDIT_FLUENT_DATASOURCE_ERROR}</red>")
         sys.exit(1)
+    # some fluent datasources
+    if 0 < len(context.fluent_datasources) < len(context.datasources):
+        cli_message(f"<yellow>{SUITE_EDIT_FLUENT_DATASOURCE_WARNING}</yellow>")
 
     interactive_mode: CLISuiteInteractiveFlagCombinations = (
         _process_suite_edit_flags_and_prompt(
