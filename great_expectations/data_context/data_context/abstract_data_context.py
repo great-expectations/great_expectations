@@ -4575,7 +4575,11 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 raw_config=raw_config, substituted_config=substituted_config
             )
         except Exception as e:
-            name = substituted_config.name or ""
+            try:
+                name = substituted_config.name or ""
+            except AttributeError:
+                # dict object has no attribute 'name'
+                name = "(unknown name)"
             raise gx_exceptions.DatasourceInitializationError(
                 datasource_name=name, message=str(e)
             )

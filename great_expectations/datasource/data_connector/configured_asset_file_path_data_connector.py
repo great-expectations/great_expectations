@@ -185,8 +185,12 @@ class ConfiguredAssetFilePathDataConnector(FilePathDataConnector):
             # Override the defaults
             if asset.pattern:
                 regex_config["pattern"] = asset.pattern
+            else:
+                regex_config["pattern"] = ""
             if asset.group_names:
                 regex_config["group_names"] = asset.group_names
+            else:
+                regex_config["group_names"] = []
 
         return regex_config
 

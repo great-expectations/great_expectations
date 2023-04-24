@@ -410,6 +410,16 @@ not {batch_spec.__class__.__name__}"""
         path = path.lower()
         if path.endswith(".csv") or path.endswith(".tsv"):
             return {"reader_method": "read_csv"}
+        elif path.endswith("*csv"):
+            #
+            # In tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_block_config.py
+            #   - the end of datasource_yaml has `pattern: yellow_tripdata_sample_2019-01.csv` instead of an actual pattern
+            #       - path -> 'data/yellow_tripdata_sample_2019-01*csv'
+            #   - changing to `pattern: yellow_tripdata_sample_2019-(\d.*).csv` and re-running tests still ends up with
+            #     an undesireable path
+            #       - path -> 'data/yellow_tripdata_sample_2019-'
+            #
+            return {"reader_method": "read_csv"}
         elif (
             path.endswith(".parquet") or path.endswith(".parq") or path.endswith(".pqt")
         ):

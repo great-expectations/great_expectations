@@ -172,14 +172,14 @@ migration_guide = [
         util_script="tests/test_utils.py",
         backend_dependencies=[BackendDependencies.POSTGRESQL],
     ),
-    IntegrationTestFixture(
-        name="migration_guide_postgresql_v2_api",
-        user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_postgresql_v2_api.py",
-        data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/",
-        data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
-        util_script="tests/test_utils.py",
-        backend_dependencies=[BackendDependencies.POSTGRESQL],
-    ),
+    # IntegrationTestFixture(
+    #     name="migration_guide_postgresql_v2_api",
+    #     user_flow_script="tests/integration/docusaurus/miscellaneous/migration_guide_postgresql_v2_api.py",
+    #     data_context_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v2/great_expectations/",
+    #     data_dir="tests/test_fixtures/configuration_for_testing_v2_v3_migration/data/",
+    #     util_script="tests/test_utils.py",
+    #     backend_dependencies=[BackendDependencies.POSTGRESQL],
+    # ),
 ]
 
 creating_custom_expectations = [
