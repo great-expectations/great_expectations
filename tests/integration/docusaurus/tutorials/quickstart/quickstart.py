@@ -31,6 +31,10 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 )
 # </snippet>
 
+# Not sure if this is necessary for the 'default' expectation_suite_name, but
+# great_expectations.data_context.abstract_data_context.get_expectation_suite()
+# (when called during "checkpoint.run()" below will complain that expectation_suite
+# 'default' is not found
 suite_name = checkpoint.get_config().expectation_suite_name
 context.add_or_update_expectation_suite(expectation_suite_name=suite_name)
 
