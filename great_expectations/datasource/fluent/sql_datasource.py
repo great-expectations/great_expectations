@@ -699,6 +699,7 @@ class _SQLAsset(DataAsset):
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
+            batch_slice=batch_slice or slice(start=0, stop=None, step=None),
         )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
