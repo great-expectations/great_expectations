@@ -398,7 +398,7 @@ class Datasource(
     assets: MutableSequence[_DataAssetT] = []
 
     # private attrs
-    _data_context: Optional[GXDataContext] = pydantic.PrivateAttr(None)
+    _data_context: Union[GXDataContext, None] = pydantic.PrivateAttr(None)
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
