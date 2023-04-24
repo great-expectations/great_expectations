@@ -471,10 +471,8 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.sources.pandas_default.assets) == 2
     assert all(
-        [
-            asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-            for asset in empty_data_context.sources.pandas_default.assets
-        ]
+        asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
+        for asset in empty_data_context.sources.pandas_default.assets
     )
 
 

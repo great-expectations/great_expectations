@@ -25,9 +25,7 @@ logger: Logger
 
 class SparkFilesystemDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[FilesystemDataConnector]
-    ] = FilesystemDataConnector
+    data_connector_type: ClassVar[Type[FilesystemDataConnector]] = ...
 
     # instance attributes
     type: Literal["spark_filesystem"] = "spark_filesystem"
