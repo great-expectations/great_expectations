@@ -124,11 +124,13 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.order(index=2)
 @pytest.fixture(scope="module")
-def spark_warehouse_session(tmp_path_factory):
+def spark_warehouse_session(tmp_path):
     # Note this fixture will configure spark to use in-memory metastore
     pyspark = pytest.importorskip("pyspark")  # noqa: F841
 
-    spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
+    path = tmp_path / "spark-warehouse"
+    path.mkdir()
+    spark_warehouse_path: str = str(path)
     spark: pyspark.SparkSession = get_or_create_spark_application(
         spark_config={
             "spark.sql.catalogImplementation": "in-memory",
@@ -887,13 +889,16 @@ def data_context_with_connection_to_metrics_db(
 
 @pytest.fixture
 def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
-    tmp_path_factory,
+    tmp_path,
     monkeypatch,
 ):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
+    path = tmp_path / "titanic_data_context_013"
+    path.mkdir()
+    project_path: str = str(path)
+
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -1022,8 +1027,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
 @pytest.fixture
 def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    tmp_path_factory,
-    monkeypatch,
 ):
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
@@ -1058,9 +1061,7 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
 def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled(
     sa,
     titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
-    tmp_path_factory,
     test_backends,
-    monkeypatch,
 ):
     context = titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
@@ -1118,23 +1119,24 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
     sa,
     spark_session,
     titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled,
-    tmp_path_factory,
     test_backends,
     monkeypatch,
 ):
-    context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
-    return context
+    return titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
 
 
 @pytest.fixture
 def deterministic_asset_data_connector_context(
-    tmp_path_factory,
+    tmp_path,
     monkeypatch,
 ):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    path = tmp_path / "titanic_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -1494,13 +1496,16 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
 @pytest.fixture
 def titanic_pandas_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
-    tmp_path_factory,
+    tmp_path,
     monkeypatch,
 ):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
+    path = tmp_path / "titanic_data_context_013"
+    path.mkdir()
+    project_path: str = str(path)
+
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -1607,10 +1612,14 @@ def empty_context_with_checkpoint(empty_data_context):
 
 
 @pytest.fixture
-def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
+def empty_data_context_stats_enabled(tmp_path, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
-    project_path = str(tmp_path_factory.mktemp("empty_data_context"))
+
+    path = tmp_path / "empty_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context = gx.data_context.FileDataContext.create(project_path)
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
@@ -1619,8 +1628,11 @@ def empty_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture
-def titanic_data_context(tmp_path_factory) -> FileDataContext:
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+def titanic_data_context(tmp_path) -> FileDataContext:
+    path = tmp_path / "titanic_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -1646,8 +1658,11 @@ def titanic_data_context(tmp_path_factory) -> FileDataContext:
 
 
 @pytest.fixture
-def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path):
+    path = tmp_path / "titanic_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -1673,8 +1688,11 @@ def titanic_data_context_no_data_docs_no_checkpoint_store(tmp_path_factory):
 
 
 @pytest.fixture
-def titanic_data_context_no_data_docs(tmp_path_factory):
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+def titanic_data_context_no_data_docs(tmp_path):
+    path = tmp_path / "titanic_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -1700,10 +1718,14 @@ def titanic_data_context_no_data_docs(tmp_path_factory):
 
 
 @pytest.fixture
-def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
+def titanic_data_context_stats_enabled(tmp_path, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+
+    path = tmp_path / "titanic_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -1729,10 +1751,14 @@ def titanic_data_context_stats_enabled(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture
-def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkeypatch):
+def titanic_data_context_stats_enabled_config_version_2(tmp_path, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+
+    path = tmp_path / "titanic_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -1758,10 +1784,14 @@ def titanic_data_context_stats_enabled_config_version_2(tmp_path_factory, monkey
 
 
 @pytest.fixture
-def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkeypatch):
+def titanic_data_context_stats_enabled_config_version_3(tmp_path, monkeypatch):
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+
+    path = tmp_path / "titanic_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -1787,7 +1817,7 @@ def titanic_data_context_stats_enabled_config_version_3(tmp_path_factory, monkey
 
 
 @pytest.fixture(scope="module")
-def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
+def titanic_spark_db(tmp_path, spark_warehouse_session):
     try:
         from pyspark.sql import DataFrame
     except ImportError:
@@ -1795,7 +1825,11 @@ def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
 
     titanic_database_name: str = "db_test"
     titanic_csv_path: str = file_relative_path(__file__, "./test_sets/Titanic.csv")
-    project_path: str = str(tmp_path_factory.mktemp("data"))
+
+    path = tmp_path / "data"
+    path.mkdir()
+    project_path: str = str(path)
+
     project_dataset_path: str = str(
         os.path.join(project_path, "Titanic.csv")  # noqa: PTH118
     )
@@ -1903,9 +1937,12 @@ def empty_sqlite_db(sa):
 @pytest.fixture
 @freeze_time("09/26/2019 13:42:41")
 def site_builder_data_context_with_html_store_titanic_random(
-    tmp_path_factory, filesystem_csv_3
+    tmp_path, filesystem_csv_3
 ):
-    base_dir = str(tmp_path_factory.mktemp("project_dir"))
+    path = tmp_path / "project_dir"
+    path.mkdir()
+    base_dir = str(path)
+
     project_dir = os.path.join(base_dir, "project_path")  # noqa: PTH118
     os.mkdir(project_dir)  # noqa: PTH102
 
@@ -2061,11 +2098,14 @@ def site_builder_data_context_v013_with_html_store_titanic_random(
 
 
 @pytest.fixture
-def v20_project_directory(tmp_path_factory):
+def v20_project_directory(tmp_path):
     """
     GX config_version: 2 project for testing upgrade helper
     """
-    project_path = str(tmp_path_factory.mktemp("v20_project"))
+    path = tmp_path / "v20_project"
+    path.mkdir()
+    project_path = str(path)
+
     context_root_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     shutil.copytree(
         file_relative_path(
@@ -2083,12 +2123,15 @@ def v20_project_directory(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_factory):
+def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path):
     """
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
     """
-    project_path = str(tmp_path_factory.mktemp("data_context"))
+    path = tmp_path / "data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
@@ -2130,12 +2173,15 @@ def data_context_parameterized_expectation_suite_no_checkpoint_store(tmp_path_fa
 
 
 @pytest.fixture
-def data_context_parameterized_expectation_suite(tmp_path_factory):
+def data_context_parameterized_expectation_suite(tmp_path):
     """
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
     """
-    project_path = str(tmp_path_factory.mktemp("data_context"))
+    path = tmp_path / "data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
@@ -2177,12 +2223,15 @@ def data_context_parameterized_expectation_suite(tmp_path_factory):
 
 
 @pytest.fixture
-def data_context_simple_expectation_suite(tmp_path_factory):
+def data_context_simple_expectation_suite(tmp_path):
     """
     This data_context is *manually* created to have the config we want, vs
     created with DataContext.create()
     """
-    project_path = str(tmp_path_factory.mktemp("data_context"))
+    path = tmp_path / "data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "./test_fixtures")
@@ -2315,9 +2364,11 @@ def data_context_with_fluent_datasource_and_block_datasource(
 
 
 @pytest.fixture
-def filesystem_csv(tmp_path_factory):
-    base_dir = tmp_path_factory.mktemp("filesystem_csv")
-    base_dir = str(base_dir)
+def filesystem_csv(tmp_path):
+    path = tmp_path / "filesystem_csv"
+    path.mkdir()
+    base_dir = str(path)
+
     # Put a few files in the directory
     with open(os.path.join(base_dir, "f1.csv"), "w") as outfile:  # noqa: PTH118
         outfile.writelines(["a,b,c\n"])
@@ -2492,15 +2543,19 @@ def expectation_suite_identifier():
 
 
 @pytest.fixture
-def test_folder_connection_path_csv(tmp_path_factory):
+def test_folder_connection_path_csv(tmp_path):
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
-    path = str(tmp_path_factory.mktemp("test_folder_connection_path_csv"))
+
+    path = tmp_path / "test_folder_connection_path_csv"
+    path.mkdir()
+    path = str(path)
+
     df1.to_csv(path_or_buf=os.path.join(path, "test.csv"), index=False)  # noqa: PTH118
     return str(path)
 
 
 @pytest.fixture
-def test_db_connection_string(tmp_path_factory, test_backends):
+def test_db_connection_string(tmp_path, test_backends):
     if "sqlite" not in test_backends:
         pytest.skip("skipping fixture because sqlite not selected")
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
@@ -2509,7 +2564,10 @@ def test_db_connection_string(tmp_path_factory, test_backends):
     try:
         import sqlalchemy as sa
 
-        basepath = str(tmp_path_factory.mktemp("db_context"))
+        path = tmp_path / "db_context"
+        path.mkdir()
+        basepath = str(path)
+
         path = os.path.join(basepath, "test.db")  # noqa: PTH118
         engine = sa.create_engine("sqlite:///" + str(path))
         add_dataframe_to_db(df=df1, name="table_1", con=engine, index=True)
@@ -2524,7 +2582,7 @@ def test_db_connection_string(tmp_path_factory, test_backends):
 
 
 @pytest.fixture
-def test_df(tmp_path_factory):
+def test_df():
     def generate_ascending_list_of_datetimes(
         k, start_date=datetime.date(2020, 1, 1), end_date=datetime.date(2020, 12, 31)
     ):
@@ -2626,7 +2684,7 @@ introspection:
 
 
 @pytest.fixture
-def basic_datasource(tmp_path_factory):
+def basic_datasource():
     basic_datasource: Datasource = instantiate_class_from_config(
         config=yaml.load(
             """
@@ -6792,14 +6850,17 @@ def bobby_columnar_table_multi_batch(empty_data_context):
 @pytest.fixture
 def bobby_columnar_table_multi_batch_deterministic_data_context(
     set_consistent_seed_within_numeric_metric_range_multi_batch_parameter_builder,
-    tmp_path_factory,
+    tmp_path,
     monkeypatch,
 ) -> FileDataContext:
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
-    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    path = tmp_path / "taxi_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -6876,9 +6937,12 @@ def bobby_columnar_table_multi_batch_deterministic_data_context(
 
 @pytest.fixture(scope="module")
 def bobby_columnar_table_multi_batch_probabilistic_data_context(
-    tmp_path_factory,
+    tmp_path,
 ) -> FileDataContext:
-    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    path = tmp_path / "taxi_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -7036,7 +7100,7 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000():
 
 @pytest.fixture
 def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
-    tmp_path_factory,
+    tmp_path,
     monkeypatch,
 ) -> FileDataContext:
     """
@@ -7047,7 +7111,10 @@ def bobster_columnar_table_multi_batch_normal_mean_5000_stdev_1000_data_context(
     monkeypatch.delenv("GE_USAGE_STATS", raising=False)
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
-    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    path = tmp_path / "taxi_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -7222,7 +7289,7 @@ def quentin_columnar_table_multi_batch():
 
 @pytest.fixture
 def quentin_columnar_table_multi_batch_data_context(
-    tmp_path_factory,
+    tmp_path,
     monkeypatch,
 ) -> FileDataContext:
     """
@@ -7233,7 +7300,10 @@ def quentin_columnar_table_multi_batch_data_context(
     monkeypatch.delenv("GE_USAGE_STATS")
     monkeypatch.setattr(AnonymizedUsageStatisticsConfig, "enabled", True)
 
-    project_path: str = str(tmp_path_factory.mktemp("taxi_data_context"))
+    path = tmp_path / "taxi_data_context"
+    path.mkdir()
+    project_path = str(path)
+
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
