@@ -6,7 +6,6 @@ import TechnicalTag from '../term_tags/_tag.mdx';
 import BatchesAndBatchRequests from './_batches_and_batch_requests.mdx';
 import ConnectHeader from '/docs/images/universal_map/_um_connect_header.mdx';
 import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
-import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 
@@ -15,8 +14,8 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 ## Overview
 
 ### Definition
-A Batch Request specifies a <TechnicalTag tag="batch" text="Batch" /> of data.
-It can be created by using the `build_batch_request` method found on a <TechnicalTag tag="data_asset" text="Data Asset" />.
+A Batch Request specifies a <TechnicalTag relative="../" tag="batch" text="Batch" /> of data.
+It can be created by using the `build_batch_request` method found on a <TechnicalTag relative="../" tag="data_asset" text="Data Asset" />.
 
 ### Features and promises
 
@@ -58,7 +57,9 @@ For more information, see:
 
 <ValidateHeader/>
 
-When <TechnicalTag relative="../" tag="validation" text="Validating" /> data with a Checkpoint, you will need to provide one or more Batch Requests and one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.  You can do this at runtime, or by defining Batch Request and Expectation Suite pairs in advance, in the Checkpoint's configuration.
+When <TechnicalTag relative="../" tag="validation" text="Validating" /> data with a Checkpoint, you will 
+need to provide one or more Batch Requests and one or more <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suites" />.
+You can do this at runtime, or by defining Batch Request and Expectation Suite pairs in advance, in the Checkpoint's configuration.
 
 For more information on setting up Batch Request/Expectation Suite pairs in a Checkpoint's configuration, see:
 
