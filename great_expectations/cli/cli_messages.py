@@ -85,3 +85,7 @@ context.delete_datasource(datasource_name)
 
 Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.delete_datasource
 """
+
+DATASOURCE_NEW_WARNING = """As of V0.16, the preferred method for adding a Datasource is using the fluent method of configuration, and not using the CLI.
+You can read more about this here: https://greatexpectations.io/blog/the-fluent-way-to-connect-to-data-sources-in-gx
+If you would like to proceed anyway, press Y."""
