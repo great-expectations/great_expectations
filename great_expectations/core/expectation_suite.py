@@ -273,6 +273,7 @@ class ExpectationSuite(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self) -> dict:
+        # breakpoint()
         dependencies: dict = {}
         for expectation in self.expectations:
             t = expectation.get_evaluation_parameter_dependencies()

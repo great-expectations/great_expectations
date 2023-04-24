@@ -174,6 +174,7 @@ class ExpectTableRowCountToEqual(BatchExpectation):
     ):
         expected_table_row_count = self.get_success_kwargs().get("value")
         actual_table_row_count = metrics.get("table.row_count")
+        # breakpoint()
 
         return {
             "success": actual_table_row_count == expected_table_row_count,

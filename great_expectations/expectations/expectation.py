@@ -1042,7 +1042,8 @@ class Expectation(metaclass=MetaExpectation):
 
         if runtime_configuration is None:
             runtime_configuration = {}
-
+        # if configuration.expectation_type == "expect_table_row_count_to_equal":
+        #     breakpoint()
         validation_dependencies: ValidationDependencies = (
             self.get_validation_dependencies(
                 configuration=configuration,
@@ -1256,7 +1257,9 @@ class Expectation(metaclass=MetaExpectation):
         self._warn_if_result_format_config_in_expectation_configuration(
             configuration=configuration
         )
-
+        # breakpoint()
+        # if configuration.expectation_type == "expect_table_row_count_to_equal":
+        #     breakpoint()
         configuration.process_evaluation_parameters(
             evaluation_parameters, interactive_evaluation, data_context
         )

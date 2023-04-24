@@ -1043,6 +1043,7 @@ class ExpectationConfiguration(SerializableDictDot):
         interactive_evaluation: bool = True,
         data_context: Optional[AbstractDataContext] = None,
     ) -> None:
+        # breakpoint()
         if not self._raw_kwargs:
             evaluation_args, _ = build_evaluation_parameters(
                 expectation_args=self._kwargs,
@@ -1399,6 +1400,7 @@ class ExpectationConfiguration(SerializableDictDot):
         return myself
 
     def get_evaluation_parameter_dependencies(self) -> dict:
+        # breakpoint()
         parsed_dependencies: dict = {}
         for value in self.kwargs.values():
             if isinstance(value, dict) and "$PARAMETER" in value:

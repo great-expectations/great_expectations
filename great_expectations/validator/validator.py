@@ -985,6 +985,8 @@ class Validator:
         Returns:
             A list of Validations, validating that all necessary metrics are available.
         """
+        # breakpoint()
+        # print(configurations)
         if runtime_configuration is None:
             runtime_configuration = {}
 
@@ -1051,7 +1053,8 @@ class Validator:
         for configuration in processed_configurations:
             try:
                 runtime_configuration_default = copy.deepcopy(runtime_configuration)
-
+                # if configuration.expectation_type == "expect_table_row_count_to_equal":
+                #     breakpoint()
                 result = configuration.metrics_validate(
                     metrics=resolved_metrics,
                     execution_engine=self._execution_engine,
@@ -1615,8 +1618,11 @@ class Validator:
 
             # Group expectations by column
             columns = {}
-
             for expectation in expectation_suite.expectations:
+                # TODO: THIS IS PROBABLY WHERE THE BUG IS vvv
+                if expectation.expectation_type == "expect_table_row_count_to_equal":
+                    # breakpoint()
+                    print("inside validator.validate before process_eval_params")
                 expectation.process_evaluation_parameters(
                     evaluation_parameters=runtime_evaluation_parameters,
                     interactive_evaluation=self.interactive_evaluation,
@@ -1640,7 +1646,8 @@ class Validator:
             runtime_configuration = self._get_runtime_configuration(
                 catch_exceptions=catch_exceptions, result_format=result_format
             )
-
+            # breakpoint()
+            # print("inside validator.validate")
             results = self.graph_validate(
                 configurations=expectations_to_evaluate,
                 runtime_configuration=runtime_configuration,

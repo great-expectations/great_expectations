@@ -235,6 +235,15 @@ def build_evaluation_parameters(
     """
     evaluation_args = copy.deepcopy(expectation_args)
     substituted_parameters = {}
+    # TODO: I THINK THIS IS THE METHOD THAT NEEDS WORK
+    ############################# TODO: DEBUG
+    # breakpoint()
+    for key, value in evaluation_args.items():
+        if isinstance(value, dict) and "$PARAMETER" in value:
+            # breakpoint()
+            print("this is the place to be :) ")
+            pass
+    ############################# TODO: DEBUG
 
     # Iterate over arguments, and replace $PARAMETER-defined args with their
     # specified parameters.
@@ -244,6 +253,8 @@ def build_evaluation_parameters(
             if not interactive_evaluation:
                 continue
 
+            # TODO: Potential bug - This seems to substitute even if the value is
+            #  in the evaluation param store
             # First, check to see whether an argument was supplied at runtime
             # If it was, use that one, but remove it from the stored config
             param_key = f"$PARAMETER.{value['$PARAMETER']}"
@@ -351,6 +362,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
     EXCEPT if they begin with the string "urn:great_expectations" in which case they may also include additional
     characters to support inclusion of GX URLs (see :ref:`evaluation_parameters` for more information).
     """
+    # breakpoint()
     if evaluation_parameters is None:
         evaluation_parameters = {}
 
@@ -366,6 +378,7 @@ def parse_evaluation_parameter(  # noqa: C901 - complexity 19
         # substitute for that value
         try:
             res = ge_urn.parseString(parse_results[0])
+            # breakpoint()
             if res["urn_type"] == "stores":
                 store = data_context.stores.get(res["store_name"])  # type: ignore[union-attr]
                 if store:
