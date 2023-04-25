@@ -1,13 +1,21 @@
+from __future__ import annotations
+
 import itertools
 import logging
-from typing import Callable, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Sequence, Union
+
+from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch import BatchDefinition  # noqa: TCH001
 from great_expectations.core.id_dict import IDDict
-from great_expectations.util import is_int
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition
 
 logger = logging.getLogger(__name__)
+
+
+BatchSlice: TypeAlias = Union[slice, str, Sequence[int], int]
 
 
 def build_batch_filter(
@@ -84,7 +92,7 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
         raise gx_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
-    index = _parse_index(index=index)
+    index = parse_batch_slice(batch_slice=index)
     return BatchFilter(
         custom_filter_function=custom_filter_function,
         batch_filter_parameters=batch_filter_parameters,  # type: ignore[arg-type]
@@ -93,47 +101,67 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
     )
 
 
-def _parse_index(
-    index: Optional[Union[int, list, tuple, slice, str]] = None
-) -> Optional[Union[int, slice]]:
-    if index is None:
-        return None
-    elif isinstance(index, (int, slice)):
-        return index
-    elif isinstance(index, (list, tuple)):
-        if len(index) > 3:
-            raise gx_exceptions.BatchFilterError(
-                f"""The number of index slice components must be between 1 and 3 (the given number is
-{len(index)}).
-                """
-            )
-        if len(index) == 1:
-            return index[0]
-        if len(index) == 2:
-            return slice(index[0], index[1], None)
-        if len(index) == 3:
-            return slice(index[0], index[1], index[2])
-    elif isinstance(index, str):
-        if is_int(value=index):
-            return _parse_index(index=int(index))
-        index_as_list: List[Union[str, int, None]]
-        if index:
-            index_as_list = index.split(":")  # type: ignore[assignment]
-            if len(index_as_list) == 1:
-                index_as_list = [None, index_as_list[0]]
-        else:
-            index_as_list = []
-        idx_str: str
-        index_as_list = [int(idx_str) if idx_str else None for idx_str in index_as_list]
-        return _parse_index(index=index_as_list)
+def _batch_slice_from_string(batch_slice: str) -> slice:
+    # trim whitespace
+    parsed_batch_slice = batch_slice.strip()
+    if parsed_batch_slice[0] == "[":
+        parsed_batch_slice = parsed_batch_slice[1:]
+    if parsed_batch_slice[-1] == "]":
+        parsed_batch_slice = parsed_batch_slice[:-1]
+    # split and convert string to int
+    slice_params: list[int | None] = []
+    for param in parsed_batch_slice.split(":"):
+        if param:
+            try:
+                slice_params.append(int(param))
+            except ValueError as e:
+                raise ValueError(
+                    f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'
+                )
+        elif param == "":
+            slice_params.append(None)
+    if len(slice_params) == 1 and slice_params[0] is not None:
+        return slice(slice_params[0] - 1, slice_params[0], None)
+    elif len(slice_params) == 2:
+        return slice(slice_params[0], slice_params[1], None)
+    elif len(slice_params) == 3:
+        return slice(slice_params[0], slice_params[1], slice_params[2])
     else:
-        raise gx_exceptions.BatchFilterError(
-            f"""The type of index must be an integer (Python "int"), or a list (Python "list") or a tuple
-(Python "tuple"), or a Python "slice" object, or a string that has the format of a single integer or a slice argument.
-The type given is "{str(type(index))}", which is illegal.
-            """
+        raise ValueError(
+            f"batch_slice string must take the form of a python slice, but {batch_slice} was provided."
         )
-    return None
+
+
+def _batch_slice_from_sequence(batch_slice: Sequence[int]) -> slice:
+    if len(batch_slice) == 0:
+        return slice(0, None, None)
+    elif len(batch_slice) == 1 and batch_slice[0] is not None:
+        return slice(batch_slice[0] - 1, batch_slice[0])
+    elif len(batch_slice) == 2:
+        return slice(batch_slice[0], batch_slice[1])
+    elif len(batch_slice) == 3:
+        return slice(batch_slice[0], batch_slice[1], batch_slice[2])
+    else:
+        raise ValueError(
+            f'batch_slice sequence must be of length 0-3, but "{batch_slice}" was provided.'
+        )
+
+
+def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
+    if not batch_slice:
+        return slice(0, None, None)
+    elif isinstance(batch_slice, slice):
+        return batch_slice
+    elif isinstance(batch_slice, int):
+        return slice(batch_slice, batch_slice + 1, None)
+    elif isinstance(batch_slice, str):
+        return _batch_slice_from_string(batch_slice=batch_slice)
+    elif isinstance(batch_slice, Sequence):
+        return _batch_slice_from_sequence(batch_slice=batch_slice)
+    else:
+        raise ValueError(
+            f'batch_slice should be of type BatchSlice, but type: "{type(batch_slice)}" was passed.'
+        )
 
 
 class BatchFilter:

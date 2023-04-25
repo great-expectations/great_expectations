@@ -32,6 +32,7 @@ from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.datasource.data_connector.batch_filter import parse_batch_slice
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -50,6 +51,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import AbstractDataContext as GXDataContext
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -68,9 +70,6 @@ class TestConnectionError(Exception):
 # would look like:
 #   options = { "year": 2020 }
 BatchRequestOptions: TypeAlias = Dict[str, Any]
-
-
-BatchSlice: TypeAlias = Union[slice, str, Sequence[int], int]
 
 
 BatchMetadata: TypeAlias = Dict[str, Any]
@@ -139,52 +138,6 @@ def _sorter_from_str(sort_key: str) -> Sorter:
         return Sorter(key=sort_key[1:], reverse=False)
 
     return Sorter(key=sort_key, reverse=False)
-
-
-def _batch_slice_from_string(batch_slice: str) -> slice:
-    # trim whitespace
-    parsed_batch_slice = batch_slice.strip()
-    if parsed_batch_slice[0] == "[":
-        parsed_batch_slice = parsed_batch_slice[1:]
-    if parsed_batch_slice[-1] == "]":
-        parsed_batch_slice = parsed_batch_slice[:-1]
-    # split and convert string to int
-    slice_params: list[int | None] = []
-    for param in parsed_batch_slice.split(":"):
-        if param:
-            try:
-                slice_params.append(int(param))
-            except ValueError as e:
-                raise ValueError(
-                    f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'
-                )
-        elif param == "":
-            slice_params.append(None)
-    if len(slice_params) == 1 and slice_params[0] is not None:
-        return slice(slice_params[0] - 1, slice_params[0], None)
-    elif len(slice_params) == 2:
-        return slice(slice_params[0], slice_params[1], None)
-    elif len(slice_params) == 3:
-        return slice(slice_params[0], slice_params[1], slice_params[2])
-    else:
-        raise ValueError(
-            f"batch_slice string must take the form of a python slice, but {batch_slice} was provided."
-        )
-
-
-def _batch_slice_from_sequence(batch_slice: Sequence[int]) -> slice:
-    if len(batch_slice) == 0:
-        return slice(0, None, None)
-    elif len(batch_slice) == 1 and batch_slice[0] is not None:
-        return slice(batch_slice[0] - 1, batch_slice[0])
-    elif len(batch_slice) == 2:
-        return slice(batch_slice[0], batch_slice[1])
-    elif len(batch_slice) == 3:
-        return slice(batch_slice[0], batch_slice[1], batch_slice[2])
-    else:
-        raise ValueError(
-            f'batch_slice sequence must be of length 0-3, but "{batch_slice}" was provided.'
-        )
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
@@ -302,20 +255,7 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
 
     @staticmethod
     def _parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
-        if not batch_slice:
-            return slice(0, None, None)
-        elif isinstance(batch_slice, slice):
-            return batch_slice
-        elif isinstance(batch_slice, int):
-            return slice(batch_slice, batch_slice + 1, None)
-        elif isinstance(batch_slice, str):
-            return _batch_slice_from_string(batch_slice=batch_slice)
-        elif isinstance(batch_slice, Sequence):
-            return _batch_slice_from_sequence(batch_slice=batch_slice)
-        else:
-            raise ValueError(
-                f'batch_slice should be of type BatchSlice, but type: "{type(batch_slice)}" was passed.'
-            )
+        return parse_batch_slice(batch_slice=batch_slice)
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
