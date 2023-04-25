@@ -516,8 +516,7 @@ class Datasource(
         asset: _DataAssetT
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
 
-        if self._data_context:
-            self._data_context._save_project_config()
+        self._save_context_project_config()
 
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
@@ -545,9 +544,13 @@ class Datasource(
 
         self.assets.append(asset)
 
+        self._save_context_project_config()
+        return asset
+
+    def _save_context_project_config(self):
+        """Check if a DataContext is available and save the project config."""
         if self._data_context:
             self._data_context._save_project_config()
-        return asset
 
     @staticmethod
     def parse_order_by_sorters(
