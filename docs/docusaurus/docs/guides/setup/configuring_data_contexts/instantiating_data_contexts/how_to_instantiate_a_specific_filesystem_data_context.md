@@ -81,13 +81,13 @@ If you are content with the default configuration of your Data Context, you can 
 
 ### Related guides
 
+To initialize and instantiate a temporary Data Context, see: [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
+
 <!-- TODO
 To instantiate an existing Data Context, reference:
 - How to quickly instantiate a Data Context
 - How to instantiate a specific Filesystem Data Context
 
-To initialize and instantiate a temporary Data Context, see:
-- How to explicitly instantiate an in-memory Ephemeral Data Context
 -->
 
 <!-- TODO

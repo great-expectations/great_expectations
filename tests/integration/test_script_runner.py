@@ -257,7 +257,7 @@ fluent_datasources = [
     IntegrationTestFixture(
         name="RUNME how_to_create_and_edit_expectations_with_a_profiler",
         data_context_dir=None,
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        data_dir=None,
         user_flow_script="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler.py",
     ),
     IntegrationTestFixture(
@@ -271,6 +271,12 @@ fluent_datasources = [
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         user_flow_script="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py",
+    ),
+    IntegrationTestFixture(
+        name="RUNME glossary_batch_request",
+        data_context_dir=None,
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        user_flow_script="tests/integration/docusaurus/reference/glossary/batch_request.py",
     ),
 ]
 
