@@ -67,7 +67,7 @@ context.build_data_docs()
 context.add_checkpoint(checkpoint=checkpoint)
 # </snippet>
 
-assert context.list_checkpoints() == ['my_checkpoint']
+assert context.list_checkpoints() == ["my_checkpoint"]
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py get checkpoint">
 retrieved_checkpoint = context.get_checkpoint(name="my_checkpoint")
