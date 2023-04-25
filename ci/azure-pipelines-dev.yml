@@ -271,7 +271,26 @@ stages:
               pytest -v --postgresql --docs-tests -m integration -k "RUNME_POSTGRES" tests/integration/test_script_runner.py
             displayName: 'Run Flagged Tests'
 
+      - job: runme_script_runner_tests_postgres_msysql
 
+        services:
+          postgres: postgres
+          mysql: mysql
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
+
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test, postgresql, mysql]"
+            displayName: 'Install GX and required dependencies'
+
+          # tests containing the name "RUNME_POSTGRES_MYSQL" are run
+          - script: |
+              pytest -v --postgresql --mysql --docs-tests -m integration -k "RUNME_POSTGRES_MYSQL" tests/integration/test_script_runner.py
+            displayName: 'Run Flagged Tests'
 
   - stage: required
     dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
