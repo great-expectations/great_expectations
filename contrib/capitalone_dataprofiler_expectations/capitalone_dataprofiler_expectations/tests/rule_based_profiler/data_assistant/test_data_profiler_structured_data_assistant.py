@@ -50,11 +50,25 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
         "data_connector_query": {"index": -1},
     }
     exclude_column_names = [
-        "pickup_datetime",
-        "dropoff_datetime",
-        "store_and_fwd_flag",
-        "congestion_surcharge",
-    ]
+    "vendor_id",
+    "pickup_datetime",
+    "dropoff_datetime",
+    "passenger_count",
+    # "trip_distance",
+    "rate_code_id",
+    "store_and_fwd_flag",
+    "pickup_location_id",
+    "dropoff_location_id",
+    "payment_type",
+    # "fare_amount",
+    # "extra",
+    # "mta_tax",
+    # "tip_amount",
+    # "tolls_amount",
+    # "improvement_surcharge",
+    # "total_amount",
+    "congestion_surcharge",
+]
 
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
@@ -95,12 +109,27 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
     }
 
     exclude_column_names = [
-        "pickup_datetime",
-        "dropoff_datetime",
-        "store_and_fwd_flag",
-        "congestion_surcharge",
-    ]
+    "vendor_id",
+    "pickup_datetime",
+    "dropoff_datetime",
+    "passenger_count",
+    # "trip_distance",
+    "rate_code_id",
+    "store_and_fwd_flag",
+    "pickup_location_id",
+    "dropoff_location_id",
+    "payment_type",
+    # "fare_amount",
+    # "extra",
+    # "mta_tax",
+    # "tip_amount",
+    # "tolls_amount",
+    # "improvement_surcharge",
+    # "total_amount",
+    "congestion_surcharge",
+]
 
+    #import pdb; pdb.set_trace()
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
         exclude_column_names=exclude_column_names,
@@ -144,7 +173,7 @@ def test_profile_data_profiler_structured_data_assistant_result_serialization(
         len(
             bobby_profile_data_profiler_structured_data_assistant_result.profiler_config.rules
         )
-        == 1
+        == 2
     )
 
 
@@ -207,8 +236,8 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
         bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
     ):
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
-    import pdb; pdb.set_trace()
-    assert num_metrics == 28
+    #import pdb; pdb.set_trace()
+    assert num_metrics == 32
 
 
 @pytest.mark.integration
