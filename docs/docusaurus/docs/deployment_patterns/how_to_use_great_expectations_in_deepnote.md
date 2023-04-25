@@ -5,6 +5,10 @@ title: How to use Great Expectations in Deepnote
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 _This piece of documentation was authored by [Allan Campopiano](https://www.linkedin.com/in/allan-campopiano-703394120)._
 
 This guide will help you get started with Great Expectations on Deepnote. You will learn how to validate columns in a Pandas DataFrame,

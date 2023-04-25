@@ -207,10 +207,8 @@ class ExpectationSuite(SerializableDictDot):
                 return NotImplemented
 
         return len(self.expectations) == len(other.expectations) and all(
-            [
-                mine.isEquivalentTo(theirs)
-                for (mine, theirs) in zip(self.expectations, other.expectations)
-            ]
+            mine.isEquivalentTo(theirs)
+            for (mine, theirs) in zip(self.expectations, other.expectations)
         )
 
     def __eq__(self, other):

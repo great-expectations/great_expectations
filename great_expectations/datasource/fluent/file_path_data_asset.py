@@ -59,6 +59,7 @@ class _FilePathDataAsset(DataAsset):
         "batching_regex",  # file_path argument
         "kwargs",  # kwargs need to be unpacked and passed separately
         "batch_metadata",
+        "connect_options",
     }
 
     # General file-path DataAsset pertaining attributes.

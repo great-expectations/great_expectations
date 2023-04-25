@@ -24,7 +24,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -61,8 +61,8 @@ if sa:
 if TYPE_CHECKING:
     import os
 
-    MappingIntStrAny = Mapping[Union[int, str], Any]
-    AbstractSetIntStr = AbstractSet[Union[int, str]]
+    MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
+    AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
@@ -545,7 +545,7 @@ class PandasDatasource(_PandasDatasource):
 
     def _get_validator(self, asset: _PandasDataAsset) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
-        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # got BatchRequest expected BatchRequestBase
+        return self._data_context.get_validator(batch_request=batch_request)
 
     def add_dataframe_asset(
         self,
