@@ -7,19 +7,11 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-<InProgress />
-
 This guide will help you <TechnicalTag tag="validation" text="Validate" /> your data by running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
-The best way to Validate data in production with Great Expectations is using a <TechnicalTag tag="checkpoint" text="Checkpoint" />. The advantage of using a Checkpoint is ease of use, due to its principal capability of combining the existing configuration in order to set up and perform the Validation:
-- <TechnicalTag tag="expectation_suite" text="Expectation Suites" />
-- <TechnicalTag tag="data_connector" text="Data Connectors" />
-- <TechnicalTag tag="batch_request" text="Batch Requests" />
-- <TechnicalTag tag="action" text="Actions" />
+The best way to Validate data with Great Expectations is using a Checkpoint. Checkpoints identify what <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> to run against which <TechnicalTag tag="data_asset" text="Data Asset" /> and <TechnicalTag tag="batch" text="Batch" /> (described by a <TechnicalTag tag="batch_request" text="Batch Requests" />), and what <TechnicalTag tag="action" text="Actions" /> to take based on the results of those tests.
 
-Otherwise, configuring these validation parameters would have to be done via the API.  A Checkpoint encapsulates this "boilerplate" and ensures that all components work in harmony together.  Finally, running a configured Checkpoint is a one-liner, as described below.
+Succintly: Checkpoints are used to test your data and take action based on the results.
 
 <Prerequisites>
 
@@ -39,43 +31,12 @@ You can run the Checkpoint from the <TechnicalTag tag="cli" text="CLI" /> in a T
   {label: 'Python', value:'python'},
   ]}>
 
-<TabItem value="terminal">
-
-## Steps
-
-### 1. Run your Checkpoint
-
-Checkpoints can be run like applications from the command line by running:
-
-```bash
-great_expectations checkpoint run my_checkpoint
-Validation failed!
-```
-
-### 2. Observe the output
-
-The output of your validation will tell you if all validations passed or if any failed.
-
-## Additional notes
-
-This command will return posix status codes and print messages as follows:
-
-    +-------------------------------+-----------------+-----------------------+
-    | **Situation**                 | **Return code** | **Message**           |
-    +-------------------------------+-----------------+-----------------------+
-    | all validations passed        | 0               | Validation succeeded! |
-    +-------------------------------+-----------------+-----------------------+
-    | one or more validation failed | 1               | Validation failed!    |
-    +-------------------------------+-----------------+-----------------------+
-
-
-</TabItem>
 <TabItem value="python">
 
 ## Steps
 
 
-### 1. Generate the Python script
+### 1. Write the Python script
 
 From your console, run the CLI command:
 
@@ -151,6 +112,37 @@ Alternatively, the above Python code can be embedded in your pipeline.
 - Other arguments to the `DataContext.run_checkpoint()` method may be required, depending on the amount and specifics of the Checkpoint configuration previously saved in the configuration file of the Checkpoint with the corresponding `name`.
 - The dynamically specified Checkpoint configuration, provided to the runtime as arguments to `DataContext.run_checkpoint()` must complement the settings in the Checkpoint configuration file so as to comprise a properly and sufficiently configured Checkpoint with the given `name`.
 - Please see [How to configure a new Checkpoint using test_yaml_config](./checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for more Checkpoint configuration examples (including the convenient templating mechanism) and `DataContext.run_checkpoint()` invocation options.
+
+</TabItem>
+<TabItem value="terminal">
+
+## Steps
+
+### 1. Run your Checkpoint
+
+Checkpoints can be run like applications from the command line by running:
+
+```bash
+great_expectations checkpoint run my_checkpoint
+Validation failed!
+```
+
+### 2. Observe the output
+
+The output of your validation will tell you if all validations passed or if any failed.
+
+## Additional notes
+
+This command will return posix status codes and print messages as follows:
+
+    +-------------------------------+-----------------+-----------------------+
+    | **Situation**                 | **Return code** | **Message**           |
+    +-------------------------------+-----------------+-----------------------+
+    | all validations passed        | 0               | Validation succeeded! |
+    +-------------------------------+-----------------+-----------------------+
+    | one or more validation failed | 1               | Validation failed!    |
+    +-------------------------------+-----------------+-----------------------+
+
 
 </TabItem>
 </Tabs>
