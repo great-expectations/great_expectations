@@ -28,9 +28,7 @@ logger: Logger
 
 class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[GoogleCloudStorageDataConnector]
-    ] = GoogleCloudStorageDataConnector
+    data_connector_type: ClassVar[Type[GoogleCloudStorageDataConnector]] = ...
 
     # instance attributes
     type: Literal["spark_gcs"] = "spark_gcs"
