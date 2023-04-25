@@ -531,7 +531,9 @@ class PandasDatasource(_PandasDatasource):
     assets: List[_PandasDataAsset] = []
 
     def dict(self, _exclude_default_asset_names: bool = True, **kwargs):
-        """Overloading `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""
+        """Overriding `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""
+        # Overriding `.dict()` instead of `.json()` because `.json()`is only called from the outermost model,
+        # .dict() is called for deeply nested models.
         ds_dict = super().dict(**kwargs)
         if _exclude_default_asset_names:
             assets = ds_dict.pop("assets", None)
