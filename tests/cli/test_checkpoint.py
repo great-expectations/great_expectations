@@ -736,7 +736,7 @@ def test_checkpoint_new_no_fluent_datasource_messages(
 ):
     """
     What does this test and why?
-    The `checkpoint new` CLI flow should now print warnings/errors if all of the Datasources in the DataContext are configured with the block config style API.
+    The `checkpoint new` CLI flow should not print warnings/errors if all of the Datasources in the DataContext are configured with the block config style API.
     """
     context = data_context_with_block_datasource
 
@@ -787,7 +787,7 @@ def test_checkpoint_new_raises_warning_on_mixed_datasource_styles(
 ):
     """
     What does this test and why?
-    The `checkpoint new` CLI flow should print a warning error if some of the Datasources in the DataContext are configured with the fluent API.
+    The `checkpoint new` CLI flow should print a warning if some of the Datasources in the DataContext are configured with the fluent API.
     """
     context = data_context_with_fluent_datasource_and_block_datasource
 
