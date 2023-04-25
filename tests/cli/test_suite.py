@@ -4489,8 +4489,10 @@ def test__process_suite_edit_flags_and_prompt(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_fluent_datasources_message(
-    mock_emit, monkeypatch, filesystem_csv_2, empty_data_context
+    mock_emit, mock_subp, mock_web, monkeypatch, filesystem_csv_2, empty_data_context
 ):
     context = empty_data_context
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -4514,8 +4516,12 @@ def test_suite_edit_fluent_datasources_message(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_suite_warning_both_fluent_and_block_datasources(
     mock_emit,
+    mock_subp,
+    mock_web,
     monkeypatch,
     filesystem_csv_2,
     data_context_with_fluent_datasource_and_block_datasource,
@@ -4538,8 +4544,16 @@ def test_suite_edit_suite_warning_both_fluent_and_block_datasources(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_suite_edit_block_datasources_no_message(
-    mock_emit, caplog, monkeypatch, filesystem_csv_2, data_context_with_block_datasource
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_block_datasource,
 ):
     context = data_context_with_block_datasource
     monkeypatch.chdir(os.path.dirname(context.root_directory))
