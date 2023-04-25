@@ -93,7 +93,7 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
         raise gx_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
-    index = parse_batch_slice(batch_slice=index)
+    index = parse_batch_slice(batch_slice=index) if index else None
     return BatchFilter(
         custom_filter_function=custom_filter_function,
         batch_filter_parameters=batch_filter_parameters,  # type: ignore[arg-type]
