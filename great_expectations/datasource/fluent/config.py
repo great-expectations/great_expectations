@@ -22,6 +22,7 @@ from typing import (
 from pydantic import Extra, Field, validator
 from typing_extensions import Final
 
+from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.fluent.constants import (
     _DATA_ASSET_NAME_KEY,
@@ -64,6 +65,11 @@ _MISSING_FLUENT_DATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 ]
 
 
+JSON_ENCODERS: dict[Type, Callable] = {}
+if TextClause:
+    JSON_ENCODERS[TextClause] = lambda v: str(v)
+
+
 class GxConfig(FluentBaseModel):
     """Represents the full fluent configuration file."""
 
@@ -81,6 +87,7 @@ class GxConfig(FluentBaseModel):
 
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
+        json_encoders = JSON_ENCODERS
 
     @property
     def datasources(self) -> List[Datasource]:
