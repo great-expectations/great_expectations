@@ -948,27 +948,30 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
     # trim whitespace
     parsed_batch_slice = batch_slice.strip()
 
-    # determine if bracket or slice() notation and choose delimiter
-    delimiter: str = ":"
-    if (parsed_batch_slice[0] in "[(") and (parsed_batch_slice[-1] in ")]"):
-        parsed_batch_slice = parsed_batch_slice[1:-1]
-    elif parsed_batch_slice.startswith("slice(") and parsed_batch_slice.endswith(")"):
-        parsed_batch_slice = parsed_batch_slice[6:-1]
-        delimiter = ","
-
-    # split and convert string to int
     slice_params: list[int | None] = []
-    for param in parsed_batch_slice.split(delimiter):
-        param = param.strip()
-        if param and param != "None":
-            try:
-                slice_params.append(int(param))
-            except ValueError as e:
-                raise ValueError(
-                    f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'
-                )
-        else:
-            slice_params.append(None)
+    if parsed_batch_slice:
+        # determine if bracket or slice() notation and choose delimiter
+        delimiter: str = ":"
+        if (parsed_batch_slice[0] in "[(") and (parsed_batch_slice[-1] in ")]"):
+            parsed_batch_slice = parsed_batch_slice[1:-1]
+        elif parsed_batch_slice.startswith("slice(") and parsed_batch_slice.endswith(
+            ")"
+        ):
+            parsed_batch_slice = parsed_batch_slice[6:-1]
+            delimiter = ","
+
+        # split and convert string to int
+        for param in parsed_batch_slice.split(delimiter):
+            param = param.strip()
+            if param and param != "None":
+                try:
+                    slice_params.append(int(param))
+                except ValueError as e:
+                    raise ValueError(
+                        f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'
+                    )
+            else:
+                slice_params.append(None)
 
     return slice_params
 
@@ -978,7 +981,9 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
         batch_slice=batch_slice
     )
 
-    if len(slice_params) == 1 and slice_params[0] is not None:
+    if len(slice_params) == 0:
+        return slice(0, None, None)
+    elif len(slice_params) == 1 and slice_params[0] is not None:
         return slice(slice_params[0] - 1, slice_params[0], None)
     elif len(slice_params) == 2:
         return slice(slice_params[0], slice_params[1], None)
@@ -1006,7 +1011,7 @@ def _batch_slice_from_list_or_tuple(batch_slice: list[int] | tuple[int, ...]) ->
 
 
 def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
-    if not batch_slice:
+    if batch_slice is None:
         return slice(0, None, None)
     elif isinstance(batch_slice, slice):
         return batch_slice
