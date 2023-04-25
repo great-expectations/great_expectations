@@ -33,7 +33,6 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
 
     def __init__(
         self,
-        profile_path: str = f"{VARIABLES_KEY}profile_path",
         include_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         exclude_column_names: Optional[Union[str, Optional[List[str]]]] = None,
         include_column_name_suffixes: Optional[Union[str, Iterable, List[str]]] = None,
@@ -75,12 +74,6 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             data_context=data_context,
         )
 
-        self._profile_path = profile_path
-
-    @property
-    def profile_path(self) -> str:
-        return self._profile_path
-
     def _get_domains(
         self,
         rule_name: str,
@@ -110,7 +103,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         # Obtain profile_path from "rule state" (i.e., variables and parameters); from instance variable otherwise.
         profile_path: str = get_parameter_value_and_validate_return_type(
             domain=None,
-            parameter_reference=self.profile_path,
+            parameter_reference=f"{VARIABLES_KEY}profile_path",
             expected_return_type=str,
             variables=variables,
             parameters=None,
@@ -127,7 +120,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
         metric_values: str = get_parameter_value_and_validate_return_type(
             domain=None,
             parameter_reference=f"{VARIABLES_KEY}metric_values",
-            expected_return_type=List,
+            expected_return_type=list,
             variables=variables,
             parameters=None,
         )
