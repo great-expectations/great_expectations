@@ -247,3 +247,6 @@
 
 # Redirect for defunct JSON profiler
 /docs/guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file /docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant
+
+# removing yml-driven datacontext in favor of ephemeral
+/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context

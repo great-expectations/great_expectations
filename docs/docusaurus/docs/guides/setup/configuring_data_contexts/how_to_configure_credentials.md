@@ -8,7 +8,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will explain how to configure your ``great_expectations.yml`` project config to populate credentials from either a YAML file or a secret manager.
 
-If your Great Expectations deployment is in an environment without a file system, refer to [How to instantiate a Data Context without a yml file](./how_to_instantiate_a_data_context_without_a_yml_file.md) for credential configuration examples.
+If your Great Expectations deployment is in an environment without a file system, refer to [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 
 <Tabs
   groupId="yaml-or-secret-manager"
