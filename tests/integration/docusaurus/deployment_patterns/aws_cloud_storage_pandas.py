@@ -34,8 +34,8 @@ actual_existing_expectations_store["stores"] = stores
 actual_existing_expectations_store["expectations_store_name"] = great_expectations_yaml[
     "expectations_store_name"
 ]
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py existing_expectations_store">
 expected_existing_expectations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py existing_expectations_store">
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -53,8 +53,8 @@ assert actual_existing_expectations_store == yaml.load(
 )
 
 # adding expectations store
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py new_expectations_store">
 configured_expectations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py new_expectations_store">
 stores:
   expectations_S3_store:
     class_name: ExpectationsStore
@@ -90,9 +90,7 @@ great_expectations_yaml["stores"]["expectations_S3_store"]["store_backend"].pop(
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
-# # adding validation results store
-
-# parse great_expectations.yml for comparison
+# adding validation results store
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
@@ -116,8 +114,9 @@ actual_existing_validations_store["stores"] = stores
 actual_existing_validations_store["validations_store_name"] = great_expectations_yaml[
     "validations_store_name"
 ]
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py existing_validations_store">
+
 expected_existing_validations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py existing_validations_store">
 stores:
   validations_store:
     class_name: ValidationsStore
@@ -134,8 +133,8 @@ assert actual_existing_validations_store == yaml.load(
 )
 
 # adding validations store
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py new_validations_store">
 configured_validations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py new_validations_store">
 stores:
   validations_S3_store:
     class_name: ValidationsStore
@@ -176,8 +175,8 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # adding data docs store
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py add_data_docs_store">
 data_docs_site_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py add_data_docs_store">
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -247,7 +246,7 @@ validator = context.get_validator(
 print(validator.head())
 # </snippet>
 
-# Validator
+# add expectations to validator
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py add_expectations">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 validator.expect_column_values_to_be_between(
@@ -258,7 +257,8 @@ validator.expect_column_values_to_be_between(
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py save_expectations">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
-# Checkpoint
+
+# build Checkpoint
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py create_checkpoint">
 checkpoint = gx.checkpoint.SimpleCheckpoint(
     name="my_checkpoint",
@@ -292,7 +292,7 @@ assert (
     first_run_result["validation_result"]["statistics"]["evaluated_expectations"] == 2
 )
 
-# build and view datadocs
+# build datadocs
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py build_docs">
 context.build_data_docs()
 # </snippet>
