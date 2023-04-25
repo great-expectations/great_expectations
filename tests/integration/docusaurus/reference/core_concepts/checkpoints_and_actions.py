@@ -248,10 +248,28 @@ second_expectation_suite = second_validation_result["meta"]["expectation_suite_n
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+first_batch_identifiers = first_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
+second_batch_identifiers = second_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
+
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "taxi_asset"
+assert first_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
+
 assert second_expectation_suite == "my_expectation_suite"
 assert second_data_asset == "taxi_asset"
+assert second_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-02.csv",
+    "year": "2019",
+    "month": "02",
+}
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results">
@@ -333,15 +351,32 @@ first_expectation_suite = first_validation_result["meta"]["expectation_suite_nam
 first_data_asset = first_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+first_batch_identifiers = first_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+second_batch_identifiers = second_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "taxi_asset"
+assert first_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
+
 assert second_expectation_suite == "my_other_expectation_suite"
 assert second_data_asset == "taxi_asset"
+assert second_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-02.csv",
+    "year": "2019",
+    "month": "02",
+}
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2">
@@ -403,15 +438,32 @@ first_expectation_suite = first_validation_result["meta"]["expectation_suite_nam
 first_data_asset = first_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+first_batch_identifiers = first_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 second_expectation_suite = second_validation_result["meta"]["expectation_suite_name"]
 second_data_asset = second_validation_result["meta"]["active_batch_definition"][
     "data_asset_name"
 ]
+second_batch_identifiers = second_validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 
 assert first_expectation_suite == "my_expectation_suite"
 assert first_data_asset == "taxi_asset"
+assert first_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
+
 assert second_expectation_suite == "my_other_expectation_suite"
 assert second_data_asset == "taxi_asset"
+assert second_batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-02.csv",
+    "year": "2019",
+    "month": "02",
+}
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3">
@@ -467,9 +519,17 @@ validation_result = list(results.run_results.items())[0][1]["validation_result"]
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite">
 expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+batch_identifiers = validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 
 assert expectation_suite == "my_expectation_suite"
 assert data_asset == "taxi_asset"
+assert batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_4">
@@ -528,9 +588,17 @@ validation_result = list(results.run_results.items())[0][1]["validation_result"]
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2">
 expectation_suite = validation_result["meta"]["expectation_suite_name"]
 data_asset = validation_result["meta"]["active_batch_definition"]["data_asset_name"]
+batch_identifiers = validation_result["meta"]["active_batch_definition"][
+    "batch_identifiers"
+]
 
 assert expectation_suite == "my_expectation_suite"
 assert data_asset == "taxi_asset"
+assert batch_identifiers == {
+    "path": "yellow_tripdata_sample_2019-01.csv",
+    "year": "2019",
+    "month": "01",
+}
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_5">
