@@ -1,0 +1,17 @@
+Add a CSV `Asset` into your `Datasource` by using the `add_csv_asset()` function.
+
+```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py get_pandas_s3_asset"
+```
+
+Here we had added a `Asset` named `csv_taxi_s3_asset`. The `batching_regex` is used to build assets using a pattern.
+
+
+The pattern `r".*_(?P<year>\d{4})\.csv",` is intended to build a Batch for each file in the S3 bucket, which is
+
+```
+    taxi-data-2020.csv
+    taxi-data-2021.csv
+    taxi-data-2022.csv
+```
+The pattern will match the 4 digits of the year portion and assign it to the `year` domain.
+

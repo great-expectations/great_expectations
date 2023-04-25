@@ -143,8 +143,11 @@ stores:
       class_name: TupleS3StoreBackend
       bucket: <YOUR S3 BUCKET NAME>
       prefix: <YOUR S3 PREFIX NAME>
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py set_new_validations_store">
 validations_store_name: validations_S3_store
+# </snippet>
 """
 # </snippet>
 
@@ -235,26 +238,58 @@ config = context.fluent_datasources["s3_datasource"].yaml()
 assert "name: s3_datasource" in config
 assert "type: pandas_s3" in config
 
-
-# Validator
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py get_validator">
 context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=request, expectation_suite_name="test_suite"
 )
 
 print(validator.head())
+# </snippet>
+
+# Validator
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py add_expectations">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
+validator.expect_column_values_to_be_between(
+    column="congestion_surcharge", min_value=0, max_value=1000
+)
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py save_expectations">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 # Checkpoint
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py validate">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py create_checkpoint">
 checkpoint = gx.checkpoint.SimpleCheckpoint(
     name="my_checkpoint",
     data_context=context,
     validations=[{"batch_request": request, "expectation_suite_name": "test_suite"}],
 )
-
-checkpoint_result = checkpoint.run()
-validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
-context.build_data_docs()
 # </snippet>
+
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py add checkpoint config">
+context.add_or_update_checkpoint(checkpoint)
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py run checkpoint">
+checkpoint_result = checkpoint.run()
+# </snippet>
+
+assert checkpoint_result.checkpoint_config["name"] == "my_checkpoint"
+assert not checkpoint_result.success
+first_validation_result_identifier = (
+    checkpoint_result.list_validation_result_identifiers()[0]
+)
+first_run_result = checkpoint_result.run_results[first_validation_result_identifier]
+assert (
+    first_run_result["validation_result"]["statistics"]["successful_expectations"] == 1
+)
+assert (
+    first_run_result["validation_result"]["statistics"]["unsuccessful_expectations"]
+    == 1
+)
+assert (
+    first_run_result["validation_result"]["statistics"]["evaluated_expectations"] == 2
+)
+
+# build and view datadocs
