@@ -48,7 +48,7 @@ During Validation, a <TechnicalTag relative="../" tag="checkpoint" text="Checkpo
 
 A Batch is always part of a Data Asset. A Data Asset can be configured to slice its data into batches in many ways. For example, it can be based on an arbitrary field, including datetimes, from the data.
 
-A Batch is always built using a Batch Request. See our glossary entry about a [Batch Request](./batch_request.md) or a specific [connecting to data guide](../guides/connecting_to_your_data/index.md ).
+A Batch is always built using a Batch Request. See our glossary entry about a [Batch Request](./batch_request.md) or a specific [connecting to data guide](../guides/connecting_to_your_data/index.md).
 
 Once a Data Asset identifies the specific data that will be included in a Batch based on the Batch Request, it creates a reference to the data and adds metadata to including the parameters used in the Batch Request.
 
