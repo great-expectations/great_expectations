@@ -2,7 +2,9 @@ import os
 import pathlib
 import tempfile
 from great_expectations.core.yaml_handler import YAMLHandler
+import boto3
 
+client = boto3.client("s3")
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 yaml: YAMLHandler = YAMLHandler()
@@ -197,7 +199,7 @@ data_docs_sites:
 # </snippet>
 
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR S3 BUCKET NAME>", "aws-golden-path-tests"
+    "<YOUR S3 BUCKET NAME>", "demo-data-docs"
 )
 great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
@@ -296,3 +298,7 @@ assert (
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py build_docs">
 context.build_data_docs()
 # </snippet>
+
+# assert docs have been built
+results = client.list_objects(Bucket="demo-data-docs")
+assert "index.html" in results
