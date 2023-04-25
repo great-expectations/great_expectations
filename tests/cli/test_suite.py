@@ -4486,8 +4486,11 @@ def test__process_suite_edit_flags_and_prompt(
         ]
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_suite_edit_fluent_datasources_message(
-    monkeypatch, filesystem_csv_2, empty_data_context
+    mock_emit, monkeypatch, filesystem_csv_2, empty_data_context
 ):
     context = empty_data_context
     monkeypatch.chdir(os.path.dirname(context.root_directory))
@@ -4508,7 +4511,11 @@ def test_suite_edit_fluent_datasources_message(
     assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING not in result.stdout
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_suite_edit_suite_warning_both_fluent_and_block_datasources(
+    mock_emit,
     monkeypatch,
     filesystem_csv_2,
     data_context_with_fluent_datasource_and_block_datasource,
@@ -4528,8 +4535,11 @@ def test_suite_edit_suite_warning_both_fluent_and_block_datasources(
     assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING in result.stdout
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_suite_edit_block_datasources_no_message(
-    monkeypatch, filesystem_csv_2, data_context_with_block_datasource
+    mock_emit, caplog, monkeypatch, filesystem_csv_2, data_context_with_block_datasource
 ):
     context = data_context_with_block_datasource
     monkeypatch.chdir(os.path.dirname(context.root_directory))
