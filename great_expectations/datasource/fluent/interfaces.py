@@ -183,7 +183,7 @@ def _batch_slice_from_sequence(batch_slice: Sequence[int]) -> slice:
         return slice(batch_slice[0], batch_slice[1], batch_slice[2])
     else:
         raise ValueError(
-            f"batch_slice list must take the form of a python index, but {batch_slice} was provided."
+            f'batch_slice sequence must be of length 0-3, but "{batch_slice}" was provided.'
         )
 
 
@@ -301,15 +301,21 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         return batch_metadata
 
     @staticmethod
-    def _parse_batch_slice(batch_slice: BatchSlice) -> slice:
-        if isinstance(batch_slice, slice):
+    def _parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
+        if not batch_slice:
+            return slice(0, None, None)
+        elif isinstance(batch_slice, slice):
             return batch_slice
         elif isinstance(batch_slice, int):
             return slice(batch_slice, batch_slice + 1, None)
         elif isinstance(batch_slice, str):
             return _batch_slice_from_string(batch_slice=batch_slice)
-        elif isinstance(batch_slice, list):
+        elif isinstance(batch_slice, Sequence):
             return _batch_slice_from_sequence(batch_slice=batch_slice)
+        else:
+            raise ValueError(
+                f'batch_slice should be of type BatchSlice, but type: "{type(batch_slice)}" was passed.'
+            )
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)

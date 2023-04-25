@@ -699,11 +699,9 @@ class _SQLAsset(DataAsset):
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
 
-        parsed_batch_slice: slice
-        if batch_slice:
-            parsed_batch_slice = DataAsset._parse_batch_slice(batch_slice=batch_slice)
-        else:
-            parsed_batch_slice = slice(0)
+        parsed_batch_slice: slice = DataAsset._parse_batch_slice(
+            batch_slice=batch_slice
+        )
 
         return BatchRequest(
             datasource_name=self.datasource.name,
