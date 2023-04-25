@@ -32,7 +32,7 @@ from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
-from great_expectations.datasource.data_connector.batch_filter import parse_batch_slice
+from great_expectations.core.util import parse_batch_slice
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )

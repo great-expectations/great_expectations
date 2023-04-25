@@ -50,6 +50,7 @@ from great_expectations.util import convert_decimal_to_float
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import JSONValues
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
 
 logger = logging.getLogger(__name__)
 
@@ -275,6 +276,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
             "datasource_name": data.datasource_name,
             "data_asset_name": data.data_asset_name,
             "options": convert_to_json_serializable(data.options),
+            "batch_slice": convert_to_json_serializable(data.batch_slice),
         }
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
@@ -940,3 +942,81 @@ def get_sql_dialect_floating_point_infinity_value(
             return res["NegativeInfinity"]
         else:
             return res["PositiveInfinity"]
+
+
+def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
+    # trim whitespace
+    parsed_batch_slice = batch_slice.strip()
+
+    # determine if bracket or slice() notation and choose delimiter
+    delimiter: str = ":"
+    if (parsed_batch_slice[0] in "[(") and (parsed_batch_slice[-1] in ")]"):
+        parsed_batch_slice = parsed_batch_slice[1:-1]
+    elif parsed_batch_slice.startswith("slice(") and parsed_batch_slice.endswith(")"):
+        parsed_batch_slice = parsed_batch_slice[6:-1]
+        delimiter = ","
+
+    # split and convert string to int
+    slice_params: list[int | None] = []
+    for param in parsed_batch_slice.split(delimiter):
+        param = param.strip()
+        if param and param != "None":
+            try:
+                slice_params.append(int(param))
+            except ValueError as e:
+                raise ValueError(
+                    f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'
+                )
+        else:
+            slice_params.append(None)
+
+    return slice_params
+
+
+def _batch_slice_from_string(batch_slice: str) -> slice:
+    slice_params: list[int | None] = _batch_slice_string_to_slice_params(
+        batch_slice=batch_slice
+    )
+
+    if len(slice_params) == 1 and slice_params[0] is not None:
+        return slice(slice_params[0] - 1, slice_params[0], None)
+    elif len(slice_params) == 2:
+        return slice(slice_params[0], slice_params[1], None)
+    elif len(slice_params) == 3:
+        return slice(slice_params[0], slice_params[1], slice_params[2])
+    else:
+        raise ValueError(
+            f"batch_slice string must take the form of a python slice, but {batch_slice} was provided."
+        )
+
+
+def _batch_slice_from_list_or_tuple(batch_slice: list[int] | tuple[int, ...]) -> slice:
+    if len(batch_slice) == 0:
+        return slice(0, None, None)
+    elif len(batch_slice) == 1 and batch_slice[0] is not None:
+        return slice(batch_slice[0] - 1, batch_slice[0])
+    elif len(batch_slice) == 2:
+        return slice(batch_slice[0], batch_slice[1])
+    elif len(batch_slice) == 3:
+        return slice(batch_slice[0], batch_slice[1], batch_slice[2])
+    else:
+        raise ValueError(
+            f'batch_slice sequence must be of length 0-3, but "{batch_slice}" was provided.'
+        )
+
+
+def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
+    if not batch_slice:
+        return slice(0, None, None)
+    elif isinstance(batch_slice, slice):
+        return batch_slice
+    elif isinstance(batch_slice, int):
+        return slice(batch_slice, batch_slice + 1, None)
+    elif isinstance(batch_slice, str):
+        return _batch_slice_from_string(batch_slice=batch_slice)
+    elif isinstance(batch_slice, (list, tuple)):
+        return _batch_slice_from_list_or_tuple(batch_slice=batch_slice)
+    else:
+        raise ValueError(
+            f'batch_slice should be of type BatchSlice, but type: "{type(batch_slice)}" was passed.'
+        )
