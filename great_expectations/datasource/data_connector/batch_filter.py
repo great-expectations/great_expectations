@@ -110,7 +110,7 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
     if (parsed_batch_slice[0] in "[(") and (parsed_batch_slice[-1] in ")]"):
         parsed_batch_slice = parsed_batch_slice[1:-1]
     elif parsed_batch_slice.startswith("slice(") and parsed_batch_slice.endswith(")"):
-        parsed_batch_slice = parsed_batch_slice[5:-1]
+        parsed_batch_slice = parsed_batch_slice[6:-1]
         delimiter = ","
 
     # split and convert string to int
