@@ -249,7 +249,8 @@ def _invert_regex_to_data_reference_template(
 
     # print("-"*80)
     parsed_sre = sre_parse.parse(str(regex_pattern))
-    for token, value in parsed_sre:  # type: ignore[attr-defined]
+    for thing, char in zip(parsed_sre, list(str(regex_pattern))):  # type: ignore[attr-defined]
+        token, value = thing
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
@@ -266,7 +267,8 @@ def _invert_regex_to_data_reference_template(
             sre_constants.ANY,
         ]:
             # Replace the uncaptured group a wildcard in the template
-            data_reference_template += "*"
+            # But don't assume that a `.` in a filename should be a star glob
+            data_reference_template += char
         elif token in [
             sre_constants.AT,
             sre_constants.ASSERT_NOT,
