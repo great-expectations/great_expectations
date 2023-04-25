@@ -35,7 +35,7 @@ If you have an existing configured DataContext in your filesystem in the form of
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py get_context"
 ```
 
-If you do not have a filesystem to work with, you can load your DataContext following the instructions in [How to instantiate a Data Context without a yml file](../../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md).
+If you do not have a filesystem to work with, you can load your DataContext following the instructions in [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 
 ### 2. Connect to your data
 #### Ensure your DataContext contains a Datasource with a RuntimeDataConnector

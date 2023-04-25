@@ -90,7 +90,6 @@ module.exports = {
             },
             'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context',
             'guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context',
-            'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file',
             {
               type: 'html',
               value: '<h4>Data Context Configuration</h4>',
