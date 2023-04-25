@@ -731,8 +731,11 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
     )
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_new_no_fluent_datasource_messages(
-    caplog, monkeypatch, data_context_with_block_datasource
+    mock_emit, caplog, monkeypatch, data_context_with_block_datasource
 ):
     """
     What does this test and why?
@@ -757,8 +760,11 @@ def test_checkpoint_new_no_fluent_datasource_messages(
     assert CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES not in stdout
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_new_raises_error_on_fluent_datasources_only(
-    caplog, monkeypatch, data_context_with_fluent_datasource
+    mock_emit, caplog, monkeypatch, data_context_with_fluent_datasource
 ):
     """
     What does this test and why?
@@ -782,8 +788,14 @@ def test_checkpoint_new_raises_error_on_fluent_datasources_only(
     assert CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY in stdout
 
 
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
 def test_checkpoint_new_raises_warning_on_mixed_datasource_styles(
-    caplog, monkeypatch, data_context_with_fluent_datasource_and_block_datasource
+    mock_emit,
+    caplog,
+    monkeypatch,
+    data_context_with_fluent_datasource_and_block_datasource,
 ):
     """
     What does this test and why?
