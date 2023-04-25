@@ -777,7 +777,7 @@ def test_csv_asset_batch_metadata(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     my_config_variables = {"pipeline_filename": __file__}
-    pandas_filesystem_datasource._data_context.config_variables.update(
+    pandas_filesystem_datasource._data_context.config_variables.update(  # type: ignore[union-attr] # `_data_context`
         my_config_variables
     )
 
