@@ -232,9 +232,6 @@ stages:
     pool:
       vmImage: 'ubuntu-20.04'
 
-    services:
-      postgres: postgres
-
     jobs:
       - job: runme_script_runner_tests
 
@@ -256,6 +253,9 @@ stages:
 
       - job: runme_script_runner_tests_postgres
 
+        services:
+          postgres: postgres
+
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -264,7 +264,7 @@ stages:
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test, postgresql]"
-            displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+            displayName: 'Install GX and required dependencies'
 
           # tests containing the name "RUNME_POSTGRES" are run
           - script: |
