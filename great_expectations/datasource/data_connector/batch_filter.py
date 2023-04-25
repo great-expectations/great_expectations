@@ -101,10 +101,11 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
     )
 
 
-def _batch_slice_from_string(batch_slice: str) -> slice:
+def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
     # trim whitespace
     parsed_batch_slice = batch_slice.strip()
 
+    # determine if bracket or slice() notation and choose delimiter
     delimiter: str = ":"
     if (parsed_batch_slice[0] in "[(") and (parsed_batch_slice[-1] in ")]"):
         parsed_batch_slice = parsed_batch_slice[1:-1]
@@ -124,6 +125,14 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
                 )
         else:
             slice_params.append(None)
+
+    return slice_params
+
+
+def _batch_slice_from_string(batch_slice: str) -> slice:
+    slice_params: list[int | None] = _batch_slice_string_to_slice_params(
+        batch_slice=batch_slice
+    )
 
     if len(slice_params) == 1 and slice_params[0] is not None:
         return slice(slice_params[0] - 1, slice_params[0], None)
