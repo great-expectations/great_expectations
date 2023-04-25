@@ -323,7 +323,8 @@ class _SourceFactories:
                 asset = asset_type(name=name, **kwargs)
                 self._add_asset(asset)
                 batch_request = asset.build_batch_request()
-                return self._data_context.get_validator(batch_request=batch_request)
+                # TODO: raise error if `_data_context` not set
+                return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
             _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
                 _read_asset_factory, asset_type, exclude={"type"}
