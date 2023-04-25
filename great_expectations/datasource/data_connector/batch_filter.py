@@ -116,7 +116,8 @@ def _batch_slice_string_to_slice_params(batch_slice: str) -> list[int | None]:
     # split and convert string to int
     slice_params: list[int | None] = []
     for param in parsed_batch_slice.split(delimiter):
-        if param:
+        param = param.strip()
+        if param and param != "None":
             try:
                 slice_params.append(int(param))
             except ValueError as e:
