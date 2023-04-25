@@ -95,7 +95,7 @@ Run the following code to set up a <TechnicalTag tag="data_context" text="Data C
 
 <details>
   <summary>What is an "in code" Data Context?</summary>
-When you don't have easy access to a file system, instead of defining your Data Context via great_expectations.yml you can do so by instantiating a BaseDataContext with a config. Take a look at our how-to guide to learn more: <a href='/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file'>How to instantiate a Data Context without a yml file</a>. In Databricks, you can do either since you have access to a filesystem - we've simply shown the in code version here for simplicity.
+When you don't have easy access to a file system, instead of defining your Data Context via great_expectations.yml you can do so by instantiating a BaseDataContext with a config. Take a look at our how-to guide to learn more: <a href='/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context'>How to instantiate an Ephemeral Data Context</a>. In Databricks, you can do either since you have access to a filesystem - we've simply shown the in code version here for simplicity.
 
 </details>
 
