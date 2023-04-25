@@ -704,7 +704,7 @@ class RenderedDocumentContent(RenderedContent):
         ge_cloud_id=None,
     ) -> None:
         if not isinstance(sections, list) and all(
-            [isinstance(section, RenderedSectionContent) for section in sections]
+            isinstance(section, RenderedSectionContent) for section in sections
         ):
             raise InvalidRenderedContentError(
                 "RenderedDocumentContent requires a list of RenderedSectionContent for "
@@ -747,10 +747,8 @@ class RenderedDocumentContent(RenderedContent):
 class RenderedSectionContent(RenderedContent):
     def __init__(self, content_blocks, section_name=None) -> None:
         if not isinstance(content_blocks, list) and all(
-            [
-                isinstance(content_block, RenderedComponentContent)
-                for content_block in content_blocks
-            ]
+            isinstance(content_block, RenderedComponentContent)
+            for content_block in content_blocks
         ):
             raise InvalidRenderedContentError(
                 "Rendered section content requires a list of RenderedComponentContent "

@@ -85,7 +85,7 @@ class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
                 validation_error
                 and validation_error.messages
                 and isinstance(validation_error.messages, dict)
-                and all([key is None for key in validation_error.messages.keys()])
+                and all(key is None for key in validation_error.messages.keys())
             ):
                 validation_error.messages = list(
                     itertools.chain.from_iterable(validation_error.messages.values())
