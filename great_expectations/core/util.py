@@ -331,7 +331,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return str(data)
 
     if isinstance(data, slice):
-        return str(data)
+        slice_str = f"[{data.start}" if data.start else "["
+        slice_str += f":{data.stop}" if data.stop else ":"
+        slice_str += f":{data.step}]" if data.step else "]"
+        return slice_str
 
     if isinstance(data, pathlib.PurePath):
         return str(data)
