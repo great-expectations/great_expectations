@@ -18,8 +18,7 @@ context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 great_expectations_yaml_file_path = pathlib.Path(
     full_path_to_project_directory, "great_expectations/great_expectations.yml"
 )
-with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.load(f)
+great_expectations_yaml = yaml.load(great_expectations_yaml_file_path.read_text())
 
 stores = great_expectations_yaml["stores"]
 pop_stores = [
