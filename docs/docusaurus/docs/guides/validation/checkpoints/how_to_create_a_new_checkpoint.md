@@ -24,10 +24,6 @@ To modify this configuration for your use case, replace the `batch_request` and 
 
 Note: There are other configuration options for more advanced deployments, please refer to [How to configure a new Checkpoint using test_yaml_config](../../../guides/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.md) for more details.
 
-Also, you may have noticed in our [Quickstart](../../../tutorials/quickstart/quickstart.md) that you are also able to create a checkpoint from a <TechnicalTag tag="validator" text="Validator" /> directly if you prefer:
-
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint validator"
-```
 
 ### 2. (Optional) Run your Checkpoint
 

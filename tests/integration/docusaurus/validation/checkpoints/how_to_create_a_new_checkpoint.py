@@ -59,18 +59,6 @@ checkpoint_result = checkpoint.run()
 
 assert checkpoint_result.success
 
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint validator">
-checkpoint_from_validator = gx.checkpoint.SimpleCheckpoint(
-    name="my_checkpoint_from_validator",
-    data_context=context,
-    validator=validator,
-)
-# </snippet>
-
-checkpoint_from_validator_result = checkpoint_from_validator.run()
-
-assert checkpoint_from_validator_result.success
-
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py build data docs">
 context.build_data_docs()
 # </snippet>
