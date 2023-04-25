@@ -1,140 +1,98 @@
 ---
-title: Quickstart with GX
+title: Great Expectations Quickstart
 tag: [tutorial, getting started]
 ---
-# Quickstart with Great Expectations
+# Great Expectations Quickstart
 
-import Prerequisites from '/docs/components/_prerequisites.jsx'
-import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
-import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
-
-## Introduction
-
-Few things are as daunting as taking your first steps with a new piece of software.  This guide will introduce you to GX and demonstrate the ease with which you can implement the basic GX workflow. We will walk you through the entire process of installing GX, connecting to some sample data, building your first Expectation based off of an initial Batch of that data, validating your data with that Expectation, and finally reviewing the results of your validation.
-
-Once you have completed this guide you will have a foundation in the basics of using GX.  In the future you will be able to adapt GX to suit your specific needs by customizing the execution of the individual steps you will learn here.
+Use this quickstart to install Great Expectations, connect to sample data, build your first Expectation, validate your data, and review the validation results. This is a great place to start if you're new to Great Expectations and aren't sure if it's the right solution for you or your organization. 
 
 ## Prerequisites
 
-<Prerequisites requirePython = {true} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
+- Python versions 3.7 to 3.10. See [Python downloads](https://www.python.org/downloads/).
+- pip
+- An internet browser
 
-- The ability to install Python packages with pip
-- A working internet browser
-- A passion for data quality
+## Install Great Expectations
 
-</Prerequisites> 
-
-## Overview
-
-With GX you can get up and running with just a few lines of code.  The full process you'll be using will look like:
+Run the following command in an empty base directory inside a Python virtual environment:
 
 ```bash title="Terminal input"
 pip install great_expectations
 ```
 
-```python name="tutorials/quickstart/quickstart.py all"
-```
+It can take several minutes for the installation to complete.
 
-In the following steps we'll break down exactly what is happening here so that you can follow along and perform a Validation yourself.
+## Import the Great Expectations module
 
+A module is a Python object that defines functions, classes and variables. The Great Expectations module contains the Python code necessary for Great Expectations to run. Jupyter Notebook is included with Great Expectations, and it lets you edit code and view the results of code runs.
 
-## Steps
-
-### 1. Install GX and set up your code environment
-
-#### 1.1 Install GX using pip
-
-Starting from an empty base directory inside a Python virtual environment, we use pip to install Great Expectations:
-
-```bash title="Terminal input"
-pip install great_expectations
-```
-
-When you run this command from the terminal you will see `pip` go through the process of installing GX and it's related dependencies.  This may take a moment to complete.
-
-#### 1.2 Import Great Expectations
-
-For the rest of this tutorial we will be working with Python code in a Jupyter Notebook. Jupyter is included with GX and provides a very convenient interface that lets us easily edit code and immediately see the result of our changes.
-
-The code to import the `great_expectations` module is:
+Open Jupyter Notebook and run the following command to import the `great_expectations` module:
 
 ```python name="tutorials/quickstart/quickstart.py import_gx"
 ```
 
-#### 1.3 Instantiate a Data Context
+## Instantiate a Data Context
 
-We will get a `DataContext` object with the following code:
+The Data Context is the Great Expectations Python API entry point, and lets you access a number of utility and convenience methods.
+
+Run the following command to import the `DataContext` object:
 
 ```python name="tutorials/quickstart/quickstart.py get_context"
 ```
 
-The Data Context will provide you with access to a variety of utility and convenience methods.  It is the entry point for using the GX Python API.
+## Connect to data
 
-### 2. Connect to data
-
-For the purpose of this guide, we will connect to `.csv` data stored in our GitHub repo:
-
+Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
 
 ```python name="tutorials/quickstart/quickstart.py connect_to_data"
 ```
 
-The above code uses our Data Context's default Datasource for Pandas to access the `.csv` data in the file at the provided `path`.
+The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
 
-### 3. Create Expectations
+## Create Expectations
 
-When we read our `.csv` data, we got a Validator instance back.  A Validator is a robust object capable of storing Expectations about the data it is associated with, as well as performing introspections on that data.  
+When you connected to the `.csv` data, a Validator instance was returned.  A Validator is an object that stores and analyzes the referenced Expectations data.  
 
-In this guide, we will define two Expectations, one based on our domain knowledge (knowing that the `pickup_datetime` should not be null), and one by using GX to detect the range of values in the `passenger_count` column (using `auto=True`).
-
-The code we will use for this is:
+Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation detects a range of values in the `passenger_count` column (using `auto=True`).
 
 ```python name="tutorials/quickstart/quickstart.py create_expectation"
 ```
 
-With the Expectation defined above, we are stating that we _expect_ the column `pickup_datetime` to always be populated.  That is: none of the column's values should be null.
+The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
 
-In the future, you may define numerous Expectations about a Validator's associated data by calling multiple methods that follow the `validator.expect_*` syntax.
+To analyze Validator data, you can create multiple Expectations that call multiple methods with the `validator.expect_*` syntax.
 
+## Validate the data and review the results
 
-### 4. Validate data
+1. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations: 
 
-#### 4.1 Execute your defined Expectations
+    ```python name="tutorials/quickstart/quickstart.py create_checkpoint"
+    ```
 
-Now that we have defined our Expectations it is time for GX to introspect our data and see if it corresponds to what we told GX to expect.  To do this, we define a Checkpoint (which will allow us to repeat the Validation in the future).
+2. Run the following command to return the Validation results:
 
-```python name="tutorials/quickstart/quickstart.py create_checkpoint"
-```
-Once we have created the Checkpoint, we will run it and get back the results from our Validation.
+    ```python name="tutorials/quickstart/quickstart.py run_checkpoint"
+    ```
 
-```python name="tutorials/quickstart/quickstart.py run_checkpoint"
-```
+3. Run the following command to view an HTML representation of the Validation results:
 
-#### 4.2 Review your results
+    ```python name="tutorials/quickstart/quickstart.py view_results"
+    ```
 
-Great Expectations provides a friendly, human-readable way to view the results of Validations: Data Docs.  Our Checkpoint will have automatically compiled new Data Docs to include the results of the Validation we ran, so we can view them immediately:
+## Related documentation
 
-```python name="tutorials/quickstart/quickstart.py view_results"
-```
+If you're ready to continue your Great Expectations journey, the following topics can help you implement a tailored solution for your specific environment and business requirements: 
 
-
-## Next Steps 
-
-Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases! To help with this we have prepared some more detailed guides on setting up and installing GX and getting an initial Data Context that are tailored to specific environments and resources.
-
-:::info Great Expectations Cloud
-
-This guide has introduced you to the open source Python and command line use of Great Expectations.  GX also offers an online interface, currently in Beta.  The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
-
-If you are interested in GX Cloud, you should join the GX Cloud Beta.  During this program limited seats are available, but signing up will keep you informed of the product's process.
-
-**[Sign up for the GX Cloud Beta!](https://greatexpectations.io/cloud)**
-:::
-
-### Installing GX for specific environments and source data systems
-
-<SetupAndInstallGx />
-
-### Initializing, instantiating, and saving a Data Context
-
-<DataContextInitializeInstantiateSave />
-
+- [How to install Great Expectations locally](../../guides/setup/installation/local.md)
+- [How to set up GX to work with data on AWS S3](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
+- [How to set up GX to work with data in Azure Blob Storage](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
+- [How to set up GX to work with data on GCS](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
+- [How to set up GX to work with SQL databases](../../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases) 
+- [How to instantiate a Data Context on an EMR Spark Cluster](../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
+- [How to use Great Expectations in Databricks](../../docs/deployment_patterns/how_to_use_great_expectations_in_databricks.md)
+- [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
+- [How to initialize a new Data Context with the CLI](../../guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
+- [How to initialize a filesystem Data Context in Python](../../guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
+- [How to instantiate a specific Filesystem Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.md)
+- [How to explicitly instantiate an Ephemeral Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
+- [How to convert an Ephemeral Data Context to a Filesystem Data Context](../../guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context.md)
