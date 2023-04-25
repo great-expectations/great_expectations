@@ -618,7 +618,7 @@ def public_api_task(ctx):
         task_name="public-api", correct_dir=repo_root
     )
 
-    public_api_report.main()
+    public_api_report.generate_public_api_report()
 
 
 def _exit_with_error_if_not_run_from_correct_dir(

@@ -1,3 +1,5 @@
+"""Methods, classes and files to be included as part of the public API, even if they are not mentioned in docs snippets.
+"""
 from __future__ import annotations
 
 import pathlib

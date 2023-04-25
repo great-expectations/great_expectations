@@ -66,6 +66,7 @@ from docs.sphinx_api_docs_source.include_exclude_definition import (
 )
 from docs.sphinx_api_docs_source import public_api_excludes
 from docs.sphinx_api_docs_source import public_api_includes
+from docs.sphinx_api_docs_source import public_api_missing_threshold
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -859,7 +860,7 @@ def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
     return tree
 
 
-def main():
+def generate_public_api_report():
 
     docs_example_file_contents = FileContents.create_from_local_files(
         _default_doc_example_absolute_paths()
@@ -893,25 +894,45 @@ def main():
         definitions=filtered_definitions, repo_root=_repo_root()
     )
 
-    printable_definitions = public_api_report.generate_printable_definitions()
-    for printable_definition in printable_definitions:
-        logger.info(printable_definition)
+    missing_from_the_public_api = public_api_report.generate_printable_definitions()
 
-    num_missing_msg = f"There are {len(printable_definitions)} items referenced in documentation that are not marked with the @public_api decorator and thus not rendered as part of our public API documentation."
+    num_missing_msg = f"There are {len(missing_from_the_public_api)} items referenced in documentation that are not marked with the @public_api decorator and thus not rendered as part of our public API documentation."
     logger.info(num_missing_msg)
-    # The PUBLIC_API_MISSING_THRESHOLD should be reduced and kept at 0. Please do
+    # The missing_threshold should be reduced and kept at 0. Please do
     # not increase this threshold, but instead add to the public API by decorating
     # any methods or classes you are adding to documentation with the @public_api
     # decorator and any relevant "new" or "deprecated" public api decorators.
     # If the actual is lower than the threshold, please reduce the threshold.
-    PUBLIC_API_MISSING_THRESHOLD = 93  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
-    if len(printable_definitions) != PUBLIC_API_MISSING_THRESHOLD:
-        error_msg_prefix = f"There are {len(printable_definitions)} items missing from the public API, we currently allow {PUBLIC_API_MISSING_THRESHOLD}."
-        if len(printable_definitions) > PUBLIC_API_MISSING_THRESHOLD:
+    missing_threshold = len(
+        public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
+    )  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
+    if len(missing_from_the_public_api) != missing_threshold:
+        error_msg_prefix = f"There are {len(missing_from_the_public_api)} items missing from the public API, we currently allow {missing_threshold}."
+        if len(missing_from_the_public_api) > missing_threshold:
             logger.error(f"{error_msg_prefix} Please add to the public API.")
+            difference = set(missing_from_the_public_api) - set(
+                public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
+            )
+            logger.error(
+                f"The {len(difference)} items missing from the public API that are not accounted for are as follows:"
+            )
+            for item in difference:
+                logger.error(item)
         else:
             logger.error(f"{error_msg_prefix} Please reduce the threshold.")
+            difference = set(
+                public_api_missing_threshold.ITEMS_IGNORED_FROM_PUBLIC_API
+            ) - set(missing_from_the_public_api)
+            logger.error(
+                f"The {len(difference)} items that are now accounted for and should be removed from the threshold list in docs/sphinx_api_docs_source/public_api_missing_threshold.py are:"
+            )
+            for item in difference:
+                logger.error(item)
         sys.exit(1)
+    else:
+        logger.info(
+            "All of the missing items are accounted for in the missing threshold, but this threshold should be reduced to 0 over time."
+        )
 
     public_api_report.write_printable_definitions_to_file(
         filepath=_repo_root() / "public_api_report.txt",
@@ -919,4 +940,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    generate_public_api_report()

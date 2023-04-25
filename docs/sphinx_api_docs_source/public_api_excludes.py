@@ -1,3 +1,9 @@
+"""Methods, classes and files to be excluded from consideration as part of the public API.
+
+Include here methods that share a name with another method for example (since we use string matching
+to determine what is used in our documentation code snippets).
+"""
+
 from __future__ import annotations
 
 import pathlib
