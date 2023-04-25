@@ -135,7 +135,6 @@ batch_request: dict = {
     "datasource_name": "taxi_multi_batch_datasource",
     "data_asset_name": "all_years",
     "options": {},
-    "batch_slice": slice(0, None, None),
 }
 
 result: RuleBasedProfilerResult = rule_based_profiler.run(batch_request=batch_request)

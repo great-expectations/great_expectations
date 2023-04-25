@@ -887,9 +887,10 @@ def materialize_batch_request(
     batch_request_class: type
     if _is_fluent_batch_request(args=effective_batch_request):
         batch_request_class = _get_fluent_batch_request_class()
-        effective_batch_request["batch_slice"] = parse_batch_slice(
-            effective_batch_request["batch_slice"]
-        )
+        if "batch_slice" in effective_batch_request:
+            effective_batch_request["batch_slice"] = parse_batch_slice(
+                effective_batch_request["batch_slice"]
+            )
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request
     ):
