@@ -37,11 +37,23 @@ def change_paths_for_docs_file_references():
 
 def _paths_to_versioned_docs() -> list[pathlib.Path]:
     data_path = _docs_dir() / "docusaurus/versioned_docs"
+    paths = [f for f in data_path.iterdir() if f.is_dir()]
+    return paths
+
+
+def _paths_to_versioned_docs_after_v0_14_13() -> list[pathlib.Path]:
+    data_path = _docs_dir() / "docusaurus/versioned_docs"
     paths = [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
     return paths
 
 
 def _paths_to_versioned_code() -> list[pathlib.Path]:
+    data_path = _docs_dir() / "docusaurus/versioned_code"
+    paths = [f for f in data_path.iterdir() if f.is_dir()]
+    return paths
+
+
+def _paths_to_versioned_code_after_v0_14_13() -> list[pathlib.Path]:
     data_path = _docs_dir() / "docusaurus/versioned_code"
     paths = [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
     return paths
@@ -51,7 +63,10 @@ def prepend_version_info_to_name_for_snippet_by_name_references():
     """Prepend version info e.g. name="snippet_name" -> name="version-0.15.50 snippet_name" """
 
     pattern = re.compile(r"((.*)(name *= *\"))(.*)")
-    paths = _paths_to_versioned_docs() + _paths_to_versioned_code()
+    paths = (
+        _paths_to_versioned_docs_after_v0_14_13()
+        + _paths_to_versioned_code_after_v0_14_13()
+    )
 
     for path in paths:
         version = path.name
