@@ -362,19 +362,17 @@ def no_usage_stats(monkeypatch):
 @pytest.fixture(scope="module")
 def sa(test_backends):
     if not any(
-        [
-            dbms in test_backends
-            for dbms in [
-                "postgresql",
-                "sqlite",
-                "mysql",
-                "mssql",
-                "bigquery",
-                "trino",
-                "redshift",
-                "athena",
-                "snowflake",
-            ]
+        dbms in test_backends
+        for dbms in [
+            "postgresql",
+            "sqlite",
+            "mysql",
+            "mssql",
+            "bigquery",
+            "trino",
+            "redshift",
+            "athena",
+            "snowflake",
         ]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
@@ -1069,10 +1067,7 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
 
     if (
         any(
-            [
-                dbms in test_backends
-                for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
-            ]
+            dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
         )
         and (sa is not None)
         and is_library_loadable(library_name="sqlalchemy")
@@ -1493,7 +1488,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
 
 @pytest.fixture
-def titanic_pandas_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
     monkeypatch,
 ):

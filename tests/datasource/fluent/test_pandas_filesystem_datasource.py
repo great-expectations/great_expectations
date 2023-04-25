@@ -561,7 +561,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
         )
     ]
     # assert there are files that are not csv files
-    assert any([not file_name.endswith("csv") for file_name in all_files])
+    assert any(not file_name.endswith("csv") for file_name in all_files)
     # assert there are 12 files from 2018
     files_for_2018 = [
         file_name for file_name in all_files if file_name.find("2018") >= 0
@@ -739,7 +739,7 @@ def test_csv_asset_batch_metadata(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     my_config_variables = {"pipeline_filename": __file__}
-    pandas_filesystem_datasource._data_context.config_variables.update(
+    pandas_filesystem_datasource._data_context.config_variables.update(  # type: ignore[union-attr] # `_data_context`
         my_config_variables
     )
 
