@@ -249,8 +249,8 @@ def _invert_regex_to_data_reference_template(
 
     # print("-"*80)
     parsed_sre = sre_parse.parse(str(regex_pattern))
-    for thing, char in zip(parsed_sre, list(str(regex_pattern))):  # type: ignore[attr-defined]
-        token, value = thing
+    for parsed_sre_tuple, char in zip(parsed_sre, list(str(regex_pattern))):  # type: ignore[attr-defined]
+        token, value = parsed_sre_tuple
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
