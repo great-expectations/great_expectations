@@ -40,13 +40,13 @@ Our in-depth guide on [how to create and edit expectations with a profiler](../g
 
 <ValidateHeader/>
 
-During Validation, a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> will check a Batch of data against Expectations from an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />. You must specify a Batch Request or provide a Batch of data at runtime for the Checkpoint to run.
+During Validation, a <TechnicalTag relative="../" tag="checkpoint" text="Checkpoint" /> will check a Batch of data against Expectations from an <TechnicalTag relative="../" tag="expectation_suite" text="Expectation Suite" />. You must specify a Batch Request for the Checkpoint to run.
 
 ## Features
 
 ### Consistent Interface for Describing Specific Data from any Datasource
 
-A Batch is always part of a Data Asset. A Data Asset can be configured to slice its data batches in many ways. For example, it can be based on an arbitrary field, including datetimes, from the data. 
+A Batch is always part of a Data Asset. A Data Asset can be configured to slice its data into batches in many ways. For example, it can be based on an arbitrary field, including datetimes, from the data.
 
 A Batch is always built using a Batch Request. See our glossary entry about a [Batch Request](./batch_request.md) or a specific [connecting to data guide](../guides/connecting_to_your_data/index.md ).
 
@@ -56,11 +56,11 @@ Once a Data Asset identifies the specific data that will be included in a Batch 
 
 ### How to access
 
-You can access a Batch through the Data Asset `get_batch_list_from_batch_request` method. You typically will not need to access the Batch directly, and instead, pass it on to a Great Expectations object such as a Profiler, Validator, or Checkpoint, which will then do something in response to the Batch's data.
+You can access a Batch through the Data Asset `get_batch_list_from_batch_request` method. You typically will not need to access the Batch directly. Instead, you will pass a Batch Request to a Expectations object such as a Profiler, Validator, or Checkpoint, which will then do something in response to the Batch's data.
 
 ### How to create
 
-The `BatchRequest` object is the primary API used to construct Batches. It is provided to the `get_validator` method on DataContext.  
+The `BatchRequest` object is the primary API used to construct Batches. You construct a Batch Request that corresponds to a batch via the Data Asset's method `build_batch_request`.
 
 - For more information, see [our documentation on Batch Requests](./batch_request.md).
 
