@@ -63,7 +63,7 @@ def build_batch_filter(
 "{str(type(batch_filter_parameters))}", which is illegal.
                 """
             )
-        if not all([isinstance(key, str) for key in batch_filter_parameters.keys()]):
+        if not all(isinstance(key, str) for key in batch_filter_parameters.keys()):
             raise gx_exceptions.BatchFilterError(
                 'All batch_filter_parameters keys must strings (Python "str").'
             )

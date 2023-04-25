@@ -294,7 +294,7 @@ class TestDynamicPandasAssets:
             .build_batch_request()
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # expects BatchRequestBase
+            empty_data_context.get_validator(batch_request=batch_request)
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")
@@ -424,6 +424,13 @@ def test_default_pandas_datasource_get_and_set(
     assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2
 
+    # ensure ephemeral data assets are not serialized
+    config_as_dict = empty_data_context.fluent_config.dict()["fluent_datasources"]
+    print(f"{pf(config_as_dict)}")
+    for ds in config_as_dict:
+        for asset in ds.get("assets", []):
+            assert asset["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
+
 
 def test_default_pandas_datasource_name_conflict(
     empty_data_context: AbstractDataContext,
@@ -471,10 +478,8 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.sources.pandas_default.assets) == 2
     assert all(
-        [
-            asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-            for asset in empty_data_context.sources.pandas_default.assets
-        ]
+        asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
+        for asset in empty_data_context.sources.pandas_default.assets
     )
 
 
