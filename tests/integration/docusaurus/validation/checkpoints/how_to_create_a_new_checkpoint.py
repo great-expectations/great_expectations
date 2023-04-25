@@ -1,0 +1,74 @@
+import pathlib
+
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py get_context">
+import great_expectations as gx
+
+context = gx.get_context()
+# </snippet>
+data_directory = pathlib.Path(
+    gx.__file__,
+    "..",
+    "..",
+    "tests",
+    "test_sets",
+    "taxi_yellow_tripdata_samples",
+).resolve(strict=True)
+
+
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create asset and get validator">
+datasource = context.sources.add_pandas_filesystem(
+    name="demo_pandas", base_directory=data_directory
+)
+
+asset = datasource.add_csv_asset(
+    "yellow_tripdata",
+    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
+    order_by=["-year", "month"],
+)
+
+batch_request = asset.build_batch_request({"year": "2020", "month": "04"})
+validator = context.get_validator(
+    batch_request=batch_request,
+    create_expectation_suite_with_name="my_expectation_suite",
+)
+# </snippet>
+
+
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create expectation suite">
+validator.expect_table_row_count_to_be_between(min_value=5000, max_value=20000)
+validator.save_expectation_suite(discard_failed_expectations=False)
+# </snippet>
+
+
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py run checkpoint batch_request">
+checkpoint = gx.checkpoint.SimpleCheckpoint(
+    name="checkpoint",
+    data_context=context,
+    validations=[
+        {
+            "batch_request": batch_request,
+            "expectation_suite_name": "my_expectation_suite",
+        },
+    ],
+)
+
+checkpoint_result = checkpoint.run()
+# </snippet>
+
+assert checkpoint_result.success
+
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py run checkpoint validator">
+checkpoint_from_validator = gx.checkpoint.SimpleCheckpoint(
+    name="checkpoint",
+    data_context=context,
+    validator=validator,
+)
+
+checkpoint_from_validator_result = checkpoint_from_validator.run()
+# </snippet>
+
+assert checkpoint_from_validator_result.success
+
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py build data docs">
+context.build_data_docs()
+# </snippet>
