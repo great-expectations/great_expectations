@@ -530,15 +530,17 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"] = "pandas"
     assets: List[_PandasDataAsset] = []
 
-    def dict(self, **kwargs):
-        # print(f"dict() {kwargs}")
+    def dict(self, _exclude_default_asset_names: bool = True, **kwargs):
+        """Overloading `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""
         ds_dict = super().dict(**kwargs)
-        assets = ds_dict.pop("assets", None)
-        if assets:
-            assets = [a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME]
+        if _exclude_default_asset_names:
+            assets = ds_dict.pop("assets", None)
             if assets:
-                ds_dict["assets"] = assets
-        # print(pf(ds_dict))
+                assets = [
+                    a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
+                ]
+                if assets:
+                    ds_dict["assets"] = assets
         return ds_dict
 
     def test_connection(self, test_assets: bool = True) -> None:
