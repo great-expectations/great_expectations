@@ -16,7 +16,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 class DataProfilerTableColumnList(DataProfilerProfileMetricProvider):
     metric_name = "data_profiler.table_column_list"
 
-    value_keys = ("profile_path",)
+    value_keys = ("profile_path","metric","metric_values")
 
     @metric_value(engine=PandasExecutionEngine)
     def _pandas(
@@ -27,6 +27,8 @@ class DataProfilerTableColumnList(DataProfilerProfileMetricProvider):
         metrics,
         runtime_configuration,
     ):
+        metric = metric_value_kwargs["metric"]
+        metric_values = metric_value_kwargs["metric_values"]
         profile_report_column_data_stats: dict = metrics[
             "data_profiler.table_column_infos"
         ]
@@ -37,7 +39,11 @@ class DataProfilerTableColumnList(DataProfilerProfileMetricProvider):
             column_names=profile_report_column_names,
             batch_columns_list=metrics["table.columns"],
         )
-        return profile_report_column_names
+        profile_report_filtered_column_names:list = []
+        for col in profile_report_column_names:
+            if metrics['data_profiler.table_column_infos'][col][metric] in metric_values:
+                profile_report_filtered_column_names.append(col)
+        return profile_report_filtered_column_names
 
     @classmethod
     def _get_evaluation_dependencies(
