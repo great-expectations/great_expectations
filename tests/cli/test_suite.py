@@ -44,7 +44,6 @@ from tests.render.test_util import (
     load_notebook_from_path,
     run_notebook,
 )
-import great_expectations as gx
 
 PROFILER_CODE_CELL_USER_CONFIGURABLE_PROFILER: str = """\
 profiler = UserConfigurableProfiler(
