@@ -756,9 +756,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         else:
             datasource_name = kwargs.get("name", "")
 
-    def _update_fluent_datasource(self, datasource: FluentDatasource) -> None:
-        # NOTE: this is not called
-        self.datasources[datasource.name] = datasource
         if not datasource_name:
             raise gx_exceptions.DataContextError(
                 "Can not write the fluent datasource, because no name was provided."
