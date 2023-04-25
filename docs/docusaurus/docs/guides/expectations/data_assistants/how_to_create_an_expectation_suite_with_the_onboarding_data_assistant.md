@@ -8,20 +8,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 This guide demonstrates how to use the Onboarding Data Assistant to Profile your data and automate the generation of an
 Expectation Suite, which you can then adjust to be suited for your specific needs.
 
-:::note
-
-This process mirrors that of the Jupyter Notebook that is created when you run the following CLI command:
-
-```terminal
-great_expectations suite new --profile
-```
-:::
-
 <Prerequisites>
 
 - A [configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- The knowledge to [configure and save a Datasource](../../connecting_to_your_data/connect_to_data_overview.md).
-- The knowledge to [configure and save a Batch Request](../../connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md).
+- The knowledge to [configure a Datasource](../../connecting_to_your_data/connect_to_data_overview.md).
+- The knowledge to [configure a Batch Request](../../connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md).
 
 </Prerequisites>
 

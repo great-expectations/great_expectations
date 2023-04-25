@@ -2581,7 +2581,7 @@ class QueryExpectation(BatchExpectation, ABC):
                 "By not parameterizing your query with `{active_batch}`, "
                 "you may not be validating against your intended data asset, or the expectation may fail."
             )
-            assert all([re.match("{.*?}", x) for x in parsed_query]), (
+            assert all(re.match("{.*?}", x) for x in parsed_query), (
                 "Your query appears to have hard-coded references to your data. "
                 "By not parameterizing your query with `{active_batch}`, {col}, etc., "
                 "you may not be validating against your intended data asset, or the expectation may fail."

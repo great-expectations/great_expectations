@@ -305,7 +305,7 @@ class TestDynamicPandasAssets:
             .build_batch_request({"year": "2018"})
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # BatchRequest vs Optional[BatchRequestBase]
+            empty_data_context.get_validator(batch_request=batch_request)
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")
@@ -561,7 +561,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
         )
     ]
     # assert there are files that are not csv files
-    assert any([not file_name.endswith("csv") for file_name in all_files])
+    assert any(not file_name.endswith("csv") for file_name in all_files)
     # assert there are 12 files from 2018
     files_for_2018 = [
         file_name for file_name in all_files if file_name.find("2018") >= 0

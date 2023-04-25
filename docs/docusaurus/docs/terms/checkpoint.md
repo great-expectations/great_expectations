@@ -8,6 +8,10 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
 ## Overview

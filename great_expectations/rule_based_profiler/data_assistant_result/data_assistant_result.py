@@ -723,7 +723,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
                 title_font_weight: int = altair_theme["title"]["fontWeight"]
                 subtitle_font_weight: int = altair_theme["title"]["subtitleFontWeight"]
                 url_font_weights: str = ";".join(
-                    {str(title_font_weight), str(subtitle_font_weight)}
+                    [str(subtitle_font_weight), str(title_font_weight)]
                 )
 
                 font_url = f"{font_family_url}:wght@{url_font_weights}&display=swap"
@@ -3146,7 +3146,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         table_based_metric_names: Set[Union[tuple[str, ...], str]] = set()
         for metrics in metric_expectation_map.keys():
-            if all([metric.startswith("table") for metric in metrics]):
+            if all(metric.startswith("table") for metric in metrics):
                 table_based_metric_names.add(metrics)
 
         charts: list[alt.Chart] = []
@@ -3247,7 +3247,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
 
         column_based_metric_names: Set[Union[tuple[str, ...], str]] = set()
         for metrics in metric_expectation_map.keys():
-            if all([metric.startswith("column") for metric in metrics]):
+            if all(metric.startswith("column") for metric in metrics):
                 if plot_mode == PlotMode.DIAGNOSTIC:
                     column_based_metric_names.add(metrics)
                 if plot_mode == PlotMode.DESCRIPTIVE:
@@ -4055,7 +4055,7 @@ Use DataAssistantResult.metrics_by_domain to show all calculated Metrics"""
     def _all_metric_names_in_iterable(
         metric_names: Set[str], iterable: Iterable[str]
     ) -> bool:
-        return all([metric_name in iterable for metric_name in metric_names])
+        return all(metric_name in iterable for metric_name in metric_names)
 
     @staticmethod
     def _get_all_columns_from_column_dfs(

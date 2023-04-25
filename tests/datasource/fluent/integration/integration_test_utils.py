@@ -52,7 +52,7 @@ def run_checkpoint_and_data_doc(
     context.add_expectation_suite(expectation_suite_name=suite_name)
     # noinspection PyTypeChecker
     validator = context.get_validator(
-        batch_request=batch_request,  # type: ignore[arg-type] # expected BatchRequestBase got BatchRequest
+        batch_request=batch_request,
         expectation_suite_name=suite_name,
     )
     validator.expect_table_row_count_to_be_between(0, 10000)

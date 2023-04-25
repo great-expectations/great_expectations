@@ -294,7 +294,7 @@ class TestDynamicPandasAssets:
             .build_batch_request()
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # expects BatchRequestBase
+            empty_data_context.get_validator(batch_request=batch_request)
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")
@@ -471,10 +471,8 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.sources.pandas_default.assets) == 2
     assert all(
-        [
-            asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
-            for asset in empty_data_context.sources.pandas_default.assets
-        ]
+        asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
+        for asset in empty_data_context.sources.pandas_default.assets
     )
 
 

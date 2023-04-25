@@ -14,8 +14,7 @@
 - [How to instantiate a specific Filesystem Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context)
 
 **In-memory Data Contexts**
-- [How to explicitly instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
-- [How to instantiate a Data Context without a yml file](/docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file)
+- [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
 
 </details>
 

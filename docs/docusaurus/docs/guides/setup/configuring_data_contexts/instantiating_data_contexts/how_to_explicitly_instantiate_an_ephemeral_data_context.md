@@ -1,5 +1,5 @@
 ---
-title: How to explicitly instantiate an Ephemeral Data Context
+title: How to instantiate an Ephemeral Data Context
 tag: [how-to, setup]
 keywords: [Great Expectations, Ephemeral Data Context]
 ---
