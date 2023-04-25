@@ -530,6 +530,17 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"] = "pandas"
     assets: List[_PandasDataAsset] = []
 
+    def dict(self, **kwargs):
+        # print(f"dict() {kwargs}")
+        ds_dict = super().dict(**kwargs)
+        assets = ds_dict.pop("assets", None)
+        if assets:
+            assets = [a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME]
+            if assets:
+                ds_dict["assets"] = assets
+        # print(pf(ds_dict))
+        return ds_dict
+
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
