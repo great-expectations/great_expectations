@@ -5,6 +5,7 @@ import dataclasses
 import functools
 import logging
 import uuid
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -57,6 +58,10 @@ if TYPE_CHECKING:
 
 
 class TestConnectionError(Exception):
+    pass
+
+
+class GxSerializationWarning(UserWarning):
     pass
 
 
@@ -550,7 +555,10 @@ class Datasource(
     def _save_context_project_config(self):
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
-            self._data_context._save_project_config()
+            try:
+                self._data_context._save_project_config()
+            except TypeError as type_err:
+                warnings.warn(str(type_err), GxSerializationWarning)
 
     @staticmethod
     def parse_order_by_sorters(
