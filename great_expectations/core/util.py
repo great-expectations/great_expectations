@@ -984,7 +984,7 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
     if len(slice_params) == 0:
         return slice(0, None, None)
     elif len(slice_params) == 1 and slice_params[0] is not None:
-        return slice(slice_params[0] - 1, slice_params[0], None)
+        return _batch_slice_from_int(batch_slice=slice_params[0])
     elif len(slice_params) == 2:
         return slice(slice_params[0], slice_params[1], None)
     elif len(slice_params) == 3:
@@ -1010,13 +1010,20 @@ def _batch_slice_from_list_or_tuple(batch_slice: list[int] | tuple[int, ...]) ->
         )
 
 
+def _batch_slice_from_int(batch_slice: int) -> slice:
+    if batch_slice == -1:
+        return slice(batch_slice, None, None)
+    else:
+        return slice(batch_slice, batch_slice + 1, None)
+
+
 def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
     if batch_slice is None:
         return slice(0, None, None)
     elif isinstance(batch_slice, slice):
         return batch_slice
     elif isinstance(batch_slice, int):
-        return slice(batch_slice, batch_slice + 1, None)
+        return _batch_slice_from_int(batch_slice=batch_slice)
     elif isinstance(batch_slice, str):
         return _batch_slice_from_string(batch_slice=batch_slice)
     elif isinstance(batch_slice, (list, tuple)):
