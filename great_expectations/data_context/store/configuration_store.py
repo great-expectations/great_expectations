@@ -1,10 +1,10 @@
 import logging
 from typing import Optional, Union
 
-from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store.store import Store
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
@@ -19,10 +19,7 @@ from great_expectations.util import (
     verify_dynamic_loading_support,
 )
 
-yaml = YAML()
-
-yaml.indent(mapping=2, sequence=4, offset=2)
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
 
