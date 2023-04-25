@@ -143,4 +143,50 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    # cli(
+    #     [
+    #         "-c",
+    #         "/Users/davidtalbot/Developer/sc/devrel_repro/fds-cli/bds_only/great_expectations/great_expectations.yml",
+    #         "checkpoint",
+    #         "new",
+    #         "my_checkpoint2",
+    #     ]
+    # )
+
+    # cli(
+    #     [
+    #         "-c",
+    #         "/Users/davidtalbot/Developer/sc/devrel_repro/fds-cli/bds_and_fds/great_expectations/great_expectations.yml",
+    #         "datasource",
+    #         "delete",
+    #         "fds_pandas",
+    #     ]
+    # )
+
+    # cli(
+    #     [
+    #         "-c",
+    #         "/Users/davidtalbot/Developer/sc/devrel_repro/fds-cli/bds_and_fds/great_expectations/great_expectations.yml",
+    #         "datasource",
+    #         "list",
+    #     ]
+    # )
+
+    cli(
+        [
+            "-c",
+            "/Users/davidtalbot/Developer/sc/devrel_repro/fds-cli/bds_and_fds/great_expectations/great_expectations.yml",
+            "datasource",
+            "new",
+        ]
+    )
+
+    # cli(
+    #     [
+    #         "-c",
+    #         "/Users/davidtalbot/Developer/sc/devrel_repro/fds-cli/fds_only/great_expectations/great_expectations.yml",
+    #         "suite",
+    #         "edit",
+    #         "default"
+    #     ]
+    # )
