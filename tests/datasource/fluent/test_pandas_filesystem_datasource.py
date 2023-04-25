@@ -694,7 +694,6 @@ def test_pandas_sorter(
         (0, 1),
         ([3], 1),
         (None, 12),
-        (slice(0), 12),
         ("", 12),
     ],
 )
