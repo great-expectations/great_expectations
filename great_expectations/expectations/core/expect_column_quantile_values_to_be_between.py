@@ -279,10 +279,8 @@ class ExpectColumnQuantileValuesToBeBetween(ColumnAggregateExpectation):
             ), "quantile_ranges should be a dictionary"
 
             assert all(
-                [
-                    True if None in x or x == sorted(x) else False
-                    for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
-                ]
+                True if None in x or x == sorted(x) else False
+                for x in configuration.kwargs["quantile_ranges"]["value_ranges"]
             ), "quantile_ranges must consist of ordered pairs"
 
         except AssertionError as e:
