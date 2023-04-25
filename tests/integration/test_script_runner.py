@@ -277,7 +277,7 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/reference/glossary/batch_request.py",
     ),
     IntegrationTestFixture(
-        name="RNUME checkpoints_and_actions_core_concepts",
+        name="RUNME checkpoints_and_actions_core_concepts",
         user_flow_script="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
