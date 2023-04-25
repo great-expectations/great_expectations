@@ -15,7 +15,7 @@ context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 # </snippet>
 
 # parse great_expectations.yml for comparison
-great_expectations_yaml_file_path = os.path.join(
+great_expectations_yaml_file_path = pathlib.Path(
     full_path_to_project_directory, "great_expectations/great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
