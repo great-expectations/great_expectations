@@ -77,13 +77,14 @@ connecting_to_your_data = [
 ]
 
 deployment_patterns = [
-    IntegrationTestFixture(
-        name="deployment_pattern_spark_s3",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py",
-        # data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_context_dir=None,
-        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
-    )
+    # TODO: <Alex>ALEX -- uncomment next two (2) tests once Spark in Azure Pipelines is enabled.</Alex>
+    # IntegrationTestFixture(
+    #     name="deployment_pattern_spark_s3",
+    #     user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py",
+    #     # data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    #     data_context_dir=None,
+    #     backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
+    # )
 ]
 
 split_data = []

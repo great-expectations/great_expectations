@@ -299,6 +299,7 @@ stages:
             REDSHIFT_SSLMODE: $(REDSHIFT_SSLMODE)
 
     - job: test_docs_aws
+      # TODO: we currently don't do AWS + Spark
       timeoutInMinutes: 30
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true), eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       variables:
