@@ -530,6 +530,21 @@ class PandasDatasource(_PandasDatasource):
     type: Literal["pandas"] = "pandas"
     assets: List[_PandasDataAsset] = []
 
+    def dict(self, _exclude_default_asset_names: bool = True, **kwargs):
+        """Overriding `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""
+        # Overriding `.dict()` instead of `.json()` because `.json()`is only called from the outermost model,
+        # .dict() is called for deeply nested models.
+        ds_dict = super().dict(**kwargs)
+        if _exclude_default_asset_names:
+            assets = ds_dict.pop("assets", None)
+            if assets:
+                assets = [
+                    a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
+                ]
+                if assets:
+                    ds_dict["assets"] = assets
+        return ds_dict
+
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
@@ -545,7 +560,8 @@ class PandasDatasource(_PandasDatasource):
 
     def _get_validator(self, asset: _PandasDataAsset) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
-        return self._data_context.get_validator(batch_request=batch_request)
+        # TODO: raise error if `_data_context` not set
+        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
     def add_dataframe_asset(
         self,
