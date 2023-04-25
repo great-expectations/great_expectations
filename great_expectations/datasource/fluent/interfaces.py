@@ -77,7 +77,7 @@ BatchMetadata: TypeAlias = Dict[str, Any]
 class BatchRequest:
     datasource_name: str
     data_asset_name: str
-    options: BatchRequestOptions
+    options: BatchRequestOptions = dataclasses.field(default_factory=dict)
 
 
 @pydantic_dc.dataclass(frozen=True)

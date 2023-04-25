@@ -90,7 +90,6 @@ module.exports = {
             },
             'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context',
             'guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context',
-            'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file',
             {
               type: 'html',
               value: '<h4>Data Context Configuration</h4>',
@@ -313,8 +312,7 @@ module.exports = {
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
-            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' }
+            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' }
           ]
         },
         {
