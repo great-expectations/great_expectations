@@ -131,7 +131,10 @@ def lint(
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run code linter"""
+    """Run formatter (black) and linter (ruff)"""
+    fmt(ctx, path, check=not fix, pty=pty)
+
+    # Run code linter (ruff)
     cmds = ["ruff", path]
     if fix:
         cmds.append("--fix")

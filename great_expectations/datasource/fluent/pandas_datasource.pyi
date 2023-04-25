@@ -23,7 +23,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeAlias
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
@@ -53,8 +53,8 @@ if TYPE_CHECKING:
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type]
 
-MappingIntStrAny = Mapping[Union[int, str], Any]
-AbstractSetIntStr = AbstractSet[Union[int, str]]
+MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
+AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 logger: Logger
 _PandasDataFrameT = TypeVar("_PandasDataFrameT")
 

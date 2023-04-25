@@ -405,12 +405,10 @@ class CategoricalColumnDomainBuilder(ColumnDomainBuilder):
             column_name
             for column_name, resolved_metrics in resolved_metrics_by_column_name.items()
             if all(
-                [
-                    self.cardinality_checker.cardinality_within_limit(  # type: ignore[union-attr] # could be None
-                        metric_value=metric_value  # type: ignore[arg-type] # Expecting Union[int, float] (subset of "MetricValue").
-                    )
-                    for metric_value in resolved_metrics.values()
-                ]
+                self.cardinality_checker.cardinality_within_limit(  # type: ignore[union-attr] # could be None
+                    metric_value=metric_value  # type: ignore[arg-type] # Expecting Union[int, float] (subset of "MetricValue").
+                )
+                for metric_value in resolved_metrics.values()
             )
         ]
 
