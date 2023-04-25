@@ -199,6 +199,10 @@ stages:
     - job: public_api_report
       steps:
         - script: |
+            pip install .
+          displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+
+        - script: |
             python docs/sphinx_api_docs_source/public_api_report.py
           name: PublicAPIReport
 
