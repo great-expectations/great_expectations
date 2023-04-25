@@ -70,7 +70,7 @@ class TestConnectionError(Exception):
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
-BatchSlice: TypeAlias = Union[slice, str, List[int], int]
+BatchSlice: TypeAlias = Union[slice, str, Sequence[int], int]
 
 
 BatchMetadata: TypeAlias = Dict[str, Any]
@@ -81,7 +81,7 @@ class BatchRequest:
     datasource_name: str
     data_asset_name: str
     options: BatchRequestOptions = dataclasses.field(default_factory=dict)
-    batch_slice: slice = dataclasses.field(default=slice(0))
+    batch_slice: slice = dataclasses.field(default=slice(0, None, None))
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -161,9 +161,9 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
         elif param == "":
             slice_params.append(None)
     if len(slice_params) == 1 and slice_params[0] is not None:
-        return slice(slice_params[0] - 1, slice_params[0])
+        return slice(slice_params[0] - 1, slice_params[0], None)
     elif len(slice_params) == 2:
-        return slice(slice_params[0], slice_params[1])
+        return slice(slice_params[0], slice_params[1], None)
     elif len(slice_params) == 3:
         return slice(slice_params[0], slice_params[1], slice_params[2])
     else:
@@ -172,11 +172,15 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
         )
 
 
-def _batch_slice_from_list(batch_slice: list[int]) -> slice:
+def _batch_slice_from_sequence(batch_slice: Sequence[int]) -> slice:
     if len(batch_slice) == 0:
-        return slice(0)
+        return slice(0, None, None)
     elif len(batch_slice) == 1 and batch_slice[0] is not None:
         return slice(batch_slice[0] - 1, batch_slice[0])
+    elif len(batch_slice) == 2:
+        return slice(batch_slice[0], batch_slice[1])
+    elif len(batch_slice) == 3:
+        return slice(batch_slice[0], batch_slice[1], batch_slice[2])
     else:
         raise ValueError(
             f"batch_slice list must take the form of a python index, but {batch_slice} was provided."
@@ -301,11 +305,11 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         if isinstance(batch_slice, slice):
             return batch_slice
         elif isinstance(batch_slice, int):
-            return slice(batch_slice - 1, batch_slice)
+            return slice(batch_slice, batch_slice + 1, None)
         elif isinstance(batch_slice, str):
             return _batch_slice_from_string(batch_slice=batch_slice)
         elif isinstance(batch_slice, list):
-            return _batch_slice_from_list(batch_slice=batch_slice)
+            return _batch_slice_from_sequence(batch_slice=batch_slice)
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
