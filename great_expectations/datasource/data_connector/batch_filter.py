@@ -104,13 +104,17 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
 def _batch_slice_from_string(batch_slice: str) -> slice:
     # trim whitespace
     parsed_batch_slice = batch_slice.strip()
-    if parsed_batch_slice[0] == "[":
-        parsed_batch_slice = parsed_batch_slice[1:]
-    if parsed_batch_slice[-1] == "]":
-        parsed_batch_slice = parsed_batch_slice[:-1]
+
+    delimiter: str = ":"
+    if (parsed_batch_slice[0] in "[(") and (parsed_batch_slice[-1] in ")]"):
+        parsed_batch_slice = parsed_batch_slice[1:-1]
+    elif parsed_batch_slice.startswith("slice(") and parsed_batch_slice.endswith(")"):
+        parsed_batch_slice = parsed_batch_slice[5:-1]
+        delimiter = ","
+
     # split and convert string to int
     slice_params: list[int | None] = []
-    for param in parsed_batch_slice.split(":"):
+    for param in parsed_batch_slice.split(delimiter):
         if param:
             try:
                 slice_params.append(int(param))
@@ -118,8 +122,9 @@ def _batch_slice_from_string(batch_slice: str) -> slice:
                 raise ValueError(
                     f'Attempt to convert string slice index "{param}" to integer failed with message: {e}'
                 )
-        elif param == "":
+        else:
             slice_params.append(None)
+
     if len(slice_params) == 1 and slice_params[0] is not None:
         return slice(slice_params[0] - 1, slice_params[0], None)
     elif len(slice_params) == 2:
