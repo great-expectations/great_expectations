@@ -684,7 +684,7 @@ class _SQLAsset(DataAsset):
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
             batch_slice: A python slice that can be used to limit the sorted batches by index.
-                e.g. `batch_slice = [-5:]` will request only the last 5 batches after the options filter is applied.
+                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
