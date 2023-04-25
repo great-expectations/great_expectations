@@ -75,7 +75,7 @@ Or, for guides on using the block-config method for advanced SQL Datasource conf
 
 :::caution Datasources defined with the block-config method
 
-If you are using a Datasource that was created with the advanced block-config method please follow our guide on [how to configure a SQL Datasource with the block-config method](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md), instead.
+If you are using a Datasource that was created with the advanced block-config method please follow our guide on [how to configure a SQL Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource), instead.
 
 :::
 

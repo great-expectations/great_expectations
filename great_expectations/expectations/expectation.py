@@ -117,6 +117,7 @@ from great_expectations.render.util import (
 )
 from great_expectations.self_check.util import (
     evaluate_json_test_v3_api,
+    generate_dataset_name_from_expectation_name,
     generate_expectation_tests,
 )
 from great_expectations.util import camel_to_snake, is_parseable_date
@@ -303,7 +304,7 @@ class Expectation(metaclass=MetaExpectation):
         2. `success_keys`: a tuple of the *keys* used to determine the success of
            the expectation.
 
-    In some cases, subclasses of Expectation (such as TableExpectation) can
+    In some cases, subclasses of Expectation (such as BatchExpectation) can
     inherit these properties from their parent class.
 
     They *may* optionally override `runtime_keys` and `default_kwarg_values`, and
@@ -1427,10 +1428,10 @@ class Expectation(metaclass=MetaExpectation):
 
         # Set final maturity level based on status of all checks
         all_experimental = all(
-            [check.passed for check in maturity_checklist.experimental]
+            check.passed for check in maturity_checklist.experimental
         )
-        all_beta = all([check.passed for check in maturity_checklist.beta])
-        all_production = all([check.passed for check in maturity_checklist.production])
+        all_beta = all(check.passed for check in maturity_checklist.beta)
+        all_production = all(check.passed for check in maturity_checklist.production)
         if all_production and all_beta and all_experimental:
             library_metadata.maturity = Maturity.PRODUCTION
         elif all_beta and all_experimental:
@@ -1552,7 +1553,7 @@ class Expectation(metaclass=MetaExpectation):
         all_examples: List[dict] = self.examples or self._get_examples_from_json()
 
         included_examples = []
-        for example in all_examples:
+        for i, example in enumerate(all_examples, 1):
 
             included_test_cases = []
             # As of commit 7766bb5caa4e0 on 1/28/22, only_for does not need to be applied to individual tests
@@ -1597,6 +1598,15 @@ class Expectation(metaclass=MetaExpectation):
                     copied_example["test_backends"] = [
                         TestBackend(**tb) for tb in copied_example["test_backends"]
                     ]
+
+                if "dataset_name" not in copied_example:
+                    dataset_name = generate_dataset_name_from_expectation_name(
+                        dataset=copied_example,
+                        expectation_type=self.expectation_type,
+                        index=i,
+                    )
+                    copied_example["dataset_name"] = dataset_name
+
                 included_examples.append(ExpectationTestDataCases(**copied_example))
 
         return included_examples
@@ -2231,18 +2241,18 @@ class Expectation(metaclass=MetaExpectation):
 
 
 @public_api
-class TableExpectation(Expectation, ABC):
-    """Base class for TableExpectations.
+class BatchExpectation(Expectation, ABC):
+    """Base class for BatchExpectations.
 
-    TableExpectations answer a semantic question about the table itself.
+    BatchExpectations answer a semantic question about a Batch of data.
 
     For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer
     how many columns and rows are in your table.
 
-    TableExpectations must implement a `_validate(...)` method containing logic
+    BatchExpectations must implement a `_validate(...)` method containing logic
     for determining whether the Expectation is successfully validated.
 
-    TableExpectations may optionally provide implementations of `validate_configuration`,
+    BatchExpectations may optionally provide implementations of `validate_configuration`,
     which should raise an error if the configuration will not be usable for the Expectation.
 
     Raises:
@@ -2423,7 +2433,33 @@ representation."""
 
 
 @public_api
-class QueryExpectation(TableExpectation, ABC):
+class TableExpectation(BatchExpectation, ABC):
+    """Base class for TableExpectations.
+
+    WARNING: TableExpectation will be deprecated in a future release. Please use BatchExpectation instead.
+
+    TableExpectations answer a semantic question about the table itself.
+
+    For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer
+    how many columns and rows are in your table.
+
+    TableExpectations must implement a `_validate(...)` method containing logic
+    for determining whether the Expectation is successfully validated.
+
+    TableExpectations may optionally provide implementations of `validate_configuration`,
+    which should raise an error if the configuration will not be usable for the Expectation.
+
+    Raises:
+        InvalidExpectationConfigurationError: The configuration does not contain the values required by the Expectation.
+
+    Args:
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the
+            expectation.
+    """
+
+
+@public_api
+class QueryExpectation(BatchExpectation, ABC):
     """Base class for QueryExpectations.
 
     QueryExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
@@ -2515,7 +2551,7 @@ class QueryExpectation(TableExpectation, ABC):
                 "By not parameterizing your query with `{active_batch}`, "
                 "you may not be validating against your intended data asset, or the expectation may fail."
             )
-            assert all([re.match("{.*?}", x) for x in parsed_query]), (
+            assert all(re.match("{.*?}", x) for x in parsed_query), (
                 "Your query appears to have hard-coded references to your data. "
                 "By not parameterizing your query with `{active_batch}`, {col}, etc., "
                 "you may not be validating against your intended data asset, or the expectation may fail."
@@ -2532,8 +2568,8 @@ class QueryExpectation(TableExpectation, ABC):
 
 
 @public_api
-class ColumnExpectation(TableExpectation, ABC):
-    """Base class for column-type Expectations.
+class ColumnAggregateExpectation(BatchExpectation, ABC):
+    """Base class for column aggregate Expectations.
 
     These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
     number of unique values, column type, etc.
@@ -2574,7 +2610,36 @@ class ColumnExpectation(TableExpectation, ABC):
 
 
 @public_api
-class ColumnMapExpectation(TableExpectation, ABC):
+class ColumnExpectation(ColumnAggregateExpectation, ABC):
+    """Base class for column aggregate Expectations.
+
+    These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
+    number of unique values, column type, etc.
+
+    WARNING: This class will be deprecated in favor of ColumnAggregateExpectation, and removed in a future release.
+    If you're using this class, please update your code to use ColumnAggregateExpectation instead.
+    There is no change in functionality between the two classes; just a name change for clarity.
+
+    --Documentation--
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_aggregate_expectations/
+
+    Args:
+     domain_keys (tuple): A tuple of the keys used to determine the domain of the
+         expectation.
+     success_keys (tuple): A tuple of the keys used to determine the success of
+         the expectation.
+     default_kwarg_values (optional[dict]): Optional. A dictionary that will be used to fill unspecified
+         kwargs from the Expectation Configuration.
+
+         - A  "column" key is required for column expectations.
+
+    Raises:
+        InvalidExpectationConfigurationError: If no `column` is specified
+    """
+
+
+@public_api
+class ColumnMapExpectation(BatchExpectation, ABC):
     """Base class for ColumnMapExpectations.
 
     ColumnMapExpectations are evaluated for a column and ask a yes/no question about every row in the column.
@@ -2859,7 +2924,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
 
 @public_api
-class ColumnPairMapExpectation(TableExpectation, ABC):
+class ColumnPairMapExpectation(BatchExpectation, ABC):
     """Base class for ColumnPairMapExpectations.
 
     ColumnPairMapExpectations are evaluated for a pair of columns and ask a yes/no question about the row-wise
@@ -3125,7 +3190,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
 
 @public_api
-class MulticolumnMapExpectation(TableExpectation, ABC):
+class MulticolumnMapExpectation(BatchExpectation, ABC):
     """Base class for MulticolumnMapExpectations.
 
     MulticolumnMapExpectations are evaluated for a set of columns and ask a yes/no question about the

@@ -45,10 +45,10 @@ In this guide we will demonstrate the ways in which Batches can be organized in 
 </summary>
 
 Please reference the appropriate one of these guides:
-- [How to install GX locally](docs/guides/setup/installation/local.md)
-- [How to set up GX to work with data on AWS S3](docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
-- [How to set up GX to work with data in Azure Blob Storage](docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
-- [How to set up GX to work with data on GCS](docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
+- [How to install GX locally](/docs/guides/setup/installation/local)
+- [How to set up GX to work with data on AWS S3](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3)
+- [How to set up GX to work with data in Azure Blob Storage](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs)
+- [How to set up GX to work with data on GCS](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs)
 
 </details>
 
@@ -62,28 +62,28 @@ Please reference the appropriate one of these guides:
 Please reference the appropriate one of these guides:
 
 #### Local Filesystems
-- [How to connect to one or more files using Pandas](docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas.md)
-- [How to connect to one or more files using Spark](docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark.md)
+- [How to connect to one or more files using Pandas](/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_pandas)
+- [How to connect to one or more files using Spark](/docs/guides/connecting_to_your_data/fluent/filesystem/how_to_connect_to_one_or_more_files_using_spark)
 
 #### Google Cloud Storage
-- [How to connect to data on GCS using Pandas](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas.md)
-- [How to connect to data on GCS using Spark](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark.md)
+- [How to connect to data on GCS using Pandas](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_pandas)
+- [How to connect to data on GCS using Spark](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_gcs_using_spark)
 
 #### Azure Blob Storage
-- [How to connect to data in Azure Blob Storage using Pandas](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas.md)
-- [How to connect to data in Azure Blob Storage using Spark](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark.md)
+- [How to connect to data in Azure Blob Storage using Pandas](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_pandas)
+- [How to connect to data in Azure Blob Storage using Spark](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_azure_blob_storage_using_spark)
 
 #### Amazon Web Services S3
-- [How to connect to data on Amazon Web Services S3 using Pandas](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas.md)
-- [How to connect to data on Amazon Web Services S3 using Spark](docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark.md)
+- [How to connect to data on Amazon Web Services S3 using Pandas](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_pandas)
+- [How to connect to data on Amazon Web Services S3 using Spark](/docs/guides/connecting_to_your_data/fluent/cloud/how_to_connect_to_data_on_s3_using_spark)
 
 </details>
 
 :::caution Datasources defined with the block-config method
 
 If you are using a Datasource that was created with the advanced block-config method please follow the appropriate guide from:
-- [how to configure a Spark Datasource with the block-config method](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.md)
-- [how to configure a Pandas Datasource with the block-config method](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.md)
+- [how to configure a Spark Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
+- [how to configure a Pandas Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
 
 :::
 
@@ -124,7 +124,7 @@ In the above example, the named group "`year`" will match any four numeric chara
 
 By naming the group in your `batching_regex` you make it something you can reference in the future.  When requesting data from this Data Asset, you can use the names of your regular expression groups to limit the Batches that are returned.
 
-For more information, please see: [How to request data from a Data Asset](docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+For more information, please see: [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
 
 :::
 
@@ -181,11 +181,11 @@ for batch in batches:
 Now that you have further configured a file-based Data Asset, you may want to look into:
 
 ### Requesting Data from a Data Asset
-- [How to request data from a Data Asset](docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset.md)
+- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
 
 ### Using Data Assets to create Expectations
-- [Use a Data Asset to create Expectations while interactively evaluating a set of data](docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
+- [Use a Data Asset to create Expectations while interactively evaluating a set of data](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
+- [Use the Onboarding Data Assistant to evaluate one or more Batches of data and create Expectations](/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant)
 
 
 

@@ -8,7 +8,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
 
 </Prerequisites>
 

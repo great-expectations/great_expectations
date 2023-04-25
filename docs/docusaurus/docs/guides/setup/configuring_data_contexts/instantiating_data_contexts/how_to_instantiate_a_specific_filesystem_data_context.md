@@ -25,8 +25,8 @@ If you are using GX for multiple projects you may wish to utilize a different Da
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 - A previously initialized Filesystem Data Context
-    - [How to initialize a Filesystem Data Context in Python](docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
-    - [How to initialize a new Data Context with the CLI](docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md))
+    - [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python)
+    - [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli))
 - A passion for data quality
 
 </Prerequisites>
@@ -67,27 +67,27 @@ The `get_context(...)` method will then instantiate and return the newly initial
 ## Next steps
 
 For guidance on further customizing your Data Context's configurations for Metadata Stores and Data Docs, please see:
-- [How to configure an Expectation Store on a filesystem](docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem.md)
-- [How to configure a Validation Result Store on a filesystem](docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem.md)
-- [How to configure and use a Metric Store](docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore.md)
-- [How to host and share Data Docs on a filesystem](docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem.md)
+- [How to configure an Expectation Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_on_a_filesystem)
+- [How to configure a Validation Result Store on a filesystem](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_on_a_filesystem)
+- [How to configure and use a Metric Store](/docs/guides/setup/configuring_metadata_stores/how_to_configure_a_metricsstore)
+- [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)
 
 If you are content with the default configuration of your Data Context, you can move on to connecting GX to your source data:
-- [How to configure a Pandas Datasource](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.md)
-- [How to configure a Spark Datasource](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.md)
-- [How to configure a SQL Datasource](docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+- [How to configure a Pandas Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
+- [How to configure a Spark Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
+- [How to configure a SQL Datasource](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
 ## Additional information
 
 ### Related guides
+
+To initialize and instantiate a temporary Data Context, see: [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 
 <!-- TODO
 To instantiate an existing Data Context, reference:
 - How to quickly instantiate a Data Context
 - How to instantiate a specific Filesystem Data Context
 
-To initialize and instantiate a temporary Data Context, see:
-- How to explicitly instantiate an in-memory Ephemeral Data Context
 -->
 
 <!-- TODO

@@ -699,6 +699,28 @@ class TupleS3StoreBackend(TupleStoreBackend):
         all_keys = self.list_keys()
         return key in all_keys
 
+    def _assume_role_and_get_secret_credentials(self):
+        import boto3
+
+        role_session_name = "GXAssumeRoleSession"
+        client = boto3.client("sts", self._boto3_options.get("region_name"))
+        role_arn = self._boto3_options.pop("assume_role_arn")
+        assume_role_duration = self._boto3_options.pop("assume_role_duration")
+        response = client.assume_role(
+            RoleArn=role_arn,
+            RoleSessionName=role_session_name,
+            DurationSeconds=assume_role_duration,
+        )
+        self._boto3_options["aws_access_key_id"] = response["Credentials"][
+            "AccessKeyId"
+        ]
+        self._boto3_options["aws_secret_access_key"] = response["Credentials"][
+            "SecretAccessKey"
+        ]
+        self._boto3_options["aws_session_token"] = response["Credentials"][
+            "SessionToken"
+        ]
+
     @property
     def boto3_options(self):
         from botocore.client import Config
@@ -707,6 +729,8 @@ class TupleS3StoreBackend(TupleStoreBackend):
         if self._boto3_options.get("signature_version"):
             signature_version = self._boto3_options.pop("signature_version")
             result["config"] = Config(signature_version=signature_version)
+        if self._boto3_options.get("assume_role_arn"):
+            self._assume_role_and_get_secret_credentials()
         result.update(self._boto3_options)
 
         return result
@@ -815,9 +839,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     def _get(self, key):
         gcs_object_key = self._build_gcs_object_key(key)
 
-        from google.cloud import storage
+        from great_expectations.compatibility import google
 
-        gcs = storage.Client(project=self.project)
+        gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
         gcs_response_object = bucket.get_blob(gcs_object_key)
         if not gcs_response_object:
@@ -837,9 +861,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
     ):
         gcs_object_key = self._build_gcs_object_key(key)
 
-        from google.cloud import storage
+        from great_expectations.compatibility import google
 
-        gcs = storage.Client(project=self.project)
+        gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
         blob = bucket.blob(gcs_object_key)
 
@@ -853,9 +877,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return gcs_object_key
 
     def _move(self, source_key, dest_key, **kwargs) -> None:
-        from google.cloud import storage
+        from great_expectations.compatibility import google
 
-        gcs = storage.Client(project=self.project)
+        gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
 
         source_filepath = self._convert_key_to_filepath(source_key)
@@ -872,9 +896,9 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         # Note that the prefix arg is only included to maintain consistency with the parent class signature
         key_list = []
 
-        from google.cloud import storage
+        from great_expectations.compatibility import google
 
-        gcs = storage.Client(self.project)
+        gcs = google.storage.Client(self.project)
 
         for blob in gcs.list_blobs(self.bucket, prefix=self.prefix):
             gcs_object_name = blob.name
@@ -933,14 +957,13 @@ class TupleGCSStoreBackend(TupleStoreBackend):
         return path_url
 
     def remove_key(self, key):
-        from google.cloud import storage
-        from google.cloud.exceptions import NotFound
+        from great_expectations.compatibility import google
 
-        gcs = storage.Client(project=self.project)
+        gcs = google.storage.Client(project=self.project)
         bucket = gcs.bucket(self.bucket)
         try:
             bucket.delete_blobs(blobs=list(bucket.list_blobs(prefix=self.prefix)))
-        except NotFound:
+        except google.NotFound:
             return False
         return True
 
@@ -999,21 +1022,34 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
     @property
     @functools.lru_cache()
     def _container_client(self) -> Any:
+        from great_expectations.compatibility import azure
 
-        from azure.identity import DefaultAzureCredential
-        from azure.storage.blob import BlobServiceClient
-
-        if self.connection_string:
-            blob_service_client: BlobServiceClient = (
-                BlobServiceClient.from_connection_string(self.connection_string)
-            )
-        elif self.account_url:
-            blob_service_client = BlobServiceClient(
-                account_url=self.account_url, credential=DefaultAzureCredential()
-            )
+        # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
+        if azure.BlobServiceClient:
+            try:
+                if self.connection_string:
+                    blob_service_client: azure.BlobServiceClient = (
+                        azure.BlobServiceClient.from_connection_string(
+                            self.connection_string
+                        )
+                    )
+                elif self.account_url:
+                    blob_service_client = azure.BlobServiceClient(
+                        account_url=self.account_url,
+                        credential=azure.DefaultAzureCredential(),
+                    )
+                else:
+                    raise StoreBackendError(
+                        "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
+                    )
+            except Exception as e:
+                # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
+                raise StoreBackendError(
+                    f'Due to exception: "{str(e)}", "azure_client" could not be created.'
+                ) from e
         else:
             raise StoreBackendError(
-                "Unable to initialize ServiceClient, AZURE_STORAGE_CONNECTION_STRING should be set"
+                'Unable to create azure "BlobServiceClient" due to missing azure.storage.blob dependency.'
             )
 
         return blob_service_client.get_container_client(self.container)
@@ -1027,8 +1063,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         )
 
     def _set(self, key, value, content_encoding="utf-8", **kwargs):
-
-        from azure.storage.blob import ContentSettings
+        from great_expectations.compatibility.azure import ContentSettings
 
         az_blob_key = os.path.join(  # noqa: PTH118
             self.prefix, self._convert_key_to_filepath(key)

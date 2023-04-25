@@ -12,6 +12,7 @@ from great_expectations.cli import toolkit
 # noinspection PyPep8Naming
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.core import ExpectationSuite  # noqa: TCH001
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
@@ -32,9 +33,8 @@ from great_expectations.render.renderer.v3.suite_profile_notebook_renderer impor
     SuiteProfileNotebookRenderer,
 )
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
+if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = gx_exceptions.ProfilerError

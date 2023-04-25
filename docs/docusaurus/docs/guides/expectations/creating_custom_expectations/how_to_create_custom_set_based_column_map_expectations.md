@@ -4,7 +4,7 @@ title: How to create a Custom Set-Based Column Map Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`SetBasedColumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="ColumnMapExpectaion"/>. They are evaluated for a single column and ask whether each row in that column belongs to the specified set.
+**`SetBasedColumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="ColumnMapExpectation"/>. They are evaluated for a single column and ask whether each row in that column belongs to the specified set.
 
 Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid.  This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `SetBasedColumnMapExpectation` as a `float` between 0 and 1.
 

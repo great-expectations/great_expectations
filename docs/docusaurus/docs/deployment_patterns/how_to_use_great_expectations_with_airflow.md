@@ -7,8 +7,8 @@ This guide will help you run a Great Expectations checkpoint in Apache Airflow, 
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../tutorials/getting_started/tutorial_overview.md)
-- [Created an Expectation Suite](../tutorials/getting_started/tutorial_create_expectations.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- [Created an Expectation Suite](/docs/guides/expectations/create_expectations_overview)
 - [Created a checkpoint for that Expectation Suite and a data asset](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md)
 - Created an Airflow DAG file
 

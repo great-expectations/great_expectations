@@ -16,7 +16,7 @@ from great_expectations.data_context.cloud_constants import (
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from great_expectations.exceptions import StoreBackendError
+from great_expectations.exceptions import StoreBackendError, StoreBackendTransientError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 logger = logging.getLogger(__name__)
@@ -245,7 +245,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
-            raise StoreBackendError(
+            raise StoreBackendTransientError(
                 "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
 
@@ -298,7 +298,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
-            raise StoreBackendError(
+            raise StoreBackendTransientError(
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
@@ -380,7 +380,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
-            raise StoreBackendError(
+            raise StoreBackendTransientError(
                 "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
@@ -493,7 +493,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
-            raise StoreBackendError(
+            raise StoreBackendTransientError(
                 "Unable to delete object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
@@ -503,17 +503,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
-        # Due to list_keys being inconsistently sized (due to the possible of resource names),
-        # we remove any resource names and assert against key ids.
-
-        def _shorten_key(key) -> Tuple[str, str]:
-            if len(key) > 2:
-                key = key[:2]
-            return key
-
-        key = _shorten_key(key)
-        all_keys = set(map(_shorten_key, self.list_keys()))
-        return key in all_keys
+        try:
+            _ = self._get(key)
+        except StoreBackendTransientError:
+            raise
+        except StoreBackendError as e:
+            logger.info(f"Could not find object associated with key {key}: {e}")
+            return False
+        return True
 
     @property
     def config(self) -> dict:

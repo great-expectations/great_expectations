@@ -1,5 +1,5 @@
 ---
-title: How to get one or more Batches of data from a configured Datasource
+title: How to get one or more Batches from a Datasource configured with the block-config method
 ---
 import Prerequisites from '../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
@@ -10,7 +10,7 @@ A <TechnicalTag tag="validator" text="Validator" /> knows how to <TechnicalTag t
 
 <Prerequisites>
 
-- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
+- [Configured and loaded a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
 - [Configured a Datasource and Data Connector](../../terms/datasource.md)
   
 </Prerequisites>

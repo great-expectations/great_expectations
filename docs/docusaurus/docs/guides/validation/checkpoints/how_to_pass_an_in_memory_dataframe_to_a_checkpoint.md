@@ -7,12 +7,16 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This guide will help you pass an in-memory DataFrame to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" />. This is especially useful if you already have your data in memory due to an existing process such as a pipeline runner.
 
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 
 </Prerequisites>
 
@@ -31,7 +35,7 @@ If you have an existing configured DataContext in your filesystem in the form of
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py get_context"
 ```
 
-If you do not have a filesystem to work with, you can load your DataContext following the instructions in [How to instantiate a Data Context without a yml file](../../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md).
+If you do not have a filesystem to work with, you can load your DataContext following the instructions in [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 
 ### 2. Connect to your data
 #### Ensure your DataContext contains a Datasource with a RuntimeDataConnector

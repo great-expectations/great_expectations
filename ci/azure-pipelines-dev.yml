@@ -123,7 +123,7 @@ stages:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -144,18 +144,21 @@ stages:
 
     jobs:
     - job: static_type_check
+      variables:
+        python.version: '3.8'
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.7
-        displayName: 'Use Python 3.7'
+          versionSpec: $(python.version)
+        displayName: 'Use Python $(python.version)'
       - script: |
+          python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
-          invoke type-check --ci --pretty
+          invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
       - script: |
           # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources
+          invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
         name: TypeCheckStubSourceFiles
 
     - job: docstring_linter
@@ -213,7 +216,7 @@ stages:
              versionSpec: '3.7'
            displayName: 'Use Python 3.7'
 
-         - bash: python -m pip install --upgrade pip==21.3.1
+         - bash: python -m pip install --upgrade pip
            displayName: 'Update pip'
 
          - script: |
@@ -224,13 +227,13 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
-  - stage: quickstart
+  - stage: runme_script_runner_tests
     dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-20.04'
 
     jobs:
-      - job: quickstart
+      - job: runme_script_runner_tests
 
         steps:
           - task: UsePythonVersion@0
@@ -243,14 +246,35 @@ stages:
               pip uninstall -y sqlalchemy
             displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
+          # tests containing the name "RUNME" are run
           - script: |
-              pytest -v --no-sqlalchemy --docs-tests -m integration -k "test_docs[quickstart]" tests/integration/test_script_runner.py
-            displayName: 'Run Quickstart'
+              pytest -v --no-sqlalchemy --docs-tests -m integration -k "RUNME" tests/integration/test_script_runner.py
+            displayName: 'Run Flagged Tests'
+
+      - job: runme_script_runner_tests_postgres
+
+        services:
+          postgres: postgres
+
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
+
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test, postgresql]"
+            displayName: 'Install GX and required dependencies'
+
+          # tests containing the name "RUNME_POSTGRES" are run
+          - script: |
+              pytest -v --postgresql --docs-tests -m integration -k "RUNME_POSTGRES" tests/integration/test_script_runner.py
+            displayName: 'Run Flagged Tests'
 
 
 
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, quickstart]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -276,7 +300,7 @@ stages:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -339,7 +363,7 @@ stages:
               versionSpec: '3.7'
             displayName: 'Use Python 3.7'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -394,7 +418,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==20.2.4
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -431,7 +455,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -481,7 +505,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -521,7 +545,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |
@@ -573,7 +597,7 @@ stages:
               versionSpec: '$(python.version)'
             displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip==21.3.1
+          - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
 
           - script: |

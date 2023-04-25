@@ -31,6 +31,16 @@ import numpy as np
 import pandas as pd
 from dateutil.parser import parse
 
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.pandas_compatibility import (
+    execute_pandas_to_datetime,
+)
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import (
     ExpectationConfigurationSchema,
     ExpectationSuite,
@@ -47,7 +57,6 @@ from great_expectations.core.util import (
 from great_expectations.dataset import PandasDataset
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
-from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.exceptions.exceptions import (
     ExecutionEngineError,
     InvalidExpectationConfigurationError,
@@ -73,6 +82,8 @@ from great_expectations.util import (
 )
 from great_expectations.validator.validator import Validator
 
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
+
 if TYPE_CHECKING:
     from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
         ExpectationTestCase,
@@ -88,55 +99,25 @@ expectationSuiteValidationResultSchema = ExpectationSuiteValidationResultSchema(
 expectationConfigurationSchema = ExpectationConfigurationSchema()
 expectationSuiteSchema = ExpectationSuiteSchema()
 
+# mysql and mssql allow table names to be a maximum of 128 characters
+# for postgres it is 63.
+MAX_TABLE_NAME_LENGTH: int = 63
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy as sqlalchemy
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    Engine = None
-    SQLAlchemyError = None
-    logger.debug("Unable to load SqlAlchemy or one of its subclasses.")
-
-try:
-    from pyspark.sql import DataFrame as SparkDataFrame
-    from pyspark.sql import SparkSession
-    from pyspark.sql.types import StructType
-except ImportError:
-    SparkDataFrame = type(None)  # type: ignore[assignment,misc]
-    SparkSession = None  # type: ignore[assignment,misc]
-    StructType = None  # type: ignore[assignment,misc]
-
-try:
-    from pyspark.sql import DataFrame as spark_DataFrame
-except ImportError:
-    spark_DataFrame = type(None)  # type: ignore[assignment,misc]
-
-try:
-    import sqlalchemy.dialects.sqlite as sqlitetypes
-
-    # noinspection PyPep8Naming
-    from sqlalchemy.dialects.sqlite import dialect as sqliteDialect
-
+if sqlalchemy.sqlite:
     SQLITE_TYPES = {
-        "VARCHAR": sqlitetypes.VARCHAR,
-        "CHAR": sqlitetypes.CHAR,
-        "INTEGER": sqlitetypes.INTEGER,
-        "SMALLINT": sqlitetypes.SMALLINT,
-        "DATETIME": sqlitetypes.DATETIME(truncate_microseconds=True),
-        "DATE": sqlitetypes.DATE,
-        "FLOAT": sqlitetypes.FLOAT,
-        "BOOLEAN": sqlitetypes.BOOLEAN,
-        "TIMESTAMP": sqlitetypes.TIMESTAMP,
+        "VARCHAR": sqlalchemy.sqlite.VARCHAR,
+        "CHAR": sqlalchemy.sqlite.CHAR,
+        "INTEGER": sqlalchemy.sqlite.INTEGER,
+        "SMALLINT": sqlalchemy.sqlite.SMALLINT,
+        "DATETIME": sqlalchemy.sqlite.DATETIME(truncate_microseconds=True),
+        "DATE": sqlalchemy.sqlite.DATE,
+        "FLOAT": sqlalchemy.sqlite.FLOAT,
+        "BOOLEAN": sqlalchemy.sqlite.BOOLEAN,
+        "TIMESTAMP": sqlalchemy.sqlite.TIMESTAMP,
     }
-except (ImportError, KeyError):
-    sqlitetypes = None
-    sqliteDialect = None
+else:
     SQLITE_TYPES = {}
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
@@ -145,7 +126,7 @@ try:
     import sqlalchemy_bigquery as BigQueryDialect
     import sqlalchemy_bigquery as sqla_bigquery
 
-    sqlalchemy.dialects.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
     # noinspection PyTypeChecker
     bigquery_types_tuple = None
     BIGQUERY_TYPES = {
@@ -226,8 +207,10 @@ except ImportError:
 
 
 try:
-    import sqlalchemy.dialects.postgresql as postgresqltypes
-    from sqlalchemy.dialects.postgresql import dialect as postgresqlDialect
+    import sqlalchemy.dialects.postgresql as postgresqltypes  # noqa: TID251
+
+    # noinspection PyPep8Naming
+    from sqlalchemy.dialects.postgresql import dialect as pgDialect  # noqa: TID251
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -243,14 +226,14 @@ try:
     }
 except (ImportError, KeyError):
     postgresqltypes = None
-    postgresqlDialect = None
+    pgDialect = None
     POSTGRESQL_TYPES = {}
 
 try:
-    import sqlalchemy.dialects.mysql as mysqltypes
+    import sqlalchemy.dialects.mysql as mysqltypes  # noqa: TID251
 
     # noinspection PyPep8Naming
-    from sqlalchemy.dialects.mysql import dialect as mysqlDialect
+    from sqlalchemy.dialects.mysql import dialect as mysqlDialect  # noqa: TID251
 
     MYSQL_TYPES = {
         "TEXT": mysqltypes.TEXT,
@@ -274,10 +257,10 @@ except (ImportError, KeyError):
 try:
     # SQLAlchemy does not export the "INT" type for the MS SQL Server dialect; however "INT" is supported by the engine.
     # Since SQLAlchemy exports the "INTEGER" type for the MS SQL Server dialect, alias "INT" to the "INTEGER" type.
-    import sqlalchemy.dialects.mssql as mssqltypes
+    import sqlalchemy.dialects.mssql as mssqltypes  # noqa: TID251
 
     # noinspection PyPep8Naming
-    from sqlalchemy.dialects.mssql import dialect as mssqlDialect
+    from sqlalchemy.dialects.mssql import dialect as mssqlDialect  # noqa: TID251
 
     try:
         getattr(mssqltypes, "INT")
@@ -558,19 +541,18 @@ def get_dataset(  # noqa: C901 - 110
         return PandasDataset(df, profiler=profiler, caching=caching)
 
     elif dataset_type == "SparkDFDataset":
-        import pyspark.sql.types as sparktypes
 
         spark_types = {
-            "StringType": sparktypes.StringType,
-            "IntegerType": sparktypes.IntegerType,
-            "LongType": sparktypes.LongType,
-            "DateType": sparktypes.DateType,
-            "TimestampType": sparktypes.TimestampType,
-            "FloatType": sparktypes.FloatType,
-            "DoubleType": sparktypes.DoubleType,
-            "BooleanType": sparktypes.BooleanType,
-            "DataType": sparktypes.DataType,
-            "NullType": sparktypes.NullType,
+            "StringType": pyspark.types.StringType,
+            "IntegerType": pyspark.types.IntegerType,
+            "LongType": pyspark.types.LongType,
+            "DateType": pyspark.types.DateType,
+            "TimestampType": pyspark.types.TimestampType,
+            "FloatType": pyspark.types.FloatType,
+            "DoubleType": pyspark.types.DoubleType,
+            "BooleanType": pyspark.types.BooleanType,
+            "DataType": pyspark.types.DataType,
+            "NullType": pyspark.types.NullType,
         }
         spark = get_or_create_spark_application(
             spark_config={
@@ -588,9 +570,9 @@ def get_dataset(  # noqa: C901 - 110
             schema = schemas["spark"]
             # sometimes first method causes Spark to throw a TypeError
             try:
-                spark_schema = sparktypes.StructType(
+                spark_schema = pyspark.types.StructType(
                     [
-                        sparktypes.StructField(
+                        pyspark.types.StructField(
                             column, spark_types[schema[column]](), True
                         )
                         for column in schema
@@ -636,9 +618,9 @@ def get_dataset(  # noqa: C901 - 110
                 )  # create a list of rows
                 spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
             except TypeError:
-                string_schema = sparktypes.StructType(
+                string_schema = pyspark.types.StructType(
                     [
-                        sparktypes.StructField(column, sparktypes.StringType())
+                        pyspark.types.StructField(column, pyspark.types.StringType())
                         for column in schema
                     ]
                 )
@@ -650,9 +632,9 @@ def get_dataset(  # noqa: C901 - 110
         elif len(data_reshaped) == 0:
             # if we have an empty dataset and no schema, need to assign an arbitrary type
             columns = list(data.keys())
-            spark_schema = sparktypes.StructType(
+            spark_schema = pyspark.types.StructType(
                 [
-                    sparktypes.StructField(column, sparktypes.StringType())
+                    pyspark.types.StructField(column, pyspark.types.StringType())
                     for column in columns
                 ]
             )
@@ -737,13 +719,13 @@ def _get_test_validator_with_data_pandas(
 
             # We will use timestamp for timezone-aware (UTC only) dates in our tests
             if value.lower() in ["timestamp", "datetime64[ns, tz]"]:
-                df[key] = pd.to_datetime(df[key], utc=True)
+                df[key] = execute_pandas_to_datetime(df[key], utc=True)
                 continue
             elif value.lower() in ["datetime", "datetime64", "datetime64[ns]"]:
-                df[key] = pd.to_datetime(df[key])
+                df[key] = execute_pandas_to_datetime(df[key])
                 continue
             elif value.lower() in ["date"]:
-                df[key] = pd.to_datetime(df[key]).dt.date
+                df[key] = execute_pandas_to_datetime(df[key]).dt.date
                 value = "object"
             try:
                 type_ = np.dtype(value)
@@ -783,7 +765,7 @@ def _get_test_validator_with_data_sqlalchemy(
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator | None:
-    if not create_engine:
+    if not sa:
         return None
 
     if table_name is None:
@@ -811,19 +793,18 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     context: AbstractDataContext | None,
     pk_column: bool,
 ) -> Validator:
-    import pyspark.sql.types as sparktypes
 
     spark_types: dict = {
-        "StringType": sparktypes.StringType,
-        "IntegerType": sparktypes.IntegerType,
-        "LongType": sparktypes.LongType,
-        "DateType": sparktypes.DateType,
-        "TimestampType": sparktypes.TimestampType,
-        "FloatType": sparktypes.FloatType,
-        "DoubleType": sparktypes.DoubleType,
-        "BooleanType": sparktypes.BooleanType,
-        "DataType": sparktypes.DataType,
-        "NullType": sparktypes.NullType,
+        "StringType": pyspark.types.StringType,
+        "IntegerType": pyspark.types.IntegerType,
+        "LongType": pyspark.types.LongType,
+        "DateType": pyspark.types.DateType,
+        "TimestampType": pyspark.types.TimestampType,
+        "FloatType": pyspark.types.FloatType,
+        "DoubleType": pyspark.types.DoubleType,
+        "BooleanType": pyspark.types.BooleanType,
+        "DataType": pyspark.types.DataType,
+        "NullType": pyspark.types.NullType,
     }
 
     spark = get_or_create_spark_application(
@@ -842,9 +823,11 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
             schema["pk_index"] = "IntegerType"
         # sometimes first method causes Spark to throw a TypeError
         try:
-            spark_schema = sparktypes.StructType(
+            spark_schema = pyspark.types.StructType(
                 [
-                    sparktypes.StructField(column, spark_types[schema[column]](), True)
+                    pyspark.types.StructField(
+                        column, spark_types[schema[column]](), True
+                    )
                     for column in schema
                 ]
             )
@@ -888,9 +871,9 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
             )  # create a list of rows
             spark_df = spark.createDataFrame(data_reshaped, schema=spark_schema)
         except TypeError:
-            string_schema = sparktypes.StructType(
+            string_schema = pyspark.types.StructType(
                 [
-                    sparktypes.StructField(column, sparktypes.StringType())
+                    pyspark.types.StructField(column, pyspark.types.StringType())
                     for column in schema
                 ]
             )
@@ -902,9 +885,9 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     elif len(data_reshaped) == 0:
         # if we have an empty dataset and no schema, need to assign an arbitrary type
         columns = list(data.keys())
-        spark_schema = sparktypes.StructType(
+        spark_schema = pyspark.types.StructType(
             [
-                sparktypes.StructField(column, sparktypes.StringType())
+                pyspark.types.StructField(column, pyspark.types.StringType())
                 for column in columns
             ]
         )
@@ -968,7 +951,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     dialect_classes: Dict[str, Type] = {}
     dialect_types = {}
     try:
-        dialect_classes["sqlite"] = sqlitetypes.dialect
+        dialect_classes["sqlite"] = sqlalchemy.sqlite.dialect
         dialect_types["sqlite"] = SQLITE_TYPES
     except AttributeError:
         pass
@@ -1016,7 +999,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     if sa_engine_name == "sqlite":
         connection_string = get_sqlite_connection_url(sqlite_db_path)
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "postgresql":
         connection_string = f"postgresql://postgres@{db_hostname}/test_ci"
         engine = connection_manager.get_connection(connection_string)
@@ -1025,25 +1008,25 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
         engine = connection_manager.get_connection(connection_string)
     elif sa_engine_name == "mssql":
         connection_string = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
-        engine = create_engine(
+        engine = sa.create_engine(
             connection_string,
             # echo=True,
         )
     elif sa_engine_name == "bigquery":
         connection_string = _get_bigquery_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "trino":
         connection_string = _get_trino_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "redshift":
         connection_string = _get_redshift_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "athena":
         connection_string = _get_athena_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     elif sa_engine_name == "snowflake":
         connection_string = _get_snowflake_connection_string()
-        engine = create_engine(connection_string)
+        engine = sa.create_engine(connection_string)
     else:
         connection_string = None
         engine = None
@@ -1103,7 +1086,7 @@ def build_sa_validator_with_data(  # noqa: C901 - 39
                 "TIMESTAMP_LTZ",
                 "TIMESTAMP_TZ",
             ]:
-                df[col] = pd.to_datetime(df[col])
+                df[col] = execute_pandas_to_datetime(df[col])
             elif type_ in ["VARCHAR", "STRING"]:
                 df[col] = df[col].apply(str)
 
@@ -1215,8 +1198,8 @@ def modify_locale(func):
 
 
 def build_spark_validator_with_data(
-    df: Union[pd.DataFrame, SparkDataFrame],
-    spark: SparkSession,
+    df: Union[pd.DataFrame, pyspark.DataFrame],
+    spark: pyspark.SparkSession,
     batch_definition: Optional[BatchDefinition] = None,
     context: Optional[AbstractDataContext] = None,
 ) -> Validator:
@@ -1271,7 +1254,7 @@ def build_sa_engine(
     table_name: str = "test"
 
     # noinspection PyUnresolvedReferences
-    sqlalchemy_engine: Engine = sa.create_engine("sqlite://", echo=False)
+    sqlalchemy_engine: sqlalchemy.Engine = sa.create_engine("sqlite://", echo=False)
     add_dataframe_to_db(
         df=df,
         name=table_name,
@@ -1302,9 +1285,9 @@ def build_sa_engine(
 
 # Builds a Spark Execution Engine
 def build_spark_engine(
-    spark: SparkSession,
-    df: Union[pd.DataFrame, SparkDataFrame],
-    schema: Optional[StructType] = None,
+    spark: pyspark.SparkSession,
+    df: Union[pd.DataFrame, pyspark.DataFrame],
+    schema: Optional[pyspark.types.StructType] = None,
     batch_id: Optional[str] = None,
     batch_definition: Optional[BatchDefinition] = None,
 ) -> SparkDFExecutionEngine:
@@ -1593,10 +1576,9 @@ def build_test_backends_list(  # noqa: C901 - 48
         test_backends += ["pandas"]
 
     if include_spark:
-        try:
-            import pyspark  # noqa: F401
-            from pyspark.sql import SparkSession  # noqa: F401
-        except ImportError:
+        from great_expectations.compatibility import pyspark
+
+        if not pyspark.SparkSession:  # type: ignore[truthy-function]
             if raise_exceptions_for_backends is True:
                 raise ValueError(
                     "spark tests are requested, but pyspark is not installed"
@@ -1653,7 +1635,7 @@ def build_test_backends_list(  # noqa: C901 - 48
 
         if include_mysql:
             try:
-                engine = create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
+                engine = sa.create_engine(f"mysql+pymysql://root@{db_hostname}/test_ci")
                 conn = engine.connect()
                 conn.close()
             except (ImportError, SQLAlchemyError):
@@ -1673,7 +1655,7 @@ def build_test_backends_list(  # noqa: C901 - 48
         if include_mssql:
             # noinspection PyUnresolvedReferences
             try:
-                engine = create_engine(
+                engine = sa.create_engine(
                     f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?"
                     "driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true",
                     # echo=True,
@@ -2750,7 +2732,7 @@ def generate_test_table_name(
 def generate_dataset_name_from_expectation_name(
     dataset: dict, expectation_type: str, index: int, sub_index: int | None = None
 ) -> str:
-    """Method to generate datset_name for tests. Will either use the name defined in the test
+    """Method to generate dataset_name for tests. Will either use the name defined in the test
     configuration ("dataset_name"), or generate one using the Expectation name and index. In cases where
     the dataset is a list, then an additional index will be used.
 
@@ -2772,11 +2754,48 @@ def generate_dataset_name_from_expectation_name(
         dataset_name = dataset.get(
             "dataset_name", f"{expectation_type}_dataset_{index}_{sub_index}"
         )
+
+    dataset_name = _check_if_valid_dataset_name(dataset_name)
     return dataset_name
 
 
-def _create_bigquery_engine() -> Engine:
-    return create_engine(_get_bigquery_connection_string())
+def _check_if_valid_dataset_name(dataset_name: str) -> str:
+    """Check that dataset_name (ie. table name) is valid before adding data to table.
+
+    A valid dataset_name must:
+
+        1. Contain only alphanumeric characters and `_`
+        2. Not be longer than 63 characters (which is the limit for postgres)
+        3. Begin with letter
+
+    Args:
+        dataset_name (str): dataset_name passed in by user or generated by generate_dataset_name_from_expectation_name()
+
+    Returns: dataset_name
+
+    """
+    if not re.match(r"^[A-Za-z0-9_]+$", dataset_name):
+        raise ExecutionEngineError(
+            f"dataset_name: {dataset_name} is not valid, because it contains non-alphanumeric and _ characters."
+            f"Please check your configuration."
+        )
+
+    if len(dataset_name) >= MAX_TABLE_NAME_LENGTH:
+        # starting from the end, so that we always get the index and sub_index
+        new_dataset_name = dataset_name[-MAX_TABLE_NAME_LENGTH:]
+        logger.info(
+            f"dataset_name: '{dataset_name}' was truncated to '{new_dataset_name}' to keep within length limits."
+        )
+        dataset_name = new_dataset_name
+
+    while not re.match(r"^[A-Za-z]+$", dataset_name[0]):
+        dataset_name = dataset_name[1:]
+
+    return dataset_name
+
+
+def _create_bigquery_engine() -> sqlalchemy.Engine:
+    return sa.create_engine(_get_bigquery_connection_string())
 
 
 def _get_bigquery_connection_string() -> str:
@@ -2800,20 +2819,19 @@ def _bigquery_dataset() -> str:
 
 def _create_trino_engine(
     hostname: str = "localhost", schema_name: str = "schema"
-) -> Engine:
-    engine = create_engine(
+) -> sqlalchemy.Engine:
+    engine = sa.create_engine(
         _get_trino_connection_string(hostname=hostname, schema_name=schema_name)
     )
-    from sqlalchemy import text
     from trino.exceptions import TrinoUserError
 
     with engine.begin() as conn:
         try:
             schemas = conn.execute(
-                text(f"show schemas from memory like {repr(schema_name)}")
+                sa.text(f"show schemas from memory like {repr(schema_name)}")
             ).fetchall()
             if (schema_name,) not in schemas:
-                conn.execute(text(f"create schema {schema_name}"))
+                conn.execute(sa.text(f"create schema {schema_name}"))
         except TrinoUserError:
             pass
 
@@ -2853,8 +2871,8 @@ def _get_trino_connection_string(
     return f"trino://test@{hostname}:8088/memory/{schema_name}"
 
 
-def _create_redshift_engine() -> Engine:
-    return create_engine(_get_redshift_connection_string())
+def _create_redshift_engine() -> sqlalchemy.Engine:
+    return sa.create_engine(_get_redshift_connection_string())
 
 
 def _get_redshift_connection_string() -> str:
@@ -2898,8 +2916,12 @@ def _get_redshift_connection_string() -> str:
     return url
 
 
-def _create_athena_engine(db_name_env_var: str = "ATHENA_DB_NAME") -> Engine:
-    return create_engine(_get_athena_connection_string(db_name_env_var=db_name_env_var))
+def _create_athena_engine(
+    db_name_env_var: str = "ATHENA_DB_NAME",
+) -> sqlalchemy.Engine:
+    return sa.create_engine(
+        _get_athena_connection_string(db_name_env_var=db_name_env_var)
+    )
 
 
 def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> str:
@@ -2925,8 +2947,8 @@ def _get_athena_connection_string(db_name_env_var: str = "ATHENA_DB_NAME") -> st
     return url
 
 
-def _create_snowflake_engine() -> Engine:
-    return create_engine(_get_snowflake_connection_string())
+def _create_snowflake_engine() -> sqlalchemy.Engine:
+    return sa.create_engine(_get_snowflake_connection_string())
 
 
 def _get_snowflake_connection_string() -> str:

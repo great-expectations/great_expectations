@@ -14,44 +14,39 @@ import numpy as np
 import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import pyspark
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_function_types import (
     SummarizationMetricNameSuffixes,
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.execution_engine.sqlalchemy_execution_engine import (
-    OperationalError,
-)
-from great_expectations.expectations.metrics.import_manager import F, quoted_name
 from great_expectations.expectations.metrics.map_metric_provider.is_sqlalchemy_metric_selectable import (
     _is_sqlalchemy_metric_selectable,
 )
 from great_expectations.expectations.metrics.util import (
-    Insert,
-    Label,
-    Select,
     compute_unexpected_pandas_indices,
     get_dbms_compatible_column_names,
     get_sqlalchemy_source_table_and_schema,
     sql_statement_with_post_compile_to_string,
     verify_column_names_exist,
 )
-from great_expectations.optional_imports import sqlalchemy as sa
 from great_expectations.util import (
     generate_temporary_table_name,
     get_sqlalchemy_selectable,
 )
 
 if TYPE_CHECKING:
-    import pyspark
-
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
         SqlAlchemyExecutionEngine,
     )
 
-    # from great_expectations.expectations.metrics.import_manager import quoted_name
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +87,9 @@ def _pandas_map_condition_index(
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
 
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
@@ -115,7 +112,7 @@ def _pandas_map_condition_index(
 
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
         verify_column_names_exist(
@@ -125,7 +122,7 @@ def _pandas_map_condition_index(
 
     # column pair expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = list()
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         verify_column_names_exist(
@@ -184,7 +181,9 @@ def _pandas_map_condition_query(
         domain_kwargs=domain_kwargs
     )
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
 
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
@@ -199,7 +198,7 @@ def _pandas_map_condition_query(
             ]
 
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
         verify_column_names_exist(
@@ -231,7 +230,9 @@ def _pandas_map_condition_rows(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
 
         column_name = get_dbms_compatible_column_names(
             column_names=column_name,
@@ -250,7 +251,7 @@ def _pandas_map_condition_rows(
             df = df[df[column_name].notnull()]
 
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
         verify_column_names_exist(
@@ -314,7 +315,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     # The integral values are cast to SQL Numeric in order to avoid a bug in AWS Redshift (converted to integer later).
-    count_case_statement: List[Label] = sa.case(
+    count_case_statement: List[sqlalchemy.Label] = sa.case(
         (
             unexpected_condition,
             sa.sql.expression.cast(1, sa.Numeric),
@@ -322,7 +323,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         else_=sa.sql.expression.cast(0, sa.Numeric),
     ).label("condition")
 
-    count_selectable: Select = sa.select(count_case_statement)
+    count_selectable: sqlalchemy.Select = sa.select(count_case_statement)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         count_selectable = count_selectable.select_from(selectable)
@@ -334,7 +335,8 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             )
 
             with execution_engine.engine.begin():
-                metadata: sa.MetaData = sa.MetaData(execution_engine.engine)
+                metadata: sa.MetaData = sa.MetaData()
+                metadata.reflect(bind=execution_engine.engine)
                 temp_table_obj: sa.Table = sa.Table(
                     temp_table_name,
                     metadata,
@@ -344,24 +346,30 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 )
                 temp_table_obj.create(execution_engine.engine, checkfirst=True)
 
-                inner_case_query: Insert = temp_table_obj.insert().from_select(
-                    [count_case_statement],
-                    count_selectable,
+                inner_case_query: sqlalchemy.Insert = (
+                    temp_table_obj.insert().from_select(
+                        [count_case_statement],
+                        count_selectable,
+                    )
                 )
                 execution_engine.engine.execute(inner_case_query)
 
                 count_selectable = temp_table_obj
 
         count_selectable = get_sqlalchemy_selectable(count_selectable)
-        unexpected_count_query: Select = (
+        unexpected_count_query: sqlalchemy.Select = (
             sa.select(
                 sa.func.sum(sa.column("condition")).label("unexpected_count"),
             )
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
-
-        unexpected_count: Union[float, int] = execution_engine.engine.execute(
+        if sqlalchemy.Engine and isinstance(execution_engine.engine, sqlalchemy.Engine):
+            connection = execution_engine.engine.connect()
+        else:
+            # execution_engine.engine is already a Connection. Use it directly
+            connection = execution_engine.engine
+        unexpected_count: Union[float, int] = connection.execute(
             sa.select(
                 unexpected_count_query.c[
                     f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
@@ -375,7 +383,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         except TypeError:
             unexpected_count = 0
 
-    except OperationalError as oe:
+    except sqlalchemy.OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
@@ -418,7 +426,7 @@ def _sqlalchemy_map_condition_rows(
         query = query.limit(result_format["partial_unexpected_count"])
     try:
         return execution_engine.engine.execute(query).fetchall()
-    except OperationalError as oe:
+    except sqlalchemy.OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {str(oe)}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
             message=exception_message
@@ -457,17 +465,19 @@ def _sqlalchemy_map_condition_query(
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
         domain_column_name_list.append(column_name)
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
         domain_column_name_list = column_list
     # column-map expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = list()
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         domain_column_name_list = column_list
@@ -541,17 +551,19 @@ def _sqlalchemy_map_condition_index(
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
         domain_column_name_list.append(column_name)
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
         domain_column_name_list = column_list
     # column-map expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = list()
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         domain_column_name_list = column_list
@@ -719,18 +731,20 @@ def _spark_map_condition_index(
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
         domain_column_name_list.append(column_name)
 
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = accessor_domain_kwargs[
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = accessor_domain_kwargs[
             "column_list"
         ]
         domain_column_name_list = column_list
     # column-map expectations
     elif "column_A" in accessor_domain_kwargs and "column_B" in accessor_domain_kwargs:
-        column_list: List[Union[str, quoted_name]] = list()
+        column_list: List[Union[str, sqlalchemy.quoted_name]] = list()
         column_list.append(accessor_domain_kwargs["column_A"])
         column_list.append(accessor_domain_kwargs["column_B"])
         domain_column_name_list = column_list
@@ -766,7 +780,10 @@ def _spark_map_condition_index(
             )
 
     if result_format["result_format"] != "COMPLETE":
-        filtered.limit(result_format["partial_unexpected_count"])
+        filtered = filtered.limit(result_format["partial_unexpected_count"])
+
+    # Prune the dataframe down only the columns we care about
+    filtered = filtered.select(columns_to_keep)
 
     for row in filtered.collect():
         dict_to_add: dict = {}

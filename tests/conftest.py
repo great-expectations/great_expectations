@@ -19,6 +19,9 @@ import pytest
 from freezegun import freeze_time
 
 import great_expectations as gx
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.domain import (
     INFERRED_SEMANTIC_TYPE_KEY,
@@ -77,7 +80,6 @@ from great_expectations.datasource.data_connector.util import (
     get_filesystem_one_level_directory_glob_path_list,
 )
 from great_expectations.datasource.new_datasource import BaseDatasource, Datasource
-from great_expectations.df_to_database_loader import add_dataframe_to_db
 from great_expectations.render.renderer_configuration import MetaNotesFormat
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.config.base import (
@@ -106,8 +108,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
-    import pyspark.sql
-    from pyspark.sql import SparkSession
+    from great_expectations.compatibility import pyspark
 
 yaml = YAMLHandler()
 ###
@@ -128,7 +129,7 @@ def spark_warehouse_session(tmp_path_factory):
     pyspark = pytest.importorskip("pyspark")  # noqa: F841
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: SparkSession = get_or_create_spark_application(
+    spark: pyspark.SparkSession = get_or_create_spark_application(
         spark_config={
             "spark.sql.catalogImplementation": "in-memory",
             "spark.executor.memory": "450m",
@@ -361,25 +362,23 @@ def no_usage_stats(monkeypatch):
 @pytest.fixture(scope="module")
 def sa(test_backends):
     if not any(
-        [
-            dbms in test_backends
-            for dbms in [
-                "postgresql",
-                "sqlite",
-                "mysql",
-                "mssql",
-                "bigquery",
-                "trino",
-                "redshift",
-                "athena",
-                "snowflake",
-            ]
+        dbms in test_backends
+        for dbms in [
+            "postgresql",
+            "sqlite",
+            "mysql",
+            "mssql",
+            "bigquery",
+            "trino",
+            "redshift",
+            "athena",
+            "snowflake",
         ]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         try:
-            import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             return sa
         except ImportError:
@@ -388,14 +387,13 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends) -> SparkSession:
+def spark_session(test_backends) -> pyspark.SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    try:
-        import pyspark  # noqa: F401
-        from pyspark.sql import SparkSession  # noqa: F401
+    from great_expectations.compatibility import pyspark
 
+    if pyspark.SparkSession:
         return get_or_create_spark_application(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
@@ -403,8 +401,8 @@ def spark_session(test_backends) -> SparkSession:
                 # "spark.driver.allowMultipleContexts": "true",  # This directive does not appear to have any effect.
             }
         )
-    except ImportError:
-        raise ValueError("spark tests are requested, but pyspark is not installed")
+
+    raise ValueError("spark tests are requested, but pyspark is not installed")
 
 
 @pytest.fixture
@@ -427,35 +425,62 @@ def spark_df_taxi_data_schema(spark_session):
     """
 
     # will not import unless we have a spark_session already passed in as fixture
-    from pyspark.sql.types import (
-        DoubleType,
-        IntegerType,
-        StringType,
-        StructField,
-        StructType,
-        TimestampType,
-    )
+    from great_expectations.compatibility import pyspark
 
-    schema = StructType(
+    schema = pyspark.types.StructType(
         [
-            StructField("vendor_id", IntegerType(), True, None),
-            StructField("pickup_datetime", TimestampType(), True, None),
-            StructField("dropoff_datetime", TimestampType(), True, None),
-            StructField("passenger_count", IntegerType(), True, None),
-            StructField("trip_distance", DoubleType(), True, None),
-            StructField("rate_code_id", IntegerType(), True, None),
-            StructField("store_and_fwd_flag", StringType(), True, None),
-            StructField("pickup_location_id", IntegerType(), True, None),
-            StructField("dropoff_location_id", IntegerType(), True, None),
-            StructField("payment_type", IntegerType(), True, None),
-            StructField("fare_amount", DoubleType(), True, None),
-            StructField("extra", DoubleType(), True, None),
-            StructField("mta_tax", DoubleType(), True, None),
-            StructField("tip_amount", DoubleType(), True, None),
-            StructField("tolls_amount", DoubleType(), True, None),
-            StructField("improvement_surcharge", DoubleType(), True, None),
-            StructField("total_amount", DoubleType(), True, None),
-            StructField("congestion_surcharge", DoubleType(), True, None),
+            pyspark.types.StructField(
+                "vendor_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "pickup_datetime", pyspark.types.TimestampType(), True, None
+            ),
+            pyspark.types.StructField(
+                "dropoff_datetime", pyspark.types.TimestampType(), True, None
+            ),
+            pyspark.types.StructField(
+                "passenger_count", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "trip_distance", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "rate_code_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "store_and_fwd_flag", pyspark.types.StringType(), True, None
+            ),
+            pyspark.types.StructField(
+                "pickup_location_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "dropoff_location_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "payment_type", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "fare_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField("extra", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField(
+                "mta_tax", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tip_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tolls_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "improvement_surcharge", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "total_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "congestion_surcharge", pyspark.types.DoubleType(), True, None
+            ),
         ]
     )
     return schema
@@ -866,7 +891,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -876,9 +901,11 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(  # noqa: PTH118
-                "test_fixtures",
-                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
             ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
@@ -1040,10 +1067,7 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
 
     if (
         any(
-            [
-                dbms in test_backends
-                for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
-            ]
+            dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
         )
         and (sa is not None)
         and is_library_loadable(library_name="sqlalchemy")
@@ -1098,7 +1122,7 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
 
 
 @pytest.fixture
-def deterministic_asset_dataconnector_context(
+def deterministic_asset_data_connector_context(
     tmp_path_factory,
     monkeypatch,
 ):
@@ -1115,7 +1139,12 @@ def deterministic_asset_dataconnector_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            "./test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
+            ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
@@ -1459,6 +1488,104 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
 
 @pytest.fixture
+def titanic_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
+    tmp_path_factory,
+    monkeypatch,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_no_block_no_fluent_datasources_stats_enabled.yml",
+                )
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
+    )
+
+    context = get_context(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    path_to_folder_containing_csv_files = pathlib.Path(data_path)
+
+    datasource_name = "my_pandas_filesystem_datasource"
+    datasource = context.sources.add_pandas_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    # noinspection PyUnusedLocal
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    # noinspection PyUnusedLocal
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
 def empty_context_with_checkpoint(empty_data_context):
     context = empty_data_context
     root_dir = empty_data_context.root_directory
@@ -1703,10 +1830,11 @@ def titanic_sqlite_db(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:///{titanic_db_path}")
-        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
-            0
-        ] == (1313,)
-        return engine
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
+            return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
 
@@ -1719,9 +1847,10 @@ def titanic_sqlite_db_connection_string(sa):
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
         engine = create_engine(f"sqlite:////{titanic_db_path}")
-        assert engine.execute(sa.text("select count(*) from titanic")).fetchall()[
-            0
-        ] == (1313,)
+        with engine.begin() as connection:
+            assert connection.execute(
+                sa.text("select count(*) from titanic")
+            ).fetchall()[0] == (1313,)
         return f"sqlite:///{titanic_db_path}"
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -1759,7 +1888,8 @@ def empty_sqlite_db(sa):
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
-        assert engine.execute(sa.text("select 1")).fetchall()[0] == (1,)
+        with engine.begin() as connection:
+            assert connection.execute(sa.text("select 1")).fetchall()[0] == (1,)
         return engine
     except ImportError:
         raise ValueError("sqlite tests require sqlalchemy to be installed")
@@ -2125,6 +2255,60 @@ def filesystem_csv_data_context(
     return empty_data_context
 
 
+@pytest.fixture()
+def data_context_with_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.add_datasource(
+        "rad_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_fluent_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    # noinspection PyProtectedMember
+    empty_data_context._save_project_config()
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_fluent_datasource_and_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_fluent_datasource", base_directory=str(filesystem_csv_2)
+    )
+    empty_data_context.add_datasource(
+        "my_block_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
+
+
 @pytest.fixture
 def filesystem_csv(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("filesystem_csv")
@@ -2279,18 +2463,17 @@ def sqlite_view_engine(test_backends):
                 con=sqlite_engine,
                 index=True,
             )
-            with sqlite_engine.connect() as connection:
-                with connection.begin():
-                    connection.execute(
-                        sa.text(
-                            "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
-                        )
+            with sqlite_engine.begin() as connection:
+                connection.execute(
+                    sa.text(
+                        "CREATE TEMP VIEW test_temp_view AS SELECT * FROM test_table where a < 4;"
                     )
-                    connection.execute(
-                        sa.text(
-                            "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
-                        )
+                )
+                connection.execute(
+                    sa.text(
+                        "CREATE VIEW test_view AS SELECT * FROM test_table where a > 4;"
                     )
+                )
             return sqlite_engine
         except ImportError:
             sa = None
@@ -2324,8 +2507,10 @@ def test_db_connection_string(tmp_path_factory, test_backends):
         basepath = str(tmp_path_factory.mktemp("db_context"))
         path = os.path.join(basepath, "test.db")  # noqa: PTH118
         engine = sa.create_engine("sqlite:///" + str(path))
-        df1.to_sql(name="table_1", con=engine, index=True)
-        df2.to_sql(name="table_2", con=engine, index=True, schema="main")
+        add_dataframe_to_db(df=df1, name="table_1", con=engine, index=True)
+        add_dataframe_to_db(
+            df=df2, name="table_2", con=engine, index=True, schema="main"
+        )
 
         # Return a connection string to this newly-created db
         return "sqlite:///" + str(path)
@@ -7452,7 +7637,7 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index() -> pd.DataF
 @pytest.fixture
 def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark.sql.dataframe.DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7482,7 +7667,7 @@ def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark.sql.dataframe.DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7499,7 +7684,7 @@ def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> pyspark.sql.dataframe.DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],

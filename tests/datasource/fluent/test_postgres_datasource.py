@@ -1,8 +1,19 @@
 from __future__ import annotations
 
+import copy
 from contextlib import contextmanager
 from pprint import pprint
-from typing import Any, Callable, ContextManager, Dict, Generator, List, Optional, Tuple
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    ContextManager,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Tuple,
+)
 
 import pytest
 from pydantic import ValidationError
@@ -28,6 +39,10 @@ from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from tests.datasource.fluent.conftest import sqlachemy_execution_engine_mock_cls
 from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
+
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
 _DEFAULT_TEST_MONTHS = list(range(1, 13))
@@ -38,6 +53,7 @@ def _source(
     validate_batch_spec: Callable[[SqlAlchemyDatasourceBatchSpec], None],
     dialect: str,
     connection_string: str = "postgresql+psycopg2://postgres:@localhost/test_ci",
+    data_context: Optional[AbstractDataContext] = None,
     splitter_query_response: Optional[List[Dict[str, Any]]] = None,
     create_temp_table: bool = True,
 ) -> Generator[PostgresDatasource, None, None]:
@@ -57,11 +73,14 @@ def _source(
     original_override = PostgresDatasource.execution_engine_override  # type: ignore[misc]
     try:
         PostgresDatasource.execution_engine_override = execution_eng_cls  # type: ignore[misc]
-        yield PostgresDatasource(
+        postgres_datasource = PostgresDatasource(
             name="my_datasource",
             connection_string=connection_string,  # type: ignore[arg-type] # coerced
             create_temp_table=create_temp_table,
         )
+        if data_context:
+            postgres_datasource._data_context = data_context
+        yield postgres_datasource
     finally:
         PostgresDatasource.execution_engine_override = original_override  # type: ignore[misc]
 
@@ -83,7 +102,7 @@ def test_construct_postgres_datasource(create_source: CreateSourceFixture):
     ) as source:
         assert source.name == "my_datasource"
         assert source.execution_engine_type is SqlAlchemyExecutionEngine
-        assert source.assets == {}
+        assert source.assets == []
 
 
 def assert_table_asset(
@@ -128,7 +147,7 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_splitter_year_and_month(column_name="my_col")
         assert len(source.assets) == 1
-        assert asset == list(source.assets.values())[0]
+        assert asset == source.assets[0]
         assert_table_asset(
             asset=asset,
             name="my_asset",
@@ -155,7 +174,7 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
 
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         assert len(source.assets) == 1
-        assert asset == list(source.assets.values())[0]
+        assert asset == source.assets[0]
         assert_table_asset(
             asset=asset,
             name="my_asset",
@@ -202,7 +221,7 @@ def create_and_add_table_asset_without_testing_connection(
     )
     # TODO: asset custom init
     table_asset._datasource = source
-    source.assets[table_asset.name] = table_asset
+    source.assets.append(table_asset)
     return source, table_asset
 
 
@@ -241,7 +260,7 @@ def test_construct_table_asset_directly_with_splitter(create_source):
 
 
 @pytest.mark.unit
-def test_datasource_gets_batch_list_no_splitter(create_source):
+def test_datasource_gets_batch_list_no_splitter(empty_data_context, create_source):
     def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
         assert spec == {
             "batch_identifiers": {},
@@ -252,7 +271,9 @@ def test_datasource_gets_batch_list_no_splitter(create_source):
         }
 
     with create_source(
-        validate_batch_spec=validate_batch_spec, dialect="postgresql"
+        validate_batch_spec=validate_batch_spec,
+        dialect="postgresql",
+        data_context=empty_data_context,
     ) as source:
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
@@ -290,6 +311,7 @@ def assert_batches_correct_with_year_month_splitter_defaults(batches):
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_options(
+    empty_data_context,
     create_source: CreateSourceFixture,
 ):
     batch_specs = []
@@ -298,7 +320,9 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
         batch_specs.append(spec)
 
     with create_source(
-        validate_batch_spec=collect_batch_spec, dialect="postgresql"
+        validate_batch_spec=collect_batch_spec,
+        dialect="postgresql",
+        data_context=empty_data_context,
     ) as source:
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
@@ -313,6 +337,7 @@ def test_datasource_gets_batch_list_splitter_with_unspecified_batch_request_opti
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_none(
+    empty_data_context,
     create_source: CreateSourceFixture,
 ):
     batch_specs = []
@@ -321,7 +346,9 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
         batch_specs.append(spec)
 
     with create_source(
-        validate_batch_spec=collect_batch_spec, dialect="postgresql"
+        validate_batch_spec=collect_batch_spec,
+        dialect="postgresql",
+        data_context=empty_data_context,
     ) as source:
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
@@ -340,6 +367,7 @@ def test_datasource_gets_batch_list_splitter_with_batch_request_options_set_to_n
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_request_options(
+    empty_data_context,
     create_source: CreateSourceFixture,
 ):
     batch_specs = []
@@ -351,6 +379,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
     with create_source(
         validate_batch_spec=collect_batch_spec,
         dialect="postgresql",
+        data_context=empty_data_context,
         splitter_query_response=[
             {"year": year, "month": month} for month in list(range(1, 13))
         ],
@@ -384,6 +413,7 @@ def test_datasource_gets_batch_list_splitter_with_partially_specified_batch_requ
 
 @pytest.mark.unit
 def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
+    empty_data_context,
     create_source: CreateSourceFixture,
 ):
     year = 2022
@@ -403,6 +433,7 @@ def test_datasource_gets_batch_list_with_fully_specified_batch_request_options(
     with create_source(
         validate_batch_spec=validate_batch_spec,
         dialect="postgresql",
+        data_context=empty_data_context,
         splitter_query_response=[{"month": month, "year": year}],
     ) as source:
         source, asset = create_and_add_table_asset_without_testing_connection(
@@ -504,10 +535,14 @@ def test_bad_batch_request_passed_into_get_batch_list_from_batch_request(
     [{}, {"year": 2021}, {"year": 2021, "month": 10}, {"year": None, "month": 10}],
 )
 def test_get_batch_list_from_batch_request_with_good_batch_request(
-    create_source: CreateSourceFixture, batch_request_options
+    empty_data_context,
+    create_source: CreateSourceFixture,
+    batch_request_options,
 ):
     with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        data_context=empty_data_context,
     ) as source:
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
@@ -620,10 +655,14 @@ def test_get_bad_batch_request(create_source: CreateSourceFixture):
         ),
     ],
 )
-def test_sort_batch_list_by_metadata(sort_info, create_source: CreateSourceFixture):
+def test_sort_batch_list_by_metadata(
+    empty_data_context, sort_info, create_source: CreateSourceFixture
+):
     sort_keys, sort_values = sort_info
     with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        data_context=empty_data_context,
     ) as source:
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
@@ -650,9 +689,13 @@ def test_sort_batch_list_by_metadata(sort_info, create_source: CreateSourceFixtu
 
 
 @pytest.mark.unit
-def test_sort_batch_list_by_unknown_key(create_source: CreateSourceFixture):
+def test_sort_batch_list_by_unknown_key(
+    empty_data_context, create_source: CreateSourceFixture
+):
     with create_source(
-        validate_batch_spec=lambda _: None, dialect="postgresql"
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        data_context=empty_data_context,
     ) as source:
         source, asset = create_and_add_table_asset_without_testing_connection(
             source=source, name="my_asset", table_name="my_table"
@@ -737,9 +780,25 @@ def test_datasource_dict_has_properties(create_source):
         asset.add_sorters(["year", "month"])
         source_dict = source.dict()
         pprint(source_dict)
-        assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)
+        assert isinstance(
+            list(
+                filter(
+                    lambda element: element["name"] == "my_asset",
+                    source_dict["assets"],
+                )
+            )[0]["order_by"],
+            list,
+        )
         # type should be in dumped dict even if not explicitly set
-        assert "type" in source_dict["assets"]["my_asset"]
+        assert (
+            "type"
+            in list(
+                filter(
+                    lambda element: element["name"] == "my_asset",
+                    source_dict["assets"],
+                )
+            )[0]
+        )
 
 
 @pytest.mark.unit
@@ -846,7 +905,9 @@ def bad_configuration_datasource(
     return PostgresDatasource(
         name="postgres_datasource",
         connection_string=connection_string,
-        assets={"table_asset": table_asset},
+        assets=[
+            table_asset,
+        ],
     )
 
 
@@ -873,7 +934,7 @@ def test_test_connection_failures(
 
 
 @pytest.mark.unit
-def test_query_data_asset(create_source):
+def test_query_data_asset(empty_data_context, create_source):
     query = "SELECT * FROM my_table"
 
     def validate_batch_spec(spec: SqlAlchemyDatasourceBatchSpec) -> None:
@@ -885,7 +946,9 @@ def test_query_data_asset(create_source):
         }
 
     with create_source(
-        validate_batch_spec=validate_batch_spec, dialect="postgresql"
+        validate_batch_spec=validate_batch_spec,
+        dialect="postgresql",
+        data_context=empty_data_context,
     ) as source:
         asset = source.add_query_asset(
             name="query_asset", query="SELECT * FROM my_table"
@@ -906,6 +969,7 @@ def test_non_select_query_data_asset(create_source):
 
 @pytest.mark.unit
 def test_splitter_year(
+    empty_data_context,
     create_source: CreateSourceFixture,
 ):
     years = [2020, 2021]
@@ -917,6 +981,7 @@ def test_splitter_year(
     with create_source(
         validate_batch_spec=collect_batch_spec,
         dialect="postgresql",
+        data_context=empty_data_context,
         splitter_query_response=[{"year": year} for year in years],
     ) as source:
         # We use a query asset because then we don't have to mock out db connection tests
@@ -939,6 +1004,7 @@ def test_splitter_year(
 
 @pytest.mark.unit
 def test_splitter_year_and_month(
+    empty_data_context,
     create_source: CreateSourceFixture,
 ):
     years = [2020, 2021]
@@ -951,6 +1017,7 @@ def test_splitter_year_and_month(
     with create_source(
         validate_batch_spec=collect_batch_spec,
         dialect="postgresql",
+        data_context=empty_data_context,
         splitter_query_response=[
             {"year": year, "month": month} for year in years for month in months
         ],
@@ -979,6 +1046,7 @@ def test_splitter_year_and_month(
 
 @pytest.mark.unit
 def test_splitter_year_and_month_and_day(
+    empty_data_context,
     create_source: CreateSourceFixture,
 ):
     years = [2020, 2021]
@@ -992,6 +1060,7 @@ def test_splitter_year_and_month_and_day(
     with create_source(
         validate_batch_spec=collect_batch_spec,
         dialect="postgresql",
+        data_context=empty_data_context,
         splitter_query_response=[
             {"year": year, "month": month, "day": day}
             for year in years
@@ -1141,6 +1210,7 @@ def test_splitter_year_and_month_and_day(
     ],
 )
 def test_splitter(
+    empty_data_context,
     create_source: CreateSourceFixture,
     add_splitter_method,
     splitter_kwargs,
@@ -1154,6 +1224,7 @@ def test_splitter(
     with create_source(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
+        data_context=empty_data_context,
         splitter_query_response=[response for response in splitter_query_responses],
     ) as source:
         asset = source.add_query_asset(name="query_asset", query="SELECT * from table")
@@ -1174,6 +1245,7 @@ def test_splitter(
 
 @pytest.mark.unit
 def test_sorting_none_in_metadata(
+    empty_data_context,
     create_source: CreateSourceFixture,
 ):
     years = [None, 2020, 2021]
@@ -1181,6 +1253,7 @@ def test_sorting_none_in_metadata(
     with create_source(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
+        data_context=empty_data_context,
         splitter_query_response=[{"year": year} for year in years],
     ) as source:
         # We use a query asset because then we don't have to mock out db connection tests
@@ -1195,10 +1268,11 @@ def test_sorting_none_in_metadata(
 
 
 @pytest.mark.unit
-def test_create_temp_table(create_source):
+def test_create_temp_table(empty_data_context, create_source):
     with create_source(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
+        data_context=empty_data_context,
         create_temp_table=False,
     ) as source:
         assert source.create_temp_table is False
@@ -1209,14 +1283,23 @@ def test_create_temp_table(create_source):
 
 @pytest.mark.unit
 def test_add_postgres_query_asset_with_batch_metadata(
+    empty_data_context,
     create_source: CreateSourceFixture,
 ):
+    my_config_variables = {"pipeline_filename": __file__}
+    empty_data_context.config_variables.update(my_config_variables)
+
     years = [2021, 2022]
-    asset_specified_metadata = {"pipeline_name": "my_pipeline"}
+    asset_specified_metadata = {
+        "pipeline_name": "my_pipeline",
+        "no_curly_pipeline_filename": "$pipeline_filename",
+        "curly_pipeline_filename": "${pipeline_filename}",
+    }
 
     with create_source(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
+        data_context=empty_data_context,
         splitter_query_response=[{"year": year} for year in years],
     ) as source:
         asset = source.add_query_asset(
@@ -1229,22 +1312,40 @@ def test_add_postgres_query_asset_with_batch_metadata(
         asset.add_splitter_year(column_name="col")
         batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
         assert len(batches) == len(years)
+        substituted_batch_metadata: BatchMetadata = copy.deepcopy(
+            asset_specified_metadata
+        )
+        substituted_batch_metadata.update(
+            {
+                "no_curly_pipeline_filename": __file__,
+                "curly_pipeline_filename": __file__,
+            }
+        )
         for i, year in enumerate(years):
-            assert batches[i].metadata == {"pipeline_name": "my_pipeline", "year": year}
+            substituted_batch_metadata["year"] = year
+            assert batches[i].metadata == substituted_batch_metadata
 
 
 @pytest.mark.unit
 def test_add_postgres_table_asset_with_batch_metadata(
-    create_source: CreateSourceFixture, monkeypatch
+    empty_data_context, create_source: CreateSourceFixture, monkeypatch
 ):
+    my_config_variables = {"pipeline_filename": __file__}
+    empty_data_context.config_variables.update(my_config_variables)
+
     monkeypatch.setattr(TableAsset, "test_connection", lambda _: None)
     monkeypatch.setattr(TableAsset, "test_splitter_connection", lambda _: None)
     years = [2021, 2022]
-    asset_specified_metadata = {"pipeline_name": "my_pipeline"}
+    asset_specified_metadata = {
+        "pipeline_name": "my_pipeline",
+        "no_curly_pipeline_filename": "$pipeline_filename",
+        "curly_pipeline_filename": "${pipeline_filename}",
+    }
 
     with create_source(
         validate_batch_spec=lambda _: None,
         dialect="postgresql",
+        data_context=empty_data_context,
         splitter_query_response=[{"year": year} for year in years],
     ) as source:
         asset = source.add_table_asset(
@@ -1257,5 +1358,15 @@ def test_add_postgres_table_asset_with_batch_metadata(
         asset.add_splitter_year(column_name="my_col")
         batches = source.get_batch_list_from_batch_request(asset.build_batch_request())
         assert len(batches) == len(years)
+        substituted_batch_metadata: BatchMetadata = copy.deepcopy(
+            asset_specified_metadata
+        )
+        substituted_batch_metadata.update(
+            {
+                "no_curly_pipeline_filename": __file__,
+                "curly_pipeline_filename": __file__,
+            }
+        )
         for i, year in enumerate(years):
-            assert batches[i].metadata == {"pipeline_name": "my_pipeline", "year": year}
+            substituted_batch_metadata["year"] = year
+            assert batches[i].metadata == substituted_batch_metadata

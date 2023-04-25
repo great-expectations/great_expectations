@@ -28,42 +28,18 @@ While the contents of this document accurately reflect the state of the feature,
 
 - Create a new directory, called `taxi_profiling_tutorial`
 - Within this directory, create another directory called `data`
-- Navigate to the top level of `taxi_profiling_tutorial` in a terminal and run `great_expectations init`
 
 ### 2. Download the data
 
 - Download [this directory](https://github.com/great-expectations/great_expectations/tree/develop/tests/test_sets/taxi_yellow_tripdata_samples) of yellow taxi trip `csv` files from the Great Expectations GitHub repo. You can use a tool like [DownGit](https://downgit.github.io/) to do so
 - Move the unzipped directory of `csv` files into the `data` directory that you created in Step 1
 
-### 3. Set up your Datasource
+### 3. Create a context and add your Datasource
 
-- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas.md). For the purpose of this tutorial, we will work from a `yaml` to set up your <TechnicalTag tag="datasource" text="Datasource" /> config. When you open up your notebook to create and test and save your Datasource config, replace the config docstring with the following docstring:
+- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas.md). The following code snippet adds a Pandas Filesystem asset for our taxi data.
 
-```python
-example_yaml = f"""
-name: taxi_pandas
-class_name: Datasource
-execution_engine:
-  class_name: PandasExecutionEngine
-data_connectors:
-  monthly:
-    base_directory: ../<YOUR BASE DIR>/
-    glob_directive: '*.csv'
-    class_name: ConfiguredAssetFilesystemDataConnector
-    assets:
-      my_reports:
-        base_directory: ./
-        group_names:
-          - name
-          - year
-          - month
-        class_name: Asset
-        pattern: (.+)_(\d.*)-(\d.*)\.csv
-"""
+```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py init"
 ```
-
-- Test your YAML config to make sure it works - you should see some of the taxi `csv` filenames listed
-- Save your Datasource config
 
 ### 4. Configure the Profiler
 
@@ -117,24 +93,19 @@ You can see here that we use a special `$` syntax to reference `variables` and `
 
 ### 5. Run the Profiler
 
-Now let's use our config to Profile our data and create a simple Expectation Suite!
+Now let's use our config to Profile our data and create an Expectation Suite!
 
-First we'll do some basic set-up - set up a <TechnicalTag tag="data_context" text="Data Context" /> and parse our YAML
-
-```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py set up"
-```
-
-Next, we'll instantiate our Profiler, passing in our config and our Data Context
+First, we load the profiler config and instantiate our Profiler, passing in our config and our Data Context
 
 ```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py instantiate"
 ```
 
-Finally, we'll run the profiler and save the result to a variable. 
+Then we run the profiler and save the result to a variable. 
 
 ```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py run"
 ```
 
-Then, we can print our Expectation Suite so we can see how it looks!
+Now we can print our Expectation Suite so we can see how it looks!
 
 ```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py row_count_rule_suite"
 ```

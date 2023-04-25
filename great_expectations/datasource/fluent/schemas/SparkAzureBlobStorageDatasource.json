@@ -1,6 +1,6 @@
 {
     "title": "SparkAzureBlobStorageDatasource",
-    "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+    "description": "--Public API--",
     "type": "object",
     "properties": {
         "type": {
@@ -23,16 +23,26 @@
         },
         "assets": {
             "title": "Assets",
-            "default": {},
-            "type": "object",
-            "additionalProperties": {
+            "default": [],
+            "type": "array",
+            "items": {
                 "$ref": "#/definitions/_FilePathDataAsset"
             }
         },
         "azure_options": {
             "title": "Azure Options",
             "default": {},
-            "type": "object"
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [

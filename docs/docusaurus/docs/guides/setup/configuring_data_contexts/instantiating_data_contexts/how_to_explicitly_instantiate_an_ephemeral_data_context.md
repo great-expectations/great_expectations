@@ -1,5 +1,5 @@
 ---
-title: How to explicitly instantiate an Ephemeral Data Context
+title: How to instantiate an Ephemeral Data Context
 tag: [how-to, setup]
 keywords: [Great Expectations, Ephemeral Data Context]
 ---
@@ -90,4 +90,4 @@ Now that you have an Ephemeral Data Context you will want to connect GX to your 
 
 An Ephemeral Data Context is a temporary, in-memory object.  It will not persist beyond the current Python session.  If you decide that you would like to keep the contents of your Ephemeral Data Context for future use, please see:
 
-- [How to convert an Ephemeral Data Context to a Filesystem Data Context](docs/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context.md)
+- [How to convert an Ephemeral Data Context to a Filesystem Data Context](/docs/guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context)

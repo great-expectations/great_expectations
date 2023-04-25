@@ -9,12 +9,11 @@ Data Docs will be served using an Azure Blob Storage static website with restric
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
 - Have permission to create and configured an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage)
 
 </Prerequisites>
-    
-   
+
 ## Steps
 
 ### 1. Create an Azure Blob Storage static website

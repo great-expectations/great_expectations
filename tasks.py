@@ -131,7 +131,10 @@ def lint(
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run code linter"""
+    """Run formatter (black) and linter (ruff)"""
+    fmt(ctx, path, check=not fix, pty=pty)
+
+    # Run code linter (ruff)
     cmds = ["ruff", path]
     if fix:
         cmds.append("--fix")
@@ -219,6 +222,7 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         " stub files in `great_expectations`."
         " By default `mypy` will not check implementation files if a `.pyi` stub file exists."
         " This should be run in CI in addition to the normal type-checking step.",
+        "python-version": "Type check as if running a specific python version. Default 3.8",
     },
 )
 def type_check(
@@ -232,6 +236,7 @@ def type_check(
     report: bool = False,
     check_stub_sources: bool = False,
     ci: bool = False,
+    python_version: str = "3.8",
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -251,6 +256,7 @@ def type_check(
             report=report,
             check_stub_sources=check_stub_sources,
             ci=False,
+            python_version=python_version,
         )
         return  # don't run twice
 
@@ -293,6 +299,8 @@ def type_check(
         cmds.extend(["--pretty"])
     if warn_unused_ignores:
         cmds.extend(["--warn-unused-ignores"])
+    if python_version:
+        cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 

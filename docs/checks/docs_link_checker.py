@@ -72,8 +72,18 @@ class LinkChecker:
         external_link_regex = r"^https?:\/\/"  # links that start with http or https
         self._external_link_pattern = re.compile(external_link_regex)
 
-        # links that being with /{site_prefix}/(?P<path>), may end with #abc
-        absolute_link_regex = r"^\/" + site_prefix + r"\/(?P<path>[\w\/-]+?)(?:#\S+)?$"
+        # with versioned docs, an absolute link may contain version information
+        version_info_regex = r"//"
+        self._version_info_pattern = re.compile(version_info_regex)
+
+        # links that being with /{site_prefix}/(?:/(?P<version>))?/(?P<path>), may end with #abc
+        # ex: ^/docs(?:/(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2}))?/(?P<path>[\w/-]+?)(?:#\S+)?$
+        #     /docs/0.15.50/cli#anchor
+        absolute_link_regex = (
+            r"^/"
+            + site_prefix
+            + r"(?:/(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2}))?/(?P<path>[\w/-]+?)(?:#\S+)?$"
+        )
         self._absolute_link_pattern = re.compile(absolute_link_regex)
 
         # docroot links start without a . or a slash
@@ -147,9 +157,13 @@ class LinkChecker:
         return os.path.join(self._docs_root, self._get_os_path(path))  # noqa: PTH118
 
     def _check_absolute_link(
-        self, link: str, file: str, path: str
+        self, link: str, file: str, path: str, version: Optional[str]
     ) -> Optional[LinkReport]:
         logger.debug(f"Checking absolute link {link} in file {file}")
+
+        if version:
+            logger.debug(f"Skipping absolute link {link} due to version information")
+            return None
 
         # absolute links should point to files that exist (with the .md extension added)
         md_file = self._get_absolute_path(path).rstrip("/") + ".md"
@@ -256,7 +270,9 @@ class LinkChecker:
             else:
                 match = self._absolute_link_pattern.match(link)
                 if match:
-                    result = self._check_absolute_link(link, file, match.group("path"))
+                    result = self._check_absolute_link(
+                        link, file, match.group("path"), match.group("version")
+                    )
                 else:
                     match = self._docroot_link_pattern.match(link)
                     if match:
@@ -316,7 +332,7 @@ class LinkChecker:
 @click.option(
     "--site-prefix",
     "-s",
-    default=None,
+    default="docs",
     help="Top-most folder in the docs URL for resolving absolute paths",
 )
 @click.option("--skip-external", is_flag=True)

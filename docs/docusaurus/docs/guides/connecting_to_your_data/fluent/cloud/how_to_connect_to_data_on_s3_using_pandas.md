@@ -25,7 +25,7 @@ In this guide we will demonstrate how to use Pandas to connect to data stored on
 
 <Prerequisites>
 
-- [An installation of GX set up to work with S3](docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
+- [An installation of GX set up to work with S3](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3)
 - Access to data on a S3 bucket
 - A passion for data quality
 
@@ -101,4 +101,4 @@ To see the full source code used for the examples in this guide, please referenc
 
 ### Related reading
 
-For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials](docs/guides/setup/configuring_data_contexts/how_to_configure_credentials.md)
+For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)

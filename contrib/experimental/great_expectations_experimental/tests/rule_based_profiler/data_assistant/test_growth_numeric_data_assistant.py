@@ -285,12 +285,10 @@ def test_growth_numeric_data_assistant_get_metrics_and_expectations_using_implic
 
     rule_config: dict
     assert all(
-        [
-            rule_config["variables"]["estimator"] == "exact"
-            if "estimator" in rule_config["variables"]
-            else True
-            for rule_config in data_assistant_result.profiler_config.rules.values()
-        ]
+        rule_config["variables"]["estimator"] == "exact"
+        if "estimator" in rule_config["variables"]
+        else True
+        for rule_config in data_assistant_result.profiler_config.rules.values()
     )
 
 
@@ -413,9 +411,9 @@ def test_spark_happy_path_growth_numeric_data_assistant(
     4. Configuring BatchRequest to load 2020 January data
     5. Configuring and running Checkpoint using BatchRequest for 2020-01, and 'taxi_data_2019_suite'.
     """
-    from pyspark.sql.types import StructType
+    from great_expectations.compatibility import pyspark
 
-    schema: StructType = spark_df_taxi_data_schema
+    schema: pyspark.types.StructType = spark_df_taxi_data_schema
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__,

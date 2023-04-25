@@ -24,7 +24,7 @@ skip_gitignore = true
 extend_skip_glob = ['venv/*', 'docs/*']
 
 [tool.mypy]
-python_version = "3.7"
+python_version = "3.8"
 plugins = ["pydantic.mypy"]
 files = [
     "great_expectations",
@@ -196,8 +196,6 @@ exclude = [
     'validator/validator\.py', # 54
     # tests
     'tests/datasource/fluent/tasks\.py',
-    'tests/datasource/fluent/integration/integration_test_utils\.py',
-    'tests/datasource/fluent/test_spark_datasource\.py',
 ]
 
 [tool.pydantic-mypy]
@@ -283,7 +281,19 @@ extend-exclude = [
     "F401",  # unused import
     "F403",  # star imports
     ]
-"great_expectations/optional_imports.py" = [
+"great_expectations/compatibility/sqlalchemy.py" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/compatibility/pyspark.py" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/compatibility/google.py" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/compatibility/azure.py" = [
+    "TID251",  # flake8-banned-api
+]
+"great_expectations/compatibility/pyarrow.py" = [
     "TID251",  # flake8-banned-api
 ]
 
@@ -295,8 +305,11 @@ convention = "google"
 
 [tool.ruff.flake8-tidy-imports]
 [tool.ruff.flake8-tidy-imports.banned-api]
-# Uncomment this to prevent importing sqlalchemy everywhere but optional_imports.py
-# "sqlalchemy".msg = "Don't import sqlalchemy directly, please use the great_expectations.import_manager."
+"sqlalchemy".msg = "Please do not import sqlalchemy directly, import from great_expectations.compatibility.sqlalchemy instead."
+"pyspark".msg = "Please do not import pyspark directly, import from great_expectations.compatibility.pyspark instead."
+"google".msg = "Please do not import google directly, import from great_expectations.compatibility.google instead."
+"azure".msg = "Please do not import azure directly, import from great_expectations.compatibility.azure instead."
+"pyarrow".msg = "Please do not import azure directly, import from great_expectations.compatibility.pyarrow instead."
 
 [tool.pytest.ini_options]
 filterwarnings = [
@@ -463,26 +476,6 @@ filterwarnings = [
     # Example Actual Warning: (tests/datasource/fluent/integration/conftest.py)
     # sqlalchemy.exc.SADeprecationWarning: Table.tometadata() is renamed to Table.to_metadata() (deprecated since: 1.4)
     'ignore: Table.tometadata\(\) is renamed to Table.to_metadata\(\):DeprecationWarning',
-
-    # SQLAlchemy 2.x support warnings. These warnings should be ignored until sqlalchemy 2.x is fully supported.
-    # To get SQLAlchemy 2.x supported, remove one of these ignores and then fix the resulting errors.
-    'ignore: The Engine.execute\(\) method is considered legacy as of the 1.x series of SQLAlchemy and will be removed in 2.0. All statement execution in SQLAlchemy 2.0 is performed by the Connection.execute\(\) method of Connection, or in the ORM by the Session.execute\(\) method of Session.:DeprecationWarning',
-    # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
-    # Example Actual Warning: Found by running pytest tests/test_definitions/test_expectations_v2_api.py (delete with v2 api code if this warning doesn't appear elsewhere).
-    # sqlalchemy.exc.RemovedIn20Warning: Using non-integer/slice indices on Row is deprecated and will be removed in version 2.0; please use row._mapping[<key>], or the mappings() accessor on the Result object. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: Using non-integer\/slice indices on Row is deprecated and will be removed in version 2.0:DeprecationWarning',
-    # Example Actual Warning: Found by running setup of test_validate_dataset[sqlite]
-    # sqlalchemy.exc.RemovedIn20Warning: The MetaData.bind argument is deprecated and will be removed in SQLAlchemy 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: The MetaData.bind argument is deprecated and will be removed in SQLAlchemy 2.0.:DeprecationWarning',
-    # Example Actual Warning: Found in mysql test_table_column_reflection_fallback[test_backends0]
-    # sqlalchemy.exc.RemovedIn20Warning: The .close() method on a so-called 'branched' connection is deprecated as of 1.4, as are 'branched' connections overall, and will be removed in a future release.  If this is a default-handling function, don't close the connection. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: The .close\(\) method on a so-called:DeprecationWarning',
-    # Example Actual Warning: Found in setup of test_validate_dataset[sqlite]
-    # sqlalchemy.exc.RemovedIn20Warning: The ``bind`` argument for schema methods that invoke SQL against an engine or connection will be required in SQLAlchemy 2.0. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    'ignore: The ``bind`` argument for schema methods that invoke SQL against an engine or connection will be required in SQLAlchemy 2.0.:DeprecationWarning',
-    # Example Actual Warning: sqlalchemy.exc.RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    # Found so far in test_cli_datasource_list
-    'ignore: Deprecated API features detected!:DeprecationWarning',
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
 ]
 junit_family="xunit2"
@@ -494,7 +487,8 @@ markers = [
     "integration: mark test as an integration test.",
     "slow: mark tests taking longer than 1 second.",
     "unit: mark a test as a unit test.",
-    "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors)",
+    "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
+    "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
 ]
 testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`

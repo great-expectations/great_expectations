@@ -24,6 +24,7 @@ from typing import (
     Union,
 )
 
+import pandas as pd
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
@@ -51,6 +52,7 @@ from great_expectations.execution_engine.pandas_batch_data import PandasBatchDat
 from great_expectations.expectations.registry import (
     get_expectation_impl,
     list_registered_expectation_implementations,
+    register_core_expectations,
 )
 from great_expectations.rule_based_profiler.config import RuleBasedProfilerConfig
 from great_expectations.rule_based_profiler.helpers.configuration_reconciliation import (
@@ -74,14 +76,6 @@ from great_expectations.validator.validation_graph import (
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import (
@@ -200,6 +194,9 @@ class Validator:
         include_rendered_content: Optional[bool] = None,
         **kwargs,
     ) -> None:
+        # Ensure that Expectations are available for __dir__ and __getattr__
+        register_core_expectations()
+
         self._data_context: Optional[AbstractDataContext] = data_context
 
         self._metrics_calculator: MetricsCalculator = MetricsCalculator(
@@ -1977,14 +1974,10 @@ class BridgeValidator:
                     self.expectation_engine = PandasDataset
 
         if self.expectation_engine is None:
-            try:
-                import pyspark
+            from great_expectations.compatibility import pyspark
 
-                if isinstance(batch.data, pyspark.sql.DataFrame):
-                    self.expectation_engine = SparkDFDataset
-            except ImportError:
-                # noinspection PyUnusedLocal
-                pyspark = None
+            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame):
+                self.expectation_engine = SparkDFDataset
 
         if self.expectation_engine is None:
             raise ValueError(
@@ -2016,9 +2009,11 @@ class BridgeValidator:
             )
 
         elif issubclass(self.expectation_engine, SparkDFDataset):
-            import pyspark
+            from great_expectations.compatibility import pyspark
 
-            if not isinstance(self.batch.data, pyspark.sql.DataFrame):
+            if not (
+                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)
+            ):
                 raise ValueError(
                     "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"
                 )

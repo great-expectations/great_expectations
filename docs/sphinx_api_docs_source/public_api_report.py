@@ -1493,6 +1493,10 @@ class CodeReferenceFilter:
             name="get_batch",
             filepath=pathlib.Path("great_expectations/datasource/datasource.py"),
         ),
+        IncludeExcludeDefinition(
+            reason="Deprecated v2 api Dataset is not included in the public API",
+            filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+        ),
     ]
 
     def __init__(
@@ -1859,7 +1863,7 @@ def main():
     # any methods or classes you are adding to documentation with the @public_api
     # decorator and any relevant "new" or "deprecated" public api decorators.
     # If the actual is lower than the threshold, please reduce the threshold.
-    PUBLIC_API_MISSING_THRESHOLD = 94  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
+    PUBLIC_API_MISSING_THRESHOLD = 93  # TODO: reduce this number again once this works for the Fluent DS dynamic methods
     if len(printable_definitions) != PUBLIC_API_MISSING_THRESHOLD:
         error_msg_prefix = f"There are {len(printable_definitions)} items missing from the public API, we currently allow {PUBLIC_API_MISSING_THRESHOLD}."
         if len(printable_definitions) > PUBLIC_API_MISSING_THRESHOLD:

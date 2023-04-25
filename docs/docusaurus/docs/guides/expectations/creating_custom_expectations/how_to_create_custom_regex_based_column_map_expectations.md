@@ -4,7 +4,7 @@ title: How to create a Custom Regex-Based Column Map Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`RegexBasedColumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="ColumnMapExpectaion"/> that allow for highly-extensible, regex-powered validation of your data.
+**`RegexBasedColumnMapExpectations`** are a sub-type of <TechnicalTag tag="expectation" text="ColumnMapExpectation"/> that allow for highly-extensible, regex-powered validation of your data.
 
 They are evaluated for a single column and ask a yes/no, regex-based question for every row in that column. Based on the result, they then calculate the percentage of rows that gave a positive answer. If that percentage meets a specified threshold (100% by default), the Expectation considers that data valid.
 This threshold is configured via the `mostly` parameter, which can be passed as input to your Custom `RegexBasedColumnMapExpectation` as a `float` between 0 and 1.

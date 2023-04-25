@@ -1,15 +1,15 @@
 from datetime import date, datetime, timedelta
 from typing import Dict, List, Optional
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     ExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import ColumnAggregateMetricProvider
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 
 TODAY: datetime = datetime(year=2022, month=8, day=10)
@@ -86,7 +86,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
         return results
 
 
-class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnExpectation):
+class ExpectYesterdayCountComparedToAvgEquivalentDaysOfWeek(ColumnAggregateExpectation):
     """Expect No missing days in date column"""
 
     # Default values

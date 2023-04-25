@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import copy
 import dataclasses
 import functools
 import logging
 import uuid
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -14,6 +16,7 @@ from typing import (
     Generic,
     List,
     MutableMapping,
+    MutableSequence,
     Optional,
     Sequence,
     Set,
@@ -28,6 +31,7 @@ from pydantic import Field, StrictBool, StrictInt, root_validator, validate_argu
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
+from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
@@ -52,16 +56,12 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.type_lookup import TypeLookup
 
-try:
-    import pyspark
-    from pyspark.sql import Row as pyspark_sql_Row
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    pyspark_sql_Row = None  # type: ignore[assignment,misc]
-    logger.debug("No spark sql dataframe module available.")
-
 
 class TestConnectionError(Exception):
+    pass
+
+
+class GxSerializationWarning(UserWarning):
     pass
 
 
@@ -82,7 +82,7 @@ BatchMetadata: TypeAlias = Dict[str, Any]
 class BatchRequest:
     datasource_name: str
     data_asset_name: str
-    options: BatchRequestOptions
+    options: BatchRequestOptions = dataclasses.field(default_factory=dict)
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -143,7 +143,7 @@ def _sorter_from_str(sort_key: str) -> Sorter:
 
 
 # It would be best to bind this to Datasource, but we can't now due to circular dependencies
-_DatasourceT = TypeVar("_DatasourceT")
+_DatasourceT = TypeVar("_DatasourceT", bound=MetaDatasource)
 
 
 class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
@@ -204,8 +204,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     ) -> List[Batch]:
         raise NotImplementedError
 
-    # End Abstract Methods
-
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
@@ -224,9 +222,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             """One must implement "build_batch_request" on a DataAsset subclass."""
         )
 
-    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
-        return set(options.keys()).issubset(set(self.batch_request_options))
-
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
         """Validates the batch_request has the correct form.
 
@@ -236,6 +231,25 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError(
             """One must implement "_validate_batch_request" on a DataAsset subclass."""
         )
+
+    # End Abstract Methods
+
+    def _valid_batch_request_options(self, options: BatchRequestOptions) -> bool:
+        return set(options.keys()).issubset(set(self.batch_request_options))
+
+    def _get_batch_metadata_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> BatchMetadata:
+        """Performs config variable substitution and populates batch request options for
+        Batch.metadata at runtime.
+        """
+        batch_metadata = copy.deepcopy(self.batch_metadata)
+        config_variables = self._datasource._data_context.config_variables  # type: ignore[attr-defined]
+        batch_metadata = _ConfigurationSubstitutor().substitute_all_config_variables(
+            data=batch_metadata, replace_variables_dict=config_variables
+        )
+        batch_metadata.update(copy.deepcopy(batch_request.options))
+        return batch_metadata
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
@@ -386,10 +400,10 @@ class Datasource(
     type: str
     name: str
     id: Optional[uuid.UUID] = Field(default=None, description="Datasource id")
-    assets: MutableMapping[str, _DataAssetT] = {}
+    assets: MutableSequence[_DataAssetT] = []
 
     # private attrs
-    _data_context: GXDataContext = pydantic.PrivateAttr()
+    _data_context: Union[GXDataContext, None] = pydantic.PrivateAttr(None)
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
@@ -454,15 +468,60 @@ class Datasource(
         data_asset = self.get_asset(batch_request.data_asset_name)
         return data_asset.get_batch_list_from_batch_request(batch_request)
 
+    def get_assets_as_dict(self) -> MutableMapping[str, _DataAssetT]:
+        """Returns available DataAsset objects as dictionary, with corresponding name as key.
+
+        Returns:
+            Dictionary of "_DataAssetT" objects with "name" attribute serving as key.
+        """
+        asset: _DataAssetT
+        assets_as_dict: MutableMapping[str, _DataAssetT] = {
+            asset.name: asset for asset in self.assets
+        }
+
+        return assets_as_dict
+
+    def get_asset_names(self) -> Set[str]:
+        """Returns the set of available DataAsset names
+
+        Returns:
+            Set of available DataAsset names.
+        """
+        asset: _DataAssetT
+        return {asset.name for asset in self.assets}
+
     def get_asset(self, asset_name: str) -> _DataAssetT:
-        """Returns the DataAsset referred to by name"""
+        """Returns the DataAsset referred to by asset_name
+
+        Args:
+            asset_name: name of DataAsset sought.
+
+        Returns:
+            _DataAssetT -- if named "DataAsset" object exists; otherwise, exception is raised.
+        """
         # This default implementation will be used if protocol is inherited
         try:
-            return self.assets[asset_name]
-        except KeyError as exc:
+            asset: _DataAssetT
+            found_asset: _DataAssetT = list(
+                filter(lambda asset: asset.name == asset_name, self.assets)
+            )[0]
+            found_asset._datasource = self
+            return found_asset
+        except IndexError as exc:
             raise LookupError(
-                f"'{asset_name}' not found. Available assets are {list(self.assets.keys())}"
+                f'"{asset_name}" not found. Available assets are {", ".join(self.get_asset_names())})'
             ) from exc
+
+    def delete_asset(self, asset_name: str) -> None:
+        """Removes the DataAsset referred to by asset_name from internal list of available DataAsset objects.
+
+        Args:
+            asset_name: name of DataAsset to be deleted.
+        """
+        asset: _DataAssetT
+        self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
+
+        self._save_context_project_config()
 
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
@@ -482,9 +541,24 @@ class Datasource(
 
         asset.test_connection()
 
-        self.assets[asset.name] = asset
+        asset_names: Set[str] = self.get_asset_names()
+        if asset.name in asset_names:
+            raise ValueError(
+                f'"{asset.name}" already exists (all existing assets are {", ".join(asset_names)})'
+            )
 
+        self.assets.append(asset)
+
+        self._save_context_project_config()
         return asset
+
+    def _save_context_project_config(self):
+        """Check if a DataContext is available and save the project config."""
+        if self._data_context:
+            try:
+                self._data_context._save_project_config()
+            except TypeError as type_err:
+                warnings.warn(str(type_err), GxSerializationWarning)
 
     @staticmethod
     def parse_order_by_sorters(
@@ -576,7 +650,7 @@ class Batch(FluentBaseModel):
     id: str = ""
     # metadata is any arbitrary data one wants to associate with a batch. GX will add arbitrary metadata
     # to a batch so developers may want to namespace any custom metadata they add.
-    metadata: Dict[str, Any] = {}
+    metadata: Dict[str, Any] = Field(default_factory=dict, allow_mutation=True)
 
     # TODO: These legacy fields are currently required. They are only used in usage stats so we
     #       should figure out a better way to anonymize and delete them.

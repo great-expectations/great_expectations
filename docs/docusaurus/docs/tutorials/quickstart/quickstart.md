@@ -32,32 +32,7 @@ With GX you can get up and running with just a few lines of code.  The full proc
 pip install great_expectations
 ```
 
-```python title="Python code"
-import great_expectations as gx
-
-# Set up
-context = gx.get_context()
-
-# Connect to data
-validator = context.sources.pandas_default.read_csv(
-    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-)
-
-# Create Expectations
-validator.expect_column_values_to_not_be_null("pickup_datetime")
-validator.expect_column_values_to_be_between("passenger_count", auto=True)
-
-# Validate data
-checkpoint = gx.checkpoint.SimpleCheckpoint( 
-    name="my_quickstart_checkpoint",
-    data_context=context,
-    validator=validator,
-)
-checkpoint_result = checkpoint.run()
-
-# View results
-validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
-context.open_data_docs(resource_identifier=validation_result_identifier)
+```python name="tutorials/quickstart/quickstart.py all"
 ```
 
 In the following steps we'll break down exactly what is happening here so that you can follow along and perform a Validation yourself.
@@ -83,16 +58,14 @@ For the rest of this tutorial we will be working with Python code in a Jupyter N
 
 The code to import the `great_expectations` module is:
 
-```python title="Python code"
-import great_expectations as gx
+```python name="tutorials/quickstart/quickstart.py import_gx"
 ```
 
 #### 1.3 Instantiate a Data Context
 
 We will get a `DataContext` object with the following code:
 
-```python title="Python code"
-context = gx.get_context()
+```python name="tutorials/quickstart/quickstart.py get_context"
 ```
 
 The Data Context will provide you with access to a variety of utility and convenience methods.  It is the entry point for using the GX Python API.
@@ -101,10 +74,8 @@ The Data Context will provide you with access to a variety of utility and conven
 
 For the purpose of this guide, we will connect to `.csv` data stored in our GitHub repo:
 
-```python title="Python code"
-validator = context.sources.pandas_default.read_csv(
-    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
-)
+
+```python name="tutorials/quickstart/quickstart.py connect_to_data"
 ```
 
 The above code uses our Data Context's default Datasource for Pandas to access the `.csv` data in the file at the provided `path`.
@@ -117,9 +88,7 @@ In this guide, we will define two Expectations, one based on our domain knowledg
 
 The code we will use for this is:
 
-```python title="Python code"
-validator.expect_column_values_to_not_be_null("pickup_datetime")
-validator.expect_column_values_to_be_between("passenger_count", auto=True)
+```python name="tutorials/quickstart/quickstart.py create_expectation"
 ```
 
 With the Expectation defined above, we are stating that we _expect_ the column `pickup_datetime` to always be populated.  That is: none of the column's values should be null.
@@ -133,39 +102,33 @@ In the future, you may define numerous Expectations about a Validator's associat
 
 Now that we have defined our Expectations it is time for GX to introspect our data and see if it corresponds to what we told GX to expect.  To do this, we define a Checkpoint (which will allow us to repeat the Validation in the future).
 
-```python title="Python code"
-checkpoint = gx.checkpoint.SimpleCheckpoint( 
-    name="my_quickstart_checkpoint",
-    data_context=context,
-    validator=validator,
-)
+```python name="tutorials/quickstart/quickstart.py create_checkpoint"
 ```
 Once we have created the Checkpoint, we will run it and get back the results from our Validation.
 
-```python title="Python code"
-checkpoint_result = checkpoint.run()
+```python name="tutorials/quickstart/quickstart.py run_checkpoint"
 ```
 
 #### 4.2 Review your results
 
 Great Expectations provides a friendly, human-readable way to view the results of Validations: Data Docs.  Our Checkpoint will have automatically compiled new Data Docs to include the results of the Validation we ran, so we can view them immediately:
 
-```python title="Python code"
-validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
-context.open_data_docs(resource_identifier=validation_result_identifier)
+```python name="tutorials/quickstart/quickstart.py view_results"
 ```
 
-### 5. (Optional) Great Expectations Cloud
-
-By completing the Quickstart guide, you now have the opportunity to join the Cloud Early Access program and explore how Great Expectations Cloud visualizes and creates shareable links for anyone on your team. The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
-
-To access GX Cloud, you need to join our Cloud Early Access program. During this program, limited seats are available, but joining the queue will keep you informed of the product's progress.
-
-**[Sign up for the Cloud Early Access program!](https://greatexpectations.io/cloud)**
 
 ## Next Steps 
 
 Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases! To help with this we have prepared some more detailed guides on setting up and installing GX and getting an initial Data Context that are tailored to specific environments and resources.
+
+:::info Great Expectations Cloud
+
+This guide has introduced you to the open source Python and command line use of Great Expectations.  GX also offers an online interface, currently in Beta.  The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
+
+If you are interested in GX Cloud, you should join the GX Cloud Beta.  During this program limited seats are available, but signing up will keep you informed of the product's process.
+
+**[Sign up for the GX Cloud Beta!](https://greatexpectations.io/cloud)**
+:::
 
 ### Installing GX for specific environments and source data systems
 
@@ -174,3 +137,4 @@ Now that you've seen how easy it is to implement the GX workflow, it is time to 
 ### Initializing, instantiating, and saving a Data Context
 
 <DataContextInitializeInstantiateSave />
+

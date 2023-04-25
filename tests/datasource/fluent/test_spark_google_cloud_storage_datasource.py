@@ -10,6 +10,7 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 import great_expectations.execution_engine.sparkdf_execution_engine
+from great_expectations.compatibility import google
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import (
     SparkGoogleCloudStorageDatasource,
@@ -28,17 +29,6 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 logger = logging.getLogger(__file__)
 
 
-try:
-    from google.cloud import storage
-    from google.cloud.storage import Client as GCSClient
-except ImportError:
-    storage = None
-    GCSClient = None
-    logger.debug(
-        "Unable to load GoogleCloudStorage connection object; install optional Google dependency for support"
-    )
-
-
 class MockGCSClient:
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def list_blobs(
@@ -55,7 +45,7 @@ class MockGCSClient:
 def _build_spark_gcs_datasource(
     gcs_options: Dict[str, Any] | None = None
 ) -> SparkGoogleCloudStorageDatasource:
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: google.Client = cast(google.Client, MockGCSClient())
     spark_gcs_datasource = SparkGoogleCloudStorageDatasource(
         name="spark_gcs_datasource",
         bucket_or_name="test_bucket",
@@ -67,7 +57,8 @@ def _build_spark_gcs_datasource(
 
 @pytest.fixture
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 def spark_gcs_datasource() -> SparkGoogleCloudStorageDatasource:
     spark_gcs_datasource: SparkGoogleCloudStorageDatasource = (
@@ -111,7 +102,8 @@ def csv_asset(
 
 @pytest.fixture
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
     regex = re.compile(
@@ -126,7 +118,8 @@ def bad_regex_config(csv_asset: CSVAsset) -> tuple[re.Pattern, str]:
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 def test_construct_spark_gcs_datasource_without_gcs_options():
     google_cred_file = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
@@ -138,14 +131,15 @@ def test_construct_spark_gcs_datasource_without_gcs_options():
         bucket_or_name="test_bucket",
         gcs_options={},
     )
-    gcs_client: GCSClient = spark_gcs_datasource._get_gcs_client()
+    gcs_client: google.Client = spark_gcs_datasource._get_gcs_client()
     assert gcs_client is not None
     assert spark_gcs_datasource.name == "spark_gcs_datasource"
 
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -162,14 +156,15 @@ def test_construct_spark_gcs_datasource_with_filename_in_gcs_options(
             "filename": "my_filename.csv",
         },
     )
-    gcs_client: GCSClient = spark_gcs_datasource._get_gcs_client()
+    gcs_client: google.Client = spark_gcs_datasource._get_gcs_client()
     assert gcs_client is not None
     assert spark_gcs_datasource.name == "spark_gcs_datasource"
 
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -186,14 +181,15 @@ def test_construct_spark_gcs_datasource_with_info_in_gcs_options(
             "info": "{my_csv: my_content,}",
         },
     )
-    gcs_client: GCSClient = spark_gcs_datasource._get_gcs_client()
+    gcs_client: google.Client = spark_gcs_datasource._get_gcs_client()
     assert gcs_client is not None
     assert spark_gcs_datasource.name == "spark_gcs_datasource"
 
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -206,20 +202,24 @@ def test_add_csv_asset_to_datasource(
     spark_gcs_datasource: SparkGoogleCloudStorageDatasource,
 ):
     mock_list_keys.return_value = object_keys
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(.+)_(.+)_(\d{4})\.csv",
+        batch_metadata=asset_specified_metadata,
     )
     assert asset.name == "csv_asset"
     assert asset.batching_regex.match("random string") is None
     assert asset.batching_regex.match("alex_20200819_13D0.csv") is None
     m1 = asset.batching_regex.match("alex_20200819_1300.csv")
     assert m1 is not None
+    assert asset.batch_metadata == asset_specified_metadata
 
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -242,7 +242,8 @@ def test_construct_csv_asset_directly(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -270,7 +271,8 @@ def test_csv_asset_with_batching_regex_unnamed_parameters(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -298,7 +300,8 @@ def test_csv_asset_with_batching_regex_named_parameters(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -326,7 +329,8 @@ def test_csv_asset_with_some_batching_regex_named_parameters(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 @mock.patch(
     "great_expectations.datasource.fluent.data_asset.data_connector.google_cloud_storage_data_connector.list_gcs_keys"
@@ -355,13 +359,14 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     reason="Accessing objects on google.cloud.storage using Spark is not working, due to local credentials issues (this test is conducted using Jupyter notebook manually)."
 )
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 def test_get_batch_list_from_fully_specified_batch_request(
     monkeypatch: pytest.MonkeyPatch,
     spark_gcs_datasource: SparkGoogleCloudStorageDatasource,
 ):
-    gcs_client: GCSClient = cast(GCSClient, MockGCSClient())
+    gcs_client: google.Client = cast(google.Client, MockGCSClient())
 
     def instantiate_gcs_client_spy(self) -> None:
         self._gcs = gcs_client
@@ -372,9 +377,11 @@ def test_get_batch_list_from_fully_specified_batch_request(
         instantiate_gcs_client_spy,
         raising=True,
     )
+    asset_specified_metadata = {"asset_level_metadata": "my_metadata"}
     asset = spark_gcs_datasource.add_csv_asset(
         name="csv_asset",
         batching_regex=r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>\d{4})\.csv",
+        batch_metadata=asset_specified_metadata,
     )
 
     request = asset.build_batch_request(
@@ -396,6 +403,7 @@ def test_get_batch_list_from_fully_specified_batch_request(
         "name": "alex",
         "timestamp": "20200819",
         "price": "1300",
+        **asset_specified_metadata,
     }
     assert (
         batch.id
@@ -409,7 +417,8 @@ def test_get_batch_list_from_fully_specified_batch_request(
 
 @pytest.mark.integration
 @pytest.mark.skipif(
-    storage is None, reason='Could not import "storage" from google.cloud'
+    not google.storage,
+    reason='Could not import "storage" from google.cloud',
 )
 def test_test_connection_failures(
     spark_gcs_datasource: SparkGoogleCloudStorageDatasource,
@@ -421,7 +430,9 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = spark_gcs_datasource
-    spark_gcs_datasource.assets = {"csv_asset": csv_asset}
+    spark_gcs_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = GoogleCloudStorageDataConnector(
         datasource_name=spark_gcs_datasource.name,
         data_asset_name=csv_asset.name,

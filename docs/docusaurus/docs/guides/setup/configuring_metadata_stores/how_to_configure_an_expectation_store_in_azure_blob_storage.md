@@ -8,8 +8,8 @@ By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag
 
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
-- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 - Configured an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
 - Create the Azure Blob container. If you also wish to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may set up this first and then use the ``$web`` existing container to store your Expectations.
 - Identify the prefix (folder) where Expectations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).

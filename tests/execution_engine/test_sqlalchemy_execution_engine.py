@@ -32,7 +32,9 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import get_sqlalchemy_domain_data
-from great_expectations.df_to_database_loader import add_dataframe_to_db
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
@@ -44,6 +46,8 @@ try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
 except ImportError:
     sqlalchemy = None
+
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 
 def test_instantiation_via_connection_string(sa, test_db_connection_string):
@@ -939,21 +943,21 @@ def test_get_batch_data_and_markers_using_query(sqlite_view_engine, test_df):
 
 
 def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
-    def validate_tmp_tables():
+    def validate_tmp_tables(execution_engine):
         temp_tables = [
             name
-            for name in get_sqlite_temp_table_names(engine.engine)
+            for name in get_sqlite_temp_table_names(execution_engine)
             if name.startswith("ge_temp_")
         ]
         tables = [
             name
-            for name in get_sqlite_table_names(engine.engine)
+            for name in get_sqlite_table_names(execution_engine)
             if name.startswith("ge_temp_")
         ]
         assert len(temp_tables) == 0
         assert len(tables) == 0
 
-    engine = build_sa_engine(
+    execution_engine = build_sa_engine(
         pd.DataFrame({"a": [1, 2, 1, 2, 3, 3], "b": [4, 4, 4, 4, 4, 4]}), sa
     )
 
@@ -962,10 +966,10 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     table_columns_metric: MetricConfiguration
     results: Dict[Tuple[str, str, str], MetricValue]
 
-    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    table_columns_metric, results = get_table_columns_metric(engine=execution_engine)
     metrics.update(results)
 
-    validate_tmp_tables()
+    validate_tmp_tables(execution_engine=execution_engine)
 
     condition_metric = MetricConfiguration(
         metric_name=f"column_values.unique.{MetricPartialFunctionTypeSuffixes.CONDITION.value}",
@@ -975,12 +979,12 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
     condition_metric.metric_dependencies = {
         "table.columns": table_columns_metric,
     }
-    results = engine.resolve_metrics(
+    results = execution_engine.resolve_metrics(
         metrics_to_resolve=(condition_metric,), metrics=metrics
     )
     metrics.update(results)
 
-    validate_tmp_tables()
+    validate_tmp_tables(execution_engine=execution_engine)
 
     desired_metric = MetricConfiguration(
         metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
@@ -991,8 +995,8 @@ def test_sa_batch_unexpected_condition_temp_table(caplog, sa):
         "unexpected_condition": condition_metric,
     }
     # noinspection PyUnusedLocal
-    results = engine.resolve_metrics(
+    results = execution_engine.resolve_metrics(
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
 
-    validate_tmp_tables()
+    validate_tmp_tables(execution_engine=execution_engine)

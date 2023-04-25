@@ -1,3 +1,4 @@
+from __future__ import annotations
 import datetime
 import os
 from typing import List
@@ -54,6 +55,8 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
         id="year_month getting date parts from SqlAlchemyDataSplitter.date_part",
     )
 ]
+
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 
 @mock.patch(
@@ -594,9 +597,13 @@ def test_sqlite_split_on_year(
     assert num_rows == n
 
     # Right rows?
-    rows: sa.Row = batch_data.execution_engine.engine.execute(
-        sa.select(sa.text("*")).select_from(batch_data.selectable)
-    ).fetchall()
+    rows: list[sa.RowMapping] = (
+        batch_data.execution_engine.engine.execute(
+            sa.select(sa.text("*")).select_from(batch_data.selectable)
+        )
+        .mappings()
+        .fetchall()
+    )
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
     for row_date in row_dates:
@@ -636,9 +643,13 @@ def test_sqlite_split_and_sample_using_limit(
     assert num_rows == n
 
     # Right rows?
-    rows: sa.Row = batch_data.execution_engine.engine.execute(
-        sa.select(sa.text("*")).select_from(batch_data.selectable)
-    ).fetchall()
+    rows: list[sa.RowMapping] = (
+        batch_data.execution_engine.engine.execute(
+            sa.select(sa.text("*")).select_from(batch_data.selectable)
+        )
+        .mappings()
+        .fetchall()
+    )
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
     for row_date in row_dates:

@@ -17,7 +17,7 @@ from great_expectations.types import safe_deep_copy
 from great_expectations.util import load_class, verify_dynamic_loading_support
 
 try:
-    import sqlalchemy as sa
+    import sqlalchemy as sa  # noqa: TID251
 except ImportError:
     sa = None
 

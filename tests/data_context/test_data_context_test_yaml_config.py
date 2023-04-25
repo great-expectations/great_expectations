@@ -15,7 +15,9 @@ from great_expectations.data_context.config_validator.yaml_config_validator impo
 )
 from great_expectations.data_context.store import CheckpointStore
 from great_expectations.data_context.util import file_relative_path
-from great_expectations.df_to_database_loader import add_dataframe_to_db
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 from great_expectations.util import get_sqlalchemy_url, load_class
 from tests.core.usage_statistics.util import (
@@ -41,31 +43,35 @@ def test_connectable_postgresql_db(sa, test_backends, test_df):
         database="test_ci",
     )
     engine = sa.create_engine(url)
-
-    schema_check_results = engine.execute(
-        sa.text(
-            "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
-        )
-    ).fetchall()
+    with engine.begin() as connection:
+        schema_check_results = connection.execute(
+            sa.text(
+                "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'connection_test';"
+            )
+        ).fetchall()
     if len(schema_check_results) == 0:
         with engine.begin() as connection:
             connection.execute(sa.text("CREATE SCHEMA connection_test;"))
 
-    table_check_results = engine.execute(
-        sa.text(
-            """
+            table_check_results = connection.execute(
+                sa.text(
+                    """
 SELECT EXISTS (
    SELECT FROM information_schema.tables
    WHERE  table_schema = 'connection_test'
    AND    table_name   = 'test_df'
 );
 """
-        )
-    ).fetchall()
-    if table_check_results != [(True,)]:
-        add_dataframe_to_db(
-            df=test_df, name="test_df", con=engine, index=True, schema="connection_test"
-        )
+                )
+            ).fetchall()
+        if table_check_results != [(True,)]:
+            add_dataframe_to_db(
+                df=test_df,
+                name="test_df",
+                con=engine,
+                index=True,
+                schema="connection_test",
+            )
 
     # Return a connection string to this newly-created db
     return engine

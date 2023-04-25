@@ -9,7 +9,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import TableExpectation
+from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
     metric_value,
@@ -94,7 +94,7 @@ class TableEvaluateBinaryLabelModelBias(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableBinaryLabelModelBias(TableExpectation):
+class ExpectTableBinaryLabelModelBias(BatchExpectation):
     """Expect fairness in a model by calculating disparities among features, score (binary or continuous), and a label (binary) in a table using Aequitas.
 
     Using Aeqitas we evaluate predicted and true values to evaluate certain metrics \

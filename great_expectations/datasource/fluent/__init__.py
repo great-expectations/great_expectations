@@ -6,6 +6,7 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
     Sorter,
+    BatchMetadata,
 )
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,

@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 import great_expectations.exceptions.exceptions as gx_exceptions
+from great_expectations.compatibility import google
 from great_expectations.core.batch import BatchDefinition, BatchRequest, IDDict
 
 # noinspection PyProtectedMember
@@ -15,7 +16,6 @@ from great_expectations.datasource.data_connector.util import (
     list_gcs_keys,
     map_batch_definition_to_data_reference_string_using_regex,
     map_data_reference_string_to_batch_definition_list_using_regex,
-    storage,
 )
 
 
@@ -513,10 +513,10 @@ def test_build_sorters_from_config_bad_config():
 
 
 @pytest.mark.skipif(
-    storage is None,
-    reason="Could not import 'storage' from google.cloud in datasource.data_connector.util",
+    not google.storage,
+    reason="Could not import 'storage' from google.cloud",
 )
-@mock.patch("great_expectations.datasource.data_connector.util.storage.Client")
+@mock.patch("great_expectations.compatibility.google.Client")
 def test_list_gcs_keys_overwrites_delimiter(mock_gcs_conn):
     # Set defaults for ConfiguredAssetGCSDataConnector
     query_options = {"delimiter": None}

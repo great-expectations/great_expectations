@@ -1,5 +1,9 @@
 from typing import Dict, List, Optional, Union
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.configured_asset_sql_data_connector import (
     ConfiguredAssetSqlDataConnector,
@@ -7,17 +11,6 @@ from great_expectations.datasource.data_connector.configured_asset_sql_data_conn
 from great_expectations.execution_engine import ExecutionEngine  # noqa: TCH001
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import deep_filter_properties_iterable
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.engine import Engine
-    from sqlalchemy.engine.reflection import Inspector
-    from sqlalchemy.exc import OperationalError
-except ImportError:
-    sa = None
-    Engine = None
-    Inspector = None
-    OperationalError = None
 
 
 @public_api
@@ -163,7 +156,7 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
                     data_asset_name=data_asset_name,
                     data_asset_config=data_asset_config,
                 )
-            except OperationalError as e:
+            except sqlalchemy.OperationalError as e:
                 # If it doesn't work, then...
                 if self._skip_inapplicable_tables:
                     # No harm done. Just don't include this table in the list of assets.
@@ -198,8 +191,8 @@ class InferredAssetSqlDataConnector(ConfiguredAssetSqlDataConnector):
         if system_tables is None:
             system_tables = ["sqlite_master"]  # sqlite
 
-        engine: Engine = self.execution_engine.engine
-        inspector: Inspector = sa.inspect(engine)
+        engine: sqlalchemy.Engine = self.execution_engine.engine
+        inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
         selected_schema_name = schema_name
 

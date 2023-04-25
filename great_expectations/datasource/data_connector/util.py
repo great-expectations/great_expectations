@@ -11,6 +11,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import azure
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.base import assetConfigSchema
@@ -23,34 +24,6 @@ if TYPE_CHECKING:
     from great_expectations.datasource import DataConnector
 
 logger = logging.getLogger(__name__)
-
-try:
-    from azure.storage.blob import BlobPrefix, BlobServiceClient, ContainerClient
-except ImportError:
-    BlobPrefix = None
-    BlobServiceClient = None
-    ContainerClient = None
-    logger.debug(
-        "Unable to load azure types; install optional Azure dependency for support."
-    )
-
-try:
-    from google.cloud import storage
-except ImportError:
-    storage = None
-    logger.debug(
-        "Unable to load GCS connection object; install optional Google dependency for support"
-    )
-
-try:
-    import pyspark
-    import pyspark.sql as pyspark_sql
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    pyspark_sql = None  # type: ignore[assignment]
-    logger.debug(
-        "Unable to load pyspark and pyspark.sql; install optional Spark dependency for support."
-    )
 
 
 DEFAULT_DATA_ASSET_NAME: str = "DEFAULT_ASSET_NAME"
@@ -385,7 +358,7 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 
 def list_azure_keys(
-    azure_client: BlobServiceClient,
+    azure_client: azure.BlobServiceClient,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
@@ -409,7 +382,7 @@ def list_azure_keys(
         List of keys representing Azure file paths (as filtered by the query_options dict)
     """
     container: str = query_options["container"]
-    container_client: ContainerClient = azure_client.get_container_client(
+    container_client: azure.ContainerClient = azure_client.get_container_client(
         container=container
     )
 
@@ -417,7 +390,7 @@ def list_azure_keys(
 
     def _walk_blob_hierarchy(name_starts_with: str) -> None:
         for item in container_client.walk_blobs(name_starts_with=name_starts_with):
-            if isinstance(item, BlobPrefix):
+            if isinstance(item, azure.BlobPrefix):
                 if recursive:
                     _walk_blob_hierarchy(name_starts_with=item.name)
 

@@ -19,6 +19,7 @@ from typing import (
 import pydantic
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
@@ -40,6 +41,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -53,8 +55,11 @@ class _FilePathDataAsset(DataAsset):
         "type",
         "name",
         "order_by",
+        "batch_metadata",
         "batching_regex",  # file_path argument
         "kwargs",  # kwargs need to be unpacked and passed separately
+        "batch_metadata",
+        "connect_options",
     }
 
     # General file-path DataAsset pertaining attributes.
@@ -127,9 +132,21 @@ class _FilePathDataAsset(DataAsset):
         """
         return tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
 
+    @public_api
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
+        """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: A dict that can be used to limit the number of batches returned from the asset.
+                The dict structure depends on the asset type. The available keys for dict can be obtained by
+                calling batch_request_options.
+
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
         if options:
             for option, value in options.items():
                 if (
@@ -199,7 +216,7 @@ class _FilePathDataAsset(DataAsset):
         batch_spec_options: dict
         batch_data: Any
         batch_markers: BatchMarkers
-        batch_metadata: BatchRequestOptions
+        batch_metadata: BatchMetadata
         batch: Batch
         for batch_definition in batch_definition_list:
             batch_spec = self._data_connector.build_batch_spec(
@@ -225,8 +242,9 @@ class _FilePathDataAsset(DataAsset):
             fully_specified_batch_request.options.update(
                 batch_definition.batch_identifiers
             )
-
-            batch_metadata = copy.deepcopy(fully_specified_batch_request.options)
+            batch_metadata = self._get_batch_metadata_from_batch_request(
+                batch_request=fully_specified_batch_request
+            )
 
             # Some pydantic annotations are postponed due to circular imports.
             # Batch.update_forward_refs() will set the annotations before we

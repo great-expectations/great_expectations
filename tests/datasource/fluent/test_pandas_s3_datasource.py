@@ -83,7 +83,9 @@ def s3_bucket(s3_mock: BaseClient, aws_s3_bucket_name: str) -> str:
 
 
 @pytest.fixture
-def pandas_s3_datasource(s3_mock, s3_bucket: str) -> PandasS3Datasource:
+def pandas_s3_datasource(
+    empty_data_context, s3_mock, s3_bucket: str
+) -> PandasS3Datasource:
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
     keys: List[str] = [
@@ -106,10 +108,13 @@ def pandas_s3_datasource(s3_mock, s3_bucket: str) -> PandasS3Datasource:
             Key=key,
         )
 
-    return PandasS3Datasource(  # type: ignore[call-arg]
+    pandas_s3_datasource = PandasS3Datasource(  # type: ignore[call-arg]
         name="pandas_s3_datasource",
         bucket=s3_bucket,
     )
+    pandas_s3_datasource._data_context = empty_data_context
+
+    return pandas_s3_datasource
 
 
 @pytest.fixture
@@ -384,7 +389,9 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = pandas_s3_datasource
-    pandas_s3_datasource.assets = {"csv_asset": csv_asset}
+    pandas_s3_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = S3DataConnector(
         datasource_name=pandas_s3_datasource.name,
         data_asset_name=csv_asset.name,

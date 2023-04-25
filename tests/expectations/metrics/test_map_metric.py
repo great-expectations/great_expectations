@@ -1,6 +1,9 @@
 import pandas as pd
 import pytest
 
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import (
     ExpectationConfiguration,
     ExpectationValidationResult,
@@ -35,15 +38,16 @@ from great_expectations.expectations.metrics.map_metric_provider import (
 )
 from great_expectations.validator.validation_graph import MetricConfiguration
 from great_expectations.validator.validator import Validator
+from great_expectations.compatibility import sqlalchemy
 
 
 @pytest.fixture
 def sqlite_table_for_unexpected_rows_with_index(
     test_backends,
-) -> "sqlalchemy.engine.Engine":  # noqa: F821
+) -> sqlalchemy.Engine:  # noqa: F821
     if "sqlite" in test_backends:
         try:
-            import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             sqlite_path = file_relative_path(
                 __file__, "../../test_sets/metrics_test.db"
@@ -66,7 +70,8 @@ def sqlite_table_for_unexpected_rows_with_index(
             # use try-except block to ensure we don't keep modifying the database
             # adapted from https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_sql.html
             try:
-                df.to_sql(
+                add_dataframe_to_db(
+                    df=df,
                     name="animal_names",
                     con=sqlite_engine,
                     index=False,

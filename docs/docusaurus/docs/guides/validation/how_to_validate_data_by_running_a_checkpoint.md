@@ -7,9 +7,13 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This guide will help you <TechnicalTag tag="validation" text="Validate" /> your data by running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
-As stated in the Getting Started Tutorial [Step 4: Validate data](../../tutorials/getting_started/tutorial_validate_data.md), the best way to Validate data in production with Great Expectations is using a <TechnicalTag tag="checkpoint" text="Checkpoint" />. The advantage of using a Checkpoint is ease of use, due to its principal capability of combining the existing configuration in order to set up and perform the Validation:
+The best way to Validate data in production with Great Expectations is using a <TechnicalTag tag="checkpoint" text="Checkpoint" />. The advantage of using a Checkpoint is ease of use, due to its principal capability of combining the existing configuration in order to set up and perform the Validation:
 - <TechnicalTag tag="expectation_suite" text="Expectation Suites" />
 - <TechnicalTag tag="data_connector" text="Data Connectors" />
 - <TechnicalTag tag="batch_request" text="Batch Requests" />
@@ -19,8 +23,8 @@ Otherwise, configuring these validation parameters would have to be done via the
 
 <Prerequisites>
 
-- [Configured a Data Context](../../tutorials/getting_started/tutorial_setup.md#create-a-data-context).
-- [Configured an Expectations Suite](../../tutorials/getting_started/tutorial_create_expectations.md).
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
+- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
 - [Configured a Checkpoint](./checkpoints/how_to_create_a_new_checkpoint.md)
 
 </Prerequisites>

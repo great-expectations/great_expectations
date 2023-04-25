@@ -19,6 +19,9 @@ import pydantic
 from typing_extensions import Literal, Protocol
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
 from great_expectations.datasource.fluent.config_str import (
@@ -30,7 +33,6 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchMetadata,
     BatchRequest,
     BatchRequestOptions,
     DataAsset,
@@ -44,12 +46,12 @@ from great_expectations.execution_engine.split_and_sample.data_splitter import D
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
     SqlAlchemyDataSplitter,
 )
-from great_expectations.optional_imports import sqlalchemy
 
 if TYPE_CHECKING:
-    # min version of typing_extension missing `Self`, so it can't be imported at runtime
-    import sqlalchemy as sa
     from typing_extensions import Self
+
+    from great_expectations.compatibility import sqlalchemy
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
 
 
 class SQLDatasourceError(Exception):
@@ -469,6 +471,13 @@ class _SQLAsset(DataAsset):
     def add_splitter_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
+        """Associates a datetime part splitter with this sql asset.
+        Args:
+            column_name: Name of the date column where parts will be parsed out.
+            datetime_parts: A list of datetime parts to split on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterDatetimePart(
                 method_name="split_on_date_parts",
@@ -478,6 +487,12 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_column_value(self: Self, column_name: str) -> Self:
+        """Associates a column value splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterColumnValue(
                 method_name="split_on_column_value",
@@ -488,6 +503,13 @@ class _SQLAsset(DataAsset):
     def add_splitter_divided_integer(
         self: Self, column_name: str, divisor: int
     ) -> Self:
+        """Associates a divided integer splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+            divisor: The divisor to use when splitting.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterDividedInteger(
                 method_name="split_on_divided_integer",
@@ -497,6 +519,13 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
+        """Associates a mod integer splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+            mod: The mod to use when splitting.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterModInteger(
                 method_name="split_on_mod_integer",
@@ -506,6 +535,12 @@ class _SQLAsset(DataAsset):
         )
 
     def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
+        """Associates a multi column value splitter with this sql asset.
+        Args:
+            column_names: A list of column names to split on.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
         return self._add_splitter(
             SplitterMultiColumnValue(
                 column_names=column_names, method_name="split_on_multi_column_values"
@@ -576,8 +611,9 @@ class _SQLAsset(DataAsset):
         splitter = self.splitter
         batch_spec_kwargs: dict[str, str | dict | None]
         for request in self._fully_specified_batch_requests(batch_request):
-            batch_metadata = copy.deepcopy(self.batch_metadata)
-            batch_metadata.update(copy.deepcopy(request.options))
+            batch_metadata: BatchMetadata = self._get_batch_metadata_from_batch_request(
+                batch_request=request
+            )
             batch_spec_kwargs = self._create_batch_spec_kwargs()
             if splitter:
                 batch_spec_kwargs["splitter_method"] = splitter.method_name
@@ -632,6 +668,7 @@ class _SQLAsset(DataAsset):
         self.sort_batches(batch_list)
         return batch_list
 
+    @public_api
     def build_batch_request(
         self, options: Optional[BatchRequestOptions] = None
     ) -> BatchRequest:
@@ -693,7 +730,7 @@ class _SQLAsset(DataAsset):
         """
         raise NotImplementedError
 
-    def as_selectable(self) -> sqlalchemy.sql.Selectable:
+    def as_selectable(self) -> sqlalchemy.Selectable:
         """Returns a Selectable that can be used to query this data
 
         Returns:
@@ -714,12 +751,12 @@ class QueryAsset(_SQLAsset):
             raise ValueError("query must start with 'SELECT' followed by a whitespace.")
         return v
 
-    def as_selectable(self) -> sqlalchemy.sql.Selectable:
+    def as_selectable(self) -> sqlalchemy.Selectable:
         """Returns the Selectable that is used to retrieve the data.
 
         This can be used in a subselect FROM clause for queries against this data.
         """
-        return sqlalchemy.select(sqlalchemy.text(self.query.lstrip()[6:])).subquery()
+        return sa.select(sa.text(self.query.lstrip()[6:])).subquery()
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
@@ -760,8 +797,8 @@ class TableAsset(_SQLAsset):
             TestConnectionError: If the connection test fails.
         """
         datasource: SQLDatasource = self.datasource
-        engine: sqlalchemy.engine.Engine = datasource.get_engine()
-        inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+        engine: sqlalchemy.Engine = datasource.get_engine()
+        inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
         if self.schema_name and self.schema_name not in inspector.get_schema_names():
             raise TestConnectionError(
@@ -769,7 +806,7 @@ class TableAsset(_SQLAsset):
                 f'"{self.schema_name}" does not exist.'
             )
 
-        table_exists = sqlalchemy.inspect(engine).has_table(
+        table_exists = sa.inspect(engine).has_table(
             table_name=self.table_name,
             schema=self.schema_name,
         )
@@ -782,8 +819,8 @@ class TableAsset(_SQLAsset):
     def test_splitter_connection(self) -> None:
         if self.splitter:
             datasource: SQLDatasource = self.datasource
-            engine: sqlalchemy.engine.Engine = datasource.get_engine()
-            inspector: sqlalchemy.engine.Inspector = sqlalchemy.inspect(engine)
+            engine: sqlalchemy.Engine = datasource.get_engine()
+            inspector: sqlalchemy.Inspector = sa.inspect(engine)
 
             columns: list[dict[str, Any]] = inspector.get_columns(
                 table_name=self.table_name, schema=self.schema_name
@@ -795,12 +832,12 @@ class TableAsset(_SQLAsset):
                         f'The column "{splitter_column_name}" was not found in table "{self.qualified_name}"'
                     )
 
-    def as_selectable(self) -> sqlalchemy.sql.Selectable:
+    def as_selectable(self) -> sqlalchemy.Selectable:
         """Returns the table as a sqlalchemy Selectable.
 
         This can be used in a from clause for a query against this data.
         """
-        return sqlalchemy.text(self.table_name)
+        return sa.text(self.table_name)
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
         return {
@@ -842,11 +879,11 @@ class SQLDatasource(Datasource):
     )
     # We need to explicitly add each asset type to the Union due to how
     # deserialization is implemented in our pydantic base model.
-    assets: Dict[str, Union[TableAsset, QueryAsset]] = {}
+    assets: List[Union[TableAsset, QueryAsset]] = []
 
     # private attrs
     _cached_connection_string: Union[str, ConfigStr] = pydantic.PrivateAttr("")
-    _engine: Union[sa.engine.Engine, None] = pydantic.PrivateAttr(None)
+    _engine: Union[sqlalchemy.Engine, None] = pydantic.PrivateAttr(None)
 
     # These are instance var because ClassVars can't contain Type variables. See
     # https://peps.python.org/pep-0526/#class-and-instance-variable-annotations
@@ -858,7 +895,7 @@ class SQLDatasource(Datasource):
         """Returns the default execution engine type."""
         return SqlAlchemyExecutionEngine
 
-    def get_engine(self) -> sqlalchemy.engine.Engine:
+    def get_engine(self) -> sqlalchemy.Engine:
         if self.connection_string != self._cached_connection_string or not self._engine:
             try:
                 model_dict = self.dict(
@@ -867,7 +904,7 @@ class SQLDatasource(Datasource):
                 )
                 connection_string = model_dict.pop("connection_string")
                 kwargs = model_dict.pop("kwargs", {})
-                self._engine = sqlalchemy.create_engine(connection_string, **kwargs)
+                self._engine = sa.create_engine(connection_string, **kwargs)
             except Exception as e:
                 # connection_string has passed pydantic validation, but still fails to create a sqlalchemy engine
                 # one possible case is a missing plugin (e.g. psycopg2)
@@ -889,7 +926,7 @@ class SQLDatasource(Datasource):
             TestConnectionError: If the connection test fails.
         """
         try:
-            engine: sqlalchemy.engine.Engine = self.get_engine()
+            engine: sqlalchemy.Engine = self.get_engine()
             engine.connect()
         except Exception as e:
             raise TestConnectionError(
@@ -897,7 +934,7 @@ class SQLDatasource(Datasource):
                 f"{str(e)}"
             ) from e
         if self.assets and test_assets:
-            for asset in self.assets.values():
+            for asset in self.assets:
                 asset._datasource = self
                 asset.test_connection()
 
