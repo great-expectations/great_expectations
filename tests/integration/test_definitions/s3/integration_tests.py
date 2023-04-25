@@ -78,10 +78,9 @@ connecting_to_your_data = [
 
 deployment_patterns = [
     IntegrationTestFixture(
-        name="deployment_pattern_pandas_s3",
+        name="RUNME_AWS_deployment_pattern_pandas_s3",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py",
-        # data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_context_dir=None,
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         backend_dependencies=[BackendDependencies.AWS],
     )
 ]

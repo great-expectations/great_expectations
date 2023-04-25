@@ -1,12 +1,11 @@
 import os
 import pathlib
-import tempfile
 from great_expectations.core.yaml_handler import YAMLHandler
 import boto3
 
 client = boto3.client("s3")
-temp_dir = tempfile.TemporaryDirectory()
-full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
+# we can use __file__ here because the script is copied to a test-directory by test_script_runner.py
+full_path_to_project_directory = __file__
 yaml: YAMLHandler = YAMLHandler()
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py imports">
 import great_expectations as gx
@@ -65,8 +64,8 @@ stores:
       prefix: <YOUR S3 PREFIX NAME>
 
 expectations_store_name: expectations_S3_store
-"""
 # </snippet>
+"""
 
 # replace example code with integration test configuration
 configured_expectations_store = yaml.load(configured_expectations_store_yaml)
@@ -126,8 +125,8 @@ stores:
       base_directory: uncommitted/validations/
 
 validations_store_name: validations_store
-"""
 # </snippet>
+"""
 
 assert actual_existing_validations_store == yaml.load(
     expected_existing_validations_store_yaml
@@ -149,8 +148,6 @@ stores:
 validations_store_name: validations_S3_store
 # </snippet>
 """
-# </snippet>
-
 
 # replace example code with integration test configuration
 configured_validations_store = yaml.load(configured_validations_store_yaml)
@@ -194,8 +191,8 @@ data_docs_sites:
       bucket: <YOUR S3 BUCKET NAME>
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-"""
 # </snippet>
+"""
 
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR S3 BUCKET NAME>", "demo-data-docs"

@@ -271,7 +271,25 @@ stages:
               pytest -v --postgresql --docs-tests -m integration -k "RUNME_POSTGRES" tests/integration/test_script_runner.py
             displayName: 'Run Flagged Tests'
 
+      - job: runme_script_runner_tests_aws
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
+          - script: |
+              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+            displayName: 'Install GX and required dependencies'
+
+          # tests containing the name "RUNME_AWS" are run
+          - script: |
+              pytest -v --docs-tests -m integration --aws -k "RUNME_AWS" tests/integration/test_script_runner.py
+            displayName: 'Run Flagged Tests'
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
   - stage: required
     dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
