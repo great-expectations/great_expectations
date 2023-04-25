@@ -293,3 +293,6 @@ assert (
 )
 
 # build and view datadocs
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py build_docs">
+context.build_data_docs()
+# </snippet>
