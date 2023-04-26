@@ -1488,7 +1488,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
     monkeypatch,
 ):
@@ -2293,10 +2293,10 @@ def data_context_with_fluent_datasource_and_block_datasource(
     filesystem_csv_2,
 ) -> FileDataContext:
     empty_data_context.sources.add_pandas_filesystem(
-        name="my_fluent_datasource", base_directory=str(filesystem_csv_2)
+        name="my_fluent_datasource", base_directory=filesystem_csv_2
     )
     empty_data_context.add_datasource(
-        "my_block_datasource",
+        name="my_block_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
         batch_kwargs_generators={
