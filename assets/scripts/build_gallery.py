@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 import importlib
 import json
@@ -14,11 +16,11 @@ from typing import Dict, List, Optional, Tuple
 import click
 import pkg_resources
 
-from great_expectations.data_context.data_context import DataContext
-from great_expectations.expectations.expectation import Expectation
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     ExpectationBackendTestResultCounts,
 )
+from great_expectations.data_context.data_context import DataContext
+from great_expectations.expectations.expectation import Expectation
 
 logger = logging.getLogger(__name__)
 chandler = logging.StreamHandler(stream=sys.stdout)
@@ -105,8 +107,29 @@ def execute_shell_command(command: str) -> int:
 def get_expectations_info_dict(
     include_core: bool = True,
     include_contrib: bool = True,
-    only_these_expectations: List[str] = [],
+    only_these_expectations: list[str] | None = None,
 ) -> dict:
+    """Gather information for each expectation, including create/update time, run requirements among others.
+
+    This method loads and parses the files where expectations are defined to collect this info.
+
+    Args:
+        include_core: Whether to include core expectations or not (default True).
+        include_contrib: Whether to include community contributed expectations or not (default True).
+        only_these_expectations: An optional list of the names of expectations to gather info for as the snake case string name e.g. `expect_column_values_to_not_be_null`
+
+    Returns:
+        A Dictionary containing the following information:
+            updated_at: git last updated timestamp
+            created_at: git created timestamp
+            path: file path where the expectation is defined
+            package: name of the package containing the expectation, typically the root directory. For core expectations it is `core` instead of the directory name.
+            requirements: Additional packages that need to be installed to run the expectation.
+            import_module_args: The location of the expectation for use in importing.
+            sys_path: path to add to sys.path when importing an expectation.
+    """
+    if not only_these_expectations:
+        only_these_expectations = []
     rx = re.compile(r".*?([A-Za-z]+?Expectation\b).*")
     result = {}
     files_found = []
