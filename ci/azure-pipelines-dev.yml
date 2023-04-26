@@ -199,7 +199,8 @@ stages:
     - job: public_api_report
       steps:
         - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
+            pip install --requirement reqs/requirements-dev-test.txt
+            invoke public-api
           name: PublicAPIReport
 
   - stage: import_ge
