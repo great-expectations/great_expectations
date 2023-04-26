@@ -221,7 +221,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 ### 1.6 Configure Data Docs for hosting and sharing from Amazon S3
 
 #### 1.6.1 Create an Amazon S3 bucket for your Data Docs
-<CreateAnS3BucketForDataDocs />
+<CreateAnSBucketForDataDocs />
 
 #### 1.6.2 Configure your bucket policy to enable appropriate access
 <ConfigureYourBucketPolicyToEnableAppropriateAccess />
@@ -242,6 +242,8 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 ### 2.1 Instantiate your project's DataContext
 <CreateDataContextWithGetContext />
+
+If you have already instantiated your `DataContext` in a previous step, this step can be skipped. 
 
 ### 2.2 Add CSV Asset to your Datasource 
 <ConfigureYourDatasource />
