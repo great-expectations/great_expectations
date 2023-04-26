@@ -233,9 +233,6 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2"
 ```
 
-```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py simple checkpoint doc results"
-```
-
 </TabItem>
 </Tabs>
 

@@ -25,10 +25,10 @@ You can run the Checkpoint from the <TechnicalTag tag="cli" text="CLI" /> in a T
 
 <Tabs
   groupId="terminal-or-python"
-  defaultValue='terminal'
+  defaultValue='python'
   values={[
-  {label: 'Terminal', value:'terminal'},
   {label: 'Python', value:'python'},
+  {label: 'Terminal', value:'terminal'},
   ]}>
 
 <TabItem value="python">
