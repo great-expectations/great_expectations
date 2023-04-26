@@ -7,7 +7,6 @@ import pathlib
 import re
 import sre_constants
 import sre_parse
-import warnings
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
