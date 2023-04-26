@@ -1762,6 +1762,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     )
     def add_checkpoint(
         self,
+        checkpoint: Checkpoint | None = None,
         name: str | None = None,
         config_version: int | float | None = None,
         template_name: str | None = None,
@@ -1788,7 +1789,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
-        checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """Add a Checkpoint to the DataContext.
 
@@ -1796,6 +1796,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             - https://docs.greatexpectations.io/docs/terms/checkpoint/
 
         Args:
+            checkpoint: An existing checkpoint you wish to persist.
             name: The name to give the checkpoint.
             config_version: The config version of this checkpoint.
             template_name: The template to use in generating this checkpoint.
@@ -1820,7 +1821,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             default_validation_id: The default validation ID to use in generating this checkpoint.
             id: The ID to use in generating this checkpoint (preferred over `ge_cloud_id`).
             expectation_suite_id: The expectation suite ID to use in generating this checkpoint (preferred over `expectation_suite_ge_cloud_id`).
-            checkpoint: An existing checkpoint you wish to persist.
 
         Returns:
             The Checkpoint object created.

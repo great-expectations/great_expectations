@@ -645,6 +645,7 @@ class CloudDataContext(SerializableDataContext):
 
     def add_checkpoint(
         self,
+        checkpoint: Checkpoint | None = None,
         name: str | None = None,
         config_version: int | float | None = None,
         template_name: str | None = None,
@@ -671,7 +672,6 @@ class CloudDataContext(SerializableDataContext):
         default_validation_id: str | None = None,
         id: str | None = None,
         expectation_suite_id: str | None = None,
-        checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """
         See `AbstractDataContext.add_checkpoint` for more information.
