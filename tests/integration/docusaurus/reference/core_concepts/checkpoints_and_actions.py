@@ -272,24 +272,6 @@ assert second_batch_identifiers == {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results">
-documentation_results = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results just the text">
-print(first_expectation_suite)
-my_expectation_suite
-
-print(first_data_asset)
-yellow_tripdata_sample_2019-01
-
-print(second_expectation_suite)
-my_expectation_suite
-
-print(second_data_asset)
-yellow_tripdata_sample_2019-02
-# </snippet>
-"""
-# </snippet>
-
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime">
 keys_passed_at_runtime = """
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py keys_passed_at_runtime just the yaml">
@@ -379,24 +361,6 @@ assert second_batch_identifiers == {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2">
-documentation_results = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2 just the text">
-print(first_expectation_suite)
-my_expectation_suite
-
-print(first_data_asset)
-yellow_tripdata_sample_2019-01
-
-print(second_expectation_suite)
-my_other_expectation_suite
-
-print(second_data_asset)
-yellow_tripdata_sample_2019-02
-# </snippet>
-"""
-# </snippet>
-
 context.add_or_update_expectation_suite("my_expectation_suite")
 context.add_or_update_expectation_suite("my_other_expectation_suite")
 
@@ -466,25 +430,6 @@ assert second_batch_identifiers == {
 }
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3">
-documentation_results = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3 just the text">
-print(first_expectation_suite)
-my_expectation_suite
-
-print(first_data_asset)
-yellow_tripdata_sample_2019-01"
-
-print(second_expectation_suite)
-my_other_expectation_suite
-
-print(second_data_asset)
-yellow_tripdata_sample_2019-02
-# </snippet>
-"""
-# </snippet>
-
-
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint">
 using_simple_checkpoint = """
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py using_simple_checkpoint just the yaml">
@@ -530,13 +475,6 @@ assert batch_identifiers == {
     "year": "2019",
     "month": "01",
 }
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_4">
-documentation_results: str = """
-print(expectation_suite)
-my_expectation_suite
-"""
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py equivalent_using_checkpoint">
@@ -599,16 +537,4 @@ assert batch_identifiers == {
     "year": "2019",
     "month": "01",
 }
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_5">
-documentation_results: str = """
-# <snippet name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py simple checkpoint doc results">
-print(expectation_suite)
-my_expectation_suite
-
-print(data_asset)
-yellow_tripdata_sample_2019-01"
-# </snippet>
-"""
 # </snippet>
