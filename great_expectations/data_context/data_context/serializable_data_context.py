@@ -228,7 +228,7 @@ class SerializableDataContext(AbstractDataContext):
         with open(path_to_yml) as f:
             config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
-        config_var_path = os.path.join(gx_dir, config_var_path)  # noqa: PTH118
+        config_var_path = os.path.join(gx_dir, config_var_path)  # type: ignore[arg-type] # noqa: PTH118
         return os.path.isfile(config_var_path)  # noqa: PTH113
 
     @classmethod
@@ -356,7 +356,7 @@ class SerializableDataContext(AbstractDataContext):
             config_commented_map_from_yaml = yaml.load(f)
 
         config_version = config_commented_map_from_yaml.get("config_version")
-        return float(config_version) if config_version else None
+        return float(config_version) if config_version else None  # type: ignore[arg-type]
 
     @classmethod
     def set_ge_config_version(
