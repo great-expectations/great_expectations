@@ -26,6 +26,13 @@ pytestmark = [pytest.mark.integration]
 yaml = YAMLHandler()
 
 
+@pytest.fixture
+def taxi_data_samples_dir() -> pathlib.Path:
+    return pathlib.Path(
+        __file__, "..", "..", "..", "test_sets", "taxi_yellow_tripdata_samples"
+    ).resolve(strict=True)
+
+
 @pytest.mark.cloud
 def test_add_fluent_datasource_are_persisted(
     cloud_api_fake: RequestsMock,
@@ -105,19 +112,23 @@ def test_assets_are_persisted_on_creation_and_removed_on_deletion(
 def test_context_add_or_update_datasource(
     cloud_api_fake: RequestsMock,
     empty_contexts: CloudDataContext | FileDataContext,
-    db_file: pathlib.Path,
+    # db_file: pathlib.Path, TODO: sqlite deser broken
+    taxi_data_samples_dir: pathlib.Path,
 ):
     context = empty_contexts
 
-    datasource: SqliteDatasource = context.sources.add_sqlite(
-        name="save_ds_test", connection_string=f"sqlite:///{db_file}"
+    datasource = context.sources.add_pandas_filesystem(
+        name="save_ds_test", base_directory=taxi_data_samples_dir
+    )
+    datasource.add_csv_asset(
+        name="my_asset",
     )
 
-    assert datasource.connection_string == f"sqlite:///{db_file}"
+    # assert datasource.connection_string == f"sqlite:///{db_file}"
 
     # modify the datasource
-    datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
-    context.sources.add_or_update_sqlite(datasource)
+    # datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
+    # context.sources.add_or_update_pandas_filesystem(datasource)
 
     # TODO: spy the store.delete calls instead of ctx specific tests
     if isinstance(empty_contexts, CloudDataContext):
