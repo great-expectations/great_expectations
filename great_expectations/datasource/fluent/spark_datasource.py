@@ -26,6 +26,7 @@ from great_expectations.datasource.fluent.constants import (
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchRequest,
+    BatchRequestOptions,
     DataAsset,
     Datasource,
 )
@@ -103,17 +104,33 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         )
 
     @public_api
-    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+    def build_batch_request(
+        self, options: Optional[BatchRequestOptions] = None
+    ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
+
+        Args:
+            options: A dict that can be used to limit the number of batches returned from the asset.
+                The dict structure depends on the asset type. The available keys for dict can be obtained by
+                calling batch_request_options.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
+        if options is not None and not self._valid_batch_request_options(options):
+            allowed_keys = set(self.batch_request_options)
+            actual_keys = set(options.keys())
+            raise gx_exceptions.InvalidBatchRequestError(
+                "Batch request options should only contain keys from the following set:\n"
+                f"{allowed_keys}\nbut your specified keys contain\n"
+                f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
+            )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
-            options={},
+            options=options or {},
         )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -211,7 +228,7 @@ class SparkDatasource(_SparkDatasource):
 
         Args:
             name: The name of the Dataframe asset. This can be any arbitrary string.
-            dataframe: The Dataframe containing the data for this data asset.
+            dataframe: The Spark DataFrame containing the data for this data asset.
             batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
                             batches created from the asset.
 
