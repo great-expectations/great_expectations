@@ -1119,7 +1119,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     batch_request_as_dict,
-    sa,
 ):
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
@@ -1648,3 +1647,266 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert len(context.validations_store.list_keys()) == 1
     assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_dataframe_asset_in_context_run_checkpoint_pandasdf(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: dict = {
+        "datasource_name": "my_pandas_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", batch_request=batch_request
+    )
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_dataframe_asset_in_context_run_checkpoint_sparkdf(
+    titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: dict = {
+        "datasource_name": "my_spark_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", batch_request=batch_request
+    )
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_pandasdf(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: dict = {
+        "datasource_name": "my_pandas_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        validations=[{"batch_request": batch_request}],
+    )
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_sparkdf(
+    titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: dict = {
+        "datasource_name": "my_spark_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        validations=[{"batch_request": batch_request}],
+    )
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_request_dataframe_pandasdf(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: dict = {
+        "datasource_name": "my_pandas_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+    )
+
+    result = checkpoint.run(batch_request=batch_request)
+
+    assert type(repr(result)) == str
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_result_with_batch_request_dataframe_sparkdf(
+    titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: dict = {
+        "datasource_name": "my_spark_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+    )
+
+    result = checkpoint.run(batch_request=batch_request)
+
+    assert type(repr(result)) == str
+
+
+@pytest.mark.slow  # 1.75s
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run_pandas(
+    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
+    common_action_list,
+    batch_request_as_dict,
+):
+    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request_0: dict = batch_request_as_dict
+
+    batch_request_1: dict = {
+        "datasource_name": "my_pandas_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+        "batch_request": batch_request_0,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+
+    result = checkpoint.run()
+    assert not result["success"]
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+
+    result = checkpoint.run(batch_request=batch_request_1)
+    assert result["success"]
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 1
+    )
