@@ -240,7 +240,7 @@ Completeness checklist for ExpectColumnValuesToOnlyContainVowels:
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
-If you've [set up your dev environment](../../../contributing/contributing_setup.md), these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
+If you've [set up your dev environment](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_CODE.md), these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
 ```console
 black <PATH/TO/YOUR/EXPECTATION.py>
