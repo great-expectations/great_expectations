@@ -1029,6 +1029,23 @@ def test_add_checkpoint_with_existing_checkpoint(
 
 
 @pytest.mark.unit
+def test_add_checkpoint_with_existing_checkpoint_without_keyword_arg(
+    in_memory_data_context: EphemeralDataContextSpy,
+):
+    """What does this test and why?
+    context.add_checkpoint(checkpoint) should work without requiring the use of the keyword argument e.g.
+    context.add_checkpoint(checkpoint=checkpoint)"""
+    context = in_memory_data_context
+    checkpoint_name = "my_checkpoint"
+    checkpoint = Checkpoint(name=checkpoint_name, data_context=context)
+
+    persisted_checkpoint = context.add_checkpoint(checkpoint)
+
+    assert checkpoint == persisted_checkpoint
+    assert context.checkpoint_store.save_count == 1
+
+
+@pytest.mark.unit
 def test_add_checkpoint_namespace_collision_raises_deprecation(
     in_memory_data_context: EphemeralDataContextSpy,
 ):
