@@ -38,7 +38,9 @@ context.delete_datasource("taxi_datasource")
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py simple_checkpoint_add_dataframe">
 dataframe_asset = context.sources.add_pandas(
     "my_taxi_validator_checkpoint"
-).add_dataframe_asset("taxi_frame", df, batch_metadata={"year": "2019", "month": "01"})
+).add_dataframe_asset(
+    df, name="taxi_frame", batch_metadata={"year": "2019", "month": "01"}
+)
 
 batch_request = dataframe_asset.build_batch_request()
 

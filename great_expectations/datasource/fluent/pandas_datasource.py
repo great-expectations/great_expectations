@@ -563,12 +563,24 @@ class PandasDatasource(_PandasDatasource):
         # TODO: raise error if `_data_context` not set
         return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
+    @public_api
     def add_dataframe_asset(
         self,
         name: str,
         dataframe: pd.DataFrame,
         **kwargs,
     ) -> DataFrameAsset:
+        """Adds a Dataframe DataAsset to this PandasDatasource object.
+
+        Args:
+            name: The name of the Dataframe asset. This can be any arbitrary string.
+            dataframe: The Dataframe containing the data for this data asset.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            The DataFameAsset that has been added to this datasource.
+        """
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
@@ -576,12 +588,24 @@ class PandasDatasource(_PandasDatasource):
         )
         return self._add_asset(asset=asset)
 
+    @public_api
     def read_dataframe(
         self,
         dataframe: pd.DataFrame,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
+        """Reads a Dataframe and returns a Validator associated with it.
+
+        Args:
+            dataframe: The Dataframe containing the data for this data asset.
+            asset_name: The name of the Dataframe asset, should you wish to use it again.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            A Validator using an ephemeral DataFrameAsset and the "default" Expectation Suite.
+        """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,

@@ -201,6 +201,7 @@ class SparkDatasource(_SparkDatasource):
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
+    @public_api
     def add_dataframe_asset(
         self,
         name: str,
