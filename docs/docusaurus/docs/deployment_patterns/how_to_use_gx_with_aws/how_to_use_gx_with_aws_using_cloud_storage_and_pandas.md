@@ -100,7 +100,7 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- 2.1 Create your Data Context -->
 
-import CreateDataContextWithGetContext from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
+import CreateDataContextWithGetContextAgain from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
 
 <!-- 2.2 Add Datasource to your DataContext -->
 
@@ -241,7 +241,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 ## Part 2: Connect to data
 
 ### 2.1 Instantiate your project's DataContext
-<CreateDataContextWithGetContext />
+<CreateDataContextWithGetContextAgain />
 
 If you have already instantiated your `DataContext` in a previous step, this step can be skipped. 
 
