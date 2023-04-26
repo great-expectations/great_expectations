@@ -4,12 +4,11 @@ import logging
 import pathlib
 from typing import TYPE_CHECKING, Mapping, Optional, Union
 
-from ruamel.yaml import YAMLError
+from ruamel.yaml import YAML, YAMLError
 from ruamel.yaml.constructor import DuplicateKeyError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.serializable_data_context import (
     SerializableDataContext,
 )
@@ -34,7 +33,9 @@ if TYPE_CHECKING:
     )
 
 logger = logging.getLogger(__name__)
-yaml = YAMLHandler()
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 @public_api

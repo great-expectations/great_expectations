@@ -14,6 +14,7 @@ from __future__ import annotations
 import traceback
 from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union, cast
 
+from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap
 from typing_extensions import Literal
 
@@ -26,7 +27,6 @@ from great_expectations.core.usage_statistics.anonymizers.datasource_anonymizer 
 from great_expectations.core.usage_statistics.usage_statistics import (
     send_usage_message_from_handler,
 )
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.store import Store  # noqa: TCH001
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
@@ -42,7 +42,10 @@ if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
 
 
-yaml = YAMLHandler()
+# TODO: check if this can be refactored to use YAMLHandler class
+yaml = YAML()
+yaml.indent(mapping=2, sequence=4, offset=2)
+yaml.default_flow_style = False
 
 
 class _YamlConfigValidator:
@@ -355,7 +358,7 @@ class _YamlConfigValidator:
         self, config_str: str, usage_stats_event_name: str
     ) -> CommentedMap:
         try:
-            substituted_config: CommentedMap = yaml.load(config_str)  # type: ignore[assignment]
+            substituted_config: CommentedMap = yaml.load(config_str)
             return substituted_config
 
         except Exception as e:
