@@ -64,8 +64,8 @@ And use the results from the Data Assistant to build and save an Expectation Sui
 ```
 
 <details>
-<summary><code>excluded_expectations</code>?</summary>
-Above, we excluded <code>expect_column_quantile_values_to_be_between</code>, as it isn't fully supported by some SQL dialects.
+<summary><code>exclude_column_names</code>?</summary>
+Above, we excluded <code>"VendorID",</code>, so Expectations won't be set against this column.
 
 This is one example of the ways in which we can customize the Suite built by our Data Assistant.
 
