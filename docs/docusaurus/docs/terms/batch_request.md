@@ -3,7 +3,6 @@ title: "Batch Request"
 ---
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
-import BatchesAndBatchRequests from './_batches_and_batch_requests.mdx';
 import ConnectHeader from '/docs/images/universal_map/_um_connect_header.mdx';
 import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
