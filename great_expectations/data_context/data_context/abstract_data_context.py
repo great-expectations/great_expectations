@@ -1673,6 +1673,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @overload
     def add_checkpoint(
         self,
+        checkpoint: None = ...,
         name: str = ...,
         config_version: int | float | None = ...,
         template_name: str | None = ...,
@@ -1699,7 +1700,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: str | None = ...,
         id: str | None = ...,
         expectation_suite_id: str | None = ...,
-        checkpoint: None = ...,
     ) -> Checkpoint:
         """
         Individual constructor arguments are provided.
@@ -1710,6 +1710,7 @@ class AbstractDataContext(ConfigPeer, ABC):
     @overload
     def add_checkpoint(
         self,
+        checkpoint: Checkpoint = ...,
         name: None = ...,
         config_version: None = ...,
         template_name: None = ...,
@@ -1734,7 +1735,6 @@ class AbstractDataContext(ConfigPeer, ABC):
         default_validation_id: None = ...,
         id: None = ...,
         expectation_suite_id: None = ...,
-        checkpoint: Checkpoint = ...,
     ) -> Checkpoint:
         """
         A `checkpoint` is provided.
