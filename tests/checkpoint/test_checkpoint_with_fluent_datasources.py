@@ -1,3 +1,4 @@
+import copy
 import logging
 import pickle
 import unittest
@@ -10,7 +11,10 @@ import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-from great_expectations.core import ExpectationSuiteValidationResult
+from great_expectations.core import (
+    ExpectationSuiteValidationResult,
+    ExpectationConfiguration,
+)
 from great_expectations.datasource.fluent.interfaces import (
     BatchRequest as FluentBatchRequest,
 )
@@ -1122,7 +1126,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    batch_request_0: dict = batch_request_as_dict
+    batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
 
     batch_request_1: dict = {
         "datasource_name": "my_pandas_dataframes_datasource",
@@ -1854,13 +1858,17 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_printable_validation_re
 @pytest.mark.slow  # 1.75s
 @pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run_pandas(
-    titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
+    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
     batch_request_as_dict,
 ):
-    context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
 
-    batch_request_0: dict = batch_request_as_dict
+    batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
+    batch_request_0["options"] = {
+        "timestamp": "19120414",
+        "size": "1313",
+    }
 
     batch_request_1: dict = {
         "datasource_name": "my_pandas_dataframes_datasource",
@@ -1896,7 +1904,18 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         == 0
     )
 
-    result = checkpoint.run(batch_request=batch_request_1)
+    suite = context.add_expectation_suite("my_new_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "Age", "min_value": 0, "max_value": 71},
+    )
+    suite.add_expectation(expectation, send_usage_event=False)
+    context.update_expectation_suite(expectation_suite=suite)
+
+    result = checkpoint.run(
+        expectation_suite_name="my_new_expectation_suite",
+        batch_request=batch_request_1,
+    )
     assert result["success"]
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
@@ -1906,6 +1925,610 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     )
     assert (
         list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.slow  # 1.75s
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_checkpoint_run_spark(
+    titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
+    common_action_list,
+    batch_request_as_dict,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
+    batch_request_0["options"] = {
+        "timestamp": "19120414",
+        "size": "1313",
+    }
+
+    batch_request_1: dict = {
+        "datasource_name": "my_spark_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+        "batch_request": batch_request_0,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+
+    result = checkpoint.run()
+    assert not result["success"]
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+
+    suite = context.add_expectation_suite("my_new_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "Age", "min_value": 0, "max_value": 71},
+    )
+    suite.add_expectation(expectation, send_usage_event=False)
+    context.update_expectation_suite(expectation_suite=suite)
+
+    result = checkpoint.run(
+        expectation_suite_name="my_new_expectation_suite",
+        batch_request=batch_request_1,
+    )
+    assert result["success"]
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.slow  # 2.35s
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run_pandas(
+    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
+    common_action_list,
+    batch_request_as_dict,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
+    batch_request_0["options"] = {
+        "timestamp": "19120414",
+        "size": "1313",
+    }
+
+    batch_request_1: dict = {
+        "datasource_name": "my_pandas_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+        "validations": [{"batch_request": batch_request_0}],
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+
+    result = checkpoint.run()
+    assert result["success"] is False
+    assert len(result.run_results.values()) == 1
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+
+    suite = context.add_expectation_suite("my_new_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "Age", "min_value": 0, "max_value": 71},
+    )
+    suite.add_expectation(expectation, send_usage_event=False)
+    context.update_expectation_suite(expectation_suite=suite)
+
+    result = checkpoint.run(
+        validations=[
+            {
+                "batch_request": batch_request_1,
+                "expectation_suite_name": "my_new_expectation_suite",
+            }
+        ],
+    )
+    assert result["success"] is False
+    assert len(result.run_results.values()) == 2
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+    assert (
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.slow  # 2.35s
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run_spark(
+    titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
+    common_action_list,
+    batch_request_as_dict,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
+    batch_request_0["options"] = {
+        "timestamp": "19120414",
+        "size": "1313",
+    }
+
+    batch_request_1: dict = {
+        "datasource_name": "my_spark_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+        "validations": [{"batch_request": batch_request_0}],
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+    checkpoint: Checkpoint = context.get_checkpoint(name="my_checkpoint")
+
+    result = checkpoint.run()
+    assert result["success"] is False
+    assert len(result.run_results.values()) == 1
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+
+    suite = context.add_expectation_suite("my_new_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "Age", "min_value": 0, "max_value": 71},
+    )
+    suite.add_expectation(expectation, send_usage_event=False)
+    context.update_expectation_suite(expectation_suite=suite)
+
+    result = checkpoint.run(
+        validations=[
+            {
+                "batch_request": batch_request_1,
+                "expectation_suite_name": "my_new_expectation_suite",
+            }
+        ],
+    )
+    assert result["success"] is False
+    assert len(result.run_results.values()) == 2
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+    assert (
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.slow  # 1.91s
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint_pandas(
+    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
+    common_action_list,
+    batch_request_as_dict,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
+    batch_request_0["options"] = {
+        "timestamp": "19120414",
+        "size": "1313",
+    }
+
+    batch_request_1: dict = {
+        "datasource_name": "my_pandas_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+        "batch_request": batch_request_0,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    suite = context.add_expectation_suite("my_new_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "Age", "min_value": 0, "max_value": 71},
+    )
+    suite.add_expectation(expectation, send_usage_event=False)
+    context.update_expectation_suite(expectation_suite=suite)
+
+    result = context.run_checkpoint(checkpoint_name="my_checkpoint")
+    assert result["success"] is False
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        batch_request=batch_request_1,
+        expectation_suite_name="my_new_expectation_suite",
+    )
+    assert result["success"]
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.slow  # 1.91s
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint_spark(
+    titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
+    common_action_list,
+    batch_request_as_dict,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
+    batch_request_0["options"] = {
+        "timestamp": "19120414",
+        "size": "1313",
+    }
+
+    batch_request_1: dict = {
+        "datasource_name": "my_spark_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+        "batch_request": batch_request_0,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    suite = context.add_expectation_suite("my_new_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "Age", "min_value": 0, "max_value": 71},
+    )
+    suite.add_expectation(expectation, send_usage_event=False)
+    context.update_expectation_suite(expectation_suite=suite)
+
+    result = context.run_checkpoint(checkpoint_name="my_checkpoint")
+    assert result["success"] is False
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        batch_request=batch_request_1,
+        expectation_suite_name="my_new_expectation_suite",
+    )
+    assert result["success"]
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.slow  # 2.46s
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint_pandas(
+    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
+    common_action_list,
+    batch_request_as_dict,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
+    batch_request_0["options"] = {
+        "timestamp": "19120414",
+        "size": "1313",
+    }
+
+    batch_request_1: dict = {
+        "datasource_name": "my_pandas_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+        "validations": [{"batch_request": batch_request_0}],
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    result = context.run_checkpoint(checkpoint_name="my_checkpoint")
+    assert result["success"] is False
+    assert len(result.run_results.values()) == 1
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+
+    suite = context.add_expectation_suite("my_new_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "Age", "min_value": 0, "max_value": 71},
+    )
+    suite.add_expectation(expectation, send_usage_event=False)
+    context.update_expectation_suite(expectation_suite=suite)
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        validations=[
+            {
+                "batch_request": batch_request_1,
+                "expectation_suite_name": "my_new_expectation_suite",
+            }
+        ],
+    )
+    assert result["success"] is False
+    assert len(result.run_results.values()) == 2
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+    assert (
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 1
+    )
+
+
+@pytest.mark.slow  # 2.46s
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint_spark(
+    titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation,
+    common_action_list,
+    batch_request_as_dict,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_and_expectation_suite_with_one_expectation
+
+    batch_request_0: dict = copy.deepcopy(batch_request_as_dict)
+    batch_request_0["options"] = {
+        "timestamp": "19120414",
+        "size": "1313",
+    }
+
+    batch_request_1: dict = {
+        "datasource_name": "my_spark_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+        "validations": [{"batch_request": batch_request_0}],
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    result = context.run_checkpoint(checkpoint_name="my_checkpoint")
+    assert result["success"] is False
+    assert len(result.run_results.values()) == 1
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+
+    suite = context.add_expectation_suite("my_new_expectation_suite")
+    expectation = ExpectationConfiguration(
+        expectation_type="expect_column_values_to_be_between",
+        kwargs={"column": "Age", "min_value": 0, "max_value": 71},
+    )
+    suite.add_expectation(expectation, send_usage_event=False)
+    context.update_expectation_suite(expectation_suite=suite)
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        validations=[
+            {
+                "batch_request": batch_request_1,
+                "expectation_suite_name": "my_new_expectation_suite",
+            }
+        ],
+    )
+    assert result["success"] is False
+    assert len(result.run_results.values()) == 2
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[0]["validation_result"]["statistics"][
+            "successful_expectations"
+        ]
+        == 0
+    )
+    assert (
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
+            "evaluated_expectations"
+        ]
+        == 1
+    )
+    assert (
+        list(result.run_results.values())[1]["validation_result"]["statistics"][
             "successful_expectations"
         ]
         == 1

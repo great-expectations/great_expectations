@@ -1861,7 +1861,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     mock_emit,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
-    sa,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -4126,7 +4125,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_checkpoint_run(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
-    sa,
 ):
     context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -4215,7 +4213,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_batch_request_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
-    sa,
 ):
     context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -4291,7 +4288,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_result_validations_in_checkpoint_yml_and_context_run_checkpoint(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
-    sa,
 ):
     context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
@@ -4462,7 +4458,6 @@ def test_newstyle_checkpoint_does_not_pass_dataframes_via_validations_into_check
 def test_newstyle_checkpoint_result_can_be_pickled(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
-    sa,
 ):
     context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
 
@@ -4496,7 +4491,6 @@ def test_newstyle_checkpoint_result_can_be_pickled(
 def test_newstyle_checkpoint_result_validations_include_rendered_content(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
-    sa,
 ):
     context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
 
@@ -4544,7 +4538,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content(
 def test_newstyle_checkpoint_result_validations_include_rendered_content_data_context_variable(
     titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation,
     common_action_list,
-    sa,
 ):
     context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
 
@@ -4706,7 +4699,6 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
     common_action_list,
     checkpoint_config: CheckpointConfig,
     expected_validation_id: str,
-    sa,
 ) -> None:
     context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
 

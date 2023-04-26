@@ -53,7 +53,6 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
     )
     suite.add_expectation(expectation, send_usage_event=False)
     context.update_expectation_suite(expectation_suite=suite)
-
     # noinspection PyProtectedMember
     context._save_project_config()
 
