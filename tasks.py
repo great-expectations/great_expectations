@@ -14,6 +14,7 @@ import json
 import os
 import pathlib
 import shutil
+import sys
 from typing import TYPE_CHECKING, Union
 
 import invoke
@@ -625,6 +626,10 @@ def public_api_task(
     _exit_with_error_if_not_run_from_correct_dir(
         task_name="public-api", correct_dir=repo_root
     )
+
+    # Docs folder is not reachable from install of Great Expectations
+    api_docs_dir = repo_root / "docs" / "sphinx_api_docs_source"
+    sys.path.append(str(api_docs_dir.resolve()))
 
     public_api_report.generate_public_api_report(write_to_file=write_to_file)
 
