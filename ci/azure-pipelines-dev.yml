@@ -287,6 +287,18 @@ stages:
               pip install --constraint constraints-dev.txt ".[test, postgresql, mysql]"
             displayName: 'Install GX and required dependencies'
 
+          - script: |
+              printf 'Waiting for MySQL database to accept connections'
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+            displayName: Wait for database to initialise
+          - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+            displayName: 'Configure mysql'
+
           # tests containing the name "RUNME_POSTGRES_MYSQL" are run
           - script: |
               pytest -v --postgresql --mysql --docs-tests -m integration -k "RUNME_POSTGRES_MYSQL" tests/integration/test_script_runner.py
