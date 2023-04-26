@@ -734,8 +734,15 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_checkpoint_new_no_fluent_datasource_messages(
-    mock_emit, caplog, monkeypatch, data_context_with_block_datasource
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    data_context_with_block_datasource,
 ):
     """
     What does this test and why?
@@ -763,8 +770,15 @@ def test_checkpoint_new_no_fluent_datasource_messages(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_checkpoint_new_raises_error_on_fluent_datasources_only(
-    mock_emit, caplog, monkeypatch, data_context_with_fluent_datasource
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    data_context_with_fluent_datasource,
 ):
     """
     What does this test and why?
@@ -791,8 +805,12 @@ def test_checkpoint_new_raises_error_on_fluent_datasources_only(
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 def test_checkpoint_new_raises_warning_on_mixed_datasource_styles(
     mock_emit,
+    mock_subp,
+    mock_web,
     caplog,
     monkeypatch,
     data_context_with_fluent_datasource_and_block_datasource,
