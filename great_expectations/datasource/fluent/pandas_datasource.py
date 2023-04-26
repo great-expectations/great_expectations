@@ -584,7 +584,7 @@ class PandasDatasource(_PandasDatasource):
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
-            batch_metadata=batch_metadata,
+            batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset=asset)
 
@@ -610,7 +610,7 @@ class PandasDatasource(_PandasDatasource):
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
             dataframe=dataframe,
-            batch_metadata=batch_metadata,
+            batch_metadata=batch_metadata or {},
         )
         return self._get_validator(asset=asset)
 
