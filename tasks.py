@@ -608,8 +608,16 @@ def docs(ctx):
     doc_builder.build_docs()
 
 
-@invoke.task(name="public-api")
-def public_api_task(ctx):
+@invoke.task(
+    name="public-api",
+    help={
+        "write_to_file": "Write items to be addressed to public_api_report.txt, default False",
+    },
+)
+def public_api_task(
+    ctx: Context,
+    write_to_file: bool = False,
+):
     """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
 
     repo_root = pathlib.Path(__file__).parent
@@ -618,7 +626,7 @@ def public_api_task(ctx):
         task_name="public-api", correct_dir=repo_root
     )
 
-    public_api_report.generate_public_api_report()
+    public_api_report.generate_public_api_report(write_to_file=write_to_file)
 
 
 def _exit_with_error_if_not_run_from_correct_dir(

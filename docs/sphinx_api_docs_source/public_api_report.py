@@ -860,7 +860,7 @@ def _parse_file_to_ast_tree(filepath: pathlib.Path) -> ast.AST:
     return tree
 
 
-def generate_public_api_report():
+def generate_public_api_report(write_to_file: bool = False) -> None:
 
     docs_example_file_contents = FileContents.create_from_local_files(
         _default_doc_example_absolute_paths()
@@ -934,9 +934,10 @@ def generate_public_api_report():
             "All of the missing items are accounted for in the missing threshold, but this threshold should be reduced to 0 over time."
         )
 
-    public_api_report.write_printable_definitions_to_file(
-        filepath=_repo_root() / "public_api_report.txt",
-    )
+    if write_to_file:
+        public_api_report.write_printable_definitions_to_file(
+            filepath=_repo_root() / "public_api_report.txt",
+        )
 
 
 if __name__ == "__main__":
