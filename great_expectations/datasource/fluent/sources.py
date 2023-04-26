@@ -515,7 +515,7 @@ class _SourceFactories:
                 datasource_type,
             )
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
+                datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
@@ -555,7 +555,7 @@ class _SourceFactories:
                 datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
             )
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name  # type: ignore[arg-type] # expected str only
+                datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # expected str only
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
