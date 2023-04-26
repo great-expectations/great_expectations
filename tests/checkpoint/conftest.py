@@ -29,9 +29,9 @@ def titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_exp
 
 @pytest.fixture
 def titanic_data_context_with_fluent_datasources_stats_enabled_and_expectation_suite_with_one_expectation(
-    titanic_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    titanic_data_context_with_fluent_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
-    context = titanic_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context = titanic_data_context_with_fluent_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     datasource_name = "my_pandas_filesystem_datasource"
     datasource = context.get_datasource(datasource_name=datasource_name)

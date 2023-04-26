@@ -1488,7 +1488,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_data_context_with_fluent_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
     monkeypatch,
 ):
