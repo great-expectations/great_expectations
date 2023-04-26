@@ -31,7 +31,7 @@ from typing import (
 
 from marshmallow import ValidationError
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
@@ -3884,12 +3884,15 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         )
         return generator
 
+    BlockConfigDataAssetNames: TypeAlias = Dict[str, List[str]]
+    FluentDataAssetNames: TypeAlias = List[str]
+
     @public_api
     def get_available_data_asset_names(
         self,
         datasource_names: str | list[str] | None = None,
         batch_kwargs_generator_names: str | list[str] | None = None,
-    ):
+    ) -> dict[str, BlockConfigDataAssetNames | FluentDataAssetNames]:
         """Inspect datasource and batch kwargs generators to provide available data_asset objects.
 
         Args:
@@ -3904,6 +3907,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ValueError: `datasource_names` is not None, a string, or list of strings.
         """
         data_asset_names = {}
+        fluent_data_asset_names = {}
         if datasource_names is None:
             datasource_names = [
                 datasource["name"] for datasource in self.list_datasources()
@@ -3923,27 +3927,30 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ):  # Iterate over both together
                 for idx, datasource_name in enumerate(datasource_names):
                     datasource = self.get_datasource(datasource_name)
-                    assert not isinstance(
-                        datasource, FluentDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
-                    data_asset_names[
-                        datasource_name
-                    ] = datasource.get_available_data_asset_names(
-                        batch_kwargs_generator_names[idx]
-                    )
+                    if isinstance(datasource, FluentDatasource):
+                        fluent_data_asset_names[datasource_name] = sorted(
+                            datasource.get_asset_names()
+                        )
+                    else:
+                        data_asset_names[
+                            datasource_name
+                        ] = datasource.get_available_data_asset_names(
+                            batch_kwargs_generator_names[idx]
+                        )
 
             elif len(batch_kwargs_generator_names) == 1:
                 datasource = self.get_datasource(datasource_names[0])
-                assert not isinstance(
-                    datasource, FluentDatasource
-                ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
-                # 20230120 - Chetan - I believe this is a latent bug - we should not be doing string-based indexing
-                #                     within a list. This will result in a runtime error.
-                datasource_names[  # type:ignore[call-overload]
-                    datasource_names[0]
-                ] = datasource.get_available_data_asset_names(
-                    batch_kwargs_generator_names
-                )
+                if isinstance(datasource, FluentDatasource):
+                    fluent_data_asset_names[datasource_names[0]] = sorted(
+                        datasource.get_asset_names()
+                    )
+
+                else:
+                    data_asset_names[
+                        datasource_names[0]
+                    ] = datasource.get_available_data_asset_names(
+                        batch_kwargs_generator_names
+                    )
 
             else:
                 raise ValueError(
@@ -3954,17 +3961,25 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             for datasource_name in datasource_names:
                 try:
                     datasource = self.get_datasource(datasource_name)
-                    assert not isinstance(
-                        datasource, FluentDatasource
-                    ), 'Method "get_available_data_asset_names" not implemented for FluentDatasource'
-                    data_asset_names[
-                        datasource_name
-                    ] = datasource.get_available_data_asset_names()
+                    if isinstance(datasource, FluentDatasource):
+                        fluent_data_asset_names[datasource_name] = sorted(
+                            datasource.get_asset_names()
+                        )
+
+                    else:
+                        data_asset_names[
+                            datasource_name
+                        ] = datasource.get_available_data_asset_names()
+
                 except ValueError:
                     # handle the edge case of a non-existent datasource
                     data_asset_names[datasource_name] = {}
 
-        return data_asset_names
+        fluent_and_config_data_asset_names = {
+            **data_asset_names,
+            **fluent_data_asset_names,
+        }
+        return fluent_and_config_data_asset_names
 
     def build_batch_kwargs(
         self,
