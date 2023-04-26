@@ -39,7 +39,7 @@ context.delete_datasource("taxi_datasource")
 dataframe_asset = context.sources.add_pandas(
     "my_taxi_validator_checkpoint"
 ).add_dataframe_asset(
-    df, name="taxi_frame", batch_metadata={"year": "2019", "month": "01"}
+    name="taxi_frame", dataframe=df, batch_metadata={"year": "2019", "month": "01"}
 )
 
 batch_request = dataframe_asset.build_batch_request()
