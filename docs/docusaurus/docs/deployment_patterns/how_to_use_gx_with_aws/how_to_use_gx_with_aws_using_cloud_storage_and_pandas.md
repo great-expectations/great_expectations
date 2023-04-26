@@ -138,11 +138,7 @@ import CheckpointCreateAndRun from '@site/docs/deployment_patterns/how_to_use_gx
 
 import CreateCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create.md'
 
-<!-- 4.1.2 Save the Checkpoint -->
-
-import SaveCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_save.md'
-
-<!-- 4.1.3 Run the Checkpoint -->
+<!-- 4.1.2 Run the Checkpoint -->
 
 import RunCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_run.md'
 
@@ -280,11 +276,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 <CreateCheckpoint />
 
-#### 4.1.2 Save the Checkpoint
-
-<SaveCheckpoint />
-
-#### 4.1.3 Run the Checkpoint
+#### 4.1.2 Run the Checkpoint
 
 <RunCheckpoint />
 

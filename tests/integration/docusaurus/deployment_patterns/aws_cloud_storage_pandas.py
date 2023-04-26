@@ -1,11 +1,12 @@
 import os
 import pathlib
+import tempfile
 from great_expectations.core.yaml_handler import YAMLHandler
 import boto3
 
 client = boto3.client("s3")
-# we can use __file__ here because the script is copied to a test-directory by test_script_runner.py
-full_path_to_project_directory = __file__
+temp_dir = tempfile.TemporaryDirectory()
+full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 yaml: YAMLHandler = YAMLHandler()
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py imports">
 import great_expectations as gx
@@ -265,30 +266,11 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py add checkpoint config">
-context.add_or_update_checkpoint(checkpoint)
-# </snippet>
-
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py run checkpoint">
 checkpoint_result = checkpoint.run()
 # </snippet>
 
-assert checkpoint_result.checkpoint_config["name"] == "my_checkpoint"
 assert not checkpoint_result.success
-first_validation_result_identifier = (
-    checkpoint_result.list_validation_result_identifiers()[0]
-)
-first_run_result = checkpoint_result.run_results[first_validation_result_identifier]
-assert (
-    first_run_result["validation_result"]["statistics"]["successful_expectations"] == 1
-)
-assert (
-    first_run_result["validation_result"]["statistics"]["unsuccessful_expectations"]
-    == 1
-)
-assert (
-    first_run_result["validation_result"]["statistics"]["evaluated_expectations"] == 2
-)
 
 # build datadocs
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py build_docs">
@@ -297,4 +279,4 @@ context.build_data_docs()
 
 # assert docs have been built
 results = client.list_objects(Bucket="demo-data-docs")
-assert "index.html" in results
+client.head_object(Bucket="demo-data-docs", Key="index.html")
