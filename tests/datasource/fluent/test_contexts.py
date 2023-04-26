@@ -3,6 +3,7 @@ from __future__ import annotations
 import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
+import requests
 
 import pytest
 
@@ -138,9 +139,47 @@ def test_context_add_or_update_datasource(
             1,
         )
         cloud_api_fake.assert_call_count(
-            f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources{datasource.id}",
+            f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}?name={datasource.name}",
             1,
         )
+
+
+@pytest.mark.cloud
+def test_cloud_context_delete_datasource(
+    cloud_api_fake: RequestsMock,
+    empty_cloud_context_fluent: CloudDataContext,
+    taxi_data_samples_dir: pathlib.Path,
+):
+    context = empty_cloud_context_fluent
+
+    datasource = context.sources.add_pandas_filesystem(
+        name="delete_ds_test", base_directory=taxi_data_samples_dir
+    )
+
+    # check cloud_api_fake items
+    response1 = requests.get(
+        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
+    )
+    print(f"Before Delete -> {response1}\n{pf(response1.json())}\n")
+    assert response1.status_code == 200
+
+    context.sources.delete_pandas_filesystem(datasource.name)
+    assert datasource.name not in context.fluent_datasources
+
+    cloud_api_fake.assert_call_count(
+        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources",
+        1,
+    )
+    cloud_api_fake.assert_call_count(
+        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
+        2,
+    )
+
+    response2 = requests.get(
+        f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}",
+    )
+    print(f"After Delete -> {response2}\n{pf(response2.json())}")
+    assert response2.status_code == 404
 
 
 if __name__ == "__main__":
