@@ -169,7 +169,7 @@ Congratulations!<br/>&#127881; You've successfully implemented Spark support for
 
 ### 4. Contribution (Optional)
 
-This guide will leave you with core functionality sufficient for [contribution](/CONTRIBUTING_EXPECTATIONS) to Great Expectations at an Experimental level.
+This guide will leave you with core functionality sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 
 If you're interested in having your contribution accepted at a Beta level, your Custom Expectation will need to support SQLAlchemy, Spark, and Pandas.
 

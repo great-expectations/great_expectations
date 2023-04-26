@@ -301,7 +301,7 @@ Column Map Expectations come with that functionality built in; no extra `_valida
 
 ### 8. Contribution (Optional)
 
-This guide will leave you with a Custom Expectation sufficient for [contribution](/CONTRIBUTING_EXPECTATIONS) to Great Expectations at an Experimental level.
+This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
