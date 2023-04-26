@@ -1,15 +1,20 @@
 import os
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py imports">
-import great_expectations as gx
-from great_expectations.core.batch import RuntimeBatchRequest
+import tempfile
 from great_expectations.core.yaml_handler import YAMLHandler
 
-yaml = YAMLHandler()
+client = boto3.client("s3")
+temp_dir = tempfile.TemporaryDirectory()
+full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
+yaml: YAMLHandler = YAMLHandler()
+
+# TODO get rid of this one
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py imports">
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py get_context">
-context = gx.get_context()
+import great_expectations as gx
+
+context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 # </snippet>
 
 # NOTE: The following code is only for testing and depends on an environment
@@ -21,15 +26,20 @@ if not gcp_project:
         "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
     )
 
+
 # parse great_expectations.yml for comparison
-great_expectations_yaml_file_path = os.path.join(
-    context.root_directory, "great_expectations.yml"
+great_expectations_yaml_file_path = pathlib.Path(
+    full_path_to_project_directory, "great_expectations/great_expectations.yml"
 )
-with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.load(f)
+great_expectations_yaml = yaml.load(great_expectations_yaml_file_path.read_text())
 
 stores = great_expectations_yaml["stores"]
-pop_stores = ["checkpoint_store", "evaluation_parameter_store", "validations_store"]
+pop_stores = [
+    "checkpoint_store",
+    "evaluation_parameter_store",
+    "validations_store",
+    "profiler_store",
+]
 for store in pop_stores:
     stores.pop(store)
 
@@ -40,6 +50,7 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
 ]
 
 expected_existing_expectations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py existing_expectations_store">
 stores:
   expectations_store:
     class_name: ExpectationsStore
