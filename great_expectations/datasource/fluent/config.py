@@ -212,7 +212,7 @@ class GxConfig(FluentBaseModel):
         TODO (kilo59) 122822: remove this as soon as it's no longer needed. Such as when
         we use a new `config_version` instead of `fluent_datasources` key.
         """
-        loaded = yaml.load(f)
+        loaded = yaml.load(f)  # type: ignore[arg-type]
         logger.debug(f"loaded from yaml ->\n{pf(loaded, depth=3)}\n")
         loaded = _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation(
             config=loaded, _allow_empty=_allow_empty
@@ -220,7 +220,7 @@ class GxConfig(FluentBaseModel):
         if _FLUENT_DATASOURCES_KEY not in loaded:
             return cls(fluent_datasources=[])
 
-        config = cls(**loaded)
+        config = cls(**loaded)  # type: ignore[arg-type]
         return config
 
     @overload
