@@ -250,3 +250,17 @@
 
 # removing yml-driven datacontext in favor of ephemeral
 /docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context
+
+# Redirects for Contributing docs
+
+/docs/contributing/contributing_setup /great_expectations/CONTRIBUTING_CODE
+/docs/contributing/contributing_checklist /docs/contributing/contributing
+/docs/contributing/contributing_github /docs/README
+/docs/contributing/contributing_test /great_expectations/CONTRIBUTING_CODE
+/docs/contributing/contributing_misc /docs/README
+/docs/guides/miscellaneous/how_to_write_a_how_to_guide /docs/README
+/docs/guides/miscellaneous/how_to_template /docs/README
+/docs/integrations/contributing_integration /docs/README
+/docs/integrations/integration_template /docs/README
+docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations /great_expectations/CONTRIBUTING_EXPECTATIONS
+/docs/contributing/contributing_package /great_expectations/CONTRIBUTING_PACKAGES
