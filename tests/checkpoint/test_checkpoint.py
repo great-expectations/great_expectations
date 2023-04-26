@@ -1881,7 +1881,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 @pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_object_sparkdf(
-    data_context_with_datasource_spark_engine, common_action_list, spark_session
+    data_context_with_datasource_spark_engine,
+    common_action_list,
+    spark_session,
 ):
     context: FileDataContext = data_context_with_datasource_spark_engine
     pandas_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
