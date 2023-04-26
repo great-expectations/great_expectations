@@ -9,6 +9,10 @@ from _pytest.capture import CaptureResult
 from click.testing import CliRunner, Result
 
 from great_expectations.cli import cli
+from great_expectations.cli.cli_messages import (
+    SUITE_EDIT_FLUENT_DATASOURCE_ERROR,
+    SUITE_EDIT_FLUENT_DATASOURCE_WARNING,
+)
 from great_expectations.cli.suite import (
     _process_suite_edit_flags_and_prompt,
     _process_suite_new_flags_and_prompt,
@@ -4480,3 +4484,88 @@ def test__process_suite_edit_flags_and_prompt(
                 }
             ),
         ]
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_fluent_datasources_message(
+    mock_emit, mock_subp, mock_web, monkeypatch, filesystem_csv_2, empty_data_context
+):
+    context = empty_data_context
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 1
+    assert SUITE_EDIT_FLUENT_DATASOURCE_ERROR in result.stdout
+    assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING not in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_suite_warning_both_fluent_and_block_datasources(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_fluent_datasource_and_block_datasource,
+):
+    context = data_context_with_fluent_datasource_and_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING in result.stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_suite_edit_block_datasources_no_message(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    filesystem_csv_2,
+    data_context_with_block_datasource,
+):
+    context = data_context_with_block_datasource
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    runner = CliRunner(mix_stderr=False)
+    result = runner.invoke(
+        cli,
+        "suite edit my_expectation_suite",
+        catch_exceptions=False,
+    )
+    assert result.exit_code == 0
+    assert SUITE_EDIT_FLUENT_DATASOURCE_WARNING not in result.stdout
+    assert SUITE_EDIT_FLUENT_DATASOURCE_ERROR not in result.stdout
