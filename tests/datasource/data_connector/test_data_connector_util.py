@@ -407,6 +407,11 @@ def test__invert_regex_to_data_reference_template():
     assert returned == "{name}-{type}.csv"
 
     returned = _invert_regex_to_data_reference_template(
+        regex_pattern="yellow_tripdata_sample_2019-01.csv", group_names=[]
+    )
+    assert returned == "yellow_tripdata_sample_2019-01.csv"
+
+    returned = _invert_regex_to_data_reference_template(
         regex_pattern=r"(.*)-[A|B|C]\.csv", group_names=["name"]
     )
     assert returned == "{name}-*.csv"
