@@ -1588,3 +1588,65 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         if event[0][0]["event"] == "data_asset.validate":
             num_data_asset_validate_events += 1
     assert num_data_asset_validate_events == 4
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_batch_data_in_top_level_batch_request_pandasdf(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: dict = {
+        "datasource_name": "my_pandas_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+    )
+
+    result = checkpoint.run(batch_request=batch_request)
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_batch_data_in_top_level_batch_request_sparkdf(
+    titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: dict = {
+        "datasource_name": "my_spark_dataframes_datasource",
+        "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+    )
+
+    result = checkpoint.run(batch_request=batch_request)
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
