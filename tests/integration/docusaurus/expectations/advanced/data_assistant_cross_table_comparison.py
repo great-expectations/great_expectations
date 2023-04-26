@@ -12,10 +12,21 @@ MYSQL_CONNECTION_STRING = "mysql+pymysql://root@localhost/test_ci"
 
 PG_CONNECTION_STRING = "postgresql+psycopg2://postgres:@localhost/test_ci"
 
+# Only try to drop mysql table if it exists. This is due to table not found errors experienced
+# when using DROP TABLE IF EXISTS with mysql.
+import sqlalchemy as sa
+from sqlalchemy import inspect
+engine = sa.create_engine(MYSQL_CONNECTION_STRING)
+
+inspector = inspect(engine)
+table_names = [table_name for table_name in inspector.get_table_names(schema="test_ci")]
+drop_existing_table = "mysql_taxi_data" in table_names
+
 load_data_into_test_database(
     table_name="mysql_taxi_data",
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=MYSQL_CONNECTION_STRING,
+    drop_existing_table=drop_existing_table,
 )
 
 load_data_into_test_database(
@@ -23,6 +34,11 @@ load_data_into_test_database(
     csv_path="./data/yellow_tripdata_sample_2019-01.csv",
     connection_string=PG_CONNECTION_STRING,
 )
+
+# Table should now exist in mysql
+inspector = inspect(engine)
+table_names = [table_name for table_name in inspector.get_table_names(schema="test_ci")]
+assert "mysql_taxi_data" in table_names
 
 pg_datasource = context.sources.add_sql(
     name="pg_datasource", connection_string=PG_CONNECTION_STRING
@@ -48,10 +64,6 @@ pg_batch_request = pg_datasource.get_asset("postgres_taxi_data").build_batch_req
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py run_assistant">
 data_assistant_result = context.assistants.onboarding.run(
     batch_request=pg_batch_request,
-    excluded_expectations=[
-        "expect_column_quantile_values_to_be_between",
-        "expect_column_mean_to_be_between",
-    ],
 )
 # </snippet>
 # <snippet name="tests/integration/docusaurus/expectations/advanced/data_assistant_cross_table_comparison.py build_suite">
