@@ -21,7 +21,7 @@ from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
-    from typing_extensions import TypedDict
+    from typing_extensions import Literal, TypedDict
 
     from great_expectations.core.serializer import AbstractConfigSerializer
     from great_expectations.data_context.types.resource_identifiers import (
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
     class DataPayload(TypedDict):
         id: str
         attributes: dict
+        type: Literal["datasource"]
 
     class CloudResponsePayloadTD(TypedDict):
         data: DataPayload | list[DataPayload]
