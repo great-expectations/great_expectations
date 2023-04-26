@@ -28,6 +28,8 @@ from tests.test_utils import create_files_in_directory
 if TYPE_CHECKING:
     from pyfakefs.fake_filesystem import FakeFilesystem
 
+    from great_expectations.data_context import FileDataContext
+
 
 logger = logging.getLogger(__file__)
 
@@ -42,7 +44,7 @@ pytestmark = [
 
 @pytest.fixture
 def pandas_dbfs_datasource(
-    empty_data_context, fs: FakeFilesystem
+    empty_data_context: FileDataContext, fs: FakeFilesystem
 ) -> PandasDBFSDatasource:
     # Copy boto modules into fake filesystem (see https://github.com/spulec/moto/issues/1682#issuecomment-645016188)
     for module in [boto3, botocore]:
@@ -56,6 +58,8 @@ def pandas_dbfs_datasource(
 
     base_directory: str = "/dbfs/great_expectations"
     fs.create_dir(base_directory)
+
+    fs.create_dir(empty_data_context.root_directory)
 
     create_files_in_directory(
         directory=base_directory,
