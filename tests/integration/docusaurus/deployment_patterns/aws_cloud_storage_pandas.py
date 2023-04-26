@@ -46,9 +46,8 @@ stores:
       base_directory: expectations/
 
 expectations_store_name: expectations_store
-"""
 # </snippet>
-
+"""
 
 assert actual_existing_expectations_store == yaml.load(
     expected_existing_expectations_store_yaml
