@@ -2200,13 +2200,9 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
         beta_checks.append(
-            ExpectationDiagnostics._check_input_validation(
-                self, examples
-            )
+            ExpectationDiagnostics._check_input_validation(self, examples)
         )
-        beta_checks.append(
-            ExpectationDiagnostics._check_renderer_methods(self)
-        )
+        beta_checks.append(ExpectationDiagnostics._check_renderer_methods(self))
         beta_checks.append(
             ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
                 backend_test_result_counts
