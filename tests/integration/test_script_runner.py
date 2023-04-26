@@ -282,6 +282,12 @@ fluent_datasources = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
+    IntegrationTestFixture(
+        name="RUNME how_to_create_a_new_checkpoint",
+        data_context_dir=None,
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py",
+    ),
 ]
 
 
