@@ -1568,15 +1568,33 @@ def titanic_data_context_with_fluent_datasources_with_checkpoints_v1_with_empty_
     batching_regex = r"(?P<name>.+)\.csv"
     glob_directive = "*.csv"
     # noinspection PyUnusedLocal
-    datasource.add_csv_asset(
+    asset = datasource.add_csv_asset(
         name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
     batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
     glob_directive = "*.csv"
     # noinspection PyUnusedLocal
-    datasource.add_csv_asset(
+    asset = datasource.add_csv_asset(
         name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_pandas_dataframes_datasource"
+    datasource = context.sources.add_pandas(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    df = pd.read_csv(filepath_or_buffer=csv_source_path)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    # noinspection PyUnusedLocal
+    dataframe_asset = datasource.add_dataframe_asset(
+        name=dataframe_asset_name, dataframe=df
     )
 
     # noinspection PyProtectedMember
