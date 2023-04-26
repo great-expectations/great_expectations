@@ -1,8 +1,8 @@
 import os
 import tempfile
+import pathlib
 from great_expectations.core.yaml_handler import YAMLHandler
 
-client = boto3.client("s3")
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 yaml: YAMLHandler = YAMLHandler()
@@ -122,6 +122,7 @@ pop_stores = [
     "evaluation_parameter_store",
     "expectations_store",
     "expectations_GCS_store",
+    "profiler_store",
 ]
 for store in pop_stores:
     stores.pop(store)
@@ -234,59 +235,92 @@ bigquery_dataset = "demo"
 
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py datasource_yaml">
-datasource_yaml = rf"""
-name: my_bigquery_datasource
-class_name: Datasource
-execution_engine:
-  class_name: SqlAlchemyExecutionEngine
-  connection_string: bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>
-data_connectors:
-   default_runtime_data_connector_name:
-       class_name: RuntimeDataConnector
-       batch_identifiers:
-           - default_identifier_name
-   default_inferred_data_connector_name:
-       class_name: InferredAssetSqlDataConnector
-       name: whole_table
-"""
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_datasource">
+datasource = context.sources.add_or_update_sql(
+    name="my_bigquery_datasource",
+    connection_string=f"bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
+)
 # </snippet>
 
-# Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace(
-    "bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
-    CONNECTION_STRING,
+datasource = context.sources.add_or_update_sql(
+    name="my_bigquery_datasource", connection_string=CONNECTION_STRING
 )
 
-context.test_yaml_config(datasource_yaml)
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_datasource">
-context.add_datasource(**yaml.load(datasource_yaml))
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_table_asset">
+table_asset = datasource.add_table_asset(name="my_table_asset", table_name="taxi_data")
 # </snippet>
+
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_query_asset">
+query_asset = datasource.add_query_asset(
+    name="my_query_asset", query="SELECT * from taxi_data"
+)
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py get_table_asset">
+request = table_asset.build_batch_request()
+# </snippet>
+
+# query_asset = datasource.add_query_asset(
+#    name="my_asset", query="SELECT * from yellow_tripdata_sample"
+# )
+
+# ### Add a table to the Datasource as a Data Asset
+# table_asset = datasource.add_table_asset(
+#    name="my_asset", table_name="yellow_tripdata_sample"
+# )
+
+
+# datasource_yaml = rf"""
+# name: my_bigquery_datasource
+# class_name: Datasource
+# execution_engine:
+#   class_name: SqlAlchemyExecutionEngine
+#   connection_string: bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>
+# data_connectors:
+#    default_runtime_data_connector_name:
+#        class_name: RuntimeDataConnector
+#        batch_identifiers:
+#            - default_identifier_name
+#    default_inferred_data_connector_name:
+#        class_name: InferredAssetSqlDataConnector
+#        name: whole_table
+# """
+# # </snippet>
+
+# # Please note this override is only to provide good UX for docs and tests.
+# # In normal usage you'd set your path directly in the yaml above.
+# datasource_yaml = datasource_yaml.replace(
+#     "bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
+#     CONNECTION_STRING,
+# )
+
+# context.test_yaml_config(datasource_yaml)
+# # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_datasource">
+# context.add_datasource(**yaml.load(datasource_yaml))
+# # </snippet>
 
 # Test for RuntimeBatchRequest using a query.
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py batch_request">
-batch_request = RuntimeBatchRequest(
-    datasource_name="my_bigquery_datasource",
-    data_connector_name="default_runtime_data_connector_name",
-    data_asset_name="taxi_data",  # this can be anything that identifies this data
-    runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
-    batch_identifiers={"default_identifier_name": "default_identifier"},
-)
+# batch_request = RuntimeBatchRequest(
+#     datasource_name="my_bigquery_datasource",
+#     data_connector_name="default_runtime_data_connector_name",
+#     data_asset_name="taxi_data",  # this can be anything that identifies this data
+#     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
+#     batch_identifiers={"default_identifier_name": "default_identifier"},
+# )
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_or_update_expectation_suite">
 context.add_or_update_expectation_suite(expectation_suite_name="test_bigquery_suite")
 
 validator = context.get_validator(
-    batch_request=batch_request, expectation_suite_name="test_bigquery_suite"
+    batch_request=request, expectation_suite_name="test_bigquery_suite"
 )
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py validator_calls">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
-
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
@@ -296,33 +330,40 @@ validator.expect_column_values_to_be_between(
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py checkpoint">
+checkpoint = gx.checkpoint.SimpleCheckpoint(
+    name="bigquery_checkpoint",
+    data_context=context,
+    validations=[
+        {"batch_request": request, "expectation_suite_name": "test_bigquery_suite"}
+    ],
+)
+# </snippet>
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py checkpoint_config">
-my_checkpoint_name = "bigquery_checkpoint"
-checkpoint_config = f"""
-name: {my_checkpoint_name}
-config_version: 1.0
-class_name: SimpleCheckpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
-validations:
-  - batch_request:
-      datasource_name: my_bigquery_datasource
-      data_connector_name: default_runtime_data_connector_name
-      data_asset_name: taxi_data
-      batch_identifiers:
-        default_identifier_name: 1
-      runtime_parameters:
-        query: SELECT * from demo.taxi_data LIMIT 10
-    expectation_suite_name: test_bigquery_suite
-"""
-# </snippet>
+# my_checkpoint_name = "bigquery_checkpoint"
+# checkpoint_config = f"""
+# name: {my_checkpoint_name}
+# config_version: 1.0
+# class_name: SimpleCheckpoint
+# run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
+# validations:
+#   - batch_request:
+#       datasource_name: my_bigquery_datasource
+#       data_connector_name: default_runtime_data_connector_name
+#       data_asset_name: taxi_data
+#       batch_identifiers:
+#         default_identifier_name: 1
+#       runtime_parameters:
+#         query: SELECT * from demo.taxi_data LIMIT 10
+#     expectation_suite_name: test_bigquery_suite
+# """
+# # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_checkpoint">
-context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
-# </snippet>
+# # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_checkpoint">
+# context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
+# # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py run_checkpoint">
-checkpoint_result = context.run_checkpoint(
-    checkpoint_name=my_checkpoint_name,
-)
+checkpoint_result = checkpoint.run()
 # </snippet>
 assert checkpoint_result.success is True

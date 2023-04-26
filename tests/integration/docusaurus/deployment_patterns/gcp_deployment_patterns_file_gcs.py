@@ -1,4 +1,6 @@
 import os
+import tempfile
+import pathlib
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py imports">
 import great_expectations as gx
