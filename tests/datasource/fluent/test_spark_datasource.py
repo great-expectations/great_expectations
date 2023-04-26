@@ -63,7 +63,8 @@ def test_dataframe_asset(
     assert len(datasource.assets) == 1
 
     _ = datasource.add_dataframe_asset(
-        name="my_second_dataframe_asset", dataframe=spark_df
+        name="my_second_dataframe_asset",
+        dataframe=spark_df,
     )
     assert len(datasource.assets) == 2
 
