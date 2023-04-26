@@ -9,6 +9,10 @@ from great_expectations.checkpoint.types.checkpoint_result import (
     CheckpointResult,  # noqa: TCH001
 )
 from great_expectations.cli import toolkit
+from great_expectations.cli.cli_messages import (
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES,
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY,
+)
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
@@ -95,8 +99,26 @@ def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> 
 
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+    has_fluent_datasource: bool = len(context.fluent_datasources) > 0
+    has_block_datasource: bool = (
+        len(context.datasources) - len(context.fluent_datasources)
+    ) > 0
 
     try:
+
+        if has_fluent_datasource and not has_block_datasource:
+            toolkit.exit_with_failure_message_and_stats(
+                data_context=context,
+                usage_event=usage_event_end,
+                message=f"<red>{CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY}</red>",
+            )
+            return
+
+        if has_fluent_datasource and has_block_datasource:
+            cli_message(
+                f"<yellow>{CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES}</yellow>"
+            )
+
         _verify_checkpoint_does_not_exist(context, checkpoint_name, usage_event_end)
 
         # Create notebook on disk

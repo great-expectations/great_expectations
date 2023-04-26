@@ -68,6 +68,14 @@ HOW_TO_CUSTOMIZE = f"""\n<cyan>You can customize your configuration in many ways
 
 SECTION_SEPARATOR = "\n================================================================================\n"
 
+CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
+"""
+
+CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Checkpoint with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint
+"""
+
 FLUENT_DATASOURCE_LIST_WARNING = """We've detected that you have at least one fluent style Datasource in your Data Context. Fluent style Datasources cannot be listed via the CLI.
 If you would like to see a list of your fluent style Datasources, you can run the following code:
 
@@ -84,4 +92,13 @@ context = gx.get_context()
 context.delete_datasource(datasource_name)
 
 Please see the following doc for more information: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.delete_datasource
+"""
+
+SUITE_EDIT_FLUENT_DATASOURCE_ERROR = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to edit an Expectation Suite with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.add_expectation_suite
+"""
+
+SUITE_EDIT_FLUENT_DATASOURCE_WARNING = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to edit an Expectation Suite with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.add_expectation_suite
+If you would like to use a block config style Datasource, you can select it here to proceed.
 """

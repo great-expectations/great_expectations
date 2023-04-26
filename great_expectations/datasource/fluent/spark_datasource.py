@@ -92,6 +92,10 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def test_connection(self) -> None:
         ...
 
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        return tuple()
+
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """Spark DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
@@ -211,8 +215,8 @@ class SparkDatasource(_SparkDatasource):
         """Adds a Dataframe DataAsset to this SparkDatasource object.
 
         Args:
-            name: The name of the Dataframe asset. This can be any arbitrary string.
-            dataframe: The Dataframe containing the data for this data asset.
+            name: The name of the DataFrame asset. This can be any arbitrary string.
+            dataframe: The DataFrame containing the data for this data asset.
             batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
                             batches created from the asset.
 
