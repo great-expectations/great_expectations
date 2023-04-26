@@ -7,9 +7,9 @@ To contribute to Great Expectations documentation or code, see one of the follow
 
 - To request a documentation change, or a change that doesn't require local testing, see the [README](https://github.com/great-expectations/great_expectations/tree/contributing-and-style-readme/docs) in the `docs` repository.
 
-- To submit a code change to Great Expectations for consideration, see [CONTRIBUTING_CODE](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_CODE.md) in the `great_expectations` repository.
+- To submit a code change to Great Expectations for consideration, see [CONTRIBUTING_CODE](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_CODE) in the `great_expectations` repository.
 
-- To create and submit a custom Expectation to Great Expectations for consideration, see [CONTRIBUTING_EXPECTATIONS](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_EXPECTATIONS.md) in the `great_expectations` repository.
+- To create and submit a custom Expectation to Great Expectations for consideration, see [CONTRIBUTING_EXPECTATIONS](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_EXPECTATIONS) in the `great_expectations` repository.
 
 - To submit a custom package to Great Expectations for consideration, see [CONTRIBUTING_PACKAGES](https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_PACKAGES.md) in the `great_expectations` repository.
 

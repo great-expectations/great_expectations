@@ -279,7 +279,7 @@ the `RegexBasedColumnMapExpectation` class handles Metric creation and result va
 
 ### 8. Contribution (Optional)
 
-This guide will leave you with a Custom Expectation sufficient for [contribution](/CONTRIBUTING_EXPECTATIONS.md) back to Great Expectations at an Experimental level.
+This guide will leave you with a Custom Expectation sufficient for [contribution](/CONTRIBUTING_EXPECTATIONS) back to Great Expectations at an Experimental level.
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 
