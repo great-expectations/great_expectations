@@ -33,7 +33,6 @@ class MulticolumnDatetimeDifferenceInMonths(MulticolumnMapMetricProvider):
         "gap",
     )
 
-
     @multicolumn_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, dataframe, start_datetime, end_datetime, gap, **kwargs):
         def date_diff_in_months(row):
