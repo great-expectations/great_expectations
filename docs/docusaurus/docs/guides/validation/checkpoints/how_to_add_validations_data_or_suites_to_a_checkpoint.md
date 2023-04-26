@@ -5,10 +5,6 @@ title: How to add validations data or suites to a Checkpoint
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-<InProgress />
-
 This guide will help you add validation data or <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" />. This is useful if you want to aggregate individual validations (across Expectation Suites or <TechnicalTag tag="datasource" text="Datasources" />) into a single Checkpoint.
 
 
@@ -34,10 +30,7 @@ run_name_template: "%Y-%m-foo-bar-template-$VAR"
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: -1
     expectation_suite_name: users.warning
     action_list:
         - name: store_validation_result
@@ -70,10 +63,7 @@ run_name_template: "%Y-%m-foo-bar-template-$VAR"
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: -1
     expectation_suite_name: users.warning
     action_list:
         - name: store_validation_result
@@ -141,25 +131,17 @@ action_list:
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: 0
     expectation_suite_name: users.warning
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_special_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: -1
     expectation_suite_name: users.error
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_other_data_connector
       data_asset_name: users
-      data_connector_query:
-        batch_filter_parameters:
-          name: Titanic
+      options:
+        name: Titanic
     action_list:
       - name: quarantine_failed_data
         action:
