@@ -135,7 +135,7 @@ class ExpectationValidationResult(SerializableDictDot):
                 result_dict = self.to_json_dict()["result"]
                 other_result_dict = other.to_json_dict()["result"]
                 contents_equal = all(
-                    [result_dict[k] == other_result_dict[k] for k in common_keys]
+                    result_dict[k] == other_result_dict[k] for k in common_keys
                 )
             else:
                 contents_equal = False
@@ -350,9 +350,10 @@ class ExpectationValidationResult(SerializableDictDot):
             )
             if metric_kwargs_id != curr_metric_kwargs:
                 raise gx_exceptions.UnavailableMetricError(
-                    "Requested metric_kwargs_id (%s) does not match the configuration of this "
-                    "ExpectationValidationResult (%s)."
-                    % (metric_kwargs_id or "None", curr_metric_kwargs or "None")
+                    "Requested metric_kwargs_id ({}) does not match the configuration of this "
+                    "ExpectationValidationResult ({}).".format(
+                        metric_kwargs_id or "None", curr_metric_kwargs or "None"
+                    )
                 )
             if len(metric_name_parts) < 2:
                 raise gx_exceptions.UnavailableMetricError(

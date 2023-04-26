@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pathlib
+from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
 import pytest
@@ -49,7 +50,6 @@ def test_add_fluent_datasource_are_persisted(
     )
 
 
-@pytest.mark.cloud
 def test_add_fluent_datasource_are_persisted_without_duplicates(
     empty_file_context: FileDataContext,
     db_file: pathlib.Path,
@@ -66,6 +66,37 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     yaml_dict: dict = yaml.load(yaml_path.read_text())
     assert datasource_name in yaml_dict["fluent_datasources"]
     assert datasource_name not in yaml_dict["datasources"]
+
+
+def test_assets_are_persisted_on_creation_and_removed_on_deletion(
+    empty_file_context: FileDataContext,
+    db_file: pathlib.Path,
+):
+    context = empty_file_context
+
+    # ensure empty initial state
+    yaml_path = pathlib.Path(context.root_directory, context.GX_YML)
+    assert yaml_path.exists()
+    assert not yaml.load(yaml_path.read_text()).get("fluent_datasources")
+
+    datasource_name = "my_datasource"
+    asset_name = "my_asset"
+
+    context.sources.add_sqlite(
+        name=datasource_name, connection_string=f"sqlite:///{db_file}"
+    ).add_query_asset(
+        asset_name, query='SELECT name FROM sqlite_master WHERE type = "table"'
+    )
+
+    fds_after_add: dict = yaml.load(yaml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
+    print(f"'{asset_name}' added\n-----------------\n{pf(fds_after_add)}")
+    assert asset_name in fds_after_add[datasource_name]["assets"]
+
+    context.fluent_datasources[datasource_name].delete_asset(asset_name)
+
+    fds_after_delete: dict = yaml.load(yaml_path.read_text())["fluent_datasources"]  # type: ignore[assignment] # json union
+    print(f"\n\n'{asset_name}' deleted\n-----------------\n{pf(fds_after_delete)}")
+    assert asset_name not in fds_after_delete[datasource_name].get("assets", {})
 
 
 @pytest.mark.cloud
