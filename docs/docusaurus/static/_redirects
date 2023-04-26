@@ -253,14 +253,14 @@
 
 # Redirects for Contributing docs
 
-/docs/contributing/contributing_setup /great_expectations/CONTRIBUTING_CODE
+/docs/contributing/contributing_setup https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_CODE.md
 /docs/contributing/contributing_checklist /docs/contributing/contributing
 /docs/contributing/contributing_github /docs/README
-/docs/contributing/contributing_test /great_expectations/CONTRIBUTING_CODE
+/docs/contributing/contributing_test /ghttps://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_CODE.md
 /docs/contributing/contributing_misc /docs/README
 /docs/guides/miscellaneous/how_to_write_a_how_to_guide /docs/README
 /docs/guides/miscellaneous/how_to_template /docs/README
 /docs/integrations/contributing_integration /docs/README
 /docs/integrations/integration_template /docs/README
-docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations /great_expectations/CONTRIBUTING_EXPECTATIONS
-/docs/contributing/contributing_package /great_expectations/CONTRIBUTING_PACKAGES
+docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_EXPECTATIONS.md
+/docs/contributing/contributing_package https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_PACKAGES.md
