@@ -2250,10 +2250,10 @@ class Expectation(metaclass=MetaExpectation):
         """Get final maturity level based on status of all checks"""
         maturity = ""
         all_experimental = all(
-            [check.passed for check in maturity_checklist.experimental]
+            check.passed for check in maturity_checklist.experimental
         )
-        all_beta = all([check.passed for check in maturity_checklist.beta])
-        all_production = all([check.passed for check in maturity_checklist.production])
+        all_beta = all(check.passed for check in maturity_checklist.beta)
+        all_production = all(check.passed for check in maturity_checklist.production)
         if all_production and all_beta and all_experimental:
             maturity = Maturity.PRODUCTION
         elif all_beta and all_experimental:
