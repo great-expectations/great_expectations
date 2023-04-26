@@ -4,10 +4,8 @@ import json
 import logging
 import os
 import re
-import shutil
 import sys
 import traceback
-from datetime import datetime
 from glob import glob
 from io import StringIO
 from subprocess import CalledProcessError, CompletedProcess, check_output, run
@@ -331,8 +329,7 @@ def combine_backend_results(
                 logger.error(f"No backend_test_result_counts for {expectation_name}")
                 bad_key_names.append(expectation_name)
                 continue
-            maturity_checklist_object = Expectation._get_maturity_checklist(
-                expectation_instance=expectation_instance,
+            maturity_checklist_object = expectation_instance._get_maturity_checklist(
                 library_metadata=diagnostic_object.library_metadata,
                 description=diagnostic_object.description,
                 examples=diagnostic_object.examples,

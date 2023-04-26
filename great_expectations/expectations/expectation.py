@@ -1398,8 +1398,7 @@ class Expectation(metaclass=MetaExpectation):
         )
 
         maturity_checklist: ExpectationDiagnosticMaturityMessages = (
-            Expectation._get_maturity_checklist(
-                expectation_instance=self,
+            self._get_maturity_checklist(
                 library_metadata=library_metadata,
                 description=description_diagnostics,
                 examples=examples,
@@ -2172,9 +2171,8 @@ class Expectation(metaclass=MetaExpectation):
         augmented_library_metadata["problems"] = problems
         return AugmentedLibraryMetadata.from_legacy_dict(augmented_library_metadata)
 
-    @staticmethod
     def _get_maturity_checklist(
-        expectation_instance,
+        self,
         library_metadata: Union[
             AugmentedLibraryMetadata, ExpectationDescriptionDiagnostics
         ],
@@ -2203,11 +2201,11 @@ class Expectation(metaclass=MetaExpectation):
         )
         beta_checks.append(
             ExpectationDiagnostics._check_input_validation(
-                expectation_instance, examples
+                self, examples
             )
         )
         beta_checks.append(
-            ExpectationDiagnostics._check_renderer_methods(expectation_instance)
+            ExpectationDiagnostics._check_renderer_methods(self)
         )
         beta_checks.append(
             ExpectationDiagnostics._check_core_logic_for_all_applicable_execution_engines(
