@@ -568,7 +568,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         dataframe: pd.DataFrame,
-        **kwargs,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this PandasDatasource object.
 
@@ -584,7 +584,7 @@ class PandasDatasource(_PandasDatasource):
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
-            **kwargs,
+            batch_metadata=batch_metadata,
         )
         return self._add_asset(asset=asset)
 
@@ -593,7 +593,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         dataframe: pd.DataFrame,
         asset_name: Optional[str] = None,
-        **kwargs,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> Validator:
         """Reads a Dataframe and returns a Validator associated with it.
 
@@ -610,7 +610,7 @@ class PandasDatasource(_PandasDatasource):
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
             dataframe=dataframe,
-            **kwargs,
+            batch_metadata=batch_metadata,
         )
         return self._get_validator(asset=asset)
 
