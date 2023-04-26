@@ -1605,7 +1605,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         "data_asset_name": "my_dataframe_asset",
     }
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -1636,7 +1635,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         "data_asset_name": "my_dataframe_asset",
     }
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,

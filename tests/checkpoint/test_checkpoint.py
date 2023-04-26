@@ -2347,7 +2347,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -2401,7 +2400,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -2432,7 +2430,6 @@ def test_newstyle_checkpoint_raise_error_when_run_when_missing_batch_request_and
     # create expectation suite
     context.add_expectation_suite("my_expectation_suite")
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -2473,7 +2470,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -2512,7 +2508,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -2552,7 +2547,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -2599,7 +2593,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -2647,7 +2640,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3247,7 +3239,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3285,7 +3276,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3324,7 +3314,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3364,7 +3353,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3402,7 +3390,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3441,7 +3428,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3488,7 +3474,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3535,7 +3520,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3581,7 +3565,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -3628,7 +3611,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         }
     )
 
-    # add checkpoint config
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
         data_context=context,
@@ -4465,7 +4447,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
     context: FileDataContext = titanic_pandas_data_context_stats_enabled_and_expectation_suite_with_one_expectation
     test_df: pd.DataFrame = pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
 
-    # add checkpoint config
     batch_request: dict = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_basic_data_connector",
