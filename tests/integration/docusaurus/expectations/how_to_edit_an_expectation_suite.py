@@ -9,8 +9,9 @@ Steps without validator:
 1. Load suite
 2. List expectations (optional) using public methods e.g. show_expectations_by_domain_type()
 3. Manipulate using public methods e.g. remove_expectation() add_expectation()
-TODO: How to edit existing expectation?
+TODO: How to edit existing expectation? replace_expectation? patch_expectation? Neither are yet part of public_api
 4. Update suite context.update_expectation_suite()
+TODO: There are other public methods on ExpectationSuite (not public_api) for listing or removing expectations, which are useful?
 
 Steps with validator:
 1. Get validator (with suite + batch)
