@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import logging
 from typing import TYPE_CHECKING, Optional, Union, overload
 
 import great_expectations.exceptions as gx_exceptions
@@ -19,10 +20,24 @@ from great_expectations.datasource.fluent.sources import _SourceFactories
 from great_expectations.util import filter_properties_dict
 
 if TYPE_CHECKING:
+    from typing_extensions import TypedDict
+
     from great_expectations.core.serializer import AbstractConfigSerializer
     from great_expectations.data_context.types.resource_identifiers import (
         GXCloudIdentifier,
     )
+
+
+logger = logging.getLogger(__name__)
+
+
+class DataPayload(TypedDict):
+    id: str
+    attributes: dict
+
+
+class CloudResponsePayloadTD(TypedDict):
+    data: DataPayload | list[DataPayload]
 
 
 class DatasourceStore(Store):
