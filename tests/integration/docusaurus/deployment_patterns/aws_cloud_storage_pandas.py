@@ -279,4 +279,4 @@ context.build_data_docs()
 
 # assert docs have been built
 results = client.list_objects(Bucket="demo-data-docs")
-assert client.head_object(Bucket="demo-data-docs", Key="index.html")
+client.head_object(Bucket="demo-data-docs", Key="index.html")
