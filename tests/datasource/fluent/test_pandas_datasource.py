@@ -424,6 +424,13 @@ def test_default_pandas_datasource_get_and_set(
     assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2
 
+    # ensure ephemeral data assets are not serialized
+    config_as_dict = empty_data_context.fluent_config.dict()["fluent_datasources"]
+    print(f"{pf(config_as_dict)}")
+    for ds in config_as_dict:
+        for asset in ds.get("assets", []):
+            assert asset["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
+
 
 def test_default_pandas_datasource_name_conflict(
     empty_data_context: AbstractDataContext,
