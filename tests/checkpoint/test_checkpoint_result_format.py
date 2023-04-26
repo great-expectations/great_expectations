@@ -41,7 +41,6 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
         "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
-        "action_list": [],
         "profilers": [],
         "action_list": [
             {
@@ -219,6 +218,16 @@ def batch_request_for_pandas_unexpected_rows_and_index(
 
 
 @pytest.fixture()
+def fluent_batch_request_for_pandas_unexpected_rows_and_index() -> dict:
+    return {
+        "datasource_name": "pandas_datasource",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "options": {},
+        "batch_slice": -1,
+    }
+
+
+@pytest.fixture()
 def batch_request_for_spark_unexpected_rows_and_index(
     spark_dataframe_for_unexpected_rows_with_index,
 ) -> dict:
@@ -300,11 +309,11 @@ def expected_spark_query_output() -> str:
 
 
 def _add_expectations_and_checkpoint(
-    data_context: DataContext | EphemeralDataContext | FileDataContext,
+    data_context: DataContext | FileDataContext,
     checkpoint_config: dict,
     expectations_list: List[ExpectationConfiguration],
     dict_to_update_checkpoint: dict | None = None,
-) -> DataContext | EphemeralDataContext | FileDataContext:
+) -> DataContext | FileDataContext:
     """
     Helper method for adding Checkpoint and Expectations to DataContext.
 
@@ -3495,3 +3504,43 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         (4, "four"),
         (5, "five"),
     ]
+
+
+@pytest.mark.integration
+def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_fluent_batch_request_with_slice(
+    empty_data_context: AbstractDataContext,
+    fluent_batch_request_for_pandas_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+):
+    context = empty_data_context
+    data_asset = context.sources.add_pandas(
+        name="pandas_datasource"
+    ).add_dataframe_asset(
+        name="IN_MEMORY_DATA_ASSET",
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+    )
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "COMPLETE",
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    batch_request = data_asset.build_batch_request(batch_slice=-1)
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="metrics_exp",
+        batch_request=batch_request,
+    )
+
+    assert result.success
+
+    # TODO: Assert against fluent batch_request
