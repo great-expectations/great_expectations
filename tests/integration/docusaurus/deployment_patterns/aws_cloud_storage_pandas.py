@@ -8,6 +8,7 @@ client = boto3.client("s3")
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 yaml: YAMLHandler = YAMLHandler()
+
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py imports">
 import great_expectations as gx
 

@@ -98,9 +98,9 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- Part 2: Connect to data -->
 
-<!-- 2.1 Instantiate your project's DataContext -->
+<!-- 2.1 Create your Data Context -->
 
-import InstantiateDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_instantiate_your_projects_datacontext.mdx'
+import CreateDataContextWithGetContext from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
 
 <!-- 2.2 Add Datasource to your DataContext -->
 
@@ -240,16 +240,13 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 ## Part 2: Connect to data
 
-### 2.1 Choose how to run the code for creating a new Datasource
-<HowToRunDatasourceCode />
+### 2.1 Instantiate your project's DataContext
+<CreateDataContextWithGetContext />
 
-### 2.2 Instantiate your project's DataContext
-<InstantiateDataContext />
-
-### 2.3 Add CSV Asset to your Datasource 
+### 2.2 Add CSV Asset to your Datasource 
 <ConfigureYourDatasource />
 
-### 2.4 Test your new Datasource by building a BatchRequest from Asset 
+### 2.3 Test your new Datasource by building a BatchRequest from Asset 
 <SaveDatasourceConfigurationToDataContext />
 
 ## Part 3: Create Expectations
