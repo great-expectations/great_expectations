@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import logging
 from typing import Any, Dict, List
 
@@ -3515,32 +3516,43 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     context = empty_data_context
-    data_asset = context.sources.add_pandas(
-        name="pandas_datasource"
-    ).add_dataframe_asset(
+    context.sources.add_pandas(name="pandas_datasource").add_dataframe_asset(
         name="IN_MEMORY_DATA_ASSET",
         dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
     )
-    dict_to_update_checkpoint: dict = {
-        "result_format": {
-            "result_format": "COMPLETE",
-        }
-    }
-    context: DataContext = _add_expectations_and_checkpoint(
-        data_context=context,
-        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
-        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
-        dict_to_update_checkpoint=dict_to_update_checkpoint,
+
+    context.add_expectation_suite(expectation_suite_name="metrics_exp")
+
+    checkpoint_config_dict = copy.deepcopy(
+        reference_checkpoint_config_for_unexpected_column_names
     )
 
-    batch_request = data_asset.build_batch_request(batch_slice=-1)
+    dict_to_update_checkpoint: dict = {
+        "batch_request": fluent_batch_request_for_pandas_unexpected_rows_and_index,
+        "runtime_configuration": {
+            "result_format": {
+                "result_format": "COMPLETE",
+            }
+        },
+    }
+
+    checkpoint_config_dict.update(dict_to_update_checkpoint)
+
+    checkpoint_config = CheckpointConfig(**checkpoint_config_dict)
+
+    context.add_checkpoint(
+        **filter_properties_dict(
+            properties=checkpoint_config.to_json_dict(),
+            clean_falsy=True,
+        ),
+    )
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
         expectation_suite_name="metrics_exp",
-        batch_request=batch_request,
     )
 
-    assert result.success
-
-    # TODO: Assert against fluent batch_request
+    assert (
+        result.checkpoint_config.batch_request
+        == fluent_batch_request_for_pandas_unexpected_rows_and_index
+    )
