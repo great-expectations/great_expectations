@@ -28,17 +28,15 @@ if TYPE_CHECKING:
         GXCloudIdentifier,
     )
 
+    class DataPayload(TypedDict):
+        id: str
+        attributes: dict
+
+    class CloudResponsePayloadTD(TypedDict):
+        data: DataPayload | list[DataPayload]
+
 
 logger = logging.getLogger(__name__)
-
-
-class DataPayload(TypedDict):
-    id: str
-    attributes: dict
-
-
-class CloudResponsePayloadTD(TypedDict):
-    data: DataPayload | list[DataPayload]
 
 
 class DatasourceStore(Store):
