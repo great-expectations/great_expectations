@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 import datetime
 import json
 import logging
@@ -930,7 +929,7 @@ def get_batch_request_as_dict(
         batch_request = batch_request.to_dict()
 
     if isinstance(batch_request, _get_fluent_batch_request_class()):
-        batch_request = dataclasses.asdict(batch_request)
+        batch_request = batch_request.dict()
 
     return batch_request
 
