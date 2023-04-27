@@ -221,7 +221,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 ### 1.6 Configure Data Docs for hosting and sharing from Amazon S3
 
 #### 1.6.1 Create an Amazon S3 bucket for your Data Docs
-<CreateAnSBucketForDataDocs />
+<CreateAnS3BucketForDataDocs />
 
 #### 1.6.2 Configure your bucket policy to enable appropriate access
 <ConfigureYourBucketPolicyToEnableAppropriateAccess />
