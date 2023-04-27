@@ -7,11 +7,7 @@ temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 yaml: YAMLHandler = YAMLHandler()
 
-# TODO get rid of this one
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py imports">
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py get_context">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py get_context">
 import great_expectations as gx
 
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
@@ -232,7 +228,6 @@ if not gcp_project:
         "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
     )
 bigquery_dataset = "demo"
-
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_datasource">
@@ -242,6 +237,7 @@ datasource = context.sources.add_or_update_sql(
 )
 # </snippet>
 
+# For tests, we are replacing the `connection_string`
 datasource = context.sources.add_or_update_sql(
     name="my_bigquery_datasource", connection_string=CONNECTION_STRING
 )
@@ -256,60 +252,10 @@ query_asset = datasource.add_query_asset(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py get_table_asset">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py batch_request">
 request = table_asset.build_batch_request()
 # </snippet>
 
-# query_asset = datasource.add_query_asset(
-#    name="my_asset", query="SELECT * from yellow_tripdata_sample"
-# )
-
-# ### Add a table to the Datasource as a Data Asset
-# table_asset = datasource.add_table_asset(
-#    name="my_asset", table_name="yellow_tripdata_sample"
-# )
-
-
-# datasource_yaml = rf"""
-# name: my_bigquery_datasource
-# class_name: Datasource
-# execution_engine:
-#   class_name: SqlAlchemyExecutionEngine
-#   connection_string: bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>
-# data_connectors:
-#    default_runtime_data_connector_name:
-#        class_name: RuntimeDataConnector
-#        batch_identifiers:
-#            - default_identifier_name
-#    default_inferred_data_connector_name:
-#        class_name: InferredAssetSqlDataConnector
-#        name: whole_table
-# """
-# # </snippet>
-
-# # Please note this override is only to provide good UX for docs and tests.
-# # In normal usage you'd set your path directly in the yaml above.
-# datasource_yaml = datasource_yaml.replace(
-#     "bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
-#     CONNECTION_STRING,
-# )
-
-# context.test_yaml_config(datasource_yaml)
-# # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_datasource">
-# context.add_datasource(**yaml.load(datasource_yaml))
-# # </snippet>
-
-# Test for RuntimeBatchRequest using a query.
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py batch_request">
-# batch_request = RuntimeBatchRequest(
-#     datasource_name="my_bigquery_datasource",
-#     data_connector_name="default_runtime_data_connector_name",
-#     data_asset_name="taxi_data",  # this can be anything that identifies this data
-#     runtime_parameters={"query": "SELECT * from demo.taxi_data LIMIT 10"},
-#     batch_identifiers={"default_identifier_name": "default_identifier"},
-# )
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_or_update_expectation_suite">
 context.add_or_update_expectation_suite(expectation_suite_name="test_bigquery_suite")

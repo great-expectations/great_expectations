@@ -50,7 +50,7 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
     "expectations_store_name"
 ]
 expected_existing_expectations_store_yaml = """
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py get_context">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py expected_expectation_store">
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -68,6 +68,7 @@ assert actual_existing_expectations_store == yaml.load(
 
 # adding expectations store
 configured_expectations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py new_expectation_store">
 stores:
   expectations_GCS_store:
     class_name: ExpectationsStore
@@ -78,6 +79,7 @@ stores:
       prefix: <YOUR GCS PREFIX NAME>
 
 expectations_store_name: expectations_GCS_store
+# </snippet>
 """
 
 # replace example code with integration test configuration
@@ -134,6 +136,7 @@ actual_existing_validations_store["validations_store_name"] = great_expectations
 ]
 
 expected_existing_validations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py expected_validations_store">
 stores:
   validations_store:
     class_name: ValidationsStore
@@ -142,6 +145,7 @@ stores:
       base_directory: uncommitted/validations/
 
 validations_store_name: validations_store
+# </snippet>
 """
 assert actual_existing_validations_store == yaml.load(
     expected_existing_validations_store_yaml
@@ -149,6 +153,7 @@ assert actual_existing_validations_store == yaml.load(
 
 # adding validations store
 configured_validations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py new_validations_store">
 stores:
   validations_GCS_store:
     class_name: ValidationsStore
@@ -159,6 +164,7 @@ stores:
       prefix: <YOUR GCS PREFIX NAME>
 
 validations_store_name: validations_GCS_store
+# </snippet>
 """
 
 # replace example code with integration test configuration
@@ -189,6 +195,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # adding data docs store
 data_docs_site_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py new_data_docs_store">
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -206,6 +213,7 @@ data_docs_sites:
       bucket: <YOUR GCS BUCKET NAME>
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
+# </snippet>
 """
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCP PROJECT NAME>", gcp_project
@@ -225,70 +233,22 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # adding datasource
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py datasource">
-bucket_name = "test_docs_data"
-gcs_options = {}
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py datasource">
 datasource = context.sources.add_pandas_gcs(
-    name="MyGcsDatasource", bucket_or_name=bucket_name, gcs_options=gcs_options
+    name="gcs_datasource", bucket_or_name="test_docs_data"
 )
 # </snippet>
 
 ### Add GCS data to the Datasource as a Data Asset
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py gcs">
-bucket_name = "test_docs_data"
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py asset">
 batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 prefix = "data/taxi_yellow_tripdata_samples/"
 data_asset = datasource.add_csv_asset(
-    name="MyTaxiDataAsset", batching_regex=batching_regex, gcs_prefix=prefix
+    name="csv_taxi_gcs_asset", batching_regex=batching_regex, gcs_prefix=prefix
 )
 # </snippet>
 
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py datasource_yaml">
-# datasource_yaml = rf"""
-# name: my_gcs_datasource
-# class_name: Datasource
-# execution_engine:
-#     class_name: PandasExecutionEngine
-# data_connectors:
-#     default_runtime_data_connector_name:
-#         class_name: RuntimeDataConnector
-#         batch_identifiers:
-#             - default_identifier_name
-#     default_inferred_data_connector_name:
-#         class_name: InferredAssetGCSDataConnector
-#         bucket_or_name: <YOUR_GCS_BUCKET_HERE>
-#         prefix: <BUCKET_PATH_TO_DATA>
-#         default_regex:
-#             pattern: (.*)\.csv
-#             group_names:
-#                 - data_asset_name
-# """
-# </snippet>
-
-
-# # Please note this override is only to provide good UX for docs and tests.
-# # In normal usage you'd set your path directly in the yaml above.
-# datasource_yaml = datasource_yaml.replace("<YOUR_GCS_BUCKET_HERE>", "test_docs_data")
-# datasource_yaml = datasource_yaml.replace(
-#     "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
-# )
-
-# context.test_yaml_config(datasource_yaml)
-# # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_datasource">
-# context.add_datasource(**yaml.load(datasource_yaml))
-# # </snippet>
-
-# batch_request with data_asset_name
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py batch_request">
-# batch_request = BatchRequest(
-#    datasource_name="my_gcs_datasource",
-#    data_connector_name="default_inferred_data_connector_name",
-#    data_asset_name="<YOUR_DATA_ASSET_NAME>",
-# )
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py batch_request">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py batch_request">
 batch_request = data_asset.build_batch_request(
     options={
         "month": "03",
@@ -296,13 +256,7 @@ batch_request = data_asset.build_batch_request(
 )
 # </snippet>
 
-# Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your data asset name directly in the BatchRequest above.
-# batch_request.data_asset_name = (
-#     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
-# )
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_expectation_suite">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py add_expectation_suite">
 context.add_or_update_expectation_suite(expectation_suite_name="test_gcs_suite")
 
 validator = context.get_validator(
@@ -313,7 +267,7 @@ validator = context.get_validator(
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py validator_calls">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py validator_calls">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
@@ -321,11 +275,11 @@ validator.expect_column_values_to_be_between(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py save_expectation_suite">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py save_expectation_suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py checkpoint_config">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint_config">
 checkpoint = gx.checkpoint.SimpleCheckpoint(
     name="bigquery_checkpoint",
     data_context=context,
@@ -335,11 +289,8 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_checkpoint">
-# context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
-# </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py run_checkpoint">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py run_checkpoint">
 checkpoint_result = checkpoint.run()
 # </snippet>
 
