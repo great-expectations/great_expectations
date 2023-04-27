@@ -88,7 +88,6 @@ def test_add_csv_asset_to_datasource(
 def test_add_parquet_asset_to_datasource(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
-    breakpoint()
     asset = spark_filesystem_datasource.add_parquet_asset(
         name="parquet_asset",
         # header=True,
