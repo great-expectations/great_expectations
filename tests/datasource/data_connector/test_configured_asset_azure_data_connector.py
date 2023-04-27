@@ -16,7 +16,7 @@ from great_expectations.datasource.data_connector import (
     ConfiguredAssetAzureDataConnector,
 )
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.optional_imports import azure_storage
+from great_expectations.compatibility.azure import storage as azure_storage
 
 yaml = YAMLHandler()
 
