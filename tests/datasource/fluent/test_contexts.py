@@ -3,9 +3,9 @@ from __future__ import annotations
 import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
-import requests
 
 import pytest
+import requests
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import CloudDataContext, FileDataContext
@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
     from responses import RequestsMock
 
-    from great_expectations.datasource.fluent import SqliteDatasource
 
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
