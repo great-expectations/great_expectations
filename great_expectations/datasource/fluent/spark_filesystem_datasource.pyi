@@ -11,7 +11,6 @@ from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.data_asset.spark.parquet import ParquetAsset
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent import BatchMetadata
@@ -20,6 +19,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
+        ParquetAsset,
     )
 
 logger: Logger
@@ -44,7 +44,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...
-
     def add_parquet_asset(
         self,
         name: str,

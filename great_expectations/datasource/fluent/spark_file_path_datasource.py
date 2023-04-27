@@ -35,6 +35,7 @@ class CSVAsset(_FilePathDataAsset):
     def _get_reader_options_include(self) -> set[str] | None:
         return {"header", "infer_schema"}
 
+
 class ParquetAsset(_FilePathDataAsset):
     type: Literal["parquet"] = "parquet"
     merge_schema: bool = Field(False, alias="mergeSchema")
@@ -49,6 +50,7 @@ class ParquetAsset(_FilePathDataAsset):
     def _get_reader_options_include(self) -> set[str] | None:
         # TODO: AJB Add others
         return {"mergeSchema"}
+
 
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
