@@ -301,6 +301,7 @@ class _SourceFactories:
                         self.data_connector_type.asset_options_type(**connect_options)
                 else:
                     connect_options = {}
+
                 asset = asset_type(name=name, **kwargs)
                 return self._add_asset(asset, connect_options=connect_options)
 
@@ -310,7 +311,6 @@ class _SourceFactories:
                 _add_asset_factory, asset_type, exclude={"type"}
             )
             _add_asset_factory.__name__ = add_asset_factory_method_name
-
             setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
 
             # add the public api decorator

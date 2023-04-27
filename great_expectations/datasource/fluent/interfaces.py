@@ -202,8 +202,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
-        """Generate batches from batch request. Used by Validator etc."""
-        # TODO: look at how this works for others.
         raise NotImplementedError
 
     def build_batch_request(
@@ -220,7 +218,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
             get_batch_list_from_batch_request method.
         """
-        # TODO: Helper function for user that we need to implement.
         raise NotImplementedError(
             """One must implement "build_batch_request" on a DataAsset subclass."""
         )
@@ -232,7 +229,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
             batch_request: A batch request object to be validated.
         """
 
-        # TODO: Check that we make sure that the options are a subset of the batch_request_options
         raise NotImplementedError(
             """One must implement "_validate_batch_request" on a DataAsset subclass."""
         )
@@ -532,8 +528,6 @@ class Datasource(
         self, asset: _DataAssetT, connect_options: dict | None = None
     ) -> _DataAssetT:
         """Adds an asset to a datasource
-
-        # TODO: connect_options is where we should put the 'parquet' etc
 
         Args:
             asset: The DataAsset to be added to this datasource.
