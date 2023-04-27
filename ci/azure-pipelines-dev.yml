@@ -99,8 +99,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: 3.8
-            displayName: 'Use Python 3.8'
+              versionSpec: 3.7
+            displayName: 'Use Python 3.7'
 
           - script: |
               pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
@@ -120,8 +120,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
@@ -149,8 +149,6 @@ stages:
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.8
-        displayName: 'Use Python 3.8'
           versionSpec: $(python.version)
         displayName: 'Use Python $(python.version)'
       - script: |
@@ -158,11 +156,9 @@ stages:
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
-          #- script: |
-          # initial run doesn't check `.pyi` source files
-          #invoke type-check --ci --pretty --check-stub-sources
-          #name: TypeCheckStubSourceFiles
-          invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
+      - script: |
+            # initial run doesn't check `.pyi` source files
+            invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
         name: TypeCheckStubSourceFiles
 
     - job: docstring_linter
@@ -218,8 +214,8 @@ stages:
         steps:
          - task: UsePythonVersion@0
            inputs:
-             versionSpec: '3.8'
-           displayName: 'Use Python 3.8'
+             versionSpec: '3.7'
+           displayName: 'Use Python 3.7'
 
          - bash: python -m pip install --upgrade pip
            displayName: 'Update pip'
@@ -243,8 +239,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test]"
@@ -415,8 +411,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
           - bash: python -m pip install --upgrade pip
             displayName: 'Update pip'
@@ -678,8 +674,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
           - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
             name: CheckMinAirflowDependencyCompatibility
