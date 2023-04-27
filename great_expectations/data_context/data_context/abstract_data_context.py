@@ -779,9 +779,13 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
     ) -> None:
-        datasource = self.datasources[datasource_name]
-        if self._datasource_store.cloud_mode and _call_store:
-            self._datasource_store.delete(datasource)  # type: ignore[arg-type] # Could be a LegacyDatasource
+        datasource = self.datasources.get(datasource_name)
+        if datasource:
+            if self._datasource_store.cloud_mode and _call_store:
+                self._datasource_store.delete(datasource)  # type: ignore[arg-type] # Could be a LegacyDatasource
+        else:
+            # Raise key error instead?
+            logger.info(f"No Datasource '{datasource_name}' to delete")
         self.datasources.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
