@@ -1529,23 +1529,26 @@ class AbstractDataContext(ConfigPeer, ABC):
             self._cached_datasources[datasource_name]._data_context = self
             return self._cached_datasources[datasource_name]
 
-        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
-            datasource_name=datasource_name
+        datasource_config: DatasourceConfig | FluentDatasource = (
+            self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
         )
 
-        raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
-        raw_config = datasourceConfigSchema.load(raw_config_dict)
+        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
+        if isinstance(datasource_config, FluentDatasource):
+            datasource = datasource_config
+            datasource_config._data_context = self
+            # Fluent Datasource has already been hydrated into runtime model and uses lazy config substitution
+        else:
+            raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
+            raw_config = datasourceConfigSchema.load(raw_config_dict)
 
-        substituted_config = self.config_provider.substitute_config(raw_config_dict)
+            substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
-        # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = (
-            self._instantiate_datasource_from_config(
+            # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
+            datasource = self._instantiate_datasource_from_config(
                 raw_config=raw_config, substituted_config=substituted_config
             )
-        )
-        if isinstance(datasource, FluentDatasource):
-            datasource._data_context = self
+
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
