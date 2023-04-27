@@ -3516,7 +3516,7 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
     batch_request = FluentBatchRequest(
         datasource_name="pandas_datasource",
         data_asset_name="IN_MEMORY_DATA_ASSET",
-        batch_slice=-1,
+        batch_slice=-1,  # type: ignore[arg-type]
     )
 
     checkpoint_config_dict = copy.deepcopy(
