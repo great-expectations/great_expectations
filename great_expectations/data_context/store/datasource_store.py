@@ -129,6 +129,7 @@ class DatasourceStore(Store):
         data = response_json["data"]
         if isinstance(data, list):
             if len(data) > 1:
+                # TODO: handle larger arrays of Datasources
                 raise TypeError(
                     f"GX Cloud returned {len(data)} Datasources but expected 1"
                 )
