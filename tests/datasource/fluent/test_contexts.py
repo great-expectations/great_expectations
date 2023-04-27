@@ -72,7 +72,7 @@ def test_add_fluent_datasource_are_persisted_without_duplicates(
     assert yaml_path.exists()
 
     yaml_dict: dict = yaml.load(yaml_path.read_text())
-    print(pf(yaml_dict, depth=2, sort_dicts=True))
+    print(pf(yaml_dict, depth=2))
     assert datasource_name in yaml_dict["fluent_datasources"]
     assert datasource_name not in yaml_dict["datasources"]
 
