@@ -169,7 +169,7 @@ def register_expectation(expectation: Type[Expectation]) -> None:
     _registered_expectations[expectation_type] = expectation
 
 
-def register_core_expectations() -> None:
+def _register_core_expectations() -> None:
     """As Expectation registration is the responsibility of MetaExpectation.__new__,
     simply importing a given class will ensure that it is added to the Expectation
     registry.
@@ -398,6 +398,9 @@ def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
             DeprecationWarning,
         )
         expectation_name = renamed[expectation_name]
+
+    if not _registered_expectations:
+        _register_core_expectations()
 
     expectation: Type[Expectation] | None = _registered_expectations.get(
         expectation_name
