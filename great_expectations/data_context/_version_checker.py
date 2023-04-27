@@ -18,7 +18,7 @@ class _PyPIPackageData(TypedDict):
     info: _PyPIPackageInfo
 
 
-class VersionChecker:
+class _VersionChecker:
 
     _BASE_PYPI_URL = "https://pypi.org/pypi"
     _PYPI_GX_ENDPOINT = f"{_BASE_PYPI_URL}/great_expectations/json"
@@ -29,6 +29,7 @@ class VersionChecker:
     def check_if_using_latest_gx(self) -> None:
         pypi_version = self._get_latest_version_from_pypi()
         if not pypi_version:
+            logger.debug("Could not compare with latest PyPI version; skipping check.")
             return
 
         if self._is_using_outdated_release(pypi_version):
@@ -60,11 +61,7 @@ class VersionChecker:
         return version.Version(pkg_version)
 
     def _is_using_outdated_release(self, pypi_version: version.Version) -> bool:
-        return (
-            pypi_version.major > self._user_version.major
-            or pypi_version.minor > self._user_version.minor
-            or pypi_version.micro > self._user_version.micro
-        )
+        return pypi_version > self._user_version
 
     def _warn_user(self, pypi_version: version.Version) -> None:
         logger.warning(

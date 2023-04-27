@@ -26,6 +26,7 @@ from great_expectations.core.config_provider import (
     _ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
+from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudEnvironmentVariable,
@@ -47,7 +48,6 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
-from great_expectations.data_context.version_checker import VersionChecker
 from great_expectations.exceptions.exceptions import DataContextError
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
@@ -121,7 +121,7 @@ class CloudDataContext(SerializableDataContext):
         )
 
     def _check_if_latest_version(self) -> None:
-        checker = VersionChecker(__version__)
+        checker = _VersionChecker(__version__)
         checker.check_if_using_latest_gx()
 
     def _init_project_config(
