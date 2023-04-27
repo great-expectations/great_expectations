@@ -88,8 +88,8 @@ stages:
       steps:
       - task: UsePythonVersion@0
         inputs:
-          versionSpec: 3.8
-        displayName: 'Use Python 3.8'
+          versionSpec: 3.7
+        displayName: 'Use Python 3.7'
       - script: |
           pip install --requirement requirements-types.txt
           invoke type-check --ci --pretty
@@ -645,8 +645,8 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - script: cd docs/docusaurus && yarn install && bash ../build_docs
             name: TestBuildDocs
@@ -659,7 +659,7 @@ stages:
     jobs:
       - job: deploy
         variables:
-          python.version: '3.7'
+          python.version: '3.8'
 
         steps:
           - task: UsePythonVersion@0
