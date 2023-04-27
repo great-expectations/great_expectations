@@ -124,12 +124,6 @@ def test_context_add_or_update_datasource(
         name="my_asset",
     )
 
-    # assert datasource.connection_string == f"sqlite:///{db_file}"
-
-    # modify the datasource
-    # datasource.connection_string = "sqlite:///"  # type: ignore[assignment]
-    # context.sources.add_or_update_pandas_filesystem(datasource)
-
     # TODO: spy the store.delete calls instead of ctx specific tests
     if isinstance(empty_contexts, CloudDataContext):
         # TODO: adjust call counts as needed
@@ -141,6 +135,16 @@ def test_context_add_or_update_datasource(
             f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}?name={datasource.name}",
             1,
         )
+
+        response = requests.get(
+            f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}/datasources/{datasource.id}"
+        )
+        response.raise_for_status()
+        print(pf(response.json(), depth=4))
+        pytest.xfail(  # TODO: remove this
+            "Immediate persistance for cloud not implemented"
+        )
+        assert response.json()["data"]["attributes"]["datasource_config"].get("assets")
 
 
 @pytest.mark.cloud
