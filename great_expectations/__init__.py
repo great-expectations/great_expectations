@@ -5,6 +5,8 @@ __version__ = get_versions()["version"]  # isort:skip
 
 from great_expectations.data_context.migrator.cloud_migrator import CloudMigrator
 
+from .expectations.registry import register_core_expectations
+
 del get_versions  # isort:skip
 
 from great_expectations.data_context import DataContext
@@ -22,6 +24,8 @@ from .util import (
     read_table,
     validate,
 )
+
+register_core_expectations()
 
 # from great_expectations.expectations.core import *
 # from great_expectations.expectations.metrics import *

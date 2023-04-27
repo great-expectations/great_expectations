@@ -6,15 +6,6 @@ from copy import deepcopy
 from great_expectations.core.expectation_configuration import (
     ExpectationConfiguration,  # noqa: TCH001
 )
-
-"""
-# TODO: <Alex>04/24/2023: This import is a temporary work-around.</Alex>
-An effort is under way to utilize "register_core_expectation()" from great_expectations.expectations.registry
-at high-level GX OSS code location in order to register all ExpectationConfiguration classes.
-"""
-from great_expectations.expectations.core.expect_column_kl_divergence_to_be_less_than import (  # noqa: F401
-    ExpectColumnKlDivergenceToBeLessThan,
-)
 from great_expectations.expectations.registry import get_renderer_impl
 from great_expectations.render import (
     LegacyDiagnosticRendererType,
