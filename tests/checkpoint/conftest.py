@@ -38,7 +38,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
 
     batching_regex = r"^Titanic_1911\.csv"
     glob_directive = "*.csv"
-    data_asset = datasource.add_csv_asset(
+    datasource.add_csv_asset(
         name="Titanic_1911",
         batching_regex=batching_regex,
         glob_directive=glob_directive,
@@ -69,7 +69,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
     batching_regex = r"^Titanic_1911\.csv"
     glob_directive = "*.csv"
-    data_asset = datasource.add_csv_asset(
+    datasource.add_csv_asset(
         name="Titanic_1911",
         batching_regex=batching_regex,
         glob_directive=glob_directive,
