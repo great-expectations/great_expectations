@@ -399,6 +399,7 @@ def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
         )
         expectation_name = renamed[expectation_name]
 
+    # An empty registry means that core expectations haven't been registered yet
     if not _registered_expectations:
         _register_core_expectations()
 
@@ -414,6 +415,10 @@ def get_expectation_impl(expectation_name: str) -> Type[Expectation]:
 def list_registered_expectation_implementations(
     expectation_root: Optional[Type[Expectation]] = None,
 ) -> List[str]:
+    # An empty registry means that core expectations haven't been registered yet
+    if not _registered_expectations:
+        _register_core_expectations()
+
     registered_expectation_implementations = []
     for (
         expectation_name,
