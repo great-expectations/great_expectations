@@ -29,6 +29,7 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,
 )
+
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine

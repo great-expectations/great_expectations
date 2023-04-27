@@ -11,7 +11,6 @@ from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
-from great_expectations.datasource.fluent.pandas_datasource import ParquetAsset
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset
@@ -38,8 +37,6 @@ class CSVAsset(_FilePathDataAsset):
 
 class ParquetAsset(_FilePathDataAsset):
     type: Literal["parquet"] = "parquet"
-    # header: bool = False
-    # infer_schema: bool = Field(False, alias="InferSchema")
     merge_schema: bool = Field(False, alias="mergeSchema")
 
     class Config:
@@ -50,7 +47,7 @@ class ParquetAsset(_FilePathDataAsset):
         return self.type
 
     def _get_reader_options_include(self) -> set[str] | None:
-        # TODO: Add others
+        # TODO: AJB Add others
         return {"mergeSchema"}
 
 class _SparkFilePathDatasource(_SparkDatasource):
