@@ -11,6 +11,7 @@ from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
+from great_expectations.datasource.fluent.pandas_datasource import ParquetAsset
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset
@@ -38,7 +39,7 @@ class CSVAsset(_FilePathDataAsset):
 
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset, ParquetAsset]
 
     # instance attributes
     assets: List[_FilePathDataAsset] = []  # type: ignore[assignment]
