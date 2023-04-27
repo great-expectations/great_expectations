@@ -12,10 +12,15 @@ _MOCK_PYPI_VERSION = "0.16.8"
     [
         pytest.param("0.15.0", False, 200, id="outdated"),
         pytest.param(_MOCK_PYPI_VERSION, True, 200, id="up-to-date"),
+        # packaging.version should take care of dirty hashes but worth checking against
         pytest.param(
-            "0.16.8+59.g1ff4de04d.dirty", True, 200, id="up-to-date local dev"
+            f"{_MOCK_PYPI_VERSION}+59.g1ff4de04d.dirty",
+            True,
+            200,
+            id="up-to-date local dev",
         ),
-        pytest.param("0.16.8", True, 400, id="bad request"),
+        # If we error, we shouldn't raise a warning to the user
+        pytest.param(_MOCK_PYPI_VERSION, True, 400, id="bad request"),
     ],
 )
 @pytest.mark.unit
@@ -32,6 +37,6 @@ def test_check_if_using_latest_gx(version: str, expected: bool, status: int, cap
     checker = _VersionChecker(version)
     actual = checker.check_if_using_latest_gx()
 
-    assert actual == expected
+    assert actual is expected
     if not actual:
         assert "upgrade" in caplog.text
