@@ -38,6 +38,8 @@ class CSVAsset(_FilePathDataAsset):
 
 class ParquetAsset(_FilePathDataAsset):
     type: Literal["parquet"] = "parquet"
+    # The options below are available for parquet as of spark v3.4.0
+    # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
     datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(alias="datetimeRebaseMode")
     int_96_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(alias="int96RebaseMode")
     merge_schema: bool = Field(False, alias="mergeSchema")
