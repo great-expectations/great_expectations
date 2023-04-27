@@ -822,15 +822,15 @@ class CloudDataContext(SerializableDataContext):
         return expectation_suite
 
     def _save_project_config(
-        self, fds_datasource: FluentDatasource | None = None
+        self, _fds_datasource: FluentDatasource | None = None
     ) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        if fds_datasource:
-            self._datasource_store.set(key=None, value=fds_datasource)
+        if _fds_datasource:
+            self._datasource_store.set(key=None, value=_fds_datasource)
         else:
             logger.debug(
                 "CloudDataContext._save_project_config() has no `fds_datasource` to update"
