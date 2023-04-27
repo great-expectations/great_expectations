@@ -221,7 +221,9 @@ Here a table `Asset` named `my_table_asset` is built by naming the table, which 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_table_asset"
 ```
 
-In the next example, a query `Asset` named `my_query_asset` is built by submitting a query to the same table `taxi_data`
+In the next example, a query `Asset` named `my_query_asset` is built by submitting a query to the same table `taxi_data`. The query can be arbitrarily complicated. We are using a simple example in our case. You can add JOIN, SELECT, LIMIT 5(?) 
+
+TODO think about LIMIT 5. 
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_query_asset"
 ```
