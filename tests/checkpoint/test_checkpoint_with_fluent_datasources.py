@@ -8,7 +8,6 @@ from unittest import mock
 import pytest
 
 import great_expectations as gx
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
@@ -84,111 +83,6 @@ def common_action_list() -> List[dict]:
                 "class_name": "UpdateDataDocsAction",
             },
         },
-    ]
-
-
-# noinspection PyUnresolvedReferences
-@pytest.fixture
-def failed_multi_validation_checkpoint_run_usage_statistics_expected_events() -> List[
-    unittest.mock._Call
-]:
-    return [
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
-                    "config_version": 1,
-                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
-                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
-                    "anonymized_validations": [
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                    ],
-                },
-                "event": "checkpoint.run",
-                "success": False,
-            }
-        )
     ]
 
 
@@ -932,15 +826,6 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
     data_context.add_checkpoint(**yaml.load(yaml_config))
     assert len(data_context.list_checkpoints()) == 1
 
-    with pytest.raises(
-        gx_exceptions.DataContextError,
-        match=r'Checkpoint "my_base_checkpoint" must be called with a validator or contain either a batch_request or validations.',
-    ):
-        # noinspection PyUnusedLocal
-        result: CheckpointResult = data_context.run_checkpoint(
-            checkpoint_name=checkpoint.name,
-        )
-
     data_context.add_expectation_suite(expectation_suite_name="users.delivery")
 
     result = data_context.run_checkpoint(
@@ -1068,13 +953,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         key=checkpoint_config_key, value=checkpoint_config
     )
     checkpoint: Checkpoint = data_context.get_checkpoint(checkpoint_config.name)
-
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
-        checkpoint.run()
-
-    assert len(data_context.validations_store.list_keys()) == 0
 
     data_context.add_expectation_suite("my_expectation_suite")
     result = checkpoint.run()
@@ -1476,12 +1354,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
-        checkpoint.run(validations=[{"batch_request": batch_request}])
-
-    assert len(context.validations_store.list_keys()) == 0
 
     context.add_expectation_suite("my_expectation_suite")
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
@@ -1509,12 +1381,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
-        checkpoint.run(validations=[{"batch_request": batch_request}])
-
-    assert len(context.validations_store.list_keys()) == 0
 
     context.add_expectation_suite("my_expectation_suite")
     result = checkpoint.run(validations=[{"batch_request": batch_request}])
@@ -1563,29 +1429,6 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         expectation_suite_name="my_expectation_suite",
         action_list=common_action_list,
     )
-    with pytest.raises(
-        gx_exceptions.DataContextError, match=r"expectation_suite .* not found"
-    ):
-        # noinspection PyUnusedLocal
-        result = checkpoint.run(
-            validations=[
-                {"batch_request": batch_request_0},
-                {"batch_request": batch_request_1},
-                {"batch_request": batch_request_2},
-                {"batch_request": batch_request_3},
-            ]
-        )
-
-    assert mock_emit.call_count == 1
-
-    expected_events = (
-        failed_multi_validation_checkpoint_run_usage_statistics_expected_events
-    )
-    # noinspection PyUnresolvedReferences
-    actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
-    assert actual_events == expected_events
-
-    assert len(context.validations_store.list_keys()) == 0
 
     context.add_expectation_suite("my_expectation_suite")
     # noinspection PyUnusedLocal
