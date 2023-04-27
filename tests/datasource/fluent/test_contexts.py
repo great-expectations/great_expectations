@@ -141,9 +141,6 @@ def test_context_add_or_update_datasource(
         )
         response.raise_for_status()
         print(pf(response.json(), depth=4))
-        pytest.xfail(  # TODO: remove this
-            "Immediate persistance for cloud not implemented"
-        )
         assert response.json()["data"]["attributes"]["datasource_config"].get("assets")
 
 
