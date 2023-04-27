@@ -1,6 +1,6 @@
-# Contribute custom Expectations
+# Contribute Custom Expectations
 
-To submit a custom Expectation to Great Expectations for consideration, you complete the following tasks:
+To submit a Custom Expectation to Great Expectations for consideration, you complete the following tasks:
 
 - [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)
 
@@ -20,7 +20,7 @@ To submit a code change to Great Expectations for consideration, see [CONTRIBUTI
 
 - Great Expectations installed and configured for your environment. See [Great Expectations Quickstart](https://docs.greatexpectations.io/docs/tutorials/quickstart/).
 
-- A custom Expectation. See [Creating Custom Expectations](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview/).
+- A Custom Expectation. See [Creating Custom Expectations](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/overview/).
 
 - A GitHub account.
 
@@ -56,9 +56,9 @@ To submit a code change to Great Expectations for consideration, see [CONTRIBUTI
 
 ## Generate the Expectation validation checklist
 
-Before you submit your custom Expectation, you need to verify it meets the submission requirements. Great Expectations provides a checklist to help you determine if your custom Expectation meets the minimum requirements. Your custom Expectation must meet five of the listed requirements to qualify for submission.
+Before you submit your Custom Expectation, you need to verify it meets the submission requirements. Great Expectations provides a checklist to help you determine if your Custom Expectation meets the minimum requirements. Your Custom Expectation must meet the first five of the listed requirements to qualify for submission.
 
-To generate the Expectation checklist, add the `print_diagnostic_checklist()` instance method to your custom Expectation. When the instance method runs, it returns results similar to the following:
+To generate the Expectation checklist, add the `print_diagnostic_checklist()` instance method to your Custom Expectation. When the instance method runs, it returns results similar to the following:
 
 ```console
 ✔ Has a valid library_metadata object
@@ -78,18 +78,18 @@ To generate the Expectation checklist, add the `print_diagnostic_checklist()` in
 
 ## Verify Expectation metadata
 
-Verifying your custom Expectation metadata ensures that it is accredited to you and includes an accurate description.
+Verifying your Custom Expectation metadata ensures that it is accredited to you and includes an accurate description.
 
-Great Expectations maintains a number of custom Expectation packages, that contain thematically related custom Expectations. These packages are located in the [Great Expectations contrib directory](https://github.com/great-expectations/great_expectations/tree/develop/contrib) and on [PyPI](https://pypi.org/).
-If your custom Expectation fits within one of these packages, you're encouraged to contribute your custom Expectation directly to one of these packages.
+Great Expectations maintains a number of Custom Expectation packages, that contain thematically related Custom Expectations. These packages are located in the [Great Expectations contrib directory](https://github.com/great-expectations/great_expectations/tree/develop/contrib) and on [PyPI](https://pypi.org/).
+If your Custom Expectation fits within one of these packages, you're encouraged to contribute your Custom Expectation directly to one of these packages.
 
-If you're not contributing to a specific package, your Custom Expectation is automatically published in the [PyPI great-expectations-experimental package](https://pypi.org/project/great-expectations-experimental/). This package contains all Great Expectations experimental community-contributed custom Expectations that have not been submitted to other packages.
+If you're not contributing to a specific package, your Custom Expectation is automatically published in the [PyPI great-expectations-experimental package](https://pypi.org/project/great-expectations-experimental/). This package contains all Great Expectations experimental community-contributed Custom Expectations that have not been submitted to other packages.
 
-Confirm the `library_metadata` object for your custom Expectation includes the following information:
+Confirm the `library_metadata` object for your Custom Expectation includes the following information:
 
-- `contributors`: Identifies the creators of the custom Expectation.
-- `tags`: Identifies the custom Expectation functionality and domain. For example, `statistics`, `flexible comparisons`, `geography`, and so on.
-- `requirements`: Identifies if your custom Expectation relies on third-party packages.
+- `contributors`: Identifies the creators of the Custom Expectation.
+- `tags`: Identifies the Custom Expectation functionality and domain. For example, `statistics`, `flexible comparisons`, `geography`, and so on.
+- `requirements`: Identifies if your Custom Expectation relies on third-party packages.
 
 ## Submit a pull request
 
@@ -105,7 +105,7 @@ Confirm the `library_metadata` object for your custom Expectation includes the f
 
     - [MAINTENANCE] for PRs that focus on updating repository settings or related changes.
 		
-    - [CONTRIB] for the contribution of custom Expectations and supporting work into the `contrib/` directory.
+    - [CONTRIB] for the contribution of Custom Expectations and supporting work into the `contrib/` directory.
       
     - [HACKATHON] for submissions to an active Great Expectations Hackathon.
 
@@ -117,11 +117,11 @@ Confirm the `library_metadata` object for your custom Expectation includes the f
 
     A Great Expectations team member reviews, approves, and merges your PR. Depending on your GitHub notification settings, you'll be notified when there are comments or when your changes are successfully merged.
 
-    If your custom Expectation doesn't meet the minimum requirements in the validation checklist, it is failing testing, or there is a functionality error, you'll be asked to resolve the issues before your custom Expectation can move forward.
+    If your Custom Expectation doesn't meet the minimum requirements in the validation checklist, it is failing testing, or there is a functionality error, you'll be asked to resolve the issues before your Custom Expectation can move forward.
 
-    If you are submitting a production custom Expectation, Great Expectations requires that your custom Expectation meet or exceed Great Expectation standards for testing and coding.
+    If you are submitting a production Custom Expectation, Great Expectations requires that your Custom Expectation meet or exceed Great Expectation standards for testing and coding.
 
-    When your custom Expectation has successfully passed testing and received approval from a code owner, your contribution is complete. Your custom Expectation will be included in the next release of Great Expectations and an announcement will appear in the release notes
+    When your Custom Expectation has successfully passed testing and received approval from a code owner, your contribution is complete. Your custom Expectation will be included in the next release of Great Expectations and an announcement will appear in the release notes
 
 ## Issue tags
 
