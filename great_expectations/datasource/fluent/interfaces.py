@@ -9,12 +9,14 @@ import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
     Any,
     Callable,
     ClassVar,
     Dict,
     Generic,
     List,
+    Mapping,
     MutableMapping,
     MutableSequence,
     Optional,
@@ -43,6 +45,8 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    MappingIntStrAny = Mapping[Union[int, str], Any]
+    AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
     #  Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import (
@@ -80,12 +84,47 @@ BatchRequestOptions: TypeAlias = Dict[str, Any]
 BatchMetadata: TypeAlias = Dict[str, Any]
 
 
-@dataclasses.dataclass(frozen=True)
-class BatchRequest:
+class BatchRequest(pydantic.BaseModel):
     datasource_name: str
     data_asset_name: str
-    options: BatchRequestOptions = dataclasses.field(default_factory=dict)
-    batch_slice: slice = dataclasses.field(default=slice(0, None, None))
+    options: BatchRequestOptions = pydantic.Field(default_factory=dict)
+    batch_slice: slice = pydantic.Field(default=slice(0, None, None))
+
+    class Config:
+        arbitrary_types_allowed = True
+        extra = pydantic.Extra.forbid
+        json_encoders = {slice: str}
+
+    @pydantic.validator("batch_slice", pre=True)
+    def _validate_and_parse_batch_slice(cls, value):
+        return parse_batch_slice(batch_slice=value)
+
+    def json(
+        self,
+        *,
+        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        by_alias: bool = False,
+        skip_defaults: Optional[bool] = None,
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Optional[Callable[[Any], Any]] = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs: Any,
+    ) -> str:
+        return super().json(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+            **dumps_kwargs,
+        )
 
 
 @pydantic_dc.dataclass(frozen=True)

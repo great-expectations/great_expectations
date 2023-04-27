@@ -19,6 +19,9 @@ from great_expectations.data_context.data_context.data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.datasource.fluent.interfaces import (
+    BatchRequest as FluentBatchRequest,
+)
 from great_expectations.exceptions import CheckpointError
 from great_expectations.util import filter_properties_dict
 
@@ -215,16 +218,6 @@ def batch_request_for_pandas_unexpected_rows_and_index(
         "batch_identifiers": {
             "id_key_0": 1234567890,
         },
-    }
-
-
-@pytest.fixture()
-def fluent_batch_request_for_pandas_unexpected_rows_and_index() -> dict:
-    return {
-        "datasource_name": "pandas_datasource",
-        "data_asset_name": "IN_MEMORY_DATA_ASSET",
-        "options": {},
-        "batch_slice": -1,
     }
 
 
@@ -3510,32 +3503,33 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
 @pytest.mark.integration
 def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_fluent_batch_request_with_slice(
     empty_data_context: AbstractDataContext,
-    fluent_batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
-    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     context = empty_data_context
+    context.add_expectation_suite(expectation_suite_name="metrics_exp")
+
     context.sources.add_pandas(name="pandas_datasource").add_dataframe_asset(
         name="IN_MEMORY_DATA_ASSET",
         dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
     )
-
-    context.add_expectation_suite(expectation_suite_name="metrics_exp")
+    batch_request = FluentBatchRequest(
+        datasource_name="pandas_datasource",
+        data_asset_name="IN_MEMORY_DATA_ASSET",
+        batch_slice=-1,
+    )
 
     checkpoint_config_dict = copy.deepcopy(
         reference_checkpoint_config_for_unexpected_column_names
     )
-
     dict_to_update_checkpoint: dict = {
-        "batch_request": fluent_batch_request_for_pandas_unexpected_rows_and_index,
+        "batch_request": batch_request,
         "runtime_configuration": {
             "result_format": {
                 "result_format": "COMPLETE",
             }
         },
     }
-
     checkpoint_config_dict.update(dict_to_update_checkpoint)
 
     checkpoint_config = CheckpointConfig(**checkpoint_config_dict)
@@ -3552,7 +3546,11 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
         expectation_suite_name="metrics_exp",
     )
 
-    assert (
-        result.checkpoint_config.batch_request
-        == fluent_batch_request_for_pandas_unexpected_rows_and_index
-    )
+    expected_serialized_batch_request = {
+        "datasource_name": "pandas_datasource",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "options": {},
+        "batch_slice": "slice(-1, None, None)",
+    }
+
+    assert result.checkpoint_config.batch_request == expected_serialized_batch_request
