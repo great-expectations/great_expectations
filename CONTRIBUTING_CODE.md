@@ -489,7 +489,7 @@ Test the performance of code changes to determine they perform as expected. BigQ
 
     - [MAINTENANCE] for PRs that focus on updating repository settings or related changes.
 		
-    - [CONTRIB] for the contribution of custom Expectations and supporting work into the `contrib/` directory.
+    - [CONTRIB] for the contribution of Custom Expectations and supporting work into the `contrib/` directory.
       
     - [HACKATHON] for submissions to an active Great Expectations Hackathon.
 
