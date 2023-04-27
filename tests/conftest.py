@@ -1586,7 +1586,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     df = pd.read_csv(filepath_or_buffer=csv_source_path)
 
     dataframe_asset_name = "my_dataframe_asset"
-    data_asset = datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
+    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -1616,13 +1616,13 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
     batching_regex = r"(?P<name>.+)\.csv"
     glob_directive = "*.csv"
-    data_asset = datasource.add_csv_asset(
+    datasource.add_csv_asset(
         name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
     batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
     glob_directive = "*.csv"
-    data_asset = datasource.add_csv_asset(
+    datasource.add_csv_asset(
         name="users", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
@@ -1649,13 +1649,12 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
 
 @pytest.fixture
-def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     db_file,
     sa,
 ):
     context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
-    context_path: str = context.root_directory
 
     datasource_name = "my_sqlite_datasource"
     connection_string = f"sqlite:///{db_file}"
@@ -1665,7 +1664,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     )
 
     query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
-    data_asset = datasource.add_query_asset(
+    datasource.add_query_asset(
         name="table_partitioned_by_date_column__A_query_asset", query=query
     )
 
