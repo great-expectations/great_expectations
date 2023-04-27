@@ -56,6 +56,14 @@ def batch_request_as_dict() -> Dict[str, str]:
 
 
 @pytest.fixture
+def fluent_batch_request(batch_request_as_dict: Dict[str, str]) -> FluentBatchRequest:
+    return FluentBatchRequest(
+        datasource_name=batch_request_as_dict["datasource_name"],
+        data_asset_name=batch_request_as_dict["data_asset_name"],
+    )
+
+
+@pytest.fixture
 def common_action_list() -> List[dict]:
     return [
         {
@@ -731,10 +739,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_constructor(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
-    batch_request_as_dict,
+    fluent_batch_request,
 ):
     data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
-    batch_request: FluentBatchRequest = FluentBatchRequest(**batch_request_as_dict)
+    batch_request: FluentBatchRequest = fluent_batch_request
     data_context.add_expectation_suite("my_expectation_suite")
     validator: Validator = data_context.get_validator(
         batch_request=batch_request,
@@ -760,10 +768,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_run(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
-    batch_request_as_dict,
+    fluent_batch_request,
 ):
     data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
-    batch_request: FluentBatchRequest = FluentBatchRequest(**batch_request_as_dict)
+    batch_request: FluentBatchRequest = fluent_batch_request
     data_context.add_expectation_suite("my_expectation_suite")
     validator: Validator = data_context.get_validator(
         batch_request=batch_request,
@@ -1051,10 +1059,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     batch_request = FluentBatchRequest(
-        **{
-            "datasource_name": "my_pandas_dataframes_datasource",
-            "data_asset_name": "my_dataframe_asset",
-        }
+        datasource_name="my_pandas_dataframes_datasource",
+        data_asset_name="my_dataframe_asset",
     )
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
@@ -1086,10 +1092,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     batch_request = FluentBatchRequest(
-        **{
-            "datasource_name": "my_spark_dataframes_datasource",
-            "data_asset_name": "my_dataframe_asset",
-        }
+        datasource_name="my_spark_dataframes_datasource",
+        data_asset_name="my_dataframe_asset",
     )
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
