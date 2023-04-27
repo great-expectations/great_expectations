@@ -279,9 +279,9 @@ validator.expect_column_values_to_be_between(
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint_config">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint">
 checkpoint = gx.checkpoint.SimpleCheckpoint(
-    name="bigquery_checkpoint",
+    name="gcs_checkpoint",
     data_context=context,
     validations=[
         {"batch_request": batch_request, "expectation_suite_name": "test_gcs_suite"}

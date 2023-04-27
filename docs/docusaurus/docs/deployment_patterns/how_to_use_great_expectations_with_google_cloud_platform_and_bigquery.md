@@ -82,12 +82,12 @@ The full configuration used in this guide can be found in the [`great-expectatio
 #### Add Expectations Store
 By default, newly profiled Expectations are stored in JSON format in the `expectations/` subdirectory of your `great_expectations/` folder. A new Expectations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py expected_expectation_store"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_expectation_store"
 ```
 
 Great Expectations can then be configured to use this new Expectations Store, `expectations_GCS_store`, by setting the `expectations_store_name` value in the `great_expectations.yml` file.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py new_expectation_store"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_expectation_store"
 ```
 
 For additional details and example configurations, please refer to [How to configure an Expectation store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.md).
@@ -95,12 +95,12 @@ For additional details and example configurations, please refer to [How to confi
 #### Add Validations Store
 By default, Validations are stored in JSON format in the `uncommitted/validations/` subdirectory of your `great_expectations/` folder. A new Validations Store can be configured by adding the following lines into your `great_expectations.yml` file, replacing the `project`, `bucket` and `prefix` with your information.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py expected_validations_store"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_validations_store"
 ```
 
 Great Expectations can then be configured to use this new Validations Store, `validations_GCS_store`, by setting the `validations_store_name` value in the `great_expectations.yml` file.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py new_validations_store"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_validations_store"
 ```
 
 For additional details and example configurations, please refer to  [How to configure an Validation Result store to use GCS](../guides/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.md).
@@ -110,7 +110,7 @@ To host and share Datadocs on GCS, we recommend using the [following guide](../g
 
 Afterwards, your `great-expectations.yml` will contain the following configuration under `data_docs_sites`,  with `project`, and `bucket` being replaced with your information.
 
-```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py new_data_docs_store"
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_data_docs_store"
 ```
 
 
@@ -221,13 +221,10 @@ Here a table `Asset` named `my_table_asset` is built by naming the table, which 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_table_asset"
 ```
 
-In the next example, a query `Asset` named `my_query_asset` is built by submitting a query to the same table `taxi_data`. The query can be arbitrarily complicated. We are using a simple example in our case. You can add JOIN, SELECT, LIMIT 5(?) 
-
-TODO think about LIMIT 5. 
+In the next example, a query `Asset` named `my_query_asset` is built by submitting a query to the same table `taxi_data`. Although the example is a simpl operation, returning the first 5 rows from the `taxi_data` table, the query can be arbitrarily complicated, including any number of `JOIN`, `SELECT` operations and subqueries. 
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_query_asset"
 ```
-TODO add more here
 
 </TabItem>
 </Tabs>
@@ -245,15 +242,17 @@ TODO add more here
 
 For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using the [User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
 
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py add_expectation_suite">
+```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py validator_calls"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py validator_calls"
 ```
 
 Lastly, save the ExpectationSuite, which now contains our two Expectations.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py save_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py save_expectation_suite"
 ```
 
 For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas](../guides/connecting_to_your_data/cloud/gcs/pandas.md)
@@ -306,22 +305,14 @@ For our example, we will create a basic Checkpoint configuration using the `Simp
   ]}>
 <TabItem value="gcs">
 
-Add the following Checkpoint `gcs_checkpoint` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
+Add the following Checkpoint `gcs_checkpoint` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py checkpoint_config"
-```
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_checkpoint"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint"
 ```
 
 Next, you can either run the Checkpoint directly in-code,
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py run_checkpoint"
-```
-
-or through the following CLI command.
-
-```bash
-great_expectations checkpoint run gcs_checkpoint
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py run_checkpoint">
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:

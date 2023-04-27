@@ -285,29 +285,6 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
     ],
 )
 # </snippet>
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py checkpoint_config">
-# my_checkpoint_name = "bigquery_checkpoint"
-# checkpoint_config = f"""
-# name: {my_checkpoint_name}
-# config_version: 1.0
-# class_name: SimpleCheckpoint
-# run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
-# validations:
-#   - batch_request:
-#       datasource_name: my_bigquery_datasource
-#       data_connector_name: default_runtime_data_connector_name
-#       data_asset_name: taxi_data
-#       batch_identifiers:
-#         default_identifier_name: 1
-#       runtime_parameters:
-#         query: SELECT * from demo.taxi_data LIMIT 10
-#     expectation_suite_name: test_bigquery_suite
-# """
-# # </snippet>
-
-# # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_checkpoint">
-# context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
-# # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py run_checkpoint">
 checkpoint_result = checkpoint.run()
