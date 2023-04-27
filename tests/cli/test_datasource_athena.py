@@ -32,7 +32,7 @@ def test_cli_athena_datasource_new_connection_string(
     result = runner.invoke(
         cli,
         "datasource new",
-        input="2\n7\n",
+        input="Y\n2\n7\n",
         catch_exceptions=False,
     )
     stdout = result.stdout
