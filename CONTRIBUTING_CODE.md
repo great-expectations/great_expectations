@@ -164,7 +164,7 @@ To add support for Spark or SQLAlchemy tests, you can substitute `requirements-d
 Run the following command in the root of the `great_expectations` repository to install Great Expectations in editable mode:
 
 ```sh
-pip install -e
+pip install -e .
 ```
 
 ## Configure backends for testing (optional)
