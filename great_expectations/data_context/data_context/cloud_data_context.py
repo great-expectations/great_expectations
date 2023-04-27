@@ -829,6 +829,13 @@ class CloudDataContext(SerializableDataContext):
 
         Explicitly override base class implementation to retain legacy behavior.
         """
+        # 042723 kilo59
+        # Currently CloudDataContext and FileDataContext diverge in how FDS are persisted.
+        # FileDataContexts don't use the DatasourceStore at all to save or hydrate FDS configs.
+        # CloudDataContext does use DatasourceStore in order to make use of the Cloud http clients.
+        # The intended future state is for a new FluentDatasourceStore that can fully encapsulate
+        # the different requirements for FDS vs BDS.
+        # At which time `_save_project_config` will revert to being a no-op operation on the CloudDataContext.
         if _fds_datasource:
             self._datasource_store.set(key=None, value=_fds_datasource)
         else:
