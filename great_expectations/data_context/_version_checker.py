@@ -7,7 +7,7 @@ import requests
 from packaging import version
 from typing_extensions import TypedDict
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class _PyPIPackageInfo(TypedDict):
@@ -26,14 +26,16 @@ class _VersionChecker:
     def __init__(self, user_version: str) -> None:
         self._user_version = version.Version(user_version)
 
-    def check_if_using_latest_gx(self) -> None:
+    def check_if_using_latest_gx(self) -> bool:
         pypi_version = self._get_latest_version_from_pypi()
         if not pypi_version:
             logger.debug("Could not compare with latest PyPI version; skipping check.")
-            return
+            return True
 
         if self._is_using_outdated_release(pypi_version):
             self._warn_user(pypi_version)
+            return False
+        return True
 
     def _get_latest_version_from_pypi(self) -> version.Version | None:
         response_json: _PyPIPackageData | None = None
