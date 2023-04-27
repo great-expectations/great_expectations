@@ -874,7 +874,6 @@ def data_context_with_connection_to_metrics_db(
                         table_name: multi_column_sums
                         class_name: Asset
     """
-    # noinspection PyUnusedLocal
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
@@ -1007,7 +1006,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     - airflow_run_id
     """
 
-    # noinspection PyUnusedLocal
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
@@ -1044,7 +1042,6 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
                         - data_asset_name
     """
 
-    # noinspection PyUnusedLocal
     _: BaseDatasource = context.add_datasource(
         "my_additional_datasource", **yaml.load(datasource_config)
     )
@@ -1100,7 +1097,6 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
             name: whole_table
         """
 
-        # noinspection PyUnusedLocal
         _: BaseDatasource = context.add_datasource(
             "my_sqlite_db_datasource", **yaml.load(datasource_config)
         )
@@ -1567,14 +1563,12 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
 
     batching_regex = r"(?P<name>.+)\.csv"
     glob_directive = "*.csv"
-    # noinspection PyUnusedLocal
     datasource.add_csv_asset(
         name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
     batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
     glob_directive = "*.csv"
-    # noinspection PyUnusedLocal
     datasource.add_csv_asset(
         name="users", batching_regex=batching_regex, glob_directive=glob_directive
     )
@@ -1592,8 +1586,7 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
     df = pd.read_csv(filepath_or_buffer=csv_source_path)
 
     dataframe_asset_name = "my_dataframe_asset"
-    # noinspection PyUnusedLocal
-    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
+    data_asset = datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
 
     # noinspection PyProtectedMember
     context._save_project_config()
@@ -1623,15 +1616,13 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
 
     batching_regex = r"(?P<name>.+)\.csv"
     glob_directive = "*.csv"
-    # noinspection PyUnusedLocal
-    datasource.add_csv_asset(
+    data_asset = datasource.add_csv_asset(
         name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
     batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
     glob_directive = "*.csv"
-    # noinspection PyUnusedLocal
-    datasource.add_csv_asset(
+    data_asset = datasource.add_csv_asset(
         name="users", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
@@ -1649,8 +1640,34 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoin
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
     dataframe_asset_name = "my_dataframe_asset"
-    # noinspection PyUnusedLocal
     datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    db_file,
+    sa,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context_path: str = context.root_directory
+
+    datasource_name = "my_sqlite_datasource"
+    connection_string = f"sqlite:///{db_file}"
+    datasource = context.sources.add_sqlite(
+        name=datasource_name,
+        connection_string=connection_string,
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+    data_asset = datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset", query=query
+    )
 
     # noinspection PyProtectedMember
     context._save_project_config()
