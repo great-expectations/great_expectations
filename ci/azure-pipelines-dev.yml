@@ -271,6 +271,38 @@ stages:
               pytest -v --postgresql --docs-tests -m integration -k "RUNME_POSTGRES" tests/integration/test_script_runner.py
             displayName: 'Run Flagged Tests'
 
+      - job: runme_script_runner_tests_gcs
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
+
+          - task: DownloadSecureFile@1
+            name: gcp_authkey
+            displayName: 'Download Google Service Account'
+            inputs:
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+              retryCount: '2'
+
+          # includes explicit install of chardet, which was causing problems in the pipeline
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test" pytest-azurepipelines google-cloud-bigquery-storage
+              pip install chardet==3.0.4
+            displayName: 'Install GX and required dependencies'
+
+          # tests containing the name "RUNME_POSTGRES" are run
+          - script: |
+              pytest -v --docs-tests -m integration --bigquery -k "RUNME_gcp" tests/integration/test_script_runner.py
+            displayName: 'Run Flagged Tests'
+            env:
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+
+
+
+
 
 
   - stage: required

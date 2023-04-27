@@ -3,15 +3,18 @@ import tempfile
 import pathlib
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py imports">
-import great_expectations as gx
-from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
+
+temp_dir = tempfile.TemporaryDirectory()
+full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 
 yaml = YAMLHandler()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py get_context">
-context = gx.get_context()
+import great_expectations as gx
+
+context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 # </snippet>
 
 
@@ -32,7 +35,12 @@ with open(great_expectations_yaml_file_path) as f:
     great_expectations_yaml = yaml.load(f)
 
 stores = great_expectations_yaml["stores"]
-pop_stores = ["checkpoint_store", "evaluation_parameter_store", "validations_store"]
+pop_stores = [
+    "checkpoint_store",
+    "evaluation_parameter_store",
+    "validations_store",
+    "profiler_store",
+]
 for store in pop_stores:
     stores.pop(store)
 
@@ -113,6 +121,7 @@ pop_stores = [
     "evaluation_parameter_store",
     "expectations_store",
     "expectations_GCS_store",
+    "profiler_store",
 ]
 for store in pop_stores:
     stores.pop(store)
@@ -215,56 +224,82 @@ with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
 # adding datasource
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py datasource_yaml">
-datasource_yaml = rf"""
-name: my_gcs_datasource
-class_name: Datasource
-execution_engine:
-    class_name: PandasExecutionEngine
-data_connectors:
-    default_runtime_data_connector_name:
-        class_name: RuntimeDataConnector
-        batch_identifiers:
-            - default_identifier_name
-    default_inferred_data_connector_name:
-        class_name: InferredAssetGCSDataConnector
-        bucket_or_name: <YOUR_GCS_BUCKET_HERE>
-        prefix: <BUCKET_PATH_TO_DATA>
-        default_regex:
-            pattern: (.*)\.csv
-            group_names:
-                - data_asset_name
-"""
-# </snippet>
-
-
-# Please note this override is only to provide good UX for docs and tests.
-# In normal usage you'd set your path directly in the yaml above.
-datasource_yaml = datasource_yaml.replace("<YOUR_GCS_BUCKET_HERE>", "test_docs_data")
-datasource_yaml = datasource_yaml.replace(
-    "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py datasource">
+bucket_name = "test_docs_data"
+gcs_options = {}
+datasource = context.sources.add_pandas_gcs(
+    name="MyGcsDatasource", bucket_or_name=bucket_name, gcs_options=gcs_options
 )
-
-context.test_yaml_config(datasource_yaml)
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_datasource">
-context.add_datasource(**yaml.load(datasource_yaml))
 # </snippet>
+
+### Add GCS data to the Datasource as a Data Asset
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py gcs">
+bucket_name = "test_docs_data"
+batching_regex = r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+prefix = "data/taxi_yellow_tripdata_samples/"
+data_asset = datasource.add_csv_asset(
+    name="MyTaxiDataAsset", batching_regex=batching_regex, gcs_prefix=prefix
+)
+# </snippet>
+
+
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py datasource_yaml">
+# datasource_yaml = rf"""
+# name: my_gcs_datasource
+# class_name: Datasource
+# execution_engine:
+#     class_name: PandasExecutionEngine
+# data_connectors:
+#     default_runtime_data_connector_name:
+#         class_name: RuntimeDataConnector
+#         batch_identifiers:
+#             - default_identifier_name
+#     default_inferred_data_connector_name:
+#         class_name: InferredAssetGCSDataConnector
+#         bucket_or_name: <YOUR_GCS_BUCKET_HERE>
+#         prefix: <BUCKET_PATH_TO_DATA>
+#         default_regex:
+#             pattern: (.*)\.csv
+#             group_names:
+#                 - data_asset_name
+# """
+# </snippet>
+
+
+# # Please note this override is only to provide good UX for docs and tests.
+# # In normal usage you'd set your path directly in the yaml above.
+# datasource_yaml = datasource_yaml.replace("<YOUR_GCS_BUCKET_HERE>", "test_docs_data")
+# datasource_yaml = datasource_yaml.replace(
+#     "<BUCKET_PATH_TO_DATA>", "data/taxi_yellow_tripdata_samples/"
+# )
+
+# context.test_yaml_config(datasource_yaml)
+# # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_datasource">
+# context.add_datasource(**yaml.load(datasource_yaml))
+# # </snippet>
 
 # batch_request with data_asset_name
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py batch_request">
-batch_request = BatchRequest(
-    datasource_name="my_gcs_datasource",
-    data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="<YOUR_DATA_ASSET_NAME>",
+# batch_request = BatchRequest(
+#    datasource_name="my_gcs_datasource",
+#    data_connector_name="default_inferred_data_connector_name",
+#    data_asset_name="<YOUR_DATA_ASSET_NAME>",
+# )
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py batch_request">
+batch_request = data_asset.build_batch_request(
+    options={
+        "month": "03",
+    }
 )
 # </snippet>
 
-
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
-batch_request.data_asset_name = (
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
-)
+# batch_request.data_asset_name = (
+#     "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01"
+# )
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_expectation_suite">
 context.add_or_update_expectation_suite(expectation_suite_name="test_gcs_suite")
@@ -274,25 +309,14 @@ validator = context.get_validator(
 )
 # </snippet>
 
-
 # NOTE: The following code is only for testing and can be ignored by users.
 assert isinstance(validator, gx.validator.validator.Validator)
-assert [ds["name"] for ds in context.list_datasources()] == ["my_gcs_datasource"]
-assert set(
-    context.get_available_data_asset_names()["my_gcs_datasource"][
-        "default_inferred_data_connector_name"
-    ]
-) == {
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-02",
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03",
-}
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py validator_calls">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
-    column="congestion_surcharge", min_value=0, max_value=1000
+    column="congestion_surcharge", min_value=-3, max_value=1000
 )
 # </snippet>
 
@@ -301,34 +325,21 @@ validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py checkpoint_config">
-my_checkpoint_name = "gcs_checkpoint"
-checkpoint_config = f"""
-name: {my_checkpoint_name}
-config_version: 1.0
-class_name: SimpleCheckpoint
-run_name_template: "%Y%m%d-%H%M%S-my-run-name-template"
-validations:
-  - batch_request:
-      datasource_name: my_gcs_datasource
-      data_connector_name: default_inferred_data_connector_name
-      data_asset_name: <YOUR_DATA_ASSET_NAME>
-    expectation_suite_name: test_gcs_suite
-"""
+checkpoint = gx.checkpoint.SimpleCheckpoint(
+    name="bigquery_checkpoint",
+    data_context=context,
+    validations=[
+        {"batch_request": batch_request, "expectation_suite_name": "test_gcs_suite"}
+    ],
+)
 # </snippet>
 
-checkpoint_config = checkpoint_config.replace(
-    "<YOUR_DATA_ASSET_NAME>",
-    "data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01",
-)
-
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_checkpoint">
-context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
+# context.add_or_update_checkpoint(**yaml.load(checkpoint_config))
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py run_checkpoint">
-checkpoint_result = context.run_checkpoint(
-    checkpoint_name=my_checkpoint_name,
-)
+checkpoint_result = checkpoint.run()
 # </snippet>
 
 assert checkpoint_result.success is True
