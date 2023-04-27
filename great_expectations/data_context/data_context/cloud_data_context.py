@@ -826,5 +826,5 @@ class CloudDataContext(SerializableDataContext):
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        logger.info(f"{type(self).__name__}._save_project_config() is a NoOp")
+        logger.debug(f"{type(self).__name__}._save_project_config() is a NoOp")
         # TODO: this may be adjusted as part of fluent datasources save flow
