@@ -107,8 +107,8 @@ class BatchRequest(pydantic.BaseModel):
         exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
         by_alias: bool = False,
         skip_defaults: Optional[bool] = None,
-        exclude_unset: bool = True,
-        exclude_defaults: bool = False,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = True,
         exclude_none: bool = False,
         encoder: Optional[Callable[[Any], Any]] = None,
         models_as_dict: bool = True,
@@ -118,7 +118,7 @@ class BatchRequest(pydantic.BaseModel):
         Generate a json representation of the model, optionally specifying which
         fields to include or exclude.
 
-        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
+        Deviates from pydantic `exclude_defaults` `True` by default instead of `False` by
         default.
         """
         return super().json(
@@ -141,8 +141,8 @@ class BatchRequest(pydantic.BaseModel):
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
         by_alias: bool = False,
         # Default to True to prevent serializing long configs full of unset default values
-        exclude_unset: bool = True,
-        exclude_defaults: bool = False,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = True,
         exclude_none: bool = False,
         # deprecated - use exclude_unset instead
         skip_defaults: bool | None = None,
@@ -153,7 +153,7 @@ class BatchRequest(pydantic.BaseModel):
         Generate a dictionary representation of the model, optionally specifying which
         fields to include or exclude.
 
-        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
+        Deviates from pydantic `exclude_defaults` `True` by default instead of `False` by
         default.
         """
         return super().dict(
