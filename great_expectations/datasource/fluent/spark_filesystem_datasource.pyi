@@ -51,7 +51,8 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         batch_metadata: Optional[BatchMetadata] = ...,
         batching_regex: re.Pattern | str = r".*",
         glob_directive: str = "**/*",
-        header: bool = ...,
-        infer_schema: bool = ...,
+        datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"],
+        int_96_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"],
+        merge_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
     ) -> ParquetAsset: ...

@@ -38,6 +38,8 @@ class CSVAsset(_FilePathDataAsset):
 
 class ParquetAsset(_FilePathDataAsset):
     type: Literal["parquet"] = "parquet"
+    datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(alias="datetimeRebaseMode")
+    int_96_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(alias="int96RebaseMode")
     merge_schema: bool = Field(False, alias="mergeSchema")
 
     class Config:
@@ -48,8 +50,15 @@ class ParquetAsset(_FilePathDataAsset):
         return self.type
 
     def _get_reader_options_include(self) -> set[str] | None:
-        # TODO: AJB Add others
-        return {"mergeSchema"}
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
+        """
+        return {
+            "datetimeRebaseMode",
+            "int96RebaseMode",
+            "mergeSchema"
+        }
 
 
 class _SparkFilePathDatasource(_SparkDatasource):

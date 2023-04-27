@@ -90,12 +90,17 @@ def test_add_parquet_asset_to_datasource(
 ):
     asset = spark_filesystem_datasource.add_parquet_asset(
         name="parquet_asset",
-        # header=True,
-        # infer_schema=True,
+        datetime_rebase_mode="EXCEPTION",
+        int_96_rebase_mode="CORRECTED",
+        merge_schema=False,
     )
     assert asset.name == "parquet_asset"
     m1 = asset.batching_regex.match("this_can_be_named_anything.parquet")
     assert m1 is not None
+    assert asset.datetime_rebase_mode == "EXCEPTION"
+    assert asset.int_96_rebase_mode == "CORRECTED"
+    assert asset.merge_schema is False
+
 
 
 @pytest.mark.unit
