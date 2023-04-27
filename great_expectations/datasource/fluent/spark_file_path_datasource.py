@@ -36,6 +36,21 @@ class CSVAsset(_FilePathDataAsset):
         return {"header", "infer_schema"}
 
 
+class ORCAsset(_FilePathDataAsset):
+    # Overridden inherited instance fields
+    type: Literal["orc"] = "orc"
+    merge_schema: bool = Field(False, alias="mergeSchema")
+
+    class Config:
+        extra = pydantic.Extra.forbid
+        allow_population_by_field_name = True
+
+    def _get_reader_method(self) -> str:
+        return self.type
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        return {"merge_schema"}
+
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]

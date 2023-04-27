@@ -18,8 +18,8 @@ if TYPE_CHECKING:
         SortersDefinition,
     )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-    )
+        CSVAsset, ORCAsset,
+)
 
 logger: Logger
 
@@ -43,3 +43,14 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...
+
+    def add_orc_asset(
+        self,
+        name: str,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: re.Pattern | str = r".*",
+        glob_directive: str = "**/*",
+        merge_schema: bool = ...,
+        order_by: Optional[SortersDefinition] = ...,
+    ) -> ORCAsset: ...
