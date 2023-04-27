@@ -193,6 +193,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         ]
 
 
+@public_api
 class SparkDatasource(_SparkDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [DataFrameAsset]
