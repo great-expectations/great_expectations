@@ -57,8 +57,12 @@ class _VersionChecker:
         if not response_json:
             return None
 
-        info = response_json["info"]
-        pkg_version = info["version"]
+        # Structure should be guaranteed but in the case the PyPI payload changes,
+        # we don't want to fail workflows on a simple check.
+        info = response_json.get("info", {})
+        pkg_version = info.get("version")
+        if not pkg_version:
+            return None
 
         return version.Version(pkg_version)
 
