@@ -29,6 +29,7 @@ from urllib.parse import urlparse
 import dateutil.parser
 import numpy as np
 import pandas as pd
+import pydantic
 from IPython import get_ipython
 from typing_extensions import TypeAlias
 
@@ -265,13 +266,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     Raises:
         TypeError: A non-JSON-serializable field was found.
     """
-    # If it's one of our types, we use our own conversion; this can move to full schema
-    # once nesting goes all the way down
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchRequest as FluentBatchRequest,
-    )
-
-    if isinstance(data, FluentBatchRequest):
+    if isinstance(data, pydantic.BaseModel):
         return data.dict()
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
