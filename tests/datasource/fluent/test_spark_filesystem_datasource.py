@@ -102,7 +102,6 @@ def test_add_parquet_asset_to_datasource(
     assert asset.merge_schema is False
 
 
-
 @pytest.mark.unit
 def test_add_csv_asset_with_batching_regex_to_datasource(
     spark_filesystem_datasource: SparkFilesystemDatasource,
