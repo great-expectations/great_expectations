@@ -119,7 +119,7 @@ class DatasourceStore(Store):
             return self._schema.loads(value)
 
     def ge_cloud_response_json_to_object_dict(
-        self, response_json: CloudResponsePayloadTD
+        self, response_json: CloudResponsePayloadTD  # type: ignore[override]
     ) -> dict:
         """
         This method takes full json response from GX cloud and outputs a dict appropriate for
