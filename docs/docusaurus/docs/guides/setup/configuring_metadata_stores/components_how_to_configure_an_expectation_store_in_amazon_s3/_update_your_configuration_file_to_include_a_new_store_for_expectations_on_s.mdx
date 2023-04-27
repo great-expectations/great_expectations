@@ -1,15 +1,8 @@
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-You can manually add an <TechnicalTag tag="expectation_store" text="Expectations Store" /> by adding the configuration shown below into the `stores` section of your `great_expectations.yml` file.
+You can manually add an <TechnicalTag tag="expectation_store" text="Expectations Store" /> by using the `add_store()` method, which will add a Store to your configuration.
 
-```yaml title="File contents: great_expectations.yml"
-stores:
-  expectations_S3_store:
-      class_name: ExpectationsStore
-      store_backend:
-          class_name: TupleS3StoreBackend
-          bucket: '<your_s3_bucket_name>'
-          prefix: '<your_s3_bucket_folder_name>'
+```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py new_expectations_store"
 ```
 
 To make the store work with S3 you will need to make some changes to default the ``store_backend`` settings, as has been done in the above example.  The ``class_name`` should be set to ``TupleS3StoreBackend``, ``bucket`` will be set to the address of your S3 bucket, and ``prefix`` will be set to the folder in your S3 bucket where Expectation files will be located.
