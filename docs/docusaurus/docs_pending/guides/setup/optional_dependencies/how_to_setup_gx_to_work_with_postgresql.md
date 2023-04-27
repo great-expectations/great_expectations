@@ -35,8 +35,6 @@ import ConfigureCredentialsInDataContext from '/docs/components/setup/dependenci
 import PostgreSqlFurtherConfiguration from '/docs/components/setup/next_steps/_links_for_adding_postgresql_configurations_to_data_context.md'
 
 
-## Introduction
-
 This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with PostgreSQL.
 
 ## Prerequisites

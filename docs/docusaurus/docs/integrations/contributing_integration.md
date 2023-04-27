@@ -2,7 +2,6 @@
 title: How to write integration documentation
 ---
 
-### Introduction
 As the data stack ecosystem grows and expands in usage and tooling, so does the need to integrate with 3rd party
 products or services. As drivers and ushers
 of [Great Expectations](https://greatexpectations.io), we want to make the process to integrating with Great Expectations

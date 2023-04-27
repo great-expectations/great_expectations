@@ -19,8 +19,6 @@ import InfoUsingPandasToConnectToDifferentFileTypes from '/docs/components/conne
 <!-- Next steps -->
 import AfterCreateValidator from '/docs/components/connect_to_data/next_steps/_after_create_validator.md'
 
-## Introduction
-
 <Introduction execution_engine="Pandas" />
 
 ## Prerequisites

@@ -17,8 +17,6 @@ import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_b
 <!-- Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 
-## Introduction
-
 In this guide we will demonstrate how to use Pandas to connect to data stored on AWS S3.  In our examples, we will specifically be connecting to csv files.  However, Great Expectations supports most types of files that Pandas has read methods for.
 
 ## Prerequisites

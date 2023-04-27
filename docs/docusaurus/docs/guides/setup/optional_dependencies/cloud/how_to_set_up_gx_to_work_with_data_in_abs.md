@@ -37,8 +37,6 @@ import AbsConfigureCredentialsInDataContext from '/docs/components/setup/depende
 <!-- ## Next steps -->
 import AbsFurtherConfiguration from '/docs/components/setup/next_steps/_links_for_adding_azure_blob_storage_configurations_to_data_context.md'
 
-## Introduction
-
 This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with data stored in Azure Blob Storage.
 
 ## Prerequisites

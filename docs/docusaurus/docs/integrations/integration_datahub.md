@@ -11,7 +11,6 @@ authors:
 * Support/Contact: https://slack.datahubproject.io/
 :::
 
-### Introduction
 This integration allows you to push the results of running Expectations into DataHub (https://datahubproject.io/). DataHub is a metadata platform which enables search & discovery, federated governance, and data observability for the Modern Data Stack.
 
 
