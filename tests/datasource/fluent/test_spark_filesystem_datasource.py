@@ -83,6 +83,22 @@ def test_add_csv_asset_to_datasource(
     assert m1 is not None
 
 
+# TODO: Parametrize with all asset types
+@pytest.mark.unit
+def test_add_parquet_asset_to_datasource(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+):
+    breakpoint()
+    asset = spark_filesystem_datasource.add_parquet_asset(
+        name="parquet_asset",
+        # header=True,
+        # infer_schema=True,
+    )
+    assert asset.name == "parquet_asset"
+    m1 = asset.batching_regex.match("this_can_be_named_anything.parquet")
+    assert m1 is not None
+
+
 @pytest.mark.unit
 def test_add_csv_asset_with_batching_regex_to_datasource(
     spark_filesystem_datasource: SparkFilesystemDatasource,

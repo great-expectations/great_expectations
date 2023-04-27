@@ -8,10 +8,10 @@ from great_expectations.datasource.fluent.file_path_data_asset import _FilePathD
 
 
 class ParquetAsset(_FilePathDataAsset):
-    """Like DataFrameAsset or CSVAsset"""
-    type: Literal["csv"] = "parquet"
-    header: bool = False
-    infer_schema: bool = Field(False, alias="InferSchema")
+    type: Literal["parquet"] = "parquet"
+    # header: bool = False
+    # infer_schema: bool = Field(False, alias="InferSchema")
+    merge_schema: bool = Field(False, alias="mergeSchema")
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -21,5 +21,6 @@ class ParquetAsset(_FilePathDataAsset):
         return self.type
 
     def _get_reader_options_include(self) -> set[str] | None:
-        return {"header", "infer_schema"}
+        # TODO: Add others
+        return {"mergeSchema"}
 

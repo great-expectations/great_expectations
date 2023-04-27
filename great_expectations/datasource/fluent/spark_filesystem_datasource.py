@@ -59,6 +59,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         self, data_asset: CSVAsset, glob_directive: str = "**/*", **kwargs
     ) -> None:
         """Builds and attaches the `FilesystemDataConnector` to the asset."""
+        breakpoint()
         if kwargs:
             raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"

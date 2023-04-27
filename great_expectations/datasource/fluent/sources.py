@@ -301,7 +301,9 @@ class _SourceFactories:
                         self.data_connector_type.asset_options_type(**connect_options)
                 else:
                     connect_options = {}
-
+                # if asset_type_name == "ParquetAsset":
+                #     breakpoint()
+                breakpoint()
                 asset = asset_type(name=name, **kwargs)
                 return self._add_asset(asset, connect_options=connect_options)
 
@@ -311,6 +313,9 @@ class _SourceFactories:
                 _add_asset_factory, asset_type, exclude={"type"}
             )
             _add_asset_factory.__name__ = add_asset_factory_method_name
+            if add_asset_factory_method_name == "add_parquet_asset" and ds_type.__name__ == "SparkFilesystemDatasource":
+                breakpoint()
+
             setattr(ds_type, add_asset_factory_method_name, _add_asset_factory)
 
             # add the public api decorator
