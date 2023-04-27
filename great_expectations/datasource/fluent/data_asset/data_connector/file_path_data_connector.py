@@ -156,7 +156,7 @@ class FilePathDataConnector(DataConnector):
                 }
             )
 
-        if batch_request.batch_slice != slice(0):
+        if batch_request.batch_slice != slice(0, None, None):
             data_connector_query_dict.update({"index": batch_request.batch_slice})
 
         if data_connector_query_dict:
