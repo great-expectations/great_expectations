@@ -91,6 +91,7 @@ class BatchRequest(pydantic.BaseModel):
     batch_slice: slice = pydantic.Field(default=slice(0, None, None))
 
     class Config:
+        allow_mutation = False
         arbitrary_types_allowed = True
         extra = pydantic.Extra.forbid
         json_encoders = {slice: str}
