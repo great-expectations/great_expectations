@@ -7,10 +7,6 @@ import TabItem from '@theme/TabItem';
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-<InProgress />
-
 This guide will help you integrate Great Expectations (GX) with [Google Cloud Platform](https://cloud.google.com/gcp) (GCP) using our recommended workflow.
 
 <Prerequisites>
@@ -68,7 +64,10 @@ A local installation of Great Expectations can be upgraded using a simple `pip i
 pip install great-expectations --upgrade
 ```
 
-### 2. Connect to Metadata Stores on GCP
+### 2. Get DataContext: 
+{TODO}
+
+### 3. Connect to Metadata Stores on GCP
 
 The following sections describe how you can take a basic local configuration of Great Expectations and connect it to Metadata stores on GCP.
 

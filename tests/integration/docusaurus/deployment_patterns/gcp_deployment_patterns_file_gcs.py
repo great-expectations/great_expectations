@@ -11,7 +11,7 @@ full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 yaml = YAMLHandler()
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py get_context">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py get_context">
 import great_expectations as gx
 
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
@@ -49,8 +49,8 @@ actual_existing_expectations_store["stores"] = stores
 actual_existing_expectations_store["expectations_store_name"] = great_expectations_yaml[
     "expectations_store_name"
 ]
-
 expected_existing_expectations_store_yaml = """
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py get_context">
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -59,6 +59,7 @@ stores:
       base_directory: expectations/
 
 expectations_store_name: expectations_store
+# </snippet>
 """
 
 assert actual_existing_expectations_store == yaml.load(
