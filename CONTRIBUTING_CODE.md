@@ -63,7 +63,7 @@ To submit a custom package to Great Expectations for consideration, see [CONTRIB
     ```
 ## Install Python dependencies
 
-Python dependencies are required to modify Great Expectations code, submit a new feature, or submit a custom Expectation. 
+Python dependencies are required to modify Great Expectations code, submit a new feature, or submit a Custom Expectation. 
 
 1. Run the following command to create a virtual environment in your local repository using Python versions 3.7 to 3.11, activate the environment, and then install the necessary dependencies:
 
