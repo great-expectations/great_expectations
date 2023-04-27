@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.compatibility import azure
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import AzureUrl
@@ -12,7 +13,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
 from great_expectations.datasource.fluent.interfaces import BatchRequest
-from great_expectations.optional_imports import BlobServiceClient, ContainerClient
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -29,8 +29,8 @@ class MockContainerClient:
 
 class MockBlobServiceClient:
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def get_container_client(self, container: str) -> ContainerClient:
-        return cast(ContainerClient, MockContainerClient())
+    def get_container_client(self, container: str) -> azure.ContainerClient:
+        return cast(azure.ContainerClient, MockContainerClient())
 
 
 @pytest.mark.integration
@@ -44,7 +44,9 @@ def test_basic_instantiation(mock_list_keys):
         "alpha-3.csv",
     ]
 
-    azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
+    azure_client: azure.BlobServiceClient = cast(
+        azure.BlobServiceClient, MockBlobServiceClient()
+    )
     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_azure_blob_storage_data_asset",
@@ -92,7 +94,9 @@ def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
         "alpha-3.csv",
     ]
 
-    azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
+    azure_client: azure.BlobServiceClient = cast(
+        azure.BlobServiceClient, MockBlobServiceClient()
+    )
     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_azure_blob_storage_data_asset",
@@ -137,7 +141,9 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
         "will_20200810_1001.csv",
     ]
 
-    azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
+    azure_client: azure.BlobServiceClient = cast(
+        azure.BlobServiceClient, MockBlobServiceClient()
+    )
     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_azure_blob_storage_data_asset",
@@ -463,7 +469,9 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
         "A/file_3.csv",
     ]
 
-    azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
+    azure_client: azure.BlobServiceClient = cast(
+        azure.BlobServiceClient, MockBlobServiceClient()
+    )
 
     my_data_connector: DataConnector
 
@@ -551,7 +559,9 @@ def test_alpha(mock_list_keys):
         "test_dir_alpha/D.csv",
     ]
 
-    azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
+    azure_client: azure.BlobServiceClient = cast(
+        azure.BlobServiceClient, MockBlobServiceClient()
+    )
     my_data_connector: DataConnector = AzureBlobStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_azure_blob_storage_data_asset",
@@ -609,7 +619,9 @@ def test_alpha(mock_list_keys):
 def test_foxtrot(mock_list_keys):
     mock_list_keys.return_value = []
 
-    azure_client: BlobServiceClient = cast(BlobServiceClient, MockBlobServiceClient())
+    azure_client: azure.BlobServiceClient = cast(
+        azure.BlobServiceClient, MockBlobServiceClient()
+    )
 
     my_data_connector: DataConnector
 

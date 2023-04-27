@@ -90,7 +90,6 @@ module.exports = {
             },
             'guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context',
             'guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context',
-            'guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file',
             {
               type: 'html',
               value: '<h4>Data Context Configuration</h4>',
@@ -313,8 +312,7 @@ module.exports = {
             'guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly',
             'guides/expectations/how_to_create_and_edit_expectations_with_a_profiler',
             'guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data',
-            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_configure_notebooks_generated_by_suite_edit' }
+            { type: 'doc', id: 'guides/expectations/how_to_use_auto_initializing_expectations' }
           ]
         },
         {
@@ -322,8 +320,7 @@ module.exports = {
           label: 'Profilers and Data Assistants',
           items: [
             'guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers',
-            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_by_profiling_from_a_jsonschema_file'
+            'guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers'
           ]
         },
         {
@@ -332,7 +329,7 @@ module.exports = {
           items: [
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler'
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant'
           ]
         },
         {

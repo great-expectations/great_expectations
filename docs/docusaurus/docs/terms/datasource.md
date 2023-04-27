@@ -10,6 +10,10 @@ import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 <UniversalMap setup='inactive' connect='active' create='active' validate='active'/>
 
 ### Definition
@@ -18,7 +22,7 @@ A Datasource provides a standard API for accessing and interacting with data fro
 
 ### Features and promises
 
-Datasources provide a unified API across multiple backends: the Datasource API remains the same for PostgreSQL, CSV Filesystems, and all other supported data backends.  
+Datasources provide a standard API across multiple backends: the Datasource API remains the same for PostgreSQL, CSV Filesystems, and all other supported data backends.
 :::note Important: 
 
 Datasources do not modify your data.
@@ -33,7 +37,7 @@ Datasources function by bringing together a way of interacting with Data (an <Te
 
 <ConnectHeader/>
 
-When connecting to data the Datasource is your primary tool.  At this stage, you will create Datasources to define how Great Expectations can find and access your <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.  Under the hood, each Datasource must have an Execution Engine and one or more Data Connectors configured.  Once a Datasource is configured you will be able to operate with the Datasource's API rather than needing a different API for each possible data backend you may be working with.
+When connecting to data the Datasource is your primary tool. At this stage, you will create Datasources to define how Great Expectations can find and access your <TechnicalTag relative="../" tag="data_asset" text="Data Assets" />.  Under the hood, each Datasource uses an Execution Engine (ex: SQLAlchemy, Pandas, and Spark) to connect to and query data. Once a Datasource is configured you will be able to operate with the Datasource's API rather than needing a different API for each possible data backend you may be working with.
 
 <CreateHeader/>
 
@@ -45,36 +49,27 @@ Datasources are also used to obtain Batches for <TechnicalTag relative="../" tag
 
 ## Features
 
-### Unified API
+### Standard API
 
-Datasources support connecting to a variety of different data backends.  No matter which source data system you employ, the Datasource's API will remain the same.
+Datasources support connecting to a variety of different data backends. No matter which source data system you employ, the Datasource's API will remain the same.
 
 ### No Unexpected Modifications
 
-Datasources do not modify your data during profiling or validation, but they may create temporary artifacts to optimize computing Metrics and Validation.  This behaviour can be configured at the Data Connector level.
+Datasources do not modify your data during profiling or validation, but they may create temporary artifacts to optimize computing Metrics and Validation (this behavior can be configured).
 
 ### API Basics
 
-### How to access
+### How to create and access
 
-You will typically only access your Datasource directly through Python code, which can be executed from a script, a Python console, or a Jupyter Notebook.  To access a Datasource all you need is a <TechnicalTag relative="../" tag="data_context" text="Data Context" /> and the name of the Datasource you want to access, as shown below:
+Datasources can be created and accessed using Python code, which can be executed from a script, a Python console, or a Jupyter Notebook. To access a Datasource all you need is a <TechnicalTag relative="../" tag="data_context" text="Data Context" /> and the name of the Datasource. The below snippet shows how to create a Pandas Datasource for local files:
 
-```python title="Python console:"
-import great_expectations as gx
-
-context = gx.get_context()
-datasource = context.get_datasource("my_datasource_name")
+```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview add_datasource"
 ```
 
-### How to create and configure
+This next snippet shows how to retrieve the Datasource from the Data Context.
 
-Creating a Datasource is quick and easy, and can be done from the <TechnicalTag relative="../" tag="cli" text="CLI" /> or through Python code.  Configuring the Datasource may differ between backends, according to the given backend's requirements, but the process of creating one will remain the same.
-
-To create a new  Datasource through the CLI, run `great_expectations datasource new`.
-
-To create a new Datasource through Python code, obtain a data context and call its `add_datasource` method.
-
-Advanced users may also create a Datasource directly through a YAML config file.
+```python name="tests/integration/docusaurus/connecting_to_your_data/connect_to_your_data_overview config"
+```
 
 For detailed instructions on how to create Datasources that are configured for various backends, see [our documentation on Connecting to Data](../guides/connecting_to_your_data/index.md).
 

@@ -10,7 +10,15 @@ import click
 from typing_extensions import TypeAlias
 
 from great_expectations.cli import toolkit
-from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
+from great_expectations.cli.cli_messages import (
+    DATASOURCE_NEW_WARNING,
+    FLUENT_DATASOURCE_DELETE_ERROR,
+    FLUENT_DATASOURCE_LIST_WARNING,
+)
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_dict,
+)
 from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
@@ -82,6 +90,10 @@ def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
+        if not ctx.obj.assume_yes:
+            if not click.confirm(DATASOURCE_NEW_WARNING, default=True):
+                exit(0)
+
         _datasource_new_flow(
             context,
             usage_event_end=usage_event_end,
@@ -104,6 +116,14 @@ def delete_datasource(ctx: click.Context, datasource: str) -> None:
     """Delete the datasource specified as an argument"""
     context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    if datasource in context.fluent_datasources:
+        toolkit.exit_with_failure_message_and_stats(
+            data_context=context,
+            usage_event=usage_event_end,
+            message=f"<red>{FLUENT_DATASOURCE_DELETE_ERROR}</red>",
+        )
+        return
 
     if not ctx.obj.assume_yes:
         toolkit.confirm_proceed_or_exit(
@@ -142,8 +162,17 @@ def datasource_list(ctx: click.Context) -> None:
     """List known Datasources."""
     context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    if len(context.fluent_datasources) > 0:
+        cli_message(f"<yellow>{FLUENT_DATASOURCE_LIST_WARNING}</yellow>")
+
     try:
         datasources = context.list_datasources()
+        # The CLI does not support fluent Datasources. Omit them from the list.
+        datasources = [
+            d for d in datasources if d["name"] not in context.fluent_datasources
+        ]
+
         cli_message(_build_datasource_intro_string(datasources))
         for datasource in datasources:
             cli_message("")
@@ -173,8 +202,8 @@ def _build_datasource_intro_string(datasources: List[dict]) -> str:
     if datasource_count == 0:
         return "No Datasources found"
     elif datasource_count == 1:
-        return "1 Datasource found:"
-    return f"{datasource_count} Datasources found:"
+        return "1 block config Datasource found:"
+    return f"{datasource_count} block config Datasources found:"
 
 
 def _datasource_new_flow(

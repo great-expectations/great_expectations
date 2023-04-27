@@ -11,18 +11,13 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, Generator, List, Optional, Tuple, Union
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import azure
 from great_expectations.core.batch import BatchDefinition, BatchRequestBase
 from great_expectations.core.id_dict import IDDict
 from great_expectations.data_context.types.base import assetConfigSchema
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector.asset import Asset  # noqa: TCH001
 from great_expectations.datasource.data_connector.sorter import Sorter  # noqa: TCH001
-from great_expectations.optional_imports import (
-    BlobPrefix,
-    BlobServiceClient,
-    ContainerClient,
-    google_cloud_storage,  # noqa: F401
-)
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
@@ -254,7 +249,8 @@ def _invert_regex_to_data_reference_template(
 
     # print("-"*80)
     parsed_sre = sre_parse.parse(str(regex_pattern))
-    for token, value in parsed_sre:  # type: ignore[attr-defined]
+    for parsed_sre_tuple, char in zip(parsed_sre, list(str(regex_pattern))):  # type: ignore[call-overload]
+        token, value = parsed_sre_tuple
         if token == sre_constants.LITERAL:
             # Transcribe the character directly into the template
             data_reference_template += chr(value)
@@ -270,8 +266,12 @@ def _invert_regex_to_data_reference_template(
             sre_constants.BRANCH,
             sre_constants.ANY,
         ]:
-            # Replace the uncaptured group a wildcard in the template
-            data_reference_template += "*"
+            if group_names:
+                # Replace the uncaptured group a wildcard in the template
+                data_reference_template += "*"
+            else:
+                # Don't assume that a `.` in a filename should be a star glob
+                data_reference_template += char
         elif token in [
             sre_constants.AT,
             sre_constants.ASSERT_NOT,
@@ -363,7 +363,7 @@ def get_filesystem_one_level_directory_glob_path_list(
 
 
 def list_azure_keys(
-    azure_client: BlobServiceClient,
+    azure_client: azure.BlobServiceClient,
     query_options: dict,
     recursive: bool = False,
 ) -> List[str]:
@@ -387,7 +387,7 @@ def list_azure_keys(
         List of keys representing Azure file paths (as filtered by the query_options dict)
     """
     container: str = query_options["container"]
-    container_client: ContainerClient = azure_client.get_container_client(
+    container_client: azure.ContainerClient = azure_client.get_container_client(
         container=container
     )
 
@@ -395,7 +395,7 @@ def list_azure_keys(
 
     def _walk_blob_hierarchy(name_starts_with: str) -> None:
         for item in container_client.walk_blobs(name_starts_with=name_starts_with):
-            if isinstance(item, BlobPrefix):
+            if isinstance(item, azure.BlobPrefix):
                 if recursive:
                     _walk_blob_hierarchy(name_starts_with=item.name)
 

@@ -108,10 +108,7 @@ from tests.rule_based_profiler.parameter_builder.conftest import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.optional_imports import (
-        pyspark_sql_DataFrame,
-        pyspark_sql_SparkSession,
-    )
+    from great_expectations.compatibility import pyspark
 
 yaml = YAMLHandler()
 ###
@@ -132,7 +129,7 @@ def spark_warehouse_session(tmp_path_factory):
     pyspark = pytest.importorskip("pyspark")  # noqa: F841
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
-    spark: pyspark_sql_SparkSession = get_or_create_spark_application(
+    spark: pyspark.SparkSession = get_or_create_spark_application(
         spark_config={
             "spark.sql.catalogImplementation": "in-memory",
             "spark.executor.memory": "450m",
@@ -365,25 +362,23 @@ def no_usage_stats(monkeypatch):
 @pytest.fixture(scope="module")
 def sa(test_backends):
     if not any(
-        [
-            dbms in test_backends
-            for dbms in [
-                "postgresql",
-                "sqlite",
-                "mysql",
-                "mssql",
-                "bigquery",
-                "trino",
-                "redshift",
-                "athena",
-                "snowflake",
-            ]
+        dbms in test_backends
+        for dbms in [
+            "postgresql",
+            "sqlite",
+            "mysql",
+            "mssql",
+            "bigquery",
+            "trino",
+            "redshift",
+            "athena",
+            "snowflake",
         ]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
     else:
         try:
-            from great_expectations.optional_imports import sqlalchemy as sa
+            from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 
             return sa
         except ImportError:
@@ -392,15 +387,13 @@ def sa(test_backends):
 
 @pytest.mark.order(index=2)
 @pytest.fixture
-def spark_session(test_backends) -> pyspark_sql_SparkSession:
+def spark_session(test_backends) -> pyspark.SparkSession:
     if "SparkDFDataset" not in test_backends:
         pytest.skip("No spark backend selected.")
 
-    from great_expectations.optional_imports import (
-        pyspark_sql_SparkSession,
-    )
+    from great_expectations.compatibility import pyspark
 
-    if pyspark_sql_SparkSession:
+    if pyspark.SparkSession:
         return get_or_create_spark_application(
             spark_config={
                 "spark.sql.catalogImplementation": "hive",
@@ -432,35 +425,62 @@ def spark_df_taxi_data_schema(spark_session):
     """
 
     # will not import unless we have a spark_session already passed in as fixture
-    from pyspark.sql.types import (
-        DoubleType,
-        IntegerType,
-        StringType,
-        StructField,
-        StructType,
-        TimestampType,
-    )
+    from great_expectations.compatibility import pyspark
 
-    schema = StructType(
+    schema = pyspark.types.StructType(
         [
-            StructField("vendor_id", IntegerType(), True, None),
-            StructField("pickup_datetime", TimestampType(), True, None),
-            StructField("dropoff_datetime", TimestampType(), True, None),
-            StructField("passenger_count", IntegerType(), True, None),
-            StructField("trip_distance", DoubleType(), True, None),
-            StructField("rate_code_id", IntegerType(), True, None),
-            StructField("store_and_fwd_flag", StringType(), True, None),
-            StructField("pickup_location_id", IntegerType(), True, None),
-            StructField("dropoff_location_id", IntegerType(), True, None),
-            StructField("payment_type", IntegerType(), True, None),
-            StructField("fare_amount", DoubleType(), True, None),
-            StructField("extra", DoubleType(), True, None),
-            StructField("mta_tax", DoubleType(), True, None),
-            StructField("tip_amount", DoubleType(), True, None),
-            StructField("tolls_amount", DoubleType(), True, None),
-            StructField("improvement_surcharge", DoubleType(), True, None),
-            StructField("total_amount", DoubleType(), True, None),
-            StructField("congestion_surcharge", DoubleType(), True, None),
+            pyspark.types.StructField(
+                "vendor_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "pickup_datetime", pyspark.types.TimestampType(), True, None
+            ),
+            pyspark.types.StructField(
+                "dropoff_datetime", pyspark.types.TimestampType(), True, None
+            ),
+            pyspark.types.StructField(
+                "passenger_count", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "trip_distance", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "rate_code_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "store_and_fwd_flag", pyspark.types.StringType(), True, None
+            ),
+            pyspark.types.StructField(
+                "pickup_location_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "dropoff_location_id", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "payment_type", pyspark.types.IntegerType(), True, None
+            ),
+            pyspark.types.StructField(
+                "fare_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField("extra", pyspark.types.DoubleType(), True, None),
+            pyspark.types.StructField(
+                "mta_tax", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tip_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "tolls_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "improvement_surcharge", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "total_amount", pyspark.types.DoubleType(), True, None
+            ),
+            pyspark.types.StructField(
+                "congestion_surcharge", pyspark.types.DoubleType(), True, None
+            ),
         ]
     )
     return schema
@@ -871,7 +891,7 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     # Re-enable GE_USAGE_STATS
     monkeypatch.delenv("GE_USAGE_STATS")
 
-    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
     context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
@@ -881,9 +901,11 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(  # noqa: PTH118
-                "test_fixtures",
-                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
             ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
@@ -1045,10 +1067,7 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
 
     if (
         any(
-            [
-                dbms in test_backends
-                for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
-            ]
+            dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
         )
         and (sa is not None)
         and is_library_loadable(library_name="sqlalchemy")
@@ -1103,7 +1122,7 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
 
 
 @pytest.fixture
-def deterministic_asset_dataconnector_context(
+def deterministic_asset_data_connector_context(
     tmp_path_factory,
     monkeypatch,
 ):
@@ -1120,7 +1139,12 @@ def deterministic_asset_dataconnector_context(
     shutil.copy(
         file_relative_path(
             __file__,
-            "./test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
+            ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
@@ -1460,6 +1484,104 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    tmp_path_factory,
+    monkeypatch,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_no_block_no_fluent_datasources_stats_enabled.yml",
+                )
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
+    )
+
+    context = get_context(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    path_to_folder_containing_csv_files = pathlib.Path(data_path)
+
+    datasource_name = "my_pandas_filesystem_datasource"
+    datasource = context.sources.add_pandas_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    # noinspection PyUnusedLocal
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    # noinspection PyUnusedLocal
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
     return context
 
 
@@ -2121,6 +2243,60 @@ def filesystem_csv_data_context(
 ) -> FileDataContext:
     empty_data_context.add_datasource(
         "rad_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.add_datasource(
+        "rad_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_fluent_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    # noinspection PyProtectedMember
+    empty_data_context._save_project_config()
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_fluent_datasource_and_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_fluent_datasource", base_directory=filesystem_csv_2
+    )
+    empty_data_context.add_datasource(
+        name="my_block_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
         batch_kwargs_generators={
@@ -7461,7 +7637,7 @@ def pandas_multicolumn_sum_dataframe_for_unexpected_rows_and_index() -> pd.DataF
 @pytest.fixture
 def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark_sql_DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7491,7 +7667,7 @@ def spark_column_pairs_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
     spark_session,
-) -> pyspark_sql_DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],
@@ -7508,7 +7684,7 @@ def spark_multicolumn_sum_dataframe_for_unexpected_rows_and_index(
 @pytest.fixture
 def spark_dataframe_for_unexpected_rows_with_index(
     spark_session,
-) -> pyspark_sql_DataFrame:
+) -> pyspark.DataFrame:
     df: pd.DataFrame = pd.DataFrame(
         {
             "pk_1": [0, 1, 2, 3, 4, 5],

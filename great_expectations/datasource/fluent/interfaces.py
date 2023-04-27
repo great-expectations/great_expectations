@@ -5,6 +5,7 @@ import dataclasses
 import functools
 import logging
 import uuid
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -60,6 +61,10 @@ class TestConnectionError(Exception):
     pass
 
 
+class GxSerializationWarning(UserWarning):
+    pass
+
+
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
 # Batches one wants as returned. The keys represent dimensions one can slice the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
@@ -77,7 +82,7 @@ BatchMetadata: TypeAlias = Dict[str, Any]
 class BatchRequest:
     datasource_name: str
     data_asset_name: str
-    options: BatchRequestOptions
+    options: BatchRequestOptions = dataclasses.field(default_factory=dict)
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -398,7 +403,7 @@ class Datasource(
     assets: MutableSequence[_DataAssetT] = []
 
     # private attrs
-    _data_context: GXDataContext = pydantic.PrivateAttr()
+    _data_context: Union[GXDataContext, None] = pydantic.PrivateAttr(None)
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
@@ -516,6 +521,8 @@ class Datasource(
         asset: _DataAssetT
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
 
+        self._save_context_project_config()
+
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
     ) -> _DataAssetT:
@@ -542,7 +549,16 @@ class Datasource(
 
         self.assets.append(asset)
 
+        self._save_context_project_config()
         return asset
+
+    def _save_context_project_config(self):
+        """Check if a DataContext is available and save the project config."""
+        if self._data_context:
+            try:
+                self._data_context._save_project_config()
+            except TypeError as type_err:
+                warnings.warn(str(type_err), GxSerializationWarning)
 
     @staticmethod
     def parse_order_by_sorters(

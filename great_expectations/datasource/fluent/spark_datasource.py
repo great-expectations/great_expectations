@@ -17,6 +17,7 @@ import pydantic
 from typing_extensions import Literal
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
@@ -27,9 +28,6 @@ from great_expectations.datasource.fluent.interfaces import (
     BatchRequest,
     DataAsset,
     Datasource,
-)
-from great_expectations.optional_imports import (
-    pyspark_sql_DataFrame,
 )
 
 if TYPE_CHECKING:
@@ -85,16 +83,18 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         extra = pydantic.Extra.forbid
 
     @pydantic.validator("dataframe")
-    def _validate_dataframe(
-        cls, dataframe: pyspark_sql_DataFrame
-    ) -> pyspark_sql_DataFrame:
-        if not (pyspark_sql_DataFrame and isinstance(dataframe, pyspark_sql_DataFrame)):  # type: ignore[truthy-function]
+    def _validate_dataframe(cls, dataframe: pyspark.DataFrame) -> pyspark.DataFrame:
+        if not (pyspark.DataFrame and isinstance(dataframe, pyspark.DataFrame)):  # type: ignore[truthy-function]
             raise ValueError("dataframe must be of type pyspark.sql.DataFrame")
 
         return dataframe
 
     def test_connection(self) -> None:
         ...
+
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        return tuple()
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
@@ -208,14 +208,14 @@ class SparkDatasource(_SparkDatasource):
     def add_dataframe_asset(
         self,
         name: str,
-        dataframe: pyspark_sql_DataFrame,
+        dataframe: pyspark.DataFrame,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this SparkDatasource object.
 
         Args:
-            name: The name of the Dataframe asset. This can be any arbitrary string.
-            dataframe: The Dataframe containing the data for this data asset.
+            name: The name of the DataFrame asset. This can be any arbitrary string.
+            dataframe: The DataFrame containing the data for this data asset.
             batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
                             batches created from the asset.
 

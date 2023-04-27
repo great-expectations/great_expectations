@@ -10,14 +10,11 @@ import pandas as pd
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
-from great_expectations.optional_imports import (
-    SPARK_NOT_IMPORTED,
-    pyspark_sql_DataFrame,
-)
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable, load_class
 
@@ -652,10 +649,10 @@ class BatchData:
         return pd.DataFrame({})
 
 
-if SPARK_NOT_IMPORTED:
-    BatchDataType = Union[BatchData, pd.DataFrame]
+if pyspark:
+    BatchDataType = Union[BatchData, pd.DataFrame, pyspark.DataFrame]
 else:
-    BatchDataType = Union[BatchData, pd.DataFrame, pyspark_sql_DataFrame]
+    BatchDataType = Union[BatchData, pd.DataFrame]
 
 
 # TODO: <Alex>This module needs to be cleaned up.
@@ -868,6 +865,18 @@ class Batch(SerializableDictDot):
 def materialize_batch_request(
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
 ) -> Optional[BatchRequestBase]:
+    def _is_fluent_batch_request(args: dict[str, Any]) -> bool:
+        from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
+
+        return (
+            ("datasource_name" in args)
+            and ("data_asset_name" in args)
+            and (
+                ("data_connector_name" not in args)
+                or (args["data_connector_name"].lower() == _DATA_CONNECTOR_NAME)
+            )
+        )
+
     effective_batch_request: dict = get_batch_request_as_dict(
         batch_request=batch_request
     )
@@ -876,7 +885,7 @@ def materialize_batch_request(
         return None
 
     batch_request_class: type
-    if "options" in effective_batch_request:
+    if _is_fluent_batch_request(args=effective_batch_request):
         batch_request_class = _get_fluent_batch_request_class()
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request
