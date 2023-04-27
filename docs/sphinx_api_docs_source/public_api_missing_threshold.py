@@ -99,4 +99,11 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/rule_based_profiler/parameter_builder/numeric_metric_range_multi_batch_parameter_builder.py Name: NumericMetricRangeMultiBatchParameterBuilder",
     "File: great_expectations/util.py Name: get_context",
     "File: great_expectations/validator/validation_graph.py Name: resolve",
+    "File: great_expectations/datasource/new_datasource.py Name: get_batch_list_from_batch_request",
+    "File: great_expectations/datasource/fluent/config.py Name: yaml",
+    "File: great_expectations/datasource/fluent/spark_datasource.py Name: get_batch_list_from_batch_request",
+    "File: great_expectations/datasource/fluent/fluent_base_model.py Name: yaml",
+    "File: great_expectations/datasource/fluent/sql_datasource.py Name: get_batch_list_from_batch_request",
+    "File: great_expectations/datasource/fluent/pandas_datasource.py Name: get_batch_list_from_batch_request",
+    "File: great_expectations/datasource/fluent/file_path_data_asset.py Name: get_batch_list_from_batch_request",
 ]
