@@ -23,15 +23,12 @@ from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
-# from great_expectations.datasource.fluent.data_asset.spark.parquet import ParquetAsset
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
     BatchRequest,
     DataAsset,
     Datasource,
 )
-# from great_expectations.datasource.fluent.spark_file_path_datasource import CSVAsset
-
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.execution_engine import SparkDFExecutionEngine
@@ -230,29 +227,3 @@ class SparkDatasource(_SparkDatasource):
             batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset=asset)
-
-    # def add_csv_asset(
-    #     self,
-    #     name: str,
-    #     filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-    #     **kwargs,
-    # ) -> CSVAsset:
-    #     asset = CSVAsset(
-    #         name=name,
-    #         filepath_or_buffer=filepath_or_buffer,
-    #         **kwargs,
-    #     )
-    #     return self._add_asset(asset=asset)
-    #
-    # def add_parquet_asset(
-    #     self,
-    #     name: str,
-    #     filepath_or_buffer: pydantic.FilePath | pydantic.AnyUrl,
-    #     **kwargs,
-    # ) -> ParquetAsset:  # type: ignore[valid-type]
-    #     asset = ParquetAsset(
-    #         name=name,
-    #         filepath_or_buffer=filepath_or_buffer,
-    #         **kwargs,
-    #     )
-    #     return self._add_asset(asset=asset)

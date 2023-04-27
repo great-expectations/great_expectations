@@ -228,7 +228,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         Args:
             batch_request: A batch request object to be validated.
         """
-
         raise NotImplementedError(
             """One must implement "_validate_batch_request" on a DataAsset subclass."""
         )
