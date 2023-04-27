@@ -363,7 +363,7 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
             batch_request=batch_request_from_runtime_kwargs
         )
 
-        # If "batch_request" has Fluent Datasource form, "options" must be overwridden for DataAsset type compatibility.
+        # If "batch_request" has Fluent Datasource form, "options" must be overwritten for DataAsset type compatibility.
         updated_batch_request = copy.deepcopy(batch_request)
         if batch_request_from_runtime_kwargs and "options" in updated_batch_request:
             updated_batch_request["options"] = {}
