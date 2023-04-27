@@ -199,7 +199,8 @@ stages:
     - job: public_api_report
       steps:
         - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
+            pip install --requirement reqs/requirements-dev-test.txt
+            invoke public-api
           name: PublicAPIReport
 
   - stage: import_ge
@@ -291,7 +292,7 @@ stages:
               pip install chardet==3.0.4
             displayName: 'Install GX and required dependencies'
 
-          # tests containing the name "RUNME_POSTGRES" are run
+          # tests containing the name "RUNME_gcp" are run
           - script: |
               pytest -v --docs-tests -m integration --bigquery -k "RUNME_gcp" tests/integration/test_script_runner.py
             displayName: 'Run Flagged Tests'
@@ -300,10 +301,37 @@ stages:
               GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
               GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
 
+      - job: runme_script_runner_tests_postgres_msysql
+        services:
+          postgres: postgres
+          mysql: mysql
 
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.7'
+            displayName: 'Use Python 3.7'
 
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test, postgresql, mysql]"
+            displayName: 'Install GX and required dependencies'
 
+          - script: |
+              printf 'Waiting for MySQL database to accept connections'
+              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+                printf '.'
+                sleep 1;
+              done;
+            displayName: Wait for database to initialise
+          - script: |
+              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+            displayName: 'Configure mysql'
 
+          # tests containing the name "RUNME_POSTGRES_MYSQL" are run
+          - script: |
+              pytest -v --postgresql --mysql --docs-tests -m integration -k "RUNME_POSTGRES_MYSQL" tests/integration/test_script_runner.py
+            displayName: 'Run Flagged Tests'
 
   - stage: required
     dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
