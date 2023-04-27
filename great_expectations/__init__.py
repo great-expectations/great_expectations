@@ -9,9 +9,6 @@ del get_versions  # isort:skip
 
 from great_expectations.data_context import DataContext
 
-# Ensure that Expectations are available for __dir__ and __getattr__
-from great_expectations.expectations.registry import register_core_expectations
-
 from .util import (
     from_pandas,
     get_context,
@@ -26,7 +23,7 @@ from .util import (
     validate,
 )
 
-register_core_expectations()
+# from great_expectations.expectations.core import *
 # from great_expectations.expectations.metrics import *
 
 
