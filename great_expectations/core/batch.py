@@ -934,7 +934,7 @@ def get_batch_request_as_dict(
     if (
         batch_request
         and isinstance(batch_request, dict)
-        and "data_connector" not in batch_request
+        and "data_connector_name" not in batch_request
     ):
         # round trip if a dict was passed in directly
         batch_request = _get_fluent_batch_request_class()(**batch_request).dict()
