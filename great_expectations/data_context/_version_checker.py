@@ -57,11 +57,13 @@ class _VersionChecker:
         if not response_json:
             return None
 
-        # Structure should be guaranteed but in the case the PyPI payload changes,
-        # we don't want to fail workflows on a simple check.
+        # Structure should be guaranteed but let's be defensive in case PyPI changes.
         info = response_json.get("info", {})
         pkg_version = info.get("version")
         if not pkg_version:
+            logger.debug(
+                "Successfully hit PyPI API but payload structure is not as expected."
+            )
             return None
 
         return version.Version(pkg_version)
