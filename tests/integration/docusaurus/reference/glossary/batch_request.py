@@ -30,9 +30,6 @@ asset = datasource.add_csv_asset(
     order_by=["year", "month"],
 )
 
-# Any changes to a datasource require calling update to persist the modified datasource
-context.sources.update_pandas_filesystem(datasource)
-
 batch_request = asset.build_batch_request(options={"year": "2019", "month": "02"})
 # </snippet>
 

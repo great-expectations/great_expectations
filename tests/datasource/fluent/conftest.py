@@ -178,7 +178,12 @@ def _get_fake_db_callback(
     item = _CLOUD_API_FAKE_DB.get(url, MISSING)
     logger.info(f"body -->\n{pf(item, depth=2)}")
     if item is MISSING:
-        result = _CallbackResult(404, headers={}, body=f"NotFound at {url}")
+        errors = ErrorPayload(
+            errors=[
+                {"code": "mock 404", "detail": f"NotFound at {url}", "source": None}
+            ]
+        )
+        result = _CallbackResult(404, headers={}, body=json.dumps(errors))
     else:
         result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(item))
 
