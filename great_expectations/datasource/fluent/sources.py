@@ -514,6 +514,7 @@ class _SourceFactories:
                 datasource_name,  # type:ignore[arg-type] # datasource_name is expected to be a str from assignment above
                 datasource_type,
             )
+            # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
                 datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
             )
@@ -554,6 +555,7 @@ class _SourceFactories:
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
             )
+            # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
                 datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # expected str only
             )

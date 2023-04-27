@@ -779,6 +779,10 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _delete_fluent_datasource(
         self, datasource_name: str, _call_store: bool = True
     ) -> None:
+        """
+        _call_store = False allows for local deletes without deleting the persisted storage datasource.
+        This should generally be avoided.
+        """
         datasource = self.datasources.get(datasource_name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
