@@ -8,6 +8,7 @@ import pydantic
 from typing_extensions import Final, Literal
 
 from great_expectations.compatibility import azure
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -33,6 +34,7 @@ class PandasAzureBlobStorageDatasourceError(PandasDatasourceError):
     pass
 
 
+@public_api
 class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[

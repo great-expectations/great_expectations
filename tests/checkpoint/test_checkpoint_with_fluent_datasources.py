@@ -56,6 +56,14 @@ def batch_request_as_dict() -> Dict[str, str]:
 
 
 @pytest.fixture
+def fluent_batch_request(batch_request_as_dict: Dict[str, str]) -> FluentBatchRequest:
+    return FluentBatchRequest(
+        datasource_name=batch_request_as_dict["datasource_name"],
+        data_asset_name=batch_request_as_dict["data_asset_name"],
+    )
+
+
+@pytest.fixture
 def common_action_list() -> List[dict]:
     return [
         {
@@ -76,6 +84,412 @@ def common_action_list() -> List[dict]:
                 "class_name": "UpdateDataDocsAction",
             },
         },
+    ]
+
+
+# noinspection PyUnresolvedReferences
+@pytest.fixture
+def failed_multi_validation_checkpoint_run_usage_statistics_expected_events() -> List[
+    unittest.mock._Call
+]:
+    return [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
+                    "config_version": 1,
+                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_action_list": [
+                        {
+                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                            "parent_class": "StoreValidationResultAction",
+                        },
+                        {
+                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                            "parent_class": "StoreEvaluationParametersAction",
+                        },
+                        {
+                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                            "parent_class": "UpdateDataDocsAction",
+                        },
+                    ],
+                    "anonymized_validations": [
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                "event": "checkpoint.run",
+                "success": False,
+            }
+        )
+    ]
+
+
+# noinspection PyUnresolvedReferences
+@pytest.fixture
+def successful_multi_validation_checkpoint_run_usage_statistics_expected_events() -> List[
+    unittest.mock._Call
+]:
+    return [
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
+                    "config_version": 1,
+                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_action_list": [
+                        {
+                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                            "parent_class": "StoreValidationResultAction",
+                        },
+                        {
+                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                            "parent_class": "StoreEvaluationParametersAction",
+                        },
+                        {
+                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                            "parent_class": "UpdateDataDocsAction",
+                        },
+                    ],
+                    "anonymized_validations": [
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                "event": "checkpoint.run",
+                "success": False,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.get_batch_list",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_datasource_name": "0624b9b81dc8d1169325bc65d7402272",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.get_batch_list",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_datasource_name": "1837e746b09c1e45f6e3617e786e3d6f",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.get_batch_list",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_datasource_name": "197611ca5ad77edafb9f92b4142098ba",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.get_batch_list",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event": "data_asset.validate",
+                "event_payload": {
+                    "anonymized_batch_kwarg_keys": [],
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_datasource_name": "825deae7ffa2d85cc0688ce5f5682c87",
+                },
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {},
+                "event": "data_context.build_data_docs",
+                "success": True,
+            }
+        ),
+        mock.call(
+            {
+                "event_payload": {
+                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
+                    "config_version": 1,
+                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
+                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                    "anonymized_action_list": [
+                        {
+                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                            "parent_class": "StoreValidationResultAction",
+                        },
+                        {
+                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                            "parent_class": "StoreEvaluationParametersAction",
+                        },
+                        {
+                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                            "parent_class": "UpdateDataDocsAction",
+                        },
+                    ],
+                    "anonymized_validations": [
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                        {
+                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
+                            "anonymized_action_list": [
+                                {
+                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
+                                    "parent_class": "StoreValidationResultAction",
+                                },
+                                {
+                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
+                                    "parent_class": "StoreEvaluationParametersAction",
+                                },
+                                {
+                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
+                                    "parent_class": "UpdateDataDocsAction",
+                                },
+                            ],
+                        },
+                    ],
+                },
+                "event": "checkpoint.run",
+                "success": True,
+            }
+        ),
     ]
 
 
@@ -731,10 +1145,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_constructor(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
-    batch_request_as_dict,
+    fluent_batch_request,
 ):
     data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
-    batch_request: FluentBatchRequest = FluentBatchRequest(**batch_request_as_dict)
+    batch_request: FluentBatchRequest = fluent_batch_request
     data_context.add_expectation_suite("my_expectation_suite")
     validator: Validator = data_context.get_validator(
         batch_request=batch_request,
@@ -760,10 +1174,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_with_validator_specified_in_run(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
-    batch_request_as_dict,
+    fluent_batch_request,
 ):
     data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
-    batch_request: FluentBatchRequest = FluentBatchRequest(**batch_request_as_dict)
+    batch_request: FluentBatchRequest = fluent_batch_request
     data_context.add_expectation_suite("my_expectation_suite")
     validator: Validator = data_context.get_validator(
         batch_request=batch_request,
@@ -1051,10 +1465,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     batch_request = FluentBatchRequest(
-        **{
-            "datasource_name": "my_pandas_dataframes_datasource",
-            "data_asset_name": "my_dataframe_asset",
-        }
+        datasource_name="my_pandas_dataframes_datasource",
+        data_asset_name="my_dataframe_asset",
     )
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
@@ -1086,10 +1498,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
     batch_request = FluentBatchRequest(
-        **{
-            "datasource_name": "my_spark_dataframes_datasource",
-            "data_asset_name": "my_dataframe_asset",
-        }
+        datasource_name="my_spark_dataframes_datasource",
+        data_asset_name="my_dataframe_asset",
     )
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
@@ -1123,6 +1533,8 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     batch_request_as_dict,
+    failed_multi_validation_checkpoint_run_usage_statistics_expected_events,
+    successful_multi_validation_checkpoint_run_usage_statistics_expected_events,
 ):
     context: FileDataContext = titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
 
@@ -1165,105 +1577,10 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         )
 
     assert mock_emit.call_count == 1
-    # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
-                    "config_version": 1,
-                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
-                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
-                    "anonymized_validations": [
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                    ],
-                },
-                "event": "checkpoint.run",
-                "success": False,
-            }
-        )
-    ]
+
+    expected_events = (
+        failed_multi_validation_checkpoint_run_usage_statistics_expected_events
+    )
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
@@ -1286,301 +1603,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
     assert mock_emit.call_count == 14
 
-    # noinspection PyUnresolvedReferences
-    expected_events: List[unittest.mock._Call] = [
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
-                    "config_version": 1,
-                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
-                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
-                    "anonymized_validations": [
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                    ],
-                },
-                "event": "checkpoint.run",
-                "success": False,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.get_batch_list",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_asset.validate",
-                "event_payload": {
-                    "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                    "anonymized_datasource_name": "0624b9b81dc8d1169325bc65d7402272",
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.build_data_docs",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.get_batch_list",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_asset.validate",
-                "event_payload": {
-                    "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                    "anonymized_datasource_name": "1837e746b09c1e45f6e3617e786e3d6f",
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.build_data_docs",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.get_batch_list",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_asset.validate",
-                "event_payload": {
-                    "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                    "anonymized_datasource_name": "197611ca5ad77edafb9f92b4142098ba",
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.build_data_docs",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.get_batch_list",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event": "data_asset.validate",
-                "event_payload": {
-                    "anonymized_batch_kwarg_keys": [],
-                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                    "anonymized_datasource_name": "825deae7ffa2d85cc0688ce5f5682c87",
-                },
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {},
-                "event": "data_context.build_data_docs",
-                "success": True,
-            }
-        ),
-        mock.call(
-            {
-                "event_payload": {
-                    "anonymized_name": "d7e22c0913c0cb83d528d2a7ad097f2b",
-                    "config_version": 1,
-                    "anonymized_run_name_template": "131f67e5ea07d59f2bc5376234f7f9f2",
-                    "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                    "anonymized_action_list": [
-                        {
-                            "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                            "parent_class": "StoreValidationResultAction",
-                        },
-                        {
-                            "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                            "parent_class": "StoreEvaluationParametersAction",
-                        },
-                        {
-                            "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                            "parent_class": "UpdateDataDocsAction",
-                        },
-                    ],
-                    "anonymized_validations": [
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                        {
-                            "anonymized_expectation_suite_name": "295722d0683963209e24034a79235ba6",
-                            "anonymized_action_list": [
-                                {
-                                    "anonymized_name": "8e3e134cd0402c3970a02f40d2edfc26",
-                                    "parent_class": "StoreValidationResultAction",
-                                },
-                                {
-                                    "anonymized_name": "40e24f0c6b04b6d4657147990d6f39bd",
-                                    "parent_class": "StoreEvaluationParametersAction",
-                                },
-                                {
-                                    "anonymized_name": "2b99b6b280b8a6ad1176f37580a16411",
-                                    "parent_class": "UpdateDataDocsAction",
-                                },
-                            ],
-                        },
-                    ],
-                },
-                "event": "checkpoint.run",
-                "success": True,
-            }
-        ),
-    ]
+    expected_events = (
+        successful_multi_validation_checkpoint_run_usage_statistics_expected_events
+    )
     # noinspection PyUnresolvedReferences
     actual_events: List[unittest.mock._Call] = mock_emit.call_args_list
     assert actual_events == expected_events
