@@ -125,8 +125,7 @@ class DatasourceStore(Store):
         This method takes full json response from GX cloud and outputs a dict appropriate for
         deserialization into a GX object
         """
-        # TODO: update or remove log message
-        logger.warning(pf(response_json, depth=5))
+        logger.debug(f"GE Cloud Response JSON ->\n{pf(response_json, depth=3)}")
         data = response_json["data"]
         if isinstance(data, list):
             if len(data) > 1:
@@ -138,7 +137,6 @@ class DatasourceStore(Store):
         datasource_config_dict: dict = data["attributes"]["datasource_config"]
         datasource_config_dict["id"] = datasource_ge_cloud_id
 
-        logger.warning(pf(datasource_config_dict))
         return datasource_config_dict
 
     def retrieve_by_name(self, datasource_name: str) -> DatasourceConfig:
