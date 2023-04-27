@@ -3513,26 +3513,33 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
         name="IN_MEMORY_DATA_ASSET",
         dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
     )
-    batch_request = FluentBatchRequest(
-        datasource_name="pandas_datasource",
-        data_asset_name="IN_MEMORY_DATA_ASSET",
-        batch_slice=-1,  # type: ignore[arg-type]
-    )
 
-    checkpoint_config_dict = copy.deepcopy(
-        reference_checkpoint_config_for_unexpected_column_names
-    )
-    dict_to_update_checkpoint: dict = {
-        "batch_request": batch_request,
-        "runtime_configuration": {
-            "result_format": {
-                "result_format": "COMPLETE",
-            }
-        },
-    }
-    checkpoint_config_dict.update(dict_to_update_checkpoint)
+    checkpoint_config_yml = """
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+run_name_template: "%Y-%m-foo-bar-template-test"
+batch_request:
+  datasource_name: pandas_datasource
+  data_asset_name: IN_MEMORY_DATA_ASSET
+  batch_slice: -1
+expectation_suite_name: None
+action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+runtime_configuration:
+  result_format:
+    result_format: COMPLETE
+"""
 
-    checkpoint_config = CheckpointConfig(**checkpoint_config_dict)
+    checkpoint_config = CheckpointConfig(**yaml.load(checkpoint_config_yml))
 
     context.add_checkpoint(
         **filter_properties_dict(
