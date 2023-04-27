@@ -776,7 +776,20 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         self.datasources[datasource_name] = update_datasource
 
-    def _delete_fluent_datasource(self, datasource_name: str) -> None:
+    def _delete_fluent_datasource(
+        self, datasource_name: str, _call_store: bool = True
+    ) -> None:
+        """
+        _call_store = False allows for local deletes without deleting the persisted storage datasource.
+        This should generally be avoided.
+        """
+        datasource = self.datasources.get(datasource_name)
+        if datasource:
+            if self._datasource_store.cloud_mode and _call_store:
+                self._datasource_store.delete(datasource)  # type: ignore[arg-type] # Could be a LegacyDatasource
+        else:
+            # Raise key error instead?
+            logger.info(f"No Datasource '{datasource_name}' to delete")
         self.datasources.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
@@ -1523,23 +1536,26 @@ class AbstractDataContext(ConfigPeer, ABC):
             self._cached_datasources[datasource_name]._data_context = self
             return self._cached_datasources[datasource_name]
 
-        datasource_config: DatasourceConfig = self._datasource_store.retrieve_by_name(
-            datasource_name=datasource_name
+        datasource_config: DatasourceConfig | FluentDatasource = (
+            self._datasource_store.retrieve_by_name(datasource_name=datasource_name)
         )
 
-        raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
-        raw_config = datasourceConfigSchema.load(raw_config_dict)
+        datasource: BaseDatasource | LegacyDatasource | FluentDatasource
+        if isinstance(datasource_config, FluentDatasource):
+            datasource = datasource_config
+            datasource_config._data_context = self
+            # Fluent Datasource has already been hydrated into runtime model and uses lazy config substitution
+        else:
+            raw_config_dict: dict = dict(datasourceConfigSchema.dump(datasource_config))
+            raw_config = datasourceConfigSchema.load(raw_config_dict)
 
-        substituted_config = self.config_provider.substitute_config(raw_config_dict)
+            substituted_config = self.config_provider.substitute_config(raw_config_dict)
 
-        # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
-        datasource: BaseDatasource | FluentDatasource | LegacyDatasource = (
-            self._instantiate_datasource_from_config(
+            # Instantiate the datasource and add to our in-memory cache of datasources, this does not persist:
+            datasource = self._instantiate_datasource_from_config(
                 raw_config=raw_config, substituted_config=substituted_config
             )
-        )
-        if isinstance(datasource, FluentDatasource):
-            datasource._data_context = self
+
         self._cached_datasources[datasource_name] = datasource
         return datasource
 
@@ -4652,11 +4668,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
                 raw_config=raw_config, substituted_config=substituted_config
             )
         except Exception as e:
-            try:
-                name = substituted_config.name or ""
-            except AttributeError:
-                # dict object has no attribute 'name'
-                name = "(unknown name)"
+            name = getattr(substituted_config, "name", None) or ""
             raise gx_exceptions.DatasourceInitializationError(
                 datasource_name=name, message=str(e)
             )

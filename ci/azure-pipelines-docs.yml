@@ -61,7 +61,8 @@ stages:
       condition: or(eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true), eq(variables.isDevelop, true), eq(variables.isManual, true))
       steps:
         - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
+            pip install --requirement reqs/requirements-dev-test.txt
+            invoke public-api
           name: PublicAPIReport
 
   - stage: test_build_docs

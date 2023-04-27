@@ -2,8 +2,9 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 There are many Expectations available for you to use.  To demonstrate creating an Expectation through the use of the Validator we defined earlier, here are examples of the process for two of them:
 
-```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_yaml_configs.py add expectations"
+```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py add_expectations"
 ```
+
 
 Each time you evaluate an Expectation (e.g. via `validator.expect_*`) two things will happen.  First, the Expectation will immediately be Validated against your provided Batch of data. This instant feedback helps to zero in on unexpected data very quickly, taking a lot of the guesswork out of data exploration. Second, the Expectation configuration will be stored in the Expectation Suite you provided when the Validator was initialized.
 
