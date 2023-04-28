@@ -55,9 +55,11 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_value(
     )
 
     variables_configs: dict = {
-        "estimator": "quantiles",
-        "false_positive_rate": 1.0e-2,
-        "mostly": 1.0,
+        "strict_min": False,
+        "strict_max": False,
+        "profile_path": profile_path,
+        "metric": "data_type",
+        "metric_values": ["int", "float", "string", "datetime"]
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -71,7 +73,6 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_value(
     }
 
     domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder(
-        profile_path=profile_path,
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
@@ -79,7 +80,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_value(
         variables=variables,
         batch_request=batch_request,
     )
-
+    print(domains)
     assert len(domains) == 18
     assert domains == [
         {
@@ -325,6 +326,8 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_default_refere
         "estimator": "quantiles",
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
+        "metric": "data_type",
+        "metric_values": ["int", "float", "string", "datetime"]
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -587,10 +590,12 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
     )
 
     variables_configs: dict = {
-        "my_profile_path": profile_path,
+        "profile_path": profile_path,
         "estimator": "quantiles",
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
+        "metric": "data_type",
+        "metric_values": ["int", "float", "string", "datetime"]
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -604,7 +609,6 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
     }
 
     domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder(
-        profile_path=f"{VARIABLES_KEY}my_profile_path",
         data_context=data_context,
     )
     domains: List[Domain] = domain_builder.get_domains(
@@ -854,10 +858,12 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     )
 
     variables_configs: dict = {
-        "my_profile_path": profile_path,
+        "profile_path": profile_path,
         "estimator": "quantiles",
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
+        "metric": "data_type",
+        "metric_values": ["int", "float", "string", "datetime"]
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -871,7 +877,6 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     }
 
     domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder(
-        profile_path=f"{VARIABLES_KEY}my_profile_path",
         exclude_column_names=[
             "store_and_fwd_flag",
             "congestion_surcharge",
@@ -1057,10 +1062,12 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     )
 
     variables_configs: dict = {
-        "my_profile_path": profile_path,
+        "profile_path": profile_path,
         "estimator": "quantiles",
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
+        "metric": "data_type",
+        "metric_values": ["int", "float", "string", "datetime"]
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -1074,7 +1081,6 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
     }
 
     domain_builder: DomainBuilder = DataProfilerColumnDomainBuilder(
-        profile_path=f"{VARIABLES_KEY}my_profile_path",
         data_context=data_context,
     )
     with mock.patch(

@@ -49,12 +49,6 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
         "data_asset_name": "my_reports",
         "data_connector_query": {"index": -1},
     }
-    exclude_column_names = [
-        "pickup_datetime",
-        "dropoff_datetime",
-        "store_and_fwd_flag",
-        "congestion_surcharge",
-    ]
 
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
@@ -64,8 +58,9 @@ def bobby_profile_data_profiler_structured_data_assistant_result_usage_stats_ena
                 "data_profiler_files",
                 "profile.pkl",
             ),
+            "metric": "data_type",
+            "metric_values": ["int", "float"],
         },
-        exclude_column_names=exclude_column_names,
         estimation="flag_outliers",
     )
 
@@ -87,22 +82,16 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
         "data_connector_query": {"index": -1},
     }
 
-    exclude_column_names = [
-        "pickup_datetime",
-        "dropoff_datetime",
-        "store_and_fwd_flag",
-        "congestion_surcharge",
-    ]
-
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
-        exclude_column_names=exclude_column_names,
         numeric_rule={
             "profile_path": os.path.join(  # noqa: PTH118
                 test_root_path,
                 "data_profiler_files",
                 "profile.pkl",
             ),
+            "metric": "data_type",
+            "metric_values": ["int", "float"],
         },
         estimation="flag_outliers",
     )
@@ -193,8 +182,7 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
         bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
     ):
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
-
-    assert num_metrics == 28
+    assert num_metrics == 30
 
 
 @pytest.mark.integration
