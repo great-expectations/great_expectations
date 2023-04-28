@@ -2097,7 +2097,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_sql_data_asset_batch_request_in_validations(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_sql_data_asset_in_validations(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
@@ -2129,7 +2129,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_sql_data_asset_batch_request_objects_in_validations(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multiple_batch_request_sql_data_asset_objects_in_validations(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
@@ -2169,7 +2169,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_sql_data_asset_in_top_level_batch_request(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_data_asset_in_top_level_batch_request(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
@@ -2201,7 +2201,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_sql_data_asset_batch_request_in_checkpoint_run(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_data_asset_in_checkpoint_run(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
@@ -2232,38 +2232,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_sql_data_asset_batch_request_in_checkpoint_run(
-    titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
-    sa,
-):
-    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
-
-    # create expectation suite
-    context.add_expectation_suite("my_expectation_suite")
-
-    batch_request: FluentBatchRequest = FluentBatchRequest(
-        datasource_name="my_sqlite_datasource",
-        data_asset_name="table_partitioned_by_date_column__A_query_asset_limit_5",
-    )
-
-    checkpoint: Checkpoint = Checkpoint(
-        name="my_checkpoint",
-        data_context=context,
-        config_version=1,
-        run_name_template="%Y-%M-foo-bar-template",
-        expectation_suite_name="my_expectation_suite",
-        action_list=common_action_list,
-    )
-
-    result = checkpoint.run(batch_request=batch_request)
-
-    assert len(context.validations_store.list_keys()) == 1
-    assert result["success"]
-
-
-@pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_sql_data_asset_batch_request_in_checkpoint_run(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_validations_batch_request_sql_data_asset_in_checkpoint_run(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
@@ -2294,7 +2263,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_sql_data_asset_batch_request_in_context_run_checkpoint(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_data_asset_request_in_context_run_checkpoint(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
@@ -2330,7 +2299,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_sql_data_asset_batch_request_validations_in_context_run_checkpoint(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_validations_run_batch_request_sql_data_asset_in_context_run_checkpoint(
     titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
     sa,
