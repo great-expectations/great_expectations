@@ -65,6 +65,7 @@ class ParquetAsset(_FilePathDataAsset):
 
 _SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, ParquetAsset]
 
+
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset, ParquetAsset]
