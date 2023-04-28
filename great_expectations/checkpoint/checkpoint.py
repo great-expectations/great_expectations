@@ -64,6 +64,9 @@ from great_expectations.validation_operators.types.validation_operator_result im
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
+    )
     from great_expectations.validator.validator import Validator
 
 
@@ -140,7 +143,9 @@ class BaseCheckpoint(ConfigPeer):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -736,7 +741,9 @@ class Checkpoint(BaseCheckpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -816,7 +823,9 @@ constructor arguments.
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -1363,7 +1372,9 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -1430,7 +1441,9 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,

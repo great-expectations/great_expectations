@@ -1663,9 +1663,14 @@ def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoi
         connection_string=connection_string,
     )
 
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query
+    )
+
     query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
     datasource.add_query_asset(
-        name="table_partitioned_by_date_column__A_query_asset", query=query
+        name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
     )
 
     # noinspection PyProtectedMember
