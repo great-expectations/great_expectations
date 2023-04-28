@@ -433,7 +433,8 @@ stages:
                 --cov=. \
                 --cov-report=xml \
                 --cov-report=html \
-                -m 'not unit and not e2e'
+                -m 'not unit and not e2e' \
+                -vv
 
             displayName: 'pytest'
             env:
