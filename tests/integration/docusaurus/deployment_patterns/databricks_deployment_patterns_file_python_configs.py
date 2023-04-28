@@ -22,27 +22,22 @@ yaml = YAMLHandler()
 # CODE vvvvv vvvvv
 # This root directory is for use in Databricks
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py root directory">
-root_directory = "/dbfs/great_expectations/"
+context_root_dir = "/dbfs/great_expectations/"
 # </snippet>
 
 # For testing purposes only, we change the root_directory to an ephemeral location created by our test runner
-root_directory = os.path.join(os.getcwd(), "dbfs_temp_directory")
+context_root_dir = os.path.join(os.getcwd(), "dbfs_temp_directory")
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py set up context">
-data_context_config = DataContextConfig(
-    store_backend_defaults=FilesystemStoreBackendDefaults(
-        root_directory=root_directory
-    ),
-)
-context = get_context(project_config=data_context_config)
+context = get_context(context_root_dir=context_root_dir)
 # </snippet>
 # CODE ^^^^^ ^^^^^
 
 # ASSERTIONS vvvvv vvvvv
 # Check the stores were initialized
-uncommitted_directory = os.path.join(root_directory, "uncommitted")
+uncommitted_directory = os.path.join(context_root_dir, "uncommitted")
 assert {"checkpoints", "expectations", "uncommitted"}.issubset(
-    set(os.listdir(root_directory))
+    set(os.listdir(context_root_dir))
 )
 assert os.listdir(uncommitted_directory) == ["validations"]
 # ASSERTIONS ^^^^^ ^^^^^
