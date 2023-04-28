@@ -281,6 +281,11 @@ stages:
               secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
               retryCount: '2'
 
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
         # includes explicit install of chardet, which was causing problems in the pipeline
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines google-cloud-bigquery-storage
@@ -289,6 +294,7 @@ stages:
           # tests containing the name "RUNME_gcp" are run
           - script: |
               pytest -v --bigquery --docs-tests -m integration -k "RUNME_gcp" tests/integration/test_script_runner.py
+              pip install chardet==3.0.4
             displayName: 'Run Flagged Tests'
             env:
               GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
