@@ -1054,10 +1054,7 @@ def test_TupleGCSStoreBackend_base_public_path():
     project = "dummy-project"
     base_public_path = "http://www.test.com/"
 
-    with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
-        mock_client = mock_gcs_client.return_value
-        mock_bucket = mock_client.get_bucket.return_value
-        mock_blob = mock_bucket.blob.return_value
+    with mock.patch("google.cloud.storage.Client", autospec=True):
 
         my_store_with_base_public_path = TupleGCSStoreBackend(
             filepath_template=None,
@@ -1111,7 +1108,6 @@ def test_TupleGCSStoreBackend():
     bucket = "leakybucket"
     prefix = "this_is_a_test_prefix"
     project = "dummy-project"
-    base_public_path = "http://www.test.com/"
 
     with mock.patch("google.cloud.storage.Client", autospec=True) as mock_gcs_client:
 

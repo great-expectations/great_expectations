@@ -150,7 +150,7 @@ def test_batch_data_get_batch_ambiguous_parameter_sparkdf_engine(
 
     # raised by get_batch_list()
     with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
-        batch_list: List[Batch] = context.get_batch_list(
+        context.get_batch_list(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -169,7 +169,7 @@ def test_batch_data_get_batch_failed_specification_type_error_sparkdf_engine(
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
-        batch: list = context.get_batch_list(
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -189,7 +189,7 @@ def test_batch_data_get_batch_failed_specification_no_batch_identifier_sparkdf_e
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # batch_identifiers missing (set to None)
-        batch: list = context.get_batch_list(
+        context.get_batch_list(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -202,7 +202,7 @@ def test_batch_data_get_batch_failed_specification_no_batch_identifier_sparkdf_e
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # batch_identifiers missing (omitted)
-        batch: list = context.get_batch_list(
+        context.get_batch_list(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -216,12 +216,11 @@ def test_batch_data_get_batch_failed_specification_no_runtime_parameters_sparkdf
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # runtime_parameters missing (None)
-        batch: list = context.get_batch_list(
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -234,7 +233,7 @@ def test_batch_data_get_batch_failed_specification_no_runtime_parameters_sparkdf
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # runtime_parameters missing (omitted)
-        batch: list = context.get_batch_list(
+        context.get_batch_list(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -253,7 +252,7 @@ def test_batch_data_get_batch_failed_specification_incorrect_batch_spec_passthro
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # incorrect batch_spec_passthrough, which should be a dict
-        batch: list = context.get_batch_list(
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -269,14 +268,13 @@ def test_get_batch_failed_specification_wrong_runtime_parameters_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     # raised by _validate_runtime_parameters() in RuntimeDataConnector
     with pytest.raises(
         great_expectations.exceptions.exceptions.InvalidBatchRequestError
     ):
         # runtime_parameters are not configured in the DataConnector
-        batch: list = context.get_batch_list(
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -323,7 +321,7 @@ def test_batch_data_get_validator_ambiguous_parameter_sparkdf_engine(
     context.add_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
     with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
-        batch_list: List[Batch] = context.get_validator(
+        context.get_validator(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -339,7 +337,6 @@ def test_get_validator_wrong_type_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     context.add_expectation_suite("my_expectations")
 
@@ -371,7 +368,7 @@ def test_batch_data_get_validator_failed_specification_no_batch_identifier_spark
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     # batch_identifiers should not be None
     with pytest.raises(TypeError):
-        validator: Validator = context.get_validator(
+        context.get_validator(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -384,7 +381,7 @@ def test_batch_data_get_validator_failed_specification_no_batch_identifier_spark
 
     # batch_identifiers should not be omitted
     with pytest.raises(TypeError):
-        validator: Validator = context.get_validator(
+        context.get_validator(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -405,7 +402,7 @@ def test_batch_data_get_validator_failed_specification_incorrect_batch_spec_pass
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # incorrect batch_spec_passthrough, which should be a dict
-        validator: Validator = context.get_validator(
+        context.get_validator(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -422,12 +419,11 @@ def test_batch_data_get_validator_failed_specification_no_runtime_parameters_spa
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
     context: DataContext = data_context_with_datasource_spark_engine
-    test_df: "pyspark.sql.dataframe.DataFrame" = test_df_spark  # noqa: F821
 
     context.add_expectation_suite("my_expectations")
     with pytest.raises(TypeError):
         # runtime_parameters should not be None
-        batch: list = context.get_validator(
+        context.get_validator(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -441,7 +437,7 @@ def test_batch_data_get_validator_failed_specification_no_runtime_parameters_spa
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     with pytest.raises(TypeError):
         # runtime_parameters missing (omitted)
-        batch: list = context.get_validator(
+        context.get_validator(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -461,7 +457,7 @@ def test_batch_data_get_validator_wrong_runtime_parameters_sparkdf_engine(
         great_expectations.exceptions.exceptions.InvalidBatchRequestError
     ):
         # runtime_parameters are not configured in the DataConnector
-        batch: list = context.get_validator(
+        context.get_validator(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -543,7 +539,7 @@ def test_file_path_get_batch_spark_directory_fail_no_reader_method(
 ):
     context: DataContext = data_context_with_datasource_spark_engine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        batch_list: List[Batch] = context.get_batch_list(
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -561,7 +557,7 @@ def test_file_path_get_batch_spark_directory_fail_wrong_reader_method(
 ):
     context: DataContext = data_context_with_datasource_spark_engine
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        batch_list: List[Batch] = context.get_batch_list(
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",
@@ -718,7 +714,7 @@ def test_file_path_get_batch_spark_fail_wrong_file_path(
 
     # raised by get_batch_data_and_markers() in SparkDFExecutionEngine.
     with pytest.raises(gx_exceptions.ExecutionEngineError):
-        batch_list: List[Batch] = context.get_batch_list(
+        context.get_batch_list(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
                 data_connector_name="default_runtime_data_connector_name",

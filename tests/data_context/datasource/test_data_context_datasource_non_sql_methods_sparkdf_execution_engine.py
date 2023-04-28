@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import shutil
-from typing import List, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Union
 
 import pandas as pd
 import pytest
@@ -233,7 +233,7 @@ data_connectors:
         **config,
     )
 
-    test_df: "pyspark.sql.dataframe.DataFrame" = (  # noqa: F821
+    test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
         spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )

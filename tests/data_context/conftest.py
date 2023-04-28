@@ -687,7 +687,7 @@ def cloud_data_context_in_cloud_mode_with_datasource_pandas_engine(
 ):
     context: DataContext = empty_data_context_in_cloud_mode
     config = yaml.load(
-        f"""
+        """
     class_name: Datasource
     execution_engine:
         class_name: PandasExecutionEngine

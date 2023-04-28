@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 import pytest
 
-import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
@@ -191,7 +190,7 @@ def test_substitute_config_variable():
     )
     assert (
         config_substitutor.substitute_config_variable(None, config_variables_dict)
-        == None
+        is None
     )
 
     # Test with mixed case

@@ -260,7 +260,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
             - airflow_run_id
     """
     # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
+    context.test_yaml_config(
         name="my_pipeline_datasource",
         yaml_config=yaml_config,
         return_mode="report_object",
@@ -325,7 +325,7 @@ data_connectors:
             A:
 """
     # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
+    context.test_yaml_config(
         name="my_directory_datasource",
         yaml_config=yaml_config,
         return_mode="report_object",
@@ -480,7 +480,7 @@ data_connectors:
       - airflow_run_id
 """
     # noinspection PyUnusedLocal
-    my_datasource = context.test_yaml_config(
+    context.test_yaml_config(
         name="some_datasource_name",
         yaml_config=yaml_config,
     )
