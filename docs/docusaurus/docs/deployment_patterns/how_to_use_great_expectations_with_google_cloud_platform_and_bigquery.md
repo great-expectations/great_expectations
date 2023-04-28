@@ -66,7 +66,7 @@ pip install great-expectations --upgrade
 
 ### 2. Get DataContext: 
 
-The simplest way to create a new <TechnicalTag relative="../../../" tag="data_context" text="Data Context" />  is by using the `get_context()` method.
+One way to create a new <TechnicalTag relative="../../../" tag="data_context" text="Data Context" />  is by using the `create()` method.
 
 From a Notebook or script where you want to deploy Great Expectations run the following command. Here the `full_path_to_project_directory`  can be an empty directory where you intend to build your Great Expectations configuration.
 
@@ -143,7 +143,7 @@ More details can be found in the corresponding How to Guides, which have been li
   ]}>
 <TabItem value="gcs">
 
-Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, add in your GCS bucket and path to a directory that contains some of your data:
+Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, add the name of your GCS bucket to the `add_pandas_gcs` function.
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py datasource"
 ```
@@ -168,7 +168,7 @@ Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Cont
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource"
 ```
 
-In the example, we have created a Datasource named `my_bigquery_datasource`, using a connection string.
+In the example, we have created a Datasource named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
 
 For more details on how to configure the BigQuery Datasource, please refer to [How to connect to a BigQuery database](../guides/connecting_to_your_data/database/bigquery.md)
 
@@ -187,14 +187,10 @@ For more details on how to configure the BigQuery Datasource, please refer to [H
 
 Add a CSV `Asset` to your `Datasource` by using the `add_csv_asset` function.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py asset"
+First, configure the `prefix` and `batching_regex`. The `prefix` is for the path in the GCS bucket where we can find our files. The `batching_regex` is a regular expression that indicates which files to treat as Batches in the Asset, and how to identify them.
+
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py prefix_and_batching_regex"
 ```
-
-Here we have added a `Asset` named `csv_taxi_gcs_asset` using the `add_csv_asset` function. 
-
-The `prefix` is for the path in the GCS bucket where we can find our files. 
-
-The `batching_regex` is a regular expression that indicates which files to treat as Batches in the Asset, and how to identify them.
 
 In our example, the pattern `r"data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"` is intended to build a Batch for each file in the GCS bucket, which are:
 
@@ -205,17 +201,22 @@ test_docs_data/data/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-03.
 ```
 The `batching_regex` pattern will match the 4 digits of the year portion and assign it to the `year` domain, and match the 2 digits of the month portion and assign it to the `month` domain.
 
+Next we can add an `Asset` named `csv_taxi_gcs_asset` to our Datasource by using the `add_csv_asset` function. 
+
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py asset"
+```
+
 </TabItem>
 <TabItem value="bigquery">
 
 Add a BigQuery `Asset` into your `Datasource` either as a table asset or query asset.
 
-Here a table `Asset` named `my_table_asset` is built by naming the table, which is `taxi_data` in our case. 
+In the first example, a table `Asset` named `my_table_asset` is built by naming the table in our BigQuery Database, which is `taxi_data` in our case. 
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset"
 ```
 
-In the next example, a query `Asset` named `my_query_asset` is built by submitting a query to the same table `taxi_data`. Although the example is a simpl operation, returning the first 5 rows from the `taxi_data` table, the query can be arbitrarily complicated, including any number of `JOIN`, `SELECT` operations and subqueries. 
+In the second example, a query `Asset` named `my_query_asset` is built by submitting a query to the same table `taxi_data`. Although we are showing a simple operation here, the query can be arbitrarily complicated, including any number of `JOIN`, `SELECT` operations and subqueries. 
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset"
 ```

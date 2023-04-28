@@ -233,7 +233,7 @@ CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource">
 datasource = context.sources.add_or_update_sql(
     name="my_bigquery_datasource",
-    connection_string=f"bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
+    connection_string="bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
 )
 # </snippet>
 
