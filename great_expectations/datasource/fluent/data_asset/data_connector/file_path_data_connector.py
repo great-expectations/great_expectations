@@ -28,6 +28,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 # TODO: <Alex>ALEX</Alex>
 # from great_expectations.datasource.fluent.data_asset.data_connector.sorter import Sorter
 # TODO: <Alex>ALEX</Alex>
+
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import BatchRequest
 
