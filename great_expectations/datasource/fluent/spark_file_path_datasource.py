@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, List, Type
+from typing import TYPE_CHECKING, ClassVar, List, Type, Union
 
 import pydantic
 from pydantic import Field
@@ -60,4 +60,4 @@ class _SparkFilePathDatasource(_SparkDatasource):
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset, DirectoryCSVAsset]
 
     # instance attributes
-    assets: List[_FilePathDataAsset] = []  # type: ignore[assignment]
+    assets: List[Union[CSVAsset, DirectoryCSVAsset]] = []  # type: ignore[assignment]

@@ -7,11 +7,6 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core import IDDict
-
-# TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.datasource.fluent.data_asset.data_connector.sorter import Sorter
-# TODO: <Alex>ALEX</Alex>
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.batch_filter import (
@@ -29,6 +24,10 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
     RegExParser,
 )
 
+# TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.datasource.fluent.data_asset.data_connector.sorter import Sorter
+# TODO: <Alex>ALEX</Alex>
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import BatchRequest
 
