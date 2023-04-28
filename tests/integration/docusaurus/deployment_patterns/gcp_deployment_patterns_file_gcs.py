@@ -2,14 +2,12 @@ import os
 import tempfile
 import pathlib
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py imports">
 from great_expectations.core.yaml_handler import YAMLHandler
 
 temp_dir = tempfile.TemporaryDirectory()
 full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
 
 yaml = YAMLHandler()
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py get_context">
 import great_expectations as gx
@@ -50,7 +48,7 @@ actual_existing_expectations_store["expectations_store_name"] = great_expectatio
     "expectations_store_name"
 ]
 expected_existing_expectations_store_yaml = """
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py expected_expectation_store">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_expectation_store">
 stores:
   expectations_store:
     class_name: ExpectationsStore
@@ -68,7 +66,7 @@ assert actual_existing_expectations_store == yaml.load(
 
 # adding expectations store
 configured_expectations_store_yaml = """
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py new_expectation_store">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_expectation_store">
 stores:
   expectations_GCS_store:
     class_name: ExpectationsStore
@@ -136,7 +134,7 @@ actual_existing_validations_store["validations_store_name"] = great_expectations
 ]
 
 expected_existing_validations_store_yaml = """
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py expected_validations_store">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py expected_validations_store">
 stores:
   validations_store:
     class_name: ValidationsStore
@@ -153,7 +151,7 @@ assert actual_existing_validations_store == yaml.load(
 
 # adding validations store
 configured_validations_store_yaml = """
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py new_validations_store">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_validations_store">
 stores:
   validations_GCS_store:
     class_name: ValidationsStore
@@ -195,7 +193,7 @@ with open(great_expectations_yaml_file_path, "w") as f:
 
 # adding data docs store
 data_docs_site_yaml = """
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py new_data_docs_store">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py new_data_docs_store">
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
