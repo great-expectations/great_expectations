@@ -220,13 +220,18 @@ great_expectations_yaml["data_docs_sites"] = yaml.load(data_docs_site_yaml)[
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
-
+CONNECTION_STRING = f"bigquery://{GCP_PROJECT_NAME}/{BIGQUERY_DATASET}"
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource">
 datasource = context.sources.add_or_update_sql(
     name="my_bigquery_datasource",
-    connection_string=f"bigquery://{GCP_PROJECT_NAME}/{BIGQUERY_DATASET}",
+    connection_string="bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
 )
 # </snippet>
+
+# For tests, we are replacing the `connection_string`
+datasource = context.sources.add_or_update_sql(
+    name="my_bigquery_datasource", connection_string=CONNECTION_STRING
+)
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset">
 table_asset = datasource.add_table_asset(name="my_table_asset", table_name="taxi_data")
