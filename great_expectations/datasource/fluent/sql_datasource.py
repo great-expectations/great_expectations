@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import dataclasses
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -51,7 +50,10 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.compatibility import sqlalchemy
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+        BatchSlice,
+    )
 
 
 class SQLDatasourceError(Exception):
@@ -666,18 +668,22 @@ class _SQLAsset(DataAsset):
                 )
             )
         self.sort_batches(batch_list)
-        return batch_list
+        return batch_list[batch_request.batch_slice]
 
     @public_api
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
+            options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -691,10 +697,16 @@ class _SQLAsset(DataAsset):
                 f"{allowed_keys}\nbut your specified keys contain\n"
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
+
+        parsed_batch_slice: slice = DataAsset._parse_batch_slice(
+            batch_slice=batch_slice
+        )
+
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
+            batch_slice=parsed_batch_slice,
         )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -713,11 +725,12 @@ class _SQLAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
+                batch_slice=batch_request.batch_slice,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+                f"{pf(expect_batch_request_form.dict())}\n"
+                f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
     def _create_batch_spec_kwargs(self) -> dict[str, Any]:
