@@ -1,10 +1,18 @@
 import pytest
 import responses
 
+import great_expectations.data_context._version_checker as vc
 from great_expectations.data_context._version_checker import _VersionChecker
 
 # Set to some arbitrary value so tests will continue to work regardless of GX's actual version
 _MOCK_PYPI_VERSION = "0.16.8"
+
+
+@pytest.fixture
+def enable_pypi_version_check():
+    vc._ENABLE_VERSION_CHECK = False
+    yield
+    vc._ENABLE_VERSION_CHECK = True
 
 
 @pytest.mark.parametrize(
@@ -25,11 +33,13 @@ _MOCK_PYPI_VERSION = "0.16.8"
 )
 @pytest.mark.unit
 @responses.activate
-def test_check_if_using_latest_gx(version: str, expected: bool, status: int, caplog):
+def test_check_if_using_latest_gx(
+    enable_pypi_version_check, version: str, expected: bool, status: int, caplog
+):
     pypi_payload = {"info": {"version": _MOCK_PYPI_VERSION}}
     responses.add(
         responses.GET,
-        "https://pypi.org/pypi/great_expectations/json",
+        _VersionChecker._PYPI_GX_ENDPOINT,
         json=pypi_payload,
         status=status,
     )

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 
 import requests
 from packaging import version
@@ -18,6 +19,11 @@ class _PyPIPackageData(TypedDict):
     info: _PyPIPackageInfo
 
 
+# Should only run in prod and in specific tests
+# This flag let's us conditionally turn on the feature
+_ENABLE_VERSION_CHECK = False
+
+
 class _VersionChecker:
 
     _BASE_PYPI_URL = "https://pypi.org/pypi"
@@ -27,6 +33,9 @@ class _VersionChecker:
         self._user_version = version.Version(user_version)
 
     def check_if_using_latest_gx(self) -> bool:
+        if self._running_non_version_check_tests():
+            return True
+
         pypi_version = self._get_latest_version_from_pypi()
         if not pypi_version:
             logger.debug("Could not compare with latest PyPI version; skipping check.")
@@ -36,6 +45,9 @@ class _VersionChecker:
             self._warn_user(pypi_version)
             return False
         return True
+
+    def _running_non_version_check_tests(self) -> bool:
+        return "pytest" in sys.modules and _ENABLE_VERSION_CHECK
 
     def _get_latest_version_from_pypi(self) -> version.Version | None:
         response_json: _PyPIPackageData | None = None
