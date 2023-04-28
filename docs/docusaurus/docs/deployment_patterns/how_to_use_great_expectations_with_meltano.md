@@ -7,6 +7,8 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 <InProgress />
 
 This guide will help you get Great Expectations installed, configured, and running in your Meltano project.

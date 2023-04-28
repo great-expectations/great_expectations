@@ -4,6 +4,8 @@ title: How to Use Great Expectations with Airflow
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 This guide will help you run a Great Expectations checkpoint in Apache Airflow, which allows you to trigger validation of a data asset using an Expectation Suite directly within an Airflow DAG.
 
 <Prerequisites>

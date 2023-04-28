@@ -12,6 +12,8 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 <InProgress />
 
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>

@@ -11,6 +11,8 @@ import NextSteps from '/docs/guides/setup/components/install_nextsteps.md'
 import InstallCongratulations from '/docs/guides/setup/components/install_congrats.md'
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 <Preface />
 
 ## Steps

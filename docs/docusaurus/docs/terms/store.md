@@ -16,6 +16,8 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 ### Definition
 
 A Store is a connector to store and retrieve information about metadata in Great Expectations.

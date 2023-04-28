@@ -12,6 +12,8 @@ import ConfirmThatTheNewExpectationsStoreHasBeenAddedByRunningGreatExpectationsS
 import ConfirmThatExpectationsCanBeAccessedFromAmazonSByRunningGreatExpectationsSuiteList from './components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_that_expectations_can_be_accessed_from_amazon_s_by_running_great_expectations_suite_list.mdx'
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 <Preface />
 
 ## Steps

@@ -11,6 +11,8 @@ import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 <!-- ## Prerequisites -->
 
 <!-- ### 1. Check your Python version -->

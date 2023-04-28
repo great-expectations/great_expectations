@@ -5,7 +5,9 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />;
 
 This guide will explain how to configure your ``great_expectations.yml`` project config to populate credentials from either a YAML file or a secret manager.
 

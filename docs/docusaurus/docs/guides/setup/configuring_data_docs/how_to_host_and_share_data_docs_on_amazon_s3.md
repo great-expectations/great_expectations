@@ -11,6 +11,8 @@ import TestThatYourConfigurationIsCorrectByBuildingTheSite from './components_ho
 import AdditionalNotes from './components_how_to_host_and_share_data_docs_on_amazon_s3/_additional_notes.mdx'
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 <Preface />
 
 ## Steps

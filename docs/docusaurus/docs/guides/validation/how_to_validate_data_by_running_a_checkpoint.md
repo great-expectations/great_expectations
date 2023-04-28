@@ -11,6 +11,8 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 <InProgress />
 
 This guide will help you <TechnicalTag tag="validation" text="Validate" /> your data by running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.

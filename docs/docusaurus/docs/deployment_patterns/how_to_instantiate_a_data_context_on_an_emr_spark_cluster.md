@@ -4,6 +4,8 @@ title: How to instantiate a Data Context on an EMR Spark cluster
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 This guide will help you instantiate a Data Context on an EMR Spark cluster.
 
 

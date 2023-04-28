@@ -13,6 +13,8 @@ import ConfirmThatTheValidationsResultsStoreHasBeenCorrectlyConfigured from './c
 import Congrats from '../components/_congrats.mdx'
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 <Preface />
 
 ## Steps

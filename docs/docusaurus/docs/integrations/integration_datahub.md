@@ -7,6 +7,8 @@ authors:
 
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
+<CLIRemoval />
+
 :::info
 * Maintained By: DataHub
 * Status: Beta
