@@ -144,29 +144,26 @@ class FilePathDataConnector(DataConnector):
         #     )
         # TODO: <Alex>ALEX</Alex>
 
-        if batch_request.options is not None:
-            data_connector_query_dict = {
-                "batch_filter_parameters": {
-                    key: value
-                    for key, value in batch_request.options.items()
-                    if value is not None
+        data_connector_query_dict: dict[str, dict | slice] = {}
+        if batch_request.options:
+            data_connector_query_dict.update(
+                {
+                    "batch_filter_parameters": {
+                        key: value
+                        for key, value in batch_request.options.items()
+                        if value is not None
+                    }
                 }
-            }
-            # TODO: <Alex>ALEX-SUPPORT_LIMIT_BATCH_QUERY_OPTION_DIRECTIVE_LATER</Alex>
-            # TODO: <Alex>ALEX</Alex>
-            # if (
-            #     batch_request.limit is not None
-            #     and data_connector_query_dict.get("limit") is None
-            # ):
-            #     data_connector_query_dict["limit"] = batch_request.limit
-            # TODO: <Alex>ALEX</Alex>
+            )
 
-            batch_filter_obj: BatchFilter = build_batch_filter(
-                data_connector_query_dict=data_connector_query_dict  # type: ignore[arg-type]
-            )
-            batch_definition_list = batch_filter_obj.select_from_data_connector_query(
-                batch_definition_list=batch_definition_list
-            )
+        data_connector_query_dict.update({"index": batch_request.batch_slice})
+
+        batch_filter_obj: BatchFilter = build_batch_filter(
+            data_connector_query_dict=data_connector_query_dict  # type: ignore[arg-type]
+        )
+        batch_definition_list = batch_filter_obj.select_from_data_connector_query(
+            batch_definition_list=batch_definition_list
+        )
 
         return batch_definition_list
 
