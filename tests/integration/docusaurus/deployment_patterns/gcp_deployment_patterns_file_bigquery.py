@@ -230,7 +230,7 @@ if not gcp_project:
 bigquery_dataset = "demo"
 CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_datasource">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource">
 datasource = context.sources.add_or_update_sql(
     name="my_bigquery_datasource",
     connection_string=f"bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
@@ -242,22 +242,22 @@ datasource = context.sources.add_or_update_sql(
     name="my_bigquery_datasource", connection_string=CONNECTION_STRING
 )
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_table_asset">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset">
 table_asset = datasource.add_table_asset(name="my_table_asset", table_name="taxi_data")
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_query_asset">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset">
 query_asset = datasource.add_query_asset(
     name="my_query_asset", query="SELECT * from taxi_data"
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py batch_request">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py batch_request">
 request = table_asset.build_batch_request()
 # </snippet>
 
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_or_update_expectation_suite">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite">
 context.add_or_update_expectation_suite(expectation_suite_name="test_bigquery_suite")
 
 validator = context.get_validator(
@@ -265,18 +265,18 @@ validator = context.get_validator(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py validator_calls">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py validator_calls">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py save_expectation_suite">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py save_expectation_suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py checkpoint">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py checkpoint">
 checkpoint = gx.checkpoint.SimpleCheckpoint(
     name="bigquery_checkpoint",
     data_context=context,
@@ -286,7 +286,7 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py run_checkpoint">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py run_checkpoint">
 checkpoint_result = checkpoint.run()
 # </snippet>
 assert checkpoint_result.success is True

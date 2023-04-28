@@ -156,22 +156,16 @@ For more details on how to configure the Datasource, and additional information 
 </TabItem>
 <TabItem value="bigquery">
 
-To connect to your data in BigQuery, first instantiate your project's Data Context. One way to way to create a new Data Context is by using the `create()` method.
-
-From a Notebook or script where you want to deploy Great Expectations run the following command. Here the `full_path_to_project_directory` can be an empty directory where you intend to build your Great Expectations configuration.:
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py get_context"
-```
-
-Next, create a Datasource that will connect to data in BigQuery,
-
 :::note
 
 In order to support tables that are created as the result of queries in BigQuery, Great Expectations previously asked users to define a named permanent table to be used as a "temporary" table that could later be deleted, or set to expire by the database. This is no longer the case, and Great Expectations will automatically set tables that are created as the result of queries to expire after 1 day.
 
 :::
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_datasource"
+
+Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, create a Datasource that will connect to data in BigQuery,
+
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource"
 ```
 
 In the example, we have created a Datasource named `my_bigquery_datasource`, using a connection string.
@@ -218,12 +212,12 @@ Add a BigQuery `Asset` into your `Datasource` either as a table asset or query a
 
 Here a table `Asset` named `my_table_asset` is built by naming the table, which is `taxi_data` in our case. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_table_asset"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset"
 ```
 
 In the next example, a query `Asset` named `my_query_asset` is built by submitting a query to the same table `taxi_data`. Although the example is a simpl operation, returning the first 5 rows from the `taxi_data` table, the query can be arbitrarily complicated, including any number of `JOIN`, `SELECT` operations and subqueries. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_bigquery_query_asset"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_query_asset"
 ```
 
 </TabItem>
@@ -266,22 +260,22 @@ For our example, we will be creating our ExpectationSuite with [instant feedback
 
 Using the `table_asset` from the previous step, build a `BatchRequest`. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py batch_request"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py batch_request"
 ```
 
-Next, create an ExpectationSuite (`test_bigquery_suite` in our example), and use it to get a `Validator`.
+Next, create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_or_update_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_or_update_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py validator_calls"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py validator_calls"
 ```
 
 Lastly, save the ExpectationSuite, which now contains our two Expectations.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py save_expectation_suite"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py save_expectation_suite"
 ```
 
 For more details on how to configure the BatchRequest, as well as an example of how you can load data by specifying a table name, please refer to [How to connect to a BigQuery database](../guides/connecting_to_your_data/database/bigquery.md)
@@ -307,7 +301,7 @@ Add the following Checkpoint `gcs_checkpoint` to the DataContext.  Here we are u
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint"
 ```
 
-Next, you can run the Checkpoint directly in-code,
+Next, you can run the Checkpoint directly in-code by calling `checkpoint.run()`.
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py run_checkpoint">
 ```
@@ -323,23 +317,14 @@ Now you are ready to migrate the local configuration to Cloud Composer.
 </TabItem>
 <TabItem value="bigquery">
 
-Add the following Checkpoint `bigquery_checkpoint` to the DataContext.  Here we are using the same `RuntimeBatchRequest` and `ExpectationSuite` name that we used to create our Validator above, translated into a YAML configuration.
+Add the following Checkpoint `bigquery_checkpoint` to the DataContext.  Here we are using the same `BatchRequest` and `ExpectationSuite` name that we used to create our Validator above.
 
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py checkpoint_config"
-```
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py add_checkpoint"
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py checkpoint"
 ```
 
-Next, you can either run the Checkpoint directly in-code,
+Next, you can run the Checkpoint directly in-code by calling `checkpoint.run()`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py run_checkpoint"
-```
-
-or through the following CLI command.
-
-```bash
-great_expectations checkpoint run bigquery_checkpoint
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py run_checkpoint"
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
