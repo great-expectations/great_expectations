@@ -1,5 +1,4 @@
 import copy
-import json
 import logging
 from enum import Enum
 from typing import ClassVar, Dict, Optional, Set
@@ -143,7 +142,7 @@ class DictDot:
         }
         for key, value in new_dict.items():
             if isinstance(value, pydantic.BaseModel):
-                new_dict[key] = json.loads(value.json())
+                new_dict[key] = value.dict()
 
             if isinstance(value, DictDot):
                 new_dict[key] = value.to_dict()
@@ -155,7 +154,7 @@ class DictDot:
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
                     if isinstance(value, pydantic.BaseModel):
-                        new_dict[key][i] = json.loads(element.json())
+                        new_dict[key][i] = element.dict()
 
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_dict()
