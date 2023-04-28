@@ -332,7 +332,7 @@ stages:
     jobs:
       # Runs pytest without any additional flags
       - job: minimal
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+        # condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
           # This matrix is intended to split up our sizeable test suite into two distinct components.
           # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
