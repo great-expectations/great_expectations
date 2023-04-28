@@ -2,6 +2,7 @@ import pathlib
 import re
 from typing import TYPE_CHECKING, List
 
+import pydantic
 import pytest
 
 from great_expectations.core import IDDict
@@ -54,7 +55,7 @@ def test_basic_instantiation(tmp_path_factory):
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
     # Missing "data_asset_name" argument.
-    with pytest.raises(TypeError):
+    with pytest.raises(pydantic.ValidationError):
         # noinspection PyArgumentList
         my_data_connector.get_batch_definition_list(
             BatchRequest(

@@ -364,27 +364,34 @@ def test_splitter(
 
 
 @pytest.mark.integration
-def test_checkpoint_run(empty_data_context):
-    context = empty_data_context
-    path = pathlib.Path(
-        __file__,
-        "..",
-        "..",
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "yellow_tripdata_sample_2019-02.csv",
-    ).resolve(strict=True)
-    csv_asset = context.sources.pandas_default.add_csv_asset("my_csv_asset", path)
-    batch_request = csv_asset.build_batch_request()
+def test_simple_checkpoint_run(
+    datasource_test_data: tuple[
+        AbstractDataContext, Datasource, DataAsset, BatchRequest
+    ]
+):
+    context, datasource, data_asset, batch_request = datasource_test_data
     expectation_suite_name = "my_expectation_suite"
     context.add_expectation_suite(expectation_suite_name)
+
     checkpoint = SimpleCheckpoint(
         "my_checkpoint",
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
+    )
+    result = checkpoint.run()
+    assert result["success"]
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+
+    checkpoint = SimpleCheckpoint(
+        "my_checkpoint",
+        data_context=context,
+        validations=[
+            {
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request,
+            }
+        ],
     )
     result = checkpoint.run()
     assert result["success"]
