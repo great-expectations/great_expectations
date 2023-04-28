@@ -130,7 +130,6 @@ def bobby_profile_data_profiler_structured_data_assistant_result(
         "congestion_surcharge",
     ]
 
-    # import pdb; pdb.set_trace()
     data_assistant_result: DataAssistantResult = context.assistants.data_profiler.run(
         batch_request=batch_request,
         exclude_column_names=exclude_column_names,
@@ -237,7 +236,6 @@ def test_profile_data_profiler_structured_data_assistant_metrics_count(
         bobby_profile_data_profiler_structured_data_assistant_result.metrics_by_domain.items()
     ):
         num_metrics += len(parameter_values_for_fully_qualified_parameter_names)
-    # import pdb; pdb.set_trace()
     assert num_metrics == 32
 
 
