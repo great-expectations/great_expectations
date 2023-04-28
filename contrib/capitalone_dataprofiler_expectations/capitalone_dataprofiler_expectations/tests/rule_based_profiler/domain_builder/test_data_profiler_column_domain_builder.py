@@ -19,7 +19,6 @@ from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.data_context import FileDataContext
 from great_expectations.rule_based_profiler.domain_builder import DomainBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
-    VARIABLES_KEY,
     ParameterContainer,
     build_parameter_container_for_variables,
 )
@@ -59,7 +58,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_value(
         "strict_max": False,
         "profile_path": profile_path,
         "metric": "data_type",
-        "metric_values": ["int", "float", "string", "datetime"]
+        "metric_values": ["int", "float", "string", "datetime"],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -327,7 +326,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_default_refere
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
         "metric": "data_type",
-        "metric_values": ["int", "float", "string", "datetime"]
+        "metric_values": ["int", "float", "string", "datetime"],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -595,7 +594,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference(
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
         "metric": "data_type",
-        "metric_values": ["int", "float", "string", "datetime"]
+        "metric_values": ["int", "float", "string", "datetime"],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -863,7 +862,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
         "metric": "data_type",
-        "metric_values": ["int", "float", "string", "datetime"]
+        "metric_values": ["int", "float", "string", "datetime"],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs
@@ -1067,7 +1066,7 @@ def test_data_profiler_column_domain_builder_with_profile_path_as_reference_with
         "false_positive_rate": 1.0e-2,
         "mostly": 1.0,
         "metric": "data_type",
-        "metric_values": ["int", "float", "string", "datetime"]
+        "metric_values": ["int", "float", "string", "datetime"],
     }
     variables: ParameterContainer = build_parameter_container_for_variables(
         variables_configs=variables_configs

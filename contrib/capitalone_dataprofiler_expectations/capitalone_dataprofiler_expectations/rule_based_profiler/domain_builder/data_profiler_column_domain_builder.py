@@ -125,7 +125,7 @@ class DataProfilerColumnDomainBuilder(ColumnDomainBuilder):
             parameters=None,
         )
 
-        #get metrics and profile path from variables and then pass them into here
+        # get metrics and profile path from variables and then pass them into here
         profile_report_column_names: List[str] = validator.get_metric(  # type: ignore[assignment] # could be None
             metric=MetricConfiguration(
                 metric_name="data_profiler.table_column_list",
