@@ -3,7 +3,8 @@ Click>=7.1.2
 colorama>=0.4.3
 cryptography>=3.2
 importlib-metadata>=1.7.0 # (included in Python 3.8 by default.)
-Ipython>=7.16.3
+Ipython>=7.16.3,<8.13.0; python_version <= "3.8" # https://github.com/ipython/ipython/issues/14053
+Ipython>=7.16.3; python_version >= "3.9"
 ipywidgets>=7.5.1
 jinja2>=2.10
 jsonpatch>=1.22
