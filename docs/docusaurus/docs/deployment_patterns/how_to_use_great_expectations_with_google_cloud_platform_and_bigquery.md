@@ -303,7 +303,7 @@ Add the following Checkpoint `gcs_checkpoint` to the DataContext.  Here we are u
 
 Next, you can run the Checkpoint directly in-code by calling `checkpoint.run()`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py run_checkpoint">
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py run_checkpoint"
 ```
 
 At this point, if you have successfully configured the local prototype, you will have the following:
