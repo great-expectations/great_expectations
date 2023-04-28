@@ -356,10 +356,6 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         batch_metadata.update(copy.deepcopy(batch_request.options))
         return batch_metadata
 
-    @staticmethod
-    def _parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
-        return parse_batch_slice(batch_slice=batch_slice)
-
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
     def _parse_order_by_sorters(
