@@ -1,5 +1,5 @@
-:::caution Update in progress
+:::caution In progress
 
-The Great Expectations CLI is deprecated. This topic will be updated soon to reflect this functionality change.
+The Great Expectations CLI is no longer the preferred method for implementing and configuring Great Expectations. This topic will be updated soon to reflect this change. For more information, see [this CLI blog post](https://greatexpectations.io/blog/).
 
 :::
