@@ -2,6 +2,8 @@
 title: How to use the Great Expectations command line interface (CLI)
 ---
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
 The Great Expectations command line is organized using a **`<NOUN> <VERB>`** syntax.
 This guide is organized by nouns (datasource, suite, docs) then verbs (new, list, edit, etc).
 

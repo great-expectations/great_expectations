@@ -2,6 +2,8 @@
 title: Deploying Great Expectations in a hosted environment without file system or CLI
 ---
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
 By default, creating a standard deployment of Great Expectations relies on two components:
 
 1. The Great Expectations [CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md) to initialize a Data Context, create Expectation Suites, add Datasources, etc.

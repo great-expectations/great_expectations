@@ -9,6 +9,7 @@ keywords: [Great Expectations, Data Context, Filesystem, ABS, Azure Blob Storage
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 <!-- ## Prerequisites -->
 import PrereqAbsConfiguredAnAbsAccount from '/docs/components/prerequisites/_abs_configured_an_azure_storage_account_and_kept_connection_string.md'

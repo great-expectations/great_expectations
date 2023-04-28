@@ -14,6 +14,8 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 ## Overview
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
 ### Definition
 
 An Expectation Suite is a collection of verifiable assertions about data.

@@ -1,5 +1,7 @@
 # Contribute packages
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
 To submit a custom Great Expectations package, you complete the following tasks:
 
 - [Contact the Great Expectations Developer Relations team](#contact-the-great-expectations-developer-relations-team)

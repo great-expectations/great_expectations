@@ -5,6 +5,7 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md';
 
 Custom <TechnicalTag tag="expectation" text="Expectations"/> are extensions to the core functionality of Great Expectations. Many Custom Expectations may be fit for a very specific purpose,
 or be at lower levels of stability and feature maturity than the core library.

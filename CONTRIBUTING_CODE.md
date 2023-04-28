@@ -1,5 +1,7 @@
 # Contribute a code change
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
 To modify existing Great Expectations code, you complete the following tasks:
 
 - [Fork and clone the Great Expectations repository](#fork-and-clone-the-great-expectations-repository)

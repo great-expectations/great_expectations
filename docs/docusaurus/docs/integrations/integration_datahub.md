@@ -5,6 +5,8 @@ authors:
     url: https://datahubproject.io
 ---
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
 :::info
 * Maintained By: DataHub
 * Status: Beta
