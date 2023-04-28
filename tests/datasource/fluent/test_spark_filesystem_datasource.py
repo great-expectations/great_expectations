@@ -214,7 +214,7 @@ def test_get_batch_list_from_directory_merges_files(
     batch_data = batches[0].data
     # The directory contains 12 files with 10,000 records each so the batch data
     # (spark dataframe) should contain 120,000 records:
-    assert batch_data.dataframe.count() == 12 * 10000
+    assert batch_data.dataframe.count() == 12 * 10000  # type: ignore[attr-defined]
 
 
 @pytest.mark.unit

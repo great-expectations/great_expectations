@@ -27,6 +27,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         # sorters (list): Optional list if you want to sort the data_references
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Format function mapping path to fully-qualified resource on DBFS
+        get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
     """
 
     def __init__(
@@ -42,6 +43,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
+        get_unfiltered_batch_definition_list_fn: None | Callable = None,
     ) -> None:
         super().__init__(
             datasource_name=datasource_name,
@@ -55,6 +57,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
+            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
 
     @classmethod
@@ -71,6 +74,7 @@ class DBFSDataConnector(FilesystemDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
+        get_unfiltered_batch_definition_list_fn: None | Callable = None,
     ) -> DBFSDataConnector:
         """Builds "DBFSDataConnector", which links named DataAsset to DBFS.
 
@@ -86,6 +90,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             # sorters: optional list of sorters for sorting data_references
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on DBFS
+            get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
 
         Returns:
             Instantiated "DBFSDataConnector" object
@@ -102,6 +107,7 @@ class DBFSDataConnector(FilesystemDataConnector):
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
+            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
 
     # Interface Method

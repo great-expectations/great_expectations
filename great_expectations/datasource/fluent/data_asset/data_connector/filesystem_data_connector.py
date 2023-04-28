@@ -116,6 +116,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             # sorters: optional list of sorters for sorting data_references
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn: Format function mapping path to fully-qualified resource on filesystem (optional)
+            get_unfiltered_batch_definition_list_fn: Function used to get the batch definition list before filtering
 
         Returns:
             Instantiated "FilesystemDataConnector" object
