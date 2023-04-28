@@ -78,7 +78,7 @@ class ExpectationLegacyTestCaseAdapter(ExpectationTestCase):
         title,
         exact_match_out,
         out,
-        suppress_test_for=[],
+        suppress_test_for=[],  # noqa: B006 # mutable default
         **kwargs,
     ) -> None:
         super().__init__(
