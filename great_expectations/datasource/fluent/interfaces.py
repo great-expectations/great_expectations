@@ -87,18 +87,22 @@ BatchMetadata: TypeAlias = Dict[str, Any]
 
 
 class BatchRequest(pydantic.BaseModel):
-    datasource_name: str
-    data_asset_name: str
-    options: BatchRequestOptions = pydantic.Field(default_factory=dict)
-    batch_slice: slice = pydantic.Field(default=slice(0, None, None))
+    datasource_name: str = pydantic.Field(..., allow_mutation=False)
+    data_asset_name: str = pydantic.Field(..., allow_mutation=False)
+    options: BatchRequestOptions = pydantic.Field(
+        default_factory=dict, allow_mutation=False
+    )
+    batch_slice: BatchSlice = pydantic.Field(
+        default=slice(0, None, None), allow_mutation=True
+    )
 
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr()
 
     class Config:
-        allow_mutation = False
         arbitrary_types_allowed = True
         extra = pydantic.Extra.forbid
         json_encoders = {slice: str}
+        validate_assignment = True
 
     def __init__(self, **kwargs) -> None:
         if "batch_slice" in kwargs:
@@ -115,8 +119,8 @@ class BatchRequest(pydantic.BaseModel):
         exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
         by_alias: bool = False,
         skip_defaults: Optional[bool] = None,
-        exclude_unset: bool = False,
-        exclude_defaults: bool = True,
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
         exclude_none: bool = False,
         encoder: Optional[Callable[[Any], Any]] = None,
         models_as_dict: bool = True,
@@ -126,10 +130,11 @@ class BatchRequest(pydantic.BaseModel):
         Generate a json representation of the model, optionally specifying which
         fields to include or exclude.
 
-        Deviates from pydantic `exclude_defaults` `True` by default instead of `False` by
+        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
-        return super().json(
+        self.batch_slice = self._batch_slice_input
+        result = super().json(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -141,6 +146,8 @@ class BatchRequest(pydantic.BaseModel):
             models_as_dict=models_as_dict,
             **dumps_kwargs,
         )
+        self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
+        return result
 
     def dict(
         self,
@@ -149,8 +156,8 @@ class BatchRequest(pydantic.BaseModel):
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
         by_alias: bool = False,
         # Default to True to prevent serializing long configs full of unset default values
-        exclude_unset: bool = False,
-        exclude_defaults: bool = True,
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
         exclude_none: bool = False,
         # deprecated - use exclude_unset instead
         skip_defaults: bool | None = None,
@@ -161,10 +168,11 @@ class BatchRequest(pydantic.BaseModel):
         Generate a dictionary representation of the model, optionally specifying which
         fields to include or exclude.
 
-        Deviates from pydantic `exclude_defaults` `True` by default instead of `False` by
+        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
-        return super().dict(
+        self.batch_slice = self._batch_slice_input
+        result = super().dict(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -173,6 +181,8 @@ class BatchRequest(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
+        self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
+        return result
 
 
 @pydantic_dc.dataclass(frozen=True)
