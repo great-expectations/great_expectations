@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
+        ParquetAsset,
     )
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,10 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
                 asset.test_connection()
 
     def _build_data_connector(
-        self, data_asset: CSVAsset, glob_directive: str = "**/*", **kwargs
+        self,
+        data_asset: CSVAsset | ParquetAsset,
+        glob_directive: str = "**/*",
+        **kwargs,
     ) -> None:
         """Builds and attaches the `FilesystemDataConnector` to the asset."""
         if kwargs:
