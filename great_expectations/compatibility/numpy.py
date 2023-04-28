@@ -21,14 +21,14 @@ def numpy_quantile(
     """
     quantile: npt.NDArray
     if version.parse(np.__version__) >= version.parse("1.22.0"):
-        quantile = np.quantile(  # type: ignore[call-overload]
+        quantile = np.quantile(  # type: ignore[call-arg]
             a=a,
             q=q,
             axis=axis,
             method=method,
         )
     else:
-        quantile = np.quantile(  # type: ignore[call-overload]
+        quantile = np.quantile(
             a=a,
             q=q,
             axis=axis,
