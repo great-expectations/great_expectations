@@ -65,7 +65,13 @@ pip install great-expectations --upgrade
 ```
 
 ### 2. Get DataContext: 
-{TODO}
+
+The simplest way to create a new <TechnicalTag relative="../../../" tag="data_context" text="Data Context" />  is by using the `get_context()` method.
+
+From a Notebook or script where you want to deploy Great Expectations run the following command. Here the `full_path_to_project_directory`  can be an empty directory where you intend to build your Great Expectations configuration.
+
+```YAML name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py get_context"
+```
 
 ### 3. Connect to Metadata Stores on GCP
 
@@ -122,9 +128,10 @@ gcloud app browse
 
 If successful, the `gcloud` CLI will provide the URL to your app and launch it in a new browser window, and you should be able to view the index page of your Data Docs site.
 
-### 3. Connect to your Data
+### 4. Connect to your Data
 
-The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that will be migrated to Cloud Composer. The following code can be run either in an interactive Python session or Jupyter Notebook that is in your `great_expectations/` folder.
+The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that will be migrated to Cloud Composer. 
+
 More details can be found in the corresponding How to Guides, which have been linked.
 
 <Tabs
@@ -136,14 +143,7 @@ More details can be found in the corresponding How to Guides, which have been li
   ]}>
 <TabItem value="gcs">
 
-To connect to your data in BigQuery, first instantiate your project's Data Context. One way to way to create a new Data Context is by using the `create()` method.
-
-From a Notebook or script where you want to deploy Great Expectations run the following command. Here the `full_path_to_project_directory` can be an empty directory where you intend to build your Great Expectations configuration.:
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py get_context"
-```
-
-Using this example configuration, add in your GCS bucket and path to a directory that contains some of your data:
+Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Context" /> that was initialized in the previous section, add in your GCS bucket and path to a directory that contains some of your data:
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py datasource"
 ```
@@ -191,7 +191,7 @@ For more details on how to configure the BigQuery Datasource, please refer to [H
   ]}>
 <TabItem value="gcs">
 
-Add a CSV `Asset` into your `Datasource` by using the `add_csv_asset` function.
+Add a CSV `Asset` to your `Datasource` by using the `add_csv_asset` function.
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py asset"
 ```
@@ -242,7 +242,9 @@ In the next example, a query `Asset` named `my_query_asset` is built by submitti
 
 For our example, we will be creating an ExpectationSuite with [instant feedback from a sample Batch of data](../guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md), which we will describe in our `BatchRequest`. For additional examples on how to create ExpectationSuites, either through [domain knowledge](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md) or using the [User Configurable Profiler](../guides/expectations/how_to_create_and_edit_expectations_with_a_profiler.md), please refer to the documentation under `How to Guides` -> `Creating and editing Expectations for your data` -> `Core skills`.
 
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py add_expectation_suite">
+First create an ExpectationSuite by using the `add_or_update_expectation_suite` method on our DataContext. Then use it to get a `Validator`. 
+
+```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file.py add_expectation_suite"
 ```
 
 Next, use the `Validator` to run expectations on the batch and automatically add them to the ExpectationSuite. For our example, we will add `expect_column_values_to_not_be_null` and `expect_column_values_to_be_between` (`passenger_count` and `congestion_surcharge` are columns in our test data, and they can be replaced with columns in your data).
@@ -265,11 +267,6 @@ For our example, we will be creating our ExpectationSuite with [instant feedback
 Using the `table_asset` from the previous step, build a `BatchRequest`. 
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery_yaml_configs.py batch_request"
-```
-
-Next, create an ExpectationSuite (`test_gcs_suite` in our example), and use it to get a `Validator`.
-
-```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs_yaml_configs.py add_expectation_suite"
 ```
 
 Next, create an ExpectationSuite (`test_bigquery_suite` in our example), and use it to get a `Validator`.
@@ -310,7 +307,7 @@ Add the following Checkpoint `gcs_checkpoint` to the DataContext.  Here we are u
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py checkpoint"
 ```
 
-Next, you can either run the Checkpoint directly in-code,
+Next, you can run the Checkpoint directly in-code,
 
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py run_checkpoint">
 ```
