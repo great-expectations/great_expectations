@@ -176,6 +176,48 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 
 
 @pytest.mark.unit
+def test_get_batch_list_from_directory_one_batch(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+):
+    """What does this test and why?
+
+    A "directory" asset should only have a single batch."""
+    asset = spark_filesystem_datasource.add_directory_csv_asset(
+        name="csv_asset",
+        data_directory="samples_2020",
+        header=True,
+        infer_schema=True,
+    )
+    request = asset.build_batch_request()
+    batches = asset.get_batch_list_from_batch_request(request)
+    assert len(batches) == 1
+
+
+@pytest.mark.integration
+def test_get_batch_list_from_directory_merges_files(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+):
+    """What does this test and why?
+
+    Adding a "directory" asset should only add a single batch merging all files into one dataframe.
+
+    Marked as an integration test since this uses the execution engine to actually load the files.
+    """
+    asset = spark_filesystem_datasource.add_directory_csv_asset(
+        name="csv_asset",
+        data_directory="samples_2020",
+        header=True,
+        infer_schema=True,
+    )
+    request = asset.build_batch_request()
+    batches = asset.get_batch_list_from_batch_request(request)
+    batch_data = batches[0].data
+    # The directory contains 12 files with 10,000 records each so the batch data
+    # (spark dataframe) should contain 120,000 records:
+    assert batch_data.dataframe.count() == 12 * 10000
+
+
+@pytest.mark.unit
 def test_get_batch_list_from_fully_specified_batch_request(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
