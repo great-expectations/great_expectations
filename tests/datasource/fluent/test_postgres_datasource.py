@@ -41,7 +41,10 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+        BatchSlice,
+    )
 
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
@@ -733,6 +736,47 @@ def test_table_asset_sorter_parsing(order_by: list):
     pprint(f"\n{table_asset.dict()}")
 
     assert table_asset.order_by == expected_sorters
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "batch_slice,expected_batch_count",
+    [
+        ("[-3:]", 3),
+        ("[5:9]", 4),
+        ("[:10:2]", 5),
+        (slice(-3, None), 3),
+        (slice(5, 9), 4),
+        (slice(0, 10, 2), 5),
+        ("-5", 1),
+        ("-1", 1),
+        (11, 1),
+        (0, 1),
+        ([3], 1),
+        (None, 12),
+        ("", 12),
+    ],
+)
+def test_postgres_slice_batch_count(
+    empty_data_context,
+    create_source: CreateSourceFixture,
+    batch_slice: BatchSlice,
+    expected_batch_count: int,
+) -> None:
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        data_context=empty_data_context,
+    ) as source:
+        source, asset = create_and_add_table_asset_without_testing_connection(
+            source=source, name="my_asset", table_name="my_table"
+        )
+        asset.splitter = year_month_splitter(column_name="my_col")
+        batch_request = asset.build_batch_request(
+            options={"year": 2021}, batch_slice=batch_slice
+        )
+        batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
+        assert len(batches) == expected_batch_count
 
 
 @pytest.mark.unit
