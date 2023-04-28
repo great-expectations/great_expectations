@@ -10,6 +10,20 @@ title: Changelog
 - Deprecation warnings are accompanied by a moniker (as a code comment) indicating when they were deprecated.  For example: `# deprecated-v0.13`
 - Changes to methods and parameters due to deprecation are also noted in the relevant docstrings.
 
+### 0.16.10
+* [FEATURE] Add tests for `Checkpoint` utilizing Pandas and Spark style Fluent Datasources. ([#7740](https://github.com/great-expectations/great_expectations/pull/7740))
+* [FEATURE] Fluent `BatchRequest` slicing ([#7706](https://github.com/great-expectations/great_expectations/pull/7706))
+* [BUGFIX] Patch Expectation registry issue introduced in 0.16.9 ([#7771](https://github.com/great-expectations/great_expectations/pull/7771))
+* [DOCS] Remove, relocate, consolidate, and edit Contributing content ([#7669](https://github.com/great-expectations/great_expectations/pull/7669))
+* [DOCS] Temporarily pin ipython for python 3.8 before building api docs ([#7764](https://github.com/great-expectations/great_expectations/pull/7764))
+* [DOCS] Update Links in Configure Topics ([#7760](https://github.com/great-expectations/great_expectations/pull/7760))
+* [DOCS] Link Updates ([#7768](https://github.com/great-expectations/great_expectations/pull/7768))
+* [MAINTENANCE] FDS Deployment Guide - Pandas S3 fix reference ([#7755](https://github.com/great-expectations/great_expectations/pull/7755))
+* [MAINTENANCE] IPython Python 3.8 upper bound ([#7763](https://github.com/great-expectations/great_expectations/pull/7763))
+* [MAINTENANCE] breakup mypy ci steps ([#7761](https://github.com/great-expectations/great_expectations/pull/7761))
+* [MAINTENANCE] fix async type-check step ([#7772](https://github.com/great-expectations/great_expectations/pull/7772))
+* [MAINTENANCE] Bump Python version in `static_type_check` stage of async CI ([#7773](https://github.com/great-expectations/great_expectations/pull/7773))
+
 ### 0.16.9
 * [FEATURE] Implementing Fluent Datasources Support for Checkpoint ([#7697](https://github.com/great-expectations/great_expectations/pull/7697))
 * [FEATURE] FDS persist `DataAsset` to YAML file immediately on creation ([#7705](https://github.com/great-expectations/great_expectations/pull/7705))
