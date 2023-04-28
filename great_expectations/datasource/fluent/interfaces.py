@@ -90,31 +90,27 @@ class BatchRequest(pydantic.BaseModel):
     datasource_name: str
     data_asset_name: str
     options: BatchRequestOptions = pydantic.Field(default_factory=dict)
-    batch_slice: slice = pydantic.Field(default=slice(0, None, None))
+    batch_slice_input: Optional[BatchSlice] = pydantic.Field(
+        default=None, alias="batch_slice"
+    )
 
-    _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr()
+    @property
+    def batch_slice(self) -> slice:
+        return parse_batch_slice(self.batch_slice_input)
 
     class Config:
+        allow_mutation = False
         arbitrary_types_allowed = True
         extra = pydantic.Extra.forbid
         json_encoders = {slice: str}
-
-    def __init__(self, **kwargs) -> None:
-        if "batch_slice" in kwargs:
-            self._batch_slice_input = kwargs["batch_slice"]
-            kwargs["batch_slice"] = parse_batch_slice(
-                batch_slice=self._batch_slice_input
-            )
-        else:
-            self._batch_slice_input = None
-        super().__init__(**kwargs)
+        validate_assignment = True
 
     def json(
         self,
         *,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
         exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         skip_defaults: Optional[bool] = None,
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
@@ -127,12 +123,11 @@ class BatchRequest(pydantic.BaseModel):
         Generate a json representation of the model, optionally specifying which
         fields to include or exclude.
 
-        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
-        default.
+        Deviates from pydantic
+          - `by_alias` `True` by default instead of `False` by default.
+          - `exclude_unset` `True` by default instead of `False` by default.
         """
-        if self._batch_slice_input is not None:
-            self.batch_slice = self._batch_slice_input  # type: ignore[assignment]
-        result = super().json(
+        return super().json(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -144,16 +139,13 @@ class BatchRequest(pydantic.BaseModel):
             models_as_dict=models_as_dict,
             **dumps_kwargs,
         )
-        if self._batch_slice_input is not None:
-            self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
-        return result
 
     def dict(
         self,
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        by_alias: bool = False,
+        by_alias: bool = True,
         # Default to True to prevent serializing long configs full of unset default values
         exclude_unset: bool = True,
         exclude_defaults: bool = False,
@@ -167,12 +159,11 @@ class BatchRequest(pydantic.BaseModel):
         Generate a dictionary representation of the model, optionally specifying which
         fields to include or exclude.
 
-        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
-        default.
+        Deviates from pydantic
+          - `by_alias` `True` by default instead of `False` by default.
+          - `exclude_unset` `True` by default instead of `False` by default.
         """
-        if self._batch_slice_input is not None:
-            self.batch_slice = self._batch_slice_input  # type: ignore[assignment]
-        result = super().dict(
+        return super().dict(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -181,9 +172,6 @@ class BatchRequest(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
-        if self._batch_slice_input is not None:
-            self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
-        return result
 
 
 @pydantic_dc.dataclass(frozen=True)
