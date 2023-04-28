@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import os
 import shutil
-from typing import List, Union
+from typing import TYPE_CHECKING, List, Union
 
 import pandas as pd
 import pytest
@@ -11,6 +13,9 @@ from great_expectations.data_context.util import file_relative_path
 from great_expectations.exceptions import InvalidBatchRequestError
 from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
+
+if TYPE_CHECKING:
+    from great_expectations.data_context import AbstractDataContext
 
 yaml = YAMLHandler()
 
@@ -72,7 +77,7 @@ def context_with_single_titanic_csv(empty_data_context, tmp_path_factory):
 
 
 def test_get_validator(context_with_single_titanic_csv):
-    context: "DataContext" = context_with_single_titanic_csv
+    context: AbstractDataContext = context_with_single_titanic_csv
     batch_request_dict: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
@@ -88,8 +93,10 @@ def test_get_validator(context_with_single_titanic_csv):
     assert my_validator.active_batch.data.dataframe.shape == (1313, 7)
 
 
-def test_get_validator_bad_batch_request(context_with_single_titanic_csv):
-    context: "DataContext" = context_with_single_titanic_csv
+def test_get_validator_bad_batch_request(
+    context_with_single_titanic_csv,
+):
+    context: AbstractDataContext = context_with_single_titanic_csv
     batch_request_dict: Union[dict, BatchRequest] = {
         "datasource_name": "my_datasource",
         "data_connector_name": "my_data_connector",
