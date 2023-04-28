@@ -284,7 +284,6 @@ stages:
         # includes explicit install of chardet, which was causing problems in the pipeline
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines google-cloud-bigquery-storage
-              pip install chardet==3.0.4
             displayName: 'Install GX and required dependencies'
 
           # tests containing the name "RUNME_gcp" are run
