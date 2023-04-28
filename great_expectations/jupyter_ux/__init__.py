@@ -136,6 +136,9 @@ Uncomment the next cell and set data_source_name to one of these names.
     return data_source_name
 
 
+_LOCAL_ZONE = tzlocal.get_localzone()
+
+
 def setup_notebook_logging(logger=None, log_level=logging.INFO):
     """Set up the provided logger for the GX default logging configuration.
 
@@ -143,7 +146,7 @@ def setup_notebook_logging(logger=None, log_level=logging.INFO):
         logger - the logger to configure
     """
 
-    def posix2local(timestamp, tz=tzlocal.get_localzone()):
+    def posix2local(timestamp, tz=_LOCAL_ZONE):
         """Seconds since the epoch -> local time as an aware datetime object."""
         return datetime.fromtimestamp(timestamp, tz)
 
