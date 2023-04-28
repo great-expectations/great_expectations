@@ -46,7 +46,7 @@ import VerifySuccessfulGxInstallation from '@site/docs/guides/setup/installation
 
 <!-- 1.3 Create your Data Context -->
 
-import CreateDataContextWithCli from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_the_cli.mdx'
+import CreateDataContextWithGetContext from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
 
 <!-- 1.4 Configure your Expectations Store on Amazon S3 -->
 
@@ -58,17 +58,9 @@ import IdentifyDataContextExpectationsStore from '@site/docs/guides/setup/config
 
 import AddS3ExpectationsStoreConfiguration from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_expectations_on_s.mdx'
 
-<!-- 1.4.3 Verify that the new Amazon S3 Expectations Store has been added successfully -->
-
-import VerifyS3ExpectationsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_that_the_new_expectations_store_has_been_added_by_running_great_expectations_store_list.mdx'
-
-<!-- 1.4.4 (Optional) Copy existing Expectation JSON files to the Amazon S3 bucket -->
+<!-- 1.4.3 (Optional) Copy existing Expectation JSON files to the Amazon S3 bucket -->
 
 import OptionalCopyExistingExpectationsToS3 from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_copy_existing_expectation_json_files_to_the_s_bucket_this_step_is_optional.mdx'
-
-<!-- 1.4.5 (Optional) Verify that copied Expectations can be accessed from Amazon S3 -->
-
-import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_that_expectations_can_be_accessed_from_amazon_s_by_running_great_expectations_suite_list.mdx'
 
 <!-- 1.5 Configure your Validation Results Store on Amazon S3 -->
 
@@ -80,11 +72,7 @@ import IdentifyDataContextValidationResultsStore from '@site/docs/guides/setup/c
 
 import AddS3ValidationResultsStoreConfiguration from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_validation_results_on_s.mdx'
 
-<!-- 1.5.3 Verify that the new Amazon S3 Validation Results Store has been added successfully -->
-
-import VerifyS3ValidationResultsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_confirm_that_the_new_validation_results_store_has_been_added_by_running_great_expectations_store_list.mdx'
-
-<!-- 1.5.4 (Optional) Copy existing Validation results to the Amazon S3 bucket -->
+<!-- 1.5.3 (Optional) Copy existing Validation results to the Amazon S3 bucket -->
 
 import OptionalCopyExistingValidationResultsToS3 from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_copy_existing_validation_results_to_the_s_bucket_this_step_is_optional.mdx'
 
@@ -110,27 +98,19 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- Part 2: Connect to data -->
 
-<!-- 2.1 Choose how to run the code for configuring a new Datasource -->
+<!-- 2.1 Create your Data Context -->
 
-import HowToRunDatasourceCode from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_code_environment.md'
+import CreateDataContextWithGetContextAgain from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
 
-<!-- 2.2 Instantiate your project's DataContext -->
-
-import InstantiateDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_instantiate_your_projects_datacontext.mdx'
-
-<!-- 2.3 Configure your Datasource -->
-
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-<InProgress />
+<!-- 2.2 Add Datasource to your DataContext -->
 
 import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_configure_your_datasource.mdx'
 
-<!-- 2.4 Save the Datasource configuration to your DataContext -->
+<!-- 2.3 Add CSV Asset to your Datasource -->
 
-import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_save_the_datasource_configuration_to_your_datacontext.mdx'
+import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_add_csv_asset_to_pandas_s3_datasource.mdx'
 
-<!-- 2.5 Test your new Datasource -->
+<!-- 2.4 Test your new Datasource by building a BatchRequest from Asset -->
 
 import TestS3Datasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_test_your_new_datasource.mdx'
 
@@ -156,13 +136,9 @@ import CheckpointCreateAndRun from '@site/docs/deployment_patterns/how_to_use_gx
 
 <!-- 4.1.1 Create a Checkpoint -->
 
-import CreateCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_tabs.md'
+import CreateCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create.md'
 
-<!-- 4.1.2 Save the Checkpoint -->
-
-import SaveCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_save.md'
-
-<!-- 4.1.3 Run the Checkpoint -->
+<!-- 4.1.2 Run the Checkpoint -->
 
 import RunCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_run.md'
 
@@ -218,7 +194,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <VerifySuccessfulGxInstallation />
 
 ### 1.3 Create your Data Context
-<CreateDataContextWithCli />
+<CreateDataContextWithGetContext />
 
 ### 1.4 Configure your Expectations Store on Amazon S3
 
@@ -228,14 +204,8 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 #### 1.4.2 Update your configuration file to include a new Store for Expectations on Amazon S3
 <AddS3ExpectationsStoreConfiguration />
 
-#### 1.4.3 Verify that the new Amazon S3 Expectations Store has been added successfully
-<VerifyS3ExpectationsStoreExists />
-
-#### 1.4.4 (Optional) Copy existing Expectation JSON files to the Amazon S3 bucket
+#### 1.4.3 (Optional) Copy existing Expectation JSON files to the Amazon S3 bucket
 <OptionalCopyExistingExpectationsToS3 />
-
-#### 1.4.5 (Optional) Verify that copied Expectations can be accessed from Amazon S3
-<OptionalVerifyCopiedExpectationsAreAccessible />
 
 ### 1.5 Configure your Validation Results Store on Amazon S3
 
@@ -245,10 +215,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 #### 1.5.2 Update your configuration file to include a new Store for Validation Results on Amazon S3
 <AddS3ValidationResultsStoreConfiguration />
 
-#### 1.5.3 Verify that the new Amazon S3 Validation Results Store has been added successfully
-<VerifyS3ValidationResultsStoreExists />
-
-#### 1.5.4 (Optional) Copy existing Validation results to the Amazon S3 bucket
+#### 1.5.3 (Optional) Copy existing Validation results to the Amazon S3 bucket
 <OptionalCopyExistingValidationResultsToS3 />
 
 ### 1.6 Configure Data Docs for hosting and sharing from Amazon S3
@@ -273,20 +240,16 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 ## Part 2: Connect to data
 
-### 2.1 Choose how to run the code for creating a new Datasource
-<HowToRunDatasourceCode />
+### 2.1 Instantiate your project's DataContext
+<CreateDataContextWithGetContextAgain />
 
-### 2.2 Instantiate your project's DataContext
-<InstantiateDataContext />
+If you have already instantiated your `DataContext` in a previous step, this step can be skipped. 
 
-### 2.3 Configure your Datasource
+### 2.2 Add CSV Asset to your Datasource 
 <ConfigureYourDatasource />
 
-### 2.4 Save the Datasource configuration to your DataContext
+### 2.3 Test your new Datasource by building a BatchRequest from Asset 
 <SaveDatasourceConfigurationToDataContext />
-
-### 2.5 Test your new Datasource
-<TestS3Datasource />
 
 ## Part 3: Create Expectations
 
@@ -312,11 +275,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 <CreateCheckpoint />
 
-#### 4.1.2 Save the Checkpoint
-
-<SaveCheckpoint />
-
-#### 4.1.3 Run the Checkpoint
+#### 4.1.2 Run the Checkpoint
 
 <RunCheckpoint />
 

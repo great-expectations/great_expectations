@@ -113,7 +113,7 @@ def get_validator(
         )
 
     batch: Batch
-    if batch_list is None or all([batch is None for batch in batch_list]):
+    if batch_list is None or all(batch is None for batch in batch_list):
         if batch_request is None:
             return None
 
@@ -157,7 +157,7 @@ def get_batch_ids(
     parameters: Optional[Dict[str, ParameterContainer]] = None,
 ) -> Optional[List[str]]:
     batch: Batch
-    if batch_list is None or all([batch is None for batch in batch_list]):
+    if batch_list is None or all(batch is None for batch in batch_list):
         if batch_request is None:
             return None
 
@@ -410,10 +410,8 @@ def get_resolved_metrics_by_key(
         key
         for key, metric_configuration_ids in metric_configuration_ids_by_key.items()
         if all(
-            [
-                metric_configuration_id in metric_configuration_ids_resolved_metrics
-                for metric_configuration_id in metric_configuration_ids
-            ]
+            metric_configuration_id in metric_configuration_ids_resolved_metrics
+            for metric_configuration_id in metric_configuration_ids
         )
     ]
 
@@ -514,14 +512,12 @@ def integer_semantic_domain_type(domain: Domain) -> bool:
 
     semantic_domain_type: SemanticDomainTypes
     return inferred_semantic_domain_type and all(
-        [
-            semantic_domain_type
-            in [
-                SemanticDomainTypes.LOGIC,
-                SemanticDomainTypes.IDENTIFIER,
-            ]
-            for semantic_domain_type in inferred_semantic_domain_type.values()
+        semantic_domain_type
+        in [
+            SemanticDomainTypes.LOGIC,
+            SemanticDomainTypes.IDENTIFIER,
         ]
+        for semantic_domain_type in inferred_semantic_domain_type.values()
     )
 
 
@@ -545,10 +541,8 @@ def datetime_semantic_domain_type(domain: Domain) -> bool:
 
     semantic_domain_type: SemanticDomainTypes
     return inferred_semantic_domain_type and all(
-        [
-            semantic_domain_type == SemanticDomainTypes.DATETIME
-            for semantic_domain_type in inferred_semantic_domain_type.values()
-        ]
+        semantic_domain_type == SemanticDomainTypes.DATETIME
+        for semantic_domain_type in inferred_semantic_domain_type.values()
     )
 
 

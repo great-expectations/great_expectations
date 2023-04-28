@@ -76,10 +76,20 @@ connecting_to_your_data = [
     # ),
 ]
 
+deployment_patterns = [
+    IntegrationTestFixture(
+        name="RUNME_AWS_deployment_pattern_pandas_s3",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.AWS],
+    )
+]
+
 split_data = []
 
 sample_data = []
 
 s3_integration_tests += connecting_to_your_data
+s3_integration_tests += deployment_patterns
 s3_integration_tests += split_data
 s3_integration_tests += sample_data

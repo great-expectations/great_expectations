@@ -91,11 +91,16 @@ stages:
           versionSpec: 3.7
         displayName: 'Use Python 3.7'
       - script: |
+          python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
-          invoke type-check --ci --pretty
-          # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources
+        name: InstallDependencies
+      - script: |
+          invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
+      - script: |
+          # initial run doesn't check `.pyi` source files
+          invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
+        name: TypeCheckStubSourceFiles
 
     - job: docstring_linter
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
@@ -131,7 +136,8 @@ stages:
       condition: or(eq(variables.isScheduled, true), eq(variables.isReleasePrep, true), eq(variables.isRelease, true), eq(variables.isManual, true))
       steps:
         - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
+            pip install --requirement reqs/requirements-dev-test.txt
+            invoke public-api
           name: PublicAPIReport
 
   - stage: docker_tests

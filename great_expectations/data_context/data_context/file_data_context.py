@@ -128,7 +128,7 @@ class FileDataContext(SerializableDataContext):
         )
         return variables
 
-    def _save_project_config(self) -> None:
+    def _save_project_config(self, _fds_datasource=None) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
@@ -208,6 +208,7 @@ class FileDataContext(SerializableDataContext):
                 # attach the config_provider for each loaded datasource
                 for datasource in gx_config.datasources:
                     datasource._config_provider = config_provider
+                    datasource._data_context = self
 
                 return gx_config
             logger.info(f"no fluent config at {path_to_fluent_yaml.absolute()}")

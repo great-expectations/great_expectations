@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 import datetime
 import json
 import logging
@@ -864,7 +863,19 @@ class Batch(SerializableDictDot):
 
 def materialize_batch_request(
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-) -> Optional[BatchRequestBase]:
+) -> Optional[FluentBatchRequest | BatchRequestBase]:
+    def _is_fluent_batch_request(args: dict[str, Any]) -> bool:
+        from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
+
+        return (
+            ("datasource_name" in args)
+            and ("data_asset_name" in args)
+            and (
+                ("data_connector_name" not in args)
+                or (args["data_connector_name"].lower() == _DATA_CONNECTOR_NAME)
+            )
+        )
+
     effective_batch_request: dict = get_batch_request_as_dict(
         batch_request=batch_request
     )
@@ -873,7 +884,7 @@ def materialize_batch_request(
         return None
 
     batch_request_class: type
-    if "options" in effective_batch_request:
+    if _is_fluent_batch_request(args=effective_batch_request):
         batch_request_class = _get_fluent_batch_request_class()
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request
@@ -914,7 +925,7 @@ def get_batch_request_as_dict(
         batch_request = batch_request.to_dict()
 
     if isinstance(batch_request, _get_fluent_batch_request_class()):
-        batch_request = dataclasses.asdict(batch_request)
+        batch_request = batch_request.dict()
 
     return batch_request
 

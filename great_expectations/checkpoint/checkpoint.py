@@ -64,6 +64,9 @@ from great_expectations.validation_operators.types.validation_operator_result im
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
+    )
     from great_expectations.validator.validator import Validator
 
 
@@ -140,7 +143,9 @@ class BaseCheckpoint(ConfigPeer):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[FluentBatchRequest, BatchRequestBase, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -441,7 +446,7 @@ class BaseCheckpoint(ConfigPeer):
             )
 
             batch_request: Union[
-                BatchRequest, RuntimeBatchRequest
+                FluentBatchRequest, BatchRequest, RuntimeBatchRequest
             ] = substituted_validation_dict.get("batch_request")
             expectation_suite_name: str = substituted_validation_dict.get(
                 "expectation_suite_name"
@@ -578,14 +583,12 @@ class BaseCheckpoint(ConfigPeer):
         ) or (
             validations_present
             and all(
-                [
-                    (
-                        validation.get("action_list")
-                        and isinstance(validation["action_list"], list)
-                        and len(validation["action_list"]) > 0
-                    )
-                    for validation in self.validations
-                ]
+                (
+                    validation.get("action_list")
+                    and isinstance(validation["action_list"], list)
+                    and len(validation["action_list"]) > 0
+                )
+                for validation in self.validations
             )
         )
         if pretty_print:
@@ -954,23 +957,38 @@ constructor arguments.
             "runtime_configuration": runtime_configuration,
             "validations": validations,
             "profilers": profilers,
-            # Next two fields are for LegacyCheckpoint configuration
-            "validation_operator_name": validation_operator_name,
-            "batches": batches,
-            # the following four keys are used by SimpleCheckpoint
-            "site_names": site_names,
-            "slack_webhook": slack_webhook,
-            "notify_on": notify_on,
-            "notify_with": notify_with,
             "ge_cloud_id": ge_cloud_id,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "default_validation_id": default_validation_id,
         }
 
-        checkpoint_config = deep_filter_properties_iterable(
-            properties=checkpoint_config,
-            clean_falsy=True,
-        )
+        if class_name == "LegacyCheckpoint":
+            checkpoint_config.update(
+                {
+                    # Next two fields are for LegacyCheckpoint configuration
+                    "validation_operator_name": validation_operator_name,
+                    "batches": batches,
+                }
+            )
+            checkpoint_config = deep_filter_properties_iterable(
+                properties=checkpoint_config,
+                clean_falsy=True,
+            )
+
+        if class_name == "SimpleCheckpoint":
+            checkpoint_config.update(
+                {
+                    # the following four keys are used by SimpleCheckpoint
+                    "site_names": site_names,
+                    "slack_webhook": slack_webhook,
+                    "notify_on": notify_on,
+                    "notify_with": notify_with,
+                }
+            )
+            checkpoint_config = deep_filter_properties_iterable(
+                properties=checkpoint_config,
+                clean_falsy=True,
+            )
 
         new_checkpoint: Checkpoint = instantiate_class_from_config(
             config=checkpoint_config,
@@ -1350,7 +1368,9 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[FluentBatchRequest, BatchRequestBase, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
