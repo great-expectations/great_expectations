@@ -245,7 +245,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
 
     tuple_filesystem_store_backend = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
     )
     # Check that store_backend_id is created on instantiation, before being accessed
     desired_directory_tree_str = f"""\
@@ -267,7 +267,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     project_path_with_filepath_template = str(full_test_dir_with_file_template)
 
     tuple_filesystem_store_backend_with_filepath_template = TupleFilesystemStoreBackend(
-        root_directory=os.path.join(project_path, path),
+        root_directory=os.path.join(project_path, path),  # noqa: PTH118
         base_directory=project_path_with_filepath_template,
         filepath_template="my_file_{0}",
     )
@@ -285,7 +285,7 @@ def test_StoreBackend_id_initialization(tmp_path_factory):
     # Create a new store with the same config and make sure it reports the same store_backend_id
     tuple_filesystem_store_backend_duplicate = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
         # filepath_template="my_file_{0}",
     )
     check_store_backend_store_backend_id_functionality(
@@ -419,7 +419,7 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
     with pytest.raises(StoreBackendError) as e:
         TupleFilesystemStoreBackend(
             root_directory=project_path,
-            base_directory=os.path.join(project_path, path),
+            base_directory=os.path.join(project_path, path),  # noqa: PTH118
             filepath_prefix="invalid_prefix_ends_with/",
         )
     assert "filepath_prefix may not end with" in e.value.message
@@ -427,7 +427,7 @@ def test_tuple_filesystem_store_filepath_prefix_error(tmp_path_factory):
     with pytest.raises(StoreBackendError) as e:
         TupleFilesystemStoreBackend(
             root_directory=project_path,
-            base_directory=os.path.join(project_path, path),
+            base_directory=os.path.join(project_path, path),  # noqa: PTH118
             filepath_prefix="invalid_prefix_ends_with\\",
         )
     assert "filepath_prefix may not end with" in e.value.message
@@ -444,7 +444,7 @@ def test_FilesystemStoreBackend_two_way_string_conversion(tmp_path_factory):
 
     my_store = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
         filepath_template="{0}/{1}/{2}/foo-{2}-expectations.txt",
     )
 
@@ -472,7 +472,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
 
     my_store = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
         filepath_template="my_file_{0}",
     )
 
@@ -502,7 +502,7 @@ def test_TupleFilesystemStoreBackend(tmp_path_factory):
 
     my_store_with_base_public_path = TupleFilesystemStoreBackend(
         root_directory=project_path,
-        base_directory=os.path.join(project_path, path),
+        base_directory=os.path.join(project_path, path),  # noqa: PTH118
         filepath_template="my_file_{0}",
         base_public_path=base_public_path,
     )
@@ -519,16 +519,16 @@ def test_TupleFilesystemStoreBackend_ignores_jupyter_notebook_checkpoints(
     test_dir = full_test_dir.parts[-1]
     project_path = str(full_test_dir)
 
-    checkpoint_dir = os.path.join(project_path, ".ipynb_checkpoints")
-    os.mkdir(checkpoint_dir)
-    assert os.path.isdir(checkpoint_dir)
-    nb_file = os.path.join(checkpoint_dir, "foo.json")
+    checkpoint_dir = os.path.join(project_path, ".ipynb_checkpoints")  # noqa: PTH118
+    os.mkdir(checkpoint_dir)  # noqa: PTH102
+    assert os.path.isdir(checkpoint_dir)  # noqa: PTH112
+    nb_file = os.path.join(checkpoint_dir, "foo.json")  # noqa: PTH118
 
     with open(nb_file, "w") as f:
         f.write("")
-    assert os.path.isfile(nb_file)
+    assert os.path.isfile(nb_file)  # noqa: PTH113
     my_store = TupleFilesystemStoreBackend(
-        root_directory=os.path.join(project_path, "dummy_str"),
+        root_directory=os.path.join(project_path, "dummy_str"),  # noqa: PTH118
         base_directory=project_path,
     )
 
@@ -1465,7 +1465,7 @@ def test_InlineStoreBackend(empty_data_context: DataContext) -> None:
 
 @pytest.mark.integration
 def test_InlineStoreBackend_with_mocked_fs(empty_data_context: DataContext) -> None:
-    path_to_great_expectations_yml: str = os.path.join(
+    path_to_great_expectations_yml: str = os.path.join(  # noqa: PTH118
         empty_data_context.root_directory, empty_data_context.GX_YML
     )
 

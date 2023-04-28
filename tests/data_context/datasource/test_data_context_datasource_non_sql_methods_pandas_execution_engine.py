@@ -30,14 +30,16 @@ def context_with_single_titanic_csv(empty_data_context, tmp_path_factory):
         )
     )
 
-    titanic_asset_base_directory_path: str = os.path.join(base_directory, "data")
-    os.makedirs(titanic_asset_base_directory_path)
+    titanic_asset_base_directory_path: str = os.path.join(
+        base_directory, "data"
+    )  # noqa: PTH118
+    os.makedirs(titanic_asset_base_directory_path)  # noqa: PTH103
 
     titanic_csv_source_file_path: str = file_relative_path(
         __file__, "../../test_sets/Titanic.csv"
     )
     titanic_csv_destination_file_path: str = str(
-        os.path.join(base_directory, "data/Titanic_19120414_1313.csv")
+        os.path.join(base_directory, "data/Titanic_19120414_1313.csv")  # noqa: PTH118
     )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 

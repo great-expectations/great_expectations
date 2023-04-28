@@ -36,8 +36,8 @@ yaml = YAMLHandler()
 def data_context_without_config_variables_filepath_configured(tmp_path_factory):
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
         context_path,
@@ -55,8 +55,8 @@ def data_context_with_variables_in_config(tmp_path_factory, monkeypatch):
     monkeypatch.setenv("REPLACE_ME_ESCAPED_ENV", "ive_been_$--replaced")
     # This data_context is *manually* created to have the config we want, vs created with DataContext.create
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
         context_path,
@@ -75,45 +75,57 @@ def create_data_context_files(
     config_variables_fixture_filename=None,
 ):
     if config_variables_fixture_filename:
-        os.makedirs(context_path, exist_ok=True)
-        os.makedirs(os.path.join(context_path, "uncommitted"), exist_ok=True)
+        os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
+        os.makedirs(
+            os.path.join(context_path, "uncommitted"), exist_ok=True
+        )  # noqa: PTH103, PTH118
         copy_relative_path(
             f"../test_fixtures/{config_variables_fixture_filename}",
-            str(os.path.join(context_path, "uncommitted/config_variables.yml")),
+            str(
+                os.path.join(context_path, "uncommitted/config_variables.yml")
+            ),  # noqa: PTH118
         )
         copy_relative_path(
             f"../test_fixtures/{ge_config_fixture_filename}",
-            str(os.path.join(context_path, "great_expectations.yml")),
+            str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
         )
     else:
-        os.makedirs(context_path, exist_ok=True)
+        os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
         copy_relative_path(
             f"../test_fixtures/{ge_config_fixture_filename}",
-            str(os.path.join(context_path, "great_expectations.yml")),
+            str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
         )
     create_common_data_context_files(context_path, asset_config_path)
 
 
 def create_common_data_context_files(context_path, asset_config_path):
-    os.makedirs(
-        os.path.join(asset_config_path, "mydatasource/mygenerator/my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(
+            asset_config_path, "mydatasource/mygenerator/my_dag_node"
+        ),  # noqa: PTH118
         exist_ok=True,
     )
     copy_relative_path(
         "../test_fixtures/"
         "expectation_suites/parameterized_expectation_suite_fixture.json",
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"
         ),
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    os.makedirs(
+        os.path.join(context_path, "plugins"), exist_ok=True
+    )  # noqa: PTH103, PTH118
     copy_relative_path(
         "../test_fixtures/custom_pandas_dataset.py",
-        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+        str(
+            os.path.join(context_path, "plugins", "custom_pandas_dataset.py")
+        ),  # noqa: PTH118
     )
     copy_relative_path(
         "../test_fixtures/custom_sparkdf_dataset.py",
-        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+        str(
+            os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")
+        ),  # noqa: PTH118
     )
 
 

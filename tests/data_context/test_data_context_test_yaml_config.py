@@ -117,9 +117,9 @@ def test_expectations_store_with_filesystem_store_backend(
     mock_emit, caplog, empty_data_context_stats_enabled
 ):
     tmp_dir = str(tempfile.mkdtemp())
-    with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:
+    with open(os.path.join(tmp_dir, "expectations_A1.json"), "w") as f_:  # noqa: PTH118
         f_.write("\n")
-    with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:
+    with open(os.path.join(tmp_dir, "expectations_A2.json"), "w") as f_:  # noqa: PTH118
         f_.write("\n")
 
     # noinspection PyUnusedLocal
@@ -577,7 +577,9 @@ def test_config_variables_in_test_yaml_config(
 
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),  # noqa: PTH118
     )
 
     context.save_config_variable("db_file", db_file)
