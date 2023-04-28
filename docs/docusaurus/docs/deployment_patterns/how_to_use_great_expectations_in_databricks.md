@@ -41,20 +41,20 @@ A notebook-scoped library is what it sounds like - "custom Python environments t
 After that we will take care of some imports that will be used later. Choose your configuration options to show applicable imports:
 
 <Tabs
-  groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file-yaml'
+  groupId="file-or-dataframe"
+  defaultValue='file'
   values={[
-  {label: 'File-python', value:'file-python'},
-  {label: 'Dataframe-python', value:'dataframe-python'},
+  {label: 'File', value:'file'},
+  {label: 'Dataframe', value:'dataframe'},
   ]}>
-  <TabItem value="file-python">
+  <TabItem value="file">
 
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports"
 ```
 
   </TabItem>
 
-  <TabItem value="dataframe-python">
+  <TabItem value="dataframe">
 
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py imports"
 ```
@@ -86,13 +86,13 @@ The root_directory here refers to the directory that will hold the data for your
 </details>
 
 <Tabs
-  groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file-yaml'
+  groupId="file-or-dataframe"
+  defaultValue='file'
   values={[
-  {label: 'File-python', value:'file-python'},
-  {label: 'Dataframe-python', value:'dataframe-python'},
+  {label: 'File', value:'file'},
+  {label: 'Dataframe', value:'dataframe'},
   ]}>
-  <TabItem value="file-python">
+  <TabItem value="file">
 
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py root directory"
 ```
@@ -101,7 +101,7 @@ The root_directory here refers to the directory that will hold the data for your
 
   </TabItem>
 
-  <TabItem value="dataframe-python">
+  <TabItem value="dataframe">
 
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py root directory"
 ```
@@ -114,13 +114,13 @@ The root_directory here refers to the directory that will hold the data for your
 ### 3. Prepare your data
 
 <Tabs
-  groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file-yaml'
+  groupId="file-or-dataframe"
+  defaultValue='file'
   values={[
-  {label: 'File-python', value:'file-python'},
-  {label: 'Dataframe-python', value:'dataframe-python'},
+  {label: 'File', value:'file'},
+  {label: 'Dataframe', value:'dataframe'},
   ]}>
-  <TabItem value="file-python">
+  <TabItem value="file">
 
 We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Let's copy some example csv data to our DBFS folder for easier access using [dbutils](https://docs.databricks.com/dev-tools/databricks-utils.html):
 
@@ -135,7 +135,7 @@ for month in range(1, 4):
 
   </TabItem>
 
-  <TabItem value="dataframe-python">
+  <TabItem value="dataframe">
 
 We will use our familiar NYC taxi yellow cab data, which is available as sample data in Databricks. Run the following code in your notebook to load a month of data as a dataframe:
 
@@ -152,13 +152,13 @@ df = spark.read.format("csv")\
 ### 4. Connect to your data
 
 <Tabs
-  groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file-yaml'
+  groupId="file-or-dataframe"
+  defaultValue='file'
   values={[
-  {label: 'File-python', value:'file-python'},
-  {label: 'Dataframe-python', value:'dataframe-python'},
+  {label: 'File', value:'file'},
+  {label: 'Dataframe', value:'dataframe'},
   ]}>
-  <TabItem value="file-python">
+  <TabItem value="file">
 
 Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
@@ -191,7 +191,7 @@ Then we create a `BatchRequest` using the `DataAsset` we configured earlier to u
 
   </TabItem>
 
-  <TabItem value="dataframe-python">
+  <TabItem value="dataframe">
 
 Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
@@ -227,13 +227,13 @@ Each time we evaluate an Expectation (e.g. via `validator.expect_*`), it will im
 This is the same method of interactive Expectation Suite editing used in the CLI interactive mode notebook accessed via `great_expectations suite new --interactive`. For more information, see our documentation on [How to create and edit Expectations with instant feedback from a sample Batch of data](../../docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md). You can also create Expectation Suites using a [Data Assistant](../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md) to automatically create expectations based on your data or [manually using domain knowledge and without inspecting data directly](../guides/expectations/how_to_create_and_edit_expectations_based_on_domain_knowledge_without_inspecting_data_directly.md). 
 
 <Tabs
-  groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file-yaml'
+  groupId="file-or-dataframe"
+  defaultValue='file'
   values={[
-  {label: 'File-python', value:'file-python'},
-  {label: 'Dataframe-python', value:'dataframe-python'},
+  {label: 'File', value:'file'},
+  {label: 'Dataframe', value:'dataframe'},
   ]}>
-  <TabItem value="file-python">
+  <TabItem value="file">
 
 First we create the suite and get a `Validator`:
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py get validator"
@@ -249,7 +249,7 @@ Finally we save our Expectation Suite (all of the unique Expectation Configurati
 
   </TabItem>
 
-  <TabItem value="dataframe-python">
+  <TabItem value="dataframe">
 
 First we create the suite and get a `Validator`:
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py get validator"
@@ -270,13 +270,13 @@ Finally we save our Expectation Suite (all of the unique Expectation Configurati
 ### 6. Validate your data
 
 <Tabs
-  groupId="file-or-dataframe-pandas-or-yaml"
-  defaultValue='file-yaml'
+  groupId="file-or-dataframe"
+  defaultValue='file'
   values={[
-  {label: 'File-python', value:'file-python'},
-  {label: 'Dataframe-python', value:'dataframe-python'},
+  {label: 'File', value:'file'},
+  {label: 'Dataframe', value:'dataframe'},
   ]}>
-  <TabItem value="file-python">
+  <TabItem value="file">
 
 Here we will create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> for our batch, which we can use to validate and run post-validation actions. Check out our docs on "Validating your data" for more info on how to customize your Checkpoints.
 
@@ -299,7 +299,7 @@ Finally we run the Checkpoint:
 
   </TabItem>
 
-  <TabItem value="dataframe-python">
+  <TabItem value="dataframe">
 
 Here we will create and store a <TechnicalTag tag="checkpoint" text="Checkpoint"/> with no defined validations, then pass in our dataframe at runtime.
 

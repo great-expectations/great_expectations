@@ -30,7 +30,7 @@ spark = get_or_create_spark_application()
 # Imports
 
 # 2. Set up Great Expectations
-# In-memory DataContext using DBFS and FilesystemStoreBackendDefaults
+# Ephemeral DataContext
 
 # CODE vvvvv vvvvv
 # This root directory is for use in Databricks
@@ -42,12 +42,7 @@ root_directory = "/dbfs/great_expectations/"
 root_directory = os.path.join(os.getcwd(), "dbfs_temp_directory")
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py set up context">
-data_context_config = DataContextConfig(
-    store_backend_defaults=FilesystemStoreBackendDefaults(
-        root_directory=root_directory
-    ),
-)
-context = get_context(project_config=data_context_config)
+context = get_context(context_root_dir=root_directory)
 # </snippet>
 # CODE ^^^^^ ^^^^^
 
