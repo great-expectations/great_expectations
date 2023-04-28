@@ -11,10 +11,14 @@ from typing_extensions import TypeAlias
 
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
+    DATASOURCE_NEW_WARNING,
     FLUENT_DATASOURCE_DELETE_ERROR,
     FLUENT_DATASOURCE_LIST_WARNING,
 )
-from great_expectations.cli.pretty_printing import cli_message, cli_message_dict
+from great_expectations.cli.pretty_printing import (
+    cli_message,
+    cli_message_dict,
+)
 from great_expectations.cli.util import verify_library_dependent_modules
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.util import send_usage_message
@@ -86,6 +90,10 @@ def datasource_new(ctx: click.Context, name: str, jupyter: bool) -> None:
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
+        if not ctx.obj.assume_yes:
+            if not click.confirm(DATASOURCE_NEW_WARNING, default=True):
+                exit(0)
+
         _datasource_new_flow(
             context,
             usage_event_end=usage_event_end,

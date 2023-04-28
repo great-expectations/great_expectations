@@ -72,6 +72,11 @@ echo -e "${ORANGE}Installing Great Expectations library dev dependencies.${NC}"
 echo -e "${ORANGE}Installing api docs dependencies.${NC}"
 (cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
+# TODO: Remove the below temporary install after v0.16.10 is released:
+echo -e "${ORANGE}Temporarily install compatible version of Ipython (remove this after v0.16.10 is released).${NC}"
+# Due to https://github.com/ipython/ipython/issues/14053
+(pip install 'ipython<8.13.0; python_version <= "3.8"')
+
 echo -e "${ORANGE}Building API docs for current version.${NC}"
 (cd ../../; invoke docs)
 

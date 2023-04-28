@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 import logging
 from pprint import pformat as pf
 from typing import (
@@ -92,6 +91,10 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     def test_connection(self) -> None:
         ...
 
+    @property
+    def batch_request_options(self) -> tuple[str, ...]:
+        return tuple()
+
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """Spark DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
@@ -131,11 +134,12 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
+                batch_slice=batch_request.batch_slice,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+                f"{pf(expect_batch_request_form.dict())}\n"
+                f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
     def get_batch_list_from_batch_request(
@@ -189,6 +193,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         ]
 
 
+@public_api
 class SparkDatasource(_SparkDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [DataFrameAsset]
@@ -210,8 +215,8 @@ class SparkDatasource(_SparkDatasource):
         """Adds a Dataframe DataAsset to this SparkDatasource object.
 
         Args:
-            name: The name of the Dataframe asset. This can be any arbitrary string.
-            dataframe: The Dataframe containing the data for this data asset.
+            name: The name of the DataFrame asset. This can be any arbitrary string.
+            dataframe: The DataFrame containing the data for this data asset.
             batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
                             batches created from the asset.
 

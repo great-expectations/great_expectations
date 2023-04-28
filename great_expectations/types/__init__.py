@@ -4,6 +4,7 @@ from enum import Enum
 from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
+import pydantic
 
 from great_expectations.compatibility import pyspark
 
@@ -140,6 +141,9 @@ class DictDot:
             )
         }
         for key, value in new_dict.items():
+            if isinstance(value, pydantic.BaseModel):
+                new_dict[key] = value.dict()
+
             if isinstance(value, DictDot):
                 new_dict[key] = value.to_dict()
 
@@ -149,6 +153,9 @@ class DictDot:
             if isinstance(value, list) or isinstance(value, tuple):
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
+                    if isinstance(value, pydantic.BaseModel):
+                        new_dict[key][i] = element.dict()
+
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_dict()
 
