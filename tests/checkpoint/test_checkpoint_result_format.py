@@ -3507,7 +3507,8 @@ def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_flue
     pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
 ):
     context = empty_data_context
-    context.add_expectation_suite(expectation_suite_name="metrics_exp")
+    expectation_suite_name = "metrics_exp"
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
 
     context.sources.add_pandas(name="pandas_datasource").add_dataframe_asset(
         name="IN_MEMORY_DATA_ASSET",
@@ -3541,22 +3542,17 @@ runtime_configuration:
 
     checkpoint_config = CheckpointConfig(**yaml.load(checkpoint_config_yml))
 
-    context.add_checkpoint(
-        **filter_properties_dict(
-            properties=checkpoint_config.to_json_dict(),
-            clean_falsy=True,
-        ),
-    )
+    context.add_checkpoint(**checkpoint_config.to_json_dict())
 
     result: CheckpointResult = context.run_checkpoint(
         checkpoint_name="my_checkpoint",
-        expectation_suite_name="metrics_exp",
+        expectation_suite_name=expectation_suite_name,
     )
 
-    expected_serialized_batch_request = {
+    expected_batch_request = {
         "datasource_name": "pandas_datasource",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
-        "batch_slice": "-1",
+        "batch_slice": -1,
     }
 
-    assert result.checkpoint_config.batch_request == expected_serialized_batch_request
+    assert result.checkpoint_config.batch_request == expected_batch_request
