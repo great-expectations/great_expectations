@@ -370,7 +370,8 @@ stages:
                 --cov-report=xml \
                 --cov-report=html \
                 -m 'not unit and not e2e' \
-                --durations=10
+                --durations=10 \
+                -vv
 
             displayName: 'pytest'
             env:
@@ -392,7 +393,7 @@ stages:
       # Runs pytest with Spark and Postgres enabled
       - job: comprehensive
         timeoutInMinutes: 90
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+        # condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
         strategy:
           # This matrix is intended to split up our sizeable test suite into two distinct components.
           # By splitting up slow tests from the remainder of the suite, we can parallelize test runs
