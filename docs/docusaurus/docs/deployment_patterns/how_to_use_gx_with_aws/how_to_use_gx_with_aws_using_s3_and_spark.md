@@ -7,10 +7,6 @@ import TabItem from '@theme/TabItem';
 import Congratulations from './components/_congratulations_aws_s3_spark.md'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-<InProgress />
-
 <!-- Part 1: Setup -->
 
 <!-- 1.1 Ensure that the AWS CLI is ready for use -->
@@ -41,6 +37,7 @@ import GetLatestPip from '@site/docs/guides/setup/installation/components_local/
 import InstallBoto3WithPip from '@site/docs/guides/setup/configuring_metadata_stores/components/_install_boto3_with_pip.mdx'
 
 <!-- 1.2.5 Install Spark dependencies for S3 -->
+TODO: There is a ticket about putting this under test. It may need to be updated also.
 import InstallSparkS3Dependencies from './components/_spark_s3_dependencies.md'
 
 <!-- 1.2.6 Install Great Expectations -->
@@ -278,9 +275,12 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <AdditionalDataDocsNotes />
 
 ## Part 2: Connect to data
+TODO: all of section 2 needs to be rewritten. The code snippet I sent you should do most/all of this.
 
 ### 2.1 Choose how to run the code for creating a new Datasource
-<HowToRunDatasourceCode />
+<CreateDataContextWithGetContextAgain />
+
+If you have already instantiated your `DataContext` in a previous step, this step can be skipped.
 
 ### 2.2 Instantiate your project's DataContext
 <InstantiateDataContext />
