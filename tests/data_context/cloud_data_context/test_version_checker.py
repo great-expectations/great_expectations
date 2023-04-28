@@ -10,9 +10,9 @@ _MOCK_PYPI_VERSION = "0.16.8"
 
 @pytest.fixture
 def enable_pypi_version_check():
-    vc._ENABLE_VERSION_CHECK = False
+    vc._ENABLE_VERSION_CHECK_IN_TESTS = False
     yield
-    vc._ENABLE_VERSION_CHECK = True
+    vc._ENABLE_VERSION_CHECK_IN_TESTS = True
 
 
 @pytest.mark.parametrize(

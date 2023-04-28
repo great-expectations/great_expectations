@@ -21,7 +21,7 @@ class _PyPIPackageData(TypedDict):
 
 # Should only run in prod and in specific tests
 # This flag let's us conditionally turn on the feature
-_ENABLE_VERSION_CHECK = False
+_ENABLE_VERSION_CHECK_IN_TESTS = False
 
 
 class _VersionChecker:
@@ -47,7 +47,7 @@ class _VersionChecker:
         return True
 
     def _running_non_version_check_tests(self) -> bool:
-        return "pytest" in sys.modules and _ENABLE_VERSION_CHECK
+        return "pytest" in sys.modules and _ENABLE_VERSION_CHECK_IN_TESTS
 
     def _get_latest_version_from_pypi(self) -> version.Version | None:
         response_json: _PyPIPackageData | None = None
