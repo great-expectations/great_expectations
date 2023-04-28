@@ -135,7 +135,8 @@ class BatchRequest(pydantic.BaseModel):
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
-        self.batch_slice = self._batch_slice_input
+        if self._batch_slice_input is not None:
+            self.batch_slice = self._batch_slice_input
         result = super().json(
             include=include,
             exclude=exclude,
@@ -148,7 +149,8 @@ class BatchRequest(pydantic.BaseModel):
             models_as_dict=models_as_dict,
             **dumps_kwargs,
         )
-        self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
+        if self._batch_slice_input is not None:
+            self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
         return result
 
     def dict(
@@ -173,7 +175,8 @@ class BatchRequest(pydantic.BaseModel):
         Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
         default.
         """
-        self.batch_slice = self._batch_slice_input
+        if self._batch_slice_input is not None:
+            self.batch_slice = self._batch_slice_input
         result = super().dict(
             include=include,
             exclude=exclude,
@@ -183,7 +186,8 @@ class BatchRequest(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
-        self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
+        if self._batch_slice_input is not None:
+            self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
         return result
 
 
