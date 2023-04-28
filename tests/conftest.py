@@ -1579,6 +1579,79 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
         name="users", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
+    datasource_name = "my_pandas_dataframes_datasource"
+    datasource = context.sources.add_pandas(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    df = pd.read_csv(filepath_or_buffer=csv_source_path)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    # noinspection PyUnusedLocal
+    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    spark_df_from_pandas_df,
+    spark_session,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context_path: str = context.root_directory
+    path_to_folder_containing_csv_files = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+    )
+
+    datasource_name = "my_spark_filesystem_datasource"
+    datasource = context.sources.add_spark_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    # noinspection PyUnusedLocal
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    # noinspection PyUnusedLocal
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_spark_dataframes_datasource"
+    datasource = context.sources.add_spark(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    pandas_df = pd.read_csv(filepath_or_buffer=csv_source_path)
+    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    # noinspection PyUnusedLocal
+    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+
     # noinspection PyProtectedMember
     context._save_project_config()
 

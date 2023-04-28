@@ -251,3 +251,17 @@
 
 # removing yml-driven datacontext in favor of ephemeral
 /docs/guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file /docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context
+
+# Redirects for Contributing docs
+
+/docs/contributing/contributing_setup https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_CODE.md
+/docs/contributing/contributing_checklist /docs/contributing/contributing
+/docs/contributing/contributing_github https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/docs/README.md
+/docs/contributing/contributing_test /https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_CODE.md
+/docs/contributing/contributing_misc https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/docs/README.md
+/docs/guides/miscellaneous/how_to_write_a_how_to_guide https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/docs/README.md
+/docs/guides/miscellaneous/how_to_template https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/docs/README.md
+/docs/integrations/contributing_integration https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/docs/README.md
+/docs/integrations/integration_template https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/docs/README.md
+docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_EXPECTATIONS.md
+/docs/contributing/contributing_package https://github.com/great-expectations/great_expectations/blob/contributing-and-style-readme/CONTRIBUTING_PACKAGES.md
