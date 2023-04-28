@@ -82,7 +82,7 @@ class SerializableDataContext(AbstractDataContext):
         return self._context_root_directory
 
     @abc.abstractmethod
-    def _save_project_config(self) -> None:
+    def _save_project_config(self, _fds_datasource=None) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
         Explicitly override base class implementation to retain legacy behavior.

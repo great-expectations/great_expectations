@@ -651,7 +651,7 @@ class Datasource(
         """Check if a DataContext is available and save the project config."""
         if self._data_context:
             try:
-                self._data_context._save_project_config()
+                self._data_context._save_project_config(self)
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
 
