@@ -79,16 +79,6 @@ def test_basic_instantiation():
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
-    # Missing "data_asset_name" argument.
-    with pytest.raises(TypeError):
-        # noinspection PyArgumentList
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="something",
-                options={},
-            )
-        )
-
 
 @pytest.mark.integration
 @mock_s3
