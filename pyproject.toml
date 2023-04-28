@@ -228,6 +228,8 @@ select = [
     "PYI", # flake8-pyi - type stub files
     # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
     "PTH", # use-pathlib - use pathlib for os.path and glob operations
+    # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
+    "B", # bugbear - common python bugs & design issues
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
