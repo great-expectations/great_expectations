@@ -156,16 +156,14 @@ class FilePathDataConnector(DataConnector):
                 }
             )
 
-        if batch_request.batch_slice != slice(0, None, None):
-            data_connector_query_dict.update({"index": batch_request.batch_slice})
+        data_connector_query_dict.update({"index": batch_request.batch_slice})
 
-        if data_connector_query_dict:
-            batch_filter_obj: BatchFilter = build_batch_filter(
-                data_connector_query_dict=data_connector_query_dict  # type: ignore[arg-type]
-            )
-            batch_definition_list = batch_filter_obj.select_from_data_connector_query(
-                batch_definition_list=batch_definition_list
-            )
+        batch_filter_obj: BatchFilter = build_batch_filter(
+            data_connector_query_dict=data_connector_query_dict  # type: ignore[arg-type]
+        )
+        batch_definition_list = batch_filter_obj.select_from_data_connector_query(
+            batch_definition_list=batch_definition_list
+        )
 
         return batch_definition_list
 

@@ -36,6 +36,9 @@ from typing_extensions import TypeAlias, TypeGuard
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
 from great_expectations.core.util import parse_batch_slice
+from great_expectations.datasource.data_connector.batch_filter import (
+    BatchSlice,  # noqa: TCH001
+)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -56,7 +59,6 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import AbstractDataContext as GXDataContext
-    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -90,15 +92,18 @@ class BatchRequest(pydantic.BaseModel):
     options: BatchRequestOptions = pydantic.Field(default_factory=dict)
     batch_slice: slice = pydantic.Field(default=slice(0, None, None))
 
+    _batch_slice_input: BatchSlice = pydantic.PrivateAttr()
+
     class Config:
         allow_mutation = False
         arbitrary_types_allowed = True
         extra = pydantic.Extra.forbid
         json_encoders = {slice: str}
 
-    @pydantic.validator("batch_slice", pre=True)
-    def _validate_and_parse_batch_slice(cls, value):
-        return parse_batch_slice(batch_slice=value)
+    def __init__(self, **kwargs) -> None:
+        self._batch_slice_input = kwargs["batch_slice"]
+        kwargs["batch_slice"] = parse_batch_slice(batch_slice=self._batch_slice_input)
+        super().__init__(**kwargs)
 
     def json(
         self,

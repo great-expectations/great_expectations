@@ -3556,7 +3556,7 @@ runtime_configuration:
     expected_serialized_batch_request = {
         "datasource_name": "pandas_datasource",
         "data_asset_name": "IN_MEMORY_DATA_ASSET",
-        "batch_slice": "slice(-1, None, None)",
+        "batch_slice": "-1",
     }
 
     assert result.checkpoint_config.batch_request == expected_serialized_batch_request

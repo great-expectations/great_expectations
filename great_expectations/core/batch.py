@@ -12,7 +12,7 @@ from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
-from great_expectations.core.util import convert_to_json_serializable, parse_batch_slice
+from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidBatchIdError
 from great_expectations.types import DictDot, SerializableDictDot, safe_deep_copy
 from great_expectations.util import deep_filter_properties_iterable, load_class
@@ -886,10 +886,6 @@ def materialize_batch_request(
     batch_request_class: type
     if _is_fluent_batch_request(args=effective_batch_request):
         batch_request_class = _get_fluent_batch_request_class()
-        if "batch_slice" in effective_batch_request:
-            effective_batch_request["batch_slice"] = parse_batch_slice(
-                effective_batch_request["batch_slice"]
-            )
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request
     ):
@@ -930,9 +926,6 @@ def get_batch_request_as_dict(
 
     if isinstance(batch_request, _get_fluent_batch_request_class()):
         batch_request = batch_request.dict()
-
-    if "batch_slice" in batch_request:
-        batch_request["batch_slice"] = parse_batch_slice(batch_request["batch_slice"])
 
     return batch_request
 
