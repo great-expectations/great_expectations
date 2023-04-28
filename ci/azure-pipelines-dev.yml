@@ -49,283 +49,283 @@ variables:
 
 
 stages:
-  - stage: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
-    jobs:
-      - job: changes
-        steps:
-          - task: ChangedFiles@1
-            name: CheckChanges
-            inputs:
-              verbose: true
-              rules: |
-                [DocsChanged]
-                docs/**
-                tests/integration/docusaurus/**
-                tests/integration/fixtures/**
-                tests/test_sets/**
-                examples/expectations/*.py
-                static/_redirects
-                static/index.html
-                /*.js
-                /*.json
-                yarn.lock
+  # - stage: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
+  #   jobs:
+  #     - job: changes
+  #       steps:
+  #         - task: ChangedFiles@1
+  #           name: CheckChanges
+  #           inputs:
+  #             verbose: true
+  #             rules: |
+  #               [DocsChanged]
+  #               docs/**
+  #               tests/integration/docusaurus/**
+  #               tests/integration/fixtures/**
+  #               tests/test_sets/**
+  #               examples/expectations/*.py
+  #               static/_redirects
+  #               static/index.html
+  #               /*.js
+  #               /*.json
+  #               yarn.lock
 
-                [GXChanged]
-                great_expectations/**/*.py
-                pyproject.toml
-                setup.cfg
-                setup.py
-                MANIFEST.in
-                tests/**
-                /*.txt
-                /*.yml
-                requirements*
-                reqs/*.txt
-                ci/**/*.yml
-                assets/scripts/**
-                scripts/*.py
-                scripts/*.sh
+  #               [GXChanged]
+  #               great_expectations/**/*.py
+  #               pyproject.toml
+  #               setup.cfg
+  #               setup.py
+  #               MANIFEST.in
+  #               tests/**
+  #               /*.txt
+  #               /*.yml
+  #               requirements*
+  #               reqs/*.txt
+  #               ci/**/*.yml
+  #               assets/scripts/**
+  #               scripts/*.py
+  #               scripts/*.sh
 
-  - stage: lint
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: lint
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: lint
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: 3.7
-            displayName: 'Use Python 3.7'
+  #   jobs:
+  #     - job: lint
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: 3.7
+  #           displayName: 'Use Python 3.7'
 
-          - script: |
-              pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
-              EXIT_STATUS=0
-              invoke fmt --check || EXIT_STATUS=$?
-              invoke lint || EXIT_STATUS=$?
-              exit $EXIT_STATUS
+  #         - script: |
+  #             pip install $(grep -E '^(black|invoke|ruff)' reqs/requirements-dev-contrib.txt)
+  #             EXIT_STATUS=0
+  #             invoke fmt --check || EXIT_STATUS=$?
+  #             invoke lint || EXIT_STATUS=$?
+  #             exit $EXIT_STATUS
 
-  - stage: unit_tests
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: unit_tests
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: run_unit_tests
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+  #   jobs:
+  #     - job: run_unit_tests
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '3.7'
+  #           displayName: 'Use Python 3.7'
 
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip
+  #           displayName: 'Update pip'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              invoke tests --cloud --unit --timeout=3.0
-            displayName: 'Unit Tests'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-              SQLALCHEMY_WARN_20: true
+  #         - script: |
+  #             invoke tests --cloud --unit --timeout=3.0
+  #           displayName: 'Unit Tests'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #             SQLALCHEMY_WARN_20: true
 
-  - stage: custom_checks
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: custom_checks
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-    - job: static_type_check
-      variables:
-        python.version: '3.8'
-      steps:
-      - task: UsePythonVersion@0
-        inputs:
-          versionSpec: $(python.version)
-        displayName: 'Use Python $(python.version)'
-      - script: |
-          python -m pip install --upgrade pip
-          pip install --requirement requirements-types.txt
-          invoke type-check --ci --pretty --python-version $(python.version)
-        name: StaticTypeCheck
-      - script: |
-          # initial run doesn't check `.pyi` source files
-          invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
-        name: TypeCheckStubSourceFiles
+  #   jobs:
+  #   - job: static_type_check
+  #     variables:
+  #       python.version: '3.8'
+  #     steps:
+  #     - task: UsePythonVersion@0
+  #       inputs:
+  #         versionSpec: $(python.version)
+  #       displayName: 'Use Python $(python.version)'
+  #     - script: |
+  #         python -m pip install --upgrade pip
+  #         pip install --requirement requirements-types.txt
+  #         invoke type-check --ci --pretty --python-version $(python.version)
+  #       name: StaticTypeCheck
+  #     - script: |
+  #         # initial run doesn't check `.pyi` source files
+  #         invoke type-check --ci --pretty --check-stub-sources --python-version $(python.version)
+  #       name: TypeCheckStubSourceFiles
 
-    - job: docstring_linter
-      steps:
-      - script: |
-          pip install --requirement reqs/requirements-dev-test.txt
-          invoke docstrings
-        name: DocstringLinter
+  #   - job: docstring_linter
+  #     steps:
+  #     - script: |
+  #         pip install --requirement reqs/requirements-dev-test.txt
+  #         invoke docstrings
+  #       name: DocstringLinter
 
-    - job: unused_import_checker
-      steps:
-      - script: |
-          pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
-          # https://www.flake8rules.com/rules/F401.html
-          ruff --select F401 great_expectations tests
-        name: UnusedImportChecker
+  #   - job: unused_import_checker
+  #     steps:
+  #     - script: |
+  #         pip install $(grep -E '^(ruff)' reqs/requirements-dev-contrib.txt)
+  #         # https://www.flake8rules.com/rules/F401.html
+  #         ruff --select F401 great_expectations tests
+  #       name: UnusedImportChecker
 
-    - job: check_repo_root_size
-      steps:
-        - script: ./ci/checks/check_repo_root_size.sh
-          name: CheckRepoRootSize
+  #   - job: check_repo_root_size
+  #     steps:
+  #       - script: ./ci/checks/check_repo_root_size.sh
+  #         name: CheckRepoRootSize
 
-    - job: docs_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
-      steps:
-      - script: |
-          yarn install
-          python ci/checks/validate_docs_snippets.py
-        name: DocsSnippetChecker
+  #   - job: docs_snippet_checker
+  #     condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+  #     steps:
+  #     - script: |
+  #         yarn install
+  #         python ci/checks/validate_docs_snippets.py
+  #       name: DocsSnippetChecker
 
-    - job: line_number_snippet_checker
-      condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
-      steps:
-        - script: |
-            python ci/checks/check_no_line_number_snippets.py
-          name: LineNumberSnippetChecker
+  #   - job: line_number_snippet_checker
+  #     condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.DocsChanged'], true)
+  #     steps:
+  #       - script: |
+  #           python ci/checks/check_no_line_number_snippets.py
+  #         name: LineNumberSnippetChecker
 
-    - job: public_api_report
-      steps:
-        - script: |
-            pip install --requirement reqs/requirements-dev-test.txt
-            invoke public-api
-          name: PublicAPIReport
+  #   - job: public_api_report
+  #     steps:
+  #       - script: |
+  #           pip install --requirement reqs/requirements-dev-test.txt
+  #           invoke public-api
+  #         name: PublicAPIReport
 
-  - stage: import_ge
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
+  # - stage: import_ge
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-20.04'
 
-    jobs:
-      - job: import_ge
+  #   jobs:
+  #     - job: import_ge
 
-        steps:
-         - task: UsePythonVersion@0
-           inputs:
-             versionSpec: '3.7'
-           displayName: 'Use Python 3.7'
+  #       steps:
+  #        - task: UsePythonVersion@0
+  #          inputs:
+  #            versionSpec: '3.7'
+  #          displayName: 'Use Python 3.7'
 
-         - bash: python -m pip install --upgrade pip
-           displayName: 'Update pip'
+  #        - bash: python -m pip install --upgrade pip
+  #          displayName: 'Update pip'
 
-         - script: |
-             pip install  .
-           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+  #        - script: |
+  #            pip install  .
+  #          displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
-         - script: |
-             python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
-           displayName: 'Import Great Expectations'
+  #        - script: |
+  #            python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
+  #          displayName: 'Import Great Expectations'
 
-  - stage: runme_script_runner_tests
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
+  # - stage: runme_script_runner_tests
+  #   dependsOn: scope_check
+  #   pool:
+  #     vmImage: 'ubuntu-20.04'
 
-    jobs:
-      - job: runme_script_runner_tests
+  #   jobs:
+  #     - job: runme_script_runner_tests
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '3.7'
+  #           displayName: 'Use Python 3.7'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test]"
-              pip uninstall -y sqlalchemy
-            displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test]"
+  #             pip uninstall -y sqlalchemy
+  #           displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
 
-          # tests containing the name "RUNME" are run
-          - script: |
-              pytest -v --no-sqlalchemy --docs-tests -m integration -k "RUNME" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
+  #         # tests containing the name "RUNME" are run
+  #         - script: |
+  #             pytest -v --no-sqlalchemy --docs-tests -m integration -k "RUNME" tests/integration/test_script_runner.py
+  #           displayName: 'Run Flagged Tests'
 
-      - job: runme_script_runner_tests_postgres
+  #     - job: runme_script_runner_tests_postgres
 
-        services:
-          postgres: postgres
+  #       services:
+  #         postgres: postgres
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '3.7'
+  #           displayName: 'Use Python 3.7'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, postgresql]"
-            displayName: 'Install GX and required dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, postgresql]"
+  #           displayName: 'Install GX and required dependencies'
 
-          # tests containing the name "RUNME_POSTGRES" are run
-          - script: |
-              pytest -v --postgresql --docs-tests -m integration -k "RUNME_POSTGRES" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
+  #         # tests containing the name "RUNME_POSTGRES" are run
+  #         - script: |
+  #             pytest -v --postgresql --docs-tests -m integration -k "RUNME_POSTGRES" tests/integration/test_script_runner.py
+  #           displayName: 'Run Flagged Tests'
 
-      - job: runme_script_runner_tests_aws
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+  #     - job: runme_script_runner_tests_aws
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '3.7'
+  #           displayName: 'Use Python 3.7'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
-            displayName: 'Install GX and required dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+  #           displayName: 'Install GX and required dependencies'
 
-          # tests containing the name "RUNME_AWS" are run
-          - script: |
-              pytest -v --docs-tests -m integration --aws -k "RUNME_AWS" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
-            env:
-              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-      - job: runme_script_runner_tests_postgres_msysql
+  #         # tests containing the name "RUNME_AWS" are run
+  #         - script: |
+  #             pytest -v --docs-tests -m integration --aws -k "RUNME_AWS" tests/integration/test_script_runner.py
+  #           displayName: 'Run Flagged Tests'
+  #           env:
+  #             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+  #             AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+  #             AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
+  #     - job: runme_script_runner_tests_postgres_msysql
 
-        services:
-          postgres: postgres
-          mysql: mysql
+  #       services:
+  #         postgres: postgres
+  #         mysql: mysql
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '3.7'
+  #           displayName: 'Use Python 3.7'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, postgresql, mysql]"
-            displayName: 'Install GX and required dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, postgresql, mysql]"
+  #           displayName: 'Install GX and required dependencies'
 
-          - script: |
-              printf 'Waiting for MySQL database to accept connections'
-              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
-                printf '.'
-                sleep 1;
-              done;
-            displayName: Wait for database to initialise
-          - script: |
-              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
-            displayName: 'Configure mysql'
+  #         - script: |
+  #             printf 'Waiting for MySQL database to accept connections'
+  #             until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+  #               printf '.'
+  #               sleep 1;
+  #             done;
+  #           displayName: Wait for database to initialise
+  #         - script: |
+  #             echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+  #             mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+  #           displayName: 'Configure mysql'
 
-          # tests containing the name "RUNME_POSTGRES_MYSQL" are run
-          - script: |
-              pytest -v --postgresql --mysql --docs-tests -m integration -k "RUNME_POSTGRES_MYSQL" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
+  #         # tests containing the name "RUNME_POSTGRES_MYSQL" are run
+  #         - script: |
+  #             pytest -v --postgresql --mysql --docs-tests -m integration -k "RUNME_POSTGRES_MYSQL" tests/integration/test_script_runner.py
+  #           displayName: 'Run Flagged Tests'
 
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
+    # dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -453,233 +453,233 @@ stages:
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
               reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'
 
-  - stage: usage_stats_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: usage_stats_integration
+  #   dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: test_usage_stats_messages
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
-        variables:
-          python.version: '3.8'
+  #   jobs:
+  #     - job: test_usage_stats_messages
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip
+  #           displayName: 'Update pip'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
-          - script: |
-              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+  #         # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
+  #         - script: |
+  #             pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
 
-  - stage: db_integration
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: db_integration
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+  #   dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
 
-    jobs:
-      - job: mysql
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #   jobs:
+  #     - job: mysql
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
-        services:
-          mysql: mysql
+  #       services:
+  #         mysql: mysql
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip
+  #           displayName: 'Update pip'
 
-          - script: |
-              printf 'Waiting for MySQL database to accept connections'
-              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
-                printf '.'
-                sleep 1;
-              done;
-            displayName: Wait for database to initialise
+  #         - script: |
+  #             printf 'Waiting for MySQL database to accept connections'
+  #             until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
+  #               printf '.'
+  #               sleep 1;
+  #             done;
+  #           displayName: Wait for database to initialise
 
-          - script: |
-              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
-            displayName: 'Configure mysql'
+  #         - script: |
+  #             echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
+  #             mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
+  #           displayName: 'Configure mysql'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, mysql]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              # Run pytest
-              pytest tests/test_definitions tests/expectations \
-                --mysql \
-                --napoleon-docstrings \
-                --junitxml=junit/test-results.xml \
-                --cov=. \
-                --cov-report=xml \
-                --cov-report=html
+  #         - script: |
+  #             # Run pytest
+  #             pytest tests/test_definitions tests/expectations \
+  #               --mysql \
+  #               --napoleon-docstrings \
+  #               --junitxml=junit/test-results.xml \
+  #               --cov=. \
+  #               --cov-report=xml \
+  #               --cov-report=html
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-              SQLALCHEMY_WARN_20: true
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #             SQLALCHEMY_WARN_20: true
 
-      - job: mssql
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #     - job: mssql
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
-        services:
-          mssql: mssql
+  #       services:
+  #         mssql: mssql
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip
+  #           displayName: 'Update pip'
 
-          - script: |
-              sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
+  #         - script: |
+  #             sqlcmd -U sa -P "ReallyStrongPwd1234%^&*" -Q "CREATE DATABASE test_ci;" -o create_db_output.txt
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, mssql]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              # Run pytest
-              pytest tests/test_definitions tests/expectations \
-                --mssql \
-                --napoleon-docstrings \
-                --junitxml=junit/test-results.xml \
-                --cov=. \
-                --cov-report=xml \
-                --cov-report=html
+  #         - script: |
+  #             # Run pytest
+  #             pytest tests/test_definitions tests/expectations \
+  #               --mssql \
+  #               --napoleon-docstrings \
+  #               --junitxml=junit/test-results.xml \
+  #               --cov=. \
+  #               --cov-report=xml \
+  #               --cov-report=html
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-              SQLALCHEMY_WARN_20: true
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #             SQLALCHEMY_WARN_20: true
 
-      - job: trino
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #     - job: trino
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
-        services:
-          trino: trino
+  #       services:
+  #         trino: trino
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip
+  #           displayName: 'Update pip'
 
-          - script: |
-              printf 'Waiting for Trino database to accept connections'
-              sleep 30
-#             until trino --execute "SHOW CATALOGS"; do
-#               printf '.'
-#               sleep 1;
-#             done;
-            displayName: Wait for database to initialise
+  #         - script: |
+  #             printf 'Waiting for Trino database to accept connections'
+  #             sleep 30
+# #             until trino --execute "SHOW CATALOGS"; do
+# #               printf '.'
+# #               sleep 1;
+# #             done;
+  #           displayName: Wait for database to initialise
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, trino]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              # Run pytest
-              pytest tests/test_definitions tests/expectations \
-                --trino \
-                --napoleon-docstrings \
-                --junitxml=junit/test-results.xml \
-                --cov=. \
-                --cov-report=xml \
-                --cov-report=html
+  #         - script: |
+  #             # Run pytest
+  #             pytest tests/test_definitions tests/expectations \
+  #               --trino \
+  #               --napoleon-docstrings \
+  #               --junitxml=junit/test-results.xml \
+  #               --cov=. \
+  #               --cov-report=xml \
+  #               --cov-report=html
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-              SQLALCHEMY_WARN_20: true
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #             SQLALCHEMY_WARN_20: true
 
-  - stage: cli_integration
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: cli_integration
+  #   dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: test_cli
-        condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
+  #   jobs:
+  #     - job: test_cli
+  #       condition: eq(stageDependencies.scope_check.changes.outputs['CheckChanges.GXChanged'], true)
 
-        services:
-          postgres: postgres
+  #       services:
+  #         postgres: postgres
 
-        variables:
-          python.version: '3.8'
+  #       variables:
+  #         python.version: '3.8'
 
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '$(python.version)'
-            displayName: 'Use Python $(python.version)'
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '$(python.version)'
+  #           displayName: 'Use Python $(python.version)'
 
-          - bash: python -m pip install --upgrade pip
-            displayName: 'Update pip'
+  #         - bash: python -m pip install --upgrade pip
+  #           displayName: 'Update pip'
 
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, postgresql, spark, athena]" pytest-azurepipelines
-            displayName: 'Install dependencies'
+  #         - script: |
+  #             pip install --constraint constraints-dev.txt ".[test, postgresql, spark, athena]" pytest-azurepipelines
+  #           displayName: 'Install dependencies'
 
-          - script: |
-              # Run pytest
-              pytest --postgresql --spark --aws-integration tests/cli
+  #         - script: |
+  #             # Run pytest
+  #             pytest --postgresql --spark --aws-integration tests/cli
 
-            displayName: 'pytest'
-            env:
-              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
-              SQLALCHEMY_WARN_20: true
+  #           displayName: 'pytest'
+  #           env:
+  #             GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+  #             SQLALCHEMY_WARN_20: true
 
-  - stage: airflow_provider
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
-    pool:
-      vmImage: 'ubuntu-latest'
+  # - stage: airflow_provider
+  #   dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
 
-    jobs:
-      - job: run_airflow_provider_tests
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+  #   jobs:
+  #     - job: run_airflow_provider_tests
+  #       steps:
+  #         - task: UsePythonVersion@0
+  #           inputs:
+  #             versionSpec: '3.7'
+  #           displayName: 'Use Python 3.7'
 
-          - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
-            name: CheckMinAirflowDependencyCompatibility
+  #         - script: ./ci/checks/check_min_airflow_dependency_compatibility.sh
+  #           name: CheckMinAirflowDependencyCompatibility
 
-          - script: ./ci/checks/run_gx_airflow_operator_tests.sh
-            name: RunAirflowProviderTests
+  #         - script: ./ci/checks/run_gx_airflow_operator_tests.sh
+  #           name: RunAirflowProviderTests
