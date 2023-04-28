@@ -45,20 +45,24 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
         ),
         os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
-    os.makedirs(
-        os.path.join(context_path, "plugins"), exist_ok=True
-    )  # noqa: PTH103, PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
     shutil.copy(
         os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
         str(
-            os.path.join(context_path, "plugins", "custom_pandas_dataset.py")
-        ),  # noqa: PTH118
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_pandas_dataset.py"
+            )
+        ),
     )
     shutil.copy(
         os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
         str(
-            os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")
-        ),  # noqa: PTH118
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_sparkdf_dataset.py"
+            )
+        ),
     )
     return gx.get_context(context_root_dir=context_path)
 

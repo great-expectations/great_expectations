@@ -577,9 +577,9 @@ def test_config_variables_in_test_yaml_config(
 
     db_file = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..", "test_sets", "test_cases_for_sql_data_connector.db"
-        ),  # noqa: PTH118
+        ),
     )
 
     context.save_config_variable("db_file", db_file)

@@ -80,9 +80,9 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
     context: DataContext = empty_data_context
     db_file_path: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..", "test_sets", "test_cases_for_sql_data_connector.db"
-        ),  # noqa: PTH118
+        ),
     )
 
     datasource_config: str = f"""
@@ -170,16 +170,16 @@ def test_load_config_variables_file(
 ):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
-    os.makedirs(
-        os.path.join(base_path, "uncommitted"), exist_ok=True
-    )  # noqa: PTH103, PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(base_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+    )
     with open(
         os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"  # noqa: PTH118
     ) as outfile:
         yaml.dump({"env": "dev"}, outfile)
     with open(
-        os.path.join(base_path, "uncommitted", "prod_variables.yml"),
-        "w",  # noqa: PTH118
+        os.path.join(base_path, "uncommitted", "prod_variables.yml"),  # noqa: PTH118
+        "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
     basic_data_context_v013_config[

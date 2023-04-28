@@ -15,9 +15,9 @@ def totally_empty_data_context(tmp_path_factory):
     # However, as of 2019/08/22, most tests still use filesystem-based fixtures.
     # TODO: Where appropriate, switch DataContext tests to the new method.
     project_root_dir = str(tmp_path_factory.mktemp("totally_empty_data_context"))
-    os.mkdir(
-        os.path.join(project_root_dir, "great_expectations")
-    )  # noqa: PTH102, PTH118
+    os.mkdir(  # noqa: PTH102
+        os.path.join(project_root_dir, "great_expectations")  # noqa: PTH118
+    )
 
     config = {
         "config_version": 2,
@@ -39,15 +39,17 @@ def totally_empty_data_context(tmp_path_factory):
         "validation_operators": {},
     }
     with open(
-        os.path.join(project_root_dir, "great_expectations/great_expectations.yml"),
-        "w",  # noqa: PTH118
+        os.path.join(  # noqa: PTH118
+            project_root_dir, "great_expectations/great_expectations.yml"
+        ),
+        "w",
     ) as config_file:
         yaml.dump(config, config_file)
 
     context = gx.get_context(
-        context_root_dir=os.path.join(
+        context_root_dir=os.path.join(  # noqa: PTH118
             project_root_dir, "great_expectations"
-        )  # noqa: PTH118
+        )
     )
     # print(json.dumps(context._project_config, indent=2))
     return context

@@ -219,9 +219,9 @@ def test_clean_data_docs_on_context_with_multiple_sites_with_existing_site_name_
     assert not os.path.isfile(  # noqa: PTH113
         os.path.join(data_docs_dir, "another_local_site", "index.html")  # noqa: PTH118
     )
-    assert os.path.isfile(
-        os.path.join(data_docs_dir, "local_site", "index.html")
-    )  # noqa: PTH113, PTH118
+    assert os.path.isfile(  # noqa: PTH113
+        os.path.join(data_docs_dir, "local_site", "index.html")  # noqa: PTH118
+    )
 
 
 def test_clean_data_docs_on_context_with_multiple_sites_with_non_existent_site_name_raises_error(
@@ -242,9 +242,9 @@ def test_existing_local_data_docs_urls_returns_url_on_project_with_no_datasource
     empty_directory = str(tmp_path_factory.mktemp("another_empty_project"))
     FileDataContext.create(empty_directory)
     context = get_context(
-        context_root_dir=os.path.join(
+        context_root_dir=os.path.join(  # noqa: PTH118
             empty_directory, FileDataContext.GX_DIR
-        )  # noqa: PTH118
+        )
     )
 
     obs = context.get_docs_sites_urls(only_if_exists=False)
@@ -349,9 +349,9 @@ def test_build_data_docs_skipping_index_does_not_build_index(
             "class_name": "SiteBuilder",
             "store_backend": {
                 "class_name": "TupleFilesystemStoreBackend",
-                "base_directory": os.path.join(
+                "base_directory": os.path.join(  # noqa: PTH118
                     "uncommitted", "data_docs"
-                ),  # noqa: PTH118
+                ),
             },
         },
     }

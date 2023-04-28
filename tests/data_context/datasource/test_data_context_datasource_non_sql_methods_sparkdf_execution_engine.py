@@ -48,9 +48,9 @@ def context_with_single_titanic_csv_spark(
         )
     )
 
-    titanic_asset_base_directory_path: str = os.path.join(
+    titanic_asset_base_directory_path: str = os.path.join(  # noqa: PTH118
         base_directory, "data"
-    )  # noqa: PTH118
+    )
     os.makedirs(titanic_asset_base_directory_path)  # noqa: PTH103
 
     titanic_csv_source_file_path: str = file_relative_path(

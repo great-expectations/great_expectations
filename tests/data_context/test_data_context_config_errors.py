@@ -17,8 +17,8 @@ def test_DataContext_raises_error_on_config_not_found():
 
 def test_DataContext_raises_error_on_unparsable_yaml_file():
     local_dir = file_relative_path(
-        __file__, os.path.join(BASE_DIR, "bad_yml")
-    )  # noqa: PTH118
+        __file__, os.path.join(BASE_DIR, "bad_yml")  # noqa: PTH118
+    )
     with pytest.raises(gx_exceptions.InvalidConfigurationYamlError):
         get_context(context_root_dir=local_dir)
 
@@ -67,8 +67,8 @@ def test_DataContext_raises_error_on_old_config_version():
 
 def test_DataContext_raises_error_on_missing_config_version_aka_version_zero():
     local_dir = file_relative_path(
-        __file__, os.path.join(BASE_DIR, "version_zero")
-    )  # noqa: PTH118
+        __file__, os.path.join(BASE_DIR, "version_zero")  # noqa: PTH118
+    )
     with pytest.raises(gx_exceptions.InvalidDataContextConfigError):
         get_context(context_root_dir=local_dir)
 

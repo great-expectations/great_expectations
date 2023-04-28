@@ -78,9 +78,9 @@ def titanic_multibatch_data_context(
     project_path.mkdir()
     project_path = str(project_path)
     context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    os.makedirs(
-        os.path.join(context_path, "expectations"), exist_ok=True
-    )  # noqa: PTH103, PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
     data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
     shutil.copy(
@@ -90,14 +90,18 @@ def titanic_multibatch_data_context(
     shutil.copy(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
         str(
-            os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")
-        ),  # noqa: PTH118
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
     )
     shutil.copy(
         file_relative_path(__file__, "../test_sets/Titanic.csv"),
         str(
-            os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")
-        ),  # noqa: PTH118
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
     )
     return get_context(context_root_dir=context_path)
 
@@ -122,9 +126,9 @@ def data_context_with_bad_datasource(tmp_path_factory):
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_bad_datasource.yml"
-        ),  # noqa: PTH118
+        ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     return get_context(context_root_dir=context_path)
@@ -454,9 +458,9 @@ project_path/
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(
+                "base_directory": os.path.join(  # noqa: PTH118
                     project_dir, "data/titanic/"
-                ),  # noqa: PTH118
+                ),
             }
         },
     )
@@ -468,9 +472,9 @@ project_path/
         batch_kwargs_generators={
             "subdir_reader": {
                 "class_name": "SubdirReaderBatchKwargsGenerator",
-                "base_directory": os.path.join(
+                "base_directory": os.path.join(  # noqa: PTH118
                     project_dir, "data/random/"
-                ),  # noqa: PTH118
+                ),
             }
         },
     )
@@ -481,9 +485,9 @@ project_path/
     # validation result
     titanic_profiled_batch_id = PathBatchKwargs(
         {
-            "path": os.path.join(
+            "path": os.path.join(  # noqa: PTH118
                 project_dir, "data/titanic/Titanic.csv"
-            ),  # noqa: PTH118
+            ),
             "datasource": "titanic",
             "data_asset_name": "Titanic",
         }
@@ -712,9 +716,9 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..", "test_fixtures", "great_expectations_basic.yml"
-            ),  # noqa: PTH118
+            ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
@@ -826,9 +830,9 @@ def empty_context(tmp_path_factory) -> FileDataContext:
     FileDataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     assert os.path.isdir(ge_dir)  # noqa: PTH112
-    assert os.path.isfile(
-        os.path.join(ge_dir, FileDataContext.GX_YML)
-    )  # noqa: PTH113, PTH118
+    assert os.path.isfile(  # noqa: PTH113
+        os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
+    )
     context = DataContext(ge_dir)
     assert isinstance(context, FileDataContext)
     return context
@@ -944,8 +948,8 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_
     ge_dir = empty_context.root_directory
     # mangle project
     shutil.rmtree(
-        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR)
-    )  # noqa: PTH118
+        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR)  # noqa: PTH118
+    )
 
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
@@ -956,8 +960,10 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_data
     ge_dir = empty_context.root_directory
     # mangle project
     shutil.rmtree(
-        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs")
-    )  # noqa: PTH118
+        os.path.join(  # noqa: PTH118
+            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs"
+        )
+    )
 
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
@@ -968,8 +974,10 @@ def test_data_context_is_project_initialized_returns_false_when_uncommitted_vali
     ge_dir = empty_context.root_directory
     # mangle project
     shutil.rmtree(
-        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations")
-    )  # noqa: PTH118
+        os.path.join(  # noqa: PTH118
+            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"
+        )
+    )
 
     assert FileDataContext.is_project_initialized(ge_dir) is False
 
@@ -980,9 +988,9 @@ def test_data_context_is_project_initialized_returns_false_when_config_variable_
     ge_dir = empty_context.root_directory
     # mangle project
     safe_remove(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             ge_dir, empty_context.GX_UNCOMMITTED_DIR, "config_variables.yml"
-        )  # noqa: PTH118
+        )
     )
 
     assert FileDataContext.is_project_initialized(ge_dir) is False
@@ -993,9 +1001,9 @@ def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_yml = os.path.join(
+    ge_yml = os.path.join(  # noqa: PTH118
         project_path, "great_expectations/great_expectations.yml"
-    )  # noqa: PTH118
+    )
     with open(ge_yml, "a") as ff:
         ff.write("# LOOK I WAS MODIFIED")
 
@@ -1025,9 +1033,9 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
         FileDataContext.create(project_path)
     obs = gen_directory_tree_str(ge_dir)
 
-    assert os.path.isdir(
+    assert os.path.isdir(  # noqa: PTH112
         uncommitted_dir
-    ), "No uncommitted directory created"  # noqa: PTH112
+    ), "No uncommitted directory created"
     assert (
         obs
         == """\
@@ -1143,9 +1151,9 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
     FileDataContext.create(project_path)
     ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
     uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
-    config_vars_yml = os.path.join(
+    config_vars_yml = os.path.join(  # noqa: PTH118
         uncommitted_dir, "config_variables.yml"
-    )  # noqa: PTH118
+    )
 
     # modify config variables
     with open(config_vars_yml, "a") as ff:
@@ -1173,8 +1181,8 @@ def test_scaffold_directories(tmp_path_factory):
         "uncommitted",
     }
     assert set(
-        os.listdir(os.path.join(empty_directory, "uncommitted"))
-    ) == {  # noqa: PTH118
+        os.listdir(os.path.join(empty_directory, "uncommitted"))  # noqa: PTH118
+    ) == {
         "data_docs",
         "validations",
     }
@@ -1216,16 +1224,16 @@ def test_load_config_variables_property(
 ):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
-    os.makedirs(
-        os.path.join(base_path, "uncommitted"), exist_ok=True
-    )  # noqa: PTH103, PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(base_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+    )
     with open(
         os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"  # noqa: PTH118
     ) as outfile:
         yaml.dump({"env": "dev"}, outfile)
     with open(
-        os.path.join(base_path, "uncommitted", "prod_variables.yml"),
-        "w",  # noqa: PTH118
+        os.path.join(base_path, "uncommitted", "prod_variables.yml"),  # noqa: PTH118
+        "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
     basic_data_context_config[
@@ -1350,9 +1358,9 @@ def test_list_checkpoints_on_context_with_two_checkpoints(
     )
     shutil.copy(
         checkpoints_file,
-        os.path.join(
-            os.path.dirname(checkpoints_file), "another.yml"
-        ),  # noqa: PTH118, PTH120
+        os.path.join(  # noqa: PTH118
+            os.path.dirname(checkpoints_file), "another.yml"  # noqa: PTH120
+        ),
     )
     assert set(context.list_checkpoints()) == {"another", "my_checkpoint"}
 
@@ -1940,9 +1948,9 @@ expectation_suite_ge_cloud_id:
         context.root_directory,
         context.checkpoint_store.config["store_backend"]["base_directory"],
     )
-    checkpoint_file = os.path.join(
+    checkpoint_file = os.path.join(  # noqa: PTH118
         checkpoint_dir, f"{checkpoint_name}.yml"
-    )  # noqa: PTH118
+    )
 
     with open(checkpoint_file) as cf:
         checkpoint_from_disk = cf.read()

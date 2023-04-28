@@ -76,14 +76,16 @@ def create_data_context_files(
 ):
     if config_variables_fixture_filename:
         os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
-        os.makedirs(
-            os.path.join(context_path, "uncommitted"), exist_ok=True
-        )  # noqa: PTH103, PTH118
+        os.makedirs(  # noqa: PTH103
+            os.path.join(context_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+        )
         copy_relative_path(
             f"../test_fixtures/{config_variables_fixture_filename}",
             str(
-                os.path.join(context_path, "uncommitted/config_variables.yml")
-            ),  # noqa: PTH118
+                os.path.join(  # noqa: PTH118
+                    context_path, "uncommitted/config_variables.yml"
+                )
+            ),
         )
         copy_relative_path(
             f"../test_fixtures/{ge_config_fixture_filename}",
@@ -100,9 +102,9 @@ def create_data_context_files(
 
 def create_common_data_context_files(context_path, asset_config_path):
     os.makedirs(  # noqa: PTH103
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             asset_config_path, "mydatasource/mygenerator/my_dag_node"
-        ),  # noqa: PTH118
+        ),
         exist_ok=True,
     )
     copy_relative_path(
@@ -112,20 +114,24 @@ def create_common_data_context_files(context_path, asset_config_path):
             asset_config_path, "mydatasource/mygenerator/my_dag_node/default.json"
         ),
     )
-    os.makedirs(
-        os.path.join(context_path, "plugins"), exist_ok=True
-    )  # noqa: PTH103, PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
     copy_relative_path(
         "../test_fixtures/custom_pandas_dataset.py",
         str(
-            os.path.join(context_path, "plugins", "custom_pandas_dataset.py")
-        ),  # noqa: PTH118
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_pandas_dataset.py"
+            )
+        ),
     )
     copy_relative_path(
         "../test_fixtures/custom_sparkdf_dataset.py",
         str(
-            os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")
-        ),  # noqa: PTH118
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_sparkdf_dataset.py"
+            )
+        ),
     )
 
 
