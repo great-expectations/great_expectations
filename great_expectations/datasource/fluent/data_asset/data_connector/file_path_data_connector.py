@@ -7,6 +7,12 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from great_expectations.core import IDDict
+
+# TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
+# TODO: <Alex>ALEX</Alex>
+# from great_expectations.datasource.fluent.data_asset.data_connector.sorter import Sorter
+# TODO: <Alex>ALEX</Alex>
+from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchFilter,
@@ -23,13 +29,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
     RegExParser,
 )
 
-# TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
-# TODO: <Alex>ALEX</Alex>
-# from great_expectations.datasource.fluent.data_asset.data_connector.sorter import Sorter
-# TODO: <Alex>ALEX</Alex>
-
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
     from great_expectations.datasource.fluent.interfaces import BatchRequest
 
 
@@ -73,6 +73,7 @@ class FilePathDataConnector(DataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
+        get_unfiltered_batch_definition_list_fn: None | Callable = None,
     ) -> None:
         super().__init__(
             datasource_name=datasource_name,
@@ -89,6 +90,16 @@ class FilePathDataConnector(DataConnector):
         )
 
         self._file_path_template_map_fn: Optional[Callable] = file_path_template_map_fn
+
+        if get_unfiltered_batch_definition_list_fn:
+            self._get_unfiltered_batch_definition_list_fn = (
+                get_unfiltered_batch_definition_list_fn
+            )
+        else:
+            # Default to file based approach
+            self._get_unfiltered_batch_definition_list_fn = (
+                file_get_unfiltered_batch_definition_list_fn
+            )
 
         # This is a dictionary which maps data_references onto batch_requests.
         self._data_references_cache: Dict[str, List[BatchDefinition] | None] = {}
@@ -121,20 +132,11 @@ class FilePathDataConnector(DataConnector):
             A list of BatchDefinition objects that match BatchRequest
 
         """
-        # Use a combination of a list and set to preserve iteration order
-        batch_definition_list: List[BatchDefinition] = list()
-        batch_definition_set = set()
-        for (
-            batch_definition
-        ) in self._get_batch_definition_list_from_data_references_cache():
-            if (
-                self._batch_definition_matches_batch_request(
-                    batch_definition=batch_definition, batch_request=batch_request
-                )
-                and batch_definition not in batch_definition_set
-            ):
-                batch_definition_list.append(batch_definition)
-                batch_definition_set.add(batch_definition)
+        batch_definition_list: List[
+            BatchDefinition
+        ] = self._get_unfiltered_batch_definition_list_fn(
+            data_connector=self, batch_request=batch_request
+        )
 
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
@@ -453,3 +455,61 @@ batch identifiers {batch_definition.batch_identifiers} from batch definition {ba
     @abstractmethod
     def _get_full_file_path(self, path: str) -> str:
         pass
+
+
+def file_get_unfiltered_batch_definition_list_fn(
+    data_connector: FilePathDataConnector, batch_request: BatchRequest
+) -> list[BatchDefinition]:
+    """Get all batch definitions for all files from a data connector using the supplied batch request.
+
+    Args:
+        data_connector: Used to get batch definitions.
+        batch_request: Specifies which batch definitions to get from data connector.
+
+    Returns:
+        A list of batch definitions from the data connector based on the batch request.
+    """
+
+    # Use a combination of a list and set to preserve iteration order
+    batch_definition_list: list[BatchDefinition] = list()
+    batch_definition_set = set()
+    for (
+        batch_definition
+    ) in data_connector._get_batch_definition_list_from_data_references_cache():
+        if (
+            data_connector._batch_definition_matches_batch_request(
+                batch_definition=batch_definition, batch_request=batch_request
+            )
+            and batch_definition not in batch_definition_set
+        ):
+            batch_definition_list.append(batch_definition)
+            batch_definition_set.add(batch_definition)
+
+    return batch_definition_list
+
+
+def directory_get_unfiltered_batch_definition_list_fn(
+    data_connector: FilePathDataConnector,
+    batch_request: BatchRequest,
+    data_directory: str,
+) -> list[BatchDefinition]:
+    """Get a single batch definition for the directory supplied in data_directory.
+
+    Args:
+        data_connector: Data connector containing information for the batch definition.
+        batch_request: Unused, but included for consistency.
+        data_directory: Directory pointing to data to reference in the batch definition.
+
+    Returns:
+        List containing a single batch definition referencing the directory of interest.
+    """
+    batch_definition_list: List[BatchDefinition] = list()
+    batch_definition = BatchDefinition(
+        datasource_name=data_connector.datasource_name,
+        data_connector_name=_DATA_CONNECTOR_NAME,
+        data_asset_name=data_connector.data_asset_name,
+        batch_identifiers=IDDict({"path": data_directory}),
+    )
+    batch_definition_list.append(batch_definition)
+
+    return [batch_definition]

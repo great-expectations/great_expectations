@@ -55,6 +55,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
+        get_unfiltered_batch_definition_list_fn: None | Callable = None,
     ) -> None:
         self._base_directory = base_directory
         self._glob_directive: str = glob_directive
@@ -71,6 +72,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
+            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
 
     @property
@@ -98,6 +100,7 @@ class FilesystemDataConnector(FilePathDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
+        get_unfiltered_batch_definition_list_fn: None | Callable = None,
     ) -> FilesystemDataConnector:
         """Builds "FilesystemDataConnector", which links named DataAsset to filesystem.
 
@@ -129,6 +132,7 @@ class FilesystemDataConnector(FilePathDataConnector):
             # sorters=sorters,
             # TODO: <Alex>ALEX</Alex>
             file_path_template_map_fn=file_path_template_map_fn,
+            get_unfiltered_batch_definition_list_fn=get_unfiltered_batch_definition_list_fn,
         )
 
     @classmethod
