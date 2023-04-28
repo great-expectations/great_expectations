@@ -183,7 +183,12 @@ ToStr: TypeAlias = Union[
 
 ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
 ToDict: TypeAlias = Union[
-    dict, "CommentedMap", pd.DataFrame, SerializableDictDot, SerializableDotDict
+    dict,
+    "CommentedMap",
+    pd.DataFrame,
+    SerializableDictDot,
+    SerializableDotDict,
+    pydantic.BaseModel,
 ]
 
 JSONConvertable: TypeAlias = Union[
