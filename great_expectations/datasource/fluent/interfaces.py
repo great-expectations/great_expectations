@@ -110,6 +110,8 @@ class BatchRequest(pydantic.BaseModel):
             kwargs["batch_slice"] = parse_batch_slice(
                 batch_slice=self._batch_slice_input
             )
+        else:
+            self._batch_slice_input = None
         super().__init__(**kwargs)
 
     def json(
