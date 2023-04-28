@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime
 import decimal
+import json
 import logging
 import os
 import pathlib
@@ -266,7 +267,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         TypeError: A non-JSON-serializable field was found.
     """
     if isinstance(data, pydantic.BaseModel):
-        return data.dict()
+        return json.loads(data.json())
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
