@@ -92,7 +92,7 @@ class BatchRequest(pydantic.BaseModel):
     options: BatchRequestOptions = pydantic.Field(default_factory=dict)
     batch_slice: slice = pydantic.Field(default=slice(0, None, None))
 
-    _batch_slice_input: BatchSlice = pydantic.PrivateAttr()
+    _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr()
 
     class Config:
         allow_mutation = False
@@ -101,8 +101,11 @@ class BatchRequest(pydantic.BaseModel):
         json_encoders = {slice: str}
 
     def __init__(self, **kwargs) -> None:
-        self._batch_slice_input = kwargs["batch_slice"]
-        kwargs["batch_slice"] = parse_batch_slice(batch_slice=self._batch_slice_input)
+        if "batch_slice" in kwargs:
+            self._batch_slice_input = kwargs["batch_slice"]
+            kwargs["batch_slice"] = parse_batch_slice(
+                batch_slice=self._batch_slice_input
+            )
         super().__init__(**kwargs)
 
     def json(
