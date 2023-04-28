@@ -101,9 +101,17 @@ class BatchRequest(pydantic.BaseModel):
     class Config:
         allow_mutation = False
         arbitrary_types_allowed = True
-        extra = pydantic.Extra.forbid
+        extra = pydantic.Extra.ignore
         json_encoders = {slice: str}
         validate_assignment = True
+
+    @pydantic.validator("options")
+    def _validate_options(cls, options):
+        if any(not isinstance(key, str) for key in options):
+            raise pydantic.ValidationError(
+                "BatchRequestOptions keys must all be strings."
+            )
+        return options
 
     def json(
         self,
