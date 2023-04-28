@@ -15,9 +15,9 @@ import pydantic
 import pytest
 from typing_extensions import Final
 
-from great_expectations.datasource.data_connector.batch_filter import parse_batch_slice
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
+from great_expectations.datasource.data_connector.batch_filter import parse_batch_slice
 from great_expectations.datasource.fluent.config import (
     GxConfig,
     _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation,
