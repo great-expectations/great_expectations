@@ -15,8 +15,8 @@ import pydantic
 import pytest
 from typing_extensions import Final
 
-from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.core.util import parse_batch_slice
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import (
     GxConfig,
