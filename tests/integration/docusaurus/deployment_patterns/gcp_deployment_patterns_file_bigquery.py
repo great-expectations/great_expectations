@@ -16,11 +16,12 @@ context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 # NOTE: The following code is only for testing and depends on an environment
 # variable to set the gcp_project. You can replace the value with your own
 # GCP project information
-gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
-if not gcp_project:
+GCP_PROJECT_NAME = os.environ.get("GE_TEST_GCP_PROJECT")
+if not GCP_PROJECT_NAME:
     raise ValueError(
         "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
     )
+BIGQUERY_DATASET = "demo"
 
 
 # parse great_expectations.yml for comparison
@@ -79,7 +80,7 @@ expectations_store_name: expectations_GCS_store
 configured_expectations_store = yaml.load(configured_expectations_store_yaml)
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "project"
-] = gcp_project
+] = GCP_PROJECT_NAME
 configured_expectations_store["stores"]["expectations_GCS_store"]["store_backend"][
     "bucket"
 ] = "test_metadata_store"
@@ -160,7 +161,7 @@ validations_store_name: validations_GCS_store
 configured_validations_store = yaml.load(configured_validations_store_yaml)
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "project"
-] = gcp_project
+] = GCP_PROJECT_NAME
 configured_validations_store["stores"]["validations_GCS_store"]["store_backend"][
     "bucket"
 ] = "test_metadata_store"
@@ -203,7 +204,7 @@ data_docs_sites:
       class_name: DefaultSiteIndexBuilder
 """
 data_docs_site_yaml = data_docs_site_yaml.replace(
-    "<YOUR GCP PROJECT NAME>", gcp_project
+    "<YOUR GCP PROJECT NAME>", GCP_PROJECT_NAME
 )
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCS BUCKET NAME>", "test_datadocs_store"
@@ -219,28 +220,13 @@ great_expectations_yaml["data_docs_sites"] = yaml.load(data_docs_site_yaml)[
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
-# NOTE: The following code is only for testing and depends on an environment
-# variable to set the gcp_project. You can replace the value with your own
-# GCP project information
-gcp_project = os.environ.get("GE_TEST_GCP_PROJECT")
-if not gcp_project:
-    raise ValueError(
-        "Environment Variable GE_TEST_GCP_PROJECT is required to run BigQuery integration tests"
-    )
-bigquery_dataset = "demo"
-CONNECTION_STRING = f"bigquery://{gcp_project}/{bigquery_dataset}"
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_datasource">
 datasource = context.sources.add_or_update_sql(
     name="my_bigquery_datasource",
-    connection_string="bigquery://<GCP_PROJECT_NAME>/<BIGQUERY_DATASET>",
+    connection_string=f"bigquery://{GCP_PROJECT_NAME}/{BIGQUERY_DATASET}",
 )
 # </snippet>
-
-# For tests, we are replacing the `connection_string`
-datasource = context.sources.add_or_update_sql(
-    name="my_bigquery_datasource", connection_string=CONNECTION_STRING
-)
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_bigquery.py add_bigquery_table_asset">
 table_asset = datasource.add_table_asset(name="my_table_asset", table_name="taxi_data")
