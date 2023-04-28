@@ -36,9 +36,28 @@ class CSVAsset(_FilePathDataAsset):
         return {"header", "infer_schema"}
 
 
+class DirectoryCSVAsset(_FilePathDataAsset):
+    # Overridden inherited instance fields
+    type: Literal["directory_csv"] = "directory_csv"
+    data_directory: str
+    header: bool = False
+    infer_schema: bool = Field(False, alias="InferSchema")
+
+    class Config:
+        extra = pydantic.Extra.forbid
+        allow_population_by_field_name = True
+
+    def _get_reader_method(self) -> str:
+        # Reader method is still "csv"
+        return self.type.replace("directory_", "")
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        return {"data_directory", "header", "infer_schema"}
+
+
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset, DirectoryCSVAsset]
 
     # instance attributes
     assets: List[_FilePathDataAsset] = []  # type: ignore[assignment]

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
+        DirectoryCSVAsset,
     )
 
 logger: Logger
@@ -43,3 +44,14 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...
+    def add_directory_csv_asset(
+        self,
+        name: str,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        glob_directive: str = "**/*",
+        data_directory: str,
+        header: bool = ...,
+        infer_schema: bool = ...,
+        order_by: Optional[SortersDefinition] = ...,
+    ) -> DirectoryCSVAsset: ...
