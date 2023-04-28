@@ -87,14 +87,10 @@ BatchMetadata: TypeAlias = Dict[str, Any]
 
 
 class BatchRequest(pydantic.BaseModel):
-    datasource_name: str = pydantic.Field(..., allow_mutation=False)
-    data_asset_name: str = pydantic.Field(..., allow_mutation=False)
-    options: BatchRequestOptions = pydantic.Field(
-        default_factory=dict, allow_mutation=False
-    )
-    batch_slice: BatchSlice = pydantic.Field(
-        default=slice(0, None, None), allow_mutation=True
-    )
+    datasource_name: str
+    data_asset_name: str
+    options: BatchRequestOptions = pydantic.Field(default_factory=dict)
+    batch_slice: slice = pydantic.Field(default=slice(0, None, None))
 
     _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr()
 
@@ -102,7 +98,6 @@ class BatchRequest(pydantic.BaseModel):
         arbitrary_types_allowed = True
         extra = pydantic.Extra.forbid
         json_encoders = {slice: str}
-        validate_assignment = True
 
     def __init__(self, **kwargs) -> None:
         if "batch_slice" in kwargs:
@@ -136,7 +131,7 @@ class BatchRequest(pydantic.BaseModel):
         default.
         """
         if self._batch_slice_input is not None:
-            self.batch_slice = self._batch_slice_input
+            self.batch_slice = self._batch_slice_input  # type: ignore[assignment]
         result = super().json(
             include=include,
             exclude=exclude,
@@ -176,7 +171,7 @@ class BatchRequest(pydantic.BaseModel):
         default.
         """
         if self._batch_slice_input is not None:
-            self.batch_slice = self._batch_slice_input
+            self.batch_slice = self._batch_slice_input  # type: ignore[assignment]
         result = super().dict(
             include=include,
             exclude=exclude,
