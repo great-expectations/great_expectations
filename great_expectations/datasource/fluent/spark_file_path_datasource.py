@@ -63,9 +63,11 @@ class ParquetAsset(_FilePathDataAsset):
         return {"datetimeRebaseMode", "int96RebaseMode", "mergeSchema"}
 
 
+_SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, ParquetAsset]
+
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset, ParquetAsset]
 
     # instance attributes
-    assets: List[Union[CSVAsset, ParquetAsset]] = []  # type: ignore[assignment]
+    assets: List[_SPARK_FILE_PATH_ASSET_TYPES] = []  # type: ignore[assignment]
