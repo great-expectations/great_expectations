@@ -230,9 +230,18 @@ def sqlite_database_path() -> pathlib.Path:
             slice(4, 20, 2),
             id="no options, batch_slice: str",
         ),
+        pytest.param(
+            {
+                "datasource_name": "my_datasource",
+                "data_asset_name": "my_data_asset",
+                "options": {"season": "summer"},
+            },
+            slice(0, None, None),
+            id="no slice, options: str",
+        ),
     ],
 )
-def test_batch_request_config_round_trip(
+def test_batch_request_config_serialization_round_trip(
     batch_request_config: dict, parsed_batch_slice: slice
 ) -> None:
     batch_request = BatchRequest(**batch_request_config)
@@ -253,13 +262,27 @@ def test_batch_request_config_round_trip(
         "batch_slice", None
     )
 
+    # assert that all fields show up in the json string with expected defaults
     batch_request_json = batch_request.json()
+
+    # convert options dict to json string
+    options_json = json.dumps(batch_request_config.get("options", {}))
+
+    # convert batch_slice value to json string
+    batch_slice_json = batch_request_config.get("batch_slice", None)
+    if isinstance(batch_slice_json, str):
+        batch_slice_json = f'"{batch_slice_json}"'
+    elif batch_slice_json is None:
+        # if batch_slice is not passed in, it will show up as slice(0, None, None)
+        # on the BatchRequest object, and null in the json string.
+        batch_slice_json = "null"
+
     assert batch_request_json == (
         "{"
         f'"datasource_name": "{batch_request_config["datasource_name"]}", '
         f'"data_asset_name": "{batch_request_config["data_asset_name"]}", '
-        f'"options": {batch_request_config.get("options", {})}, '
-        f'"batch_slice": "{batch_request_config.get("batch_slice", None)}"'
+        f'"options": {options_json}, '
+        f'"batch_slice": {batch_slice_json}'
         "}"
     )
 
