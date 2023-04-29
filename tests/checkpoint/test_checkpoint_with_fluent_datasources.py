@@ -14,7 +14,7 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
     ExpectationConfiguration,
 )
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations.datasource.fluent.batch_request import (
     BatchRequest as FluentBatchRequest,
 )
 from great_expectations.core.config_peer import ConfigOutputModes
