@@ -37,7 +37,6 @@ import GetLatestPip from '@site/docs/guides/setup/installation/components_local/
 import InstallBoto3WithPip from '@site/docs/guides/setup/configuring_metadata_stores/components/_install_boto3_with_pip.mdx'
 
 <!-- 1.2.5 Install Spark dependencies for S3 -->
-TODO: There is a ticket about putting this under test. It may need to be updated also.
 import InstallSparkS3Dependencies from './components/_spark_s3_dependencies.md'
 
 <!-- 1.2.6 Install Great Expectations -->
@@ -50,7 +49,8 @@ import VerifySuccessfulGxInstallation from '@site/docs/guides/setup/installation
 
 <!-- 1.3 Create your Data Context -->
 
-import CreateDataContextWithCli from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_the_cli.mdx'
+import CreateDataContextWithGetContext from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
+
 
 <!-- 1.4 Configure your Expectations Store on Amazon S3 -->
 
@@ -82,7 +82,9 @@ import IdentifyDataContextValidationResultsStore from '@site/docs/guides/setup/c
 
 <!-- 1.5.2 Update your configuration file to include a new Store for Validation Results on Amazon S3 -->
 
-import AddS3ValidationResultsStoreConfiguration from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_validation_results_on_s.mdx'
+import AddS3ValidationResultsStoreConfiguration from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_vnpm run build
+
+alidation_result_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_validation_results_on_s.mdx'
 
 <!-- 1.5.3 Verify that the new Amazon S3 Validation Results Store has been added successfully -->
 
@@ -114,23 +116,19 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- Part 2: Connect to data -->
 
-<!-- 2.1 Choose how to run the code for configuring a new Datasource -->
+<!-- 2.1 Instantiate your project's DataContext -->
 
-import HowToRunDatasourceCode from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_datasource_code_environment.md'
+import CreateDataContextWithGetContextAgain from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
 
-<!-- 2.2 Instantiate your project's DataContext -->
-
-import InstantiateDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_instantiate_your_projects_datacontext.md'
-
-<!-- 2.3 Configure your Datasource -->
+<!-- 2.2 Configure your Datasource -->
 
 import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_configure_your_datasource.md'
 
-<!-- 2.4 Save the Datasource configuration to your DataContext -->
+<!-- 2.3 Save the Datasource configuration to your DataContext -->
 
 import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_save_the_datasource_configuration_to_your_datacontext.mdx'
 
-<!-- 2.5 Test your new Datasource -->
+<!-- 2.4 Test your new Datasource -->
 
 import TestS3Datasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_test_your_new_datasource.md'
 
@@ -221,7 +219,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <VerifySuccessfulGxInstallation />
 
 ### 1.3 Create your Data Context
-<CreateDataContextWithCli />
+<CreateDataContextWithGetContext />
 
 ### 1.4 Configure your Expectations Store on Amazon S3
 
@@ -275,24 +273,17 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <AdditionalDataDocsNotes />
 
 ## Part 2: Connect to data
-TODO: all of section 2 needs to be rewritten. The code snippet I sent you should do most/all of this.
 
-### 2.1 Choose how to run the code for creating a new Datasource
+### 2.1 Instantiate your project's DataContext
 <CreateDataContextWithGetContextAgain />
 
 If you have already instantiated your `DataContext` in a previous step, this step can be skipped.
 
-### 2.2 Instantiate your project's DataContext
-<InstantiateDataContext />
-
-### 2.3 Configure your Datasource
+### 2.2 Add CSV Asset to your Datasource 
 <ConfigureYourDatasource />
 
-### 2.4 Save the Datasource configuration to your DataContext
+### 2.3 Test your new Datasource by building a BatchRequest from Asset 
 <SaveDatasourceConfigurationToDataContext />
-
-### 2.5 Test your new Datasource
-<TestS3Datasource />
 
 ## Part 3: Create Expectations
 
