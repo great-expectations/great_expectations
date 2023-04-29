@@ -29,7 +29,14 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictInt,
+    StrictStr,
+    root_validator,
+    validate_arguments,
+)
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
@@ -87,8 +94,8 @@ BatchMetadata: TypeAlias = Dict[str, Any]
 
 
 class BatchRequest(pydantic.BaseModel):
-    datasource_name: str
-    data_asset_name: str
+    datasource_name: StrictStr
+    data_asset_name: StrictStr
     options: BatchRequestOptions = pydantic.Field(default_factory=dict)
     batch_slice_input: Optional[BatchSlice] = pydantic.Field(
         default=None,
@@ -101,12 +108,8 @@ class BatchRequest(pydantic.BaseModel):
 
     class Config:
         allow_mutation = False
-        arbitrary_types_allowed = True
         extra = pydantic.Extra.ignore
         json_encoders = {slice: str}
-        # without smart_union checking all types,
-        # the tuples were getting coerced into lists, and vice versa
-        smart_union = True
         validate_assignment = True
 
     @pydantic.validator("options")

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import itertools
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Sequence, Union
 
 from typing_extensions import TypeAlias
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-BatchSlice: TypeAlias = Union[slice, str, List[int], Tuple[int, ...], int]
+BatchSlice: TypeAlias = Union[Sequence[int], int, str]
 
 
 def build_batch_filter(

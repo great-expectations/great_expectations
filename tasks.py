@@ -515,6 +515,7 @@ def type_schema(
         _PANDAS_SCHEMA_VERSION,
         Datasource,
     )
+    from great_expectations.datasource.fluent.interfaces import BatchRequest
     from great_expectations.datasource.fluent.sources import (
         _iter_all_registered_types,
     )
@@ -534,10 +535,13 @@ def type_schema(
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    for name, model in [
+    name_model = [
+        ("BatchRequest", BatchRequest),
         (Datasource.__name__, Datasource),
         *_iter_all_registered_types(),
-    ]:
+    ]
+
+    for name, model in name_model:
         if issubclass(model, Datasource):
             datasource_dir = schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)

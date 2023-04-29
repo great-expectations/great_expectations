@@ -1,0 +1,39 @@
+{
+    "title": "BatchRequest",
+    "type": "object",
+    "properties": {
+        "datasource_name": {
+            "title": "Datasource Name",
+            "type": "string"
+        },
+        "data_asset_name": {
+            "title": "Data Asset Name",
+            "type": "string"
+        },
+        "options": {
+            "title": "Options",
+            "type": "object"
+        },
+        "batch_slice": {
+            "title": "Batch Slice",
+            "anyOf": [
+                {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        }
+    },
+    "required": [
+        "datasource_name",
+        "data_asset_name"
+    ]
+}
