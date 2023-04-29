@@ -4,6 +4,7 @@ import itertools
 import logging
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Sequence, Union
 
+from pydantic import StrictInt, StrictStr
 from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-BatchSlice: TypeAlias = Union[Sequence[int], slice, int, str]
+BatchSlice: TypeAlias = Union[Sequence[StrictInt], slice, StrictInt, StrictStr]
 
 
 def build_batch_filter(
