@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-BatchSlice: TypeAlias = Union[Sequence[int], int, str]
+BatchSlice: TypeAlias = Union[Sequence[int], slice, int, str]
 
 
 def build_batch_filter(
@@ -76,9 +76,7 @@ def build_batch_filter(
                 'All batch_filter_parameters keys must strings (Python "str").'
             )
         batch_filter_parameters = IDDict(batch_filter_parameters)
-    index: Optional[
-        Union[int, list, tuple, slice, str]
-    ] = data_connector_query_dict.get(  # type: ignore[assignment]
+    index: Optional[BatchSlice] = data_connector_query_dict.get(  # type: ignore[assignment]
         "index"
     )
     limit: Optional[int] = data_connector_query_dict.get("limit")  # type: ignore[assignment]

@@ -19,6 +19,10 @@ import pydantic
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest,
+    BatchRequestOptions,
+)
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
@@ -28,8 +32,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchRequest,
-    BatchRequestOptions,
     DataAsset,
     TestConnectionError,
 )
@@ -197,7 +199,7 @@ class _FilePathDataAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
-                batch_slice=batch_request.batch_slice,
+                batch_slice=batch_request.batch_slice_input,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"

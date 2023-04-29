@@ -515,7 +515,7 @@ def type_schema(
         _PANDAS_SCHEMA_VERSION,
         Datasource,
     )
-    from great_expectations.datasource.fluent.interfaces import BatchRequest
+    from great_expectations.datasource.fluent.batch_request import BatchRequest
     from great_expectations.datasource.fluent.sources import (
         _iter_all_registered_types,
     )

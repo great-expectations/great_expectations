@@ -10,7 +10,7 @@ from great_expectations.core.batch import BatchDefinition
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import BatchRequest
+from great_expectations.datasource.fluent.batch_request import BatchRequest
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:

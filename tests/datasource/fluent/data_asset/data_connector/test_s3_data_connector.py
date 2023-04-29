@@ -17,7 +17,7 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import BatchRequest
+from great_expectations.datasource.fluent.batch_request import BatchRequest
 
 if TYPE_CHECKING:
     from botocore.client import BaseClient

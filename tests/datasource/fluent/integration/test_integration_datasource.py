@@ -10,9 +10,9 @@ from great_expectations.datasource.fluent import (
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
 )
+from great_expectations.datasource.fluent.batch_request import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.interfaces import (
-    BatchRequest,
     DataAsset,
     Datasource,
     TestConnectionError,

@@ -68,7 +68,7 @@ _MISSING_FLUENT_DATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 ]
 
 
-JSON_ENCODERS: dict[Type, Callable] = {}
+JSON_ENCODERS: dict[Type, Callable] = {slice: lambda v: str(v)}
 if TextClause:
     JSON_ENCODERS[TextClause] = lambda v: str(v)
 

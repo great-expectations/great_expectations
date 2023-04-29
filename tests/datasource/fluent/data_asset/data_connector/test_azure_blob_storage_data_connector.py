@@ -12,7 +12,7 @@ from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import BatchRequest
+from great_expectations.datasource.fluent.batch_request import BatchRequest
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (

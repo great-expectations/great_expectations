@@ -19,7 +19,7 @@ from great_expectations.data_context.data_context.data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations.datasource.fluent.batch_request import (
     BatchRequest as FluentBatchRequest,
 )
 from great_expectations.exceptions import CheckpointError
