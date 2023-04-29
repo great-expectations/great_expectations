@@ -38,8 +38,7 @@ def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expect
 
     batching_regex = r"^Titanic_1911\.csv"
     glob_directive = "*.csv"
-    # noinspection PyUnusedLocal
-    data_asset = datasource.add_csv_asset(
+    datasource.add_csv_asset(
         name="Titanic_1911",
         batching_regex=batching_regex,
         glob_directive=glob_directive,
@@ -70,8 +69,7 @@ def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_
 
     batching_regex = r"^Titanic_1911\.csv"
     glob_directive = "*.csv"
-    # noinspection PyUnusedLocal
-    data_asset = datasource.add_csv_asset(
+    datasource.add_csv_asset(
         name="Titanic_1911",
         batching_regex=batching_regex,
         glob_directive=glob_directive,
@@ -195,7 +193,6 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
                     - airflow_run_id
     """
 
-    # noinspection PyUnusedLocal
     context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
