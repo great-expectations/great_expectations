@@ -15,7 +15,6 @@ from great_expectations.datasource.fluent import (
     DataAsset,
     Datasource,
 )
-from great_expectations.datasource.fluent.batch_request import BatchRequest
 from great_expectations.datasource.fluent.sources import (
     _iter_all_registered_types,
 )
