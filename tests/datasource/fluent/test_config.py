@@ -9,7 +9,7 @@ import re
 import uuid
 from pprint import pformat as pf
 from pprint import pprint as pp
-from typing import TYPE_CHECKING, Callable, List, cast  # TODO: revert use of cast
+from typing import TYPE_CHECKING, Any, Callable, List, cast  # TODO: revert use of cast
 
 import pydantic
 import pytest
@@ -272,7 +272,7 @@ def test_batch_request_config_serialization_round_trips(
 ) -> None:
     datasource_name: Final[str] = "my_datasource"
     data_asset_name: Final[str] = "my_data_asset"
-    batch_request_config = {
+    batch_request_config: dict[str, Any] = {
         "datasource_name": datasource_name,
         "data_asset_name": data_asset_name,
     }
