@@ -15,6 +15,7 @@ from great_expectations.datasource.fluent import (
     DataAsset,
     Datasource,
 )
+from great_expectations.datasource.fluent.batch_request import BatchRequest
 from great_expectations.datasource.fluent.sources import (
     _iter_all_registered_types,
 )
@@ -119,6 +120,7 @@ def test_no_orphaned_schemas():
 
     # NOTE: this is a very low fidelity check
     all_schemas: set[str] = {t[1].__name__ for t in _iter_all_registered_types()}
+    all_schemas.add("BatchRequest")
     all_schemas.add(Datasource.__name__)
 
     orphans: list[pathlib.Path] = []
