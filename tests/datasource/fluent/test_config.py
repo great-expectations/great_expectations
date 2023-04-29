@@ -50,11 +50,6 @@ LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
 
-BATCH_REQUEST_DICT = {
-    "datasource_name": "my_datasource",
-    "data_asset_name": "my_data_asset",
-    "batch_slice": "[4:20:2]",
-}
 
 CSV_PATH = FLUENT_DATASOURCE_TEST_DIR.joinpath(
     pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
@@ -206,11 +201,6 @@ DEFAULT_PANDAS_DATASOURCE_AND_DATA_ASSET_CONFIG_DICT: Final[dict] = {
 
 
 @pytest.fixture
-def batch_request_config() -> dict:
-    return copy.deepcopy(BATCH_REQUEST_DICT)
-
-
-@pytest.fixture
 def ds_dict_config() -> dict:
     return copy.deepcopy(COMPLEX_CONFIG_DICT)
 
@@ -229,21 +219,49 @@ def sqlite_database_path() -> pathlib.Path:
 
 
 @pytest.mark.unit
-def test_batch_request_config_round_trip(batch_request_config: dict) -> None:
+@pytest.mark.parametrize(
+    "batch_request_config,parsed_batch_slice",
+    [
+        pytest.param(
+            {
+                "datasource_name": "my_datasource",
+                "data_asset_name": "my_data_asset",
+                "batch_slice": "[4:20:2]",
+            },
+            slice(4, 20, 2),
+            id="no options, batch_slice: str",
+        ),
+    ],
+)
+def test_batch_request_config_round_trip(
+    batch_request_config: dict, parsed_batch_slice: slice
+) -> None:
     batch_request = BatchRequest(**batch_request_config)
-    assert batch_request.options == {}
-    assert batch_request.batch_slice == parse_batch_slice(
-        batch_request_config["batch_slice"]
-    )
+    assert batch_request.datasource_name == batch_request_config["datasource_name"]
+    assert batch_request.data_asset_name == batch_request_config["data_asset_name"]
+    assert batch_request.options == batch_request_config.get("options", {})
+    assert batch_request.batch_slice == parsed_batch_slice
 
     batch_request_dict = batch_request.dict()
-    assert "options" not in batch_request_dict
-    assert batch_request_dict["batch_slice"] == batch_request_config["batch_slice"]
+    assert (
+        batch_request_dict["datasource_name"] == batch_request_config["datasource_name"]
+    )
+    assert (
+        batch_request_dict["data_asset_name"] == batch_request_config["data_asset_name"]
+    )
+    assert batch_request_dict["options"] == batch_request_config.get("options", {})
+    assert batch_request_dict["batch_slice"] == batch_request_config.get(
+        "batch_slice", None
+    )
 
     batch_request_json = batch_request.json()
-    assert (
-        batch_request_json
-        == '{"datasource_name": "my_datasource", "data_asset_name": "my_data_asset", "batch_slice": "[4:20:2]"}'
+    assert batch_request_json == (
+        "{"
+        f'"datasource_name": "{batch_request_config["datasource_name"]}", '
+        f'"data_asset_name": "{batch_request_config["data_asset_name"]}", '
+        f'"options": {batch_request_config.get("options", {})}, '
+        f'"batch_slice": "{batch_request_config.get("batch_slice", None)}"'
+        "}"
     )
 
 

@@ -118,9 +118,10 @@ class BatchRequest(pydantic.BaseModel):
         *,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
         exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        # Default to True to serialize the batch_slice_input with the name batch_slice
         by_alias: bool = True,
         skip_defaults: Optional[bool] = None,
-        exclude_unset: bool = True,
+        exclude_unset: bool = False,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
         encoder: Optional[Callable[[Any], Any]] = None,
@@ -133,7 +134,6 @@ class BatchRequest(pydantic.BaseModel):
 
         Deviates from pydantic
           - `by_alias` `True` by default instead of `False` by default.
-          - `exclude_unset` `True` by default instead of `False` by default.
         """
         return super().json(
             include=include,
@@ -153,9 +153,9 @@ class BatchRequest(pydantic.BaseModel):
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        # Default to True to serialize the batch_slice_input with the name batch_slice
         by_alias: bool = True,
-        # Default to True to prevent serializing long configs full of unset default values
-        exclude_unset: bool = True,
+        exclude_unset: bool = False,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
         # deprecated - use exclude_unset instead
@@ -169,7 +169,6 @@ class BatchRequest(pydantic.BaseModel):
 
         Deviates from pydantic
           - `by_alias` `True` by default instead of `False` by default.
-          - `exclude_unset` `True` by default instead of `False` by default.
         """
         return super().dict(
             include=include,
