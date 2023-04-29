@@ -103,6 +103,9 @@ class BatchRequest(pydantic.BaseModel):
         arbitrary_types_allowed = True
         extra = pydantic.Extra.ignore
         json_encoders = {slice: str}
+        # without smart_union checking all types,
+        # the tuples were getting coerced into lists, and vice versa
+        smart_union = True
         validate_assignment = True
 
     @pydantic.validator("options")
