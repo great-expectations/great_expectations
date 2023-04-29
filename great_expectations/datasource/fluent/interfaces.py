@@ -9,12 +9,14 @@ import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
     Any,
     Callable,
     ClassVar,
     Dict,
     Generic,
     List,
+    Mapping,
     MutableMapping,
     MutableSequence,
     Optional,
@@ -33,6 +35,10 @@ from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
 from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.datasource.data_connector.batch_filter import (
+    BatchSlice,  # noqa: TCH001
+    parse_batch_slice,
+)
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -42,6 +48,8 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    MappingIntStrAny = Mapping[Union[int, str], Any]
+    AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
     #  Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import (
@@ -66,7 +74,7 @@ class GxSerializationWarning(UserWarning):
 
 
 # BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants as returned. The keys represent dimensions one can slice the data along
+# Batches one wants as returned. The keys represent dimensions one can filter the data along
 # and the values are the realized. If a value is None or unspecified, the batch_request
 # will capture all data along this dimension. For example, if we have a year and month
 # splitter, and we want to query all months in the year 2020, the batch request options
@@ -78,11 +86,104 @@ BatchRequestOptions: TypeAlias = Dict[str, Any]
 BatchMetadata: TypeAlias = Dict[str, Any]
 
 
-@dataclasses.dataclass(frozen=True)
-class BatchRequest:
+class BatchRequest(pydantic.BaseModel):
     datasource_name: str
     data_asset_name: str
-    options: BatchRequestOptions = dataclasses.field(default_factory=dict)
+    options: BatchRequestOptions = pydantic.Field(default_factory=dict)
+    batch_slice: slice = pydantic.Field(default=slice(0, None, None))
+
+    _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr()
+
+    class Config:
+        arbitrary_types_allowed = True
+        extra = pydantic.Extra.forbid
+        json_encoders = {slice: str}
+
+    def __init__(self, **kwargs) -> None:
+        if "batch_slice" in kwargs:
+            self._batch_slice_input = kwargs["batch_slice"]
+            kwargs["batch_slice"] = parse_batch_slice(
+                batch_slice=self._batch_slice_input
+            )
+        else:
+            self._batch_slice_input = None
+        super().__init__(**kwargs)
+
+    def json(
+        self,
+        *,
+        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        by_alias: bool = False,
+        skip_defaults: Optional[bool] = None,
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        encoder: Optional[Callable[[Any], Any]] = None,
+        models_as_dict: bool = True,
+        **dumps_kwargs: Any,
+    ) -> str:
+        """
+        Generate a json representation of the model, optionally specifying which
+        fields to include or exclude.
+
+        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
+        default.
+        """
+        if self._batch_slice_input is not None:
+            self.batch_slice = self._batch_slice_input  # type: ignore[assignment]
+        result = super().json(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            skip_defaults=skip_defaults,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            encoder=encoder,
+            models_as_dict=models_as_dict,
+            **dumps_kwargs,
+        )
+        if self._batch_slice_input is not None:
+            self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
+        return result
+
+    def dict(
+        self,
+        *,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
+        by_alias: bool = False,
+        # Default to True to prevent serializing long configs full of unset default values
+        exclude_unset: bool = True,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        # deprecated - use exclude_unset instead
+        skip_defaults: bool | None = None,
+        # custom
+        config_provider: _ConfigurationProvider | None = None,
+    ) -> dict[str, Any]:
+        """
+        Generate a dictionary representation of the model, optionally specifying which
+        fields to include or exclude.
+
+        Deviates from pydantic `exclude_unset` `True` by default instead of `False` by
+        default.
+        """
+        if self._batch_slice_input is not None:
+            self.batch_slice = self._batch_slice_input  # type: ignore[assignment]
+        result = super().dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+            skip_defaults=skip_defaults,
+        )
+        if self._batch_slice_input is not None:
+            self.batch_slice = parse_batch_slice(batch_slice=self._batch_slice_input)
+        return result
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -205,14 +306,18 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError
 
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
+            options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -250,6 +355,10 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         )
         batch_metadata.update(copy.deepcopy(batch_request.options))
         return batch_metadata
+
+    @staticmethod
+    def _parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
+        return parse_batch_slice(batch_slice=batch_slice)
 
     # Sorter methods
     @pydantic.validator("order_by", pre=True)
