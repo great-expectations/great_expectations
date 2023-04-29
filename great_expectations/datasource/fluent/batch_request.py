@@ -15,6 +15,7 @@ import pydantic
 from pydantic import StrictStr
 from typing_extensions import TypeAlias
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.datasource.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,
@@ -36,7 +37,25 @@ if TYPE_CHECKING:
 BatchRequestOptions: TypeAlias = Dict[str, Any]
 
 
+@public_api
 class BatchRequest(pydantic.BaseModel):
+    """A BatchRequest is the way to specify which data Great Expectations will validate.
+
+    A Batch Request is provided to a Data Asset in order to create one or more Batches.
+
+    Args:
+        datasource_name: The name of the Datasource used to connect to the data.
+        data_asset_name: The name of the Data Asset used to connect to the data.
+        options: A dict that can be used to filter the batch groups associated with the Data Asset.
+            The dict structure depends on the asset type. The available keys for dict can be obtained by
+            calling DataAsset.batch_request_options.
+        batch_slice: A python slice that can be used to limit the sorted batches by index.
+            e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
+
+    Returns:
+        BatchRequest
+    """
+
     datasource_name: StrictStr
     data_asset_name: StrictStr
     options: BatchRequestOptions = pydantic.Field(default_factory=dict)
