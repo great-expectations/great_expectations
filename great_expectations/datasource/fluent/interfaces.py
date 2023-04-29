@@ -91,12 +91,13 @@ class BatchRequest(pydantic.BaseModel):
     data_asset_name: str
     options: BatchRequestOptions = pydantic.Field(default_factory=dict)
     batch_slice_input: Optional[BatchSlice] = pydantic.Field(
-        default=None, alias="batch_slice"
+        default=None,
+        alias="batch_slice",
     )
 
     @property
     def batch_slice(self) -> slice:
-        return parse_batch_slice(self.batch_slice_input)
+        return parse_batch_slice(batch_slice=self.batch_slice_input)
 
     class Config:
         allow_mutation = False

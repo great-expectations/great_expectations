@@ -187,7 +187,7 @@ def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
         return _batch_slice_from_list_or_tuple(batch_slice=batch_slice)
     else:
         raise ValueError(
-            f'batch_slice should be of type BatchSlice, but type: "{type(batch_slice)}" was passed.'
+            f"batch_slice should be of type BatchSlice, but type: {type(batch_slice)} was passed."
         )
 
 
