@@ -633,7 +633,9 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
         config_version=1,
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
-        action_list=store_validation_result_action,
+        action_list=[
+            store_validation_result_action,
+        ],
         validations=[
             {
                 "batch_request": {
