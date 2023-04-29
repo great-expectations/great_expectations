@@ -91,6 +91,7 @@ class BatchRequest(pydantic.BaseModel):
             )
         return options
 
+    @public_api
     def json(
         self,
         *,
@@ -107,7 +108,7 @@ class BatchRequest(pydantic.BaseModel):
         **dumps_kwargs: Any,
     ) -> str:
         """
-        Generate a json representation of the model, optionally specifying which
+        Generate a json representation of the BatchRequest, optionally specifying which
         fields to include or exclude.
 
         Deviates from pydantic
@@ -126,6 +127,7 @@ class BatchRequest(pydantic.BaseModel):
             **dumps_kwargs,
         )
 
+    @public_api
     def dict(
         self,
         *,
@@ -140,7 +142,7 @@ class BatchRequest(pydantic.BaseModel):
         skip_defaults: bool | None = None,
     ) -> dict[str, Any]:
         """
-        Generate a dictionary representation of the model, optionally specifying which
+        Generate a dictionary representation of the BatchRequest, optionally specifying which
         fields to include or exclude.
 
         Deviates from pydantic
