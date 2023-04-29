@@ -17,6 +17,7 @@ from typing_extensions import Final
 
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
+from great_expectations.datasource.fluent.batch_request import BatchRequest
 from great_expectations.datasource.fluent.config import (
     GxConfig,
     _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representation,
@@ -27,7 +28,6 @@ from great_expectations.datasource.fluent.constants import (
     _DATASOURCE_NAME_KEY,
     _FLUENT_DATASOURCES_KEY,
 )
-from great_expectations.datasource.fluent.batch_request import BatchRequest
 from great_expectations.datasource.fluent.interfaces import Datasource
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,

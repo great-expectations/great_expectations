@@ -9,10 +9,10 @@ from great_expectations.compatibility import azure
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import AzureUrl
+from great_expectations.datasource.fluent.batch_request import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
-from great_expectations.datasource.fluent.batch_request import BatchRequest
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
