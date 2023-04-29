@@ -239,6 +239,15 @@ def sqlite_database_path() -> pathlib.Path:
             slice(0, None, None),
             id="no slice, options: str",
         ),
+        pytest.param(
+            {
+                "datasource_name": "my_datasource",
+                "data_asset_name": "my_data_asset",
+                "options": {"month": 7},
+            },
+            slice(0, None, None),
+            id="no slice, options: int",
+        ),
     ],
 )
 def test_batch_request_config_serialization_round_trip(
@@ -247,7 +256,10 @@ def test_batch_request_config_serialization_round_trip(
     batch_request = BatchRequest(**batch_request_config)
     assert batch_request.datasource_name == batch_request_config["datasource_name"]
     assert batch_request.data_asset_name == batch_request_config["data_asset_name"]
+    # options is optional and an empty dict by default
     assert batch_request.options == batch_request_config.get("options", {})
+    # BatchRequest always has a slice associated with it,
+    # even if it is slice(0, None, None) (all elements in sequence).
     assert batch_request.batch_slice == parsed_batch_slice
 
     batch_request_dict = batch_request.dict()
@@ -257,7 +269,10 @@ def test_batch_request_config_serialization_round_trip(
     assert (
         batch_request_dict["data_asset_name"] == batch_request_config["data_asset_name"]
     )
+    # options is optional and an empty dict by default
     assert batch_request_dict["options"] == batch_request_config.get("options", {})
+    # Even though BatchRequest.batch_slice has a slice object,
+    # it will serialize to None since batch_slice wasn't passed in.
     assert batch_request_dict["batch_slice"] == batch_request_config.get(
         "batch_slice", None
     )
