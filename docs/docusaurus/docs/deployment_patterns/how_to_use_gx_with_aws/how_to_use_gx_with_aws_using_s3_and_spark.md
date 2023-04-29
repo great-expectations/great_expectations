@@ -120,7 +120,7 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 import CreateDataContextWithGetContextAgain from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
 
-<!-- 2.2 Configure your Datasource -->
+<!-- 2.2 Add Datasource to your DataContext  -->
 
 import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_configure_your_datasource.md'
 
@@ -279,11 +279,14 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 If you have already instantiated your `DataContext` in a previous step, this step can be skipped.
 
-### 2.2 Add CSV Asset to your Datasource 
+### 2.2 Add Datasource to your DataContext 
 <ConfigureYourDatasource />
 
-### 2.3 Test your new Datasource by building a BatchRequest from Asset 
+### 2.2 Add CSV Asset to your Datasource 
 <SaveDatasourceConfigurationToDataContext />
+
+### 2.3 Test your new Datasource by building a BatchRequest from Asset 
+<TestS3Datasource />
 
 ## Part 3: Create Expectations
 
