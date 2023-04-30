@@ -48,16 +48,28 @@ class BatchRequest(pydantic.BaseModel):
         options: A dict that can be used to filter the batch groups associated with the Data Asset.
             The dict structure depends on the asset type. The available keys for dict can be obtained by
             calling DataAsset.batch_request_options.
-        batch_slice: A python slice that can be used to limit the sorted batches by index.
+        batch_slice: A python slice that can be used to filter the sorted batches by index.
             e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
     Returns:
         BatchRequest
     """
 
-    datasource_name: StrictStr
-    data_asset_name: StrictStr
-    options: BatchRequestOptions = pydantic.Field(default_factory=dict)
+    datasource_name: StrictStr = pydantic.Field(
+        ...,
+        description="The name of the Datasource used to connect to the data.",
+    )
+    data_asset_name: StrictStr = pydantic.Field(
+        ...,
+        description="The name of the Data Asset used to connect to the data.",
+    )
+    options: BatchRequestOptions = pydantic.Field(
+        default_factory=dict,
+        description=(
+            "A map that can be used to filter the batch groups associated with the Data Asset. "
+            "The structure and types depends on the asset type."
+        ),
+    )
     batch_slice_input: Optional[BatchSlice] = pydantic.Field(
         default=None,
         alias="batch_slice",
@@ -65,6 +77,7 @@ class BatchRequest(pydantic.BaseModel):
 
     @property
     def batch_slice(self) -> slice:
+        """A built-in slice that can be used to filter a list of batches by index."""
         return parse_batch_slice(batch_slice=self.batch_slice_input)
 
     class Config:
