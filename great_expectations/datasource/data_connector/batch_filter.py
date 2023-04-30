@@ -18,7 +18,9 @@ logger = logging.getLogger(__name__)
 
 class SliceValidator:
     """
-    A custom slice class which has implemented __get_validators__ for type validation.
+    A custom slice class which has implemented:
+      - __get_validators__ for type validation
+      - __modify_schemas__ to provide custom json schema
     """
 
     def __init__(self, slice_validator: slice):

@@ -198,7 +198,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
-                batch_slice=batch_request.batch_slice,
+                batch_slice=batch_request.batch_slice_input,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
