@@ -20,7 +20,6 @@ from great_expectations.datasource.data_connector.batch_filter import (
     BatchSlice,
     parse_batch_slice,
 )
-from great_expectations.datasource.fluent.config import JSON_ENCODERS
 
 if TYPE_CHECKING:
     MappingIntStrAny = Mapping[Union[int, str], Any]
@@ -71,7 +70,6 @@ class BatchRequest(pydantic.BaseModel):
     class Config:
         allow_mutation = False
         extra = pydantic.Extra.ignore
-        json_encoders = JSON_ENCODERS
         validate_assignment = True
 
     @pydantic.validator("options")
