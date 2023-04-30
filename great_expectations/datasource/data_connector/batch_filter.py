@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-BatchSlice: TypeAlias = Union[Sequence[StrictInt], slice, StrictInt, StrictStr]
+BatchSlice: TypeAlias = Union[Sequence[Union[StrictInt, None]], StrictInt, StrictStr]
 
 
 def build_batch_filter(

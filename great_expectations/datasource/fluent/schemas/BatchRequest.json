@@ -1,5 +1,6 @@
 {
     "title": "BatchRequest",
+    "description": "--Public API--A BatchRequest is the way to specify which data Great Expectations will validate.\n\nA Batch Request is provided to a Data Asset in order to create one or more Batches.\n\nArgs:\n    datasource_name: The name of the Datasource used to connect to the data.\n    data_asset_name: The name of the Data Asset used to connect to the data.\n    options: A dict that can be used to filter the batch groups associated with the Data Asset.\n        The dict structure depends on the asset type. The available keys for dict can be obtained by\n        calling DataAsset.batch_request_options.\n    batch_slice: A python slice that can be used to limit the sorted batches by index.\n        e.g. `batch_slice = \"[-5:]\"` will request only the last 5 batches after the options filter is applied.\n\nReturns:\n    BatchRequest",
     "type": "object",
     "properties": {
         "datasource_name": {
