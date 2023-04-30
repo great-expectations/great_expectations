@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 # splitter, and we want to query all months in the year 2020, the batch request options
 # would look like:
 #   options = { "year": 2020 }
-BatchRequestOptions: TypeAlias = Dict[str, Any]
+BatchRequestOptions: TypeAlias = Dict[StrictStr, Any]
 
 
 @public_api
@@ -85,7 +85,8 @@ class BatchRequest(pydantic.BaseModel):
         return parse_batch_slice(batch_slice=self.batch_slice_input)
 
     class Config:
-        extra = pydantic.Extra.forbid
+        # ignore extra params, otherwise pycharm will not recognize "batch_slice" alias and show an error
+        extra = pydantic.Extra.ignore
         validate_assignment = True
 
     @pydantic.validator("options")
