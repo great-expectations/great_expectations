@@ -89,13 +89,21 @@ class BatchRequest(pydantic.BaseModel):
         extra = pydantic.Extra.ignore
         validate_assignment = True
 
-    @pydantic.validator("options")
-    def _validate_options(cls, options):
+    @pydantic.validator("options", pre=True)
+    def _validate_options(cls, options) -> BatchRequestOptions:
+        if not isinstance(options, dict):
+            raise TypeError("BatchRequestOptions must take the form of a dictionary.")
         if any(not isinstance(key, str) for key in options):
-            raise pydantic.ValidationError(
-                "BatchRequestOptions keys must all be strings."
-            )
+            raise TypeError("BatchRequestOptions keys must all be strings.")
         return options
+
+    @pydantic.validator("batch_slice_input")
+    def _validate_batch_slice_input(cls, batch_slice_input) -> Optional[BatchSlice]:
+        try:
+            parse_batch_slice(batch_slice=batch_slice_input)
+        except (TypeError, ValueError) as e:
+            raise ValueError(f"Failed to parse BatchSlice to slice: {e}")
+        return batch_slice_input
 
     @public_api
     def json(

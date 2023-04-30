@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pathlib
 
+import pydantic
 import pytest
 
 from great_expectations.checkpoint import SimpleCheckpoint
@@ -462,3 +463,39 @@ def test_asset_specified_metadata(
     assert len(batches) == 1
     # Update the batch_metadata from the request with the metadata inherited from the asset
     assert batches[0].metadata == {**asset_specified_metadata, "year": 2019, "month": 2}
+
+
+@pytest.mark.integration
+def test_batch_request_error_messages(
+    datasource_test_data: tuple[
+        AbstractDataContext, Datasource, DataAsset, BatchRequest
+    ]
+) -> None:
+    _, _, _, batch_request = datasource_test_data
+    # DataAsset.build_batch_request() infers datasource_name and data_asset_name
+    # which have already been confirmed as functional via test_connection() methods.
+    with pytest.raises(TypeError):
+        batch_request.datasource_name = "untested_datasource_name"
+
+    with pytest.raises(TypeError):
+        batch_request.data_asset_name = "untested_data_asset_name"
+
+    # options can be added/updated if they take the correct form
+    batch_request.options["new_option"] = 42
+    assert "new_option" in batch_request.options
+
+    with pytest.raises(pydantic.ValidationError):
+        batch_request.options = {10: "value for non-string key"}
+
+    with pytest.raises(pydantic.ValidationError):
+        batch_request.options = "not a dictionary"
+
+    # batch_slice can be added/updated if it takes the correct form
+    batch_request.batch_slice_input = "[5:10]"
+    assert batch_request.batch_slice == slice(5, 10, None)
+
+    with pytest.raises(pydantic.ValidationError):
+        batch_request.batch_slice_input = "nonsense slice"
+
+    with pytest.raises(pydantic.ValidationError):
+        batch_request.batch_slice_input = True
