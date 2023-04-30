@@ -42,10 +42,23 @@ class SliceValidator:
         # the returned value will be ignored
         field_schema.update(
             slice={
-                "start": "integer",
-                "stop": "integer",
-                "step": "integer",
-            },
+                "description": "A slice object representing the set of indices specified by range(start, stop, step).",
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "description": "The starting index of the slice.",
+                        "type": "integer",
+                    },
+                    "stop": {
+                        "description": "The stopping index of the slice.",
+                        "type": "integer",
+                    },
+                    "step": {
+                        "description": "The number of steps between indices.",
+                        "type": "integer",
+                    },
+                },
+            }
         )
 
     @classmethod
