@@ -25,6 +25,13 @@
                     }
                 },
                 {
+                    "slice": {
+                        "start": "integer",
+                        "stop": "integer",
+                        "step": "integer"
+                    }
+                },
+                {
                     "type": "integer"
                 },
                 {

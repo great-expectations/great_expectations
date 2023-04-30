@@ -70,18 +70,9 @@ class BatchRequest(pydantic.BaseModel):
 
     class Config:
         allow_mutation = False
-        arbitrary_types_allowed = True
         extra = pydantic.Extra.ignore
         json_encoders = JSON_ENCODERS
         validate_assignment = True
-
-    # @classmethod
-    # def __modify_schema__(
-    #     cls, field_schema: Dict[str, Any], field: Optional[pydantic.fields.ModelField]
-    # ):
-    #     if field:
-    #         batch_slice_input_slice = field.field_info.extra['batch_slice_input_slice']
-    #         field_schema['examples'] = [c * 3 for c in batch_slice_input_slice]
 
     @pydantic.validator("options")
     def _validate_options(cls, options):

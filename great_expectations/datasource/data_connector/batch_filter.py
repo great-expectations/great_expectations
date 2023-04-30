@@ -16,7 +16,46 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-BatchSlice: TypeAlias = Union[Sequence[Union[StrictInt, None]], StrictInt, StrictStr]
+class SliceValidator:
+    """
+    A custom slice class which has implemented __get_validators__ for type validation.
+    """
+
+    def __init__(self, slice_validator: slice):
+        self._slice = slice_validator
+        self.start = self._slice.start
+        self.stop = self._slice.stop
+        self.step = self._slice.step
+
+    @classmethod
+    def __get_validators__(cls):
+        # one or more validators may be yielded which will be called in the
+        # order to validate the input, each validator will receive as an input
+        # the value returned from the previous validator
+        yield cls.validate
+
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        # __modify_schema__ should mutate the dict it receives in place,
+        # the returned value will be ignored
+        field_schema.update(
+            slice={
+                "start": "integer",
+                "stop": "integer",
+                "step": "integer",
+            },
+        )
+
+    @classmethod
+    def validate(cls, v):
+        if not isinstance(v, slice):
+            raise TypeError("slice required")
+        return cls(v)
+
+
+BatchSlice: TypeAlias = Union[
+    Sequence[Union[StrictInt, None]], SliceValidator, StrictInt, StrictStr
+]
 
 
 def build_batch_filter(
@@ -28,7 +67,7 @@ def build_batch_filter(
                     int,
                     list,
                     tuple,
-                    slice,
+                    Union[slice, SliceValidator],
                     str,
                     Union[Dict, IDDict],
                     Callable,
@@ -91,11 +130,13 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
         raise gx_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
-    index = parse_batch_slice(batch_slice=index) if index is not None else None
+    parsed_index: slice | None = (
+        parse_batch_slice(batch_slice=index) if index is not None else None
+    )
     return BatchFilter(
         custom_filter_function=custom_filter_function,
         batch_filter_parameters=batch_filter_parameters,  # type: ignore[arg-type]
-        index=index,
+        index=parsed_index,
         limit=limit,
     )
 
@@ -178,6 +219,8 @@ def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
         return slice(0, None, None)
     elif isinstance(batch_slice, slice):
         return batch_slice
+    elif isinstance(batch_slice, SliceValidator):
+        return slice(batch_slice.start, batch_slice.stop, batch_slice.step)
     elif isinstance(batch_slice, int):
         return _batch_slice_from_int(batch_slice=batch_slice)
     elif isinstance(batch_slice, str):
