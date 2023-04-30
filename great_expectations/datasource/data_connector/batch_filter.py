@@ -230,22 +230,25 @@ def _batch_slice_from_int(batch_slice: int) -> slice:
 
 
 def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
+    return_slice: slice
     if batch_slice is None:
-        return slice(0, None, None)
+        return_slice = slice(0, None, None)
     elif isinstance(batch_slice, slice):
-        return batch_slice
+        return_slice = batch_slice
     elif isinstance(batch_slice, SliceValidator):
-        return slice(batch_slice.start, batch_slice.stop, batch_slice.step)
+        return_slice = slice(batch_slice.start, batch_slice.stop, batch_slice.step)
     elif isinstance(batch_slice, int):
-        return _batch_slice_from_int(batch_slice=batch_slice)
+        return_slice = _batch_slice_from_int(batch_slice=batch_slice)
     elif isinstance(batch_slice, str):
-        return _batch_slice_from_string(batch_slice=batch_slice)
+        return_slice = _batch_slice_from_string(batch_slice=batch_slice)
     elif isinstance(batch_slice, (list, tuple)):
-        return _batch_slice_from_list_or_tuple(batch_slice=batch_slice)
+        return_slice = _batch_slice_from_list_or_tuple(batch_slice=batch_slice)
     else:
         raise TypeError(
-            f"batch_slice should be of type BatchSlice, but type: {type(batch_slice)} was passed."
+            f"`batch_slice` should be of type `BatchSlice`, but type: {type(batch_slice)} was passed."
         )
+    logger.info(f"batch_slice: {batch_slice} was parsed to: {return_slice}")
+    return return_slice
 
 
 class BatchFilter:

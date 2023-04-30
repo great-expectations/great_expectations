@@ -485,10 +485,10 @@ def test_batch_request_error_messages(
     assert "new_option" in batch_request.options
 
     with pytest.raises(pydantic.ValidationError):
-        batch_request.options = {10: "value for non-string key"}
+        batch_request.options = {10: "value for non-string key"}  # type: ignore[dict-item]
 
     with pytest.raises(pydantic.ValidationError):
-        batch_request.options = "not a dictionary"
+        batch_request.options = "not a dictionary"  # type: ignore[assignment]
 
     # batch_slice can be added/updated if it takes the correct form
     batch_request.batch_slice_input = "[5:10]"
