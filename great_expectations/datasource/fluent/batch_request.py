@@ -57,14 +57,17 @@ class BatchRequest(pydantic.BaseModel):
 
     datasource_name: StrictStr = pydantic.Field(
         ...,
+        allow_mutation=False,
         description="The name of the Datasource used to connect to the data.",
     )
     data_asset_name: StrictStr = pydantic.Field(
         ...,
+        allow_mutation=False,
         description="The name of the Data Asset used to connect to the data.",
     )
     options: BatchRequestOptions = pydantic.Field(
         default_factory=dict,
+        allow_mutation=True,
         description=(
             "A map that can be used to filter the batch groups associated with the Data Asset. "
             "The structure and types depends on the asset type."
@@ -72,6 +75,7 @@ class BatchRequest(pydantic.BaseModel):
     )
     batch_slice_input: Optional[BatchSlice] = pydantic.Field(
         default=None,
+        allow_mutation=True,
         alias="batch_slice",
     )
 
@@ -81,8 +85,7 @@ class BatchRequest(pydantic.BaseModel):
         return parse_batch_slice(batch_slice=self.batch_slice_input)
 
     class Config:
-        allow_mutation = False
-        extra = pydantic.Extra.ignore
+        extra = pydantic.Extra.forbid
         validate_assignment = True
 
     @pydantic.validator("options")
