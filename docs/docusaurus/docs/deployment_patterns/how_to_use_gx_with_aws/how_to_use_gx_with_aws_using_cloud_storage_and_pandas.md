@@ -110,6 +110,10 @@ import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/c
 
 import AddAssetToDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_add_csv_asset_to_pandas_s3_datasource.mdx'
 
+<!-- 2.4 Test your new Datasource Asset -->
+
+import TestS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_fluent_datasource.md'
+
 <!-- Part 3: Create Expectations -->
 
 <!-- 3.1 Prepare a Batch Request-->
