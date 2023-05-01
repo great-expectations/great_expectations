@@ -67,31 +67,32 @@ def file_get_unfiltered_batch_definition_list_fn(
     return batch_definition_list
 
 
-def directory_get_unfiltered_batch_definition_list_fn(
-    data_connector: FilePathDataConnector,
-    batch_request: BatchRequest,
+def make_directory_get_unfiltered_batch_definition_list_fn(
     data_directory: str,
-) -> list[BatchDefinition]:
-    """Get a single batch definition for the directory supplied in data_directory.
+) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+    def directory_get_unfiltered_batch_definition_list_fn(
+        data_connector: FilePathDataConnector,
+        batch_request: BatchRequest,
+    ) -> list[BatchDefinition]:
+        """Get a single batch definition for the directory supplied in data_directory.
 
-    Args:
-        data_connector: Data connector containing information for the batch definition.
-        batch_request: Unused, but included for consistency.
-        data_directory: Directory pointing to data to reference in the batch definition.
+        Args:
+            data_connector: Data connector containing information for the batch definition.
+            batch_request: Unused, but included for consistency.
+            data_directory: Directory pointing to data to reference in the batch definition.
 
-    Returns:
-        List containing a single batch definition referencing the directory of interest.
-    """
-    batch_definition_list: List[BatchDefinition] = list()
-    batch_definition = BatchDefinition(
-        datasource_name=data_connector.datasource_name,
-        data_connector_name=_DATA_CONNECTOR_NAME,
-        data_asset_name=data_connector.data_asset_name,
-        batch_identifiers=IDDict({"path": data_directory}),
-    )
-    batch_definition_list.append(batch_definition)
+        Returns:
+            List containing a single batch definition referencing the directory of interest.
+        """
+        batch_definition = BatchDefinition(
+            datasource_name=data_connector.datasource_name,
+            data_connector_name=_DATA_CONNECTOR_NAME,
+            data_asset_name=data_connector.data_asset_name,
+            batch_identifiers=IDDict({"path": data_directory}),
+        )
+        return [batch_definition]
 
-    return [batch_definition]
+    return directory_get_unfiltered_batch_definition_list_fn
 
 
 class FilePathDataConnector(DataConnector):
