@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import re
-from typing import Callable, ClassVar, List, Optional, Type
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
 
 import pydantic
 
@@ -14,6 +14,13 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilePathDataConnector,
 )
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+    file_get_unfiltered_batch_definition_list_fn,
+)
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.datasource.fluent.interfaces import BatchRequest
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +62,9 @@ class FilesystemDataConnector(FilePathDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
-        get_unfiltered_batch_definition_list_fn: None | Callable = None,
+        get_unfiltered_batch_definition_list_fn: Callable[
+            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+        ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> None:
         self._base_directory = base_directory
         self._glob_directive: str = glob_directive
@@ -100,7 +109,9 @@ class FilesystemDataConnector(FilePathDataConnector):
         # sorters: Optional[list] = None,
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
-        get_unfiltered_batch_definition_list_fn: None | Callable = None,
+        get_unfiltered_batch_definition_list_fn: Callable[
+            [FilePathDataConnector, BatchRequest], list[BatchDefinition]
+        ] = file_get_unfiltered_batch_definition_list_fn,
     ) -> FilesystemDataConnector:
         """Builds "FilesystemDataConnector", which links named DataAsset to filesystem.
 
