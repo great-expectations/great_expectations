@@ -2120,9 +2120,6 @@ def generate_expectation_tests(  # noqa: C901 - 43
                     )
                     continue
 
-            except Exception:
-                continue
-
             for test in d["tests"]:
                 if not should_we_generate_this_test(
                     backend=c,
