@@ -59,5 +59,6 @@
     "required": [
         "datasource_name",
         "data_asset_name"
-    ]
+    ],
+    "additionalProperties": false
 }

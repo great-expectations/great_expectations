@@ -13,6 +13,8 @@ from typing import (
 
 import pydantic
 from pydantic import StrictStr
+from pydantic.json import pydantic_encoder
+from pydantic.schema import default_ref_template
 from typing_extensions import TypeAlias
 
 from great_expectations.core._docs_decorators import public_api
@@ -73,16 +75,22 @@ class BatchRequest(pydantic.BaseModel):
             "The structure and types depends on the asset type."
         ),
     )
-    batch_slice_input: Optional[BatchSlice] = pydantic.Field(
+    _batch_slice_input: Optional[BatchSlice] = pydantic.Field(
         default=None,
         allow_mutation=True,
-        alias="batch_slice",
     )
+
+    def __init__(self, **kwargs) -> None:
+        _batch_slice_input: Optional[BatchSlice] = None
+        if "batch_slice" in kwargs:
+            _batch_slice_input = kwargs.pop("batch_slice")
+        super().__init__(**kwargs)
+        self._batch_slice_input = _batch_slice_input
 
     @property
     def batch_slice(self) -> slice:
         """A built-in slice that can be used to filter a list of batches by index."""
-        return parse_batch_slice(batch_slice=self.batch_slice_input)
+        return parse_batch_slice(batch_slice=self._batch_slice_input)
 
     @public_api
     def update_batch_slice(self, value: Optional[BatchSlice] = None) -> None:
@@ -94,12 +102,16 @@ class BatchRequest(pydantic.BaseModel):
         Returns:
             None
         """
-        self.batch_slice_input = value
+        try:
+            parse_batch_slice(batch_slice=value)
+        except (TypeError, ValueError) as e:
+            raise ValueError(f"Failed to parse BatchSlice to slice: {e}")
+        self._batch_slice_input = value
 
     class Config:
-        # ignore extra params, otherwise pycharm will not recognize "batch_slice" alias and show an error
-        extra = pydantic.Extra.ignore
+        extra = pydantic.Extra.forbid
         property_set_methods = {"batch_slice": "update_batch_slice"}
+        underscore_attrs_are_private = True
         validate_assignment = True
 
     def __setattr__(self, key, val):
@@ -117,22 +129,13 @@ class BatchRequest(pydantic.BaseModel):
             raise TypeError("BatchRequestOptions keys must all be strings.")
         return options
 
-    @pydantic.validator("batch_slice_input")
-    def _validate_batch_slice_input(cls, batch_slice_input) -> Optional[BatchSlice]:
-        try:
-            parse_batch_slice(batch_slice=batch_slice_input)
-        except (TypeError, ValueError) as e:
-            raise ValueError(f"Failed to parse BatchSlice to slice: {e}")
-        return batch_slice_input
-
     @public_api
     def json(
         self,
         *,
         include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
         exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-        # Default to True to serialize the batch_slice_input with the name batch_slice
-        by_alias: bool = True,
+        by_alias: bool = False,
         skip_defaults: Optional[bool] = None,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
@@ -144,9 +147,6 @@ class BatchRequest(pydantic.BaseModel):
         """
         Generate a json representation of the BatchRequest, optionally specifying which
         fields to include or exclude.
-
-        Deviates from pydantic
-          - `by_alias` `True` by default instead of `False` by default.
         """
         return super().json(
             include=include,
@@ -167,8 +167,7 @@ class BatchRequest(pydantic.BaseModel):
         *,
         include: AbstractSetIntStr | MappingIntStrAny | None = None,
         exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
-        # Default to True to serialize the batch_slice_input with the name batch_slice
-        by_alias: bool = True,
+        by_alias: bool = False,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
@@ -178,10 +177,19 @@ class BatchRequest(pydantic.BaseModel):
         """
         Generate a dictionary representation of the BatchRequest, optionally specifying which
         fields to include or exclude.
-
-        Deviates from pydantic
-          - `by_alias` `True` by default instead of `False` by default.
         """
+        self.__fields__["batch_slice"] = pydantic.fields.ModelField(
+            name="batch_slice",
+            type_=Optional[BatchSlice],
+            required=False,
+            default=None,
+            model_config=self.__config__,
+            class_validators=None,
+        )
+        property_set_methods = self.__config__.property_set_methods
+        self.__config__.property_set_methods = {}
+        self.batch_slice = self._batch_slice_input
+        self.__config__.property_set_methods = property_set_methods
         return super().dict(
             include=include,
             exclude=exclude,
@@ -190,4 +198,27 @@ class BatchRequest(pydantic.BaseModel):
             exclude_defaults=exclude_defaults,
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
+        )
+
+    @classmethod
+    def schema_json(
+        cls,
+        *,
+        by_alias: bool = True,
+        ref_template: str = default_ref_template,
+        **dumps_kwargs: Any,
+    ) -> str:
+        cls.__fields__["batch_slice"] = pydantic.fields.ModelField(
+            name="batch_slice",
+            type_=Optional[BatchSlice],
+            required=False,
+            default=None,
+            model_config=cls.__config__,
+            class_validators=None,
+        )
+        cls.__config__.property_set_methods = {}
+        return cls.__config__.json_dumps(
+            cls.schema(by_alias=by_alias, ref_template=ref_template),
+            default=pydantic_encoder,
+            **dumps_kwargs,
         )

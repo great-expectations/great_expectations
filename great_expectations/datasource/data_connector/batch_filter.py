@@ -237,7 +237,7 @@ def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
         return_slice = batch_slice
     elif isinstance(batch_slice, SliceValidator):
         return_slice = slice(batch_slice.start, batch_slice.stop, batch_slice.step)
-    elif isinstance(batch_slice, int):
+    elif isinstance(batch_slice, int) and not isinstance(batch_slice, bool):
         return_slice = _batch_slice_from_int(batch_slice=batch_slice)
     elif isinstance(batch_slice, str):
         return_slice = _batch_slice_from_string(batch_slice=batch_slice)
