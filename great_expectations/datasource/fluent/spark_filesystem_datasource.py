@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import pathlib
 from functools import partial
-from typing import TYPE_CHECKING, ClassVar, Optional, Type
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type, cast
 
 from typing_extensions import Literal
 
@@ -13,6 +13,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
     directory_get_unfiltered_batch_definition_list_fn,
     file_get_unfiltered_batch_definition_list_fn,
 )
@@ -22,6 +23,8 @@ from great_expectations.datasource.fluent.interfaces import (
 
 if TYPE_CHECKING:
 
+    from great_expectations.core.batch import BatchDefinition
+    from great_expectations.datasource.fluent import BatchRequest
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         _SPARK_DIRECTORY_ASSET_CLASSES,
         _SPARK_FILE_PATH_ASSET_TYPES,
@@ -73,9 +76,12 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
         if isinstance(data_asset, _SPARK_DIRECTORY_ASSET_CLASSES):
-            get_unfiltered_batch_definition_list_fn = partial(
-                directory_get_unfiltered_batch_definition_list_fn,
-                data_directory=data_asset.data_directory,
+            get_unfiltered_batch_definition_list_fn = cast(
+                Callable[[FilePathDataConnector, BatchRequest], List[BatchDefinition]],
+                partial(
+                    directory_get_unfiltered_batch_definition_list_fn,
+                    data_directory=data_asset.data_directory,
+                ),
             )
         else:
             get_unfiltered_batch_definition_list_fn = (
