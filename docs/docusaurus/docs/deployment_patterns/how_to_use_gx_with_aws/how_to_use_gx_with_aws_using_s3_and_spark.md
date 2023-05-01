@@ -122,13 +122,14 @@ import CreateDataContextWithGetContextAgain from '@site/docs/guides/setup/config
 
 import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_configure_your_datasource.md'
 
-<!-- 2.3 Save the Datasource configuration to your DataContext -->
+<!-- 2.3 Add CSV Asset to your Datasource -->
 
-import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_save_the_datasource_configuration_to_your_datacontext.mdx'
+import AddAssetToDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_add_csv_asset_to_spark_s3_datasource.mdx'
 
-<!-- 2.4 Test your new Datasource -->
+<!-- 2.4 Test your new Datasource Asset -->
 
 import TestS3Datasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_test_your_new_datasource.md'
+
 
 <!-- Part 3: Create Expectations -->
 
@@ -280,11 +281,8 @@ If you have already instantiated your `DataContext` in a previous step, this ste
 ### 2.2 Add Datasource to your DataContext 
 <ConfigureYourDatasource />
 
-### 2.2 Add CSV Asset to your Datasource 
-<SaveDatasourceConfigurationToDataContext />
-
-### 2.3 Test your new Datasource by building a BatchRequest from Asset 
-<TestS3Datasource />
+### 2.3 Add CSV Asset to your Datasource 
+<AddAssetToDatasource />
 
 ## Part 3: Create Expectations
 

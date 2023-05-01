@@ -240,7 +240,7 @@ datasource = context.sources.add_or_update_spark_s3(
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py get_pandas_s3_asset">
+# <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py get_spark_s3_asset">
 asset = datasource.add_csv_asset(
     name="csv_taxi_s3_asset",
     batching_regex=r".*_(?P<year>\d{4})\.csv",
@@ -250,7 +250,7 @@ asset = datasource.add_csv_asset(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py get_batch_request">
-request = asset.build_batch_request({"year": "2021"})
+request = asset.build_batch_request(batch_request_options={"year": "2021"})
 # </snippet>
 
 

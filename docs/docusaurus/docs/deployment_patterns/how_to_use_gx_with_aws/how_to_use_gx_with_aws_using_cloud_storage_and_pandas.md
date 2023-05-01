@@ -108,15 +108,11 @@ import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/c
 
 <!-- 2.3 Add CSV Asset to your Datasource -->
 
-import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_add_csv_asset_to_pandas_s3_datasource.mdx'
-
-<!-- 2.4 Test your new Datasource by building a BatchRequest from Asset -->
-
-import TestS3Datasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_test_your_new_datasource.mdx'
+import AddAssetToDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_add_csv_asset_to_pandas_s3_datasource.mdx'
 
 <!-- Part 3: Create Expectations -->
 
-<!-- 3.1 Prepare a Batch Request, Empty Expectation Suite, and Validator -->
+<!-- 3.1 Prepare a Batch Request-->
 
 import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_expectation_suite_batch_request_validator_prepare_or_reuse.md'
 
@@ -245,11 +241,11 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 If you have already instantiated your `DataContext` in a previous step, this step can be skipped. 
 
-### 2.2 Add CSV Asset to your Datasource 
+### 2.2 Add Datasource to DataContext
 <ConfigureYourDatasource />
 
-### 2.3 Test your new Datasource by building a BatchRequest from Asset 
-<SaveDatasourceConfigurationToDataContext />
+### 2.3 Add CSV Asset to your Datasource 
+<AddAssetToDatasource />
 
 ## Part 3: Create Expectations
 
