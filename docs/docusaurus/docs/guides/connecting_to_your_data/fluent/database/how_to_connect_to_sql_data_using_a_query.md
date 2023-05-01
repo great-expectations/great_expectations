@@ -25,7 +25,6 @@ If you would like to connect to the contents of a SQL table instead of the resul
 
 - An installation of GX set up to work with SQL
 - Source data stored in a SQL database
-- A passion for data quality
 
 </Prerequisites> 
 

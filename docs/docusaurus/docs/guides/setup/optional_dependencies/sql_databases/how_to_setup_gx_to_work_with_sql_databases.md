@@ -38,7 +38,6 @@ This guide will walk you through best practices for creating your GX Python envi
 <Prerequisites requirePython = {true} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 - The ability to install Python modules with pip
-- A passion for data quality
 
 </Prerequisites>
 

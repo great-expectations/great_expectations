@@ -36,7 +36,6 @@ In this guide we will demonstrate the ways in which Batches can be organized in 
 
 - A working installation of Great Expectations
 - A Data Asset in a SQL-based Datasource
-- A passion for data quality
 
 </Prerequisites>
 

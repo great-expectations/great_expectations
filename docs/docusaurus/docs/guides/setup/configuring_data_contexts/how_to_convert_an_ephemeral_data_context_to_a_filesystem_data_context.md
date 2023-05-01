@@ -19,7 +19,6 @@ An Ephemeral Data Context is a temporary, in-memory Data Context that will not p
 
 - A working installation of Great Expectations
 - An Ephemeral Data Context instance
-- A passion for Data Quality
 
 </Prerequisites> 
 

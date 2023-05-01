@@ -24,7 +24,6 @@ Once you have completed this guide you will have a foundation in the basics of u
 - Installed Great Expectations OSS on your machine.
 - Followed invitation email instructions from the GX team after signing up for Early Access.
 - Successfully logged in to GX Cloud at [https://app.greatexpectations.io](https://app.greatexpectations.io).
-- A passion for data quality.
 
 </Prerequisites>
 

@@ -24,8 +24,6 @@ This guide will demonstrate how to initialize, instantiate, and verify the conte
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- A passion for data quality
-
 </Prerequisites>
 
 ## Steps

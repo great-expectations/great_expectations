@@ -24,7 +24,6 @@ In this guide we will demonstrate how to connect Great Expectations to SQL datab
 
 - An installation of GX set up to work with SQL
 - Source data stored in a SQL database
-- A passion for data quality
 
 </Prerequisites> 
 
