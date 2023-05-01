@@ -370,8 +370,8 @@ def _create_pandas_asset_model(
     def _get_reader_options_include(self) -> set[str] | None:
         return None
 
-    setattr(model, "_get_reader_method", _get_reader_method)
-    setattr(model, "_get_reader_options_include", _get_reader_options_include)
+    model._get_reader_method = _get_reader_method
+    model._get_reader_options_include = _get_reader_options_include
 
     return model
 
