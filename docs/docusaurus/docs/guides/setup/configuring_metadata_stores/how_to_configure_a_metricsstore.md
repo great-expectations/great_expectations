@@ -4,7 +4,7 @@ title: How to configure and use a MetricStore
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
-<CLIRemoval />;
+<CLIRemoval />
 
 Saving <TechnicalTag tag="metric" text="Metrics" /> during <TechnicalTag tag="validation" text="Validation" /> makes it easy to construct a new data series based on observed dataset characteristics computed by Great Expectations. That data series can serve as the source for a dashboard or overall data quality metrics, for example.
 
