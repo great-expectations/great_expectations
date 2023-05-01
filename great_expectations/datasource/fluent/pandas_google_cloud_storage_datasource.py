@@ -7,6 +7,7 @@ import pydantic
 from typing_extensions import Literal
 
 from great_expectations.compatibility import google
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import GCSUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
@@ -32,6 +33,7 @@ class PandasGoogleCloudStorageDatasourceError(PandasDatasourceError):
     pass
 
 
+@public_api
 class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[

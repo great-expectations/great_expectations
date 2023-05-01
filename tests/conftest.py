@@ -874,7 +874,6 @@ def data_context_with_connection_to_metrics_db(
                         table_name: multi_column_sums
                         class_name: Asset
     """
-    # noinspection PyUnusedLocal
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
@@ -1007,7 +1006,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     - airflow_run_id
     """
 
-    # noinspection PyUnusedLocal
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
@@ -1044,7 +1042,6 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
                         - data_asset_name
     """
 
-    # noinspection PyUnusedLocal
     _: BaseDatasource = context.add_datasource(
         "my_additional_datasource", **yaml.load(datasource_config)
     )
@@ -1100,7 +1097,6 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
             name: whole_table
         """
 
-        # noinspection PyUnusedLocal
         _: BaseDatasource = context.add_datasource(
             "my_sqlite_db_datasource", **yaml.load(datasource_config)
         )
@@ -1488,7 +1484,7 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
 
 @pytest.fixture
-def titanic_pandas_data_context_with_fluent_datasource_with_checkpoints_v1_with_empty_store_stats_enabled(
+def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
     tmp_path_factory,
     monkeypatch,
 ):
@@ -1567,16 +1563,114 @@ def titanic_pandas_data_context_with_fluent_datasource_with_checkpoints_v1_with_
 
     batching_regex = r"(?P<name>.+)\.csv"
     glob_directive = "*.csv"
-    # noinspection PyUnusedLocal
     datasource.add_csv_asset(
         name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
     )
 
     batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
     glob_directive = "*.csv"
-    # noinspection PyUnusedLocal
     datasource.add_csv_asset(
         name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_pandas_dataframes_datasource"
+    datasource = context.sources.add_pandas(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    df = pd.read_csv(filepath_or_buffer=csv_source_path)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    spark_df_from_pandas_df,
+    spark_session,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context_path: str = context.root_directory
+    path_to_folder_containing_csv_files = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+    )
+
+    datasource_name = "my_spark_filesystem_datasource"
+    datasource = context.sources.add_spark_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_spark_dataframes_datasource"
+    datasource = context.sources.add_spark(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    pandas_df = pd.read_csv(filepath_or_buffer=csv_source_path)
+    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    db_file,
+    sa,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    datasource_name = "my_sqlite_datasource"
+    connection_string = f"sqlite:///{db_file}"
+    datasource = context.sources.add_sqlite(
+        name=datasource_name,
+        connection_string=connection_string,
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
     )
 
     # noinspection PyProtectedMember
@@ -2293,10 +2387,10 @@ def data_context_with_fluent_datasource_and_block_datasource(
     filesystem_csv_2,
 ) -> FileDataContext:
     empty_data_context.sources.add_pandas_filesystem(
-        name="my_fluent_datasource", base_directory=str(filesystem_csv_2)
+        name="my_fluent_datasource", base_directory=filesystem_csv_2
     )
     empty_data_context.add_datasource(
-        "my_block_datasource",
+        name="my_block_datasource",
         module_name="great_expectations.datasource",
         class_name="PandasDatasource",
         batch_kwargs_generators={
