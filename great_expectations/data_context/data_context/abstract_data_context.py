@@ -370,7 +370,9 @@ class AbstractDataContext(ConfigPeer, ABC):
     def _init_variables(self) -> DataContextVariables:
         raise NotImplementedError
 
-    def _save_project_config(self) -> None:
+    def _save_project_config(
+        self, _fds_datasource: FluentDatasource | None = None
+    ) -> None:
         """
         Each DataContext will define how its project_config will be saved through its internal 'variables'.
             - FileDataContext : Filesystem.
@@ -2206,7 +2208,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | dict | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         action_list: list[dict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
@@ -2282,7 +2284,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         template_name: str | None = None,
         run_name_template: str | None = None,
         expectation_suite_name: str | None = None,
-        batch_request: BatchRequestBase | dict | None = None,
+        batch_request: BatchRequestBase | FluentBatchRequest | dict | None = None,
         action_list: list[dict] | None = None,
         evaluation_parameters: dict | None = None,
         runtime_configuration: dict | None = None,
