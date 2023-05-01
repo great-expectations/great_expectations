@@ -23,6 +23,10 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest,
+    BatchRequestOptions,
+)
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # needed for pydantic
 )
@@ -32,8 +36,6 @@ from great_expectations.datasource.fluent.fluent_base_model import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchRequest,
-    BatchRequestOptions,
     DataAsset,
     Datasource,
     Sorter,
@@ -698,15 +700,11 @@ class _SQLAsset(DataAsset):
                 f"{actual_keys.difference(allowed_keys)}\nwhich is not valid.\n"
             )
 
-        parsed_batch_slice: slice = DataAsset._parse_batch_slice(
-            batch_slice=batch_slice
-        )
-
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
-            batch_slice=parsed_batch_slice,
+            batch_slice=batch_slice,
         )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -725,7 +723,7 @@ class _SQLAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
-                batch_slice=batch_request.batch_slice,
+                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"

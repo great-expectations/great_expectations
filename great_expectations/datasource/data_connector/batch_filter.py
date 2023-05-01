@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import itertools
 import logging
-from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Sequence, Union
 
+from pydantic import StrictInt, StrictStr
 from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
@@ -15,7 +16,61 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-BatchSlice: TypeAlias = Union[slice, str, List[int], Tuple[int, ...], int]
+class SliceValidator:
+    """
+    A custom slice class which has implemented:
+      - __get_validators__ for type validation
+      - __modify_schemas__ to provide custom json schema
+    """
+
+    def __init__(self, slice_validator: slice):
+        self._slice = slice_validator
+        self.start = self._slice.start
+        self.stop = self._slice.stop
+        self.step = self._slice.step
+
+    @classmethod
+    def __get_validators__(cls):
+        # one or more validators may be yielded which will be called in the
+        # order to validate the input, each validator will receive as an input
+        # the value returned from the previous validator
+        yield cls.validate
+
+    @classmethod
+    def __modify_schema__(cls, field_schema):
+        # __modify_schema__ should mutate the dict it receives in place,
+        # the returned value will be ignored
+        field_schema.update(
+            slice={
+                "description": "A slice object representing the set of indices specified by range(start, stop, step).",
+                "type": "object",
+                "properties": {
+                    "start": {
+                        "description": "The starting index of the slice.",
+                        "type": "integer",
+                    },
+                    "stop": {
+                        "description": "The stopping index of the slice.",
+                        "type": "integer",
+                    },
+                    "step": {
+                        "description": "The number of steps between indices.",
+                        "type": "integer",
+                    },
+                },
+            }
+        )
+
+    @classmethod
+    def validate(cls, v):
+        if not isinstance(v, slice):
+            raise TypeError("slice required")
+        return cls(v)
+
+
+BatchSlice: TypeAlias = Union[
+    Sequence[Union[StrictInt, None]], SliceValidator, StrictInt, StrictStr
+]
 
 
 def build_batch_filter(
@@ -27,7 +82,7 @@ def build_batch_filter(
                     int,
                     list,
                     tuple,
-                    slice,
+                    Union[slice, SliceValidator],
                     str,
                     Union[Dict, IDDict],
                     Callable,
@@ -76,9 +131,7 @@ def build_batch_filter(
                 'All batch_filter_parameters keys must strings (Python "str").'
             )
         batch_filter_parameters = IDDict(batch_filter_parameters)
-    index: Optional[
-        Union[int, list, tuple, slice, str]
-    ] = data_connector_query_dict.get(  # type: ignore[assignment]
+    index: Optional[BatchSlice] = data_connector_query_dict.get(  # type: ignore[assignment]
         "index"
     )
     limit: Optional[int] = data_connector_query_dict.get("limit")  # type: ignore[assignment]
@@ -92,11 +145,13 @@ type and value given are "{str(type(limit))}" and "{limit}", respectively, which
         raise gx_exceptions.BatchFilterError(
             "Only one of index or limit, but not both, can be specified (specifying both is illegal)."
         )
-    index = parse_batch_slice(batch_slice=index) if index is not None else None
+    parsed_index: slice | None = (
+        parse_batch_slice(batch_slice=index) if index is not None else None
+    )
     return BatchFilter(
         custom_filter_function=custom_filter_function,
         batch_filter_parameters=batch_filter_parameters,  # type: ignore[arg-type]
-        index=index,
+        index=parsed_index,
         limit=limit,
     )
 
@@ -175,20 +230,25 @@ def _batch_slice_from_int(batch_slice: int) -> slice:
 
 
 def parse_batch_slice(batch_slice: Optional[BatchSlice]) -> slice:
+    return_slice: slice
     if batch_slice is None:
-        return slice(0, None, None)
+        return_slice = slice(0, None, None)
     elif isinstance(batch_slice, slice):
-        return batch_slice
-    elif isinstance(batch_slice, int):
-        return _batch_slice_from_int(batch_slice=batch_slice)
+        return_slice = batch_slice
+    elif isinstance(batch_slice, SliceValidator):
+        return_slice = slice(batch_slice.start, batch_slice.stop, batch_slice.step)
+    elif isinstance(batch_slice, int) and not isinstance(batch_slice, bool):
+        return_slice = _batch_slice_from_int(batch_slice=batch_slice)
     elif isinstance(batch_slice, str):
-        return _batch_slice_from_string(batch_slice=batch_slice)
+        return_slice = _batch_slice_from_string(batch_slice=batch_slice)
     elif isinstance(batch_slice, (list, tuple)):
-        return _batch_slice_from_list_or_tuple(batch_slice=batch_slice)
+        return_slice = _batch_slice_from_list_or_tuple(batch_slice=batch_slice)
     else:
-        raise ValueError(
-            f'batch_slice should be of type BatchSlice, but type: "{type(batch_slice)}" was passed.'
+        raise TypeError(
+            f"`batch_slice` should be of type `BatchSlice`, but type: {type(batch_slice)} was passed."
         )
+    logger.info(f"batch_slice: {batch_slice} was parsed to: {return_slice}")
+    return return_slice
 
 
 class BatchFilter:
