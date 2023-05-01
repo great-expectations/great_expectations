@@ -55,9 +55,12 @@ class DirectoryCSVAsset(_FilePathDataAsset):
         return {"data_directory", "header", "infer_schema"}
 
 
+_SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, DirectoryCSVAsset]
+
+
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
     asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset, DirectoryCSVAsset]
 
     # instance attributes
-    assets: List[Union[CSVAsset, DirectoryCSVAsset]] = []  # type: ignore[assignment]
+    assets: List[_SPARK_FILE_PATH_ASSET_TYPES] = []  # type: ignore[assignment]

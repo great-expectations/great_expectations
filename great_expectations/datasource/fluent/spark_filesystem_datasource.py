@@ -23,8 +23,7 @@ from great_expectations.datasource.fluent.interfaces import (
 if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-        DirectoryCSVAsset,
+        _SPARK_FILE_PATH_ASSET_TYPES,
     )
 
 logger = logging.getLogger(__name__)
@@ -63,7 +62,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
 
     def _build_data_connector(
         self,
-        data_asset: CSVAsset | DirectoryCSVAsset,
+        data_asset: _SPARK_FILE_PATH_ASSET_TYPES,
         glob_directive: str = "**/*",
         **kwargs,
     ) -> None:
