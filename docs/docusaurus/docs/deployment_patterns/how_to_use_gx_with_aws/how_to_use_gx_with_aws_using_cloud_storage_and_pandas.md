@@ -104,21 +104,21 @@ import CreateDataContextWithGetContextAgain from '@site/docs/guides/setup/config
 
 <!-- 2.2 Add Datasource to your DataContext -->
 
-import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_configure_your_datasource.mdx'
+import ConfigureYourDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_configure_your_datasource.mdx'
 
 <!-- 2.3 Add CSV Asset to your Datasource -->
 
-import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_add_csv_asset_to_pandas_s3_datasource.mdx'
+import SaveDatasourceConfigurationToDataContext from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_csv_asset_to_pandas_s3_datasource.mdx'
 
 <!-- 2.4 Test your new Datasource by building a BatchRequest from Asset -->
 
-import TestS3Datasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_test_your_new_datasource.mdx'
+import TestS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_datasource.mdx'
 
 <!-- Part 3: Create Expectations -->
 
 <!-- 3.1 Prepare a Batch Request, Empty Expectation Suite, and Validator -->
 
-import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_expectation_suite_batch_request_validator_prepare_or_reuse.md'
+import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_expectation_suite_and_validator_for_fluent_datasource.md'
 
 <!-- 3.2: Use a Validator to add Expectations to the Expectation Suite -->
 
