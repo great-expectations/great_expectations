@@ -186,7 +186,7 @@ class BatchRequest(pydantic.BaseModel):
             model_config=self.__config__,
             class_validators=None,
         )
-        property_set_methods = self.__config__.property_set_methods
+        property_set_methods = self.__config__.property_set_methods  # type: ignore[attr-defined]
         self.__config__.property_set_methods = {}  # type: ignore[attr-defined]
         self.__setattr__("batch_slice", self._batch_slice_input)
         self.__config__.property_set_methods = property_set_methods  # type: ignore[attr-defined]
