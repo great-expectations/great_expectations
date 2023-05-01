@@ -505,11 +505,11 @@ def test_add_directory_csv_asset_with_splitter(
     assert asset.name == "directory_csv_asset"
     assert asset.data_directory == "samples_2020"
     assert asset.datasource == source
-    assert asset.batch_request_options == tuple()  # TODO: Is this correct?
+    assert asset.batch_request_options == ("path",)
     # 4. Assert batch request
     assert post_splitter_batch_request.datasource_name == source.name
     assert post_splitter_batch_request.data_asset_name == asset.name
-    assert post_splitter_batch_request.options == tuple()
+    assert post_splitter_batch_request.options == {}
 
     # 5. Assert num batches
     batches = asset.get_batch_list_from_batch_request(post_splitter_batch_request)

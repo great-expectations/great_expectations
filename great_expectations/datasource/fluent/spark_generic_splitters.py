@@ -30,16 +30,6 @@ from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
-from great_expectations.datasource.fluent.interfaces import (
-    Batch,
-    BatchRequest,
-    BatchRequestOptions,
-    DataAsset,
-    Datasource,
-    Sorter,
-    SortersDefinition,
-    TestConnectionError,
-)
 from great_expectations.execution_engine import SqlAlchemyExecutionEngine
 from great_expectations.execution_engine.split_and_sample.data_splitter import DatePart
 from great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter import (
@@ -54,6 +44,7 @@ if TYPE_CHECKING:
         BatchMetadata,
         BatchSlice,
     )
+    from great_expectations.datasource.fluent.batch_request import BatchRequestOptions
 
 
 class _Splitter(Protocol):

@@ -21,12 +21,17 @@ from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError,
 )
 
+from great_expectations.datasource.fluent.spark_file_path_datasource import (
+    _SPARK_DIRECTORY_ASSET_CLASSES,
+)
+
+from great_expectations.datasource.fluent import BatchRequest
+
+from great_expectations.core.batch import BatchDefinition
+
 if TYPE_CHECKING:
 
-    from great_expectations.core.batch import BatchDefinition
-    from great_expectations.datasource.fluent import BatchRequest
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        _SPARK_DIRECTORY_ASSET_CLASSES,
         _SPARK_FILE_PATH_ASSET_TYPES,
     )
 

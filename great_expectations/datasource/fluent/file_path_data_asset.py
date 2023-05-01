@@ -13,6 +13,7 @@ from typing import (
     Optional,
     Pattern,
     Set,
+    cast,
 )
 
 import pydantic
@@ -251,11 +252,23 @@ class _FilePathDataAsset(DataAsset):
                 ),
             }
             if self.splitter:
+                batch_request.options["year"] = 2020  # TODO: Pull this in from query
+                batch_request.options["month"] = 5  # TODO: Pull this in from query
                 batch_spec_options["splitter_method"] = self.splitter.method_name
                 batch_spec_options[
                     "splitter_kwargs"
                 ] = self.splitter.splitter_method_kwargs()
+                batch_spec_options["batch_identifiers"] = {}
+                # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
+                # it is hardcoded to a dict above, so we cast it here.
+                cast(Dict, batch_spec_options["batch_identifiers"]).update(
+                    self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
+                        batch_request.options
+                    )
+                )
             batch_spec.update(batch_spec_options)
+            if self.splitter:
+                breakpoint()
 
             batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
