@@ -100,7 +100,7 @@ class DataContext:
                 f"'{datasource_name}' not found. Available datasources are {list(self._datasources.keys())}"
             ) from exc
 
-    def _save_project_config(self) -> None:
+    def _save_project_config(self, _fs_datasource=None) -> None:
         ...
 
 
