@@ -23,8 +23,8 @@ from great_expectations.datasource.fluent.interfaces import (
 if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        _SPARK_FILE_PATH_ASSET_TYPES,
-    )
+        _SPARK_FILE_PATH_ASSET_TYPES, _SPARK_DIRECTORY_ASSET_CLASSES,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +71,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             raise TypeError(
                 f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
             )
-        if hasattr(data_asset, "data_directory"):
+        if isinstance(data_asset, _SPARK_DIRECTORY_ASSET_CLASSES):
             get_unfiltered_batch_definition_list_fn = partial(
                 directory_get_unfiltered_batch_definition_list_fn,
                 data_directory=data_asset.data_directory,

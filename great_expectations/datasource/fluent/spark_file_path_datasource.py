@@ -56,6 +56,7 @@ class DirectoryCSVAsset(_FilePathDataAsset):
 
 
 _SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, DirectoryCSVAsset]
+_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
