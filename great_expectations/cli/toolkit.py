@@ -365,7 +365,7 @@ def select_datasource(
     data_source: Union[BaseDatasource, LegacyDatasource, FluentDatasource, None] = None
 
     if datasource_name is None:
-        # do not include fluent datasources as options
+        # exclude fluent datasources from options
         block_style_datasources = [
             x
             for x in context.datasources.values()
