@@ -289,7 +289,7 @@ def test_configuration_driven_site_builder(
     # verify that an additional validation result HTML file was generated
     assert len(index_links_dict["validations_links"]) == 2
 
-    site_builder.site_index_builder.target_store.store_backends[
+    _ = site_builder.site_index_builder.target_store.store_backends[
         ValidationResultIdentifier
     ].full_base_directory
 

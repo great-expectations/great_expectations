@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-import sys
+from typing import ClassVar
 
 import requests
 from packaging import version
@@ -19,36 +19,32 @@ class _PyPIPackageData(TypedDict):
     info: _PyPIPackageInfo
 
 
-# Should only run in prod and in specific tests
-# This flag let's us conditionally turn on the feature
-_ENABLE_VERSION_CHECK_IN_TESTS = False
-
-
 class _VersionChecker:
 
-    _BASE_PYPI_URL = "https://pypi.org/pypi"
-    _PYPI_GX_ENDPOINT = f"{_BASE_PYPI_URL}/great_expectations/json"
+    _LATEST_GX_VERSION_CACHE: ClassVar[version.Version | None] = None
+
+    _BASE_PYPI_URL: ClassVar[str] = "https://pypi.org/pypi"
+    _PYPI_GX_ENDPOINT: ClassVar[str] = f"{_BASE_PYPI_URL}/great_expectations/json"
 
     def __init__(self, user_version: str) -> None:
         self._user_version = version.Version(user_version)
 
     def check_if_using_latest_gx(self) -> bool:
-        if self._running_non_version_check_tests():
-            return True
-
-        pypi_version = self._get_latest_version_from_pypi()
-        if not pypi_version:
-            logger.debug("Could not compare with latest PyPI version; skipping check.")
-            return True
+        pypi_version: version.Version | None
+        if self._LATEST_GX_VERSION_CACHE:
+            pypi_version = self._LATEST_GX_VERSION_CACHE
+        else:
+            pypi_version = self._get_latest_version_from_pypi()
+            if not pypi_version:
+                logger.debug(
+                    "Could not compare with latest PyPI version; skipping check."
+                )
+                return True
 
         if self._is_using_outdated_release(pypi_version):
             self._warn_user(pypi_version)
             return False
         return True
-
-    def _running_non_version_check_tests(self) -> bool:
-        # Exit early unless specifically running tests/data_context/cloud_data_context/test_version_checker.py
-        return "pytest" in sys.modules and not _ENABLE_VERSION_CHECK_IN_TESTS
 
     def _get_latest_version_from_pypi(self) -> version.Version | None:
         response_json: _PyPIPackageData | None = None
@@ -79,7 +75,10 @@ class _VersionChecker:
             )
             return None
 
-        return version.Version(pkg_version)
+        pypi_version = version.Version(pkg_version)
+        # update the _LATEST_GX_VERSION_CACHE
+        self.__class__._LATEST_GX_VERSION_CACHE = pypi_version
+        return pypi_version
 
     def _is_using_outdated_release(self, pypi_version: version.Version) -> bool:
         return pypi_version > self._user_version
