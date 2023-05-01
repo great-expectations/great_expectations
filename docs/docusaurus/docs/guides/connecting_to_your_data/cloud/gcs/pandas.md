@@ -64,7 +64,7 @@ It is also important to note that GCS `DataConnectors` support various methods o
 Please note that if you use the `filename` or `info` options, you must supply these options to any GX objects that interact with GCS (i.e. `PandasExecutionEngine`).
 The `gcs_options` dictionary is also responsible for storing any `**kwargs` you wish to pass to the GCS `storage.Client()` connection object (i.e. `project`)
 
-For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials]](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
+For more details regarding storing credentials for use with Great Expectations see: [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md)
 
 For more details regarding authentication, please visit the following:
 * [gcloud CLI Tutorial](https://cloud.google.com/storage/docs/reference/libraries)
