@@ -33,8 +33,14 @@ from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     TestConnectionError,
 )
+from great_expectations.datasource.fluent.spark_generic_splitters import (
+    Splitter,
+    SplitterYear,
+)
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
     from great_expectations.core.id_dict import BatchSpec
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -72,6 +78,7 @@ class _FilePathDataAsset(DataAsset):
         default_factory=dict,
         description="Optional filesystem specific advanced parameters for connecting to data assets",
     )
+    splitter: Optional[Splitter] = None
 
     _unnamed_regex_param_prefix: str = pydantic.PrivateAttr(
         default="batch_request_param_"
@@ -244,6 +251,11 @@ class _FilePathDataAsset(DataAsset):
                     config_provider=self._datasource._config_provider,
                 ),
             }
+            if self.splitter:
+                batch_spec_options["splitter_method"] = self.splitter.method_name
+                batch_spec_options[
+                    "splitter_kwargs"
+                ] = self.splitter.splitter_method_kwargs()
             batch_spec.update(batch_spec_options)
 
             batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
@@ -306,4 +318,29 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
+        )
+
+    def test_splitter_connection(self) -> None:
+        # TODO: Implementation
+        pass
+
+    # TODO: Add more add_splitter_* methods here
+
+    def _add_splitter(self: Self, splitter: Splitter) -> Self:
+        self.splitter = splitter
+        self.test_splitter_connection()
+        return self
+
+    def add_splitter_year(
+        self: Self,
+        column_name: str,
+    ) -> Self:
+        """Associates a year splitter with this data asset.
+        Args:
+            column_name: A column name of the date column where year will be parsed out.
+        Returns:
+            This asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            SplitterYear(method_name="split_on_year", column_name=column_name)
         )
