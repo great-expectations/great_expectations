@@ -75,9 +75,8 @@ class BatchRequest(pydantic.BaseModel):
             "The structure and types depends on the asset type."
         ),
     )
-    _batch_slice_input: Optional[BatchSlice] = pydantic.Field(
+    _batch_slice_input: Optional[BatchSlice] = pydantic.PrivateAttr(
         default=None,
-        allow_mutation=True,
     )
 
     def __init__(self, **kwargs) -> None:
@@ -111,7 +110,6 @@ class BatchRequest(pydantic.BaseModel):
     class Config:
         extra = pydantic.Extra.forbid
         property_set_methods = {"batch_slice": "update_batch_slice"}
-        underscore_attrs_are_private = True
         validate_assignment = True
 
     def __setattr__(self, key, val):
