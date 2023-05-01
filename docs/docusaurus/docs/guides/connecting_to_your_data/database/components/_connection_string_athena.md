@@ -23,6 +23,6 @@ awsathena+rest://@athena.{region}.amazonaws.com/{database}?s3_staging_dir={s3_pa
 
 :::tip Tip: Using `credentials` instead of `connection_string`
 
-The `credentials` key uses a dictionary to provide the elements of your connection string as separate, individual values.  For information on how to populate the `credentials` dictionary and how to configure your `great_expectations.yml` project config file to populate credentials from either a YAML file or a secret manager, please see our guide on [How to configure credentials](../../../setup/configuring_data_contexts/how_to_configure_credentials.md).
+The `credentials` key uses a dictionary to provide the elements of your connection string as separate, individual values.  For information on how to populate the `credentials` dictionary and how to configure your `great_expectations.yml` project config file to populate credentials from either a YAML file or a secret manager, please see our guide on [How to configure credentials]](../../../setup/configuring_data_contexts/how_to_configure_credentials.md).
 
 :::
