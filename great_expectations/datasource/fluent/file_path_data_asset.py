@@ -36,6 +36,7 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.spark_generic_splitters import (
     Splitter,
     SplitterYear,
+    SplitterYearAndMonth,
 )
 
 if TYPE_CHECKING:
@@ -343,4 +344,20 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         """
         return self._add_splitter(
             SplitterYear(method_name="split_on_year", column_name=column_name)
+        )
+
+    def add_splitter_year_and_month(
+        self: Self,
+        column_name: str,
+    ) -> Self:
+        """Associates a year, month splitter with this asset.
+        Args:
+            column_name: A column name of the date column where year and month will be parsed out.
+        Returns:
+            This asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            SplitterYearAndMonth(
+                method_name="split_on_year_and_month", column_name=column_name
+            )
         )

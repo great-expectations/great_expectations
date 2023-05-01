@@ -428,3 +428,27 @@ def test_add_csv_asset_with_batch_metadata(
         **batch_options,
         **asset_specified_metadata,
     }
+
+
+@pytest.mark.integration
+def test_add_directory_csv_asset_with_splitter(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+):
+
+    # TODO: Starting with integration test for PoC, but the filesystem should be mocked
+    # TODO: This will need to incorporate https://github.com/great-expectations/great_expectations/pull/7777/files to get add_directory_csv_asset()
+    # 1. source.add_directory_csv_asset()
+    asset = spark_filesystem_datasource.add_directory_csv_asset(
+        name="directory_csv_asset",
+        data_directory="samples_2020",
+        header=True,
+        infer_schema=True,
+    )
+
+    # 2. asset.add_splitter_year_and_month()
+    asset.add_splitter_year_and_month(column_name="pickup_datetime")
+    assert len(spark_filesystem_datasource.assets) == 1
+    assert asset == spark_filesystem_datasource.assets[0]
+    # 3. Assert asset type
+    # 4. Asert batch request
+    # 5. Assert num batches
