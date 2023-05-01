@@ -199,7 +199,7 @@ class _FilePathDataAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
-                batch_slice=batch_request.batch_slice_input,
+                batch_slice=batch_request.batch_slice_input,  # type: ignore[attr-defined]
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"

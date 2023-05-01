@@ -84,10 +84,30 @@ class BatchRequest(pydantic.BaseModel):
         """A built-in slice that can be used to filter a list of batches by index."""
         return parse_batch_slice(batch_slice=self.batch_slice_input)
 
+    @public_api
+    def update_batch_slice(self, value: Optional[BatchSlice] = None) -> None:
+        """Updates the batch_slice on this BatchRequest.
+
+        Args:
+            value: The new value to be parsed into a python slice and set on the batch_slice attribute.
+
+        Returns:
+            None
+        """
+        self.batch_slice_input = value
+
     class Config:
         # ignore extra params, otherwise pycharm will not recognize "batch_slice" alias and show an error
         extra = pydantic.Extra.ignore
+        property_set_methods = {"batch_slice": "update_batch_slice"}
         validate_assignment = True
+
+    def __setattr__(self, key, val):
+        method = self.__config__.property_set_methods.get(key)
+        if method is None:
+            super().__setattr__(key, val)
+        else:
+            getattr(self, method)(val)
 
     @pydantic.validator("options", pre=True)
     def _validate_options(cls, options) -> BatchRequestOptions:

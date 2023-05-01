@@ -490,12 +490,16 @@ def test_batch_request_error_messages(
     with pytest.raises(pydantic.ValidationError):
         batch_request.options = "not a dictionary"  # type: ignore[assignment]
 
-    # batch_slice can be added/updated if it takes the correct form
-    batch_request.batch_slice_input = "[5:10]"
+    # batch_slice can be updated if it takes the correct form
+    batch_request.batch_slice = "[5:10]"  # type: ignore[assignment]
     assert batch_request.batch_slice == slice(5, 10, None)
 
-    with pytest.raises(pydantic.ValidationError):
-        batch_request.batch_slice_input = "nonsense slice"
+    # batch_slice can be updated via update method
+    batch_request.update_batch_slice("[2:10:2]")
+    assert batch_request.batch_slice == slice(2, 10, 2)
 
     with pytest.raises(pydantic.ValidationError):
-        batch_request.batch_slice_input = True
+        batch_request.batch_slice = "nonsense slice"  # type: ignore[assignment]
+
+    with pytest.raises(pydantic.ValidationError):
+        batch_request.batch_slice = True  # type: ignore[assignment]
