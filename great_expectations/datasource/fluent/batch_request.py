@@ -180,16 +180,16 @@ class BatchRequest(pydantic.BaseModel):
         """
         self.__fields__["batch_slice"] = pydantic.fields.ModelField(
             name="batch_slice",
-            type_=Optional[BatchSlice],
+            type_=Optional[BatchSlice],  # type: ignore[arg-type]
             required=False,
             default=None,
             model_config=self.__config__,
             class_validators=None,
         )
-        property_set_methods = self.__config__.property_set_methods
+        property_set_methods = self.__config__.property_set_methods  # type: ignore[attr-defined]
         self.__config__.property_set_methods = {}
-        self.batch_slice = self._batch_slice_input
-        self.__config__.property_set_methods = property_set_methods
+        self.__setattr__("batch_slice", self._batch_slice_input)
+        self.__config__.property_set_methods = property_set_methods  # type: ignore[arg-type]
         return super().dict(
             include=include,
             exclude=exclude,
@@ -210,15 +210,16 @@ class BatchRequest(pydantic.BaseModel):
     ) -> str:
         cls.__fields__["batch_slice"] = pydantic.fields.ModelField(
             name="batch_slice",
-            type_=Optional[BatchSlice],
+            type_=Optional[BatchSlice],  # type: ignore[arg-type]
             required=False,
             default=None,
             model_config=cls.__config__,
             class_validators=None,
         )
-        cls.__config__.property_set_methods = {}
-        return cls.__config__.json_dumps(
+        schema_json = cls.__config__.json_dumps(
             cls.schema(by_alias=by_alias, ref_template=ref_template),
             default=pydantic_encoder,
             **dumps_kwargs,
         )
+        cls.__fields__.pop("batch_slice")
+        return schema_json
