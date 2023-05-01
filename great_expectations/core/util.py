@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime
 import decimal
+import json
 import logging
 import os
 import pathlib
@@ -29,6 +30,7 @@ from urllib.parse import urlparse
 import dateutil.parser
 import numpy as np
 import pandas as pd
+import pydantic
 from IPython import get_ipython
 from typing_extensions import TypeAlias
 
@@ -176,12 +178,17 @@ ToBool: TypeAlias = bool
 ToFloat: TypeAlias = Union[float, np.floating]
 ToInt: TypeAlias = Union[int, np.integer]
 ToStr: TypeAlias = Union[
-    str, bytes, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
+    str, bytes, slice, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
 ]
 
 ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
 ToDict: TypeAlias = Union[
-    dict, "CommentedMap", pd.DataFrame, SerializableDictDot, SerializableDotDict
+    dict,
+    "CommentedMap",
+    pd.DataFrame,
+    SerializableDictDot,
+    SerializableDotDict,
+    pydantic.BaseModel,
 ]
 
 JSONConvertable: TypeAlias = Union[
@@ -264,18 +271,8 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     Raises:
         TypeError: A non-JSON-serializable field was found.
     """
-    # If it's one of our types, we use our own conversion; this can move to full schema
-    # once nesting goes all the way down
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchRequest as FluentBatchRequest,
-    )
-
-    if isinstance(data, FluentBatchRequest):
-        return {
-            "datasource_name": data.datasource_name,
-            "data_asset_name": data.data_asset_name,
-            "options": convert_to_json_serializable(data.options),
-        }
+    if isinstance(data, pydantic.BaseModel):
+        return json.loads(data.json())
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
@@ -328,6 +325,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return str(data)
 
     if isinstance(data, bytes):
+        return str(data)
+
+    if isinstance(data, slice):
         return str(data)
 
     if isinstance(data, pathlib.PurePath):
