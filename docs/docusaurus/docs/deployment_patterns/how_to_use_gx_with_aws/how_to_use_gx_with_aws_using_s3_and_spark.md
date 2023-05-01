@@ -82,9 +82,7 @@ import IdentifyDataContextValidationResultsStore from '@site/docs/guides/setup/c
 
 <!-- 1.5.2 Update your configuration file to include a new Store for Validation Results on Amazon S3 -->
 
-import AddS3ValidationResultsStoreConfiguration from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_vnpm run build
-
-alidation_result_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_validation_results_on_s.mdx'
+import AddS3ValidationResultsStoreConfiguration from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_your_configuration_file_to_include_a_new_store_for_validation_results_on_s.mdx'
 
 <!-- 1.5.3 Verify that the new Amazon S3 Validation Results Store has been added successfully -->
 
