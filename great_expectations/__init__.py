@@ -24,6 +24,12 @@ from .util import (
     validate,
 )
 
+# By placing this registry function in our top-level __init__,  we ensure that all
+# GX workflows have populated expectation registries before they are used.
+#
+# Both of the following import paths will trigger this file, causing the registration to occur:
+#   import great_expectations as gx
+#   from great_expectations.core import ExpectationSuite, ExpectationConfiguration
 register_core_expectations()
 
 # from great_expectations.expectations.core import *
