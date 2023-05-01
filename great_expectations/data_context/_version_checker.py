@@ -47,7 +47,8 @@ class _VersionChecker:
         return True
 
     def _running_non_version_check_tests(self) -> bool:
-        return "pytest" in sys.modules and _ENABLE_VERSION_CHECK_IN_TESTS
+        # Exit early unless specifically running tests/data_context/cloud_data_context/test_version_checker.py
+        return "pytest" in sys.modules and not _ENABLE_VERSION_CHECK_IN_TESTS
 
     def _get_latest_version_from_pypi(self) -> version.Version | None:
         response_json: _PyPIPackageData | None = None
