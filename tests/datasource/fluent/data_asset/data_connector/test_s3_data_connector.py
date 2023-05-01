@@ -14,7 +14,7 @@ from great_expectations.datasource.data_connector.util import (
     sanitize_prefix,
     sanitize_prefix_for_s3,
 )
-from great_expectations.datasource.fluent.batch_request import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     S3DataConnector,
 )

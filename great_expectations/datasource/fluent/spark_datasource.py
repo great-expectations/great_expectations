@@ -19,7 +19,7 @@ import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
-from great_expectations.datasource.fluent.batch_request import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )

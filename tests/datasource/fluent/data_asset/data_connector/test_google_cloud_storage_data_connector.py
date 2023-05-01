@@ -9,7 +9,7 @@ from great_expectations.compatibility import google
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import GCSUrl
-from great_expectations.datasource.fluent.batch_request import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )

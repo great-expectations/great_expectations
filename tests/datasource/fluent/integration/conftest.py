@@ -17,7 +17,7 @@ from great_expectations.datasource.fluent import (
     SparkFilesystemDatasource,
     SqliteDatasource,
 )
-from great_expectations.datasource.fluent.batch_request import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
     Datasource,

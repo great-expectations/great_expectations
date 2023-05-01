@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 from typing_extensions import Final
 
-from great_expectations.datasource.fluent.batch_request import BatchRequest
+from great_expectations.datasource.fluent import BatchRequest
 
 
 @pytest.mark.unit
