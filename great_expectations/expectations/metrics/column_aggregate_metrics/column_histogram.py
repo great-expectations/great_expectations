@@ -158,7 +158,9 @@ class ColumnHistogram(ColumnAggregateMetricProvider):
 
         negative_boundary: float
         positive_boundary: float
-        for idx in range(idx, len(bins) - 2):
+        for idx in range(  # noqa: B020 # loop-variable-overrides-iterator
+            idx, len(bins) - 2
+        ):
             negative_boundary = float(bins[idx])
             positive_boundary = float(bins[idx + 1])
             case_conditions.append(
