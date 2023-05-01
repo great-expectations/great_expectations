@@ -178,6 +178,8 @@ class BatchRequest(pydantic.BaseModel):
         Generate a dictionary representation of the BatchRequest, optionally specifying which
         fields to include or exclude.
         """
+        # batch_slice is only a property/pydantic setter, so we need to add a field
+        # if we want it to show up in dict() with the _batch_request_input
         self.__fields__["batch_slice"] = pydantic.fields.ModelField(
             name="batch_slice",
             type_=Optional[BatchSlice],  # type: ignore[arg-type]
@@ -189,8 +191,7 @@ class BatchRequest(pydantic.BaseModel):
         property_set_methods = self.__config__.property_set_methods  # type: ignore[attr-defined]
         self.__config__.property_set_methods = {}  # type: ignore[attr-defined]
         self.__setattr__("batch_slice", self._batch_slice_input)
-        self.__config__.property_set_methods = property_set_methods  # type: ignore[attr-defined]
-        return super().dict(
+        result = super().dict(
             include=include,
             exclude=exclude,
             by_alias=by_alias,
@@ -199,6 +200,10 @@ class BatchRequest(pydantic.BaseModel):
             exclude_none=exclude_none,
             skip_defaults=skip_defaults,
         )
+        # revert model changes
+        self.__config__.property_set_methods = property_set_methods  # type: ignore[attr-defined]
+        self.__fields__.pop("batch_slice")
+        return result
 
     @classmethod
     def schema_json(
@@ -208,6 +213,8 @@ class BatchRequest(pydantic.BaseModel):
         ref_template: str = default_ref_template,
         **dumps_kwargs: Any,
     ) -> str:
+        # batch_slice is only a property/pydantic setter, so we need to add a field
+        # if we want its definition to show up in schema_json()
         cls.__fields__["batch_slice"] = pydantic.fields.ModelField(
             name="batch_slice",
             type_=Optional[BatchSlice],  # type: ignore[arg-type]
@@ -216,10 +223,11 @@ class BatchRequest(pydantic.BaseModel):
             model_config=cls.__config__,
             class_validators=None,
         )
-        schema_json = cls.__config__.json_dumps(
+        result = cls.__config__.json_dumps(
             cls.schema(by_alias=by_alias, ref_template=ref_template),
             default=pydantic_encoder,
             **dumps_kwargs,
         )
+        # revert model changes
         cls.__fields__.pop("batch_slice")
-        return schema_json
+        return result
