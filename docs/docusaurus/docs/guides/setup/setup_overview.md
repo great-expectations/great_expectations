@@ -12,7 +12,7 @@ import UniversalMap from '@site/docs/images/universal_map/_universal_map.mdx';
 
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
-Prerequisites
+## Prerequisites
 
 - Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 
