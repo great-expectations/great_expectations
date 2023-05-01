@@ -30,7 +30,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 # TODO: <Alex>ALEX</Alex>
 
 if TYPE_CHECKING:
-    from great_expectations.core.batch import BatchDefinition
     from great_expectations.datasource.fluent import BatchRequest
 
 
