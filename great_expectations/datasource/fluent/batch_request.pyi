@@ -14,6 +14,13 @@ class BatchRequest(pydantic.BaseModel):
     data_asset_name: StrictStr
     options: BatchRequestOptions
 
+    def __init__(
+        self,
+        datasource_name: StrictStr,
+        data_asset_name: StrictStr,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
+    ) -> None: ...
     @property
     def batch_slice(self) -> slice: ...
 
