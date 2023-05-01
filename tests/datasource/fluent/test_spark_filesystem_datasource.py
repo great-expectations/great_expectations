@@ -434,21 +434,42 @@ def test_add_csv_asset_with_batch_metadata(
 def test_add_directory_csv_asset_with_splitter(
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
+    source = spark_filesystem_datasource
 
     # TODO: Starting with integration test for PoC, but the filesystem should be mocked
     # TODO: This will need to incorporate https://github.com/great-expectations/great_expectations/pull/7777/files to get add_directory_csv_asset()
     # 1. source.add_directory_csv_asset()
-    asset = spark_filesystem_datasource.add_directory_csv_asset(
+    asset = source.add_directory_csv_asset(
         name="directory_csv_asset",
         data_directory="samples_2020",
         header=True,
         infer_schema=True,
     )
+    assert len(source.assets) == 1
+    assert asset == source.assets[0]
+
+    # Before applying the splitter, there should be one batch
+    pre_splitter_batch_request = asset.build_batch_request()
+    batches = asset.get_batch_list_from_batch_request(pre_splitter_batch_request)
+    pre_splitter_expected_num_batches = 1
+    assert len(batches) == pre_splitter_expected_num_batches
 
     # 2. asset.add_splitter_year_and_month()
     asset.add_splitter_year_and_month(column_name="pickup_datetime")
-    assert len(spark_filesystem_datasource.assets) == 1
-    assert asset == spark_filesystem_datasource.assets[0]
-    # 3. Assert asset type
-    # 4. Asert batch request
+    post_splitter_batch_request = asset.build_batch_request()
+
+    # TODO: Are assert steps 3 and 4 necessary?
+    # 3. Assert asset
+    assert asset.name == "directory_csv_asset"
+    assert asset.data_directory == "samples_2020"
+    assert asset.datasource == source
+    assert asset.batch_request_options == tuple()  # TODO: Is this correct?
+    # 4. Assert batch request
+    assert post_splitter_batch_request.datasource_name == source.name
+    assert post_splitter_batch_request.data_asset_name == asset.name
+    assert post_splitter_batch_request.options == tuple()
+
     # 5. Assert num batches
+    batches = asset.get_batch_list_from_batch_request(post_splitter_batch_request)
+    post_splitter_expected_num_batches = 12
+    assert len(batches) == post_splitter_expected_num_batches
