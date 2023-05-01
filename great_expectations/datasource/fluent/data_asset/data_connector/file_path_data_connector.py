@@ -189,9 +189,7 @@ class FilePathDataConnector(DataConnector):
         """
         batch_definition_list: List[
             BatchDefinition
-        ] = self._get_unfiltered_batch_definition_list_fn(
-            data_connector=self, batch_request=batch_request
-        )
+        ] = self._get_unfiltered_batch_definition_list_fn(self, batch_request)
 
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
