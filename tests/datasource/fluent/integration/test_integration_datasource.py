@@ -8,10 +8,10 @@ import pytest
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import (
+    BatchRequest,
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
 )
-from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.interfaces import (
     DataAsset,
