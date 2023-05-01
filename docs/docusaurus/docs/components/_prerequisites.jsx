@@ -53,8 +53,7 @@ export default class Prerequisites extends React.Component {
   defaultPrerequisiteItems () {
     const returnItems = []
     if (this.props.requirePython === true) {
-      returnItems.push(<li>A supported Python (version {GxData.min_python} to {GxData.max_python})</li>)
-      returnItems.push(<ul><li>To download and install Python, see the <a href='https://www.python.org/doc/'>Python documentation</a> and <a href='https://www.python.org/downloads/'>Python downloads</a></li></ul>)
+      returnItems.push(<li>A supported Python (version {GxData.min_python} to {GxData.max_python}). To download and install Python, see the <a href='https://www.python.org/doc/'>Python documentation</a> and also <a href='https://www.python.org/downloads/'>Python downloads.</a></li>)
     }
     if (this.props.requireInstallation === true) {
       returnItems.push(<li>Great Exepctations <a href='/docs/guides/setup/installation/local'>installed and configured</a></li>)

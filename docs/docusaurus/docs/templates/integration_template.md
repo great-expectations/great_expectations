@@ -19,13 +19,12 @@ habitant morbi. Sed enim ut sem viverra aliquet eget. A diam maecenas sed enim u
 Non sodales neque sodales ut etiam sit amet nisl. Fermentum iaculis eu non diam.
 
 ### Technical background
-An quick overview (of couple of sentences) here.
 
-:::note Prerequisites
+Prerequisites
+
  - Req1 
  - Req2 
  - Req3
-:::
 
 Deeper and longer information goes here.
 

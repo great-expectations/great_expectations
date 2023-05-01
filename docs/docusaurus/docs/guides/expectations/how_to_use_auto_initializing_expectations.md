@@ -7,13 +7,14 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will walk you through the process of using a auto-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you are creating Expectations interactively by using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
 
-:::note PREREQUISITES: THIS HOW-TO GUIDE ASSUMES YOU HAVE:
-- Completed the [Quickstart guide](tutorials/quickstart/quickstart.md)
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
-- [Configured a Datasource](/docs/guides/connecting_to_your_data/connect_to_data_overview)
+Prerequisites
+
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
+- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
+- [A configured Datasource](/docs/guides/connecting_to_your_data/connect_to_data_overview)
 - [An understanding of how to configure a BatchRequest](../../guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 - [An understanding of how to create and edit expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md)
-:::
+
 
 ## Steps
 

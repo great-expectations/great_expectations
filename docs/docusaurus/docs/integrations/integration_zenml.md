@@ -29,12 +29,13 @@ tools and services that spans everything else MLOps.
 
 ### Technical background
 
-:::note Prerequisites
- - An overview of the Great Expectations <TechnicalTag tag="expectation_suite" text="Expectation Suites" />,
+Prerequisites
+
+ - An understanding of Great Expectations <TechnicalTag tag="expectation_suite" text="Expectation Suites" />,
  <TechnicalTag tag="validation_result" text="Validation Results"/>,
- and <TechnicalTag tag="data_docs" text="Data Docs" /> concepts.
- - Some understanding of the [ZenML pipelines and steps](https://docs.zenml.io/developer-guide/steps-and-pipelines#pipeline) concepts is recommended, but optional.
-:::
+ and <TechnicalTag tag="data_docs" text="Data Docs" /> concepts
+ - Some understanding of the [ZenML pipelines and steps](https://docs.zenml.io/developer-guide/steps-and-pipelines#pipeline)
+
 
 ZenML ships with a couple of builtin pipeline steps that take care of everything
 from configuring temporary <TechnicalTag tag="datasource" text="Datasources" />,
