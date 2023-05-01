@@ -23,8 +23,9 @@ from great_expectations.datasource.fluent.interfaces import (
 if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        _SPARK_FILE_PATH_ASSET_TYPES, _SPARK_DIRECTORY_ASSET_CLASSES,
-)
+        _SPARK_FILE_PATH_ASSET_TYPES,
+        _SPARK_DIRECTORY_ASSET_CLASSES,
+    )
 
 logger = logging.getLogger(__name__)
 
