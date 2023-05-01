@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, List, Type
+from typing import TYPE_CHECKING, ClassVar, List, Type, Union
 
 import pydantic
 from pydantic import Field
@@ -36,9 +36,32 @@ class CSVAsset(_FilePathDataAsset):
         return {"header", "infer_schema"}
 
 
+class DirectoryCSVAsset(_FilePathDataAsset):
+    # Overridden inherited instance fields
+    type: Literal["directory_csv"] = "directory_csv"
+    data_directory: str
+    header: bool = False
+    infer_schema: bool = Field(False, alias="InferSchema")
+
+    class Config:
+        extra = pydantic.Extra.forbid
+        allow_population_by_field_name = True
+
+    def _get_reader_method(self) -> str:
+        # Reader method is still "csv"
+        return self.type.replace("directory_", "")
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        return {"data_directory", "header", "infer_schema"}
+
+
+_SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, DirectoryCSVAsset]
+_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
+
+
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset, DirectoryCSVAsset]
 
     # instance attributes
-    assets: List[_FilePathDataAsset] = []  # type: ignore[assignment]
+    assets: List[_SPARK_FILE_PATH_ASSET_TYPES] = []  # type: ignore[assignment]
