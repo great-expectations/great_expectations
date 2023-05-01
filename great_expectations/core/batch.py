@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 def _get_fluent_batch_request_class() -> Type[FluentBatchRequest]:
     """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.datasource.fluent.interfaces"
+    module_name = "great_expectations.datasource.fluent.batch_request"
     class_name = "BatchRequest"
     return load_class(class_name=class_name, module_name=module_name)
 
