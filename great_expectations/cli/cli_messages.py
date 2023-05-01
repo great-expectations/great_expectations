@@ -106,3 +106,13 @@ SUITE_EDIT_FLUENT_DATASOURCE_WARNING = """Fluent style Datasources detected. The
 If you would like to edit an Expectation Suite with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.add_expectation_suite
 If you would like to use a block config style Datasource, you can select it here to proceed.
 """
+
+SUITE_NEW_FLUENT_DATASOURCE_ERROR = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Expectation Suite interactively with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.add_expectation_suite
+"""
+
+SUITE_NEW_FLUENT_DATASOURCE_WARNING = """Fluent style Datasources detected. The CLI does not work with fluent style Datasources.
+If you would like to create a new Expectation Suite interactively with your fluent style Datasource, please see the instructions here: https://docs.greatexpectations.io/docs/reference/api/data_context/AbstractDataContext_class#great_expectations.data_context.AbstractDataContext.add_expectation_suite
+If you would like to create a new Expectation Suite with your fluent style Datasource using the Onboarding Assistant, please see the instructions here: https://docs.greatexpectations.io/docs/guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant/#2-prepare-a-new-expectation-suite
+If you would like to use a block config style Datasource, you can select it here to proceed.
+"""
