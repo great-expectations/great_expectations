@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from functools import partial
-from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type, cast
+from typing import TYPE_CHECKING, ClassVar, Optional, Type
 
 from typing_extensions import Literal
 
