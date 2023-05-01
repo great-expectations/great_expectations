@@ -1,107 +1,33 @@
+# isort:skip_file
 import os
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports">
-from great_expectations.core.batch import BatchRequest
-from great_expectations.core.yaml_handler import YAMLHandler
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    FilesystemStoreBackendDefaults,
-)
-from great_expectations.util import get_context
+import great_expectations as gx
+from great_expectations.checkpoint import SimpleCheckpoint
 
-yaml = YAMLHandler()
 # </snippet>
 
-# 1. Install Great Expectations
-# %pip install great-expectations
-# Imports
-
-# 2. Set up Great Expectations
-# In-memory DataContext using DBFS and FilesystemStoreBackendDefaults
-
-# CODE vvvvv vvvvv
-# This root directory is for use in Databricks
-# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py root directory">
-context_root_dir = "/dbfs/great_expectations/"
-# </snippet>
-
-# For testing purposes only, we change the root_directory to an ephemeral location created by our test runner
-context_root_dir = os.path.join(os.getcwd(), "dbfs_temp_directory")
+from great_expectations.core.util import get_or_create_spark_application
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py set up context">
-context = get_context(context_root_dir=context_root_dir)
+context = gx.get_context()
 # </snippet>
-# CODE ^^^^^ ^^^^^
 
-# ASSERTIONS vvvvv vvvvv
-# Check the stores were initialized
-uncommitted_directory = os.path.join(context_root_dir, "uncommitted")
-assert {"checkpoints", "expectations", "uncommitted"}.issubset(
-    set(os.listdir(context_root_dir))
-)
-assert os.listdir(uncommitted_directory) == ["validations"]
-# ASSERTIONS ^^^^^ ^^^^^
-
-# 3. Prepare your data
-
-# See guide
-
-# 4. Connect to your data
-
-# CODE vvvvv vvvvv
-# Python Version
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py datasource_config">
-my_spark_datasource_config = {
-    "name": "insert_your_datasource_name_here",
-    "class_name": "Datasource",
-    "module_name": "great_expectations.datasource",
-    "execution_engine": {
-        "module_name": "great_expectations.execution_engine",
-        "class_name": "SparkDFExecutionEngine",
-    },
-    "data_connectors": {
-        "insert_your_data_connector_name_here": {
-            "class_name": "InferredAssetDBFSDataConnector",
-            "base_directory": "/dbfs/example_data/nyctaxi/tripdata/yellow/",
-            "glob_directive": "*.csv.gz",
-            "default_regex": {
-                "group_names": [
-                    "data_asset_name",
-                    "year",
-                    "month",
-                ],
-                "pattern": r"(.*)_(\d{4})-(\d{2})\.csv\.gz",
-            },
-        },
-    },
-}
+dbfs_datasource = context.sources.add_or_update_spark_dbfs(
+    name="my_spark_dbfs_datasource",
+    base_directory="/path/to/data/directory/",
+)
 # </snippet>
 
 # For this test script, change base_directory to location where test runner data is located
-my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
-    "base_directory"
-] = os.path.join(root_directory, "../data/")
-# For this test script, change the data_conector class_name to the filesystem version since we are unable to
-# mock /dbfs/ and dbfs:/ style paths without using a mocked filesystem
-my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
-    "class_name"
-] = "InferredAssetFilesystemDataConnector"
+dbfs_datasource.base_directory = os.path.join(root_directory, "../data/")
+
+
 # For this test script, we use uncompressed sample csv files, but in the databricks example these files are compressed
 my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
     "default_regex"
 ]["pattern"] = r"(.*)_(\d{4})-(\d{2})\.csv"
-my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
-    "glob_directive"
-] = "*.csv"
-
-# Data location used when running or debugging this script directly
-# os.path.join(
-#     root_directory, "../../../../test_sets/taxi_yellow_tripdata_samples/first_3_files/"
-# )
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py test datasource_config">
-context.test_yaml_config(yaml.dump(my_spark_datasource_config))
-# </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource_config">
 context.add_datasource(**my_spark_datasource_config)

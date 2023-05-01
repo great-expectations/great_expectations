@@ -1,98 +1,34 @@
 # isort:skip_file
 import os
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py imports">
-import datetime
-
 import pandas as pd
 
-from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.util import get_context
-from great_expectations.data_context.types.base import (
-    DataContextConfig,
-    FilesystemStoreBackendDefaults,
-)
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py imports">
+import great_expectations as gx
+from great_expectations.checkpoint import SimpleCheckpoint
 
 # </snippet>
 
 from great_expectations.core.util import get_or_create_spark_application
-from great_expectations.core.yaml_handler import YAMLHandler
 
-yaml = YAMLHandler()
 spark = get_or_create_spark_application()
 
-##################
-# BEGIN CONTENT
-##################
-
-# 1. Install Great Expectations
-# %pip install great-expectations
-# Imports
-
-# 2. Set up Great Expectations
-# Ephemeral DataContext
-
-# CODE vvvvv vvvvv
-# This root directory is for use in Databricks
-# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py root directory">
-context_root_dir = "/dbfs/great_expectations/"
-# </snippet>
-
-# For testing purposes only, we change the root_directory to an ephemeral location created by our test runner
-context_root_dir = os.path.join(os.getcwd(), "dbfs_temp_directory")
-
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py set up context">
-context = get_context(context_root_dir=context_root_dir)
+context = gx.get_context()
 # </snippet>
-# CODE ^^^^^ ^^^^^
 
-# ASSERTIONS vvvvv vvvvv
-# Check the stores were initialized
-uncommitted_directory = os.path.join(context_root_dir, "uncommitted")
-assert {"checkpoints", "expectations", "uncommitted"}.issubset(
-    set(os.listdir(context_root_dir))
-)
-assert os.listdir(uncommitted_directory) == ["validations"]
-# ASSERTIONS ^^^^^ ^^^^^
-
-# 3. Prepare your data
-
-# CODE vvvvv vvvvv
+context_root_dir = os.path.join(os.getcwd(), "dbfs_temp_directory")
 filename = "yellow_tripdata_sample_2019-01.csv"
 data_dir = os.path.join(os.path.dirname(context_root_dir), "data")
 pandas_df = pd.read_csv(os.path.join(data_dir, filename))
 df = spark.createDataFrame(data=pandas_df)
-# CODE ^^^^^ ^^^^^
 
-# ASSERTIONS vvvvv vvvvv
 assert len(pandas_df) == df.count() == 10000
 assert len(pandas_df.columns) == len(df.columns) == 18
-# ASSERTIONS ^^^^^ ^^^^^
 
-
-# 4. Connect to your data
-
-# CODE vvvvv vvvvv
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py datasource config">
-my_spark_datasource_config = {
-    "name": "insert_your_datasource_name_here",
-    "class_name": "Datasource",
-    "execution_engine": {"class_name": "SparkDFExecutionEngine"},
-    "data_connectors": {
-        "insert_your_data_connector_name_here": {
-            "module_name": "great_expectations.datasource.data_connector",
-            "class_name": "RuntimeDataConnector",
-            "batch_identifiers": [
-                "some_key_maybe_pipeline_stage",
-                "some_other_key_maybe_run_id",
-            ],
-        }
-    },
-}
-# </snippet>
-
-# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py test datasource config">
-context.test_yaml_config(yaml.dump(my_spark_datasource_config))
+dataframe_datasource = context.sources.add_or_update_spark(
+    name="my_spark_in_memory_datasource",
+)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource config">
