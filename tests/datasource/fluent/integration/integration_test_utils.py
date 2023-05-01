@@ -347,7 +347,7 @@ def _configure_and_run_data_assistant(
 ) -> tuple[DataAssistantResult, CheckpointResult]:
     expectation_suite_name = "my_onboarding_assistant_suite"
     context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
-    data_assistant_result = context.assistants.onboarding.run(  # type: ignore[attr-defined] # no attribute .run
+    data_assistant_result = context.assistants.onboarding.run(
         batch_request=batch_request,
         numeric_columns_rule={
             "estimator": "exact",

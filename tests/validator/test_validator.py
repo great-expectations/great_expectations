@@ -1157,7 +1157,7 @@ def test___get_attr___retrieves_existing_expectation(
 
     # Does not raise error if properly registered
     # Avoiding invocation to only test registration (and not actual expectation)
-    validator.expect_column_max_to_be_between
+    _ = validator.expect_column_max_to_be_between
 
 
 @pytest.mark.unit
@@ -1167,7 +1167,7 @@ def test__get_attr___raises_attribute_error_with_invalid_attr(
     validator = validator_with_mock_execution_engine
 
     with pytest.raises(AttributeError) as e:
-        validator.my_fake_attr
+        _ = validator.my_fake_attr
 
     assert "'Validator'  object has no attribute 'my_fake_attr'" in str(e.value)
 
