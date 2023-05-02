@@ -9,9 +9,9 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder.  This guide will help you configure Great Expectations to store them in a Google Cloud Storage (GCS) bucket.
 
-<Prerequisites>
-
 ## Prerequisites
+
+<Prerequisites>
 
 - [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
 - [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
