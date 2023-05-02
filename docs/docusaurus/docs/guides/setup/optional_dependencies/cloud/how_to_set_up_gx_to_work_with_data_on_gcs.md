@@ -46,7 +46,6 @@ This guide will walk you through best practices for creating your GX Python envi
 
 - The ability to install Python modules with pip
 - <PrereqGcpServiceAccount />
-- A passion for data quality
 
 </Prerequisites>
 

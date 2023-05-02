@@ -22,7 +22,6 @@ A <TechnicalTag tag="data_context" text="Data Context" /> contains the configura
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- A passion for data quality
 
 </Prerequisites>
 

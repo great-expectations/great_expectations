@@ -27,7 +27,6 @@ If you would like to connect to the results of a SQL query instead of the conten
 - An installation of GX set up to work with SQL
 - Source data stored in a SQL database
 - A SQL-based Datasource
-- A passion for data quality
 
 </Prerequisites> 
 

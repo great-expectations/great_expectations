@@ -17,6 +17,8 @@ Enhancing the metadata in OpenLineage with results from an <TechnicalTag tag="ex
 
 This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to emit results to an OpenLineage backend, where their effect on related datasets can be studied.
 
+## Prerequisites
+
 <Prerequisites>
 
  - Created at least one Expectation Suite

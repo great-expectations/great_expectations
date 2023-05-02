@@ -11,6 +11,8 @@ By default, <TechnicalTag tag="validation_result" text="Validation Results" /> a
 
 This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new Validation Results from <TechnicalTag tag="checkpoint" text="Checkpoint" /> runs.
 
+## Prerequisites
+
 <Prerequisites>
 
 - [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).

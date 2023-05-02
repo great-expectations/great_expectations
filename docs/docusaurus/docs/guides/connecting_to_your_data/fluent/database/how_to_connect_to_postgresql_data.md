@@ -18,7 +18,6 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 - [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
 - Source data stored in a PostgreSQL database
-- A passion for data quality
 
 </Prerequisites> 
 
