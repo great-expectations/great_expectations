@@ -55,13 +55,44 @@ class DirectoryCSVAsset(_FilePathDataAsset):
         return {"data_directory", "header", "infer_schema"}
 
 
+class ParquetAsset(_FilePathDataAsset):
+    type: Literal["parquet"] = "parquet"
+    # The options below are available for parquet as of spark v3.4.0
+    # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
+    datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(
+        alias="datetimeRebaseMode"
+    )
+    int_96_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(
+        alias="int96RebaseMode"
+    )
+    merge_schema: bool = Field(False, alias="mergeSchema")
+
+    class Config:
+        extra = pydantic.Extra.forbid
+        allow_population_by_field_name = True
+
+    def _get_reader_method(self) -> str:
+        return self.type
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
+        """
+        return {"datetimeRebaseMode", "int96RebaseMode", "mergeSchema"}
+
+
 _SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, DirectoryCSVAsset]
 _SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset, DirectoryCSVAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [
+        CSVAsset,
+        DirectoryCSVAsset,
+        ParquetAsset,
+    ]
 
     # instance attributes
     assets: List[_SPARK_FILE_PATH_ASSET_TYPES] = []  # type: ignore[assignment]
