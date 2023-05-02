@@ -2,6 +2,10 @@
 title: How to use the project check-config command
 ---
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+
 To facilitate this substantial config format change, starting with version 0.8.0
 we introduced `project check-config` to sanity check your config files. From your
 project directory, run:
