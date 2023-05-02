@@ -64,12 +64,22 @@ def assertDeepAlmostEqual(expected, actual, *args, **kwargs):
             assert len(expected) == len(actual)
             for index in range(len(expected)):
                 v1, v2 = expected[index], actual[index]
-                assertDeepAlmostEqual(v1, v2, __trace=repr(index), *args, **kwargs)
+                assertDeepAlmostEqual(
+                    v1,
+                    v2,
+                    __trace=repr(index),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
+                )
         elif isinstance(expected, dict):
             assert set(expected) == set(actual)
             for key in expected:
                 assertDeepAlmostEqual(
-                    expected[key], actual[key], __trace=repr(key), *args, **kwargs
+                    expected[key],
+                    actual[key],
+                    __trace=repr(key),
+                    *args,  # noqa: B026 # expected
+                    **kwargs,
                 )
         else:
             assert expected == actual
