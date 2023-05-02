@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
         DirectoryCSVAsset,
+        ParquetAsset,
     )
 
 logger: Logger
@@ -44,6 +45,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...
+
     def add_directory_csv_asset(
         self,
         name: str,
@@ -55,3 +57,16 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
     ) -> DirectoryCSVAsset: ...
+
+    def add_parquet_asset(
+        self,
+        name: str,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: re.Pattern | str = r".*",
+        glob_directive: str = "**/*",
+        datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"],
+        int_96_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"],
+        merge_schema: bool = ...,
+        order_by: Optional[SortersDefinition] = ...,
+    ) -> ParquetAsset: ...
