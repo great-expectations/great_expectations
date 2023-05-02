@@ -13,9 +13,9 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
-:::note Prerequisites
-- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
-:::
+Prerequisites
+
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 
 ## The Validate Data process
 

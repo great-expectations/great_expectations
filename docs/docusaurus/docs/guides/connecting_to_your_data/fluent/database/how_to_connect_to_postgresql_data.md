@@ -10,8 +10,6 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 
 import PostgreSqlConfigureCredentialsInConfigVariablesYml from '/docs/components/setup/dependencies/_postgresql_configure_credentials_in_config_variables_yml.md'
 
-## Introduction
-
 In this guide we will demonstrate how to connect Great Expectations to data in a PostgreSQL database.  We will demonstrate how to create a PostgreSQL Datasource.  With our PostgreSQL Datasource we will then show the methods for connecting to data in a PostgreSQL table and connecting to data from a PostgreSQL query.
 
 ## Prerequisites
@@ -20,7 +18,6 @@ In this guide we will demonstrate how to connect Great Expectations to data in a
 
 - [An installation of GX set up to work with PostgreSQL](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases)
 - Source data stored in a PostgreSQL database
-- A passion for data quality
 
 </Prerequisites> 
 

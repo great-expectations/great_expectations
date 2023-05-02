@@ -25,6 +25,8 @@ The best way to Validate data in production with Great Expectations is using a <
 
 Otherwise, configuring these validation parameters would have to be done via the API.  A Checkpoint encapsulates this "boilerplate" and ensures that all components work in harmony together.  Finally, running a configured Checkpoint is a one-liner, as described below.
 
+## Prerequisites
+
 <Prerequisites>
 
 - [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
