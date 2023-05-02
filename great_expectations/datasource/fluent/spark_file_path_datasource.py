@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, List, Type, Union, Sequence
+from typing import TYPE_CHECKING, ClassVar, List, Sequence, Type, Union
 
 import pydantic
 from pydantic import Field
