@@ -62,10 +62,7 @@ if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
-    from great_expectations.datasource.fluent.batch_request import (
-        BatchRequest,
-        BatchRequestOptions,
-    )
+    from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
