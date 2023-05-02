@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING, ClassVar, List, Type, Union
+from typing import TYPE_CHECKING, ClassVar, List, Type, Union, Sequence
 
 import pydantic
 from pydantic import Field
@@ -83,17 +83,21 @@ class ParquetAsset(_FilePathDataAsset):
         return {"datetimeRebaseMode", "int96RebaseMode", "mergeSchema"}
 
 
-_SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, DirectoryCSVAsset, ParquetAsset]
+# This list is to make sure that the asset_types and assets are always in sync
+# New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple
+# so that the schemas are generated and the assets are registered.
+_SPARK_FILE_PATH_ASSET_TYPES = (
+    CSVAsset,
+    DirectoryCSVAsset,
+    ParquetAsset,
+)
+_SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[_SPARK_FILE_PATH_ASSET_TYPES]  # type: ignore[valid-type]
 _SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [
-        CSVAsset,
-        DirectoryCSVAsset,
-        ParquetAsset,
-    ]
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = _SPARK_FILE_PATH_ASSET_TYPES
 
     # instance attributes
-    assets: List[_SPARK_FILE_PATH_ASSET_TYPES] = []  # type: ignore[assignment]
+    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []  # type: ignore[assignment]
