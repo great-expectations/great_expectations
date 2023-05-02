@@ -32,6 +32,7 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -41,7 +42,6 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchRequest,
     DataAsset,
     Datasource,
     _DataAssetT,
@@ -198,7 +198,7 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
-                batch_slice=batch_request.batch_slice,
+                batch_slice=batch_request._batch_slice_input,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
