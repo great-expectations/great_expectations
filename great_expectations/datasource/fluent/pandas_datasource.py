@@ -563,12 +563,23 @@ class PandasDatasource(_PandasDatasource):
         # TODO: raise error if `_data_context` not set
         return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
+    @public_api
     def add_dataframe_asset(
         self,
         name: str,
         dataframe: pd.DataFrame,
         **kwargs,
     ) -> DataFrameAsset:
+        """Adds a DataFrameAsset to this PandasDatasource.
+
+        Args:
+            name: The name given to the DataFrameAsset.
+            dataframe: The pandas DataFrame to attach to the returned DataFrameAsset.
+            batch_metadata: A dictionary of metadata to associate with the DataFrameAsset batch.
+
+        Returns:
+            The DataFameAsset that has been added to this datasource.
+        """
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
@@ -582,6 +593,17 @@ class PandasDatasource(_PandasDatasource):
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
+        """Adds a DataFrameAsset to this PandasDatasource and returns a Validator.
+
+        Args:
+            dataframe: The pandas DataFrame to attach to the returned DataFrameAsset.
+            asset_name: The name given to the DataFrameAsset associated with the Validator.
+                        If no asset_name is provided, a default asset_name will be used.
+            batch_metadata: A dictionary of metadata to associate with the DataFrameAsset batch.
+
+        Returns:
+            The Validator produced by this datasource and DataFrameAsset.
+        """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
