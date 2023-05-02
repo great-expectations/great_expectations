@@ -124,7 +124,7 @@ import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/c
 
 <!-- 2.3 Add CSV Asset to your Datasource -->
 
-import AddAssetToDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_add_csv_asset_to_spark_s3_datasource.mdx'
+import AddAssetToDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_add_csv_asset_to_spark_s3_datasource.md'
 
 <!-- 2.4 Test your new Datasource Asset -->
 
