@@ -3,9 +3,7 @@ from typing import Dict, List, Union
 
 import pytest
 
-from great_expectations.datasource.fluent.interfaces import (
-    BatchRequest as FluentBatchRequest,
-)
+from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
 from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
     CheckpointResult,
