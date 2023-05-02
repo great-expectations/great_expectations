@@ -55,8 +55,6 @@ class DirectoryCSVAsset(_FilePathDataAsset):
         return {"data_directory", "header", "infer_schema"}
 
 
-
-
 class ParquetAsset(_FilePathDataAsset):
     type: Literal["parquet"] = "parquet"
     # The options below are available for parquet as of spark v3.4.0
@@ -90,7 +88,11 @@ _SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
 
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [CSVAsset, DirectoryCSVAsset, ParquetAsset]
+    asset_types: ClassVar[List[Type[DataAsset]]] = [
+        CSVAsset,
+        DirectoryCSVAsset,
+        ParquetAsset,
+    ]
 
     # instance attributes
     assets: List[_SPARK_FILE_PATH_ASSET_TYPES] = []  # type: ignore[assignment]

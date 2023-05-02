@@ -45,7 +45,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
     ) -> CSVAsset: ...
-
     def add_directory_csv_asset(
         self,
         name: str,
@@ -57,7 +56,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,
     ) -> DirectoryCSVAsset: ...
-
     def add_parquet_asset(
         self,
         name: str,
