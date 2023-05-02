@@ -143,12 +143,12 @@ class _SQLiteAssetMixin:
 
 
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
-    type: Literal["sqlite_table"] = "sqlite_table"  # type: ignore[assignment]  # override superclass value
+    type: Literal["table"] = "table"  # type: ignore[assignment]  # override superclass value
     splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
-    type: Literal["sqlite_query"] = "sqlite_query"  # type: ignore[assignment]  # override superclass value
+    type: Literal["query"] = "query"  # type: ignore[assignment]  # override superclass value
     splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
@@ -215,9 +215,3 @@ class SqliteDatasource(SQLDatasource):
         )
 
     add_query_asset.__doc__ = SQLDatasource.add_query_asset.__doc__
-
-
-# Removed automatically added add_*_asset methods we don't want.
-# TODO: Prevent these from being created.
-delattr(SqliteDatasource, "add_sqlite_table_asset")
-delattr(SqliteDatasource, "add_sqlite_query_asset")
