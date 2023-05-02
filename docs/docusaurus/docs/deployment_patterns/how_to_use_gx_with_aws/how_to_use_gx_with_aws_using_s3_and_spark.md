@@ -49,8 +49,7 @@ import VerifySuccessfulGxInstallation from '@site/docs/guides/setup/installation
 
 <!-- 1.3 Create your Data Context -->
 
-import CreateDataContextWithGetContext from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
-
+import CreateDataContextWithCreate from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
 <!-- 1.4 Configure your Expectations Store on Amazon S3 -->
 
@@ -116,7 +115,7 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- 2.1 Instantiate your project's DataContext -->
 
-import CreateDataContextWithGetContextAgain from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
+import CreateDataContextWithCreateAgain from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
 <!-- 2.2 Add Datasource to your DataContext  -->
 
@@ -124,11 +123,11 @@ import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/c
 
 <!-- 2.3 Add CSV Asset to your Datasource -->
 
-import AddAssetToDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_add_csv_asset_to_spark_s3_datasource.md'
+import AddCSVAssetToS3Datasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_add_csv_asset_to_spark_s3_datasource.md'
 
 <!-- 2.4 Test your new Datasource Asset -->
 
-import TestS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_fluent_datasource.md'
+import TestS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_datasource.mdx'
 
 <!-- Part 3: Create Expectations -->
 
@@ -154,11 +153,7 @@ import CheckpointCreateAndRun from '@site/docs/deployment_patterns/how_to_use_gx
 
 import CreateCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_create_tabs.md'
 
-<!-- 4.1.2 Save the Checkpoint -->
-
-import SaveCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_save.md'
-
-<!-- 4.1.3 Run the Checkpoint -->
+<!-- 4.1.2 Run the Checkpoint -->
 
 import RunCheckpoint from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_checkpoint_run.md'
 
@@ -217,7 +212,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <VerifySuccessfulGxInstallation />
 
 ### 1.3 Create your Data Context
-<CreateDataContextWithGetContext />
+<CreateDataContextWithGetCreate />
 
 ### 1.4 Configure your Expectations Store on Amazon S3
 
@@ -273,7 +268,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 ## Part 2: Connect to data
 
 ### 2.1 Instantiate your project's DataContext
-<CreateDataContextWithGetContextAgain />
+<CreateDataContextWithGetCreateAgain />
 
 If you have already instantiated your `DataContext` in a previous step, this step can be skipped.
 
@@ -281,7 +276,10 @@ If you have already instantiated your `DataContext` in a previous step, this ste
 <ConfigureYourDatasource />
 
 ### 2.3 Add CSV Asset to your Datasource 
-<AddAssetToDatasource />
+<AddCSVAssetToS3Datasource />
+
+### 2.3 Test your new Datasource
+<TestS3Datasource />
 
 ## Part 3: Create Expectations
 
@@ -307,11 +305,7 @@ If you have already instantiated your `DataContext` in a previous step, this ste
 
 <CreateCheckpoint />
 
-#### 4.1.2 Save the Checkpoint
-
-<SaveCheckpoint />
-
-#### 4.1.3 Run the Checkpoint
+#### 4.1.2 Run the Checkpoint
 
 <RunCheckpoint />
 
