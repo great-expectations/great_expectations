@@ -32,7 +32,7 @@ class CSVAsset(_FilePathDataAsset):
     def _get_reader_method(self) -> str:
         return self.type
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         return {"header", "infer_schema"}
 
 
@@ -55,7 +55,7 @@ class ParquetAsset(_FilePathDataAsset):
     def _get_reader_method(self) -> str:
         return self.type
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
         See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.

@@ -300,7 +300,7 @@ class _FilePathDataAsset(DataAsset):
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
-    def _get_reader_options_include(self) -> Set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""

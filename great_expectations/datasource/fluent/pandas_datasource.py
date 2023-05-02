@@ -343,7 +343,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
         )
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
