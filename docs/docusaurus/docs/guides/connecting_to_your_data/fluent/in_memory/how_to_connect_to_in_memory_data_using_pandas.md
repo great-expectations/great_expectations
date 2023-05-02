@@ -21,7 +21,6 @@ In this guide we will demonstrate how to connect to an in-memory Pandas DataFram
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 - Access to data that can be read into a Pandas DataFrame
-- A passion for data quality
 
 </Prerequisites> 
 

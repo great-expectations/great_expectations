@@ -19,7 +19,6 @@ If you are using a Datasource that was created by using the block-config method 
 
 - An installation of GX
 - A Datasource with a configured Data Asset
-- A passion for data quality
 
 </Prerequisites> 
 

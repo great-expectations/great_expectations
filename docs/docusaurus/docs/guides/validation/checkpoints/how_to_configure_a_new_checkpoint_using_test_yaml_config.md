@@ -12,6 +12,8 @@ This how-to guide demonstrates advanced examples for configuring a <TechnicalTag
 
 ``test_yaml_config`` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for <TechnicalTag tag="datasource" text="Datasources" />, <TechnicalTag tag="store" text="Stores" />, and Checkpoints. ``test_yaml_config`` is primarily intended for use within a notebook, where you can iterate through an edit-run-check loop in seconds.
 
+## Prerequisites
+
 <Prerequisites>
 
 - [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)

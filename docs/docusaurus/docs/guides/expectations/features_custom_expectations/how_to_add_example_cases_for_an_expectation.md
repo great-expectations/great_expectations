@@ -6,9 +6,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you add example cases to document and test the behavior of your <TechnicalTag tag="expectation" text="Expectation" />. 
 
+## Prerequisites
+
 <Prerequisites>
 
- - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
+ - [A Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 

@@ -18,7 +18,6 @@ Once you have completed this guide you will have a foundation in the basics of u
 
 - The ability to install Python packages with pip
 - A working internet browser
-- A passion for data quality
 
 </Prerequisites> 
 
