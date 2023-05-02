@@ -14,8 +14,6 @@ import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_cont
 <!-- ## Next steps -->
 import AfterCreateInMemoryDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_in_memory_data_asset.md'
 
-## Introduction
-
 In this guide we will demonstrate how to connect to an in-memory Pandas DataFrame.  Pandas can read many types of data into its DataFrame class, but in our example we will use data originating in a parquet file.
 
 ## Prerequisites

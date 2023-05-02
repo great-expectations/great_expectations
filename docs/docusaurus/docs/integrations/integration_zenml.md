@@ -13,7 +13,6 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 * Support/Contact: https://zenml.io/slack-invite/
 :::
 
-### Introduction
 [ZenML](https://zenml.io/) helps data scientists and ML engineers to make
 Great Expectations data profiling and validation an integral part of their
 production ML toolset and workflows. ZenML is [an extensible open source MLOps framework](https://github.com/zenml-io/zenml)
