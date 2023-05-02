@@ -12,7 +12,6 @@ authors:
 * Support/Contact: https://yoururl.com
 :::
 
-### Introduction
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 Viverra nam libero justo laoreet. Hendrerit gravida rutrum quisque non. Mauris pellentesque pulvinar pellentesque
 habitant morbi. Sed enim ut sem viverra aliquet eget. A diam maecenas sed enim ut sem viverra aliquet eget.

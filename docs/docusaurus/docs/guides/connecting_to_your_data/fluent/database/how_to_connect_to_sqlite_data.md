@@ -8,8 +8,6 @@ keywords: [Great Expectations, SQLite, SQL]
 <!-- Import statements start here. -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
-## Introduction
-
 In this guide we will demonstrate how to connect Great Expectations to data in a SQLite database.  We will demonstrate how to create a SQLite Datasource.  With our SQLite Datasource we will then show the methods for connecting to data in a SQLite table and connecting to data from a SQLite query.
 
 ## Prerequisites

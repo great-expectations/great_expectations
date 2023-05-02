@@ -13,8 +13,6 @@ import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data
 import ConnectingToSqlDatasourcesBlockConfig from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_block_config.md'
 
 
-## Introduction
-
 In this guide we will demonstrate how to connect Great Expectations to the data returned by a query in a generic SQL database.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, please see [SQLAlchemy's official documentation on dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 If you would like to connect to the contents of a SQL table instead of the results of a SQL query, please see [our guide on how to connect to a SQL table](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table), instead.
