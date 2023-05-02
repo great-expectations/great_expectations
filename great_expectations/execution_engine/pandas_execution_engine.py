@@ -233,7 +233,10 @@ class PandasExecutionEngine(ExecutionEngine):
                     inferred_compression_param = sniff_s3_compression(s3_url)
                     if inferred_compression_param is not None:
                         reader_options["compression"] = inferred_compression_param
-                s3_object = s3_engine.get_object(Bucket=s3_url.bucket, Key=s3_url.key)
+                if s3_engine:
+                    s3_object = s3_engine.get_object(
+                        Bucket=s3_url.bucket, Key=s3_url.key
+                    )
             except (aws.ParamValidationError, aws.ClientError) as error:
                 raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""
