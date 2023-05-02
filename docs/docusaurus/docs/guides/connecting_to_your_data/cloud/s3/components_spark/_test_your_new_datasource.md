@@ -5,6 +5,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 Verify your new <TechnicalTag tag="datasource" text="Datasource" /> by loading data from it into a <TechnicalTag tag="validator" text="Validator" /> using a <TechnicalTag tag="batch_request" text="Batch Request" />.
 
 We will use the `build_batch_request(...)` method of our Data Asset to generate a Batch Request. Here we have specified the `batch_request_options` property to only include the Batches where the `year` property is `2021`.
+<TabItem value="batch_request">
 
 ```python name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py get_batch_request
 ```
