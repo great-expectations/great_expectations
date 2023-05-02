@@ -131,7 +131,7 @@ import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/c
 
 <!-- 2.4 Save the Datasource configuration to your DataContext -->
 
-import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_spark/_save_the_datasource_configuration_to_your_datacontext.mdx'
+import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_save_the_datasource_configuration_to_your_datacontext.mdx'
 
 <!-- 2.5 Test your new Datasource -->
 
