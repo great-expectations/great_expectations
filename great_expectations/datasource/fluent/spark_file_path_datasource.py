@@ -82,7 +82,7 @@ class ParquetAsset(_FilePathDataAsset):
         return {"datetimeRebaseMode", "int96RebaseMode", "mergeSchema"}
 
 
-_SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, DirectoryCSVAsset]
+_SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, DirectoryCSVAsset, ParquetAsset]
 _SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
 
 
