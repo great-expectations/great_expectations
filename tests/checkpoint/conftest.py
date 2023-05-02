@@ -6,9 +6,7 @@ import pandas as pd
 
 import pytest
 
-from great_expectations.datasource.fluent.interfaces import (
-    BatchRequest as FluentBatchRequest,
-)
+from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
