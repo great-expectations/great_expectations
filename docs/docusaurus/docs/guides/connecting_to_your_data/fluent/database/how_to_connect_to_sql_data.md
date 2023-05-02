@@ -14,8 +14,6 @@ import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_cont
 <!-- ## Next steps -->
 import AfterCreateSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_sql_datasource.md'
 
-## Introduction
-
 In this guide we will demonstrate how to connect Great Expectations to SQL databases.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, please see [SQLAlchemy's official documentation on dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
 ## Prerequisites

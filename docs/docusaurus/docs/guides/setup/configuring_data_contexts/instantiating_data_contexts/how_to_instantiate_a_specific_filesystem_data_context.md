@@ -14,8 +14,6 @@ import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
 <!--- ### 3. Verify the content of the Data Context -->
 import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
 
-## Introduction
-
 A <TechnicalTag tag="data_context" text="Data Context" /> contains the configurations for <TechnicalTag tag="expectation" text="Expectations" />, <TechnicalTag tag="store" text="Metadata Stores" />, <TechnicalTag tag="data_docs" text="Data Docs" />, <TechnicalTag tag="checkpoint" text="Checkpoints" />, and all things related to working with Great Expectations.  
 
 If you are using GX for multiple projects you may wish to utilize a different Data Context for each one.  This guide will demonstrate how to instantiate a specific Filesystem Data Context so that you can switch between sets of previously defined GX configurations.

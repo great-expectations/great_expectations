@@ -28,8 +28,6 @@ import DefiningMultipleDataAssets from '/docs/components/connect_to_data/filesys
 <!-- Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 
-## Introduction
-
 <Introduction execution_engine="Pandas" />
 
 ## Prerequisites
