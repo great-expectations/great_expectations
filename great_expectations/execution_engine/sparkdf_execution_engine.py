@@ -387,6 +387,7 @@ illegal.  Please check your config."""
                 splitter_method_name
             )
             splitter_kwargs: dict = batch_spec.get("splitter_kwargs") or {}
+            breakpoint()
             batch_data = splitter_fn(batch_data, **splitter_kwargs)
 
         sampler_method_name: Optional[str] = batch_spec.get("sampling_method")

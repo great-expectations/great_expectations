@@ -40,6 +40,7 @@ from great_expectations.datasource.fluent.spark_generic_splitters import (
     Splitter,
     SplitterYear,
     SplitterYearAndMonth,
+    SplitterColumnValue,
 )
 
 if TYPE_CHECKING:
@@ -143,7 +144,14 @@ class _FilePathDataAsset(DataAsset):
         Returns:
             A tuple of keys that can be used in a BatchRequestOptions dictionary.
         """
-        return tuple(self._all_group_names) + (FILE_PATH_BATCH_SPEC_KEY,)
+        splitter_options: tuple[str, ...] = tuple()
+        if self.splitter:
+            splitter_options = tuple(self.splitter.param_names)
+        return (
+            tuple(self._all_group_names)
+            + (FILE_PATH_BATCH_SPEC_KEY,)
+            + splitter_options
+        )
 
     @public_api
     def build_batch_request(
@@ -225,10 +233,12 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
+        # TODO: I think this is where to look to find the missing batch_definitions
+        #  There are no batch_definitions here after adding the splitter.
         batch_definition_list: List[
             BatchDefinition
         ] = self._data_connector.get_batch_definition_list(batch_request=batch_request)
-
+        breakpoint()
         batch_list: List[Batch] = []
 
         batch_spec: BatchSpec
@@ -252,21 +262,24 @@ class _FilePathDataAsset(DataAsset):
                 ),
             }
             if self.splitter:
-                batch_request.options["year"] = 2020  # TODO: Pull this in from query
-                batch_request.options["month"] = 5  # TODO: Pull this in from query
+                # batch_request.options["year"] = 2020  # TODO: Pull this in from query
+                # batch_request.options["month"] = 5  # TODO: Pull this in from query
                 batch_spec_options["splitter_method"] = self.splitter.method_name
                 batch_spec_options[
                     "splitter_kwargs"
                 ] = self.splitter.splitter_method_kwargs()
-                batch_spec_options["batch_identifiers"] = {}
+                batch_spec_options["splitter_kwargs"]["batch_identifiers"] = {}
                 # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
                 # it is hardcoded to a dict above, so we cast it here.
-                cast(Dict, batch_spec_options["batch_identifiers"]).update(
+                cast(
+                    Dict, batch_spec_options["splitter_kwargs"]["batch_identifiers"]
+                ).update(
                     self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
                         batch_request.options
                     )
                 )
             batch_spec.update(batch_spec_options)
+            breakpoint()
             if self.splitter:
                 breakpoint()
 
@@ -370,5 +383,20 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         return self._add_splitter(
             SplitterYearAndMonth(
                 method_name="split_on_year_and_month", column_name=column_name
+            )
+        )
+
+    # TODO: Add other splitters
+    def add_splitter_column_value(self: Self, column_name: str) -> Self:
+        """Associates a column value splitter with this sql asset.
+        Args:
+            column_name: A column name of the column to split on.
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            SplitterColumnValue(
+                method_name="split_on_column_value",
+                column_name=column_name,
             )
         )
