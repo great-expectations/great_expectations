@@ -23,6 +23,13 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+if not google.storage:
+    pytest.skip(
+        'Could not import "storage" from google.cloud in configured_asset_gcs_data_connector.py',
+        allow_module_level=True,
+    )
+
+
 class MockGCSClient:
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def list_blobs(
