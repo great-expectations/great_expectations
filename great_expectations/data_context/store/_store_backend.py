@@ -200,7 +200,7 @@ class StoreBackend(metaclass=ABCMeta):
                 )
             )
 
-    def _validate_value(self, value) -> None:
+    def _validate_value(self, value) -> None:  # noqa: B027 # no abstract decorator
         pass
 
     @abstractmethod
