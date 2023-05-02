@@ -8,10 +8,12 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide demonstrates how to configure a ConfiguredAssetDataConnector, and provides several examples you can use for configuration.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Understand the basics of Datasources in 0.13 or later](../../terms/datasource.md)
-- Learned how to configure a [Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
+- [An understanding of Datasource version 0.13 or later basics](../../terms/datasource.md)
+- [An understanding of how to configure a Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 </Prerequisites>
 

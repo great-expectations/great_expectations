@@ -25,7 +25,6 @@ In this guide we will demonstrate how to use Pandas to connect to data stored on
 
 - [An installation of GX set up to work with S3](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3)
 - Access to data on a S3 bucket
-- A passion for data quality
 
 </Prerequisites> 
 

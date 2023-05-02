@@ -26,7 +26,6 @@ import AfterCreateValidator from '/docs/components/connect_to_data/next_steps/_a
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 - Access to source data stored in a filesystem
-- A passion for data quality
 
 </Prerequisites> 
 
