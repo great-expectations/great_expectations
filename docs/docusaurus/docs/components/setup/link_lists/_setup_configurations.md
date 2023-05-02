@@ -6,7 +6,7 @@
 </summary>
 
 While some source data systems provide their own means of configuring credentials through environment variables, you can also configure GX to populate credentials from either a YAML file or a secret manager.  For more information, please see:
-- [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+- [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
 
 </details>
 
