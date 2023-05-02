@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional
 from unittest import mock
 
 import numpy as np
+import packaging
 import pandas as pd
 import pytest
 from freezegun import freeze_time
@@ -44,6 +45,7 @@ from great_expectations.data_context import (
     BaseDataContext,
     CloudDataContext,
 )
+from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
     GXCloudRESTResource,
@@ -357,6 +359,26 @@ def pytest_collection_modifyitems(config, items):
 def no_usage_stats(monkeypatch):
     # Do not generate usage stats from test runs
     monkeypatch.setenv("GE_USAGE_STATS", "False")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def preload_latest_gx_cache():
+    """
+    Pre-load the _VersionChecker version cache so that we don't attempt to call pypi
+    when creating contexts as part of normal testing.
+    """
+    # setup
+    import great_expectations as gx
+
+    current_version = packaging.version.Version(gx.__version__)
+    logger.info(
+        f"Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with {current_version}"
+    )
+    _VersionChecker._LATEST_GX_VERSION_CACHE = current_version
+    yield current_version
+    # teardown
+    logger.info("Clearing _VersionChecker._LATEST_GX_VERSION_CACHE ")
+    _VersionChecker._LATEST_GX_VERSION_CACHE = None
 
 
 @pytest.fixture(scope="module")

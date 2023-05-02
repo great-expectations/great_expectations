@@ -365,12 +365,16 @@ def select_datasource(
     data_source: Union[BaseDatasource, LegacyDatasource, FluentDatasource, None] = None
 
     if datasource_name is None:
+        # exclude fluent datasources from options
+        block_style_datasources = [
+            x
+            for x in context.datasources.values()
+            if x.name not in context.fluent_datasources
+        ]
         data_sources: List[BaseDatasource] = cast(
             List[BaseDatasource],
             list(
-                sorted(
-                    context.datasources.values(), key=lambda x: (len(x.name), x.name)
-                ),
+                sorted(block_style_datasources, key=lambda x: (len(x.name), x.name)),
             ),
         )
         if len(data_sources) == 0:
