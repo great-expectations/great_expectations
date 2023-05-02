@@ -46,7 +46,7 @@ import VerifySuccessfulGxInstallation from '@site/docs/guides/setup/installation
 
 <!-- 1.3 Create your Data Context -->
 
-import CreateDataContextWithGetContext from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
+import CreateDataContextWithCreate from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
 <!-- 1.4 Configure your Expectations Store on Amazon S3 -->
 
@@ -100,7 +100,7 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- 2.1 Instantiate your project's Data Context -->
 
-import CreateDataContextWithGetContextAgain from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
+import CreateDataContextWithGetCreateAgain from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
 <!-- 2.2 Add Datasource to your DataContext -->
 
@@ -194,7 +194,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <VerifySuccessfulGxInstallation />
 
 ### 1.3 Create your Data Context
-<CreateDataContextWithGetContext />
+<CreateDataContextWithGetCreate />
 
 ### 1.4 Configure your Expectations Store on Amazon S3
 
@@ -241,7 +241,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 ## Part 2: Connect to data
 
 ### 2.1 Instantiate your project's DataContext
-<CreateDataContextWithGetContextAgain />
+<CreateDataContextWithGetCreateAgain />
 
 If you have already instantiated your `DataContext` in a previous step, this step can be skipped. 
 
