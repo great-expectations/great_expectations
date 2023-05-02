@@ -9,6 +9,9 @@ keywords: [Great Expectations, Data Context, Filesystem, GCS, Google Cloud Stora
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 <!-- ## Prerequisites -->
 import PrereqGcpServiceAccount from '/docs/components/prerequisites/_gcp_service_account.md'
