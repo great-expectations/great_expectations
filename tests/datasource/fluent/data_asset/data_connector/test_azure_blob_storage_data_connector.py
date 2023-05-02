@@ -23,6 +23,13 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+if not azure.storage:
+    pytest.skip(
+        'Could not import "azure.storage.blob" from Microsoft Azure cloud',
+        allow_module_level=True,
+    )
+
+
 class MockContainerClient:
     pass
 
