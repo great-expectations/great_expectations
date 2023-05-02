@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import pathlib
 from typing import TYPE_CHECKING, ClassVar, List, Type, Union
 
 import pydantic
@@ -39,7 +40,7 @@ class CSVAsset(_FilePathDataAsset):
 class DirectoryCSVAsset(_FilePathDataAsset):
     # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"
-    data_directory: str
+    data_directory: pathlib.Path
     header: bool = False
     infer_schema: bool = Field(False, alias="InferSchema")
 
