@@ -23,7 +23,7 @@ except (ImportError, AttributeError):
     ClientError = AWS_NOT_IMPORTED
 
 try:
-    pass
+    from botocore.exceptions import ParamValidationError
 
 except (ImportError, AttributeError):
-    ClientError = AWS_NOT_IMPORTED
+    ParamValidationError = AWS_NOT_IMPORTED
