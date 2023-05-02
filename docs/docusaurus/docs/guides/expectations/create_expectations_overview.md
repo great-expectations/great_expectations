@@ -10,7 +10,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
-Prerequisites
+## Prerequisites
 
 - Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 

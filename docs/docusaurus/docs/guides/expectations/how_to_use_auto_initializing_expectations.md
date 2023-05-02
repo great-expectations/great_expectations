@@ -7,7 +7,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will walk you through the process of using a auto-initializing <TechnicalTag tag="expectation" text="Expectations" /> to automate parameter estimation when you are creating Expectations interactively by using a <TechnicalTag tag="batch" text="Batch" /> or Batches that have been loaded into a <TechnicalTag tag="validator" text="Validator" />.
 
-Prerequisites
+## Prerequisites
 
 - Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 - [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)

@@ -27,9 +27,7 @@ away, with all the other great features that ZenML brings along: portability,
 caching, tracking and versioning and immediate access to a rich ecosystem of
 tools and services that spans everything else MLOps.
 
-### Technical background
-
-Prerequisites
+### Prerequisites
 
  - An understanding of Great Expectations <TechnicalTag tag="expectation_suite" text="Expectation Suites" />,
  <TechnicalTag tag="validation_result" text="Validation Results"/>,

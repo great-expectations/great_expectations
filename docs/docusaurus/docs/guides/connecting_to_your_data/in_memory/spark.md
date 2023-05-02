@@ -14,9 +14,11 @@ import TabItem from '@theme/TabItem';
 This guide will help you connect to your data in an in-memory dataframe using Spark.
 This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Have access to an in-memory Spark dataframe
+- Access to an in-memory Spark dataframe
 
 </Prerequisites>
 

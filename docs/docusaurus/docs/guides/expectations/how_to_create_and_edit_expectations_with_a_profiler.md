@@ -7,6 +7,8 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you create a new <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> by profiling your data with the User Configurable <TechnicalTag tag="profiler" text="Profiler" />.
 
+## Prerequisites
+
 <Prerequisites>
 </Prerequisites>
 
