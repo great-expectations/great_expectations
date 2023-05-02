@@ -8,9 +8,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you implement native Spark support for your <TechnicalTag tag="custom_expectation" text="Custom Expectation" />. 
 
+## Prerequisites
+
 <Prerequisites>
 
- - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
+ - [A Custom Expectation](../creating_custom_expectations/overview.md)
     
 </Prerequisites>
 

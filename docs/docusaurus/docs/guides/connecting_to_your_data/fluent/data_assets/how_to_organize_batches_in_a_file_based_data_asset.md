@@ -30,7 +30,6 @@ In this guide we will demonstrate the ways in which Batches can be organized in 
 
 - A working installation of Great Expectations
 - A Datasource that connects to a location with source data files
-- A passion for data quality
 
 </Prerequisites>
 
