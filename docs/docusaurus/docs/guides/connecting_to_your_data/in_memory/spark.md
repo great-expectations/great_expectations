@@ -11,8 +11,7 @@ import SparkDataContextNote from '../components/spark_data_context_note.md'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide will help you connect to your data in an in-memory dataframe using Spark.
-This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
+This guide will help you connect to your data in an in-memory dataframe using Spark. This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
 ## Prerequisites
 

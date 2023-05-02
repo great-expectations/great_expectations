@@ -13,7 +13,7 @@ In this guide, you will utilize a <TechnicalTag tag="data_assistant" text="Data 
 <Prerequisites>
 
 - A minimum of two configured [Datasources](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview) and [Assets](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table)
-- A basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations)
+- A basic understanding of how to [configure Expectation in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations)
 - Completion of the <TechnicalTag tag="data_assistant" text="Data Assistants" /> overview
 
 </Prerequisites>
