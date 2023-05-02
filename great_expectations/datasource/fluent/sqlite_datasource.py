@@ -143,12 +143,12 @@ class _SQLiteAssetMixin:
 
 
 class SqliteTableAsset(_SQLiteAssetMixin, SqlTableAsset):
-    type: Literal["table"] = "table"  # type: ignore[assignment]  # override superclass value
+    type: Literal["table"] = "table"
     splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
 class SqliteQueryAsset(_SQLiteAssetMixin, SqlQueryAsset):
-    type: Literal["query"] = "query"  # type: ignore[assignment]  # override superclass value
+    type: Literal["query"] = "query"
     splitter: Optional[SqliteSplitter] = None  # type: ignore[assignment]  # override superclass type
 
 
