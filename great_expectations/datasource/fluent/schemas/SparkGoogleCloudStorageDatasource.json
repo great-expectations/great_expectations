@@ -191,7 +191,8 @@
                 },
                 "data_directory": {
                     "title": "Data Directory",
-                    "type": "string"
+                    "type": "string",
+                    "format": "path"
                 },
                 "header": {
                     "title": "Header",
