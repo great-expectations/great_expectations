@@ -9,9 +9,11 @@ They are evaluated for a single column, and produce an aggregate <TechnicalTag t
 
 This guide will walk you through the process of creating your own custom `ColumnAggregateExpectation`.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](./overview.md).
+- Completion of the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 
