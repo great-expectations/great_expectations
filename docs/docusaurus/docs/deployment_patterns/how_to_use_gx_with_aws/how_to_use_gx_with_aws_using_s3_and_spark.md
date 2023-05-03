@@ -133,7 +133,7 @@ import TestS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_
 
 <!-- 3.1 Prepare a Batch Request, Empty Expectation Suite, and Validator -->
 
-import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_expectation_suite_and_validator_for_fluent_datasource.md'
+import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_expectation_suite_and_validator_for_fluent_datasource.mdx'
 
 <!-- 3.2: Use a Validator to add Expectations to the Expectation Suite -->
 
