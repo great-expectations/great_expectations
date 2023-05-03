@@ -83,15 +83,17 @@ class ParquetAsset(_FilePathDataAsset):
         return {"datetimeRebaseMode", "int96RebaseMode", "mergeSchema"}
 
 
-# This list is to make sure that the asset_types and assets are always in sync
-# New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple
+# New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
+# and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
 _SPARK_FILE_PATH_ASSET_TYPES = (
     CSVAsset,
     DirectoryCSVAsset,
     ParquetAsset,
 )
-_SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[_SPARK_FILE_PATH_ASSET_TYPES]  # type: ignore[valid-type]
+_SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[CSVAsset, DirectoryCSVAsset, ParquetAsset]
+# Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
+# tuple so that the appropriate directory related methods are called.
 _SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
 
 
