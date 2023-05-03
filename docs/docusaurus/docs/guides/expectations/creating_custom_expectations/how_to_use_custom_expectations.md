@@ -16,9 +16,11 @@ As such, they are not available for use from the core library, and require regis
 
 This guide will walk you through the process of utilizing Custom Expectations, whether they were built by you or came from the Great Expectations Experimental Library.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Created a <TechnicalTag tag="custom_expectation" text="Custom Expectation"/> ***or*** identified a Custom Expectation for use from the [Great Expectations Experimental Library](https://github.com/great-expectations/great_expectations/tree/develop/contrib/experimental/great_expectations_experimental/expectations)
+- A <TechnicalTag tag="custom_expectation" text="Custom Expectation"/> ***or*** identified a Custom Expectation for use from the [Great Expectations Experimental Library](https://github.com/great-expectations/great_expectations/tree/develop/contrib/experimental/great_expectations_experimental/expectations)
 
 </Prerequisites>
 

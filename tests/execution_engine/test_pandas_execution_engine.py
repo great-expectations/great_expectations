@@ -8,7 +8,7 @@ import pytest
 # noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.compatibility import google
+from great_expectations.compatibility import azure, google
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import (
@@ -513,6 +513,10 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 
 # noinspection PyUnusedLocal
+@pytest.mark.skipif(
+    not azure.storage,
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
+)
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )
@@ -530,6 +534,10 @@ def test_constructor_with_azure_options(mock_azure_conn):
     assert engine.config.get("azure_options")["account_url"] == "my_account_url"
 
 
+@pytest.mark.skipif(
+    not azure.storage,
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
+)
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )

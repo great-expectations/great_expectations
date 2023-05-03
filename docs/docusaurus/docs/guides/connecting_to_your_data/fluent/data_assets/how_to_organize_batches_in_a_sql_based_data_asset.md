@@ -26,8 +26,6 @@ import TipFilesystemDatasourceNestedSourceDataFolders from '/docs/components/con
 <!-- ## Next steps -->
 import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
 
-## Introduction
-
 In this guide we will demonstrate the ways in which Batches can be organized in a SQL-based Data Asset.  We will discuss how to use Splitters to divide the data in a table or query based on the contents of a provided field.  We will also show how to add Batch Sorters to a Data Asset in order to specify the order in which Batches are returned.
 
 ## Prerequisites
@@ -36,7 +34,6 @@ In this guide we will demonstrate the ways in which Batches can be organized in 
 
 - A working installation of Great Expectations
 - A Data Asset in a SQL-based Datasource
-- A passion for data quality
 
 </Prerequisites>
 

@@ -20,8 +20,6 @@ import AbsBatchingRegexExample from '/docs/components/connect_to_data/cloud/_abs
 <!-- ## Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 
-## Introduction
-
 <Introduction execution_engine='Spark' />
 
 ## Prerequisites
@@ -30,7 +28,6 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 - <PrereqInstallGxWithDependencies />
 - Access to data in Azure Blob Storage
-- A passion for data quality
 
 </Prerequisites> 
 
