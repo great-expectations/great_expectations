@@ -309,12 +309,22 @@ stages:
         steps:
           - task: UsePythonVersion@0
             inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
 
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
             displayName: 'Install GX and required dependencies'
+
+          - script : |
+              echo cwd
+              wget https://dlcdn.apache.org/spark/spark-3.3.2/spark-3.3.2-bin-hadoop3.tgz
+              tar -xzf spark-3.3.2-bin-hadoop3.tgz
+              mkdir spark
+              mv spark-3.3.2-bin-hadoop3 spark
+              export SPARK_HOME=/home/sparkuser/spark
+              export PATH=$PATH:$SPARK_HOME/bin
+            displayName: download and install Spark 3.3.2
 
           # tests containing the name "RUNME_AWS" are run
           - script: |
