@@ -10,6 +10,7 @@ from great_expectations.core.async_executor import AsyncExecutor
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -487,10 +488,21 @@ class ActionListValidationOperator(ValidationOperator):
                     checkpoint_identifier=checkpoint_identifier,
                 )
 
+                # Transform action_result if it not a dictionary.
+                if isinstance(action_result, GXCloudResourceRef):
+                    transformed_result = {
+                        "id": action_result.id,
+                        "validation_result_url": action_result.response["data"][
+                            "attributes"
+                        ]["validation_result"]["display_url"],
+                    }
+                elif action_result is None:
+                    transformed_result = {}
+                else:
+                    transformed_result = action_result
+
                 # add action_result
-                batch_actions_results[action["name"]] = (
-                    {} if action_result is None else action_result
-                )
+                batch_actions_results[action["name"]] = transformed_result
                 batch_actions_results[action["name"]]["class"] = action["action"][
                     "class_name"
                 ]

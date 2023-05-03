@@ -3,6 +3,7 @@ import os
 
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import DataContextConfig
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 
 def make_retrieve_data_context_config_from_cloud(data_dir):
@@ -28,13 +29,33 @@ def make_store_get(data_file_name):
 
 
 def store_set(self, key, value, **kwargs):
-    url = os.environ["GX_CLOUD_BASE_URL"]
-    if not url.endswith("/"):
-        url += "/"
-    return {
-        "id": "2e13ecc3-eaaa-444b-b30d-2f616f80ae35",
-        "validation_result_url": f"{url}?validationResult=2e13ecc3-eaaa-444b-b30d-2f616f80ae35",
+    base_url = os.environ["GX_CLOUD_BASE_URL"]
+    if not base_url.endswith("/"):
+        base_url += "/"
+    url = (
+        base_url
+        + "organizations/"
+        + os.environ["GX_CLOUD_ORGANIZATION_ID"]
+        + "/validation-results"
+    )
+    # This is incomplete but has the necessary info for the current tests.
+    validation_result_json = {
+        "data": {
+            "attributes": {
+                "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
+                "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                "validation_result": {
+                    "display_url": f"{base_url}?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35",
+                },
+            }
+        }
     }
+    return GXCloudResourceRef(
+        resource_type=GXCloudRESTResource.VALIDATION_RESULT,
+        id="2e13ecc3-eaaa-444b-b30d-2f616f80ae35",
+        url=url,
+        response_json=validation_result_json,
+    )
 
 
 def list_keys(self, prefix: Tuple = ()):

@@ -4770,7 +4770,7 @@ def test_use_validation_url_from_cloud(fake_cloud_context):
     )
     assert (
         checkpoint_result.validation_result_url
-        == "https://my_cloud_backend.com/?validationResult=2e13ecc3-eaaa-444b-b30d-2f616f80ae35"
+        == "https://my_cloud_backend.com/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35"
     )
     print(checkpoint_result)
 

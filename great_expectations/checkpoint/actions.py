@@ -41,6 +41,7 @@ from great_expectations.exceptions import ClassInstantiationError, DataContextEr
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext, DataContext
+    from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 logger = logging.getLogger(__name__)
 
@@ -852,7 +853,7 @@ class StoreValidationResultAction(ValidationAction):
         self,
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
-    ) -> None:
+    ) -> Optional[GXCloudResourceRef]:
         super().__init__(data_context)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
@@ -903,8 +904,11 @@ class StoreValidationResultAction(ValidationAction):
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
         if self._using_cloud_context:
-            validation_result_suite_identifier.id = store_set_return_value["id"]
+            store_set_return_value: GXCloudResourceRef
+            new_ge_cloud_id = store_set_return_value.id
+            validation_result_suite_identifier.id = new_ge_cloud_id
             return store_set_return_value
+
         return None
 
 

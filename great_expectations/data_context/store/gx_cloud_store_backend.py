@@ -14,6 +14,7 @@ from great_expectations.data_context.cloud_constants import (
     GXCloudRESTResource,
 )
 from great_expectations.data_context.store.store_backend import StoreBackend
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions import StoreBackendError, StoreBackendTransientError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
@@ -323,13 +324,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             raise ValueError(f'Invalid kwargs: {(", ").join(extra_kwargs)}')
         return None
 
-    # BDIRKS fix type. Not bool ever and return type should be some dict
     def _set(  # type: ignore[override]
         self,
         key: Tuple[GXCloudRESTResource, ...],
         value: Any,
         **kwargs: dict,
-    ) -> Dict[str, Any]:
+    ) -> Union[bool, GXCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
         resource = key[0]
         id: str = key[1]
@@ -339,6 +339,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
         if id or resource is GXCloudRESTResource.DATA_CONTEXT_VARIABLES:
+            # _update returns a bool
             return self._update(id=id, value=value)
 
         resource_type = self.ge_cloud_resource_type
@@ -367,21 +368,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             response.raise_for_status()
             response_json = response.json()
 
-            return_value = {
-                "id": response_json["data"]["id"],
-            }
-
-            # TODO: This method is responsible for posting to our cloud endpoint urls regardless of the payload.
-            #       We really shouldn't have parsing of specific return values in this method. Instead, we should
-            #       pass the response_json up the call stack so the object which knowledge of the payload and the
-            #       specifics of the response can parse out the appropriate fields. Only 1 of our cloud endpoints
-            #       return data for now (a result of StoreValidationResultAction), we parse it out here for now.
-            if "validation_result" in response_json["data"]["attributes"]:
-                return_value["validation_result_url"] = response_json["data"][
-                    "attributes"
-                ]["validation_result"]["display_url"]
-            return return_value
-
+            object_id = response_json["data"]["id"]
+            object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
+            return GXCloudResourceRef(
+                resource_type=resource_type,
+                id=object_id,
+                url=object_url,
+                response_json=response_json,
+            )
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
                 f"Unable to set object in GX Cloud Store Backend: {get_user_friendly_error_message(http_exc)}"
