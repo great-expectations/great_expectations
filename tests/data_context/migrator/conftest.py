@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
+from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuite, ExpectationSuiteValidationResult
 from great_expectations.data_context.data_context_variables import (
@@ -72,6 +73,9 @@ class StubConfigurationProvider:
         return config
 
 
+_ANONYMIZED_USAGE_STATS_CONFIG: Final = AnonymizedUsageStatisticsConfig(enabled=True)
+
+
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
@@ -81,7 +85,7 @@ class StubBaseDataContext:
         self,
         anonymized_usage_statistics_config: Optional[
             AnonymizedUsageStatisticsConfig
-        ] = AnonymizedUsageStatisticsConfig(enabled=True),
+        ] = _ANONYMIZED_USAGE_STATS_CONFIG,
         checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint",),
         expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
         profiler_names: Tuple[Optional[str]] = ("my_profiler",),

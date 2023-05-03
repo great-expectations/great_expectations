@@ -391,7 +391,7 @@ def test_validate_set_kwargs(
     store_backend = construct_ge_cloud_store_backend(
         GXCloudRESTResource.VALIDATION_RESULT
     )
-    store_backend.validate_set_kwargs(kwargs) == expected
+    assert store_backend.validate_set_kwargs(kwargs) == expected
 
 
 @pytest.mark.cloud
