@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import logging
 from typing import Any, Dict, List
 
@@ -18,6 +19,9 @@ from great_expectations.data_context.data_context.data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest as FluentBatchRequest,
+)
 from great_expectations.exceptions import CheckpointError
 from great_expectations.util import filter_properties_dict
 
@@ -41,7 +45,6 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
         "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
-        "action_list": [],
         "profilers": [],
         "action_list": [
             {
@@ -300,11 +303,11 @@ def expected_spark_query_output() -> str:
 
 
 def _add_expectations_and_checkpoint(
-    data_context: DataContext | EphemeralDataContext | FileDataContext,
+    data_context: DataContext | FileDataContext,
     checkpoint_config: dict,
     expectations_list: List[ExpectationConfiguration],
     dict_to_update_checkpoint: dict | None = None,
-) -> DataContext | EphemeralDataContext | FileDataContext:
+) -> DataContext | FileDataContext:
     """
     Helper method for adding Checkpoint and Expectations to DataContext.
 
@@ -3495,3 +3498,61 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         (4, "four"),
         (5, "five"),
     ]
+
+
+@pytest.mark.integration
+def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_fluent_batch_request_with_slice(
+    empty_data_context: AbstractDataContext,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+):
+    context = empty_data_context
+    expectation_suite_name = "metrics_exp"
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+    context.sources.add_pandas(name="pandas_datasource").add_dataframe_asset(
+        name="IN_MEMORY_DATA_ASSET",
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+    )
+
+    checkpoint_config_yml = """
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+run_name_template: "%Y-%m-foo-bar-template-test"
+batch_request:
+  datasource_name: pandas_datasource
+  data_asset_name: IN_MEMORY_DATA_ASSET
+  batch_slice: -1
+expectation_suite_name: None
+action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+runtime_configuration:
+  result_format:
+    result_format: COMPLETE
+"""
+
+    checkpoint_config = CheckpointConfig(**yaml.load(checkpoint_config_yml))
+
+    context.add_checkpoint(**checkpoint_config.to_json_dict())
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    expected_batch_request = {
+        "datasource_name": "pandas_datasource",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "batch_slice": -1,
+    }
+
+    assert result.checkpoint_config.batch_request == expected_batch_request

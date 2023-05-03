@@ -12,20 +12,18 @@ authors:
 * Support/Contact: https://yoururl.com
 :::
 
-### Introduction
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 Viverra nam libero justo laoreet. Hendrerit gravida rutrum quisque non. Mauris pellentesque pulvinar pellentesque
 habitant morbi. Sed enim ut sem viverra aliquet eget. A diam maecenas sed enim ut sem viverra aliquet eget.
 Non sodales neque sodales ut etiam sit amet nisl. Fermentum iaculis eu non diam.
 
 ### Technical background
-An quick overview (of couple of sentences) here.
 
-:::note Prerequisites
+Prerequisites
+
  - Req1 
  - Req2 
  - Req3
-:::
 
 Deeper and longer information goes here.
 

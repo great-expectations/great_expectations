@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import copy
 import logging
 import pickle
 import unittest
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 from unittest import mock
 
 import pytest
@@ -14,7 +16,7 @@ from great_expectations.core import (
     ExpectationSuiteValidationResult,
     ExpectationConfiguration,
 )
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations.datasource.fluent.batch_request import (
     BatchRequest as FluentBatchRequest,
 )
 from great_expectations.core.config_peer import ConfigOutputModes
@@ -33,7 +35,7 @@ from great_expectations.data_context.types.resource_identifiers import (
 )
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import (
-    filter_properties_dict,
+    deep_filter_properties_iterable,
 )
 from great_expectations.validator.validator import Validator
 
@@ -44,46 +46,6 @@ if TYPE_CHECKING:
 yaml = YAMLHandler()
 
 logger = logging.getLogger(__name__)
-
-
-@pytest.fixture
-def batch_request_as_dict() -> Dict[str, str]:
-    return {
-        "datasource_name": "my_pandas_filesystem_datasource",
-        "data_asset_name": "users",
-    }
-
-
-@pytest.fixture
-def fluent_batch_request(batch_request_as_dict: Dict[str, str]) -> FluentBatchRequest:
-    return FluentBatchRequest(
-        datasource_name=batch_request_as_dict["datasource_name"],
-        data_asset_name=batch_request_as_dict["data_asset_name"],
-    )
-
-
-@pytest.fixture
-def common_action_list() -> List[dict]:
-    return [
-        {
-            "name": "store_validation_result",
-            "action": {
-                "class_name": "StoreValidationResultAction",
-            },
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {
-                "class_name": "StoreEvaluationParametersAction",
-            },
-        },
-        {
-            "name": "update_data_docs",
-            "action": {
-                "class_name": "UpdateDataDocsAction",
-            },
-        },
-    ]
 
 
 @pytest.mark.integration
@@ -167,10 +129,10 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -298,10 +260,10 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -424,10 +386,10 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         yaml_config=yaml_config,
         name="airflow_users_node_3",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -513,10 +475,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         yaml_config=yaml_config,
         name="my_base_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -598,10 +560,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -663,7 +625,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 @pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
+    store_validation_result_action,
 ):
     data_context: FileDataContext = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
     checkpoint_name: str = "test_checkpoint_name"
@@ -674,12 +636,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
+            store_validation_result_action,
         ],
         validations=[
             {
@@ -1013,7 +970,6 @@ def test_newstyle_checkpoint_result_validations_include_rendered_content_data_co
 )
 def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_result_meta(
     titanic_data_context_with_fluent_pandas_datasources_stats_enabled_and_expectation_suite_with_one_expectation: FileDataContext,
-    common_action_list,
     checkpoint_config: CheckpointConfig,
     expected_validation_id: str,
 ) -> None:
@@ -1089,11 +1045,42 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_sql_asset_in_checkpoint_run_sqlalchemy(
+    titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+    sa,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request = {
+        "datasource_name": "my_sqlite_datasource",
+        "data_asset_name": "table_partitioned_by_date_column__A_query_asset_limit_5",
+    }
+
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+    )
+
+    result = checkpoint.run(validations=[{"batch_request": batch_request}])
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
 @mock.patch(
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 @pytest.mark.slow  # 1.31s
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_multi_validation(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_multi_validation_pandasdf_and_sparkdf(
     mock_emit,
     titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1155,6 +1142,46 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_multi_validation_batch_request_sql_asset_objects_in_validations_sqlalchemy(
+    titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+    sa,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request_0 = {
+        "datasource_name": "my_sqlite_datasource",
+        "data_asset_name": "table_partitioned_by_date_column__A_query_asset_limit_5",
+    }
+
+    batch_request_1 = {
+        "datasource_name": "my_sqlite_datasource",
+        "data_asset_name": "table_partitioned_by_date_column__A_query_asset_limit_10",
+    }
+
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+        validations=[
+            {"batch_request": batch_request_0},
+            {"batch_request": batch_request_1},
+        ],
+    )
+
+    result = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 2
+    assert result["success"]
+
+
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_batch_data_in_top_level_batch_request_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1198,6 +1225,69 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
         "datasource_name": "my_spark_dataframes_datasource",
         "data_asset_name": "my_dataframe_asset",
     }
+
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+    )
+
+    result = checkpoint.run(batch_request=batch_request)
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_top_level_batch_request_sqlalchemy(
+    titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+    sa,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: FluentBatchRequest = FluentBatchRequest(
+        datasource_name="my_sqlite_datasource",
+        data_asset_name="table_partitioned_by_date_column__A_query_asset_limit_5",
+    )
+
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+        batch_request=batch_request,
+    )
+
+    result = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_checkpoint_run_sqlalchemy(
+    titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+    sa,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: FluentBatchRequest = FluentBatchRequest(
+        datasource_name="my_sqlite_datasource",
+        data_asset_name="table_partitioned_by_date_column__A_query_asset_limit_5",
+    )
 
     checkpoint: Checkpoint = Checkpoint(
         name="my_checkpoint",
@@ -1285,6 +1375,42 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_batch_request_sql_asset_in_context_run_checkpoint_sqlalchemy(
+    titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+    sa,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request: FluentBatchRequest = FluentBatchRequest(
+        datasource_name="my_sqlite_datasource",
+        data_asset_name="table_partitioned_by_date_column__A_query_asset_limit_5",
+    )
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint", batch_request=batch_request
+    )
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_dataframe_in_context_run_checkpoint_pandasdf(
     titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
@@ -1333,6 +1459,43 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     batch_request: dict = {
         "datasource_name": "my_spark_dataframes_datasource",
         "data_asset_name": "my_dataframe_asset",
+    }
+
+    # add checkpoint config
+    checkpoint_config: dict = {
+        "class_name": "Checkpoint",
+        "name": "my_checkpoint",
+        "config_version": 1,
+        "run_name_template": "%Y-%M-foo-bar-template",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+
+    context.add_checkpoint(**checkpoint_config)
+
+    result = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        validations=[{"batch_request": batch_request}],
+    )
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_validations_batch_request_sql_asset_in_context_run_checkpoint_sqlalchemy(
+    titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+    sa,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request = {
+        "datasource_name": "my_sqlite_datasource",
+        "data_asset_name": "table_partitioned_by_date_column__A_query_asset_limit_5",
     }
 
     # add checkpoint config
@@ -2094,3 +2257,35 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_correct_validation_resu
         ]
         == 1
     )
+
+
+@pytest.mark.integration
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_single_runtime_batch_request_sql_asset_in_validations_sqlalchemy(
+    titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+    sa,
+):
+    context: FileDataContext = titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # create expectation suite
+    context.add_expectation_suite("my_expectation_suite")
+
+    batch_request = {
+        "datasource_name": "my_sqlite_datasource",
+        "data_asset_name": "table_partitioned_by_date_column__A_query_asset_limit_5",
+    }
+
+    checkpoint: Checkpoint = Checkpoint(
+        name="my_checkpoint",
+        data_context=context,
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template",
+        expectation_suite_name="my_expectation_suite",
+        action_list=common_action_list,
+        validations=[{"batch_request": batch_request}],
+    )
+
+    result = checkpoint.run()
+
+    assert len(context.validations_store.list_keys()) == 1
+    assert result["success"]

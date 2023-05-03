@@ -49,6 +49,7 @@ LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
 
+
 CSV_PATH = FLUENT_DATASOURCE_TEST_DIR.joinpath(
     pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
 )

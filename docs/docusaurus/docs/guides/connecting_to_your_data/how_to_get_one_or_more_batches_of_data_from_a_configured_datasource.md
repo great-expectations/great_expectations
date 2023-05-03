@@ -8,10 +8,12 @@ This guide will help you load a <TechnicalTag tag="batch" text="Batch" /> for va
 
 A <TechnicalTag tag="validator" text="Validator" /> knows how to <TechnicalTag tag="validation" text="Validate" /> a particular Batch of data on a particular <TechnicalTag tag="execution_engine" text="Execution Engine" /> against a particular <TechnicalTag tag="expectation_suite" text="Expectation Suite" />. In interactive mode, the Validator can store and update an Expectation Suite while conducting Data Discovery or Exploratory Data Analysis.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Configured and loaded a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
-- [Configured a Datasource and Data Connector](../../terms/datasource.md)
+- [A configured and loaded Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
+- [A configured Datasource and Data Connector](../../terms/datasource.md)
   
 </Prerequisites>
 
