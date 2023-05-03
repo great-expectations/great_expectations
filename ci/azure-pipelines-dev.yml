@@ -232,6 +232,7 @@ stages:
 
   - stage: runme_script_runner_tests
     dependsOn: scope_check
+    condition: or(ne(variables['SYSTEM.PULLREQUEST.ISFORK'], true), eq(variables.isManual, true))
     pool:
       vmImage: 'ubuntu-20.04'
 
