@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import pathlib
 import re
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
@@ -68,7 +69,7 @@ def file_get_unfiltered_batch_definition_list_fn(
 
 
 def make_directory_get_unfiltered_batch_definition_list_fn(
-    data_directory: str,
+    data_directory: str | pathlib.Path,
 ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
     def directory_get_unfiltered_batch_definition_list_fn(
         data_connector: FilePathDataConnector,
