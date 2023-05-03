@@ -11,7 +11,7 @@ cross_table_comparisons = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         util_script="tests/test_utils.py",
         backend_dependencies=[
-            BackendDependencies.MYSQL,
+            BackendDependencies.TRINO,
             BackendDependencies.POSTGRESQL,
         ],
     ),
