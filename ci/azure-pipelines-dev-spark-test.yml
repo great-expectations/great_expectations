@@ -231,7 +231,6 @@
 #            displayName: 'Import Great Expectations'
 stages:
   - stage: runme_script_runner_tests
-    dependsOn: scope_check
     pool:
       vmImage: 'ubuntu-20.04'
 
