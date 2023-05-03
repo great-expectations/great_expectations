@@ -70,7 +70,9 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
 def test_instantiation_via_url(sa):
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
     assert my_execution_engine.connection_string is None
@@ -93,7 +95,9 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     # 1. Create engine with sqlite db
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
     assert my_execution_engine.connection_string is None

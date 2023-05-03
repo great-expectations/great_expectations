@@ -455,7 +455,7 @@ def test_get_batch_data(test_df):
 def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     bucket, keys = test_s3_files_compressed
     path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_csv")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
@@ -470,7 +470,7 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
 def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     bucket, keys = test_s3_files_parquet
     path = [key for key in keys if key.endswith(".parquet")][0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)

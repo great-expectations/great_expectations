@@ -275,7 +275,9 @@ def test_get_batch_empty_splitter(
     # reader_options are needed to specify the fact that the first line of test file is the header
     test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
+            path=os.path.join(  # noqa: PTH118
+                test_folder_connection_path_csv, "test.csv"
+            ),
             reader_options={"header": True},
             splitter_method=None,
         )
@@ -292,7 +294,9 @@ def test_get_batch_empty_splitter_tsv(
     # reader_options are also needed to specify the separator (otherwise, comma will be used as the default separator)
     test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_tsv, "test.tsv"),
+            path=os.path.join(  # noqa: PTH118
+                test_folder_connection_path_tsv, "test.tsv"
+            ),
             reader_options={"header": True, "sep": "\t"},
             splitter_method=None,
         )
@@ -312,7 +316,9 @@ def test_get_batch_empty_splitter_parquet(
     # SparkDFExecutionEngine automatically determines the file type as well as the schema of the Parquet file.
     test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_parquet, "test.parquet"),
+            path=os.path.join(  # noqa: PTH118
+                test_folder_connection_path_parquet, "test.parquet"
+            ),
             splitter_method=None,
         )
     ).dataframe
@@ -338,7 +344,9 @@ def test_get_batch_with_split_on_whole_table_filesystem(
     # reader_method not configured because spark will configure own reader by default
     test_sparkdf = basic_spark_df_execution_engine.get_batch_data(
         PathBatchSpec(
-            path=os.path.join(test_folder_connection_path_csv, "test.csv"),
+            path=os.path.join(  # noqa: PTH118
+                test_folder_connection_path_csv, "test.csv"
+            ),
             splitter_method="_split_on_whole_table",
         )
     ).dataframe

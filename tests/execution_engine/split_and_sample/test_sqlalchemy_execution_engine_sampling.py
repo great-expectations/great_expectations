@@ -256,8 +256,8 @@ def test_sample_using_limit_builds_correct_query_where_clause_none(
 def test_sqlite_sample_using_limit(sa):
 
     csv_path: str = file_relative_path(
-        os.path.dirname(os.path.dirname(__file__)),
-        os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),  # noqa: PTH120
+        os.path.join(  # noqa: PTH118
             "test_sets",
             "taxi_yellow_tripdata_samples",
             "ten_trips_from_each_month",
