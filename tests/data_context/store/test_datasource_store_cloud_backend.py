@@ -20,7 +20,7 @@ from tests.data_context.conftest import MockResponse
 def test_datasource_store_set(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
     mocked_datasource_post_response: Callable[[], MockResponse],
@@ -47,11 +47,13 @@ def test_datasource_store_set(
     ):
 
         saved_datasource_config: DatasourceConfig = (
-            datasource_store_ge_cloud_backend.set(key=key, value=datasource_config)
+            datasource_store_ge_cloud_backend.set(
+                key=key, value=block_config_datasource_config
+            )
         )
 
     serializer = DictConfigSerializer(schema=datasourceConfigSchema)
-    expected_datasource_config = serializer.serialize(datasource_config)
+    expected_datasource_config = serializer.serialize(block_config_datasource_config)
 
     mock_post.assert_called_once_with(
         mock.ANY,  # requests.Session object
@@ -77,7 +79,7 @@ def test_datasource_store_set(
 def test_datasource_store_get_by_id(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
     """What does this test and why?
@@ -95,7 +97,7 @@ def test_datasource_store_get_by_id(
             {
                 "data": {
                     "id": id,
-                    "attributes": {"datasource_config": datasource_config},
+                    "attributes": {"datasource_config": block_config_datasource_config},
                 }
             },
             200,
@@ -119,7 +121,7 @@ def test_datasource_store_get_by_id(
 def test_datasource_store_get_by_name(
     ge_cloud_base_url: str,
     ge_cloud_organization_id: str,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     datasource_store_ge_cloud_backend: DatasourceStore,
 ) -> None:
     """What does this test and why?
@@ -136,7 +138,7 @@ def test_datasource_store_get_by_name(
             {
                 "data": {
                     "id": id,
-                    "attributes": {"datasource_config": datasource_config},
+                    "attributes": {"datasource_config": block_config_datasource_config},
                 }
             },
             200,

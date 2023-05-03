@@ -323,7 +323,8 @@ class _SourceFactories:
                 asset = asset_type(name=name, **kwargs)
                 self._add_asset(asset)
                 batch_request = asset.build_batch_request()
-                return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # got BatchRequest expected BatchRequestBase
+                # TODO: raise error if `_data_context` not set
+                return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
             _read_asset_factory.__signature__ = _merge_signatures(  # type: ignore[attr-defined]
                 _read_asset_factory, asset_type, exclude={"type"}
@@ -513,8 +514,9 @@ class _SourceFactories:
                 datasource_name,  # type:ignore[arg-type] # datasource_name is expected to be a str from assignment above
                 datasource_type,
             )
+            # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
+                datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # datasource_name is expected to be a str from assignment above
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
@@ -553,8 +555,9 @@ class _SourceFactories:
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
             )
+            # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
-                datasource_name=datasource_name  # type: ignore[arg-type] # expected str only
+                datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # expected str only
             )
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).

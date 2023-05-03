@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import datetime
 import decimal
+import json
 import logging
 import os
 import pathlib
@@ -29,10 +30,16 @@ from urllib.parse import urlparse
 import dateutil.parser
 import numpy as np
 import pandas as pd
+import pydantic
 from IPython import get_ipython
 from typing_extensions import TypeAlias
 
 from great_expectations import exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    SQLALCHEMY_NOT_IMPORTED,
+    LegacyRow,
+)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier
 from great_expectations.exceptions import InvalidExpectationConfigurationError
@@ -49,22 +56,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 try:
-    import pyspark
-    from pyspark.sql import SparkSession  # noqa: F401
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    SparkSession = None  # type: ignore[assignment,misc]
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
-
-try:
-    from pyspark.sql.types import StructType
-except ImportError:
-    StructType = None  # type: ignore[assignment,misc]
-
-
-try:
     from shapely.geometry import LineString, MultiPolygon, Point, Polygon
 except ImportError:
     Point = None
@@ -72,19 +63,8 @@ except ImportError:
     MultiPolygon = None
     LineString = None
 
-from great_expectations.optional_imports import (
-    SQLALCHEMY_NOT_IMPORTED,
-    sqlalchemy,
-    sqlalchemy_Connection,
-    sqlalchemy_TextClause,
-)
 
-try:
-    LegacyRow = sqlalchemy.engine.row.LegacyRow
-except (
-    ImportError,
-    AttributeError,
-):  # We need to catch an AttributeError since sqlalchemy>=2 does not have LegacyRow
+if not LegacyRow:
     LegacyRow = SQLALCHEMY_NOT_IMPORTED
 
 SCHEMAS = {
@@ -198,12 +178,17 @@ ToBool: TypeAlias = bool
 ToFloat: TypeAlias = Union[float, np.floating]
 ToInt: TypeAlias = Union[int, np.integer]
 ToStr: TypeAlias = Union[
-    str, bytes, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
+    str, bytes, slice, uuid.UUID, datetime.date, datetime.datetime, np.datetime64
 ]
 
 ToList: TypeAlias = Union[list, set, tuple, "npt.NDArray", pd.Index, pd.Series]
 ToDict: TypeAlias = Union[
-    dict, "CommentedMap", pd.DataFrame, SerializableDictDot, SerializableDotDict
+    dict,
+    "CommentedMap",
+    pd.DataFrame,
+    SerializableDictDot,
+    SerializableDotDict,
+    pydantic.BaseModel,
 ]
 
 JSONConvertable: TypeAlias = Union[
@@ -286,18 +271,8 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     Raises:
         TypeError: A non-JSON-serializable field was found.
     """
-    # If it's one of our types, we use our own conversion; this can move to full schema
-    # once nesting goes all the way down
-    from great_expectations.datasource.fluent.interfaces import (
-        BatchRequest as FluentBatchRequest,
-    )
-
-    if isinstance(data, FluentBatchRequest):
-        return {
-            "datasource_name": data.datasource_name,
-            "data_asset_name": data.data_asset_name,
-            "options": convert_to_json_serializable(data.options),
-        }
+    if isinstance(data, pydantic.BaseModel):
+        return json.loads(data.json())
 
     if isinstance(data, (SerializableDictDot, SerializableDotDict)):
         return data.to_json_dict()
@@ -352,6 +327,9 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if isinstance(data, bytes):
         return str(data)
 
+    if isinstance(data, slice):
+        return str(data)
+
     if isinstance(data, pathlib.PurePath):
         return str(data)
 
@@ -403,7 +381,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
     if isinstance(data, pd.DataFrame):
         return convert_to_json_serializable(data.to_dict(orient="records"))
 
-    if pyspark and isinstance(data, pyspark.sql.DataFrame):
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return convert_to_json_serializable(
@@ -415,7 +393,7 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return dict(data)
 
     # sqlalchemy text for SqlAlchemy 2 compatibility
-    if sqlalchemy_TextClause and isinstance(data, sqlalchemy_TextClause):
+    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
         return str(data)
 
     if isinstance(data, decimal.Decimal):
@@ -425,10 +403,10 @@ def convert_to_json_serializable(  # noqa: C901 - complexity 32
         return data.to_json_dict()
 
     # PySpark schema serialization
-    if StructType is not None and isinstance(data, StructType):
+    if pyspark.types and isinstance(data, pyspark.types.StructType):
         return dict(data.jsonValue())
 
-    if sqlalchemy_Connection and isinstance(data, sqlalchemy_Connection):
+    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
         # Connection is a module, which is non-serializable. Return module name instead.
         return "sqlalchemy.engine.base.Connection"
 
@@ -522,7 +500,7 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
         ]
         return
 
-    if pyspark and isinstance(data, pyspark.sql.DataFrame):
+    if pyspark.DataFrame and isinstance(data, pyspark.DataFrame):  # type: ignore[truthy-function]
         # using StackOverflow suggestion for converting pyspark df into dictionary
         # https://stackoverflow.com/questions/43679880/pyspark-dataframe-to-dictionary-columns-as-keys-and-list-of-column-values-ad-di
         return ensure_json_serializable(
@@ -538,17 +516,17 @@ def ensure_json_serializable(data):  # noqa: C901 - complexity 21
     if isinstance(data, RunIdentifier):
         return
 
-    if sqlalchemy_TextClause and isinstance(data, sqlalchemy_TextClause):
+    if sqlalchemy.TextClause and isinstance(data, sqlalchemy.TextClause):
         # TextClause is handled manually by convert_to_json_serializable()
         return
-    if sqlalchemy_Connection and isinstance(data, sqlalchemy_Connection):
+
+    if sqlalchemy.Connection and isinstance(data, sqlalchemy.Connection):
         # Connection module is handled manually by convert_to_json_serializable()
         return
 
-    else:
-        raise InvalidExpectationConfigurationError(
-            f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
-        )
+    raise InvalidExpectationConfigurationError(
+        f"{str(data)} is of type {type(data).__name__} which cannot be serialized to json"
+    )
 
 
 def substitute_all_strftime_format_strings(
@@ -805,7 +783,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 def get_or_create_spark_application(
     spark_config: Optional[Dict[str, str]] = None,
     force_reuse_spark_context: bool = True,
-) -> SparkSession:
+) -> pyspark.SparkSession:
     """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
@@ -831,7 +809,7 @@ def get_or_create_spark_application(
 
     spark_config.update({"spark.app.name": name})
 
-    spark_session: Optional[SparkSession] = get_or_create_spark_session(
+    spark_session: Optional[pyspark.SparkSession] = get_or_create_spark_session(
         spark_config=spark_config
     )
     if spark_session is None:
@@ -867,7 +845,7 @@ def get_or_create_spark_application(
 # noinspection PyPep8Naming
 def get_or_create_spark_session(
     spark_config: Optional[Dict[str, str]] = None,
-) -> SparkSession | None:
+) -> pyspark.SparkSession | None:
     """Obtains Spark session if it already exists; otherwise creates Spark session and returns it to caller.
 
     Due to the uniqueness of SparkContext per JVM, it is impossible to change SparkSession configuration dynamically.
@@ -882,14 +860,14 @@ def get_or_create_spark_session(
     Returns:
 
     """
-    spark_session: Optional[SparkSession]
+    spark_session: Optional[pyspark.SparkSession]
     try:
         if spark_config is None:
             spark_config = {}
         else:
             spark_config = copy.deepcopy(spark_config)
 
-        builder = SparkSession.builder
+        builder = pyspark.SparkSession.builder
 
         app_name: Optional[str] = spark_config.get("spark.app.name")
         if app_name:

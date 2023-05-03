@@ -26,7 +26,7 @@ from great_expectations.datasource.datasource_serializer import (
 from great_expectations.datasource.fluent.config import GxConfig
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import PathStr
+    from great_expectations.alias_types import JSONValues, PathStr
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context.store.datasource_store import (
         DatasourceStore,
@@ -128,6 +128,43 @@ class FileDataContext(SerializableDataContext):
         )
         return variables
 
+    def _save_project_config(self, _fds_datasource=None) -> None:
+        """
+        See parent 'AbstractDataContext._save_project_config()` for more information.
+
+        Explicitly override base class implementation to retain legacy behavior.
+        """
+        config_filepath = pathlib.Path(self.root_directory, self.GX_YML)
+
+        logger.debug(
+            f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
+        )
+
+        try:
+            with open(config_filepath, "w") as outfile:
+
+                fluent_datasources = self._synchronize_fluent_datasources()
+                if fluent_datasources:
+                    self.fluent_config.update_datasources(
+                        datasources=fluent_datasources
+                    )
+                    logger.info(
+                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
+                    )
+                    fluent_json_dict: dict[
+                        str, JSONValues
+                    ] = self.fluent_config._json_dict()
+                    fluent_json_dict = (
+                        self.fluent_config._exclude_name_fields_from_fluent_datasources(
+                            config=fluent_json_dict
+                        )
+                    )
+                    self.config._commented_map.update(fluent_json_dict)
+
+                self.config.to_yaml(outfile)
+        except PermissionError as e:
+            logger.warning(f"Could not save project config to disk: {e}")
+
     @classmethod
     def _load_file_backed_project_config(
         cls,
@@ -171,6 +208,7 @@ class FileDataContext(SerializableDataContext):
                 # attach the config_provider for each loaded datasource
                 for datasource in gx_config.datasources:
                     datasource._config_provider = config_provider
+                    datasource._data_context = self
 
                 return gx_config
             logger.info(f"no fluent config at {path_to_fluent_yaml.absolute()}")

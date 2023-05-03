@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import logging
 from typing import Any, Dict, List
 
@@ -18,6 +19,9 @@ from great_expectations.data_context.data_context.data_context import (
     AbstractDataContext,
 )
 from great_expectations.data_context.types.base import CheckpointConfig
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest as FluentBatchRequest,
+)
 from great_expectations.exceptions import CheckpointError
 from great_expectations.util import filter_properties_dict
 
@@ -41,7 +45,6 @@ def reference_checkpoint_config_for_unexpected_column_names() -> dict:
         "run_name_template": "%Y-%M-foo-bar-template-test",
         "expectation_suite_name": None,
         "batch_request": None,
-        "action_list": [],
         "profilers": [],
         "action_list": [
             {
@@ -300,11 +303,11 @@ def expected_spark_query_output() -> str:
 
 
 def _add_expectations_and_checkpoint(
-    data_context: DataContext | EphemeralDataContext | FileDataContext,
+    data_context: DataContext | FileDataContext,
     checkpoint_config: dict,
     expectations_list: List[ExpectationConfiguration],
     dict_to_update_checkpoint: dict | None = None,
-) -> DataContext | EphemeralDataContext | FileDataContext:
+) -> DataContext | FileDataContext:
     """
     Helper method for adding Checkpoint and Expectations to DataContext.
 
@@ -2086,6 +2089,63 @@ def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_ou
 
 
 @pytest.mark.integration
+def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_summary_output_limit_1(
+    in_memory_runtime_context: AbstractDataContext,
+    batch_request_for_spark_unexpected_rows_and_index: dict,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    expectation_config_expect_column_values_to_be_in_set: ExpectationConfiguration,
+    expected_unexpected_indices_output: list[dict[str, str | int]],
+):
+    """
+    What does this test?
+        - unexpected_index_column defined in Checkpoint only.
+        - SUMMARY output, which means we have `partial_unexpected_index_list` only
+        - 1 Expectations added to suite
+        - limit is 1 so we only get 1 output in the `partial_unexpected_index_list`
+    """
+    dict_to_update_checkpoint: dict = {
+        "result_format": {
+            "result_format": "SUMMARY",
+            "partial_unexpected_count": 1,
+            "unexpected_index_column_names": ["pk_1"],
+        }
+    }
+    context: DataContext = _add_expectations_and_checkpoint(
+        data_context=in_memory_runtime_context,
+        checkpoint_config=reference_checkpoint_config_for_unexpected_column_names,
+        expectations_list=[expectation_config_expect_column_values_to_be_in_set],
+        dict_to_update_checkpoint=dict_to_update_checkpoint,
+    )
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name="metrics_exp",
+        batch_request=batch_request_for_spark_unexpected_rows_and_index,
+    )
+    evrs: List[ExpectationSuiteValidationResult] = result.list_validation_results()
+
+    index_column_names: List[str] = evrs[0]["results"][0]["result"][
+        "unexpected_index_column_names"
+    ]
+    assert index_column_names == ["pk_1"]
+
+    first_result_full_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"].get(
+        "unexpected_index_list"
+    )
+    assert not first_result_full_list
+    first_result_partial_list: List[Dict[str, Any]] = evrs[0]["results"][0]["result"][
+        "partial_unexpected_index_list"
+    ]
+    assert first_result_partial_list == [
+        {
+            "animals": "giraffe",
+            "pk_1": 3,
+        }
+    ]
+    assert evrs[0]["results"][0]["result"].get("unexpected_index_query") is None
+
+
+@pytest.mark.integration
 def test_spark_result_format_in_checkpoint_pk_defined_one_expectation_basic_output(
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_spark_unexpected_rows_and_index: dict,
@@ -3438,3 +3498,61 @@ def test_pandas_result_format_in_checkpoint_one_multicolumn_map_expectation_comp
         (4, "four"),
         (5, "five"),
     ]
+
+
+@pytest.mark.integration
+def test_pandas_result_format_in_checkpoint_one_expectation_complete_output_fluent_batch_request_with_slice(
+    empty_data_context: AbstractDataContext,
+    reference_checkpoint_config_for_unexpected_column_names: dict,
+    pandas_animals_dataframe_for_unexpected_rows_and_index: pd.DataFrame,
+):
+    context = empty_data_context
+    expectation_suite_name = "metrics_exp"
+    context.add_expectation_suite(expectation_suite_name=expectation_suite_name)
+
+    context.sources.add_pandas(name="pandas_datasource").add_dataframe_asset(
+        name="IN_MEMORY_DATA_ASSET",
+        dataframe=pandas_animals_dataframe_for_unexpected_rows_and_index,
+    )
+
+    checkpoint_config_yml = """
+name: my_checkpoint
+config_version: 1
+class_name: Checkpoint
+run_name_template: "%Y-%m-foo-bar-template-test"
+batch_request:
+  datasource_name: pandas_datasource
+  data_asset_name: IN_MEMORY_DATA_ASSET
+  batch_slice: -1
+expectation_suite_name: None
+action_list:
+    - name: store_validation_result
+      action:
+        class_name: StoreValidationResultAction
+    - name: store_evaluation_params
+      action:
+        class_name: StoreEvaluationParametersAction
+    - name: update_data_docs
+      action:
+        class_name: UpdateDataDocsAction
+runtime_configuration:
+  result_format:
+    result_format: COMPLETE
+"""
+
+    checkpoint_config = CheckpointConfig(**yaml.load(checkpoint_config_yml))
+
+    context.add_checkpoint(**checkpoint_config.to_json_dict())
+
+    result: CheckpointResult = context.run_checkpoint(
+        checkpoint_name="my_checkpoint",
+        expectation_suite_name=expectation_suite_name,
+    )
+
+    expected_batch_request = {
+        "datasource_name": "pandas_datasource",
+        "data_asset_name": "IN_MEMORY_DATA_ASSET",
+        "batch_slice": -1,
+    }
+
+    assert result.checkpoint_config.batch_request == expected_batch_request

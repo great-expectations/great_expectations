@@ -3,9 +3,9 @@ from unittest import mock
 
 import pytest
 
+from great_expectations.compatibility import azure, google
 from great_expectations.core.config_substitutor import (
     _ConfigurationSubstitutor,
-    secretmanager,
 )
 
 
@@ -118,7 +118,7 @@ class MockedSecretManagerServiceClient:
 
 
 @pytest.mark.skipif(
-    secretmanager is None,
+    not google.secretmanager,
     reason="Could not import 'secretmanager' from google.cloud in data_context.util",
 )
 @pytest.mark.parametrize(
@@ -156,7 +156,7 @@ def test_substitute_value_from_gcp_secret_manager(
 ):
     with raises:
         with mock.patch(
-            "great_expectations.core.config_substitutor.secretmanager.SecretManagerServiceClient",
+            "great_expectations.core.config_substitutor.google.secretmanager.SecretManagerServiceClient",
             return_value=MockedSecretManagerServiceClient(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,
@@ -186,7 +186,8 @@ class MockedSecretClient:
 
 
 @mock.patch(
-    "great_expectations.core.config_substitutor.DefaultAzureCredential", new=object
+    "great_expectations.core.config_substitutor.azure.DefaultAzureCredential",
+    new=object,
 )
 @pytest.mark.parametrize(
     "input_value,secret_response,raises,expected",
@@ -219,12 +220,16 @@ class MockedSecretClient:
     ],
 )
 @pytest.mark.unit
+@pytest.mark.skipif(
+    not azure.storage,
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
+)
 def test_substitute_value_from_azure_keyvault(
     config_substitutor, input_value, secret_response, raises, expected
 ):
     with raises:
         with mock.patch(
-            "great_expectations.core.config_substitutor.SecretClient",
+            "great_expectations.core.config_substitutor.azure.SecretClient",
             return_value=MockedSecretClient(secret_response),
         ):
             # As we're testing the secret store and not the actual substitution logic,

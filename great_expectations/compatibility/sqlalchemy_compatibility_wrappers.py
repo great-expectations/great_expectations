@@ -6,22 +6,9 @@ from typing import Callable, Iterator, Sequence
 
 import pandas as pd
 
+from great_expectations.compatibility import sqlalchemy
+
 logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy as sa  # noqa: TID251
-    from sqlalchemy import Table  # noqa: TID251
-    from sqlalchemy.engine import reflection  # noqa: TID251
-    from sqlalchemy.sql import Select  # noqa: TID251
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    reflection = None
-    Table = None
-    Select = None
 
 
 def read_sql_table_as_df(
@@ -60,7 +47,7 @@ def read_sql_table_as_df(
         chunksize: If specified, returns an iterator where `chunksize` is the number of
             rows to include in each chunk.
     """
-    if isinstance(con, sa.engine.Engine):
+    if sqlalchemy.Engine and isinstance(con, sqlalchemy.Engine):
         con = con.connect()
     with warnings.catch_warnings():
         warnings.filterwarnings(action="ignore", category=DeprecationWarning)
@@ -124,7 +111,7 @@ def add_dataframe_to_db(
                 * 'multi': Pass multiple values in a single ``INSERT`` clause.
                 * callable with signature ``(pd_table, conn, keys, data_iter)``.
     """
-    if isinstance(con, sa.engine.Engine):
+    if sqlalchemy.Engine and isinstance(con, sqlalchemy.Engine):
         con = con.connect()
     with warnings.catch_warnings():
         # Note that RemovedIn20Warning is the warning class that we see from sqlalchemy

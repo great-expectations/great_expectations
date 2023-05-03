@@ -16,15 +16,12 @@ import DataContextVerifyContents from '/docs/components/setup/data_context/_data
 
 import AdmonitionConvertToFileContext from '/docs/components/setup/data_context/_admonition_convert_to_file_context.md'
 
-## Introduction
-
 A <TechnicalTag tag="data_context" text="Data Context" /> contains the configurations for <TechnicalTag tag="expectation" text="Expectations" />, <TechnicalTag tag="store" text="Metadata Stores" />, <TechnicalTag tag="data_docs" text="Data Docs" />, <TechnicalTag tag="checkpoint" text="Checkpoints" />, and all things related to working with Great Expectations.  This guide will demonstrate how to instantiate an existing Filesystem Data Context so that you can continue working with previously defined GX configurations.
 
 ## Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- A passion for data quality
 
 </Prerequisites>
 
@@ -74,13 +71,15 @@ If you are content with the default configuration of your Data Context, you can 
 
 ### Related guides
 
+- To initialize and instantiate a temporary Data Context, see: [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
+
 <!-- TODO
 To instantiate an existing Data Context, reference:
 - How to quickly instantiate a Data Context
 - How to instantiate a specific Filesystem Data Context
 
 To initialize and instantiate a temporary Data Context, see:
-- How to explicitly instantiate an in-memory Ephemeral Data Context
+- How to instantiate an in-memory Ephemeral Data Context
 -->
 
 <!-- TODO

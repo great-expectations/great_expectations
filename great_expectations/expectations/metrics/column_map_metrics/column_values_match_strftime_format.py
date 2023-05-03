@@ -1,10 +1,11 @@
 from datetime import datetime
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -54,5 +55,5 @@ class ColumnValuesMatchStrftimeFormat(ColumnMapMetricProvider):
             except ValueError:
                 return False
 
-        success_udf = F.udf(is_parseable_by_format, sparktypes.BooleanType())
+        success_udf = F.udf(is_parseable_by_format, pyspark.types.BooleanType())
         return success_udf(column)

@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 import pydantic
 from typing_extensions import Final, Literal
 
+from great_expectations.compatibility import azure
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
@@ -25,16 +26,6 @@ from great_expectations.datasource.fluent.spark_datasource import (
 
 logger = logging.getLogger(__name__)
 
-
-ABS_IMPORTED = False
-try:
-    from azure.storage.blob import (
-        BlobServiceClient,  # noqa: disable=E0602
-    )
-
-    ABS_IMPORTED = True
-except ImportError:
-    pass
 
 _MISSING: Final = object()
 
@@ -62,10 +53,12 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
     azure_options: Dict[str, Union[ConfigStr, Any]] = {}
 
     _account_name: str = pydantic.PrivateAttr(default="")
-    _azure_client: Union[BlobServiceClient, None] = pydantic.PrivateAttr(default=None)
+    _azure_client: Union[azure.BlobServiceClient, None] = pydantic.PrivateAttr(
+        default=None
+    )
 
-    def _get_azure_client(self) -> BlobServiceClient:
-        azure_client: Union[BlobServiceClient, None] = self._azure_client
+    def _get_azure_client(self) -> azure.BlobServiceClient:
+        azure_client: Union[azure.BlobServiceClient, None] = self._azure_client
         if not azure_client:
             # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
             # use in authentication (but not both). If the format or content of the provided keys is invalid,
@@ -78,7 +71,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                 )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if ABS_IMPORTED:
+            if azure.BlobServiceClient:
                 try:
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr] # re.search could return None
@@ -86,7 +79,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                         ).group(
                             1
                         )
-                        azure_client = BlobServiceClient.from_connection_string(
+                        azure_client = azure.BlobServiceClient.from_connection_string(
                             **self.azure_options
                         )
                     elif account_url is not None:
@@ -96,7 +89,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
                         ).group(
                             1
                         )
-                        azure_client = BlobServiceClient(**self.azure_options)
+                        azure_client = azure.BlobServiceClient(**self.azure_options)
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                     raise SparkAzureBlobStorageDatasourceError(

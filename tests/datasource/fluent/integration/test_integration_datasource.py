@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import pathlib
 
+import pydantic
 import pytest
 
 from great_expectations.checkpoint import SimpleCheckpoint
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import (
+    BatchRequest,
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
 )
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.interfaces import (
-    BatchRequest,
     DataAsset,
     Datasource,
     TestConnectionError,
@@ -364,27 +365,34 @@ def test_splitter(
 
 
 @pytest.mark.integration
-def test_checkpoint_run(empty_data_context):
-    context = empty_data_context
-    path = pathlib.Path(
-        __file__,
-        "..",
-        "..",
-        "..",
-        "..",
-        "test_sets",
-        "taxi_yellow_tripdata_samples",
-        "yellow_tripdata_sample_2019-02.csv",
-    ).resolve(strict=True)
-    csv_asset = context.sources.pandas_default.add_csv_asset("my_csv_asset", path)
-    batch_request = csv_asset.build_batch_request()
+def test_simple_checkpoint_run(
+    datasource_test_data: tuple[
+        AbstractDataContext, Datasource, DataAsset, BatchRequest
+    ]
+):
+    context, datasource, data_asset, batch_request = datasource_test_data
     expectation_suite_name = "my_expectation_suite"
     context.add_expectation_suite(expectation_suite_name)
+
     checkpoint = SimpleCheckpoint(
         "my_checkpoint",
         data_context=context,
         expectation_suite_name=expectation_suite_name,
         batch_request=batch_request,
+    )
+    result = checkpoint.run()
+    assert result["success"]
+    assert result["checkpoint_config"]["class_name"] == "Checkpoint"
+
+    checkpoint = SimpleCheckpoint(
+        "my_checkpoint",
+        data_context=context,
+        validations=[
+            {
+                "expectation_suite_name": expectation_suite_name,
+                "batch_request": batch_request,
+            }
+        ],
     )
     result = checkpoint.run()
     assert result["success"]
@@ -455,3 +463,43 @@ def test_asset_specified_metadata(
     assert len(batches) == 1
     # Update the batch_metadata from the request with the metadata inherited from the asset
     assert batches[0].metadata == {**asset_specified_metadata, "year": 2019, "month": 2}
+
+
+@pytest.mark.integration
+def test_batch_request_error_messages(
+    datasource_test_data: tuple[
+        AbstractDataContext, Datasource, DataAsset, BatchRequest
+    ]
+) -> None:
+    _, _, _, batch_request = datasource_test_data
+    # DataAsset.build_batch_request() infers datasource_name and data_asset_name
+    # which have already been confirmed as functional via test_connection() methods.
+    with pytest.raises(TypeError):
+        batch_request.datasource_name = "untested_datasource_name"
+
+    with pytest.raises(TypeError):
+        batch_request.data_asset_name = "untested_data_asset_name"
+
+    # options can be added/updated if they take the correct form
+    batch_request.options["new_option"] = 42
+    assert "new_option" in batch_request.options
+
+    with pytest.raises(pydantic.ValidationError):
+        batch_request.options = {10: "value for non-string key"}  # type: ignore[dict-item]
+
+    with pytest.raises(pydantic.ValidationError):
+        batch_request.options = "not a dictionary"  # type: ignore[assignment]
+
+    # batch_slice can be updated if it takes the correct form
+    batch_request.batch_slice = "[5:10]"  # type: ignore[assignment]
+    assert batch_request.batch_slice == slice(5, 10, None)
+
+    # batch_slice can be updated via update method
+    batch_request.update_batch_slice("[2:10:2]")
+    assert batch_request.batch_slice == slice(2, 10, 2)
+
+    with pytest.raises(ValueError):
+        batch_request.batch_slice = "nonsense slice"  # type: ignore[assignment]
+
+    with pytest.raises(ValueError):
+        batch_request.batch_slice = True  # type: ignore[assignment]

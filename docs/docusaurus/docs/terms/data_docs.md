@@ -12,6 +12,10 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 ## Overview
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+
 ### Definition
 
 Data Docs are human readable documentation generated from Great Expectations metadata detailing <TechnicalTag relative="../" tag="expectation" text="Expectations" />, <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, etc.

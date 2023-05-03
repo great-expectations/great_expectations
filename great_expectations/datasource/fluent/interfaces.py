@@ -5,15 +5,18 @@ import dataclasses
 import functools
 import logging
 import uuid
+import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
     Any,
     Callable,
     ClassVar,
     Dict,
     Generic,
     List,
+    Mapping,
     MutableMapping,
     MutableSequence,
     Optional,
@@ -26,7 +29,13 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictInt,
+    root_validator,
+    validate_arguments,
+)
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
@@ -41,6 +50,8 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    MappingIntStrAny = Mapping[Union[int, str], Any]
+    AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
     #  Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import (
@@ -50,42 +61,23 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import AbstractDataContext as GXDataContext
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
     from great_expectations.datasource.fluent.type_lookup import TypeLookup
-
-try:
-    import pyspark
-    from pyspark.sql import Row as pyspark_sql_Row
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    pyspark_sql_Row = None  # type: ignore[assignment,misc]
-    logger.debug("No spark sql dataframe module available.")
 
 
 class TestConnectionError(Exception):
     pass
 
 
-# BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants as returned. The keys represent dimensions one can slice the data along
-# and the values are the realized. If a value is None or unspecified, the batch_request
-# will capture all data along this dimension. For example, if we have a year and month
-# splitter, and we want to query all months in the year 2020, the batch request options
-# would look like:
-#   options = { "year": 2020 }
-BatchRequestOptions: TypeAlias = Dict[str, Any]
+class GxSerializationWarning(UserWarning):
+    pass
 
 
 BatchMetadata: TypeAlias = Dict[str, Any]
-
-
-@dataclasses.dataclass(frozen=True)
-class BatchRequest:
-    datasource_name: str
-    data_asset_name: str
-    options: BatchRequestOptions
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -208,14 +200,18 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError
 
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
+            options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -406,7 +402,7 @@ class Datasource(
     assets: MutableSequence[_DataAssetT] = []
 
     # private attrs
-    _data_context: GXDataContext = pydantic.PrivateAttr()
+    _data_context: Union[GXDataContext, None] = pydantic.PrivateAttr(None)
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
     _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
@@ -524,6 +520,8 @@ class Datasource(
         asset: _DataAssetT
         self.assets = list(filter(lambda asset: asset.name != asset_name, self.assets))
 
+        self._save_context_project_config()
+
     def _add_asset(
         self, asset: _DataAssetT, connect_options: dict | None = None
     ) -> _DataAssetT:
@@ -550,7 +548,16 @@ class Datasource(
 
         self.assets.append(asset)
 
+        self._save_context_project_config()
         return asset
+
+    def _save_context_project_config(self):
+        """Check if a DataContext is available and save the project config."""
+        if self._data_context:
+            try:
+                self._data_context._save_project_config(self)
+            except TypeError as type_err:
+                warnings.warn(str(type_err), GxSerializationWarning)
 
     @staticmethod
     def parse_order_by_sorters(
@@ -675,11 +682,13 @@ class Batch(FluentBaseModel):
             BatchDefinition,
             BatchMarkers,
         )
+        from great_expectations.datasource.fluent import BatchRequest
 
         super().update_forward_refs(
             BatchData=BatchData,
             BatchDefinition=BatchDefinition,
             BatchMarkers=BatchMarkers,
+            BatchRequest=BatchRequest,
         )
 
     @validate_arguments

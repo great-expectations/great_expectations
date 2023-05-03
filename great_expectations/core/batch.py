@@ -1,13 +1,15 @@
 from __future__ import annotations
 
-import dataclasses
 import datetime
 import json
 import logging
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Type, Union
 
+import pandas as pd
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
+from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.core.id_dict import BatchKwargs, BatchSpec, IDDict
 from great_expectations.core.util import convert_to_json_serializable
@@ -25,29 +27,10 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
-
-try:
-    import pyspark
-    from pyspark.sql import DataFrame as SparkDataFrame
-except ImportError:
-    pyspark = None
-    SparkDataFrame = None
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
-
 
 def _get_fluent_batch_request_class() -> Type[FluentBatchRequest]:
     """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.datasource.fluent.interfaces"
+    module_name = "great_expectations.datasource.fluent.batch_request"
     class_name = "BatchRequest"
     return load_class(class_name=class_name, module_name=module_name)
 
@@ -665,7 +648,10 @@ class BatchData:
         return pd.DataFrame({})
 
 
-BatchDataType = Union[BatchData, pd.DataFrame, SparkDataFrame]
+if pyspark:
+    BatchDataType = Union[BatchData, pd.DataFrame, pyspark.DataFrame]
+else:
+    BatchDataType = Union[BatchData, pd.DataFrame]
 
 
 # TODO: <Alex>This module needs to be cleaned up.
@@ -877,7 +863,19 @@ class Batch(SerializableDictDot):
 
 def materialize_batch_request(
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-) -> Optional[BatchRequestBase]:
+) -> Optional[FluentBatchRequest | BatchRequestBase]:
+    def _is_fluent_batch_request(args: dict[str, Any]) -> bool:
+        from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
+
+        return (
+            ("datasource_name" in args)
+            and ("data_asset_name" in args)
+            and (
+                ("data_connector_name" not in args)
+                or (args["data_connector_name"].lower() == _DATA_CONNECTOR_NAME)
+            )
+        )
+
     effective_batch_request: dict = get_batch_request_as_dict(
         batch_request=batch_request
     )
@@ -886,7 +884,7 @@ def materialize_batch_request(
         return None
 
     batch_request_class: type
-    if "options" in effective_batch_request:
+    if _is_fluent_batch_request(args=effective_batch_request):
         batch_request_class = _get_fluent_batch_request_class()
     elif batch_request_contains_runtime_parameters(
         batch_request=effective_batch_request
@@ -927,7 +925,7 @@ def get_batch_request_as_dict(
         batch_request = batch_request.to_dict()
 
     if isinstance(batch_request, _get_fluent_batch_request_class()):
-        batch_request = dataclasses.asdict(batch_request)
+        batch_request = batch_request.dict()
 
     return batch_request
 

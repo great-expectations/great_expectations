@@ -14,6 +14,7 @@ import json
 import os
 import pathlib
 import shutil
+import sys
 from typing import TYPE_CHECKING, Union
 
 import invoke
@@ -131,7 +132,10 @@ def lint(
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run code linter"""
+    """Run formatter (black) and linter (ruff)"""
+    fmt(ctx, path, check=not fix, pty=pty)
+
+    # Run code linter (ruff)
     cmds = ["ruff", path]
     if fix:
         cmds.append("--fix")
@@ -219,6 +223,7 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         " stub files in `great_expectations`."
         " By default `mypy` will not check implementation files if a `.pyi` stub file exists."
         " This should be run in CI in addition to the normal type-checking step.",
+        "python-version": "Type check as if running a specific python version. Default 3.8",
     },
 )
 def type_check(
@@ -232,6 +237,7 @@ def type_check(
     report: bool = False,
     check_stub_sources: bool = False,
     ci: bool = False,
+    python_version: str = "3.8",
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -251,6 +257,7 @@ def type_check(
             report=report,
             check_stub_sources=check_stub_sources,
             ci=False,
+            python_version=python_version,
         )
         return  # don't run twice
 
@@ -293,6 +300,8 @@ def type_check(
         cmds.extend(["--pretty"])
     if warn_unused_ignores:
         cmds.extend(["--warn-unused-ignores"])
+    if python_version:
+        cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -504,6 +513,7 @@ def type_schema(
 
     from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
+        BatchRequest,
         Datasource,
     )
     from great_expectations.datasource.fluent.sources import (
@@ -525,10 +535,13 @@ def type_schema(
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    for name, model in [
+    name_model = [
+        ("BatchRequest", BatchRequest),
         (Datasource.__name__, Datasource),
         *_iter_all_registered_types(),
-    ]:
+    ]
+
+    for name, model in name_model:
         if issubclass(model, Datasource):
             datasource_dir = schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)
@@ -600,8 +613,16 @@ def docs(ctx):
     doc_builder.build_docs()
 
 
-@invoke.task(name="public-api")
-def public_api_task(ctx):
+@invoke.task(
+    name="public-api",
+    help={
+        "write_to_file": "Write items to be addressed to public_api_report.txt, default False",
+    },
+)
+def public_api_task(
+    ctx: Context,
+    write_to_file: bool = False,
+):
     """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
 
     repo_root = pathlib.Path(__file__).parent
@@ -610,7 +631,11 @@ def public_api_task(ctx):
         task_name="public-api", correct_dir=repo_root
     )
 
-    public_api_report.main()
+    # Docs folder is not reachable from install of Great Expectations
+    api_docs_dir = repo_root / "docs" / "sphinx_api_docs_source"
+    sys.path.append(str(api_docs_dir.resolve()))
+
+    public_api_report.generate_public_api_report(write_to_file=write_to_file)
 
 
 def _exit_with_error_if_not_run_from_correct_dir(

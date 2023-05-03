@@ -9,6 +9,9 @@ keywords: [Great Expectations, Data Context, Filesystem, ABS, Azure Blob Storage
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 <!-- ## Prerequisites -->
 import PrereqAbsConfiguredAnAbsAccount from '/docs/components/prerequisites/_abs_configured_an_azure_storage_account_and_kept_connection_string.md'
@@ -37,8 +40,6 @@ import AbsConfigureCredentialsInDataContext from '/docs/components/setup/depende
 <!-- ## Next steps -->
 import AbsFurtherConfiguration from '/docs/components/setup/next_steps/_links_for_adding_azure_blob_storage_configurations_to_data_context.md'
 
-## Introduction
-
 This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with data stored in Azure Blob Storage.
 
 ## Prerequisites
@@ -47,7 +48,6 @@ This guide will walk you through best practices for creating your GX Python envi
 
 - The ability to install Python modules with pip
 - <PrereqAbsConfiguredAnAbsAccount />
-- A passion for data quality
 
 </Prerequisites>
 

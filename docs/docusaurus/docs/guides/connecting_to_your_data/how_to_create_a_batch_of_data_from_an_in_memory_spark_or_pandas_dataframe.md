@@ -23,13 +23,15 @@ What used to be called a “Batch” in the old API was replaced with <Technical
 
 <TabItem value='spark'>
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
-- [Initialized a Data Context](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python)
-- Configured a [Spark Datasource](../../guides/connecting_to_your_data/filesystem/spark.md)
-- Identified an in-memory Spark DataFrame that you would like to use as the data to validate **OR**
-- Identified a filesystem or S3 path to a file that contains the data you would like to use to validate.
+- [A working Great Expectations deployment](/docs/guides/setup/setup_overview)
+- [An initialized Data Context](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python)
+- [A configured Spark Datasource](../../guides/connecting_to_your_data/filesystem/spark.md)
+- An in-memory Spark DataFrame to use as the data to validate **OR**
+- A file system or S3 path to a file that contains the data to validate.
   
 </Prerequisites>
 
@@ -47,7 +49,7 @@ What used to be called a “Batch” in the old API was replaced with <Technical
     ```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_context"
     ```
 
-    If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.), load an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
+    If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.), load an in-code Data Context using these instructions: [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 
 2. **Obtain an Expectation Suite**
    
@@ -142,7 +144,7 @@ What used to be called a “Batch” in the old API was replaced with <Technical
     ```python name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_pandas_dataframe.py get_context"
     ```
    
-    If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.), load an in-code Data Context using these instructions: [How to instantiate a Data Context without a yml file](../../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
+    If you are working in an environment without easy access to a local filesystem (e.g. AWS Spark EMR, Databricks, etc.), load an in-code Data Context using these instructions: [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
 
 2. **Obtain an Expectation Suite**
     If you have not already created an Expectation Suite, you can do so now.

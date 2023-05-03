@@ -30,10 +30,7 @@ run_name_template: "%Y-%m-foo-bar-template-$VAR"
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: -1
     expectation_suite_name: users.warning
     action_list:
         - name: store_validation_result
@@ -66,10 +63,7 @@ run_name_template: "%Y-%m-foo-bar-template-$VAR"
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: -1
     expectation_suite_name: users.warning
     action_list:
         - name: store_validation_result
@@ -137,25 +131,17 @@ action_list:
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: 0
     expectation_suite_name: users.warning
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_special_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: -1
     expectation_suite_name: users.error
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_other_data_connector
       data_asset_name: users
-      data_connector_query:
-        batch_filter_parameters:
-          name: Titanic
+      options:
+        name: Titanic
     action_list:
       - name: quarantine_failed_data
         action:

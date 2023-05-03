@@ -14,8 +14,6 @@ import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
 <!--- ### 2. Verify the content of the Data Context -->
 import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
 
-## Introduction
-
 A <TechnicalTag tag="data_context" text="Data Context" /> will be required in almost all Python scripts utilizing GX, and will be implemented behind the scenes when using GX's <TechnicalTag tag="cli" text="CLI" />.
 
 This guide will demonstrate how to initialize, instantiate, and verify the contents of a Filesystem Data Context from through Python code.
@@ -23,8 +21,6 @@ This guide will demonstrate how to initialize, instantiate, and verify the conte
 ## Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
-
-- A passion for data quality
 
 </Prerequisites>
 
@@ -80,16 +76,14 @@ If you are content with the default configuration of your Data Context, you can 
 
 ### Related guides
 
-To initialize a Filesystem Data Context from the terminal, please see:
-- [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli)
+To initialize a Filesystem Data Context from the terminal, please see: [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli).
 
+To initialize and instantiate a temporary Data Context, see: [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 <!-- TODO
 To instantiate an existing Data Context, reference:
 - How to quickly instantiate a Data Context
 - How to instantiate a specific Filesystem Data Context
 
-To initialize and instantiate a temporary Data Context, see:
-- How to explicitly instantiate an in-memory Ephemeral Data Context
 -->
 
 <!-- TODO
