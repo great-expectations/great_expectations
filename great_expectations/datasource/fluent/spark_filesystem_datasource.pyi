@@ -20,9 +20,9 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
         DirectoryCSVAsset,
-        ParquetAsset,
         ORCAsset,
-)
+        ParquetAsset,
+    )
 
 logger: Logger
 
