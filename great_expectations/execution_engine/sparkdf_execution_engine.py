@@ -197,12 +197,6 @@ class SparkDFExecutionEngine(ExecutionEngine):
         if spark_config is None:
             spark_config = {}
 
-        print(
-            f"\n[ALEX_TEST] [SparkDFExecutionEngine.__INIT__()] FORCE_REUSE_SPARK_CONTEXT:\n{force_reuse_spark_context} ; TYPE: {str(type(force_reuse_spark_context))}"
-        )
-        print(
-            f"\n[ALEX_TEST] [SparkDFExecutionEngine.__INIT__()] SPARK_CONFIG:\n{spark_config} ; TYPE: {str(type(spark_config))}"
-        )
         spark: pyspark.SparkSession = get_or_create_spark_application(
             spark_config=spark_config,
             force_reuse_spark_context=force_reuse_spark_context,
