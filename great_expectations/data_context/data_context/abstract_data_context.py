@@ -165,6 +165,9 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequestOptions,
+    )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -2644,6 +2647,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -2681,6 +2685,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             splitter_method: The method used to split the Data Asset into Batches
             splitter_kwargs: Arguments for the splitting method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
+            batch_request_options: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
@@ -2714,6 +2719,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
+            batch_request_options=batch_request_options,
             **kwargs,
         )
 
@@ -2738,6 +2744,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         batch_request = get_batch_request_from_acceptable_arguments(
@@ -2760,6 +2767,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
+            batch_request_options=batch_request_options,
             **kwargs,
         )
         datasource_name = batch_request.datasource_name
