@@ -599,7 +599,7 @@ def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
 ):
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
-        basic_spark_df_execution_engine.get_batch_data(
+        _ = basic_spark_df_execution_engine.get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_sparkdf,
                 splitter_method="_split_on_hashed_column",
