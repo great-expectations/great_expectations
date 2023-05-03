@@ -444,18 +444,18 @@ def list_gcs_keys(
     # Manually set to appropriate default if not already set by user
     delimiter = query_options["delimiter"]
     if delimiter is None and not recursive:
-        # warnings.warn(
-        #     'In order to access blobs with a ConfiguredAssetGCSDataConnector, \
-        #     the delimiter that has been passed to gcs_options in your config cannot be empty; \
-        #     please note that the value is being set to the default "/" in order to work with the Google SDK.'
-        # )
+        warnings.warn(
+            'In order to access blobs with a ConfiguredAssetGCSDataConnector, \
+            the delimiter that has been passed to gcs_options in your config cannot be empty; \
+            please note that the value is being set to the default "/" in order to work with the Google SDK.'
+        )
         query_options["delimiter"] = "/"
     elif delimiter is not None and recursive:
-        # warnings.warn(
-        #     "In order to access blobs with an InferredAssetGCSDataConnector, \
-        #     the delimiter that has been passed to gcs_options in your config must be empty; \
-        #     please note that the value is being set to None in order to work with the Google SDK."
-        # )
+        warnings.warn(
+            "In order to access blobs with an InferredAssetGCSDataConnector, \
+            the delimiter that has been passed to gcs_options in your config must be empty; \
+            please note that the value is being set to None in order to work with the Google SDK."
+        )
         query_options["delimiter"] = None
 
     keys: List[str] = []
