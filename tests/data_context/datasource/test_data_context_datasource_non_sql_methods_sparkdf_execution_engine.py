@@ -235,7 +235,7 @@ data_connectors:
         **config,
     )
 
-    test_df: pyspark.sql.dataframe.DataFrame = (  # noqa: F821
+    test_df: pyspark.sql.dataframe.DataFrame = (
         spark_session.createDataFrame(
             data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
         )
