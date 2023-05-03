@@ -98,6 +98,7 @@ class ORCAsset(_FilePathDataAsset):
     def _get_reader_options_include(self) -> set[str] | None:
         return {"merge_schema"}
 
+
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -105,8 +106,11 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     CSVAsset,
     DirectoryCSVAsset,
     ParquetAsset,
+    ORCAsset,
 )
-_SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[CSVAsset, DirectoryCSVAsset, ParquetAsset]
+_SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
+    CSVAsset, DirectoryCSVAsset, ParquetAsset, ORCAsset
+]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
 _SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
