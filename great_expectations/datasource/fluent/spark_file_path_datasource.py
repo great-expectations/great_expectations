@@ -78,7 +78,7 @@ class CSVAsset(_SparkGenericFilePathAsset):
     sampling_ratio: float = Field(1.0, alias="samplingRatio")
     empty_value: str = Field(alias="emptyValue")
     locale: str
-    lineSep: str = Field(alias="lineSep")
+    line_sep: str = Field(alias="lineSep")
     unescaped_quote_handling: Literal[
         "STOP_AT_CLOSING_QUOTE",
         "BACK_TO_DELIMITER",
