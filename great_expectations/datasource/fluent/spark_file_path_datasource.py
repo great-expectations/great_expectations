@@ -40,7 +40,7 @@ class _SparkGenericFilePathAsset(_FilePathDataAsset):
 
 
 class CSVAsset(_SparkGenericFilePathAsset):
-    # The options below are available for parquet as of spark v3.4.0
+    # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
     type: Literal["csv"] = "csv"
     delimiter: str
@@ -171,7 +171,7 @@ class DirectoryCSVAsset(CSVAsset):
 
 class ParquetAsset(_SparkGenericFilePathAsset):
     type: Literal["parquet"] = "parquet"
-    # The options below are available for parquet as of spark v3.4.0
+    # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
     datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(
         alias="datetimeRebaseMode"
@@ -201,7 +201,7 @@ class ParquetAsset(_SparkGenericFilePathAsset):
 
 
 class ORCAsset(_SparkGenericFilePathAsset):
-    # The options below are available for parquet as of spark v3.4.0
+    # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
     type: Literal["orc"] = "orc"
     merge_schema: bool = Field(False, alias="mergeSchema")
@@ -299,7 +299,7 @@ class JSONAsset(_SparkGenericFilePathAsset):
 
 
 class TextAsset(_SparkGenericFilePathAsset):
-    # The options below are available for parquet as of spark v3.4.0
+    # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
     type: Literal["text"] = "text"
     wholetext: bool = Field(False)
@@ -320,6 +320,44 @@ class TextAsset(_SparkGenericFilePathAsset):
         return super()._get_reader_options_include().union({"wholetext", "lineSep"})
 
 
+class AvroAsset(_FilePathDataAsset):
+    # Note: AvroAsset does not support generic options, so it does not inherit from _SparkGenericFilePathAsset
+    # The options below are available as of spark v3.4.0
+    # See https://spark.apache.org/docs/latest/sql-data-sources-avro.html for more info.
+    type: Literal["avro"] = "avro"
+    avro_schema: str = Field(None, alias="avroSchema")
+    ignore_extension: bool = Field(True, alias="ignoreExtension")
+    datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(
+        alias="datetimeRebaseMode"
+    )
+    positional_field_matching: bool = Field(False, alias="positionalFieldMatching")
+
+    class Config:
+        extra = pydantic.Extra.forbid
+        allow_population_by_field_name = True
+
+    def _get_reader_method(self) -> str:
+        return self.type
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-avro.html for more info.
+        """
+        return (
+            super()
+            ._get_reader_options_include()
+            .union(
+                {
+                    "avroSchema",
+                    "ignoreExtension",
+                    "datetimeRebaseMode",
+                    "positionalFieldMatching",
+                }
+            )
+        )
+
+
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -330,9 +368,10 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     ORCAsset,
     JSONAsset,
     TextAsset,
+    AvroAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
-    CSVAsset, DirectoryCSVAsset, ParquetAsset, ORCAsset, JSONAsset, TextAsset
+    CSVAsset, DirectoryCSVAsset, ParquetAsset, ORCAsset, JSONAsset, TextAsset, AvroAsset
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
