@@ -344,18 +344,36 @@ class AvroAsset(_FilePathDataAsset):
 
         See https://spark.apache.org/docs/latest/sql-data-sources-avro.html for more info.
         """
-        return (
-            super()
-            ._get_reader_options_include()
-            .union(
-                {
-                    "avroSchema",
-                    "ignoreExtension",
-                    "datetimeRebaseMode",
-                    "positionalFieldMatching",
-                }
-            )
-        )
+        return {
+            "avroSchema",
+            "ignoreExtension",
+            "datetimeRebaseMode",
+            "positionalFieldMatching",
+        }
+
+
+class BinaryFileAsset(_FilePathDataAsset):
+    # Note: BinaryFileAsset does not support generic options, so it does not inherit from _SparkGenericFilePathAsset
+    # The options below are available as of spark v3.4.0
+    # See https://spark.apache.org/docs/latest/sql-data-sources-binaryFile.html for more info.
+    type: Literal["binary_file"] = "binary_file"
+    path_glob_filter: str = Field(alias="pathGlobFilter")
+
+    class Config:
+        extra = pydantic.Extra.forbid
+        allow_population_by_field_name = True
+
+    def _get_reader_method(self) -> str:
+        return self.type
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-binaryFile.html for more info.
+        """
+        return {
+            "pathGlobFilter",
+        }
 
 
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
@@ -369,9 +387,17 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     JSONAsset,
     TextAsset,
     AvroAsset,
+    BinaryFileAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
-    CSVAsset, DirectoryCSVAsset, ParquetAsset, ORCAsset, JSONAsset, TextAsset, AvroAsset
+    CSVAsset,
+    DirectoryCSVAsset,
+    ParquetAsset,
+    ORCAsset,
+    JSONAsset,
+    TextAsset,
+    AvroAsset,
+    BinaryFileAsset,
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
