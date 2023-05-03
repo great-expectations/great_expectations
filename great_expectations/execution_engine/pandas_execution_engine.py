@@ -234,7 +234,7 @@ class PandasExecutionEngine(ExecutionEngine):
                     if inferred_compression_param is not None:
                         reader_options["compression"] = inferred_compression_param
                 if s3_engine:
-                    s3_object = s3_engine.get_object(
+                    s3_object: dict = s3_engine.get_object(
                         Bucket=s3_url.bucket, Key=s3_url.key
                     )
             except (aws.ParamValidationError, aws.ClientError) as error:
