@@ -40,10 +40,52 @@ class _SparkGenericFilePathAsset(_FilePathDataAsset):
 
 
 class CSVAsset(_SparkGenericFilePathAsset):
-    # Overridden inherited instance fields
+    # The options below are available for parquet as of spark v3.4.0
+    # See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
     type: Literal["csv"] = "csv"
+    delimiter: str
+    sep: str
+    encoding: str = Field("UTF-8")
+    quote: str = Field('"')
+    escape: str
+    comment: str
     header: bool = False
-    infer_schema: bool = Field(False, alias="InferSchema")
+    infer_schema: bool = Field(False, alias="inferSchema")
+    prefer_date: bool = Field(True, alias="preferDate")
+    enforce_schema: bool = Field(True, alias="enforceSchema")
+    ignore_leading_white_space: bool = Field(False, alias="ignoreLeadingWhiteSpace")
+    ignore_trailing_white_space: bool = Field(False, alias="ignoreTrailingWhiteSpace")
+    null_value: str = Field(alias="nullValue")
+    nan_value: str = Field(alias="nanValue")
+    positive_inf: str = Field(alias="positiveInf")
+    negative_inf: str = Field(alias="negativeInf")
+    date_format: str = Field("yyyy-MM-dd", alias="dateFormat")
+    timestamp_format: str = Field(
+        "yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]", alias="timestampFormat"
+    )
+    timestamp_ntz_format: str = Field(
+        "yyyy-MM-dd'T'HH:mm:ss[.SSS]", alias="timestampNTZFormat"
+    )
+    enable_date_time_parsing_fallback: bool = Field(
+        alias="enableDateTimeParsingFallback"
+    )
+    max_columns: int = Field(20480, alias="maxColumns")
+    max_chars_per_column: int = Field(-1, alias="maxCharsPerColumn")
+    mode: Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"] = Field("PERMISSIVE")
+    column_name_of_corrupt_record: str = Field(alias="columnNameOfCorruptRecord")
+    multi_line: bool = Field(False, alias="multiLine")
+    char_to_escape_quote_escaping: str = Field(alias="charToEscapeQuoteEscaping")
+    sampling_ratio: float = Field(1.0, alias="samplingRatio")
+    empty_value: str = Field(alias="emptyValue")
+    locale: str
+    lineSep: str = Field(alias="lineSep")
+    unescaped_quote_handling: Literal[
+        "STOP_AT_CLOSING_QUOTE",
+        "BACK_TO_DELIMITER",
+        "STOP_AT_DELIMITER",
+        "SKIP_VALUE",
+        "RAISE_ERROR",
+    ] = Field("STOP_AT_DELIMITER", alias="unescapedQuoteHandling")
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -53,15 +95,55 @@ class CSVAsset(_SparkGenericFilePathAsset):
         return self.type
 
     def _get_reader_options_include(self) -> set[str] | None:
-        return super()._get_reader_options_include().union({"header", "infer_schema"})
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
+        """
+        return (
+            super()
+            ._get_reader_options_include()
+            .union(
+                {
+                    "delimiter",
+                    "sep",
+                    "encoding",
+                    "quote",
+                    "escape",
+                    "comment",
+                    "header",
+                    "inferSchema",
+                    "preferDate",
+                    "enforceSchema",
+                    "ignoreLeadingWhiteSpace",
+                    "ignoreTrailingWhiteSpace",
+                    "nullValue",
+                    "nanValue",
+                    "positiveInf",
+                    "negativeInf",
+                    "dateFormat",
+                    "timestampFormat",
+                    "timestampNTZFormat",
+                    "enableDateTimeParsingFallback",
+                    "maxColumns",
+                    "maxCharsPerColumn",
+                    "mode",
+                    "columnNameOfCorruptRecord",
+                    "multiLine",
+                    "charToEscapeQuoteEscaping",
+                    "samplingRatio",
+                    "emptyValue",
+                    "locale",
+                    "lineSep",
+                    "unescapedQuoteHandling",
+                }
+            )
+        )
 
 
-class DirectoryCSVAsset(_SparkGenericFilePathAsset):
+class DirectoryCSVAsset(CSVAsset):
     # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"
     data_directory: pathlib.Path
-    header: bool = False
-    infer_schema: bool = Field(False, alias="InferSchema")
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -72,10 +154,18 @@ class DirectoryCSVAsset(_SparkGenericFilePathAsset):
         return self.type.replace("directory_", "")
 
     def _get_reader_options_include(self) -> set[str] | None:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
+        """
         return (
             super()
             ._get_reader_options_include()
-            .union({"data_directory", "header", "infer_schema"})
+            .union(
+                {
+                    "data_directory",
+                }
+            )
         )
 
 
@@ -111,7 +201,8 @@ class ParquetAsset(_SparkGenericFilePathAsset):
 
 
 class ORCAsset(_SparkGenericFilePathAsset):
-    # Overridden inherited instance fields
+    # The options below are available for parquet as of spark v3.4.0
+    # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
     type: Literal["orc"] = "orc"
     merge_schema: bool = Field(False, alias="mergeSchema")
 
