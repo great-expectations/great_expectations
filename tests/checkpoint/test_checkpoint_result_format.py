@@ -1485,7 +1485,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_o
 
 
 @pytest.mark.integration
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(  # noqa: F811
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1522,7 +1522,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.integration
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(  # noqa: F811
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_summary_output_limit_1(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1554,7 +1554,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.integration
-def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(  # noqa: F811
+def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_expectation_complete_output_incorrect_column(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1587,7 +1587,7 @@ def test_pandas_result_format_not_in_checkpoint_passed_into_run_checkpoint_one_e
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(  # noqa: F811
+def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_output(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -1643,7 +1643,7 @@ def test_pandas_result_format_in_checkpoint_pk_defined_two_expectation_complete_
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(  # noqa: F811
+def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_summary_output(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -2543,7 +2543,7 @@ def test_spark_complete_output_no_id_pk_fallback(
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(  # noqa: F811
+def test_pandas_result_format_in_checkpoint_pk_defined_one_expectation_complete_output_partial_unexpected_count_1(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     batch_request_for_pandas_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
@@ -2851,7 +2851,7 @@ def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set
 
 
 @pytest.mark.integration
-def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set(  # noqa: F811
+def test_pandas_result_format_in_checkpoint_named_index_two_index_column_not_set(  # noqa: F811 # TODO: review test for duplication
     in_memory_runtime_context: AbstractDataContext,
     pandas_animals_dataframe_for_unexpected_rows_and_index: dict,
     reference_checkpoint_config_for_unexpected_column_names: dict,
