@@ -52,7 +52,7 @@ class DirectoryCSVAsset(_FilePathDataAsset):
         # Reader method is still "csv"
         return self.type.replace("directory_", "")
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         return {"data_directory", "header", "infer_schema"}
 
 
