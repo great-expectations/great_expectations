@@ -4,7 +4,6 @@ from collections import OrderedDict
 
 import pytest
 
-import great_expectations as gx
 from great_expectations.core.config_provider import _ConfigurationSubstitutor
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.data_context.file_data_context import (
@@ -35,12 +34,16 @@ def empty_data_context_with_config_variables(monkeypatch, empty_data_context):
         __file__,
         "../test_fixtures/great_expectations_basic_with_variables.yml",
     )
-    shutil.copy(ge_config_path, os.path.join(root_dir, "great_expectations.yml"))
+    shutil.copy(
+        ge_config_path, os.path.join(root_dir, "great_expectations.yml")  # noqa: PTH118
+    )
     config_variables_path = file_relative_path(
         __file__,
         "../test_fixtures/config_variables.yml",
     )
-    shutil.copy(config_variables_path, os.path.join(root_dir, "uncommitted"))
+    shutil.copy(
+        config_variables_path, os.path.join(root_dir, "uncommitted")  # noqa: PTH118
+    )
     return get_context(context_root_dir=root_dir)
 
 
@@ -68,8 +71,8 @@ def test_substituted_config_variables_not_written_to_file(tmp_path_factory):
     # with substitution variables
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
 
     create_data_context_files(
         context_path,
@@ -112,8 +115,8 @@ def test_runtime_environment_are_used_preferentially(tmp_path_factory, monkeypat
     runtime_environment = {"replace_me": value_from_runtime_override}
 
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     create_data_context_files(
         context_path,
         asset_config_path,
@@ -191,7 +194,7 @@ def test_substitute_config_variable():
     )
     assert (
         config_substitutor.substitute_config_variable(None, config_variables_dict)
-        == None
+        is None
     )
 
     # Test with mixed case
