@@ -83,6 +83,7 @@ def test_add_csv_asset_to_datasource(
     assert m1 is not None
 
 
+# TODO: Add missing tests
 # TODO: Parametrize with all asset types
 @pytest.mark.unit
 def test_add_parquet_asset_to_datasource(
@@ -100,6 +101,34 @@ def test_add_parquet_asset_to_datasource(
     assert asset.datetime_rebase_mode == "EXCEPTION"
     assert asset.int_96_rebase_mode == "CORRECTED"
     assert asset.merge_schema is False
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "add_method_name,add_method_params",
+    [
+        pytest.param(
+            "add_csv_asset",
+            {
+                "ignore_corrupt_files": True,
+                "ignore_missing_files": True,
+                "path_glob_filter": "some_str",
+            },
+            id="csv",
+        )
+    ],
+)
+def test_add_asset_with_asset_specific_params(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+    add_method_name: str,
+    add_method_params: dict[str, str | bool | int | float],
+):
+    asset = getattr(spark_filesystem_datasource, add_method_name)(
+        name="asset_name", **add_method_params
+    )
+    assert asset.name == "asset_name"
+    for param, value in add_method_params.items():
+        assert getattr(asset, param) == value
 
 
 @pytest.mark.unit
