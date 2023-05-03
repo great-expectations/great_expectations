@@ -46,7 +46,7 @@ import VerifySuccessfulGxInstallation from '@site/docs/guides/setup/installation
 
 <!-- 1.3 Create your Data Context -->
 
-import CreateDataContextWithGetContext from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
+import CreateDataContextWithCreate from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
 <!-- 1.4 Configure your Expectations Store on Amazon S3 -->
 
@@ -98,27 +98,27 @@ import AdditionalDataDocsNotes from '@site/docs/guides/setup/configuring_data_do
 
 <!-- Part 2: Connect to data -->
 
-<!-- 2.1 Create your Data Context -->
+<!-- 2.1 Instantiate your project's Data Context -->
 
-import CreateDataContextWithGetContextAgain from '@site/docs/guides/setup/configuring_data_contexts/components_how_to_configure_a_new_data_context_with_the_cli/_initialize_data_context_with_get_context.mdx'
+import CreateDataContextWithGetCreateAgain from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_initialize_data_context_with_create.mdx'
 
 <!-- 2.2 Add Datasource to your DataContext -->
 
-import ConfigureYourDatasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_configure_your_datasource.mdx'
+import ConfigureYourDatasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_configure_your_datasource.mdx'
 
 <!-- 2.3 Add CSV Asset to your Datasource -->
 
-import SaveDatasourceConfigurationToDataContext from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_add_csv_asset_to_pandas_s3_datasource.mdx'
+import AddCSVAssetToS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_csv_asset_to_pandas_s3_datasource.mdx'
 
-<!-- 2.4 Test your new Datasource by building a BatchRequest from Asset -->
+<!-- 2.4 Test your new Datasource -->
 
-import TestS3Datasource from '@site/docs/guides/connecting_to_your_data/cloud/s3/components_pandas/_test_your_new_datasource.mdx'
+import TestS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_test_your_new_datasource.mdx'
 
 <!-- Part 3: Create Expectations -->
 
 <!-- 3.1 Prepare a Batch Request, Empty Expectation Suite, and Validator -->
 
-import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_expectation_suite_batch_request_validator_prepare_or_reuse.md'
+import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_expectation_suite_and_validator_for_fluent_datasource.mdx'
 
 <!-- 3.2: Use a Validator to add Expectations to the Expectation Suite -->
 
@@ -194,7 +194,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <VerifySuccessfulGxInstallation />
 
 ### 1.3 Create your Data Context
-<CreateDataContextWithGetContext />
+<CreateDataContextWithGetCreate />
 
 ### 1.4 Configure your Expectations Store on Amazon S3
 
@@ -241,15 +241,18 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 ## Part 2: Connect to data
 
 ### 2.1 Instantiate your project's DataContext
-<CreateDataContextWithGetContextAgain />
+<CreateDataContextWithGetCreateAgain />
 
 If you have already instantiated your `DataContext` in a previous step, this step can be skipped. 
 
-### 2.2 Add CSV Asset to your Datasource 
+### 2.2 Add Datasource to your DataContext
 <ConfigureYourDatasource />
 
-### 2.3 Test your new Datasource by building a BatchRequest from Asset 
-<SaveDatasourceConfigurationToDataContext />
+### 2.2 Add CSV Asset to your Datasource 
+<AddCSVAssetToS3Datasource />
+
+### 2.3 Test your new Datasource 
+<TestS3Datasource />
 
 ## Part 3: Create Expectations
 
