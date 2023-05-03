@@ -172,7 +172,11 @@ class TupleStoreBackend(StoreBackend, metaclass=ABCMeta):
                 for i in range(len(indexed_string_substitutions))
             ]
             intermediate_filepath_regex = re.sub(
-                r"{\d+}", lambda m, r=iter(tuple_index_list): next(r), filepath_template
+                r"{\d+}",
+                lambda m, r=iter(  # noqa: B008 # function-call-in-default-argument
+                    tuple_index_list
+                ): next(r),
+                filepath_template,
             )
             filepath_regex = intermediate_filepath_regex.format(*tuple_index_list)
 
@@ -1020,7 +1024,7 @@ class TupleAzureBlobStoreBackend(TupleStoreBackend):
         self.account_url = account_url or os.environ.get("AZURE_STORAGE_ACCOUNT_URL")
 
     @property
-    @functools.lru_cache()
+    @functools.lru_cache()  # noqa: B019 # lru_cache on method
     def _container_client(self) -> Any:
         from great_expectations.compatibility import azure
 

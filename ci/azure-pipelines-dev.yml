@@ -154,6 +154,8 @@ stages:
       - script: |
           python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
+        name: InstallDependencies
+      - script: |
           invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
       - script: |
@@ -251,6 +253,10 @@ stages:
           - script: |
               pytest -v --no-sqlalchemy --docs-tests -m integration -k "RUNME" tests/integration/test_script_runner.py
             displayName: 'Run Flagged Tests'
+            env:
+              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
+              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
+              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
       - job: runme_script_runner_tests_postgres
 
@@ -272,6 +278,34 @@ stages:
               pytest -v --postgresql --docs-tests -m integration -k "RUNME_POSTGRES" tests/integration/test_script_runner.py
             displayName: 'Run Flagged Tests'
 
+      - job: runme_script_runner_tests_gcs
+        steps:
+          - task: DownloadSecureFile@1
+            name: gcp_authkey
+            displayName: 'Download Google Service Account'
+            inputs:
+              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
+              retryCount: '2'
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
+        # includes explicit install of chardet, which was causing problems in the pipeline
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test, bigquery]" pytest-azurepipelines google-cloud-bigquery-storage "chardet==3.0.4"
+            displayName: 'Install GX and required dependencies'
+
+          # tests containing the name "RUNME_gcp" are run
+          - script: |
+              pytest -v --bigquery --docs-tests -m integration -k "RUNME_gcp" tests/integration/test_script_runner.py
+            displayName: 'Run Flagged Tests'
+            env:
+              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
+              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
+              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
+
       - job: runme_script_runner_tests_aws
         steps:
           - task: UsePythonVersion@0
@@ -280,7 +314,7 @@ stages:
             displayName: 'Use Python 3.7'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
             displayName: 'Install GX and required dependencies'
 
           # tests containing the name "RUNME_AWS" are run
@@ -291,8 +325,8 @@ stages:
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
               AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
               AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-      - job: runme_script_runner_tests_postgres_msysql
 
+      - job: runme_script_runner_tests_postgres_mysql
         services:
           postgres: postgres
           mysql: mysql
@@ -418,7 +452,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, postgresql, spark]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |

@@ -15,9 +15,11 @@ import SqlAlchemy2 from '/docs/components/warnings/_sql_alchemy2.md'
 This guide will help you connect to data in a MySQL database.
 This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Have access to data in a MySQL database
+- Access to data in a MySQL database
 
 </Prerequisites>
 

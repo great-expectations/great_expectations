@@ -6,9 +6,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 ``test_yaml_config`` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for <TechnicalTag relative="../../../" tag="datasource" text="Datasources" /> and <TechnicalTag relative="../../../" tag="store" text="Stores" />. For many deployments of Great Expectations, these components (plus <TechnicalTag relative="../../../" tag="expectation" text="Expectations" />) are the only ones you'll need.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- [A working Great Expectations deployment](/docs/guides/setup/setup_overview)
 
 </Prerequisites>
 

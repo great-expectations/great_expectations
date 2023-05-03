@@ -9,10 +9,10 @@ from great_expectations.compatibility import google
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import GCSUrl
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import BatchRequest
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -21,6 +21,13 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+if not google.storage:
+    pytest.skip(
+        'Could not import "storage" from google.cloud in configured_asset_gcs_data_connector.py',
+        allow_module_level=True,
+    )
 
 
 class MockGCSClient:
@@ -71,16 +78,6 @@ def test_basic_instantiation(mock_list_keys):
     ]
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
-
-    # Missing "data_asset_name" argument.
-    with pytest.raises(TypeError):
-        # noinspection PyArgumentList
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="something",
-                options={},
-            )
-        )
 
 
 @pytest.mark.integration

@@ -9,12 +9,14 @@ import warnings
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
+    AbstractSet,
     Any,
     Callable,
     ClassVar,
     Dict,
     Generic,
     List,
+    Mapping,
     MutableMapping,
     MutableSequence,
     Optional,
@@ -27,7 +29,13 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from pydantic import Field, StrictBool, StrictInt, root_validator, validate_arguments
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictInt,
+    root_validator,
+    validate_arguments,
+)
 from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
@@ -42,6 +50,8 @@ from great_expectations.validator.metrics_calculator import MetricsCalculator
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    MappingIntStrAny = Mapping[Union[int, str], Any]
+    AbstractSetIntStr = AbstractSet[Union[int, str]]
     # TODO: We should try to import the annotations from core.batch so we no longer need to call
     #  Batch.update_forward_refs() before instantiation.
     from great_expectations.core.batch import (
@@ -51,6 +61,8 @@ if TYPE_CHECKING:
     )
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import AbstractDataContext as GXDataContext
+    from great_expectations.datasource.data_connector.batch_filter import BatchSlice
+    from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -65,24 +77,7 @@ class GxSerializationWarning(UserWarning):
     pass
 
 
-# BatchRequestOptions is a dict that is composed into a BatchRequest that specifies the
-# Batches one wants as returned. The keys represent dimensions one can slice the data along
-# and the values are the realized. If a value is None or unspecified, the batch_request
-# will capture all data along this dimension. For example, if we have a year and month
-# splitter, and we want to query all months in the year 2020, the batch request options
-# would look like:
-#   options = { "year": 2020 }
-BatchRequestOptions: TypeAlias = Dict[str, Any]
-
-
 BatchMetadata: TypeAlias = Dict[str, Any]
-
-
-@dataclasses.dataclass(frozen=True)
-class BatchRequest:
-    datasource_name: str
-    data_asset_name: str
-    options: BatchRequestOptions = dataclasses.field(default_factory=dict)
 
 
 @pydantic_dc.dataclass(frozen=True)
@@ -205,14 +200,18 @@ class DataAsset(FluentBaseModel, Generic[_DatasourceT]):
         raise NotImplementedError
 
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
+            options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -683,11 +682,13 @@ class Batch(FluentBaseModel):
             BatchDefinition,
             BatchMarkers,
         )
+        from great_expectations.datasource.fluent import BatchRequest
 
         super().update_forward_refs(
             BatchData=BatchData,
             BatchDefinition=BatchDefinition,
             BatchMarkers=BatchMarkers,
+            BatchRequest=BatchRequest,
         )
 
     @validate_arguments
