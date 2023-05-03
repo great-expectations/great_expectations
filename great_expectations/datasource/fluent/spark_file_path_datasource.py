@@ -202,7 +202,7 @@ class ParquetAsset(_SparkGenericFilePathAsset):
 
 class ORCAsset(_SparkGenericFilePathAsset):
     # The options below are available for parquet as of spark v3.4.0
-    # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
+    # See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
     type: Literal["orc"] = "orc"
     merge_schema: bool = Field(False, alias="mergeSchema")
 
@@ -298,6 +298,28 @@ class JSONAsset(_SparkGenericFilePathAsset):
         )
 
 
+class TextAsset(_SparkGenericFilePathAsset):
+    # The options below are available for parquet as of spark v3.4.0
+    # See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
+    type: Literal["text"] = "text"
+    wholetext: bool = Field(False)
+    line_sep: str = Field(alias="lineSep")
+
+    class Config:
+        extra = pydantic.Extra.forbid
+        allow_population_by_field_name = True
+
+    def _get_reader_method(self) -> str:
+        return self.type
+
+    def _get_reader_options_include(self) -> set[str] | None:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
+        """
+        return super()._get_reader_options_include().union({"wholetext", "lineSep"})
+
+
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -307,9 +329,10 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     ParquetAsset,
     ORCAsset,
     JSONAsset,
+    TextAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
-    CSVAsset, DirectoryCSVAsset, ParquetAsset, ORCAsset, JSONAsset
+    CSVAsset, DirectoryCSVAsset, ParquetAsset, ORCAsset, JSONAsset, TextAsset
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
