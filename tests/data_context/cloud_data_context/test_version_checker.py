@@ -1,7 +1,6 @@
 import pytest
 import responses
 
-import great_expectations.data_context._version_checker as vc
 from great_expectations.data_context._version_checker import _VersionChecker
 
 # Set to some arbitrary value so tests will continue to work regardless of GX's actual version

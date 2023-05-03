@@ -275,7 +275,6 @@ extend-exclude = [
     "tests/checkpoint", # 15 warnings
     "tests/cli", # 34 warnings
     "tests/data_asset", # 10 warnings
-    "tests/data_context", # 127 warnings
     "tests/dataset", # 10 warnings
     "tests/execution_engine",  # 23 warnings
     "tests/expectations", # 56 warnings

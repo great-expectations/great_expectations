@@ -130,7 +130,7 @@ def test_test_yaml_config_usage_stats_class_name_not_provided(
     """
     with pytest.raises(Exception):
         # noinspection PyUnusedLocal
-        my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
+        empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 
