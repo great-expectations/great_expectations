@@ -203,7 +203,7 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
     ],
 )
 def test_get_batch_list_from_directory_one_batch(
-    path: str | pathlib.Path,
+    path: PathStr,
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
     """What does this test and why?
@@ -229,7 +229,7 @@ def test_get_batch_list_from_directory_one_batch(
     ],
 )
 def test_get_batch_list_from_directory_merges_files(
-    path: str | pathlib.Path,
+    path: PathStr,
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
     """What does this test and why?
