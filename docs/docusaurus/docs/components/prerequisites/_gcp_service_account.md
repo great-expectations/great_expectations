@@ -1,1 +1,1 @@
-<span>Configured a <a href='https://cloud.google.com/iam/docs/service-accounts'>Google Cloud Platform (GCP) service account</a> with credentials that can access GCP resources, which include Storage Objects.</span>
+<span>A <a href='https://cloud.google.com/iam/docs/service-accounts'>Google Cloud Platform (GCP) service account</a> with permissions to access GCP resources including Storage Objects.</span>

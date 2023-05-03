@@ -10,10 +10,12 @@ This guide will help you decide when you should use a single Batch and when it i
 
 By the end of this guide, you will know when it will be most beneficial to be working with a single Batch of data, when it will be most beneficial to be working with multiple Batches of data, and what you need to do in order to ensure your Datasource and Batch Request configurations permit returning multiple Batches or ensure the return of only one.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Understand the basics of Datasources](../../terms/datasource.md)
-- [Understand the basics of requesting data with a Batch Requests](./how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
+- [An understanding of Datasource basics](../../terms/datasource.md)
+- [An understanding of how to request data with a Batch Request](./how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 
 </Prerequisites>
 

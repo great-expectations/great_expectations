@@ -13,9 +13,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 This guide will help you connect to your data that is an in-memory Pandas dataframe.
 This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Have access to data in a Pandas dataframe
+- Access to data in a Pandas dataframe
 
 </Prerequisites>
 

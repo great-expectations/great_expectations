@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.compatibility import google
+from great_expectations.compatibility import azure, google
 from great_expectations.core.config_substitutor import (
     _ConfigurationSubstitutor,
 )
@@ -220,6 +220,10 @@ class MockedSecretClient:
     ],
 )
 @pytest.mark.unit
+@pytest.mark.skipif(
+    not azure.storage,
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
+)
 def test_substitute_value_from_azure_keyvault(
     config_substitutor, input_value, secret_response, raises, expected
 ):
