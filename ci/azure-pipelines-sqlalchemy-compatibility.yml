@@ -137,8 +137,8 @@ stages:
           # TODO: best way to test for sqlalchemy version compatibility and implement that here.
           - script: |
               # Run pytest
-              pytest --postgresql -m sqlalchemy_version_compatibility
-              pytest --postgresql -m unit
+              pytest -rs --postgresql -m sqlalchemy_version_compatibility
+              pytest -rs --postgresql -m unit
 
             displayName: 'pytest'
             env:
