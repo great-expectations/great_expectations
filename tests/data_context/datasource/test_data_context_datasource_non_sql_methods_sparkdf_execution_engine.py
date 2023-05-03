@@ -16,6 +16,7 @@ from great_expectations.validator.validator import Validator
 from tests.test_utils import create_files_in_directory
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility.pyspark import DataFrame
     from great_expectations.data_context import AbstractDataContext
 
 yaml = YAMLHandler()
@@ -235,10 +236,8 @@ data_connectors:
         **config,
     )
 
-    test_df: pyspark.sql.dataframe.DataFrame = (
-        spark_session.createDataFrame(
-            data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
-        )
+    test_df: DataFrame = spark_session.createDataFrame(
+        data=pd.DataFrame(data={"col1": [1, 2], "col2": [3, 4]})
     )
     data_connector_name: str = "test_runtime_data_connector"
     data_asset_name: str = "test_asset_1"
