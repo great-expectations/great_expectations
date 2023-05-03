@@ -91,7 +91,7 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     DirectoryCSVAsset,
     ParquetAsset,
 )
-_SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[_SPARK_FILE_PATH_ASSET_TYPES]
+_SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[_SPARK_FILE_PATH_ASSET_TYPES]  # type: ignore[valid-type]
 _SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
 
 
@@ -100,4 +100,4 @@ class _SparkFilePathDatasource(_SparkDatasource):
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _SPARK_FILE_PATH_ASSET_TYPES
 
     # instance attributes
-    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []  # type: ignore[assignment]
+    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []
