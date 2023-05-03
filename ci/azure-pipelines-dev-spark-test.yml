@@ -317,14 +317,15 @@ stages:
             displayName: 'Install GX and required dependencies'
 
           - script : |
-              pwd
-              echo "^^ dis is the current directory"
+              echo  '$(System.DefaultWorkingDirectory)'
               wget https://dlcdn.apache.org/spark/spark-3.3.2/spark-3.3.2-bin-hadoop3.tgz
               tar -xzf spark-3.3.2-bin-hadoop3.tgz
               mkdir spark
               mv spark-3.3.2-bin-hadoop3 spark
-              export SPARK_HOME=/home/sparkuser/spark
+              export SPARK_HOME=$(System.DefaultWorkingDirectory)/spark
               export PATH=$PATH:$SPARK_HOME/bin
+              echo $SPARK_HOME
+              echo $PATH
             displayName: download and install Spark 3.3.2
 
           # tests containing the name "RUNME_AWS" are run
