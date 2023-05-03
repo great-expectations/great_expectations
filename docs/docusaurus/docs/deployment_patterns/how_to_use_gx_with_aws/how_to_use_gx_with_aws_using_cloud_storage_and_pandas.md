@@ -248,10 +248,10 @@ If you have already instantiated your `DataContext` in a previous step, this ste
 ### 2.2 Add Datasource to your DataContext
 <ConfigureYourDatasource />
 
-### 2.2 Add CSV Asset to your Datasource
+### 2.2 Add CSV Asset to your Datasource 
 <AddCSVAssetToS3Datasource />
 
-### 2.3 Test your new Datasource
+### 2.3 Test your new Datasource 
 <TestS3Datasource />
 
 ## Part 3: Create Expectations
