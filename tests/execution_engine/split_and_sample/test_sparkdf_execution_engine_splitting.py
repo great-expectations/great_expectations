@@ -8,6 +8,8 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyarrow, pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.batch_spec import (
     AzureBatchSpec,
     GCSBatchSpec,
@@ -25,9 +27,6 @@ from tests.execution_engine.split_and_sample.split_and_sample_test_cases import 
     SINGLE_DATE_PART_BATCH_IDENTIFIERS,
     SINGLE_DATE_PART_DATE_PARTS,
 )
-from great_expectations.compatibility import pyspark
-from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility import pyarrow
 
 # Here we add SparkDataSplitter specific test cases to the generic test cases:
 SINGLE_DATE_PART_DATE_PARTS += [
@@ -600,7 +599,7 @@ def test_get_batch_with_split_on_hashed_column_incorrect_hash_function_name(
 ):
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
-        split_df = basic_spark_df_execution_engine.get_batch_data(
+        basic_spark_df_execution_engine.get_batch_data(
             RuntimeDataBatchSpec(
                 batch_data=test_sparkdf,
                 splitter_method="_split_on_hashed_column",

@@ -2,7 +2,7 @@ import logging
 import os
 import pickle
 import unittest
-from typing import Dict, List, Optional, Union, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 from unittest import mock
 
 import pandas as pd
@@ -254,18 +254,14 @@ def test_basic_checkpoint_config_validation(
     )
     captured = capsys.readouterr()
     assert any(
-        [
-            'Your current Checkpoint configuration has an empty or missing "validations" attribute'
-            in message
-            for message in [caplog.text, captured.out]
-        ]
+        'Your current Checkpoint configuration has an empty or missing "validations" attribute'
+        in message
+        for message in [caplog.text, captured.out]
     )
     assert any(
-        [
-            'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
-            in message
-            for message in [caplog.text, captured.out]
-        ]
+        'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
+        in message
+        for message in [caplog.text, captured.out]
     )
 
     assert mock_emit.call_count == 4
@@ -447,7 +443,7 @@ def test_basic_checkpoint_config_validation(
         match=r'Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
-        result: CheckpointResult = context.run_checkpoint(
+        context.run_checkpoint(
             checkpoint_name=checkpoint.name,
         )
 
@@ -1316,7 +1312,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         "my_suite"
     )
     # noinspection PyUnusedLocal
-    result = checkpoint.run()
+    checkpoint.run()
 
     assert (
         len(

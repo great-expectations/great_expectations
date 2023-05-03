@@ -5,16 +5,17 @@ from unittest import mock
 import pandas as pd
 import pytest
 
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import azure, google
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
+
 # noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.compatibility import azure, google
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
 from great_expectations.util import is_library_loadable
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
@@ -421,9 +422,9 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     desired_metrics = (mean, stdev)
 
     # noinspection PyUnusedLocal
-    with pytest.raises(gx_exceptions.MetricProviderError) as e:
+    with pytest.raises(gx_exceptions.MetricProviderError):
         # noinspection PyUnusedLocal
-        metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+        engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
 
 # Making sure dataframe property is functional

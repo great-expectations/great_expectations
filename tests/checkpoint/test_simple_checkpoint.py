@@ -405,7 +405,7 @@ def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_erro
 ):
     with pytest.raises(gx_exceptions.CheckpointError) as cpe:
         # noinspection PyUnusedLocal
-        result: CheckpointResult = simple_checkpoint_defaults.run()
+        simple_checkpoint_defaults.run()
     assert (
         'Checkpoint "foo" must be called with a validator or contain either a batch_request or validations.'
         in str(cpe.value)
@@ -762,7 +762,7 @@ def test_simple_checkpoint_error_with_invalid_top_level_batch_request(
     # raised by _validate_init_parameters() in BatchRequest.__init__()
     with pytest.raises(TypeError):
         # missing data_asset_name
-        result = simple_checkpoint_defaults.run(
+        simple_checkpoint_defaults.run(
             run_name="bar",
             batch_request={
                 "datasource_name": "my_datasource",
