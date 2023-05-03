@@ -442,9 +442,5 @@ stages:
           displayName: 'Install dependencies'
 
         - script: |
-<<<<<<< HEAD
-            pytest -v --docs-tests -m integration --trino --postgresql tests/integration/test_script_runner.py
-=======
             pytest -rs -v --docs-tests -m integration --mysql --postgresql tests/integration/test_script_runner.py
->>>>>>> origin/develop
           displayName: 'pytest'
