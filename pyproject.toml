@@ -274,7 +274,6 @@ extend-exclude = [
     # TODO: remove the items below and fix linting issues
     "tests/cli", # 34 warnings
     "tests/data_asset", # 10 warnings
-    "tests/data_context", # 127 warnings
     "tests/dataset", # 10 warnings
     "tests/expectations", # 56 warnings
     "tests/integration", # 114 warnings
