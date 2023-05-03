@@ -2,12 +2,10 @@ from __future__ import annotations
 
 import copy
 import logging
-import pathlib
 import re
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
 
-from great_expectations.alias_types import PathStr
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.batch_spec import BatchSpec, PathBatchSpec
@@ -32,8 +30,8 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 # TODO: <Alex>ALEX</Alex>
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.datasource.fluent import BatchRequest
-
 
 logger = logging.getLogger(__name__)
 
