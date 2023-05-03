@@ -28,6 +28,31 @@
             "items": {
                 "$ref": "#/definitions/DataFrameAsset"
             }
+        },
+        "spark_config": {
+            "title": "Spark Config",
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "boolean"
+                    },
+                    {
+                        "type": "number"
+                    }
+                ]
+            }
+        },
+        "force_reuse_spark_context": {
+            "title": "Force Reuse Spark Context",
+            "default": true,
+            "type": "boolean"
         }
     },
     "required": [

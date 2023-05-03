@@ -18,6 +18,7 @@ from typing_extensions import Final, TypeAlias
 from great_expectations.data_context import (
     AbstractDataContext as GXDataContext,  # noqa: TCH001
 )
+from great_expectations.datasource.fluent.spark_datasource import SparkConfig
 
 if TYPE_CHECKING:
     import pathlib
@@ -311,6 +312,8 @@ class _SourceFactories:
     def add_spark(
         self,
         name: str,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
     ) -> SparkDatasource: ...
     def update_spark(
         self,
@@ -329,6 +332,8 @@ class _SourceFactories:
         name_or_datasource: Optional[Union[str, Datasource]] = None,
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         *,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
@@ -360,6 +365,8 @@ class _SourceFactories:
         name_or_datasource: Optional[Union[str, Datasource]] = None,
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         *,
         base_directory: pathlib.Path = ...,
         data_context_root_directory: Union[pathlib.Path, None] = ...,
@@ -391,6 +398,8 @@ class _SourceFactories:
         name_or_datasource: Optional[Union[str, Datasource]] = None,
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         *,
         bucket: str = ...,
         boto3_options: dict[str, Union[ConfigStr, Any]] = ...,
@@ -422,6 +431,8 @@ class _SourceFactories:
         name_or_datasource: Optional[Union[str, Datasource]] = None,
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         *,
         bucket_or_name: str = ...,
         gcs_options: dict[str, Union[ConfigStr, Any]] = ...,
@@ -453,6 +464,8 @@ class _SourceFactories:
         name_or_datasource: Optional[Union[str, Datasource]] = None,
         name: Optional[str] = None,
         datasource: Optional[Datasource] = None,
+        spark_config: SparkConfig | None = None,
+        force_reuse_spark_context: bool = True,
         *,
         azure_options: dict[str, Any] = ...,
     ) -> SparkAzureBlobStorageDatasource: ...

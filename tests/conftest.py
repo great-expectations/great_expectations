@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Dict, List, Optional, Any
 from unittest import mock
 
 import numpy as np
@@ -432,7 +432,7 @@ def basic_spark_df_execution_engine(spark_session):
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
     conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
-    spark_config: Dict[str, str] = dict(conf)
+    spark_config: Dict[str, Any] = dict(conf)
     execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
     )
