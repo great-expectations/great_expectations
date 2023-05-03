@@ -166,6 +166,13 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
     ),
     IncludeExcludeDefinition(
+        reason="False match for validator.validate()",
+        name="validate",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/data_connector/batch_filter.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
         reason="Captured in AbstractDataContext",
         name="add_checkpoint",
         filepath=pathlib.Path(

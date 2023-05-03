@@ -26,7 +26,17 @@
             "default": [],
             "type": "array",
             "items": {
-                "$ref": "#/definitions/_FilePathDataAsset"
+                "anyOf": [
+                    {
+                        "$ref": "#/definitions/CSVAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/DirectoryCSVAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/ParquetAsset"
+                    }
+                ]
             }
         },
         "bucket_or_name": {
@@ -73,8 +83,8 @@
                 "key"
             ]
         },
-        "_FilePathDataAsset": {
-            "title": "_FilePathDataAsset",
+        "CSVAsset": {
+            "title": "CSVAsset",
             "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
             "type": "object",
             "properties": {
@@ -84,6 +94,10 @@
                 },
                 "type": {
                     "title": "Type",
+                    "default": "csv",
+                    "enum": [
+                        "csv"
+                    ],
                     "type": "string"
                 },
                 "id": {
@@ -113,12 +127,165 @@
                     "title": "Connect Options",
                     "description": "Optional filesystem specific advanced parameters for connecting to data assets",
                     "type": "object"
+                },
+                "header": {
+                    "title": "Header",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "InferSchema": {
+                    "title": "Inferschema",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "DirectoryCSVAsset": {
+            "title": "DirectoryCSVAsset",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "directory_csv",
+                    "enum": [
+                        "directory_csv"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "data_directory": {
+                    "title": "Data Directory",
+                    "type": "string",
+                    "format": "path"
+                },
+                "header": {
+                    "title": "Header",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "InferSchema": {
+                    "title": "Inferschema",
+                    "default": false,
+                    "type": "boolean"
                 }
             },
             "required": [
                 "name",
-                "type"
-            ]
+                "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "ParquetAsset": {
+            "title": "ParquetAsset",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "parquet",
+                    "enum": [
+                        "parquet"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "datetimeRebaseMode": {
+                    "title": "Datetimerebasemode",
+                    "enum": [
+                        "EXCEPTION",
+                        "CORRECTED",
+                        "LEGACY"
+                    ],
+                    "type": "string"
+                },
+                "int96RebaseMode": {
+                    "title": "Int96Rebasemode",
+                    "enum": [
+                        "EXCEPTION",
+                        "CORRECTED",
+                        "LEGACY"
+                    ],
+                    "type": "string"
+                },
+                "mergeSchema": {
+                    "title": "Mergeschema",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "name",
+                "datetimeRebaseMode",
+                "int96RebaseMode"
+            ],
+            "additionalProperties": false
         }
     }
 }

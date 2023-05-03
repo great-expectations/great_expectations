@@ -1,13 +1,13 @@
+from __future__ import annotations
+
 import logging
 from collections import OrderedDict
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
-from great_expectations.core.batch import Batch  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_asset import DataAsset  # noqa: TCH001
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.resource_identifiers import (
@@ -19,6 +19,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import Batch
+    from great_expectations.data_asset import DataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -190,7 +194,7 @@ class ActionListValidationOperator(ValidationOperator):
         data_context,
         action_list,
         name,
-        result_format={"result_format": "SUMMARY"},
+        result_format={"result_format": "SUMMARY"},  # noqa: B006 # mutable default
     ) -> None:
         super().__init__()
         self.data_context = data_context
@@ -622,7 +626,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         slack_webhook=None,
         notify_on="all",
         notify_with=None,
-        result_format={"result_format": "SUMMARY"},
+        result_format={"result_format": "SUMMARY"},  # noqa: B006 # mutable default
     ) -> None:
         super().__init__(data_context, action_list, name)
 

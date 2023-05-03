@@ -13,6 +13,8 @@ The best way to Validate data with Great Expectations is using a Checkpoint. Che
 
 Succintly: Checkpoints are used to test your data and take action based on the results.
 
+## Prerequisites
+
 <Prerequisites>
 
 - [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
