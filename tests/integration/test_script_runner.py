@@ -288,12 +288,12 @@ fluent_datasources = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py",
     ),
-    # IntegrationTestFixture(
-    #     name="RUNME validate_data_by_running_a_checkpoint",
-    #     user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py",
-    #     data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    # ),
+    IntegrationTestFixture(
+        name="RUNME validate_data_by_running_a_checkpoint",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py",
+        data_context_dir="tests/integration/fixtures/yellow_trip_data_fluent_pandas/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
 ]
 
 

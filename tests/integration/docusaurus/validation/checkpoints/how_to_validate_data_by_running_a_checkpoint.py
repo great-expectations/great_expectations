@@ -14,6 +14,11 @@ data_directory = pathlib.Path(
     "taxi_yellow_tripdata_samples",
 ).resolve(strict=True)
 
+validator = context.get_validator(
+    datasource_name="taxi_source", data_asset_name="taxi_asset"
+)
+validator.expect_column_values_to_not_be_null("pickup_datetime")
+context.add_expectation_suite("taxi_suite")
 
 # <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py create asset and get validator">
 import sys
@@ -22,6 +27,10 @@ import great_expectations as gx
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 
 context = gx.get_context()
+
+checkpoint = gx.checkpoint.SimpleCheckpoint(
+    name="taxi_checkpoint", data_context=context, expectation_suite_name="taxi_suite"
+)
 
 result: CheckpointResult = context.run_checkpoint(
     checkpoint_name="my_checkpoint",
