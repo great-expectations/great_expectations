@@ -116,7 +116,7 @@ import TestS3Datasource from '@site/docs/deployment_patterns/how_to_use_gx_with_
 
 <!-- Part 3: Create Expectations -->
 
-<!-- 3.1 Prepare a Batch Request, Empty Expectation Suite, and Validator -->
+<!-- 3.1 Prepare a Batch Request-->
 
 import PrepareABatchRequestAndValidatorForCreatingExpectations from '@site/docs/deployment_patterns/how_to_use_gx_with_aws/components/_add_expectation_suite_and_validator_for_fluent_datasource.mdx'
 
@@ -243,7 +243,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 ### 2.1 Instantiate your project's DataContext
 <CreateDataContextWithGetCreateAgain />
 
-If you have already instantiated your `DataContext` in a previous step, this step can be skipped. 
+If you have already instantiated your `DataContext` in a previous step, this step can be skipped.
 
 ### 2.2 Add Datasource to your DataContext
 <ConfigureYourDatasource />
