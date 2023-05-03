@@ -4,6 +4,7 @@ import pytest
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
+from great_expectations.compatibility import azure
 from great_expectations.core import IDDict
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -18,6 +19,13 @@ from great_expectations.datasource.data_connector import (
 from great_expectations.execution_engine import PandasExecutionEngine
 
 yaml = YAMLHandler()
+
+
+if not azure.storage:
+    pytest.skip(
+        'Could not import "azure.storage.blob" from Microsoft Azure cloud',
+        allow_module_level=True,
+    )
 
 
 @pytest.fixture
