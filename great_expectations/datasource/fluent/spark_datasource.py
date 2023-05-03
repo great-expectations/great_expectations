@@ -5,9 +5,9 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     ClassVar,
+    Dict,
     Generic,
     List,
-    Mapping,
     Optional,
     Type,
     TypeVar,
@@ -43,8 +43,8 @@ logger = logging.getLogger(__name__)
 # this enables us to include dataframe in the json schema
 _SparkDataFrameT = TypeVar("_SparkDataFrameT")
 
-SparkConfig: TypeAlias = Mapping[
-    StrictStr, Union[StrictStr, StrictStr, StrictInt, StrictBool, StrictFloat]
+SparkConfig: TypeAlias = Dict[
+    StrictStr, Union[StrictStr, StrictInt, StrictFloat, StrictBool]
 ]
 
 

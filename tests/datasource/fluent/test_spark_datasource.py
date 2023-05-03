@@ -12,6 +12,7 @@ import pytest
 
 from great_expectations.datasource.fluent.spark_datasource import (
     DataFrameAsset,
+    SparkConfig,
 )
 from great_expectations.util import is_candidate_subset_of_target
 
@@ -120,7 +121,7 @@ def test_spark_config_passed_to_execution_engine(
     empty_data_context: AbstractDataContext,
     spark_session,
 ):
-    spark_config = {
+    spark_config: SparkConfig | None = {
         "spark.sql.catalogImplementation": "in-memory",
         "spark.app.name": "gx_spark_fluent_datasource_test",
         "spark.default.parallelism": 4,
