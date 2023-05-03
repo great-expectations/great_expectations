@@ -8,9 +8,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will walk you through the process of creating a custom `ColumnMapExpectation`.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](./overview.md).
+- Completion of the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 

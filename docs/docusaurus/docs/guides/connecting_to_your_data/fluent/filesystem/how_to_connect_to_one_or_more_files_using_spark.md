@@ -27,8 +27,6 @@ import DefiningMultipleDataAssets from '/docs/components/connect_to_data/filesys
 <!-- Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 
-## Introduction
-
 <Introduction execution_engine="Spark" />
 
 ## Prerequisites
@@ -36,7 +34,6 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {true} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
 - Access to source data stored in a filesystem
-- A passion for data quality
 
 </Prerequisites> 
 
