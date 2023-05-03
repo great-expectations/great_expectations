@@ -51,10 +51,10 @@
                         "type": "integer"
                     },
                     {
-                        "type": "boolean"
+                        "type": "number"
                     },
                     {
-                        "type": "number"
+                        "type": "boolean"
                     }
                 ]
             }
