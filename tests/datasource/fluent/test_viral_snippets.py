@@ -100,7 +100,11 @@ def seeded_fds_file_context(
 
 
 @pytest.fixture
-def cloud_api_fake(fluent_only_config: GxConfig):
+def seed_cloud(
+    cloud_storage_get_client_doubles,
+    cloud_api_fake: responses.RequestsMock,
+    fluent_only_config: GxConfig,
+):
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
     dc_config_url = f"{org_url_base}/data-context-configuration"
 
@@ -114,49 +118,50 @@ def cloud_api_fake(fluent_only_config: GxConfig):
     logger.warning(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
     assert fds_config
 
-    def _cb(request: PreparedRequest) -> _CallbackResult:
-        logger.info(f"{request.method} {request.url}")
-        ds_id = request.url.partition("?")[0].split("/")[-1]
-        return _CallbackResult(
-            200,
-            headers=_DEFAULT_HEADERS,
-            body=json.dumps(
-                {
-                    "data": {
-                        "id": ds_id,
-                        "attributes": {"datasource_config": by_id[ds_id]},
-                    }
-                }
-            ),
-        )
+    # def _cb(request: PreparedRequest) -> _CallbackResult:
+    #     logger.info(f"{request.method} {request.url}")
+    #     ds_id = request.url.partition("?")[0].split("/")[-1]
+    #     return _CallbackResult(
+    #         200,
+    #         headers=_DEFAULT_HEADERS,
+    #         body=json.dumps(
+    #             {
+    #                 "data": {
+    #                     "id": ds_id,
+    #                     "attributes": {"datasource_config": by_id[ds_id]},
+    #                 }
+    #             }
+    #         ),
+    #     )
 
-    with responses.RequestsMock() as resp_mocker:
-        resp_mocker.get(
-            dc_config_url,
-            json={
-                "anonymous_usage_statistics": {
-                    "data_context_id": FAKE_DATA_CONTEXT_ID,
-                    "enabled": False,
-                },
-                "datasources": fds_config,
+    cloud_api_fake.remove(responses.GET, dc_config_url)
+    cloud_api_fake.add(
+        responses.GET,
+        dc_config_url,
+        json={
+            "anonymous_usage_statistics": {
+                "data_context_id": FAKE_DATA_CONTEXT_ID,
+                "enabled": False,
             },
-        )
-        resp_mocker.add_callback(
-            responses.PUT,
-            re.compile(rf"{org_url_base}/datasources/(?P<ds_id>.*)"),
-            callback=_cb,
-        )
-        resp_mocker.add_callback(
-            responses.GET,
-            re.compile(rf"{org_url_base}/datasources/(?P<ds_id>.*)"),
-            callback=_cb,
-        )
-        yield resp_mocker
+            "datasources": fds_config,
+        },
+    )
+    # resp_mocker.add_callback(
+    #     responses.PUT,
+    #     re.compile(rf"{org_url_base}/datasources/(?P<ds_id>.*)"),
+    #     callback=_cb,
+    # )
+    # resp_mocker.add_callback(
+    #     responses.GET,
+    #     re.compile(rf"{org_url_base}/datasources/(?P<ds_id>.*)"),
+    #     callback=_cb,
+    # )
+    return cloud_api_fake
 
 
 @pytest.fixture
 def seeded_cloud_context(
-    cloud_api_fake,  # NOTE: this fixture must be called first
+    seed_cloud,  # NOTE: this fixture must be called first
     empty_cloud_context_fluent,
 ):
     return empty_cloud_context_fluent

@@ -710,10 +710,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _add_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
-    ) -> None:
+    ) -> FluentDatasource:
         if datasource:
+            from_config: bool = False
             datasource_name = datasource.name
         else:
+            from_config = True
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
@@ -743,12 +745,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
         # Without this we end up with duplicate entries for datasources in both
         # "fluent_datasources" and "datasources" config/yaml entries.
-        if self._datasource_store.cloud_mode:
+        if self._datasource_store.cloud_mode and not from_config:
             set_datasource = self._datasource_store.set(key=None, value=datasource)
             if set_datasource.id:
                 logger.debug(f"Assigning `id` to '{datasource_name}'")
                 datasource.id = set_datasource.id
         self.datasources[datasource_name] = datasource
+        return datasource
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
@@ -4624,8 +4627,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
-                self._add_fluent_datasource(**fds)
-                # self._build_fds_asset_data_connectors_if_needed(fds)
+                self._build_fds_asset_data_connectors_if_needed(
+                    self._add_fluent_datasource(**fds)
+                )
 
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
