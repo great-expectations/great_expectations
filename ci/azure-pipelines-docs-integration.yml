@@ -4,6 +4,7 @@
 #
 # The pipeline is run under the following conditions:
 #   - On any PR
+#   - When manually triggered
 
 resources:
   containers:
@@ -42,6 +43,7 @@ variables:
 
 stages:
   - stage: scope_check
+    condition: eq(variables.isManual, true)
     pool:
       vmImage: 'ubuntu-20.04'
     jobs:
@@ -56,8 +58,6 @@ stages:
                 docs/**
                 tests/integration/docusaurus/**
                 tests/integration/fixtures/**
-                tests/integration/test_definitions/**
-                tests/integration/test_script_runner.py
                 tests/test_sets/**
 
           - bash: ./ci/checks/check_for_docs_deps_changes.sh
@@ -65,6 +65,7 @@ stages:
 
   - stage: docusaurus_tests
     dependsOn: scope_check
+    condition: eq(variables.isManual, true)
     pool:
       vmImage: 'ubuntu-latest'
     jobs:
