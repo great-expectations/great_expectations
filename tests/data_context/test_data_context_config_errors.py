@@ -10,20 +10,22 @@ BASE_DIR = "fixtures"
 
 
 def test_DataContext_raises_error_on_config_not_found():
-    local_dir = file_relative_path(__file__, os.path.join(BASE_DIR, ""))
+    local_dir = file_relative_path(__file__, os.path.join(BASE_DIR, ""))  # noqa: PTH118
     with pytest.raises(gx_exceptions.ConfigNotFoundError):
         get_context(context_root_dir=local_dir)
 
 
 def test_DataContext_raises_error_on_unparsable_yaml_file():
-    local_dir = file_relative_path(__file__, os.path.join(BASE_DIR, "bad_yml"))
+    local_dir = file_relative_path(
+        __file__, os.path.join(BASE_DIR, "bad_yml")  # noqa: PTH118
+    )
     with pytest.raises(gx_exceptions.InvalidConfigurationYamlError):
         get_context(context_root_dir=local_dir)
 
 
 def test_DataContext_raises_error_on_invalid_top_level_type():
     local_dir = file_relative_path(
-        __file__, os.path.join(BASE_DIR, "invalid_top_level_value_type")
+        __file__, os.path.join(BASE_DIR, "invalid_top_level_value_type")  # noqa: PTH118
     )
     with pytest.raises(gx_exceptions.InvalidDataContextConfigError) as exc:
         get_context(context_root_dir=local_dir)
@@ -39,7 +41,7 @@ def test_DataContext_raises_error_on_invalid_top_level_type():
 
 def test_DataContext_raises_error_on_invalid_config_version():
     local_dir = file_relative_path(
-        __file__, os.path.join(BASE_DIR, "invalid_config_version")
+        __file__, os.path.join(BASE_DIR, "invalid_config_version")  # noqa: PTH118
     )
     with pytest.raises(gx_exceptions.InvalidDataContextConfigError) as exc:
         get_context(context_root_dir=local_dir)
@@ -55,7 +57,7 @@ def test_DataContext_raises_error_on_invalid_config_version():
 
 def test_DataContext_raises_error_on_old_config_version():
     local_dir = file_relative_path(
-        __file__, os.path.join(BASE_DIR, "old_config_version")
+        __file__, os.path.join(BASE_DIR, "old_config_version")  # noqa: PTH118
     )
     with pytest.raises(gx_exceptions.InvalidDataContextConfigError) as exc:
         get_context(context_root_dir=local_dir)
@@ -64,14 +66,17 @@ def test_DataContext_raises_error_on_old_config_version():
 
 
 def test_DataContext_raises_error_on_missing_config_version_aka_version_zero():
-    local_dir = file_relative_path(__file__, os.path.join(BASE_DIR, "version_zero"))
+    local_dir = file_relative_path(
+        __file__, os.path.join(BASE_DIR, "version_zero")  # noqa: PTH118
+    )
     with pytest.raises(gx_exceptions.InvalidDataContextConfigError):
         get_context(context_root_dir=local_dir)
 
 
 def test_DataContext_raises_error_on_missing_config_version_aka_version_zero_with_v2_config():
     local_dir = file_relative_path(
-        __file__, os.path.join(BASE_DIR, "version_2-0_but_no_version_defined")
+        __file__,
+        os.path.join(BASE_DIR, "version_2-0_but_no_version_defined"),  # noqa: PTH118
     )
     with pytest.raises(gx_exceptions.InvalidDataContextConfigError):
         get_context(context_root_dir=local_dir)

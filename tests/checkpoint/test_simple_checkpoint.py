@@ -405,7 +405,7 @@ def test_simple_checkpoint_defaults_run_and_no_run_params_raises_checkpoint_erro
 ):
     with pytest.raises(gx_exceptions.CheckpointError) as cpe:
         # noinspection PyUnusedLocal
-        result: CheckpointResult = simple_checkpoint_defaults.run()
+        simple_checkpoint_defaults.run()
     assert (
         'Checkpoint "foo" must be called with a validator or contain either a batch_request or validations.'
         in str(cpe.value)
@@ -762,7 +762,7 @@ def test_simple_checkpoint_error_with_invalid_top_level_batch_request(
     # raised by _validate_init_parameters() in BatchRequest.__init__()
     with pytest.raises(TypeError):
         # missing data_asset_name
-        result = simple_checkpoint_defaults.run(
+        simple_checkpoint_defaults.run(
             run_name="bar",
             batch_request={
                 "datasource_name": "my_datasource",
@@ -1189,7 +1189,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -1237,7 +1237,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -1517,7 +1517,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -1564,7 +1564,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -1611,7 +1611,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -1658,7 +1658,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -1961,7 +1961,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -2012,7 +2012,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -2063,7 +2063,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -2114,7 +2114,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_validation_result_when_ru
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -2201,7 +2201,7 @@ def test_simple_checkpoint_instantiates_and_produces_a_runtime_parameters_error_
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
