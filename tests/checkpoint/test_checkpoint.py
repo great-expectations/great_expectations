@@ -2,7 +2,7 @@ import logging
 import os
 import pickle
 import unittest
-from typing import Dict, List, Optional, Union, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 from unittest import mock
 
 import pandas as pd
@@ -254,18 +254,14 @@ def test_basic_checkpoint_config_validation(
     )
     captured = capsys.readouterr()
     assert any(
-        [
-            'Your current Checkpoint configuration has an empty or missing "validations" attribute'
-            in message
-            for message in [caplog.text, captured.out]
-        ]
+        'Your current Checkpoint configuration has an empty or missing "validations" attribute'
+        in message
+        for message in [caplog.text, captured.out]
     )
     assert any(
-        [
-            'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
-            in message
-            for message in [caplog.text, captured.out]
-        ]
+        'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
+        in message
+        for message in [caplog.text, captured.out]
     )
 
     assert mock_emit.call_count == 4
@@ -447,7 +443,7 @@ def test_basic_checkpoint_config_validation(
         match=r'Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
-        result: CheckpointResult = context.run_checkpoint(
+        context.run_checkpoint(
             checkpoint_name=checkpoint.name,
         )
 
@@ -1316,7 +1312,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         "my_suite"
     )
     # noinspection PyUnusedLocal
-    result = checkpoint.run()
+    checkpoint.run()
 
     assert (
         len(
@@ -1373,7 +1369,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 @pytest.mark.integration
 def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_checkpoint_name_in_meta_when_run(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
-    common_action_list,
+    store_validation_result_action,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     checkpoint_name: str = "test_checkpoint_name"
@@ -1384,12 +1380,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_with_
         run_name_template="%Y-%M-foo-bar-template",
         expectation_suite_name="my_expectation_suite",
         action_list=[
-            {
-                "name": "store_validation_result",
-                "action": {
-                    "class_name": "StoreValidationResultAction",
-                },
-            },
+            store_validation_result_action,
         ],
         validations=[
             {
@@ -1586,7 +1577,7 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
 
 
 @pytest.mark.unit
-def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_validator_is_specified_in_run(
+def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_validator_is_specified_in_run(  # noqa: F811 # TODO: review test for duplication
     dummy_data_context,
     common_action_list,
     dummy_validator,
@@ -2568,7 +2559,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -2615,7 +2606,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3299,7 +3290,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3345,7 +3336,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3385,12 +3376,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(  # noqa: F811 # TODO: review test for duplication
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3436,7 +3427,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3743,7 +3734,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3794,7 +3785,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3839,12 +3830,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(  # noqa: F811 # TODO: review test for duplication
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3896,7 +3887,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3984,7 +3975,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,

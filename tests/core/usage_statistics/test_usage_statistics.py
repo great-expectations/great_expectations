@@ -155,7 +155,7 @@ def test_global_override_from_config_file_in_home_folder(
 
         with open(
             os.path.join(home_config_dir, "great_expectations.conf"),  # noqa: PTH118
-            "w",  # noqa: PTH118
+            "w",
         ) as configfile:
             disabled_config.write(configfile)
 

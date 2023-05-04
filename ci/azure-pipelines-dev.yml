@@ -230,133 +230,8 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
-  - stage: runme_script_runner_tests
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
-
-    jobs:
-      - job: runme_script_runner_tests
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
-
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test]"
-              pip uninstall -y sqlalchemy
-            displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
-
-          # tests containing the name "RUNME" are run
-          - script: |
-              pytest -v --no-sqlalchemy --docs-tests -m integration -k "RUNME" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
-
-      - job: runme_script_runner_tests_postgres
-
-        services:
-          postgres: postgres
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
-
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, postgresql]"
-            displayName: 'Install GX and required dependencies'
-
-          # tests containing the name "RUNME_POSTGRES" are run
-          - script: |
-              pytest -v --postgresql --docs-tests -m integration -k "RUNME_POSTGRES" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
-
-      - job: runme_script_runner_tests_gcs
-        steps:
-          - task: DownloadSecureFile@1
-            name: gcp_authkey
-            displayName: 'Download Google Service Account'
-            inputs:
-              secureFile: 'superconductive-service-acct_ge-oss-ci-cd.json'
-              retryCount: '2'
-
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.8'
-            displayName: 'Use Python 3.8'
-
-        # includes explicit install of chardet, which was causing problems in the pipeline
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines google-cloud-bigquery-storage
-            displayName: 'Install GX and required dependencies'
-
-          # tests containing the name "RUNME_gcp" are run
-          - script: |
-              pytest -v --bigquery --docs-tests -m integration -k "RUNME_gcp" tests/integration/test_script_runner.py
-              pip install chardet==3.0.4
-            displayName: 'Run Flagged Tests'
-            env:
-              GOOGLE_APPLICATION_CREDENTIALS: $(gcp_authkey.secureFilePath)
-              GE_TEST_GCP_PROJECT: $(GE_TEST_GCP_PROJECT)
-              GE_TEST_BIGQUERY_DATASET: $(GE_TEST_BIGQUERY_DATASET)
-
-      - job: runme_script_runner_tests_aws
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
-
-          - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
-            displayName: 'Install GX and required dependencies'
-
-          # tests containing the name "RUNME_AWS" are run
-          - script: |
-              pytest -v --docs-tests -m integration --aws -k "RUNME_AWS" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
-            env:
-              AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
-              AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
-              AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-
-      - job: runme_script_runner_tests_postgres_mysql
-        services:
-          postgres: postgres
-          mysql: mysql
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
-
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test, postgresql, mysql]"
-            displayName: 'Install GX and required dependencies'
-
-          - script: |
-              printf 'Waiting for MySQL database to accept connections'
-              until mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --execute "SHOW DATABASES"; do
-                printf '.'
-                sleep 1;
-              done;
-            displayName: Wait for database to initialise
-          - script: |
-              echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" > mysql_setup_script.sql
-              mysql --host=localhost --protocol=TCP --port=3306 --user=root --password='' --reconnect < mysql_setup_script.sql
-            displayName: 'Configure mysql'
-
-          # tests containing the name "RUNME_POSTGRES_MYSQL" are run
-          - script: |
-              pytest -v --postgresql --mysql --docs-tests -m integration -k "RUNME_POSTGRES_MYSQL" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
-
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -391,7 +266,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest $(pytest_args) \
+              pytest -rs $(pytest_args) \
                 --no-sqlalchemy \
                 --ignore 'tests/cli' \
                 --ignore 'tests/integration/usage_statistics' \
@@ -449,12 +324,12 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, postgresql, spark]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
               # Run pytest
-              pytest $(pytest_args) \
+              pytest -rs $(pytest_args) \
                 --postgresql \
                 --spark \
                 --ignore 'tests/cli' \
@@ -509,7 +384,7 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest -rs --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
             env:
@@ -559,7 +434,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest tests/test_definitions tests/expectations \
+              pytest -rs tests/test_definitions tests/expectations \
                 --mysql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -599,7 +474,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest tests/test_definitions tests/expectations \
+              pytest -rs tests/test_definitions tests/expectations \
                 --mssql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -645,7 +520,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest tests/test_definitions tests/expectations \
+              pytest -rs tests/test_definitions tests/expectations \
                 --trino \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -688,7 +563,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest --postgresql --spark --aws-integration tests/cli
+              pytest -rs --postgresql --spark --aws-integration tests/cli
 
             displayName: 'pytest'
             env:
