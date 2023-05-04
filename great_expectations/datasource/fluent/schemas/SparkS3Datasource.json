@@ -39,6 +39,31 @@
                 ]
             }
         },
+        "spark_config": {
+            "title": "Spark Config",
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string"
+                    },
+                    {
+                        "type": "integer"
+                    },
+                    {
+                        "type": "number"
+                    },
+                    {
+                        "type": "boolean"
+                    }
+                ]
+            }
+        },
+        "force_reuse_spark_context": {
+            "title": "Force Reuse Spark Context",
+            "default": true,
+            "type": "boolean"
+        },
         "bucket": {
             "title": "Bucket",
             "type": "string"
