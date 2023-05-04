@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import difflib
 import functools
+import json
 import logging
 import pathlib
+import re
 import uuid
 from collections import defaultdict
 from pprint import pformat as pf
@@ -19,12 +21,16 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
 )
 from tests.datasource.fluent.conftest import (
+    _DEFAULT_HEADERS,
     FAKE_DATA_CONTEXT_ID,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
+    _CallbackResult,
 )
 
 if TYPE_CHECKING:
+    from requests import PreparedRequest
+
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import SqliteDatasource
 
@@ -98,13 +104,31 @@ def cloud_api_fake(fluent_only_config: GxConfig):
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
     dc_config_url = f"{org_url_base}/data-context-configuration"
 
+    by_id = {}
     fds_config = {}
     for datasource in fluent_only_config._json_dict()["fluent_datasources"]:
         datasource["id"] = str(uuid.uuid4())
         fds_config[datasource["name"]] = datasource
+        by_id[datasource["id"]] = datasource
 
     logger.warning(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
     assert fds_config
+
+    def _cb(request: PreparedRequest) -> _CallbackResult:
+        logger.info(f"{request.method} {request.url}")
+        ds_id = request.url.partition("?")[0].split("/")[-1]
+        return _CallbackResult(
+            200,
+            headers=_DEFAULT_HEADERS,
+            body=json.dumps(
+                {
+                    "data": {
+                        "id": ds_id,
+                        "attributes": {"datasource_config": by_id[ds_id]},
+                    }
+                }
+            ),
+        )
 
     with responses.RequestsMock() as resp_mocker:
         resp_mocker.get(
@@ -116,6 +140,16 @@ def cloud_api_fake(fluent_only_config: GxConfig):
                 },
                 "datasources": fds_config,
             },
+        )
+        resp_mocker.add_callback(
+            responses.PUT,
+            re.compile(rf"{org_url_base}/datasources/(?P<ds_id>.*)"),
+            callback=_cb,
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            re.compile(rf"{org_url_base}/datasources/(?P<ds_id>.*)"),
+            callback=_cb,
         )
         yield resp_mocker
 
