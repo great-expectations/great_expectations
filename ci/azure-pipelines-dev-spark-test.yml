@@ -339,8 +339,6 @@ stages:
               export SPARK_CLASSPATH=$(System.DefaultWorkingDirectory)/hadoop-aws-3.3.2.jar:$(System.DefaultWorkingDirectory)/aws-java-sdk-bundle-1.11.1026.jar
 
             displayName: download the JARS
-
-
           # tests containing the name "RUNME_AWS" are run
           - script: |
               pytest -v --docs-tests -m integration --aws --spark -k "RUNME_AWS" tests/integration/test_script_runner.py
