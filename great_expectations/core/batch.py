@@ -1217,7 +1217,7 @@ def get_batch_request_from_acceptable_arguments(
         result = _get_fluent_batch_request_class()(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            options=batch_request_options or {},
+            options=batch_request_options,
         )
         return result
 
