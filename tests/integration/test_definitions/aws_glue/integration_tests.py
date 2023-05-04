@@ -8,7 +8,11 @@ deployment_patterns = [
     IntegrationTestFixture(
         name="how_to_use_great_expectations_in_aws_glue",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_glue_deployment_patterns.py",
-        backend_dependencies=[BackendDependencies.SPARK, BackendDependencies.AWS],
+        backend_dependencies=[
+            BackendDependencies.SPARK,
+            BackendDependencies.AWS,
+            BackendDependencies.AWS_GLUE,
+        ],
     ),
 ]
 
