@@ -354,14 +354,6 @@ stages:
           inputs:
             versionSpec: '$(python.version)'
           displayName: 'Use Python $(python.version)'
-        - script : |
-            wget https://dlcdn.apache.org/spark/spark-3.3.2/spark-3.3.2-bin-hadoop3.tgz
-            tar -xzf spark-3.3.2-bin-hadoop3.tgz
-            mkdir spark
-            mv spark-3.3.2-bin-hadoop3 spark
-            export SPARK_HOME=$(System.DefaultWorkingDirectory)/spark
-            export PATH=$PATH:$SPARK_HOME/bin
-          displayName: Download and Install Spark 3.3.2
         - script: |
             pip install pyspark==3.3.2
           displayName: Install Pyspark 3.3.2
@@ -371,12 +363,14 @@ stages:
         - script: |
             wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.2/hadoop-aws-3.3.2.jar
             wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.1026/aws-java-sdk-bundle-1.11.1026.jar
-            export SPARK_CLASSPATH=$(System.DefaultWorkingDirectory)/hadoop-aws-3.3.2.jar:$(System.DefaultWorkingDirectory)/aws-java-sdk-bundle-1.11.1026.jar
-          displayName: Download JARS needed for AWS and set SPARK_CLASSPATH
+            export pyspark_dir=`python -c 'import pyspark; print(pyspark.__path__[0] + "/jars/")'`
+            mv hadoop-aws-3.3.2.jar $pyspark_dir
+            mv aws-java-sdk-bundle-1.11.1026.jar $pyspark_dir
+
+          displayName: download the AWS JARs and move to pyspark's JAR directory.
         - script: |
             pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
-
         - script: |
             pytest -rs -v --docs-tests -m integration --aws --spark tests/integration/test_script_runner.py
           displayName: 'pytest'
@@ -384,8 +378,6 @@ stages:
             AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
             AWS_SECRET_ACCESS_KEY: $(AWS_SECRET_ACCESS_KEY)
             AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
-
-
 
     - job: test_docs_azure
       timeoutInMinutes: 30
