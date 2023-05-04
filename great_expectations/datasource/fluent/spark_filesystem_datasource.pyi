@@ -51,17 +51,16 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         ignore_corrupt_files: bool = ...,
         ignore_missing_files: bool = ...,
         path_glob_filter: str = ...,
-        recursive_file_lookup: bool = ...,
-        modified_before: str = ...,
-        modified_after: str = ...,
+        recursive_file_lookup: bool = False,
+        modified_before: str = "",
+        modified_after: str = "",
         # Spark Generic File Reader Options ^^^
         # CSV Specific Options vvv
-        delimiter: str = ...,
         sep: str = ...,
         encoding: str = ...,
         quote: str = ...,
         escape: str = ...,
-        comment: str = ...,
+        comment: str = "",
         header: bool = False,
         infer_schema: bool = False,
         prefer_date: bool = True,
@@ -109,9 +108,9 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         ignore_corrupt_files: bool = ...,
         ignore_missing_files: bool = ...,
         path_glob_filter: str = ...,
-        recursive_file_lookup: bool = ...,
-        modified_before: str = ...,
-        modified_after: str = ...,
+        recursive_file_lookup: bool = False,
+        modified_before: str = "",
+        modified_after: str = "",
         # Spark Generic File Reader Options ^^^
         # CSV Specific Options vvv
         delimiter: str = ...,
@@ -165,9 +164,9 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         ignore_corrupt_files: bool = ...,
         ignore_missing_files: bool = ...,
         path_glob_filter: str = ...,
-        recursive_file_lookup: bool = ...,
-        modified_before: str = ...,
-        modified_after: str = ...,
+        recursive_file_lookup: bool = False,
+        modified_before: str = "",
+        modified_after: str = "",
         # Spark Generic File Reader Options ^^^
         # Parquet Specific Options vvv
         datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"],
@@ -187,9 +186,9 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         ignore_corrupt_files: bool = ...,
         ignore_missing_files: bool = ...,
         path_glob_filter: str = ...,
-        recursive_file_lookup: bool = ...,
-        modified_before: str = ...,
-        modified_after: str = ...,
+        recursive_file_lookup: bool = False,
+        modified_before: str = "",
+        modified_after: str = "",
         # Spark Generic File Reader Options ^^^
         # ORC Specific Options vvv
         merge_schema: bool = ...,
@@ -207,9 +206,9 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         ignore_corrupt_files: bool = ...,
         ignore_missing_files: bool = ...,
         path_glob_filter: str = ...,
-        recursive_file_lookup: bool = ...,
-        modified_before: str = ...,
-        modified_after: str = ...,
+        recursive_file_lookup: bool = False,
+        modified_before: str = "",
+        modified_after: str = "",
         # Spark Generic File Reader Options ^^^
         # JSON Specific Options vvv
         timezone: str = ...,
@@ -249,9 +248,9 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         ignore_corrupt_files: bool = ...,
         ignore_missing_files: bool = ...,
         path_glob_filter: str = ...,
-        recursive_file_lookup: bool = ...,
-        modified_before: str = ...,
-        modified_after: str = ...,
+        recursive_file_lookup: bool = False,
+        modified_before: str = "",
+        modified_after: str = "",
         # Spark Generic File Reader Options ^^^
         # Text Specific Options vvv
         wholetext: bool = ...,
@@ -291,3 +290,5 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         path_glob_filter: str = ...,
         # BinaryFileAsset Specific Options ^^^
     ) -> BinaryFileAsset: ...
+
+    # TODO: Auto generate pyi content from pydantic model that includes default
