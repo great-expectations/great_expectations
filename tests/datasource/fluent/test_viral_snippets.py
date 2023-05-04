@@ -105,6 +105,10 @@ def seed_cloud(
     cloud_api_fake: responses.RequestsMock,
     fluent_only_config: GxConfig,
 ):
+    """
+    In order to load the seeded cloud config, this fixture must be called before any
+    `get_context()` calls.
+    """
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
     dc_config_url = f"{org_url_base}/data-context-configuration"
 
@@ -115,24 +119,8 @@ def seed_cloud(
         fds_config[datasource["name"]] = datasource
         by_id[datasource["id"]] = datasource
 
-    logger.warning(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
+    logger.info(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
     assert fds_config
-
-    # def _cb(request: PreparedRequest) -> _CallbackResult:
-    #     logger.info(f"{request.method} {request.url}")
-    #     ds_id = request.url.partition("?")[0].split("/")[-1]
-    #     return _CallbackResult(
-    #         200,
-    #         headers=_DEFAULT_HEADERS,
-    #         body=json.dumps(
-    #             {
-    #                 "data": {
-    #                     "id": ds_id,
-    #                     "attributes": {"datasource_config": by_id[ds_id]},
-    #                 }
-    #             }
-    #         ),
-    #     )
 
     cloud_api_fake.remove(responses.GET, dc_config_url)
     cloud_api_fake.add(
@@ -146,22 +134,12 @@ def seed_cloud(
             "datasources": fds_config,
         },
     )
-    # resp_mocker.add_callback(
-    #     responses.PUT,
-    #     re.compile(rf"{org_url_base}/datasources/(?P<ds_id>.*)"),
-    #     callback=_cb,
-    # )
-    # resp_mocker.add_callback(
-    #     responses.GET,
-    #     re.compile(rf"{org_url_base}/datasources/(?P<ds_id>.*)"),
-    #     callback=_cb,
-    # )
     return cloud_api_fake
 
 
 @pytest.fixture
 def seeded_cloud_context(
-    seed_cloud,  # NOTE: this fixture must be called first
+    seed_cloud,  # NOTE: this fixture must be called before the CloudDataContext is created
     empty_cloud_context_fluent,
 ):
     return empty_cloud_context_fluent
