@@ -103,7 +103,7 @@ sample_data = []
 
 deployment_patterns = [
     IntegrationTestFixture(
-        name="RUNME_gcp_deployment_patterns_file_gcs",
+        name="gcp_deployment_patterns_file_gcs",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py",
         data_context_dir=None,
         backend_dependencies=[BackendDependencies.GCS],
