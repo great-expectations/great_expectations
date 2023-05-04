@@ -39,7 +39,6 @@ from great_expectations.util import (
     filter_properties_dict,
 )
 from great_expectations.validator.validator import Validator
-
 from tests.checkpoint import cloud_config
 
 if TYPE_CHECKING:

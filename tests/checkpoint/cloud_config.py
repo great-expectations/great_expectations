@@ -1,5 +1,5 @@
-from typing import Tuple
 import os
+from typing import Tuple
 
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import DataContextConfig
