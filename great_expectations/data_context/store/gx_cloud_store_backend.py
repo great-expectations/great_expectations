@@ -370,6 +370,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             object_id = response_json["data"]["id"]
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
+            # This method is where posts get made for all cloud store endpoints. We pass
+            # the response_json back up to the caller because the specific resource may
+            # want to parse resource specific data out of the response.
             return GXCloudResourceRef(
                 resource_type=resource_type,
                 id=object_id,
