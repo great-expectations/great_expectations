@@ -202,10 +202,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
             force_reuse_spark_context=force_reuse_spark_context,
         )
 
-        spark_config = dict(spark_config)
         spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
 
-        self._spark_config = spark_config
         self.spark = spark
 
         azure_options: dict = kwargs.pop("azure_options", {})
