@@ -194,7 +194,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <VerifySuccessfulGxInstallation />
 
 ### 1.3 Create your Data Context
-<CreateDataContextWithCreateAgain />
+<CreateDataContextWithCreate />
 
 ### 1.4 Configure your Expectations Store on Amazon S3
 
