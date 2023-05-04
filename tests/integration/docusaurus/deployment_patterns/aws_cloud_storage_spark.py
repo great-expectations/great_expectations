@@ -21,12 +21,12 @@ from pyspark import SparkContext
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
-# conf = pyspark.SparkConf()
-# conf.set("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.1")
-# sc = SparkContext.getOrCreate(conf=conf)
-# # sc._jsc.hadoopConfiguration().set('fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider')
-# sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", AWS_ACCESS_KEY_ID)
-# sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", AWS_SECRET_ACCESS_KEY)
+conf = pyspark.SparkConf()
+conf.set("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.2")
+sc = SparkContext.getOrCreate(conf=conf)
+# sc._jsc.hadoopConfiguration().set('fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider')
+sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", AWS_ACCESS_KEY_ID)
+sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", AWS_SECRET_ACCESS_KEY)
 #'/Users/work/.sdkman/candidates/spark/current/python/pyspark'
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py imports">
