@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Type, Unio
 
 import pandas as pd
 
-import great_expectations.exceptions as gx_exceptions
 from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
@@ -601,13 +600,13 @@ class RuntimeBatchRequest(BatchRequestBase):
         batch_identifiers: dict,
         batch_spec_passthrough: Optional[dict] = None,
     ) -> None:
-        if not (runtime_parameters and (isinstance(runtime_parameters, dict))):
+        if runtime_parameters and not (isinstance(runtime_parameters, dict)):
             raise TypeError(
                 f"""The runtime_parameters must be a non-empty dict object.
                 The type given is "{str(type(runtime_parameters))}", which is an illegal type or an empty dictionary."""
             )
 
-        if not (batch_identifiers and isinstance(batch_identifiers, dict)):
+        if batch_identifiers and not isinstance(batch_identifiers, dict):
             raise TypeError(
                 f"""The type for batch_identifiers must be a dict object, with keys being identifiers defined in the
                 data connector configuration.  The type given is "{str(type(batch_identifiers))}", which is illegal."""
@@ -1034,14 +1033,32 @@ def _get_runtime_batch_request(
     **kwargs,
 ) -> Optional[RuntimeBatchRequest]:
     """Returns a `RuntimeBatchRequest`, or `None` if the arguments don't support it."""
-    if any([batch_data is not None, query, path, runtime_parameters]):
+    if any(
+        [batch_data, query, path, runtime_parameters]
+    ):  # one of these must be specified for runtime batch requests
+        # parameter checking
+        if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
+            raise ValueError("Must provide only one of batch_data, query, or path.")
 
+        if runtime_parameters and any(
+            [
+                batch_data and "batch_data" in runtime_parameters,
+                query and "query" in runtime_parameters,
+                path and "path" in runtime_parameters,
+            ]
+        ):
+            raise ValueError(
+                "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "
+                "runtime_parameters argument."
+            )
+
+        # build runtime parameters
         runtime_parameters = runtime_parameters or {}
-        if batch_data is not None:
+        if batch_data:
             runtime_parameters["batch_data"] = batch_data
-        elif query is not None:
+        elif query:
             runtime_parameters["query"] = query
-        elif path is not None:
+        elif path:
             runtime_parameters["path"] = path
 
         if batch_identifiers is None:
@@ -1130,9 +1147,8 @@ def get_batch_request_from_acceptable_arguments(
         (BatchRequest, RuntimeBatchRequest or FluentBatchRequest) The formal BatchRequest, RuntimeBatchRequest or FluentBatchRequest object
     """
 
-    # block-style batch-request args
+    # block-style batch-request args, includes arguments for both runtime and basic batch requests
     block_config_args = {
-        "batch_request": batch_request,
         "batch_data": batch_data,
         "query": query,
         "path": path,
@@ -1152,12 +1168,12 @@ def get_batch_request_from_acceptable_arguments(
 
     def block_style_args() -> list[str]:
         """Returns a list of the block-config batch request arguments"""
-        return [k for k, v in block_config_args.items if v]
+        return [k for k, v in block_config_args.items() if v]
 
     # ensure that the first parameter is datasource_name, which should be a str. This check prevents users
     # from passing in batch_request as an unnamed parameter.
-    if not isinstance(datasource_name, str):
-        raise gx_exceptions.GreatExpectationsTypeError(
+    if datasource_name and not isinstance(datasource_name, str):
+        raise TypeError(
             f"the first parameter, datasource_name, must be a str, not {type(datasource_name)}"
         )
 
@@ -1174,24 +1190,6 @@ def get_batch_request_from_acceptable_arguments(
 
         return batch_request
 
-    # parameter checking
-    if len([arg for arg in [batch_data, query, path] if arg is not None]) > 1:
-        raise ValueError("Must provide only one of batch_data, query, or path.")
-
-    if any(
-        [
-            batch_data is not None
-            and runtime_parameters
-            and "batch_data" in runtime_parameters,
-            query and runtime_parameters and "query" in runtime_parameters,
-            path and runtime_parameters and "path" in runtime_parameters,
-        ]
-    ):
-        raise ValueError(
-            "If batch_data, query, or path arguments are provided, the same keys cannot appear in the "
-            "runtime_parameters argument."
-        )
-
     # try to get a runtime batch request
     result = _get_runtime_batch_request(
         datasource_name=datasource_name,
@@ -1203,7 +1201,7 @@ def get_batch_request_from_acceptable_arguments(
         batch_data=batch_data,
         query=query,
         path=path,
-        kwargs=kwargs,
+        **kwargs,
     )
     if result:
         return result
@@ -1213,13 +1211,13 @@ def get_batch_request_from_acceptable_arguments(
         block_args = block_style_args()
         if block_args:
             raise ValueError(
-                f"Arguments: {', '.join(block_args)} are not supported for Fluent Batch Requests. Block Requests require a data connector name"
+                f"Arguments: {', '.join(block_args)} are not supported for Fluent Batch Requests. Block-config Requests require a data connector name"
             )
 
         result = _get_fluent_batch_request_class()(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            options=batch_request_options,
+            options=batch_request_options or {},
         )
         return result
 
@@ -1228,13 +1226,18 @@ def get_batch_request_from_acceptable_arguments(
         datasource_name=datasource_name,
         data_connector_name=data_connector_name,
         data_asset_name=data_asset_name,
-        runtime_parameters=runtime_parameters,
         batch_identifiers=batch_identifiers,
         batch_spec_passthrough=batch_spec_passthrough,
-        batch_data=batch_data,
-        query=query,
-        path=path,
-        kwargs=kwargs,
+        batch_filter_parameters=batch_filter_parameters,
+        data_connector_query=data_connector_query,
+        limit=limit,
+        index=index,
+        custom_filter_function=custom_filter_function,
+        sampling_method=sampling_method,
+        sampling_kwargs=sampling_kwargs,
+        splitter_method=splitter_method,
+        splitter_kwargs=splitter_kwargs,
+        **kwargs,
     )
 
 
