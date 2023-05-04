@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import difflib
 import functools
-import json
 import logging
 import pathlib
-import re
 import uuid
 from collections import defaultdict
 from pprint import pformat as pf
@@ -21,15 +19,12 @@ from great_expectations.datasource.fluent.interfaces import (
     Datasource,
 )
 from tests.datasource.fluent.conftest import (
-    _DEFAULT_HEADERS,
     FAKE_DATA_CONTEXT_ID,
     FAKE_ORG_ID,
     GX_CLOUD_MOCK_BASE_URL,
-    _CallbackResult,
 )
 
 if TYPE_CHECKING:
-    from requests import PreparedRequest
 
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import SqliteDatasource
