@@ -18,8 +18,8 @@ from pyspark import SparkContext
 # sts_connection = session.client('sts')
 # response = sts_connection.assume_role(RoleArn='arn:aws:iam:::role/role_name', RoleSessionName='role_name',DurationSeconds=3600)
 # credentials = response['Credentials']
-# AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
-# AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 
 # conf = pyspark.SparkConf()
 # conf.set("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.2")
