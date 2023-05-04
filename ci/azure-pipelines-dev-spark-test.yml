@@ -341,7 +341,7 @@ stages:
             displayName: download the JARS
           # tests containing the name "RUNME_AWS" are run
           - script: |
-              pytest -v --docs-tests -m integration --aws --spark -k "RUNME_AWS" tests/integration/test_script_runner.py
+              pytest -v --docs-tests -m integration --aws --spark tests/integration/test_script_runner.py
             displayName: 'Run Flagged Tests'
             env:
               AWS_ACCESS_KEY_ID: $(AWS_ACCESS_KEY_ID)
