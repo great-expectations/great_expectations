@@ -315,7 +315,7 @@ stages:
           - script: |
               pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
             displayName: 'Install GX and required dependencies'
-
+          # can we do it with just pyspark
           - script : |
               echo  '$(System.DefaultWorkingDirectory)'
               wget https://dlcdn.apache.org/spark/spark-3.3.2/spark-3.3.2-bin-hadoop3.tgz
@@ -324,21 +324,22 @@ stages:
               mv spark-3.3.2-bin-hadoop3 spark
               export SPARK_HOME=$(System.DefaultWorkingDirectory)/spark
               export PATH=$PATH:$SPARK_HOME/bin
-              echo $SPARK_HOME
-              echo $PATH
             displayName: download and install Spark 3.3.2
           - script: |
               pip install pyspark==3.3.2
             displayName: pip install pyspark on it's own
           - script: |
               export JAVA_HOME=$JAVA_HOME_11_X64
-            displayName: set JAVA_HOMe
+            displayName: set JAVA_HOME
           - script: |
               wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.2/hadoop-aws-3.3.2.jar
               wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.1026/aws-java-sdk-bundle-1.11.1026.jar
-              export SPARK_CLASSPATH=$(System.DefaultWorkingDirectory)/hadoop-aws-3.3.2.jar:$(System.DefaultWorkingDirectory)/aws-java-sdk-bundle-1.11.1026.jar
+              export pyspark_dir=`python -c 'import pyspark; print(pyspark.__path__[0] + "/jars/")'`
+              mv hadoop-aws-3.3.2.jar $pyspark_dir
+              mv aws-java-sdk-bundle-1.11.1026.jar $pyspark_dir
 
             displayName: download the JARS
+          #export SPARK_CLASSPATH=$(System.DefaultWorkingDirectory)/hadoop-aws-3.3.2.jar:$(System.DefaultWorkingDirectory)/aws-java-sdk-bundle-1.11.1026.jar
           # tests containing the name "RUNME_AWS" are run
           - script: |
               pytest -v --docs-tests -m integration --aws --spark -k "RUNME_AWS" tests/integration/test_script_runner.py
