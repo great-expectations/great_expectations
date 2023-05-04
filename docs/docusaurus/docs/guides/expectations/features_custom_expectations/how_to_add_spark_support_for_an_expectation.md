@@ -8,9 +8,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you implement native Spark support for your <TechnicalTag tag="custom_expectation" text="Custom Expectation" />. 
 
+## Prerequisites
+
 <Prerequisites>
 
- - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
+ - [A Custom Expectation](../creating_custom_expectations/overview.md)
     
 </Prerequisites>
 
@@ -74,7 +76,8 @@ For our Custom Column Aggregate Expectation `ExpectColumnMaxToBeBetweenCustom`, 
 ```
 
 If we need a builtin function from `pyspark.sql.functions`, usually aliased to `F`, the import logic in 
-`from great_expectations.optional_imports import F`
+`from great_expectations.compatibility.pyspark import functions as F`
+`from great_expectations.compatibility import pyspark`
 allows us to access these functions even when PySpark is not installed.
 
 <details>
@@ -90,7 +93,7 @@ def _spark(cls, column, strftime_format, **kwargs):
     def is_equal_to_three(val):
         return (val == 3)
 
-    success_udf = F.udf(is_equal_to_three, sparktypes.BooleanType())
+    success_udf = F.udf(is_equal_to_three, pyspark.types.BooleanType())
     return success_udf(column)
 ```
 
@@ -168,7 +171,7 @@ Congratulations!<br/>&#127881; You've successfully implemented Spark support for
 
 ### 4. Contribution (Optional)
 
-This guide will leave you with core functionality sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+This guide will leave you with core functionality sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 
 If you're interested in having your contribution accepted at a Beta level, your Custom Expectation will need to support SQLAlchemy, Spark, and Pandas.
 

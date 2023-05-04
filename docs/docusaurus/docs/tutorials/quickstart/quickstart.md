@@ -8,19 +8,9 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 import SetupAndInstallGx from '/docs/components/setup/link_lists/_setup_and_install_gx.md'
 import DataContextInitializeInstantiateSave from '/docs/components/setup/link_lists/_data_context_initialize_instatiate_save.md'
 
-## Introduction
-
 Few things are as daunting as taking your first steps with a new piece of software.  This guide will introduce you to GX and demonstrate the ease with which you can implement the basic GX workflow. We will walk you through the entire process of installing GX, connecting to some sample data, building your first Expectation based off of an initial Batch of that data, validating your data with that Expectation, and finally reviewing the results of your validation.
 
 Once you have completed this guide you will have a foundation in the basics of using GX.  In the future you will be able to adapt GX to suit your specific needs by customizing the execution of the individual steps you will learn here.
-
-:::info Great Expectations Cloud
-This guide is intended to introduce you to the open source Python and command line use of Great Expectations.  GX also offers an online interface, currently in Beta.  The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
-
-If you are interested in GX Cloud, you should join the GX Cloud Beta.  During this program limited seats are available, but signing up will keep you informed of the product's process.
-
-**[Sign up for the GX Cloud Beta!](https://greatexpectations.io/cloud)**
-:::
 
 ## Prerequisites
 
@@ -28,7 +18,6 @@ If you are interested in GX Cloud, you should join the GX Cloud Beta.  During th
 
 - The ability to install Python packages with pip
 - A working internet browser
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -129,6 +118,15 @@ Great Expectations provides a friendly, human-readable way to view the results o
 
 Now that you've seen how easy it is to implement the GX workflow, it is time to customize that workflow to suit your specific use cases! To help with this we have prepared some more detailed guides on setting up and installing GX and getting an initial Data Context that are tailored to specific environments and resources.
 
+:::info Great Expectations Cloud
+
+This guide has introduced you to the open source Python and command line use of Great Expectations.  GX also offers an online interface, currently in Beta.  The GX Cloud interface significantly simplifies collaboration between data teams and domain experts.
+
+If you are interested in GX Cloud, you should join the GX Cloud Beta.  During this program limited seats are available, but signing up will keep you informed of the product's process.
+
+**[Sign up for the GX Cloud Beta!](https://greatexpectations.io/cloud)**
+:::
+
 ### Installing GX for specific environments and source data systems
 
 <SetupAndInstallGx />
@@ -136,3 +134,4 @@ Now that you've seen how easy it is to implement the GX workflow, it is time to 
 ### Initializing, instantiating, and saving a Data Context
 
 <DataContextInitializeInstantiateSave />
+

@@ -5,10 +5,13 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 This guide will explain how to configure your ``great_expectations.yml`` project config to populate credentials from either a YAML file or a secret manager.
 
-If your Great Expectations deployment is in an environment without a file system, refer to [How to instantiate a Data Context without a yml file](./how_to_instantiate_a_data_context_without_a_yml_file.md) for credential configuration examples.
+If your Great Expectations deployment is in an environment without a file system, refer to [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 
 <Tabs
   groupId="yaml-or-secret-manager"
@@ -19,6 +22,8 @@ If your Great Expectations deployment is in an environment without a file system
   ]}>
 
 <TabItem value="yaml">
+
+## Prerequisites
 
 <Prerequisites></Prerequisites>
 

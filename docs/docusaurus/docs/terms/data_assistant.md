@@ -10,6 +10,10 @@ import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 
 ## Overview
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+
 ### Definition
 
 A Data Assistant is a utility that asks questions about your data, gathering information to describe what is observed, and then presents <TechnicalTag tag="metric" text="Metrics" /> and proposes <TechnicalTag tag="expectation" text="Expectations" /> based on the answers.

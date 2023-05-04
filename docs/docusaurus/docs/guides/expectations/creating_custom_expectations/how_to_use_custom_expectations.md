@@ -5,6 +5,9 @@ import Prerequisites from '../creating_custom_expectations/components/prerequisi
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 Custom <TechnicalTag tag="expectation" text="Expectations"/> are extensions to the core functionality of Great Expectations. Many Custom Expectations may be fit for a very specific purpose,
 or be at lower levels of stability and feature maturity than the core library.
@@ -13,9 +16,11 @@ As such, they are not available for use from the core library, and require regis
 
 This guide will walk you through the process of utilizing Custom Expectations, whether they were built by you or came from the Great Expectations Experimental Library.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Created a <TechnicalTag tag="custom_expectation" text="Custom Expectation"/> ***or*** identified a Custom Expectation for use from the [Great Expectations Experimental Library](https://github.com/great-expectations/great_expectations/tree/develop/contrib/experimental/great_expectations_experimental/expectations)
+- A <TechnicalTag tag="custom_expectation" text="Custom Expectation"/> ***or*** identified a Custom Expectation for use from the [Great Expectations Experimental Library](https://github.com/great-expectations/great_expectations/tree/develop/contrib/experimental/great_expectations_experimental/expectations)
 
 </Prerequisites>
 

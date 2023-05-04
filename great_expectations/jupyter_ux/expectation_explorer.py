@@ -564,7 +564,11 @@ class ExpectationExplorer:
         )
 
     def generate_zero_or_positive_integer_widget(
-        self, value, max=int(9e300), description="", continuous_update=False
+        self,
+        value,
+        max=int(9e300),  # noqa: B008 # function-call-in-default-argument
+        description="",
+        continuous_update=False,
     ):
         return widgets.BoundedIntText(
             value=value,

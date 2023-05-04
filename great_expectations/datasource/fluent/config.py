@@ -23,6 +23,7 @@ from pydantic import Extra, Field, validator
 from ruamel.yaml import YAML
 from typing_extensions import Final
 
+from great_expectations.compatibility.sqlalchemy import TextClause
 from great_expectations.datasource.fluent.constants import (
     _DATA_ASSET_NAME_KEY,
     _DATASOURCE_NAME_KEY,
@@ -67,6 +68,11 @@ _MISSING_FLUENT_DATASOURCES_ERRORS: Final[List[PydanticErrorDict]] = [
 ]
 
 
+JSON_ENCODERS: dict[Type, Callable] = {}
+if TextClause:
+    JSON_ENCODERS[TextClause] = lambda v: str(v)
+
+
 class GxConfig(FluentBaseModel):
     """Represents the full fluent configuration file."""
 
@@ -84,6 +90,7 @@ class GxConfig(FluentBaseModel):
 
     class Config:
         extra = Extra.ignore  # ignore any old style config keys
+        json_encoders = JSON_ENCODERS
 
     @property
     def datasources(self) -> List[Datasource]:
@@ -349,7 +356,7 @@ def _convert_fluent_datasources_loaded_from_yaml_to_internal_object_representati
     config: Dict[str, Any], _allow_empty: bool = False
 ) -> Dict[str, Any]:
     if _FLUENT_DATASOURCES_KEY in config:
-        fluent_datasources: dict = config[_FLUENT_DATASOURCES_KEY]
+        fluent_datasources: dict = config[_FLUENT_DATASOURCES_KEY] or {}
 
         datasource_name: str
         datasource_config: dict

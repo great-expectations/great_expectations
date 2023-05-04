@@ -9,6 +9,9 @@ keywords: [Great Expectations, Data Context, Filesystem, GCS, Google Cloud Stora
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 <!-- ## Prerequisites -->
 import PrereqGcpServiceAccount from '/docs/components/prerequisites/_gcp_service_account.md'
@@ -35,8 +38,6 @@ import GxVerifyInstallation from '/docs/components/setup/_gx_verify_installation
 <!-- ## Next steps -->
 import LinksAfterInstallingGx from '/docs/components/setup/next_steps/_links_after_installing_gx.md'
 
-## Introduction
-
 This guide will walk you through best practices for creating your GX Python environment and demonstrate how to locally install Great Expectations along with the necessary dependencies for working with data stored on Google Cloud Storage.
 
 ## Prerequisites
@@ -45,7 +46,6 @@ This guide will walk you through best practices for creating your GX Python envi
 
 - The ability to install Python modules with pip
 - <PrereqGcpServiceAccount />
-- A passion for data quality
 
 </Prerequisites>
 

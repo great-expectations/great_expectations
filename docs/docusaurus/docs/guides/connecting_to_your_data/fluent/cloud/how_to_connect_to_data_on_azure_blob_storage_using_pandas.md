@@ -20,7 +20,6 @@ import AbsBatchingRegexExample from '/docs/components/connect_to_data/cloud/_abs
 <!-- ## Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 
-## Introduction
 
 <Introduction execution_engine='Pandas' />
 
@@ -30,7 +29,6 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 - <PrereqInstallGxWithDependencies />
 - Access to data in Azure Blob Storage
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -84,4 +82,4 @@ data_asset = datasource.add_csv_asset(
 
 ### Related reading
 
-For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)

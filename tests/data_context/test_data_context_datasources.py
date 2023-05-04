@@ -3,6 +3,7 @@ from unittest import mock
 
 import pytest
 
+import great_expectations as gx
 from great_expectations.data_context.data_context.data_context import DataContext
 from great_expectations.data_context.data_context.ephemeral_data_context import (
     EphemeralDataContext,
@@ -17,6 +18,7 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     DatasourceConfig,
     GXCloudConfig,
+    InMemoryStoreBackendDefaults,
 )
 from great_expectations.datasource import Datasource
 from great_expectations.util import get_context
@@ -427,3 +429,46 @@ def test_BaseDataContext_delete_datasource_updates_cache(
 
     assert not mock_delete.called
     assert name not in context.datasources
+
+
+@pytest.mark.unit
+def test_list_datasources() -> None:
+    project_config = DataContextConfig(
+        store_backend_defaults=InMemoryStoreBackendDefaults()
+    )
+    project_config.datasources = {
+        "my_datasource_name": {
+            "class_name": "Datasource",
+            "data_connectors": {},
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
+                "module_name": "great_expectations.execution_engine",
+            },
+            "module_name": "great_expectations.datasource",
+        }
+    }
+    context = gx.get_context(project_config=project_config)
+
+    datasource_name = "my_experimental_datasource_awaiting_migration"
+    context.sources.add_pandas(datasource_name)
+
+    assert len(context.list_datasources()) == 2
+
+
+@pytest.mark.integration
+def test_get_available_data_assets_names(test_df_pandas, empty_data_context) -> None:
+
+    datasource_name = "my_fluent_pandas_datasource"
+    datasource = empty_data_context.sources.add_pandas(datasource_name)
+    asset_name = "test_data_frame"
+    datasource.add_dataframe_asset(name=asset_name, dataframe=test_df_pandas)
+
+    assert len(empty_data_context.get_available_data_asset_names()) == 1
+
+    data_asset_names = dict(
+        empty_data_context.get_available_data_asset_names(
+            datasource_names=datasource_name
+        )
+    )
+
+    assert asset_name in data_asset_names[datasource_name]

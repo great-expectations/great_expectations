@@ -49,6 +49,7 @@ LOGGER = logging.getLogger(__file__)
 
 p = pytest.param
 
+
 CSV_PATH = FLUENT_DATASOURCE_TEST_DIR.joinpath(
     pathlib.Path("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
 )
@@ -142,25 +143,28 @@ COMBINED_FLUENT_AND_OLD_STYLE_CFG_DICT: Final[dict] = {
             "connection_string": "sqlite://",
         },
     ],
-    "name": "getting_started_datasource",
-    "class_name": "Datasource",
-    "execution_engine": {
-        "class_name": "PandasExecutionEngine",
-    },
-    "data_connectors": {
-        "default_inferred_data_connector_name": {
-            "class_name": "InferredAssetFilesystemDataConnector",
-            "base_directory": "../data/",
-            "default_regex": {
-                "group_names": ["data_asset_name"],
-                "pattern": "(.*)",
+    "datasources": {
+        "getting_started_datasource": {
+            "class_name": "Datasource",
+            "execution_engine": {
+                "class_name": "PandasExecutionEngine",
             },
-        },
-        "default_runtime_data_connector_name": {
-            "class_name": "RuntimeDataConnector",
-            "assets": {
-                "my_runtime_asset_name": {
-                    "batch_identifiers": ["runtime_batch_identifier_name"],
+            "data_connectors": {
+                "default_inferred_data_connector_name": {
+                    "class_name": "InferredAssetFilesystemDataConnector",
+                    "base_directory": "../data/",
+                    "default_regex": {
+                        "group_names": ["data_asset_name"],
+                        "pattern": "(.*)",
+                    },
+                },
+                "default_runtime_data_connector_name": {
+                    "class_name": "RuntimeDataConnector",
+                    "assets": {
+                        "my_runtime_asset_name": {
+                            "batch_identifiers": ["runtime_batch_identifier_name"],
+                        },
+                    },
                 },
             },
         },

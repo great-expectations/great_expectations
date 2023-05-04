@@ -11,8 +11,6 @@ import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_set
 import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
-## Introduction
-
 Few things are as daunting as taking your first steps with a new piece of software. This guide will introduce you to GX Cloud and demonstrate the ease with which you can implement the basic GX workflow. We will walk you through the entire process of connecting to your data, building your first Expectation based off of an initial Batch of that data, validating your data with that Expectation, and finally reviewing the results of your validation.
 
 Once you have completed this guide you will have a foundation in the basics of using GX Cloud. In the future you will be able to adapt GX to suit your specific needs by customizing the execution of the individual steps you will learn here.
@@ -24,18 +22,17 @@ Once you have completed this guide you will have a foundation in the basics of u
 - Installed Great Expectations OSS on your machine.
 - Followed invitation email instructions from the GX team after signing up for Early Access.
 - Successfully logged in to GX Cloud at [https://app.greatexpectations.io](https://app.greatexpectations.io).
-- A passion for data quality.
 
-</Prerequisites> 
+</Prerequisites>
 
 ## Steps
 
 ### 1. Setup
 
-#### 1.1 Generate User Token
+#### 1.1 Generate access token
 
-Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate a User Token. Both `admin` and `editor` roles will suffice for this guide.
-These tokens are view-once and stored as a hash in Great Expectation Cloud's backend database. Once you copy the API key and close the dialog, the Cloud UI will never show the token value again. 
+Go to [“Settings” > “Tokens”](https://app.greatexpectations.io/tokens) in the navigation panel and generate an access token. Both `admin` and `editor` roles will suffice for this guide.
+These tokens are view-once and stored as a hash in Great Expectation Cloud's backend database. Once you copy the API key and close the dialog, the Cloud UI will never show the token value again.
 
 #### 1.2 Import modules
 
@@ -53,14 +50,14 @@ import os
 
 #### 1.3 Create Data Context
 
-Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTag tag="data_context" text="Data Context"/>. 
+Paste this snippet into the next notebook cell to instantiate Cloud <TechnicalTag tag="data_context" text="Data Context"/>.
 
 :::caution
-Please note that GX Cloud API tokens are sensitive information and should not be committed to version control software. Alternatively, add these as [Data Context config variables](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/)
+Please note that access tokens are sensitive information and should not be committed to version control software. Alternatively, add these as [Data Context config variables](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/)
 :::
 
 ```python title="Jupyter Notebook"
-os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<user_token_you_generated_in_the_app>"
+os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<your_gx_cloud_access_token>"
 # your organization_id is indicated on https://app.greatexpectations.io/tokens page
 os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
 
@@ -70,7 +67,7 @@ context = gx.get_context()
 ### 2. Create Datasource
 
 Modify the following snippet code to connect to your <TechnicalTag tag="datasource" text="Datasource"/>.
-In case you don't have some data handy to test in this guide, we can use the [NYC taxi data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). This is an open data set which is updated every month. Each record in the data corresponds to one taxi ride. You can find a link to it in the sniipet below.
+In case you don't have some data handy to test in this guide, we can use the [NYC taxi data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page). This is an open data set which is updated every month. Each record in the data corresponds to one taxi ride. You can find a link to it in the snippet below.
 
 :::caution
 Please note you should not include sensitive info/credentials directly in the config while connecting to your Datasource, since this would be persisted in plain text in the database and presented in Cloud UI. If credentials/full connection string is required, you should use a [config variables file](https://docs.greatexpectations.io/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials/).
@@ -78,7 +75,7 @@ Please note you should not include sensitive info/credentials directly in the co
 
 ```python title="Jupyter Notebook"
 datasource_name = None
-assert datasource_name is not None, "Please set datasource_name." 
+assert datasource_name is not None, "Please set datasource_name."
 batch_identifier_name = None # batch_identifier_name is intended to help identify batches of data passed in directly through dataframes
 assert batch_identifier_name is not None, "Please set batch_identifier_name."
 data_connector_name = None
@@ -132,7 +129,7 @@ An <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is a collect
 expectation_suite_name = None
 assert expectation_suite_name is not None, "Please set expectation_suite_name."
 
-expectation_suite = context.create_expectation_suite(
+expectation_suite = context.add_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )
 ```
@@ -163,7 +160,7 @@ expectation_suite.add_expectation(
 print(expectation_suite)
 
 # Save the Expectation Suite
-context.save_expectation_suite(expectation_suite)
+context.save_expectation_suite(expectation_suite=expectation_suite)
 ```
 
 With the Expectation defined above, we are stating that we _expect_ the column of your choice to always be populated. That is: none of the column's values should be null.
@@ -212,12 +209,12 @@ print(result)
 
 #### 4.3 Review your results
 
-After you run the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, you should see a `validation_result_url` in the result, that takes you directly to GX Cloud, so you can see your <TechnicalTag tag="expectation" text="Expectations"/> and <TechnicalTag tag="validation_result" text="Validation Results"/> in the GX Cloud UI. 
+After you run the <TechnicalTag tag="checkpoint" text="Checkpoint"/>, you should see a `validation_result_url` in the result, that takes you directly to GX Cloud, so you can see your <TechnicalTag tag="expectation" text="Expectations"/> and <TechnicalTag tag="validation_result" text="Validation Results"/> in the GX Cloud UI.
 
 Alternatively, you can visit the [Checkpoints page](https://app.greatexpectations.io/checkpoints) and filter by the Checkpoint, Expectation Suite, or Data Asset you want to see the results for.
 
 
-## Next Steps 
+## Next Steps
 
 Now that you've seen how to implement the GX workflow, it is time to customize the workflow to suit your specific use cases! To help with this we have prepared more detailed guides tailored to specific environments and resources.
 

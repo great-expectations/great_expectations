@@ -14,10 +14,12 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 This guide will help you connect to your data stored on Microsoft Azure Blob Storage (ABS) using Spark.
 This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Have access to data on an ABS container
-- Have access to a working Spark installation
+- Access to data on an ABS container
+- Access to a working Spark installation
 
 </Prerequisites>
 

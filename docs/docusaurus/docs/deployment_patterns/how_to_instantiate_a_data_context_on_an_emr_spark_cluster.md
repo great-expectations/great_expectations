@@ -2,6 +2,9 @@
 title: How to instantiate a Data Context on an EMR Spark cluster
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 This guide will help you instantiate a Data Context on an EMR Spark cluster.
 
@@ -27,7 +30,7 @@ Steps
 
 2. **Configure a Data Context in code.**
 
-    Follow the steps for creating an in-code Data Context in [How to instantiate a Data Context without a yml file](../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md).
+    Follow the steps for creating an in-code Data Context in [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 
     The snippet at the end of the guide shows Python code that instantiates and configures a Data Context in code for an EMR Spark cluster. Copy this snippet into a cell in your EMR Spark notebook or use the other examples to customize your configuration.
 
