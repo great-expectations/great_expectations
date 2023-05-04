@@ -221,7 +221,7 @@ class MockedSecretClient:
 )
 @pytest.mark.unit
 @pytest.mark.skipif(
-    not azure.storage,
+    not (azure.storage and azure.SecretClient),
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 def test_substitute_value_from_azure_keyvault(

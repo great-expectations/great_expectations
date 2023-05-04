@@ -515,7 +515,7 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 # noinspection PyUnusedLocal
 @pytest.mark.skipif(
-    not azure.storage,
+    not (azure.storage and azure.BlobServiceClient),
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
@@ -536,7 +536,7 @@ def test_constructor_with_azure_options(mock_azure_conn):
 
 
 @pytest.mark.skipif(
-    not azure.storage,
+    not (azure.storage and azure.BlobServiceClient),
     reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
 )
 @mock.patch(
