@@ -66,6 +66,11 @@ logger = logging.getLogger(__name__)
 
 
 def _extract_fluent_datasources(config_dict: dict) -> dict:
+    """
+    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
+    We need to extract the fluent datasources otherwise the data context will attempt eager config
+    substitutions and other inappropriate operations.
+    """
     datasources = config_dict.get("datasources", {})
     fds_names: list[str] = []
     for ds_name, ds in datasources.items():
