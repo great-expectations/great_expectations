@@ -4,7 +4,7 @@ import copy
 import logging
 import pickle
 import unittest
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 from unittest import mock
 
 import pytest
@@ -13,11 +13,8 @@ import great_expectations as gx
 from great_expectations.checkpoint import Checkpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import (
-    ExpectationSuiteValidationResult,
     ExpectationConfiguration,
-)
-from great_expectations.datasource.fluent.batch_request import (
-    BatchRequest as FluentBatchRequest,
+    ExpectationSuiteValidationResult,
 )
 from great_expectations.core.config_peer import ConfigOutputModes
 from great_expectations.core.expectation_validation_result import (
@@ -32,6 +29,9 @@ from great_expectations.data_context.types.base import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ValidationResultIdentifier,
+)
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest as FluentBatchRequest,
 )
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import (
