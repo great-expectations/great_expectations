@@ -13,14 +13,14 @@ def make_retrieve_data_context_config_from_cloud(data_dir):
     return retrieve_data_context_config_from_cloud
 
 
-def make_store_get(data_file_name):
+def make_store_get(data_file_name, with_slack):
     def store_get(self, key):
         # key is a 3-tuple with the form
         # (GXCloudRESTResource, cloud_id as a string uuid, name as string)
         # For example:
         # (<GXCloudRESTResource.CHECKPOINT: 'checkpoint'>, '731dc2a5-45d8-4827-9118-39b77c5cd413', 'my_checkpoint')
         if key[0] == GXCloudRESTResource.CHECKPOINT:
-            return {"data": _checkpoint_config(data_file_name)}
+            return {"data": _checkpoint_config(data_file_name, with_slack)}
         elif key[0] == GXCloudRESTResource.EXPECTATION_SUITE:
             return {"data": _expectation_suite()}
         return None
@@ -65,6 +65,21 @@ def list_keys(self, prefix: Tuple = ()):
             "1212e79d-f751-4c6e-921d-26de2b1db174",
             "suite_name",
         )
+
+
+class CallCounter:
+    def __init__(self):
+        self.count = 0
+
+    def increment(self):
+        self.count += 1
+
+
+def make_send_slack_notifications(counter: CallCounter):
+    def send_slack_notification(*args, **kwargs):
+        counter.increment()
+
+    return send_slack_notification
 
 
 def _cloud_config(data_dir):
@@ -204,21 +219,38 @@ def _cloud_config(data_dir):
     }
 
 
-def _checkpoint_config(data_file_name):
+def _checkpoint_config(data_file_name, with_slack):
+    action_list = [
+        {
+            "action": {"class_name": "StoreValidationResultAction"},
+            "name": "store_validation_result",
+        },
+        {
+            "action": {"class_name": "StoreEvaluationParametersAction"},
+            "name": "store_evaluation_params",
+        },
+    ]
+    if with_slack:
+        action_list.append(
+            {
+                "name": "send_slack_notification_on_validation_result",
+                "action": {
+                    "class_name": "SlackNotificationAction",
+                    "slack_webhook": "https://hooks.slack.com/services/11111111111/22222222222/333333333333333333333333",
+                    "notify_on": "all",
+                    "renderer": {
+                        "module_name": "great_expectations.render.renderer.slack_renderer",
+                        "class_name": "SlackRenderer",
+                    },
+                },
+            },
+        )
+
     return [
         {
             "attributes": {
                 "checkpoint_config": {
-                    "action_list": [
-                        {
-                            "action": {"class_name": "StoreValidationResultAction"},
-                            "name": "store_validation_result",
-                        },
-                        {
-                            "action": {"class_name": "StoreEvaluationParametersAction"},
-                            "name": "store_evaluation_params",
-                        },
-                    ],
+                    "action_list": action_list,
                     "batch_request": {},
                     "class_name": "Checkpoint",
                     "config_version": 1.0,

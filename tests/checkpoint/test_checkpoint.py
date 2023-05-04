@@ -4714,12 +4714,7 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
 
 
 @pytest.fixture()
-def fake_cloud_context(tmp_path, monkeypatch):
-    monkeypatch.setenv("GX_CLOUD_BASE_URL", "https://my_cloud_backend.com")
-    monkeypatch.setenv(
-        "GX_CLOUD_ORGANIZATION_ID", "11111111-1111-1111-1111-123456789012"
-    )
-    monkeypatch.setenv("GX_CLOUD_ACCESS_TOKEN", "token")
+def _fake_cloud_context_setup(tmp_path, monkeypatch):
     data_dir = tmp_path
     # When setting up a checkpoint, we validate that there is data in the data directory
     # so we create a file.
@@ -4732,18 +4727,18 @@ def fake_cloud_context(tmp_path, monkeypatch):
         / "taxi_yellow_tripdata_samples"
         / data_file
     ).resolve()
-
     shutil.copy(str(data_file_path), data_dir)
+
+    monkeypatch.setenv("GX_CLOUD_BASE_URL", "https://my_cloud_backend.com")
+    monkeypatch.setenv(
+        "GX_CLOUD_ORGANIZATION_ID", "11111111-1111-1111-1111-123456789012"
+    )
+    monkeypatch.setenv("GX_CLOUD_ACCESS_TOKEN", "token")
 
     monkeypatch.setattr(
         gx.data_context.CloudDataContext,
         "retrieve_data_context_config_from_cloud",
         cloud_config.make_retrieve_data_context_config_from_cloud(data_dir),
-    )
-    monkeypatch.setattr(
-        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
-        "_get",
-        cloud_config.make_store_get(data_file),
     )
     monkeypatch.setattr(
         gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
@@ -4755,23 +4750,60 @@ def fake_cloud_context(tmp_path, monkeypatch):
         "list_keys",
         cloud_config.list_keys,
     )
+    yield data_dir, data_file
+
+
+@pytest.fixture()
+def fake_cloud_context_basic(_fake_cloud_context_setup, monkeypatch):
+    data_dir, data_file = _fake_cloud_context_setup
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_get",
+        cloud_config.make_store_get(data_file, with_slack=False),
+    )
     context = gx.data_context.CloudDataContext()
     yield context
 
 
+@pytest.fixture()
+def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
+    data_dir, data_file = _fake_cloud_context_setup
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_get",
+        cloud_config.make_store_get(data_file, with_slack=True),
+    )
+    slack_counter = cloud_config.CallCounter()
+    monkeypatch.setattr(
+        gx.checkpoint.actions,
+        "send_slack_notification",
+        cloud_config.make_send_slack_notifications(slack_counter),
+    )
+    context = gx.data_context.CloudDataContext()
+    yield context, slack_counter
+
+
 @pytest.mark.integration
 @pytest.mark.cloud
-def test_use_validation_url_from_cloud(fake_cloud_context):
+def test_use_validation_url_from_cloud(fake_cloud_context_basic):
+    context = fake_cloud_context_basic
     checkpoint_name = "my_checkpoint"
-    checkpoint = fake_cloud_context.get_checkpoint(checkpoint_name)
-    checkpoint_result = fake_cloud_context.run_checkpoint(
-        ge_cloud_id=checkpoint.ge_cloud_id
-    )
+    checkpoint = context.get_checkpoint(checkpoint_name)
+    checkpoint_result = context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id)
     assert (
         checkpoint_result.validation_result_url
         == "https://my_cloud_backend.com/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35"
     )
-    print(checkpoint_result)
+
+
+@pytest.mark.integration
+@pytest.mark.cloud
+def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack):
+    context, slack_counter = fake_cloud_context_with_slack
+    checkpoint_name = "my_checkpoint"
+    checkpoint = context.get_checkpoint(checkpoint_name)
+    checkpoint_result = context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id)
+    assert slack_counter.count == 1
 
 
 ### SparkDF Tests
