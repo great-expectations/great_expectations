@@ -15,7 +15,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector.file_path_da
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition
-    from great_expectations.datasource.fluent.interfaces import BatchRequest
+    from great_expectations.datasource.fluent import BatchRequest
 
 logger = logging.getLogger(__name__)
 

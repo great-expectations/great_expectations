@@ -195,7 +195,15 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("samples_2020", id="str"),
+        pytest.param(pathlib.Path("samples_2020"), id="pathlib.Path"),
+    ],
+)
 def test_get_batch_list_from_directory_one_batch(
+    path: PathStr,
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
     """What does this test and why?
@@ -203,7 +211,7 @@ def test_get_batch_list_from_directory_one_batch(
     A "directory" asset should only have a single batch."""
     asset = spark_filesystem_datasource.add_directory_csv_asset(
         name="csv_asset",
-        data_directory="samples_2020",
+        data_directory=path,
         header=True,
         infer_schema=True,
     )
@@ -213,7 +221,15 @@ def test_get_batch_list_from_directory_one_batch(
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("samples_2020", id="str"),
+        pytest.param(pathlib.Path("samples_2020"), id="pathlib.Path"),
+    ],
+)
 def test_get_batch_list_from_directory_merges_files(
+    path: PathStr,
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
     """What does this test and why?
@@ -224,7 +240,7 @@ def test_get_batch_list_from_directory_merges_files(
     """
     asset = spark_filesystem_datasource.add_directory_csv_asset(
         name="csv_asset",
-        data_directory="samples_2020",
+        data_directory=path,
         header=True,
         infer_schema=True,
     )

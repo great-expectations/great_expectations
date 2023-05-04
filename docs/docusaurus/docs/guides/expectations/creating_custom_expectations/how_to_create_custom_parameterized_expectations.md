@@ -6,9 +6,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will walk you through the process of creating Parameterized <TechnicalTag tag="expectation" text="Expectations" /> - very quickly. This method is only available using the new Modular Expectations API in 0.13.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](./overview.md).
+- Completion of the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 

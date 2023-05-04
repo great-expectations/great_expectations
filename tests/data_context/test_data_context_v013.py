@@ -80,7 +80,9 @@ def data_context_with_runtime_sql_datasource_for_testing_get_batch(
     context: DataContext = empty_data_context
     db_file_path: str = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
 
     datasource_config: str = f"""
@@ -168,13 +170,16 @@ def test_load_config_variables_file(
 ):
     # Setup:
     base_path = str(tmp_path_factory.mktemp("test_load_config_variables_file"))
-    os.makedirs(os.path.join(base_path, "uncommitted"), exist_ok=True)
+    os.makedirs(  # noqa: PTH103
+        os.path.join(base_path, "uncommitted"), exist_ok=True  # noqa: PTH118
+    )
     with open(
-        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"
+        os.path.join(base_path, "uncommitted", "dev_variables.yml"), "w"  # noqa: PTH118
     ) as outfile:
         yaml.dump({"env": "dev"}, outfile)
     with open(
-        os.path.join(base_path, "uncommitted", "prod_variables.yml"), "w"
+        os.path.join(base_path, "uncommitted", "prod_variables.yml"),  # noqa: PTH118
+        "w",
     ) as outfile:
         yaml.dump({"env": "prod"}, outfile)
     basic_data_context_v013_config[
@@ -260,7 +265,7 @@ def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
             - airflow_run_id
     """
     # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
+    context.test_yaml_config(
         name="my_pipeline_datasource",
         yaml_config=yaml_config,
         return_mode="report_object",
@@ -325,7 +330,7 @@ data_connectors:
             A:
 """
     # noinspection PyUnusedLocal
-    report_object = context.test_yaml_config(
+    context.test_yaml_config(
         name="my_directory_datasource",
         yaml_config=yaml_config,
         return_mode="report_object",
@@ -480,7 +485,7 @@ data_connectors:
       - airflow_run_id
 """
     # noinspection PyUnusedLocal
-    my_datasource = context.test_yaml_config(
+    context.test_yaml_config(
         name="some_datasource_name",
         yaml_config=yaml_config,
     )
@@ -654,7 +659,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_asset_path = os.path.join(
+    data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
 
@@ -680,7 +685,7 @@ def test_get_batch_with_path_in_runtime_parameters_using_runtime_data_connector(
     assert batch.batch_markers.get("ge_load_time") is not None
 
     # using path with no extension
-    data_asset_path_no_extension = os.path.join(
+    data_asset_path_no_extension = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313"
     )
 
@@ -726,7 +731,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
     context: DataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_asset_path = os.path.join(
+    data_asset_path = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313.csv"
     )
     my_expectation_suite: ExpectationSuite = context.add_expectation_suite(
@@ -752,7 +757,7 @@ def test_get_validator_with_path_in_runtime_parameters_using_runtime_data_connec
     assert len(validator.batches) == 1
 
     # using path with no extension
-    data_asset_path_no_extension = os.path.join(
+    data_asset_path_no_extension = os.path.join(  # noqa: PTH118
         context.root_directory, "..", "data", "titanic", "Titanic_19120414_1313"
     )
 

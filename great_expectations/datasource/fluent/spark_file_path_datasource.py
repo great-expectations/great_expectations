@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, ClassVar, List, Type, Union
+import pathlib
+from typing import TYPE_CHECKING, ClassVar, List, Sequence, Type, Union
 
 import pydantic
 from pydantic import Field
@@ -39,7 +40,7 @@ class CSVAsset(_FilePathDataAsset):
 class DirectoryCSVAsset(_FilePathDataAsset):
     # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"
-    data_directory: str
+    data_directory: pathlib.Path
     header: bool = False
     infer_schema: bool = Field(False, alias="InferSchema")
 
@@ -82,17 +83,23 @@ class ParquetAsset(_FilePathDataAsset):
         return {"datetimeRebaseMode", "int96RebaseMode", "mergeSchema"}
 
 
-_SPARK_FILE_PATH_ASSET_TYPES = Union[CSVAsset, DirectoryCSVAsset]
+# New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
+# and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
+# so that the schemas are generated and the assets are registered.
+_SPARK_FILE_PATH_ASSET_TYPES = (
+    CSVAsset,
+    DirectoryCSVAsset,
+    ParquetAsset,
+)
+_SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[CSVAsset, DirectoryCSVAsset, ParquetAsset]
+# Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
+# tuple so that the appropriate directory related methods are called.
 _SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
     # class attributes
-    asset_types: ClassVar[List[Type[DataAsset]]] = [
-        CSVAsset,
-        DirectoryCSVAsset,
-        ParquetAsset,
-    ]
+    asset_types: ClassVar[Sequence[Type[DataAsset]]] = _SPARK_FILE_PATH_ASSET_TYPES
 
     # instance attributes
-    assets: List[_SPARK_FILE_PATH_ASSET_TYPES] = []  # type: ignore[assignment]
+    assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []  # type: ignore[assignment]

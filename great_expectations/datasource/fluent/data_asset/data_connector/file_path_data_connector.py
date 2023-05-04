@@ -30,8 +30,8 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 # TODO: <Alex>ALEX</Alex>
 
 if TYPE_CHECKING:
+    from great_expectations.alias_types import PathStr
     from great_expectations.datasource.fluent import BatchRequest
-
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +68,7 @@ def file_get_unfiltered_batch_definition_list_fn(
 
 
 def make_directory_get_unfiltered_batch_definition_list_fn(
-    data_directory: str,
+    data_directory: PathStr,
 ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
     def directory_get_unfiltered_batch_definition_list_fn(
         data_connector: FilePathDataConnector,

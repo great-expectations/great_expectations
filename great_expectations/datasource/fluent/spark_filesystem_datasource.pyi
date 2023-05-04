@@ -51,7 +51,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         *,
         batch_metadata: Optional[BatchMetadata] = ...,
         glob_directive: str = "**/*",
-        data_directory: str,
+        data_directory: str | pathlib.Path,
         header: bool = ...,
         infer_schema: bool = ...,
         order_by: Optional[SortersDefinition] = ...,

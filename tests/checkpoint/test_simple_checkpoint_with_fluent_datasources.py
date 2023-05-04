@@ -3,7 +3,6 @@ from typing import Dict, List, Union
 
 import pytest
 
-from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
 from great_expectations.checkpoint.checkpoint import (
     Checkpoint,
     CheckpointResult,
@@ -16,6 +15,7 @@ from great_expectations.data_context import FileDataContext
 from great_expectations.data_context.types.resource_identifiers import (
     ValidationResultIdentifier,
 )
+from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import deep_filter_properties_iterable
 

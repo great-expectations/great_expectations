@@ -13,11 +13,13 @@ While the contents of this document accurately reflect the state of the feature,
 
 :::
 
+## Prerequisites
+
 <Prerequisites>
 
-- Have a basic understanding of <TechnicalTag tag="metric" text="Metrics" /> in Great Expectations.
-- Have a basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations).
-- Have read the overview of <TechnicalTag tag="profiler" text="Profilers" /> and the section on [Rule-Based Profilers](../../../terms/profiler.md#rule-based-profilers) in particular.
+- A basic understanding of <TechnicalTag tag="metric" text="Metrics" /> in Great Expectations.
+- A basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations).
+- Completion of the overview of <TechnicalTag tag="profiler" text="Profilers" /> and the  [Rule-Based Profilers](../../../terms/profiler.md#rule-based-profilers) section.
 
 </Prerequisites>
 

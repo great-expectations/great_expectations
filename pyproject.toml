@@ -272,12 +272,9 @@ extend-exclude = [
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
-    "tests/checkpoint", # 15 warnings
     "tests/cli", # 34 warnings
     "tests/data_asset", # 10 warnings
-    "tests/data_context", # 127 warnings
     "tests/dataset", # 10 warnings
-    "tests/execution_engine",  # 23 warnings
     "tests/expectations", # 56 warnings
     "tests/integration", # 114 warnings
     "tests/rule_based_profiler", # 28 warnings
@@ -375,6 +372,10 @@ filterwarnings = [
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+
+    # Warnings related to GCS Data Connectors
+    "ignore:In order to access blobs with a ConfiguredAssetGCSDataConnector:UserWarning",
+    "ignore:In order to access blobs with an InferredAssetGCSDataConnector:UserWarning",
 
     # python
     # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
