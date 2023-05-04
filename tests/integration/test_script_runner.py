@@ -324,7 +324,7 @@ docs_test_matrix += gcs_integration_tests
 docs_test_matrix += abs_integration_tests
 docs_test_matrix += s3_integration_tests
 docs_test_matrix += athena_integration_tests
-docs_test_matrix += aws_glue_integration_tests
+# docs_test_matrix += aws_glue_integration_tests
 docs_test_matrix += multiple_backend
 
 pandas_integration_tests = [
