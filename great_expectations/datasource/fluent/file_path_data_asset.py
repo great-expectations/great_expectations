@@ -38,9 +38,9 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.spark_generic_splitters import (
     Splitter,
+    SplitterColumnValue,
     SplitterYear,
     SplitterYearAndMonth,
-    SplitterColumnValue,
 )
 
 if TYPE_CHECKING:

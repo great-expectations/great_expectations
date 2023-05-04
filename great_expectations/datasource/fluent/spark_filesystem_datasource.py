@@ -22,7 +22,6 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
     _SPARK_DIRECTORY_ASSET_CLASSES,
 )
 
-
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         _SPARK_FILE_PATH_ASSET_TYPES_UNION,
