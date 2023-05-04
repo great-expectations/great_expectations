@@ -3,13 +3,12 @@ import shutil
 from typing import Dict, List
 
 import pandas as pd
-
 import pytest
 
-from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
 from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
+from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequest
 from great_expectations.util import get_context
 
 
@@ -184,42 +183,62 @@ def titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_emp
     monkeypatch.delenv("GE_USAGE_STATS")
 
     project_path: str = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path: str = os.path.join(project_path, "great_expectations")
-    os.makedirs(os.path.join(context_path, "expectations"), exist_ok=True)
-    data_path: str = os.path.join(context_path, "..", "data", "titanic")
-    os.makedirs(os.path.join(data_path), exist_ok=True)
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH103, PTH118
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "test_fixtures",
                 "great_expectations_v013_no_datasource_stats_enabled.yml",
             ),
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
         str(
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
             )
         ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
         str(
-            os.path.join(context_path, "..", "data", "titanic", "Titanic_19120414_1313")
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313"
+            )
         ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1911.csv")),
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
     )
     shutil.copy(
-        file_relative_path(__file__, os.path.join("..", "test_sets", "Titanic.csv")),
-        str(os.path.join(context_path, "..", "data", "titanic", "Titanic_1912.csv")),
+        file_relative_path(
+            __file__, os.path.join("..", "test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
     )
 
     context = get_context(context_root_dir=context_path)
@@ -297,8 +316,10 @@ def context_with_single_taxi_csv_spark(
     yaml = YAMLHandler()
 
     base_directory = str(tmp_path_factory.mktemp("test_checkpoint_spark"))
-    taxi_asset_base_directory_path: str = os.path.join(base_directory, "data")
-    os.makedirs(taxi_asset_base_directory_path)
+    taxi_asset_base_directory_path: str = os.path.join(  # noqa: PTH118
+        base_directory, "data"
+    )
+    os.makedirs(taxi_asset_base_directory_path)  # noqa: PTH103
 
     # training data
     taxi_csv_source_file_path_training_data: str = file_relative_path(
@@ -306,7 +327,9 @@ def context_with_single_taxi_csv_spark(
         "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2019-01.csv",
     )
     taxi_csv_destination_file_path_training_data: str = str(
-        os.path.join(base_directory, "data/yellow_tripdata_sample_2019-01.csv")
+        os.path.join(  # noqa: PTH118
+            base_directory, "data/yellow_tripdata_sample_2019-01.csv"
+        )
     )
     shutil.copy(
         taxi_csv_source_file_path_training_data,
@@ -319,7 +342,9 @@ def context_with_single_taxi_csv_spark(
         "../test_sets/taxi_yellow_tripdata_samples/yellow_tripdata_sample_2020-01.csv",
     )
     taxi_csv_destination_file_path_test_data: str = str(
-        os.path.join(base_directory, "data/yellow_tripdata_sample_2020-01.csv")
+        os.path.join(  # noqa: PTH118
+            base_directory, "data/yellow_tripdata_sample_2020-01.csv"
+        )
     )
     shutil.copy(
         taxi_csv_source_file_path_test_data, taxi_csv_destination_file_path_test_data
