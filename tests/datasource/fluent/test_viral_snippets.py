@@ -9,12 +9,18 @@ from pprint import pformat as pf
 from typing import TYPE_CHECKING
 
 import pytest
+import responses
 
 from great_expectations import get_context
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
     Datasource,
+)
+from tests.datasource.fluent.conftest import (
+    FAKE_DATA_CONTEXT_ID,
+    FAKE_ORG_ID,
+    GX_CLOUD_MOCK_BASE_URL,
 )
 
 if TYPE_CHECKING:
@@ -86,6 +92,36 @@ def seeded_fds_file_context(
     return context
 
 
+@pytest.fixture
+def seeded_cloud_api_mock(fluent_only_config: GxConfig):
+    org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
+    dc_config_url = f"{org_url_base}/data-context-configuration"
+
+    fds_config = fluent_only_config._json_dict()["fluent_datasources"]
+    logger.info(f"Seeded Datasources ->\n{pf(fds_config, depth=3)}")
+
+    with responses.RequestsMock(assert_all_requests_are_fired=True) as resp_mocker:
+        resp_mocker.get(
+            dc_config_url,
+            json={
+                "anonymous_usage_statistics": {
+                    "data_context_id": FAKE_DATA_CONTEXT_ID,
+                    "enabled": False,
+                },
+                "datasources": fds_config,
+            },
+        )
+        yield resp_mocker
+
+
+@pytest.fixture
+def seeded_cloud_context(
+    seeded_cloud_api_mock,  # NOTE: this fixture must be called first
+    empty_cloud_context_fluent,
+):
+    return empty_cloud_context_fluent
+
+
 def test_load_an_existing_config(
     cloud_storage_get_client_doubles,
     fluent_yaml_config_file: pathlib.Path,
@@ -127,6 +163,33 @@ def test_data_connectors_are_built_on_config_load(
     dc_datasources: dict[str, list[str]] = defaultdict(list)
 
     for datasource in seeded_fds_file_context.fluent_datasources.values():
+        if datasource.data_connector_type:
+            print(f"class: {datasource.__class__.__name__}")
+            print(f"type: {datasource.type}")
+            print(f"data_connector: {datasource.data_connector_type.__name__}")
+            print(f"name: {datasource.name}", end="\n\n")
+
+            dc_datasources[datasource.type].append(datasource.name)
+
+            for asset in datasource.assets:
+                assert isinstance(asset._data_connector, datasource.data_connector_type)
+            print()
+
+    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
+    assert dc_datasources
+
+
+def test_data_connectors_are_built_on_cloud_config_load(
+    seeded_cloud_context: CloudDataContext,
+):
+    """
+    Ensure that all Datasources that require data_connectors have their data_connectors
+    created when loaded from config.
+    """
+    dc_datasources: dict[str, list[str]] = defaultdict(list)
+
+    assert seeded_cloud_context.fluent_datasources
+    for datasource in seeded_cloud_context.fluent_datasources.values():
         if datasource.data_connector_type:
             print(f"class: {datasource.__class__.__name__}")
             print(f"type: {datasource.type}")
