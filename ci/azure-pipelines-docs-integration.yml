@@ -371,7 +371,7 @@ stages:
             wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.2/hadoop-aws-3.3.2.jar
             wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.1026/aws-java-sdk-bundle-1.11.1026.jar
             export SPARK_CLASSPATH=$(System.DefaultWorkingDirectory)/hadoop-aws-3.3.2.jar:$(System.DefaultWorkingDirectory)/aws-java-sdk-bundle-1.11.1026.jar
-            displayName: Download JARS needed for AWS and set SPARK_CLASSPATH
+          displayName: Download JARS needed for AWS and set SPARK_CLASSPATH
         - script: |
             pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines git+https://github.com/awslabs/aws-glue-libs.git
           displayName: 'Install dependencies'
