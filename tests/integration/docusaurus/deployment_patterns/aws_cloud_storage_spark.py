@@ -250,7 +250,7 @@ asset = datasource.add_csv_asset(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py get_batch_request">
-request = asset.build_batch_request(batch_request_options={"year": "2021"})
+request = asset.build_batch_request({"year": "2021"})
 # </snippet>
 
 
