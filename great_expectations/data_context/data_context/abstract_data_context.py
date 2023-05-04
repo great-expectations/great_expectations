@@ -5558,13 +5558,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ds_name = datasource.name
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
-            # if Datasource required a data_connector we need to build the data_connector for each asset
-            if datasource.data_connector_type:
-                for data_asset in datasource.assets:
-                    connect_options = getattr(data_asset, "connect_options", {})
-                    datasource._build_data_connector(data_asset, **connect_options)
+            self._build_fds_asset_data_connectors_if_needed(datasource)
 
             self._add_fluent_datasource(datasource=datasource)
+
+    @staticmethod
+    def _build_fds_asset_data_connectors_if_needed(
+        fds_datasource: FluentDatasource,
+    ) -> None:
+        """If Datasource required a data_connector we need to build the data_connector for each asset"""
+        if fds_datasource.data_connector_type:
+            for data_asset in fds_datasource.assets:
+                connect_options = getattr(data_asset, "connect_options", {})
+                fds_datasource._build_data_connector(data_asset, **connect_options)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
