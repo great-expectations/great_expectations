@@ -710,10 +710,12 @@ class AbstractDataContext(ConfigPeer, ABC):
 
     def _add_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
-    ) -> None:
+    ) -> FluentDatasource:
         if datasource:
+            from_config: bool = False
             datasource_name = datasource.name
         else:
+            from_config = True
             datasource_name = kwargs.get("name", "")
 
         if not datasource_name:
@@ -743,12 +745,13 @@ class AbstractDataContext(ConfigPeer, ABC):
         # temporary workaround while we update stores to work better with Fluent Datasources for all contexts
         # Without this we end up with duplicate entries for datasources in both
         # "fluent_datasources" and "datasources" config/yaml entries.
-        if self._datasource_store.cloud_mode:
+        if self._datasource_store.cloud_mode and not from_config:
             set_datasource = self._datasource_store.set(key=None, value=datasource)
             if set_datasource.id:
                 logger.debug(f"Assigning `id` to '{datasource_name}'")
                 datasource.id = set_datasource.id
         self.datasources[datasource_name] = datasource
+        return datasource
 
     def _update_fluent_datasource(
         self, datasource: Optional[FluentDatasource] = None, **kwargs
@@ -772,6 +775,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         update_datasource._data_context = self
         # config provider needed for config substitution
         update_datasource._config_provider = self.config_provider
+        # rebuild data connector
+        self._build_fds_asset_data_connectors_if_needed(update_datasource)
 
         update_datasource.test_connection()
         update_datasource._data_context._save_project_config()
@@ -4619,6 +4624,13 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _init_datasources(self) -> None:
         """Initialize the datasources in store"""
         config: DataContextConfig = self.config
+
+        if self._datasource_store.cloud_mode:
+            for fds in config.fluent_datasources.values():
+                self._build_fds_asset_data_connectors_if_needed(
+                    self._add_fluent_datasource(**fds)
+                )
+
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
         )
@@ -5558,13 +5570,19 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ds_name = datasource.name
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
-            # if Datasource required a data_connector we need to build the data_connector for each asset
-            if datasource.data_connector_type:
-                for data_asset in datasource.assets:
-                    connect_options = getattr(data_asset, "connect_options", {})
-                    datasource._build_data_connector(data_asset, **connect_options)
+            self._build_fds_asset_data_connectors_if_needed(datasource)
 
             self._add_fluent_datasource(datasource=datasource)
+
+    @staticmethod
+    def _build_fds_asset_data_connectors_if_needed(
+        fds_datasource: FluentDatasource,
+    ) -> None:
+        """If Datasource required a data_connector we need to build the data_connector for each asset"""
+        if fds_datasource.data_connector_type:
+            for data_asset in fds_datasource.assets:
+                connect_options = getattr(data_asset, "connect_options", {})
+                fds_datasource._build_data_connector(data_asset, **connect_options)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
