@@ -39,7 +39,7 @@ Or, for guides on using the block-config method for advanced SQL Datasource conf
 <ConnectingToSqlDatasourcesBlockConfig />
 
 
-</details>
+<details></details>
 
 :::caution Datasources defined with the block-config method
 
