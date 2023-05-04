@@ -61,6 +61,7 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
                 "one_non_null": [np.nan, 2, np.nan, np.nan, np.nan],
                 "all_nulls": [np.nan, np.nan, np.nan, np.nan, np.nan],
             },
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -94,12 +95,6 @@ class ExpectMulticolumnValuesNotToBeAllNull(MulticolumnMapExpectation):
                     "out": {
                         "success": False,
                     },
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
                 },
             ],
         }

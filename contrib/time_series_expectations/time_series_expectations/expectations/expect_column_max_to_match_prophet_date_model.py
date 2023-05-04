@@ -52,6 +52,7 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
                 "x": [100, 102, 101, 100],
                 "y": [100, 100, 100, 500],
             },
+            "only_for": ["pandas"],
             "tests": [
                 {
                     "title": "positive_test",
@@ -80,12 +81,6 @@ class ExpectColumnMaxToMatchProphetDateModel(ColumnAggregateTimeSeriesExpectatio
                         "success": False,
                         "observed_value": 500,
                     },
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
                 },
             ],
         }

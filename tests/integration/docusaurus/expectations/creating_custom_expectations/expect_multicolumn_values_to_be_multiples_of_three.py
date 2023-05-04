@@ -69,6 +69,7 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
                 "col_c": [1, 5, 6, 27, 3],
                 "col_d": [-2, 3, 21, 0, 1],
             },
+            "only_for": ["pandas", "sqlite", "postgresql"],
             "tests": [
                 {
                     "title": "basic_positive_test",
@@ -87,16 +88,6 @@ class ExpectMulticolumnValuesToBeMultiplesOfThree(MulticolumnMapExpectation):
                     "out": {
                         "success": False,
                     },
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
                 },
             ],
         }

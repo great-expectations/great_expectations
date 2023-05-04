@@ -65,6 +65,7 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
                 ],
                 "mixed": ["do", "od", "re", "er", "mi", "im", "fa", "af"],
             },
+            "only_for": ["pandas", "spark", "sqlite", "postgresql"],
             "tests": [
                 {
                     "title": "positive_test_lowercase",
@@ -103,20 +104,6 @@ class ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
                         "unexpected_index_list": [1, 3, 5, 7],
                     },
                     "include_in_gallery": True,
-                },
-            ],
-            "test_backends": [
-                {
-                    "backend": "pandas",
-                    "dialects": None,
-                },
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite", "postgresql"],
-                },
-                {
-                    "backend": "spark",
-                    "dialects": None,
                 },
             ],
         }

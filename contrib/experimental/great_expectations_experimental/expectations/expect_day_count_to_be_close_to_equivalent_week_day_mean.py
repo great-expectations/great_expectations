@@ -140,6 +140,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
                     }
                 ),
             },
+            "only_for": ["sqlite"],
             "tests": [
                 {
                     "title": "positive test",
@@ -193,12 +194,6 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
                     },
                     "out": {"success": False},
                 },
-            ],
-            "test_backends": [
-                {
-                    "backend": "sqlalchemy",
-                    "dialects": ["sqlite"],
-                }
             ],
         }
     ]
