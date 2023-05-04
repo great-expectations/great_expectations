@@ -4,10 +4,10 @@ import difflib
 import functools
 import logging
 import pathlib
+import uuid
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
-import uuid
 
 import pytest
 import responses
