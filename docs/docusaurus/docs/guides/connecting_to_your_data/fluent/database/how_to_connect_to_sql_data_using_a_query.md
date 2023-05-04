@@ -21,28 +21,12 @@ If you would like to connect to the contents of a SQL table instead of the resul
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- An installation of GX set up to work with SQL
-- Source data stored in a SQL database
+- An installation of GX set up to work with SQL. See [How to set up GX to work with SQL databases](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases).
+- Source data stored in a SQL database.
 
 </Prerequisites> 
 
-<details>
-<summary>
-
-### If you still need to set up and install GX...
-
-</summary>
-
-Please reference the appropriate one of these guides:
-
-<SetupAndInstallForSqlData />
-
-</details>
-
-<details>
-<summary>
-
-### If you still need to connect a Datasource to a SQL database...
+### If you still need to connect a Datasource to a SQL database
 
 </summary>
 
