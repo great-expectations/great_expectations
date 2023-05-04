@@ -435,7 +435,7 @@ try:
 except ImportError:
     pyathena = None  # type: ignore[assignment]
     athenatypes = None
-    athenaDialect = None  # type: ignore[assignment,misc]
+    athenaDialect = None
     ATHENA_TYPES = {}
 
 # # Others from great_expectations/dataset/sqlalchemy_dataset.py
