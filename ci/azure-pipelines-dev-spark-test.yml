@@ -327,6 +327,19 @@ stages:
               echo $SPARK_HOME
               echo $PATH
             displayName: download and install Spark 3.3.2
+          - script: |
+              pip install pyspark==3.3.2
+            displayName: pip install pyspark on it's own
+          - script: |
+              export JAVA_HOME=$JAVA_HOME_11_X64
+            displayName: set JAVA_HOMe
+          - script: |
+              wget https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.2/hadoop-aws-3.3.2.jar
+              wget https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.1026/aws-java-sdk-bundle-1.11.1026.jar
+              export SPARK_CLASSPATH=$(System.DefaultWorkingDirectory)/hadoop-aws-3.3.2.jar:$(System.DefaultWorkingDirectory)/aws-java-sdk-bundle-1.11.1026.jar
+
+            displayName: download the JARS
+
 
           # tests containing the name "RUNME_AWS" are run
           - script: |
