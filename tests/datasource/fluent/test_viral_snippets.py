@@ -7,6 +7,7 @@ import pathlib
 from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING
+import uuid
 
 import pytest
 import responses
@@ -93,14 +94,19 @@ def seeded_fds_file_context(
 
 
 @pytest.fixture
-def seeded_cloud_api_mock(fluent_only_config: GxConfig):
+def cloud_api_fake(fluent_only_config: GxConfig):
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
     dc_config_url = f"{org_url_base}/data-context-configuration"
 
-    fds_config = fluent_only_config._json_dict()["fluent_datasources"]
-    logger.info(f"Seeded Datasources ->\n{pf(fds_config, depth=3)}")
+    fds_config = {}
+    for datasource in fluent_only_config._json_dict()["fluent_datasources"]:
+        datasource["id"] = str(uuid.uuid4())
+        fds_config[datasource["name"]] = datasource
 
-    with responses.RequestsMock(assert_all_requests_are_fired=True) as resp_mocker:
+    logger.warning(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
+    assert fds_config
+
+    with responses.RequestsMock() as resp_mocker:
         resp_mocker.get(
             dc_config_url,
             json={
@@ -116,7 +122,7 @@ def seeded_cloud_api_mock(fluent_only_config: GxConfig):
 
 @pytest.fixture
 def seeded_cloud_context(
-    seeded_cloud_api_mock,  # NOTE: this fixture must be called first
+    cloud_api_fake,  # NOTE: this fixture must be called first
     empty_cloud_context_fluent,
 ):
     return empty_cloud_context_fluent
