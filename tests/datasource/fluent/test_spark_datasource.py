@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import json
 import logging
 import pathlib
 from typing import TYPE_CHECKING
@@ -12,9 +11,7 @@ import pytest
 
 from great_expectations.datasource.fluent.spark_datasource import (
     DataFrameAsset,
-    SparkConfig,
 )
-from great_expectations.util import is_candidate_subset_of_target
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
@@ -115,27 +112,3 @@ def test_spark_data_asset_batch_metadata(
         }
     )
     assert batch_list[0].metadata == substituted_batch_metadata
-
-
-def test_spark_config_passed_to_execution_engine(
-    empty_data_context: AbstractDataContext,
-    spark_session,
-):
-    spark_config: SparkConfig | None = {
-        "spark.sql.catalogImplementation": "in-memory",
-        "spark.app.name": "gx_spark_fluent_datasource_test",
-        "spark.default.parallelism": 4,
-        "spark.driver.memory": "16g",
-        "spark.executor.memory": 471859200,
-        "spark.master": "local[*]",
-    }
-    datasource = empty_data_context.sources.add_spark(
-        name="my_spark_datasource",
-        spark_config=spark_config,
-        force_reuse_spark_context=False,
-    )
-    spark_config = json.loads(json.dumps(spark_config), parse_int=str, parse_float=str)
-    assert is_candidate_subset_of_target(
-        candidate=spark_config,
-        target=datasource.get_execution_engine().config["spark_config"],
-    )

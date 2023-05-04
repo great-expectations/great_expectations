@@ -781,7 +781,7 @@ def sniff_s3_compression(s3_url: S3Url) -> Union[str, None]:
 
 # noinspection PyPep8Naming
 def get_or_create_spark_application(
-    spark_config: Optional[Dict[str, Any]] = None,
+    spark_config: Optional[Dict[str, str]] = None,
     force_reuse_spark_context: bool = True,
 ) -> pyspark.SparkSession:
     """Obtains configured Spark session if it has already been initialized; otherwise creates Spark session, configures it, and returns it to caller.
@@ -892,7 +892,7 @@ def get_or_create_spark_session(
 
 
 def spark_restart_required(
-    current_spark_config: List[Tuple[str, Any]], desired_spark_config: dict
+    current_spark_config: List[Tuple[str, str]], desired_spark_config: dict
 ) -> bool:
     """Determines whether or not Spark session should be restarted, based on supplied current and desired configuration.
 

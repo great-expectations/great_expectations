@@ -237,7 +237,7 @@ def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
 
     # The structure of this config is dynamic based on PySpark version;
     # we deem asserting certain key-value pairs sufficient for purposes of this test
-    expected_spark_config: Dict[str, Any] = {
+    expected_spark_config: Dict[str, str] = {
         "spark.app.name": "default_great_expectations_spark_application",
         "spark.default.parallelism": 4,
         "spark.driver.memory": "6g",
