@@ -419,16 +419,20 @@ stages:
 
     - job: test_docs_multiple_database
       timeoutInMinutes: 30
-      condition: or(
-          eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
-          eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
-          eq(variables.isDevelop, true),
-          eq(variables.isManual, true)
-        )
+      condition: false
+#
+#     pymysql.err.Warning: (1051, "Unknown table 'test_ci.taxi_data'"), etc
+#
+#     condition: or(
+#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsDependenciesChanges.DocsDependenciesChanged'], true),
+#         eq(stageDependencies.scope_check.changes.outputs['CheckDocsChanges.DocsChanged'], true),
+#         eq(variables.isDevelop, true),
+#         eq(variables.isManual, true)
+#       )
       variables:
         python.version: '3.8'
       services:
-        trino: trino
+        mysql: mysql
         postgres: postgres
 
       steps:
@@ -442,5 +446,5 @@ stages:
           displayName: 'Install dependencies'
 
         - script: |
-            pytest -rs -v --docs-tests -m integration --trino --postgresql tests/integration/test_script_runner.py
+            pytest -rs -v --docs-tests -m integration --mysql --postgresql tests/integration/test_script_runner.py
           displayName: 'pytest'

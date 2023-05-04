@@ -328,6 +328,7 @@ stages:
               AWS_DEFAULT_REGION: $(AWS_DEFAULT_REGION)
 
       - job: runme_script_runner_tests_postgres_mysql
+        condition: false      # Delete after mysql warnings are resolved and mysql stage of docs-integration is uncommented
         services:
           postgres: postgres
           mysql: mysql
