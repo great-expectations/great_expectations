@@ -258,19 +258,7 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
-        # TODO: I think this is where to look to find the missing batch_definitions
-        #  There are no batch_definitions here after adding the splitter.
-        # TODO: THIS IS A HACK TO GET THINGS WORKING:
-        if batch_request.options.get("passenger_count") == 2:
-            # break if we've already added a splitter and are trying to get a batch definition list with the splitter
-            # breakpoint()
-            pass
         if self.splitter:
-            # self._data_connector._get_unfiltered_batch_definition_list_fn = (
-            #     file_get_unfiltered_batch_definition_list_fn
-            # )
-            # TODO: This works: (kind of):
-            # BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='directory_csv_asset', options={'passenger_count': 2})
             if hasattr(self, "data_directory"):
                 batch_definition_list: List[
                     BatchDefinition
@@ -349,7 +337,6 @@ class _FilePathDataAsset(DataAsset):
         batch_list: List[Batch] = []
 
         batch_spec: BatchSpec
-        batch_spec_options: dict
         batch_data: Any
         batch_markers: BatchMarkers
         batch_metadata: BatchMetadata
@@ -358,59 +345,11 @@ class _FilePathDataAsset(DataAsset):
             # breakpoint()
             pass
         for batch_definition in batch_definition_list:
-            if self.splitter:
-                # breakpoint()
-                # '/Users/anthonyburdi/src/gx/great_expectations/tests/test_sets/taxi_yellow_tripdata_samples/samples_2020'
-                # batch_spec_params = {
-                #     # "path": self.data_directory
-                #     "path": "/Users/anthonyburdi/src/gx/great_expectations/tests/test_sets/taxi_yellow_tripdata_samples/samples_2020"
-                # }  # TODO: AJB What goes here? Data directory. But need to make it absolute or get execution engine to take a non absolute path / pathlib.Path
-                # batch_spec = PathBatchSpec(**batch_spec_params)
-                # Note: if no "path" then we get *** KeyError: 'path':
-                batch_spec = self._data_connector.build_batch_spec(
-                    batch_definition=batch_definition
-                )
-                # breakpoint()
-            else:
-                # breakpoint()
-                batch_spec = self._data_connector.build_batch_spec(
-                    batch_definition=batch_definition
-                )
-                # BatchSpec here is PathBatchSpec:
-                # {'path': '/Users/anthonyburdi/src/gx/great_expectations/tests/test_sets/taxi_yellow_tripdata_samples/samples_2020'}
-                # breakpoint()
-            batch_spec_options = {
-                "reader_method": self._get_reader_method(),
-                "reader_options": self.dict(
-                    include=self._get_reader_options_include(),
-                    exclude=self._EXCLUDE_FROM_READER_OPTIONS,
-                    exclude_unset=True,
-                    by_alias=True,
-                    config_provider=self._datasource._config_provider,
-                ),
-            }
-            if self.splitter:
-                # batch_request.options["year"] = 2020  # TODO: Pull this in from query
-                # batch_request.options["month"] = 5  # TODO: Pull this in from query
-                batch_spec_options["splitter_method"] = self.splitter.method_name
-                batch_spec_options[
-                    "splitter_kwargs"
-                ] = self.splitter.splitter_method_kwargs()
-                batch_spec_options["splitter_kwargs"]["batch_identifiers"] = {}
-                # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
-                # it is hardcoded to a dict above, so we cast it here.
-                cast(
-                    Dict, batch_spec_options["splitter_kwargs"]["batch_identifiers"]
-                ).update(
-                    self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
-                        batch_request.options
-                    )
-                )
+            batch_spec = self._data_connector.build_batch_spec(
+                batch_definition=batch_definition
+            )
+            batch_spec_options = self._batch_spec_options_from_batch_request(batch_request)
             batch_spec.update(batch_spec_options)
-            # breakpoint()
-            if self.splitter:
-                # breakpoint()
-                pass
 
             batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
@@ -439,9 +378,6 @@ class _FilePathDataAsset(DataAsset):
                 legacy_batch_spec=batch_spec,
                 legacy_batch_definition=batch_definition,
             )
-            if self.splitter:
-                # breakpoint()
-                pass
             batch_list.append(batch)
 
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
@@ -449,6 +385,34 @@ class _FilePathDataAsset(DataAsset):
         self.sort_batches(batch_list)
 
         return batch_list
+
+    def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
+        batch_spec_options = {
+            "reader_method": self._get_reader_method(),
+            "reader_options": self.dict(
+                include=self._get_reader_options_include(),
+                exclude=self._EXCLUDE_FROM_READER_OPTIONS,
+                exclude_unset=True,
+                by_alias=True,
+                config_provider=self._datasource._config_provider,
+            ),
+        }
+        if self.splitter:
+            batch_spec_options["splitter_method"] = self.splitter.method_name
+            batch_spec_options[
+                "splitter_kwargs"
+            ] = self.splitter.splitter_method_kwargs()
+            batch_spec_options["splitter_kwargs"]["batch_identifiers"] = {}
+            # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
+            # it is hardcoded to a dict above, so we cast it here.
+            cast(
+                Dict, batch_spec_options["splitter_kwargs"]["batch_identifiers"]
+            ).update(
+                self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
+                    batch_request.options
+                )
+            )
+        return batch_spec_options
 
     def test_connection(self) -> None:
         """Test the connection for the DataAsset.
