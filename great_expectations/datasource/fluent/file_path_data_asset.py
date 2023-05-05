@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import warnings
 from collections import Counter
 from pprint import pformat as pf
 from typing import (
@@ -295,6 +296,14 @@ class _FilePathDataAsset(DataAsset):
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[BatchDefinition]:
+        """Generate a batch definition list from a given batch request, handling a splitter config if present.
+
+        Args:
+            batch_request: Batch request used to generate batch definitions.
+
+        Returns:
+            List of batch definitions.
+        """
         if self.splitter:
             # Remove the splitter kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
             batch_request_options_counts = Counter(self.batch_request_options)
@@ -304,10 +313,7 @@ class _FilePathDataAsset(DataAsset):
                 if batch_request_options_counts[param_name] == 1:
                     batch_request_copy_without_splitter_kwargs.options.pop(param_name)
                 else:
-                    # TODO: Better warning here, or can we pass splitter info differently
-                    print(
-                        "Warning, you are using the same splitter kwarg name as a regex name"
-                    )
+                    warnings.warn(f"The same option name is applied for your batch regex and splitter config: {param_name}")
             batch_definition_list: list[
                 BatchDefinition
             ] = self._data_connector.get_batch_definition_list(

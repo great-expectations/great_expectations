@@ -26,6 +26,14 @@ class _DirectoryDataAsset(_FilePathDataAsset):
     def _get_batch_definition_list(
         self, batch_request: BatchRequest
     ) -> list[BatchDefinition]:
+        """Generate a batch definition list from a given batch request, handling a splitter config if present.
+
+        Args:
+            batch_request: Batch request used to generate batch definitions.
+
+        Returns:
+            List of batch definitions, in the case of a _DirectoryDataAsset the list contains a single item.
+        """
         if self.splitter:
             # Currently non-sql asset splitters do not introspect the datasource for available
             # batches and only return a single batch based on specified batch_identifiers.
