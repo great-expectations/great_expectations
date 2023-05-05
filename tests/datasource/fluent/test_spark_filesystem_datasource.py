@@ -20,10 +20,12 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
+    DirectoryCSVAsset,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
 )
+from great_expectations.compatibility.pyspark import functions as F
 
 logger = logging.getLogger(__name__)
 
@@ -505,3 +507,101 @@ def test_add_csv_asset_with_batch_metadata(
         **batch_options,
         **asset_specified_metadata,
     }
+
+
+@pytest.fixture
+def directory_asset_with_no_splitter(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+) -> DirectoryCSVAsset:
+    asset = spark_filesystem_datasource.add_directory_csv_asset(
+        name="directory_csv_asset_no_splitter",
+        data_directory="samples_2020",
+        header=True,
+        infer_schema=True,
+    )
+    return asset
+
+
+@pytest.fixture
+def directory_asset_with_column_value_splitter(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+) -> DirectoryCSVAsset:
+    asset = spark_filesystem_datasource.add_directory_csv_asset(
+        name="directory_csv_asset_with_splitter",
+        data_directory="samples_2020",
+        header=True,
+        infer_schema=True,
+    )
+    asset_with_passenger_count_splitter = asset.add_splitter_column_value(
+        column_name="passenger_count"
+    )
+    return asset_with_passenger_count_splitter
+
+
+class TestSplitterDirectoryAsset:
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_directory_asset_batch_request_options(
+        self, directory_asset_with_column_value_splitter: DirectoryCSVAsset
+    ):
+        assert directory_asset_with_column_value_splitter.batch_request_options == (
+            "path",
+            "passenger_count",
+        )
+
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_directory_asset_one_batch(
+        self, directory_asset_with_column_value_splitter: DirectoryCSVAsset
+    ):
+        post_passenger_count_splitter_batch_request = (
+            directory_asset_with_column_value_splitter.build_batch_request(
+                {"passenger_count": 2}
+            )
+        )
+        post_passenger_count_splitter_batch_list = directory_asset_with_column_value_splitter.get_batch_list_from_batch_request(
+            post_passenger_count_splitter_batch_request
+        )
+        post_splitter_expected_num_batches = 1
+        assert (
+            len(post_passenger_count_splitter_batch_list)
+            == post_splitter_expected_num_batches
+        )
+
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_directory_asset_one_batch_size(
+        self,
+        directory_asset_with_column_value_splitter: DirectoryCSVAsset,
+        directory_asset_with_no_splitter: DirectoryCSVAsset,
+    ):
+        pre_splitter_batches = (
+            directory_asset_with_no_splitter.get_batch_list_from_batch_request(
+                directory_asset_with_no_splitter.build_batch_request()
+            )
+        )
+        pre_splitter_batch_data = pre_splitter_batches[0].data
+        expected_num_records = pre_splitter_batch_data.dataframe.filter(
+            F.col("passenger_count") == 2
+        ).count()
+
+        post_splitter_batch_request = (
+            directory_asset_with_column_value_splitter.build_batch_request(
+                {"passenger_count": 2}
+            )
+        )
+        post_splitter_batch_list = directory_asset_with_column_value_splitter.get_batch_list_from_batch_request(
+            post_splitter_batch_request
+        )
+        post_splitter_batch_data = post_splitter_batch_list[0].data
+
+        assert post_splitter_batch_data.dataframe.count() == expected_num_records
+
+
+class TestSplitterFileAsset:
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_file_asset(
+        self, spark_filesystem_datasource: SparkFilesystemDatasource
+    ):
+        asset = spark_filesystem_datasource.add_csv_asset(
+            name="file_csv_asset",
+            header=True,
+            infer_schema=True,
+        )
