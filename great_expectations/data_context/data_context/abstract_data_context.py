@@ -4627,9 +4627,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
 
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
-                self._build_fds_asset_data_connectors_if_needed(
-                    self._add_fluent_datasource(**fds)
-                )
+                self._add_fluent_datasource(**fds)._rebuild_asset_data_connectors()
 
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources

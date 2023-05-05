@@ -563,6 +563,7 @@ class Datasource(
         """If Datasource required a data_connector we need to build the data_connector for each asset"""
         if self.data_connector_type:
             for data_asset in self.assets:
+                # check if data_connector exist before rebuilding?
                 connect_options = getattr(data_asset, "connect_options", {})
                 self._build_data_connector(data_asset, **connect_options)
 
