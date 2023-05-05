@@ -84,6 +84,7 @@ def test_get_batch_request_from_acceptable_arguments_runtime_parameter_path(
     base_block: Dict[str, str], param, value
 ):
     """Setting any of the parameters should result in a runtime batch request"""
+    base_block["batch_identifiers"] = {"a": "1"}
     base_block[param] = value
     actual = get_batch_request_from_acceptable_arguments(**base_block)
     assert actual.runtime_parameters[param] == value
@@ -91,8 +92,8 @@ def test_get_batch_request_from_acceptable_arguments_runtime_parameter_path(
 
     # if runtime parameters are present with the same value, we should get an error
     with pytest.raises(ValueError):
-        runtime_parmaeters = {param, value}
-        base_block["runtime_parameters"] = runtime_parmaeters
+        runtime_parameters = {param, value}
+        base_block["runtime_parameters"] = runtime_parameters
         get_batch_request_from_acceptable_arguments(**base_block)
 
 
@@ -107,6 +108,21 @@ def test_get_batch_request_from_acceptable_arguments_runtime_batch_identifiers_k
     actual = get_batch_request_from_acceptable_arguments(**runtime_base_block, **bids)
     assert actual.batch_identifiers == bids
     assert isinstance(actual, RuntimeBatchRequest)
+
+
+@pytest.mark.unit
+def test_get_batch_request_from_acceptable_arguments_runtime_parameters_batch_identifiers_mismatch(
+    base_block: Dict[str, str], runtime_base_block: Dict[str, str]
+):
+    """Batch identifiers can be provided by batch identifiers or kwargs"""
+    # testing no batch identifiers
+    with pytest.raises(ValueError):
+        get_batch_request_from_acceptable_arguments(**runtime_base_block)
+
+    # testing no runtime identifiers, but batch_identifiers
+    bids = {"a": 1, "b": 2}
+    with pytest.raises(ValueError):
+        get_batch_request_from_acceptable_arguments(**base_block, **bids)
 
 
 @pytest.mark.unit

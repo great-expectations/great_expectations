@@ -602,12 +602,23 @@ class RuntimeBatchRequest(BatchRequestBase):
         batch_identifiers: dict,
         batch_spec_passthrough: Optional[dict] = None,
     ) -> None:
+        # we either have both runtime_parameters and batch_identifiers, or neither
+        if not (
+            (not runtime_parameters and not batch_identifiers)
+            or (runtime_parameters and batch_identifiers)
+        ):
+            raise ValueError(
+                "It must be that either both runtime_parameters and batch_identifiers are present, or both are missing"
+            )
+
+        # if there is a value, make sure it is a dict
         if runtime_parameters and not (isinstance(runtime_parameters, dict)):
             raise TypeError(
                 f"""The runtime_parameters must be a non-empty dict object.
                 The type given is "{str(type(runtime_parameters))}", which is an illegal type or an empty dictionary."""
             )
 
+        # if there is a value, make sure it is a dict
         if batch_identifiers and not isinstance(batch_identifiers, dict):
             raise TypeError(
                 f"""The type for batch_identifiers must be a dict object, with keys being identifiers defined in the
