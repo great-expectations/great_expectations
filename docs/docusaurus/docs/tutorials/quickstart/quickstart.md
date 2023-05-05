@@ -12,87 +12,80 @@ Use this quickstart to install Great Expectations, connect to sample data, build
 - pip
 - An internet browser
 
-## Install Great Expectations
+## Install Great Expectations and validate data
 
-Run the following command in an empty base directory inside a Python virtual environment:
+1. Run the following command in an empty base directory inside a Python virtual environment:
 
-```bash title="Terminal input"
-pip install great_expectations
-```
-
-It can take several minutes for the installation to complete.
-
-## Import the Great Expectations module
-
-A module is a Python object that defines functions, classes and variables. The Great Expectations module contains the Python code necessary for Great Expectations to run. Jupyter Notebook is included with Great Expectations, and it lets you edit code and view the results of code runs.
-
-Open Jupyter Notebook and run the following command to import the `great_expectations` module:
-
-```python name="tutorials/quickstart/quickstart.py import_gx"
-```
-
-## Instantiate a Data Context
-
-The Data Context is the Great Expectations Python API entry point, and lets you access a number of utility and convenience methods.
-
-Run the following command to import the `DataContext` object:
-
-```python name="tutorials/quickstart/quickstart.py get_context"
-```
-
-## Connect to data
-
-Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
-
-```python name="tutorials/quickstart/quickstart.py connect_to_data"
-```
-
-The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
-
-## Create Expectations
-
-When you connected to the `.csv` data, a Validator instance was returned.  A Validator is an object that stores and analyzes the referenced Expectations data.  
-
-Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation detects a range of values in the `passenger_count` column (using `auto=True`).
-
-```python name="tutorials/quickstart/quickstart.py create_expectation"
-```
-
-The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
-
-To analyze Validator data, you can create multiple Expectations that call multiple methods with the `validator.expect_*` syntax.
-
-## Validate the data and review the results
-
-1. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations: 
-
-    ```python name="tutorials/quickstart/quickstart.py create_checkpoint"
+    ```bash title="Terminal input"
+    pip install great_expectations
     ```
 
-2. Run the following command to return the Validation results:
+    It can take several minutes for the installation to complete.
 
-    ```python name="tutorials/quickstart/quickstart.py run_checkpoint"
+2. Open Jupyter Notebook and run the following command to import the `great_expectations` module:
+
+    ```python 
+    name="tutorials/quickstart/quickstart.py import_gx"
     ```
 
-3. Run the following command to view an HTML representation of the Validation results:
+3. Run the following command to import the `DataContext` object:
 
-    ```python name="tutorials/quickstart/quickstart.py view_results"
+    ```python 
+    name="tutorials/quickstart/quickstart.py get_context"
+    ```
+
+4. Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
+
+    ```python 
+    name="tutorials/quickstart/quickstart.py connect_to_data"
+    ```
+
+    The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
+
+5. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation detects a range of values in the `passenger_count` column (using `auto=True`).
+
+    ```python 
+    name="tutorials/quickstart/quickstart.py create_expectation"
+    ```
+    The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
+
+    To analyze Validator data, you can create multiple Expectations that call multiple methods with the `validator.expect_*` syntax.
+
+6. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations: 
+
+    ```python 
+    name="tutorials/quickstart/quickstart.py create_checkpoint"
+    ```
+
+7. Run the following command to return the Validation results:
+
+    ```python 
+    name="tutorials/quickstart/quickstart.py run_checkpoint"
+    ```
+
+8. Run the following command to view an HTML representation of the Validation results:
+
+    ```python 
+    name="tutorials/quickstart/quickstart.py view_results"
     ```
 
 ## Related documentation
 
 If you're ready to continue your Great Expectations journey, the following topics can help you implement a tailored solution for your specific environment and business requirements: 
 
-- [How to install Great Expectations locally](../../guides/setup/installation/local.md)
-- [How to set up GX to work with data on AWS S3](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
-- [How to set up GX to work with data in Azure Blob Storage](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
-- [How to set up GX to work with data on GCS](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
-- [How to set up GX to work with SQL databases](../../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md) 
-- [How to instantiate a Data Context on an EMR Spark Cluster](../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](../../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
-- [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
-- [How to initialize a new Data Context with the CLI](../../guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
-- [How to initialize a filesystem Data Context in Python](../../guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
-- [How to instantiate a specific Filesystem Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.md)
-- [How to explicitly instantiate an Ephemeral Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
-- [How to convert an Ephemeral Data Context to a Filesystem Data Context](../../guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context.md)
+- Install GX in a specific environment and connect to a source data system:
+    - [How to install Great Expectations locally](../../guides/setup/installation/local.md)
+    - [How to set up GX to work with data on AWS S3](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
+    - [How to set up GX to work with data in Azure Blob Storage](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
+    - [How to set up GX to work with data on GCS](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
+    - [How to set up GX to work with SQL databases](../../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md) 
+    - [How to instantiate a Data Context on an EMR Spark Cluster](../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
+    - [How to use Great Expectations in Databricks](../../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
+
+- Initialize, instantiate, and save a Data Contex:
+    [How to quickly instantiate a Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
+    - [How to initialize a new Data Context with the CLI](../../guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli.md)
+    - [How to initialize a filesystem Data Context in Python](../../guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python.md)
+    - [How to instantiate a specific Filesystem Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_instantiate_a_specific_filesystem_data_context.md)
+    - [How to explicitly instantiate an Ephemeral Data Context](../../guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context.md)
+    - [How to convert an Ephemeral Data Context to a Filesystem Data Context](../../guides/setup/configuring_data_contexts/how_to_convert_an_ephemeral_data_context_to_a_filesystem_data_context.md)
