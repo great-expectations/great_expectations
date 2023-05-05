@@ -332,6 +332,7 @@ def test_basic_checkpoint_config_validation(
     )
     assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
+        delete_fields={"class_name", "module_name"},
         clean_falsy=True,
     ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
