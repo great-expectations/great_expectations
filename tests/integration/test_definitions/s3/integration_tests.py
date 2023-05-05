@@ -34,13 +34,13 @@ connecting_to_your_data = [
         name="s3_spark_inferred_and_runtime_yaml_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[[BackendDependencies.SPARK, BackendDependencies.AWS]],
+        backend_dependencies=[BackendDependencies.SPARK, BackendDependencies.AWS],
     ),
     IntegrationTestFixture(
         name="s3_spark_inferred_and_runtime_python_example",
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_python_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        backend_dependencies=[[BackendDependencies.SPARK, BackendDependencies.AWS]],
+        backend_dependencies=[BackendDependencies.SPARK, BackendDependencies.AWS],
     ),
 ]
 
