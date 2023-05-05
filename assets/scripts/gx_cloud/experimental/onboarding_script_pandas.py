@@ -1,3 +1,4 @@
+import os
 import pprint
 
 import great_expectations as gx
@@ -15,6 +16,9 @@ import pandas as pd
 # Create a GX Data Context
 # Make sure GX_CLOUD_ACCESS_TOKEN and GX_CLOUD_ORGANIZATION_ID
 # are set in your environment or config_variables.yml
+os.environ["GX_CLOUD_ACCESS_TOKEN"] = "<your_gx_cloud_access_token>"
+os.environ["GX_CLOUD_ORGANIZATION_ID"] = "<organization_id_from_the_app>"
+
 context: CloudDataContext = gx.get_context(
     cloud_mode=True,
 )
