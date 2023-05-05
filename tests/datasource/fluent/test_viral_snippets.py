@@ -26,9 +26,10 @@ from tests.datasource.fluent.conftest import (
 
 if TYPE_CHECKING:
 
+    from pytest import FixtureRequest
+
     from great_expectations.data_context import CloudDataContext
     from great_expectations.datasource.fluent import SqliteDatasource
-
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
 
@@ -141,6 +142,17 @@ def seeded_cloud_context(
     return empty_cloud_context_fluent
 
 
+@pytest.fixture(params=["seeded_fds_file_context", "seeded_cloud_context"])
+def seeded_contexts(
+    request: FixtureRequest,
+):
+    """Parametrized fixture for seeded File and Cloud DataContexts."""
+    context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
+        request.param
+    )
+    return context_fixture
+
+
 def test_load_an_existing_config(
     cloud_storage_get_client_doubles,
     fluent_yaml_config_file: pathlib.Path,
@@ -173,42 +185,17 @@ def test_serialize_fluent_config(
 
 
 def test_data_connectors_are_built_on_config_load(
-    seeded_fds_file_context: FileDataContext,
+    seeded_contexts: CloudDataContext | FileDataContext,
 ):
     """
     Ensure that all Datasources that require data_connectors have their data_connectors
     created when loaded from config.
     """
+    context = seeded_contexts
     dc_datasources: dict[str, list[str]] = defaultdict(list)
 
-    for datasource in seeded_fds_file_context.fluent_datasources.values():
-        if datasource.data_connector_type:
-            print(f"class: {datasource.__class__.__name__}")
-            print(f"type: {datasource.type}")
-            print(f"data_connector: {datasource.data_connector_type.__name__}")
-            print(f"name: {datasource.name}", end="\n\n")
-
-            dc_datasources[datasource.type].append(datasource.name)
-
-            for asset in datasource.assets:
-                assert isinstance(asset._data_connector, datasource.data_connector_type)
-            print()
-
-    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
-    assert dc_datasources
-
-
-def test_data_connectors_are_built_on_cloud_config_load(
-    seeded_cloud_context: CloudDataContext,
-):
-    """
-    Ensure that all Datasources that require data_connectors have their data_connectors
-    created when loaded from config.
-    """
-    dc_datasources: dict[str, list[str]] = defaultdict(list)
-
-    assert seeded_cloud_context.fluent_datasources
-    for datasource in seeded_cloud_context.fluent_datasources.values():
+    assert context.fluent_datasources
+    for datasource in context.fluent_datasources.values():
         if datasource.data_connector_type:
             print(f"class: {datasource.__class__.__name__}")
             print(f"type: {datasource.type}")
