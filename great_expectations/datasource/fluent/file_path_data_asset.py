@@ -15,7 +15,6 @@ from typing import (
     Optional,
     Pattern,
     Set,
-    cast,
 )
 
 import pydantic
@@ -313,16 +312,14 @@ class _FilePathDataAsset(DataAsset):
                 if batch_request_options_counts[param_name] == 1:
                     batch_request_copy_without_splitter_kwargs.options.pop(param_name)
                 else:
-                    warnings.warn(f"The same option name is applied for your batch regex and splitter config: {param_name}")
-            batch_definition_list: list[
-                BatchDefinition
-            ] = self._data_connector.get_batch_definition_list(
+                    warnings.warn(
+                        f"The same option name is applied for your batch regex and splitter config: {param_name}"
+                    )
+            batch_definition_list = self._data_connector.get_batch_definition_list(
                 batch_request=batch_request_copy_without_splitter_kwargs
             )
         else:
-            batch_definition_list: list[
-                BatchDefinition
-            ] = self._data_connector.get_batch_definition_list(
+            batch_definition_list = self._data_connector.get_batch_definition_list(
                 batch_request=batch_request
             )
         return batch_definition_list
@@ -350,19 +347,14 @@ class _FilePathDataAsset(DataAsset):
         }
         if self.splitter:
             batch_spec_options["splitter_method"] = self.splitter.method_name
-            batch_spec_options[
-                "splitter_kwargs"
-            ] = self.splitter.splitter_method_kwargs()
-            batch_spec_options["splitter_kwargs"]["batch_identifiers"] = {}
-            # mypy infers that batch_spec_kwargs["batch_identifiers"] is a collection, but
-            # it is hardcoded to a dict above, so we cast it here.
-            cast(
-                Dict, batch_spec_options["splitter_kwargs"]["batch_identifiers"]
-            ).update(
-                self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
-                    batch_request.options
-                )
+            splitter_kwargs = self.splitter.splitter_method_kwargs()
+            splitter_kwargs[
+                "batch_identifiers"
+            ] = self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(
+                batch_request.options
             )
+            batch_spec_options["splitter_kwargs"] = splitter_kwargs
+
         return batch_spec_options
 
     def test_connection(self) -> None:
