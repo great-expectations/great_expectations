@@ -238,8 +238,8 @@ class PandasExecutionEngine(ExecutionEngine):
                         Bucket=s3_url.bucket, Key=s3_url.key
                     )
             except (
-                aws.botocore.exceptions.ParamValidationError,
-                aws.botocore.exceptions.ClientError,
+                aws.exceptions.ParamValidationError,
+                aws.exceptions.ClientError,
             ) as error:
                 raise gx_exceptions.ExecutionEngineError(
                     f"""PandasExecutionEngine encountered the following error while trying to read data from S3 Bucket: {error}"""

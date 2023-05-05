@@ -15,3 +15,9 @@ try:
     import botocore
 except ImportError:
     botocore = AWS_NOT_IMPORTED
+
+try:
+    from botocore import exceptions
+
+except ImportError:
+    exceptions = AWS_NOT_IMPORTED
