@@ -86,7 +86,7 @@ def test_get_batch_request_from_acceptable_arguments_runtime_parameter_path(
     """Setting any of the parameters should result in a runtime batch request"""
     base_block[param] = value
     actual = get_batch_request_from_acceptable_arguments(**base_block)
-    actual.runtime_parameters[param] == value
+    assert actual.runtime_parameters[param] == value
     assert isinstance(actual, RuntimeBatchRequest)
 
     # if runtime parameters are present with the same value, we should get an error
