@@ -246,7 +246,7 @@ class ExpectationSuite(SerializableDictDot):
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
-        setattr(result, "_data_context", self._data_context)
+        result._data_context = self._data_context
 
         return result
 

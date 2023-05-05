@@ -9,6 +9,10 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 import InProgress from '/docs/components/warnings/_in_progress.md'
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+
 <InProgress />
 
 This guide will help you <TechnicalTag tag="validation" text="Validate" /> your data by running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
@@ -20,6 +24,8 @@ The best way to Validate data in production with Great Expectations is using a <
 - <TechnicalTag tag="action" text="Actions" />
 
 Otherwise, configuring these validation parameters would have to be done via the API.  A Checkpoint encapsulates this "boilerplate" and ensures that all components work in harmony together.  Finally, running a configured Checkpoint is a one-liner, as described below.
+
+## Prerequisites
 
 <Prerequisites>
 

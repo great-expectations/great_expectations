@@ -194,7 +194,9 @@ class ExecutionEngine(ABC):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def configure_validator(self, validator) -> None:
+    def configure_validator(  # noqa: B027 # empty-method-without-abstract-decorator
+        self, validator
+    ) -> None:
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
 

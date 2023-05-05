@@ -76,10 +76,27 @@ connecting_to_your_data = [
     # ),
 ]
 
+deployment_patterns = [
+    IntegrationTestFixture(
+        name="deployment_pattern_pandas_s3",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.AWS],
+    ),
+    # TODO: This will currently work locally, but the Azure CI/CD will need to be updated to enable
+    # IntegrationTestFixture(
+    #     name="deployment_pattern_spark_s3",
+    #     user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py",
+    #     data_context_dir=None,
+    #     backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
+    # )
+]
+
 split_data = []
 
 sample_data = []
 
 s3_integration_tests += connecting_to_your_data
+s3_integration_tests += deployment_patterns
 s3_integration_tests += split_data
 s3_integration_tests += sample_data
