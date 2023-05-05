@@ -84,7 +84,7 @@ def fluent_yaml_config_file(
 
 @pytest.fixture
 @functools.lru_cache(maxsize=1)
-def seeded_fds_file_context(
+def seeded_file_context(
     cloud_storage_get_client_doubles,
     fluent_yaml_config_file: pathlib.Path,
 ) -> FileDataContext:
@@ -142,7 +142,7 @@ def seeded_cloud_context(
     return empty_cloud_context_fluent
 
 
-@pytest.fixture(params=["seeded_fds_file_context", "seeded_cloud_context"])
+@pytest.fixture(params=["seeded_file_context", "seeded_cloud_context"])
 def seeded_contexts(
     request: FixtureRequest,
 ):
@@ -167,17 +167,17 @@ def test_load_an_existing_config(
 
 def test_serialize_fluent_config(
     cloud_storage_get_client_doubles,
-    seeded_fds_file_context: FileDataContext,
+    seeded_file_context: FileDataContext,
 ):
-    dumped_yaml: str = seeded_fds_file_context.fluent_config.yaml()
+    dumped_yaml: str = seeded_file_context.fluent_config.yaml()
     print(f"  Dumped Config\n\n{dumped_yaml}\n")
 
-    assert seeded_fds_file_context.fluent_config.datasources
+    assert seeded_file_context.fluent_config.datasources
 
     for (
         ds_name,
         datasource,
-    ) in seeded_fds_file_context.fluent_config.get_datasources_as_dict().items():
+    ) in seeded_file_context.fluent_config.get_datasources_as_dict().items():
         assert ds_name in dumped_yaml
 
         for asset_name in datasource.get_asset_names():
@@ -212,14 +212,14 @@ def test_data_connectors_are_built_on_config_load(
     assert dc_datasources
 
 
-def test_fluent_simple_validate_workflow(seeded_fds_file_context: FileDataContext):
-    datasource = seeded_fds_file_context.get_datasource("sqlite_taxi")
+def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
+    datasource = seeded_file_context.get_datasource("sqlite_taxi")
     assert isinstance(datasource, Datasource)
     batch_request = datasource.get_asset("my_asset").build_batch_request(
         {"year": 2019, "month": 1}
     )
 
-    validator = seeded_fds_file_context.get_validator(batch_request=batch_request)
+    validator = seeded_file_context.get_validator(batch_request=batch_request)
     result = validator.expect_column_max_to_be_between(
         column="passenger_count", min_value=1, max_value=12
     )
@@ -227,15 +227,15 @@ def test_fluent_simple_validate_workflow(seeded_fds_file_context: FileDataContex
     assert result["success"] is True
 
 
-def test_save_project_does_not_break(seeded_fds_file_context: FileDataContext):
-    print(seeded_fds_file_context.fluent_config)
-    seeded_fds_file_context._save_project_config()
+def test_save_project_does_not_break(seeded_file_context: FileDataContext):
+    print(seeded_file_context.fluent_config)
+    seeded_file_context._save_project_config()
 
 
-def test_variables_save_config_does_not_break(seeded_fds_file_context: FileDataContext):
-    print(f"\tcontext.fluent_config ->\n{seeded_fds_file_context.fluent_config}\n")
-    print(f"\tcontext.variables ->\n{seeded_fds_file_context.variables}")
-    seeded_fds_file_context.variables.save_config()
+def test_variables_save_config_does_not_break(seeded_file_context: FileDataContext):
+    print(f"\tcontext.fluent_config ->\n{seeded_file_context.fluent_config}\n")
+    print(f"\tcontext.variables ->\n{seeded_file_context.variables}")
+    seeded_file_context.variables.save_config()
 
 
 def test_save_datacontext_persists_fluent_config(
