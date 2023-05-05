@@ -72,30 +72,6 @@ def batch_request_as_dict() -> Dict[str, str]:
     }
 
 
-@pytest.fixture
-def common_action_list() -> List[dict]:
-    return [
-        {
-            "name": "store_validation_result",
-            "action": {
-                "class_name": "StoreValidationResultAction",
-            },
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {
-                "class_name": "StoreEvaluationParametersAction",
-            },
-        },
-        {
-            "name": "update_data_docs",
-            "action": {
-                "class_name": "UpdateDataDocsAction",
-            },
-        },
-    ]
-
-
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
     with pytest.raises(AttributeError):
         # noinspection PyTypeChecker
