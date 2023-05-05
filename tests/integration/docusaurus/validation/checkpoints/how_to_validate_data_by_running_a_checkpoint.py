@@ -52,7 +52,10 @@ assert cp.name == "my_checkpoint"
 # context = gx.get_context()
 result = context.run_checkpoint(
     checkpoint_name="my_checkpoint",
-    batch_request={"taxi_source", "yellow_tripdata"},
+    batch_request={
+        "datasource_name": "taxi_source",
+        "data_asset_name": "yellow_tripdata",
+    },
     run_name=None,
 )
 
