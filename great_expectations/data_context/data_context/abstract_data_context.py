@@ -801,6 +801,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             # Raise key error instead?
             logger.info(f"No Datasource '{datasource_name}' to delete")
         self.datasources.pop(datasource_name, None)
+        # self.fluent_config.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
