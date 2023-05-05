@@ -2752,7 +2752,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
-        batch_request = get_batch_request_from_acceptable_arguments(
+        result = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -2775,16 +2775,18 @@ class AbstractDataContext(ConfigPeer, ABC):
             batch_request_options=batch_request_options,
             **kwargs,
         )
-        datasource_name = batch_request.datasource_name
-        if datasource_name in self.datasources:
-            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-        else:
+        datasource_name = result.datasource_name
+        if datasource_name not in self.datasources:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
                 "The given datasource could not be retrieved from the DataContext; "
                 "please confirm that your configuration is accurate.",
             )
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+
+        datasource = self.datasources[
+            datasource_name
+        ]  # this can return one of three datasource types, including Fluent datasource types
+        return datasource.get_batch_list_from_batch_request(batch_request=result)  # type: ignore[union-attr, return-value, arg-type]
 
     @public_api
     @deprecated_method_or_class(
