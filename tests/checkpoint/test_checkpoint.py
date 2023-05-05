@@ -32,7 +32,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import (
     deep_filter_properties_iterable,
-    filter_properties_dict,
 )
 from great_expectations.validator.validator import Validator
 
@@ -316,25 +315,28 @@ def test_basic_checkpoint_config_validation(
     checkpoint_config = CheckpointConfig(**config)
     checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **filter_properties_dict(
+        **deep_filter_properties_iterable(
             properties=checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         ),
     )
-    assert (
-        filter_properties_dict(
-            properties=checkpoint.self_check()["config"],
-            clean_falsy=True,
-        )
-        == expected_checkpoint_config
+    assert deep_filter_properties_iterable(
+        properties=checkpoint.self_check()["config"],
+        delete_fields={"class_name", "module_name"},
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=expected_checkpoint_config,
+        delete_fields={"class_name", "module_name"},
+        clean_falsy=True,
     )
-    assert (
-        filter_properties_dict(
-            properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
-            clean_falsy=True,
-        )
-        == expected_checkpoint_config
+    assert deep_filter_properties_iterable(
+        properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=expected_checkpoint_config,
+        delete_fields={"class_name", "module_name"},
+        clean_falsy=True,
     )
 
     checkpoint: Checkpoint = context.test_yaml_config(
@@ -342,14 +344,14 @@ def test_basic_checkpoint_config_validation(
         name="my_checkpoint",
     )
     assert (
-        filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=checkpoint.self_check()["config"],
             clean_falsy=True,
         )
         == expected_checkpoint_config
     )
     assert (
-        filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
             clean_falsy=True,
         )
@@ -516,10 +518,10 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -661,10 +663,10 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -748,10 +750,10 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         yaml_config=yaml_config,
         name="airflow_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1009,10 +1011,10 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         yaml_config=yaml_config,
         name="airflow_users_node_3",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1098,10 +1100,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         yaml_config=yaml_config,
         name="my_base_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1214,10 +1216,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -2661,7 +2663,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
     )
     simplified_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **filter_properties_dict(
+        **deep_filter_properties_iterable(
             properties=simplified_checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
@@ -2919,7 +2921,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
     )
     nested_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **filter_properties_dict(
+        **deep_filter_properties_iterable(
             properties=nested_checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
