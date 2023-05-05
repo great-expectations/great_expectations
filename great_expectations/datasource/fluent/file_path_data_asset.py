@@ -30,9 +30,6 @@ from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
 )
-from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
-    get_batch_definition_for_splitter,
-)
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
 )
@@ -240,14 +237,6 @@ class _FilePathDataAsset(DataAsset):
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
-    # TODO: This method should be different between file and directory data asset types
-    #  use inheritance instead
-    def _get_path_for_batch_definition(self):
-        if hasattr(self, "data_directory"):
-            path = self.data_directory
-        else:
-            raise Exception("Not sure what to pass here yet")
-        return path
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -258,82 +247,8 @@ class _FilePathDataAsset(DataAsset):
             self.datasource.get_execution_engine()
         )
 
-        if self.splitter:
-            if hasattr(self, "data_directory"):
-                batch_definition_list: List[
-                    BatchDefinition
-                ] = get_batch_definition_for_splitter(
-                    data_connector=self._data_connector,
-                    batch_request=batch_request,
-                    path=self._get_path_for_batch_definition(),
-                )
-            else:
-                # breakpoint()
-                # no path in batch_request
-                # batch_request = BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='file_csv_asset', options={'year': '2020', 'month': '10', 'passenger_count': 2})
-                # TODO: ****************************************************************************************
-                # TODO: Remove the splitter kwargs from the batch_request and add them back later
-                # self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(batch_request.options)
-                # splitter_kwargs = {}
-                # for param_name in self.splitter.param_names:
-                #     splitter_kwargs[param_name] = batch_request.options.pop(param_name)
-                batch_request_options_counts = Counter(self.batch_request_options)
-                batch_request_copy_without_splitter_kwargs = copy.deepcopy(
-                    batch_request
-                )
-                for param_name in self.splitter.param_names:
-                    # TODO: Maybe don't pop if the splitter kwargs match the asset.batch_request_options (e.g. if they are in there twice)?
-                    if batch_request_options_counts[param_name] == 1:
-                        batch_request_copy_without_splitter_kwargs.options.pop(
-                            param_name
-                        )
-                    else:
-                        # TODO: Better warning here, or can we pass splitter info differently
-                        print(
-                            "Warning, you are using the same splitter kwarg name as a regex name"
-                        )
-                # batch_request_copy_without_splitter_kwargs = BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='file_csv_asset', options={'year': '2020', 'month': '10'})
+        batch_definition_list = self._get_batch_definition_list(batch_request)
 
-                # splitter_kwargs = {param_name: batch_request.options.pop(param_name) for param_name in self.splitter.param_names}
-
-                # TODO: ****************************************************************************************
-                batch_definition_list: List[
-                    BatchDefinition
-                ] = self._data_connector.get_batch_definition_list(
-                    batch_request=batch_request_copy_without_splitter_kwargs
-                )
-                # breakpoint()
-            # TODO: Is the difference here that we need to stick the path into the batch_definition?
-            # breakpoint()
-            # Without path:
-            # batch_definition_list = [{'datasource_name': 'spark_filesystem_datasource', 'data_connector_name': 'fluent', 'data_asset_name': 'directory_csv_asset', 'batch_identifiers': {'passenger_count': 2}}]
-            # With path:
-            # batch_definition_list = [{'datasource_name': 'spark_filesystem_datasource', 'data_connector_name': 'fluent', 'data_asset_name': 'directory_csv_asset', 'batch_identifiers': {'passenger_count': 2, 'path': PosixPath('samples_2020')}}]
-
-            # TODO: BatchRequest here is:
-            # BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='directory_csv_asset', options={'passenger_count': 2})
-            # breakpoint()
-            # batch_definition_list: List[
-            #     BatchDefinition
-            # ] = self._data_connector.get_batch_definition_list(
-            #     batch_request=batch_request
-            # )
-            # Here: batch_definition_list = []
-            # breakpoint()
-        else:
-            # breakpoint()
-            # TODO: BatchRequest here is:
-            # BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='directory_csv_asset', options={})
-            # with file based it is:
-            # batch_request = BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='file_csv_asset', options={'year': '2020', 'month': '10'})
-            batch_definition_list: List[
-                BatchDefinition
-            ] = self._data_connector.get_batch_definition_list(
-                batch_request=batch_request
-            )
-            # breakpoint()
-            # Leads to path in batch_identifiers
-            # batch_definition_list=[{'datasource_name': 'spark_filesystem_datasource', 'data_connector_name': 'fluent', 'data_asset_name': 'directory_csv_asset', 'batch_identifiers': {'path': PosixPath('samples_2020')}}]
         batch_list: List[Batch] = []
 
         batch_spec: BatchSpec
@@ -341,9 +256,6 @@ class _FilePathDataAsset(DataAsset):
         batch_markers: BatchMarkers
         batch_metadata: BatchMetadata
         batch: Batch
-        if self.splitter:
-            # breakpoint()
-            pass
         for batch_definition in batch_definition_list:
             batch_spec = self._data_connector.build_batch_spec(
                 batch_definition=batch_definition
@@ -385,6 +297,37 @@ class _FilePathDataAsset(DataAsset):
         self.sort_batches(batch_list)
 
         return batch_list
+
+    def _get_batch_definition_list(self, batch_request: BatchRequest) -> list[BatchDefinition]:
+        if self.splitter:
+            # Remove the splitter kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
+            batch_request_options_counts = Counter(self.batch_request_options)
+            batch_request_copy_without_splitter_kwargs = copy.deepcopy(
+                batch_request
+            )
+            for param_name in self.splitter.param_names:
+                # If the option appears twice (e.g. from asset regex and from splitter) then don't remove.
+                if batch_request_options_counts[param_name] == 1:
+                    batch_request_copy_without_splitter_kwargs.options.pop(
+                        param_name
+                    )
+                else:
+                    # TODO: Better warning here, or can we pass splitter info differently
+                    print(
+                        "Warning, you are using the same splitter kwarg name as a regex name"
+                    )
+            batch_definition_list: list[
+                BatchDefinition
+            ] = self._data_connector.get_batch_definition_list(
+                batch_request=batch_request_copy_without_splitter_kwargs
+            )
+        else:
+            batch_definition_list: list[
+                BatchDefinition
+            ] = self._data_connector.get_batch_definition_list(
+                batch_request=batch_request
+            )
+        return batch_definition_list
 
     def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
         batch_spec_options = {

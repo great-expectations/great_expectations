@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import logging
-import pathlib
 import re
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional, Set, Tuple, Union
@@ -94,26 +93,6 @@ def make_directory_get_unfiltered_batch_definition_list_fn(
         return [batch_definition]
 
     return directory_get_unfiltered_batch_definition_list_fn
-
-
-# TODO: AJB Move this or fix it
-def get_batch_definition_for_splitter(
-    data_connector: FilePathDataConnector,
-    batch_request: BatchRequest,
-    path: pathlib.Path,
-) -> list[BatchDefinition]:
-
-    batch_identifiers = batch_request.options
-    if not batch_identifiers.get("path"):
-        batch_identifiers["path"] = path
-
-    batch_definition = BatchDefinition(
-        datasource_name=data_connector.datasource_name,
-        data_connector_name=_DATA_CONNECTOR_NAME,
-        data_asset_name=data_connector.data_asset_name,
-        batch_identifiers=IDDict(batch_identifiers),
-    )
-    return [batch_definition]
 
 
 class FilePathDataConnector(DataConnector):
