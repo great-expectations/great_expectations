@@ -33,13 +33,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__file__)
 
-
-try:
-    import boto3
-except ImportError:
-    logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
-    boto3 = None
-
+from great_expectations.compatibility import aws
 
 # apply markers to entire test module
 pytestmark = [
@@ -71,7 +65,7 @@ def aws_credentials() -> None:
 @pytest.fixture
 def s3_mock(aws_credentials, aws_region_name: str) -> BaseClient:
     with mock_s3():
-        client = boto3.client("s3", region_name=aws_region_name)
+        client = aws.boto3.client("s3", region_name=aws_region_name)
         yield client
 
 
