@@ -78,13 +78,13 @@ connecting_to_your_data = [
 
 deployment_patterns = [
     IntegrationTestFixture(
-        name="RUNME_AWS_deployment_pattern_pandas_s3",
+        name="deployment_pattern_pandas_s3",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_pandas.py",
         data_context_dir=None,
         backend_dependencies=[BackendDependencies.AWS],
     ),
     IntegrationTestFixture(
-        name="RUNME_AWS_deployment_pattern_spark_s3",
+        name="deployment_pattern_spark_s3",
         user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py",
         data_context_dir=None,
         backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
