@@ -375,9 +375,7 @@ class RuntimeDataConnector(DataConnector):
         ):
             raise gx_exceptions.DataConnectorError(
                 f"""RuntimeDataConnector "{self.name}" requires runtime_parameters and batch_identifiers to be both
-                present and non-empty or
-                both absent in the batch_request parameter.
-                """
+                present and non-empty or both absent in the batch_request parameter."""
             )
 
         if runtime_parameters:
