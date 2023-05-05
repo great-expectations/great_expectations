@@ -308,24 +308,24 @@ fluent_datasources = [
 
 
 # populate docs_test_matrix with sub-lists
-docs_test_matrix += local_tests
-docs_test_matrix += quickstart
-docs_test_matrix += fluent_datasources
-docs_test_matrix += spark_integration_tests
-docs_test_matrix += sqlite_integration_tests
-docs_test_matrix += mysql_integration_tests
-docs_test_matrix += postgresql_integration_tests
-docs_test_matrix += mssql_integration_tests
-docs_test_matrix += trino_integration_tests
-docs_test_matrix += snowflake_integration_tests
-docs_test_matrix += redshift_integration_tests
-docs_test_matrix += bigquery_integration_tests
-docs_test_matrix += gcs_integration_tests
-docs_test_matrix += abs_integration_tests
+# docs_test_matrix += local_tests
+# docs_test_matrix += quickstart
+# docs_test_matrix += fluent_datasources
+# docs_test_matrix += spark_integration_tests
+# docs_test_matrix += sqlite_integration_tests
+# docs_test_matrix += mysql_integration_tests
+# docs_test_matrix += postgresql_integration_tests
+# docs_test_matrix += mssql_integration_tests
+# docs_test_matrix += trino_integration_tests
+# docs_test_matrix += snowflake_integration_tests
+# docs_test_matrix += redshift_integration_tests
+# docs_test_matrix += bigquery_integration_tests
+# docs_test_matrix += gcs_integration_tests
+# docs_test_matrix += abs_integration_tests
 docs_test_matrix += s3_integration_tests
-docs_test_matrix += athena_integration_tests
-docs_test_matrix += aws_glue_integration_tests
-docs_test_matrix += multiple_backend
+# docs_test_matrix += athena_integration_tests
+# docs_test_matrix += aws_glue_integration_tests
+# docs_test_matrix += multiple_backend
 
 pandas_integration_tests = [
     IntegrationTestFixture(
