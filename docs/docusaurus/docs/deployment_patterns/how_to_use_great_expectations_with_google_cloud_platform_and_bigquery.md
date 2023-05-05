@@ -9,10 +9,12 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you integrate Great Expectations (GX) with [Google Cloud Platform](https://cloud.google.com/gcp) (GCP) using our recommended workflow.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Have a working local installation of Great Expectations that is at least version 0.13.49.
-- Have read through the documentation and are familiar with the Google Cloud Platform features that are used in this guide.
+- A working local installation of Great Expectations version 0.13.49 or later.
+- Familiarity with Google Cloud Platform features and functionality.
 - Have completed the set-up of a GCP project with a running Google Cloud Storage container that is accessible from your region, and read/write access to a BigQuery database if this is where you are loading your data.
 - Access to a GCP [Service Account](https://cloud.google.com/iam/docs/service-accounts) with permission to access and read objects in Google Cloud Storage, and read/write access to a BigQuery database if this is where you are loading your data.
 
