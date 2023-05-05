@@ -242,6 +242,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
                 "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"
             )
 
+        if self._persist:
+            batch_data.dataframe.persist()
+
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 
     def get_batch_data_and_markers(
