@@ -5,16 +5,17 @@ from unittest import mock
 import pandas as pd
 import pytest
 
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import azure, google
+from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
+
 # noinspection PyBroadException
 from great_expectations.core.metric_domain_types import MetricDomainTypes
-from great_expectations.validator.computed_metric import MetricValue
-from great_expectations.compatibility import google
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 from great_expectations.execution_engine.pandas_execution_engine import (
     PandasExecutionEngine,
 )
 from great_expectations.util import is_library_loadable
+from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
 
@@ -421,9 +422,9 @@ def test_resolve_metric_bundle_with_nonexistent_metric():
     desired_metrics = (mean, stdev)
 
     # noinspection PyUnusedLocal
-    with pytest.raises(gx_exceptions.MetricProviderError) as e:
+    with pytest.raises(gx_exceptions.MetricProviderError):
         # noinspection PyUnusedLocal
-        metrics = engine.resolve_metrics(metrics_to_resolve=desired_metrics)
+        engine.resolve_metrics(metrics_to_resolve=desired_metrics)
 
 
 # Making sure dataframe property is functional
@@ -454,7 +455,7 @@ def test_get_batch_data(test_df):
 def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     bucket, keys = test_s3_files_compressed
     path = keys[0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_csv")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
@@ -469,7 +470,7 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
 def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     bucket, keys = test_s3_files_parquet
     path = [key for key in keys if key.endswith(".parquet")][0]
-    full_path = f"s3a://{os.path.join(bucket, path)}"
+    full_path = f"s3a://{os.path.join(bucket, path)}"  # noqa: PTH118
 
     batch_spec = S3BatchSpec(path=full_path, reader_method="read_parquet")
     df = PandasExecutionEngine().get_batch_data(batch_spec=batch_spec)
@@ -513,6 +514,10 @@ def test_get_batch_with_split_on_divided_integer_and_sample_on_list(test_df):
 
 
 # noinspection PyUnusedLocal
+@pytest.mark.skipif(
+    not (azure.storage and azure.BlobServiceClient),
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
+)
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )
@@ -530,6 +535,10 @@ def test_constructor_with_azure_options(mock_azure_conn):
     assert engine.config.get("azure_options")["account_url"] == "my_account_url"
 
 
+@pytest.mark.skipif(
+    not (azure.storage and azure.BlobServiceClient),
+    reason='Could not import "azure.storage.blob" from Microsoft Azure cloud',
+)
 @mock.patch(
     "great_expectations.execution_engine.pandas_execution_engine.azure.BlobServiceClient",
 )

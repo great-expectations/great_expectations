@@ -12,6 +12,8 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 Great Expectations works well with many types of Databricks workflows. This guide will help you run Great Expectations in [Databricks](https://databricks.com/).
 
+## Prerequisites
+
 <Prerequisites>
 
 - Have completed Databricks setup including having a running Databricks cluster with attached notebook

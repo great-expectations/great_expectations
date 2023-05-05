@@ -8,10 +8,9 @@ keywords: [Great Expectations, Data Asset, Batch Request, fluent configuration m
 <!-- Import statements start here. -->
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
-In this guide we will demonstrate the process of requesting data from a Datasource that has been defined using the `context.sources.add_*` method.
+This guide demonstrates how you can request data from a Datasource that has been defined with the `context.sources.add_*` method.
 
-If you are using a Datasource that was created by using the block-config method of directly building the Datasource's yaml or Python dictionary configuration, please see:
-- [How to request data from a block-config style Datasource](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)
+If you are using a Datasource that was created by using the block-config method of directly building the Datasource's yaml or Python dictionary configuration, see [How to request data from a block-config style Datasource](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource)
 
 ## Prerequisites
 
@@ -19,7 +18,6 @@ If you are using a Datasource that was created by using the block-config method 
 
 - An installation of GX
 - A Datasource with a configured Data Asset
-- A passion for data quality
 
 </Prerequisites> 
 

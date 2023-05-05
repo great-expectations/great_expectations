@@ -9,6 +9,8 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 By default, Validation Results are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since <TechnicalTag tag="validation_result" text="Validation Results" /> may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure Great Expectations to store them in a PostgreSQL database.
 
+## Prerequisites
+
 <Prerequisites>
 
 - [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).

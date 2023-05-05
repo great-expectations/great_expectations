@@ -2,7 +2,7 @@ import logging
 import os
 import pickle
 import unittest
-from typing import Dict, List, Optional, Union, cast, TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 from unittest import mock
 
 import pandas as pd
@@ -32,7 +32,6 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import (
     deep_filter_properties_iterable,
-    filter_properties_dict,
 )
 from great_expectations.validator.validator import Validator
 
@@ -70,30 +69,6 @@ def batch_request_as_dict() -> Dict[str, str]:
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "Titanic_1911",
     }
-
-
-@pytest.fixture
-def common_action_list() -> List[dict]:
-    return [
-        {
-            "name": "store_validation_result",
-            "action": {
-                "class_name": "StoreValidationResultAction",
-            },
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {
-                "class_name": "StoreEvaluationParametersAction",
-            },
-        },
-        {
-            "name": "update_data_docs",
-            "action": {
-                "class_name": "UpdateDataDocsAction",
-            },
-        },
-    ]
 
 
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
@@ -254,18 +229,14 @@ def test_basic_checkpoint_config_validation(
     )
     captured = capsys.readouterr()
     assert any(
-        [
-            'Your current Checkpoint configuration has an empty or missing "validations" attribute'
-            in message
-            for message in [caplog.text, captured.out]
-        ]
+        'Your current Checkpoint configuration has an empty or missing "validations" attribute'
+        in message
+        for message in [caplog.text, captured.out]
     )
     assert any(
-        [
-            'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
-            in message
-            for message in [caplog.text, captured.out]
-        ]
+        'Your current Checkpoint configuration has an empty or missing "action_list" attribute'
+        in message
+        for message in [caplog.text, captured.out]
     )
 
     assert mock_emit.call_count == 4
@@ -344,25 +315,32 @@ def test_basic_checkpoint_config_validation(
     checkpoint_config = CheckpointConfig(**config)
     checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **filter_properties_dict(
+        **deep_filter_properties_iterable(
             properties=checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         ),
     )
-    assert (
-        filter_properties_dict(
-            properties=checkpoint.self_check()["config"],
-            clean_falsy=True,
-        )
-        == expected_checkpoint_config
+    filtered_expected_checkpoint_config: dict = deep_filter_properties_iterable(
+        properties=expected_checkpoint_config,
+        delete_fields={"class_name", "module_name"},
+        clean_falsy=True,
     )
     assert (
-        filter_properties_dict(
-            properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
+        deep_filter_properties_iterable(
+            properties=checkpoint.self_check()["config"],
+            delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         )
-        == expected_checkpoint_config
+        == filtered_expected_checkpoint_config
+    )
+    assert (
+        deep_filter_properties_iterable(
+            properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
+            delete_fields={"class_name", "module_name"},
+            clean_falsy=True,
+        )
+        == filtered_expected_checkpoint_config
     )
 
     checkpoint: Checkpoint = context.test_yaml_config(
@@ -370,18 +348,20 @@ def test_basic_checkpoint_config_validation(
         name="my_checkpoint",
     )
     assert (
-        filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=checkpoint.self_check()["config"],
+            delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         )
-        == expected_checkpoint_config
+        == filtered_expected_checkpoint_config
     )
     assert (
-        filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
+            delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         )
-        == expected_checkpoint_config
+        == filtered_expected_checkpoint_config
     )
 
     assert mock_emit.call_count == 5
@@ -447,7 +427,7 @@ def test_basic_checkpoint_config_validation(
         match=r'Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
         # noinspection PyUnusedLocal
-        result: CheckpointResult = context.run_checkpoint(
+        context.run_checkpoint(
             checkpoint_name=checkpoint.name,
         )
 
@@ -544,10 +524,10 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -689,10 +669,10 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -776,10 +756,10 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         yaml_config=yaml_config,
         name="airflow_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1037,10 +1017,10 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         yaml_config=yaml_config,
         name="airflow_users_node_3",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1126,10 +1106,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         yaml_config=yaml_config,
         name="my_base_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1242,10 +1222,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1316,7 +1296,7 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
         "my_suite"
     )
     # noinspection PyUnusedLocal
-    result = checkpoint.run()
+    checkpoint.run()
 
     assert (
         len(
@@ -1581,7 +1561,7 @@ def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_
 
 
 @pytest.mark.unit
-def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_validator_is_specified_in_run(
+def test_newstyle_checkpoint_raises_error_if_validator_specified_in_constructor_and_validator_is_specified_in_run(  # noqa: F811 # TODO: review test for duplication
     dummy_data_context,
     common_action_list,
     dummy_validator,
@@ -2563,7 +2543,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -2610,7 +2590,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -2689,7 +2669,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
     )
     simplified_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **filter_properties_dict(
+        **deep_filter_properties_iterable(
             properties=simplified_checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
@@ -2740,21 +2720,23 @@ def test_newstyle_checkpoint_config_substitution_simple(
     substituted_config_template_only: dict = (
         simplified_checkpoint.get_substituted_config()
     )
-    assert deep_filter_properties_iterable(
-        properties=substituted_config_template_only,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
+    filtered_expected_substituted_checkpoint_config_template_only: dict = deep_filter_properties_iterable(
         properties=expected_substituted_checkpoint_config_template_only.to_json_dict(),
         clean_falsy=True,
     )
-    # make sure operation is idempotent
-    simplified_checkpoint.get_substituted_config()
-    assert deep_filter_properties_iterable(
-        properties=substituted_config_template_only,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_substituted_checkpoint_config_template_only.to_json_dict(),
-        clean_falsy=True,
+    assert (
+        deep_filter_properties_iterable(
+            properties=substituted_config_template_only,
+            clean_falsy=True,
+        )
+        == filtered_expected_substituted_checkpoint_config_template_only
+    )
+    assert (
+        deep_filter_properties_iterable(
+            properties=substituted_config_template_only,
+            clean_falsy=True,
+        )
+        == filtered_expected_substituted_checkpoint_config_template_only
     )
 
     # template and runtime kwargs
@@ -2947,7 +2929,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
     )
     nested_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **filter_properties_dict(
+        **deep_filter_properties_iterable(
             properties=nested_checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
@@ -3025,21 +3007,25 @@ def test_newstyle_checkpoint_config_substitution_nested(
     )
 
     substituted_config_template_only = nested_checkpoint.get_substituted_config()
-    assert deep_filter_properties_iterable(
-        properties=substituted_config_template_only,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_nested_checkpoint_config_template_only.to_json_dict(),
-        clean_falsy=True,
+    filtered_expected_nested_checkpoint_config_template_only: dict = (
+        deep_filter_properties_iterable(
+            properties=expected_nested_checkpoint_config_template_only.to_json_dict(),
+            clean_falsy=True,
+        )
     )
-    # make sure operation is idempotent
-    nested_checkpoint.get_substituted_config()
-    assert deep_filter_properties_iterable(
-        properties=substituted_config_template_only,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_nested_checkpoint_config_template_only.to_json_dict(),
-        clean_falsy=True,
+    assert (
+        deep_filter_properties_iterable(
+            properties=substituted_config_template_only,
+            clean_falsy=True,
+        )
+        == filtered_expected_nested_checkpoint_config_template_only
+    )
+    assert (
+        deep_filter_properties_iterable(
+            properties=substituted_config_template_only,
+            clean_falsy=True,
+        )
+        == filtered_expected_nested_checkpoint_config_template_only
     )
 
     # runtime kwargs with new checkpoint template name passed at runtime
@@ -3294,7 +3280,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3340,7 +3326,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3380,12 +3366,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_checkpoint_run_pandas(  # noqa: F811 # TODO: review test for duplication
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3431,7 +3417,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3738,7 +3724,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3789,7 +3775,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3834,12 +3820,12 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 
 
 @pytest.mark.integration
-def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(
+def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_run_runtime_batch_request_path_in_context_run_checkpoint_pandas(  # noqa: F811 # TODO: review test for duplication
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3891,7 +3877,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_validation_result_when_
 ):
     context: FileDataContext = titanic_spark_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
 
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,
@@ -3979,7 +3965,7 @@ def test_newstyle_checkpoint_instantiates_and_produces_a_runtime_parameters_erro
     common_action_list,
 ):
     context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
-    data_path: str = os.path.join(
+    data_path: str = os.path.join(  # noqa: PTH118
         context.datasources["my_datasource"]
         .data_connectors["my_basic_data_connector"]
         .base_directory,

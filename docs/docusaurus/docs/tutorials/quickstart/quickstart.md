@@ -16,9 +16,8 @@ Once you have completed this guide you will have a foundation in the basics of u
 
 <Prerequisites requirePython = {true} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- The ability to install Python packages with pip
-- A working internet browser
-- A passion for data quality
+- The ability to install Python packages with pip.
+- A working internet browser.
 
 </Prerequisites> 
 

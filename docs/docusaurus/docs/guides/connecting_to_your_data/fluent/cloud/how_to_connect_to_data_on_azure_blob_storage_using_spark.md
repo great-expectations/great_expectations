@@ -28,7 +28,6 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 - <PrereqInstallGxWithDependencies />
 - Access to data in Azure Blob Storage
-- A passion for data quality
 
 </Prerequisites> 
 

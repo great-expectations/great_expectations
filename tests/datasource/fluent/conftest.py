@@ -352,7 +352,10 @@ def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
 @pytest.fixture(
     params=["empty_cloud_context_fluent", "empty_file_context"], ids=["cloud", "file"]
 )
-def empty_contexts(request: FixtureRequest) -> FileDataContext | CloudDataContext:
+def empty_contexts(
+    request: FixtureRequest,
+    cloud_storage_get_client_doubles,
+) -> FileDataContext | CloudDataContext:
     context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
         request.param
     )

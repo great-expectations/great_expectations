@@ -15,21 +15,9 @@ An Ephemeral Data Context is a temporary, in-memory Data Context.  They are idea
 
 <Prerequisites>
 
-- A working installation of Great Expectations
-- A passion for Data Quality
+- A Great Expectations instance. See [Setup: Overview](../../setup_overview.md).
 
 </Prerequisites> 
-
-<details>
-<summary>
-
-### If you still need to set up and install GX...
-
-</summary>
-
-<IfYouStillNeedToSetupGx />
-
-</details>
 
 ## Steps
 

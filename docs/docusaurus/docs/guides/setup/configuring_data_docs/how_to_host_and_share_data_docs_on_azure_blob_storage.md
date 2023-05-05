@@ -10,10 +10,12 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 This guide will explain how to host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on Azure Blob Storage. 
 Data Docs will be served using an Azure Blob Storage static website with restricted access.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
-- Have permission to create and configured an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage)
+- [A working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- Permissions to create and configure an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage)
 
 </Prerequisites>
 

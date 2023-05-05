@@ -13,10 +13,12 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 This guide will help you connect to data in a BigQuery database.
 This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Have access to data in a BigQuery database
-- Followed the [Google Cloud Library guide](https://googleapis.dev/python/google-api-core/latest/auth.html) for authentication
+- Access to data in a BigQuery database
+- Completion of the [Google Cloud Library guide](https://googleapis.dev/python/google-api-core/latest/auth.html) for authentication
 
 </Prerequisites>
 

@@ -16,9 +16,11 @@ They are evaluated for the results of a query, and answer a semantic question ab
 
 This guide will walk you through the process of creating your own custom `QueryExpectation`.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](./overview.md).
+- Completion of the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 
