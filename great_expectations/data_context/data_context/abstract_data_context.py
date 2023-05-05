@@ -775,8 +775,8 @@ class AbstractDataContext(ConfigPeer, ABC):
         update_datasource._data_context = self
         # config provider needed for config substitution
         update_datasource._config_provider = self.config_provider
-        # rebuild data connector
-        self._build_fds_asset_data_connectors_if_needed(update_datasource)
+
+        update_datasource._rebuild_asset_data_connectors()
 
         update_datasource.test_connection()
         update_datasource._data_context._save_project_config()
@@ -5570,19 +5570,9 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
             ds_name = datasource.name
             logger.info(f"Loaded '{ds_name}' from fluent config")
 
-            self._build_fds_asset_data_connectors_if_needed(datasource)
+            datasource._rebuild_asset_data_connectors()
 
             self._add_fluent_datasource(datasource=datasource)
-
-    @staticmethod
-    def _build_fds_asset_data_connectors_if_needed(
-        fds_datasource: FluentDatasource,
-    ) -> None:
-        """If Datasource required a data_connector we need to build the data_connector for each asset"""
-        if fds_datasource.data_connector_type:
-            for data_asset in fds_datasource.assets:
-                connect_options = getattr(data_asset, "connect_options", {})
-                fds_datasource._build_data_connector(data_asset, **connect_options)
 
     def _synchronize_fluent_datasources(self) -> Dict[str, FluentDatasource]:
         """
