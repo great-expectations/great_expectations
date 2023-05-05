@@ -15,15 +15,3 @@ try:
     import botocore
 except ImportError:
     botocore = AWS_NOT_IMPORTED
-
-try:
-    from botocore.exceptions import ClientError
-
-except (ImportError, AttributeError):
-    ClientError = AWS_NOT_IMPORTED
-
-try:
-    from botocore.exceptions import ParamValidationError
-
-except (ImportError, AttributeError):
-    ParamValidationError = AWS_NOT_IMPORTED
