@@ -41,8 +41,12 @@ from great_expectations.datasource.fluent.spark_generic_splitters import (
     Splitter,
     SplitterColumnValue,
     SplitterDatetimePart,
+    SplitterDividedInteger,
+    SplitterModInteger,
+    SplitterMultiColumnValue,
     SplitterYear,
     SplitterYearAndMonth,
+    SplitterYearAndMonthAndDay,
 )
 
 if TYPE_CHECKING:
@@ -389,8 +393,6 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         # TODO: Implementation
         pass
 
-    # TODO: Add more add_splitter_* methods here
-
     def _add_splitter(self: Self, splitter: Splitter) -> Self:
         self.splitter = splitter
         self.test_splitter_connection()
@@ -426,15 +428,31 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
+    def add_splitter_year_and_month_and_day(
+        self: Self,
+        column_name: str,
+    ) -> Self:
+        """Associates a year, month, day splitter with this asset.
+        Args:
+            column_name: A column name of the date column where year and month will be parsed out.
+        Returns:
+            This asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            SplitterYearAndMonthAndDay(
+                method_name="split_on_year_and_month_and_day", column_name=column_name
+            )
+        )
+
     def add_splitter_datetime_part(
         self: Self, column_name: str, datetime_parts: List[str]
     ) -> Self:
-        """Associates a datetime part splitter with this sql asset.
+        """Associates a datetime part splitter with this asset.
         Args:
             column_name: Name of the date column where parts will be parsed out.
             datetime_parts: A list of datetime parts to split on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
         Returns:
-            This sql asset so we can use this method fluently.
+            This asset so we can use this method fluently.
         """
         return self._add_splitter(
             SplitterDatetimePart(
@@ -444,17 +462,63 @@ to use as its "include" directive for File-Path style DataAsset processing."""
             )
         )
 
-    # TODO: Add other splitters
     def add_splitter_column_value(self: Self, column_name: str) -> Self:
-        """Associates a column value splitter with this sql asset.
+        """Associates a column value splitter with this asset.
         Args:
             column_name: A column name of the column to split on.
         Returns:
-            This sql asset so we can use this method fluently.
+            This asset so we can use this method fluently.
         """
         return self._add_splitter(
             SplitterColumnValue(
                 method_name="split_on_column_value",
                 column_name=column_name,
+            )
+        )
+
+    def add_splitter_divided_integer(
+        self: Self, column_name: str, divisor: int
+    ) -> Self:
+        """Associates a divided integer splitter with this asset.
+        Args:
+            column_name: A column name of the column to split on.
+            divisor: The divisor to use when splitting.
+        Returns:
+            This asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            SplitterDividedInteger(
+                method_name="split_on_divided_integer",
+                column_name=column_name,
+                divisor=divisor,
+            )
+        )
+
+    def add_splitter_mod_integer(self: Self, column_name: str, mod: int) -> Self:
+        """Associates a mod integer splitter with this asset.
+        Args:
+            column_name: A column name of the column to split on.
+            mod: The mod to use when splitting.
+        Returns:
+            This asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            SplitterModInteger(
+                method_name="split_on_mod_integer",
+                column_name=column_name,
+                mod=mod,
+            )
+        )
+
+    def add_splitter_multi_column_values(self: Self, column_names: list[str]) -> Self:
+        """Associates a multi-column value splitter with this asset.
+        Args:
+            column_names: A list of column names to split on.
+        Returns:
+            This asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            SplitterMultiColumnValue(
+                column_names=column_names, method_name="split_on_multi_column_values"
             )
         )
