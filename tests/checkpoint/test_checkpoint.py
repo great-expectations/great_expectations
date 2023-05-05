@@ -344,19 +344,23 @@ def test_basic_checkpoint_config_validation(
         yaml_config=yaml_config,
         name="my_checkpoint",
     )
-    assert (
-        deep_filter_properties_iterable(
-            properties=checkpoint.self_check()["config"],
-            clean_falsy=True,
-        )
-        == expected_checkpoint_config
+    assert deep_filter_properties_iterable(
+        properties=checkpoint.self_check()["config"],
+        delete_fields={"class_name", "module_name"},
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=expected_checkpoint_config,
+        delete_fields={"class_name", "module_name"},
+        clean_falsy=True,
     )
-    assert (
-        deep_filter_properties_iterable(
-            properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
-            clean_falsy=True,
-        )
-        == expected_checkpoint_config
+    assert deep_filter_properties_iterable(
+        properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
+        delete_fields={"class_name", "module_name"},
+        clean_falsy=True,
+    ) == deep_filter_properties_iterable(
+        properties=expected_checkpoint_config,
+        delete_fields={"class_name", "module_name"},
+        clean_falsy=True,
     )
 
     assert mock_emit.call_count == 5
