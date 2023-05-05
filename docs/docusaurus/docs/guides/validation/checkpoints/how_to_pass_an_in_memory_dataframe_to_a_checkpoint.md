@@ -13,6 +13,7 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 This guide will help you pass an in-memory DataFrame to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" />. This is especially useful if you already have your data in memory due to an existing process such as a pipeline runner.
 
+## Prerequisites
 
 <Prerequisites>
 

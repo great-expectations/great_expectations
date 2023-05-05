@@ -14,9 +14,9 @@ import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
 <!--- ### 2. Verify the content of the Data Context -->
 import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
 
-A <TechnicalTag tag="data_context" text="Data Context" /> will be required in almost all Python scripts utilizing GX, and will be implemented behind the scenes when using GX's <TechnicalTag tag="cli" text="CLI" />.
+A <TechnicalTag tag="data_context" text="Data Context" /> is required in almost all Python scripts utilizing GX, and when using the <TechnicalTag tag="cli" text="CLI" />.
 
-This guide will demonstrate how to initialize, instantiate, and verify the contents of a Filesystem Data Context from through Python code.
+Use the information provided here to use Python code to initialize, instantiate, and verify the contents of a Filesystem Data Context.
 
 ## Prerequisites
 

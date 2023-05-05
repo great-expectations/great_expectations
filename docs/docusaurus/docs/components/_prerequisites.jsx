@@ -53,30 +53,30 @@ export default class Prerequisites extends React.Component {
   defaultPrerequisiteItems () {
     const returnItems = []
     if (this.props.requirePython === true) {
-      returnItems.push(<li>A supported version of ({GxData.min_python} to {GxData.max_python}) Python. To download and install Python, see <a href='https://www.python.org/downloads/'>Python downloads.</a></li>)
+      returnItems.push(<li>A supported version of Python ({GxData.min_python} to {GxData.max_python}). To download and install Python, see <a href='https://www.python.org/downloads/'>Python downloads.</a></li>)
     }
     if (this.props.requireInstallation === true) {
-      returnItems.push(<li>Great Exepctations <a href='/docs/guides/setup/installation/local'>installed and configured</a></li>)
+      returnItems.push(<li>A Great Expectations instance. See <a href='/docs/guides/setup/installation/local'>Install Great Expectations locally</a>.</li>)
     }
     if (this.props.requireDataContext === true) {
-      returnItems.push(<li><a href='/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli'>A Data Context</a></li>)
+      returnItems.push(<li><a href='/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli'>A Data Context.</a></li>)
     }
     if (this.props.requireSourceData === 'filesystem') {
-      returnItems.push(<li>Access to data stored in a filesystem</li>)
+      returnItems.push(<li>Access to data stored in a filesystem.</li>)
     } else if (this.props.requireSourceData === 'SQL') {
-      returnItems.push(<li>Access to data stored in a SQL database</li>)
+      returnItems.push(<li>Access to data stored in a SQL database.</li>)
     }
     if (this.props.requireDatasource === 'Pandas') {
-      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource'>A Datasource configured to access your source data</a></li>)
+      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource'>A Datasource configured to access your source data.</a></li>)
     } else if (this.props.requireDatasource === 'Spark') {
-      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'>A Datasource configured to access your source data</a></li>)
+      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'>A Datasource configured to access your source data.</a></li>)
     } else if (this.props.requireDatasource === 'SQL') {
-      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource'>A Datasource configured to access your source data</a></li>)
+      returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource'>A Datasource configured to access your source data.</a></li>)
     } else if (this.props.requireDatasource === true) {
       returnItems.push(<li><a href='/docs/guides/connecting_to_your_data/connect_to_data_overview'>A Datasource configured to access your source data</a></li>)
     }
     if (this.props.requireExpectationSuite === true) {
-      returnItems.push(<li><a href='/docs/guides/expectations/create_expectations_overview'>An Expectation Suite configured and saved</a></li>)
+      returnItems.push(<li><a href='/docs/guides/expectations/create_expectations_overview'>A configured and saved Expectation Suite.</a></li>)
     }
 
     return returnItems
