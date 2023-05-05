@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import pathlib
 from typing import TYPE_CHECKING, ClassVar, List, Sequence, Type, Union
 
 import pydantic
@@ -9,7 +8,9 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent import _SparkDatasource
-from great_expectations.datasource.fluent.directory_data_asset import _DirectoryDataAsset
+from great_expectations.datasource.fluent.directory_data_asset import (
+    _DirectoryDataAsset,
+)
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )

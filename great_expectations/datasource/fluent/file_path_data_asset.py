@@ -21,7 +21,6 @@ import pydantic
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -50,6 +49,7 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
+    from great_expectations.core.id_dict import BatchSpec
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -259,7 +259,9 @@ class _FilePathDataAsset(DataAsset):
             batch_spec = self._data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
-            batch_spec_options = self._batch_spec_options_from_batch_request(batch_request)
+            batch_spec_options = self._batch_spec_options_from_batch_request(
+                batch_request
+            )
             batch_spec.update(batch_spec_options)
 
             batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
@@ -297,19 +299,17 @@ class _FilePathDataAsset(DataAsset):
 
         return batch_list
 
-    def _get_batch_definition_list(self, batch_request: BatchRequest) -> list[BatchDefinition]:
+    def _get_batch_definition_list(
+        self, batch_request: BatchRequest
+    ) -> list[BatchDefinition]:
         if self.splitter:
             # Remove the splitter kwargs from the batch_request to retrieve the batch and add them back later to the batch_spec.options
             batch_request_options_counts = Counter(self.batch_request_options)
-            batch_request_copy_without_splitter_kwargs = copy.deepcopy(
-                batch_request
-            )
+            batch_request_copy_without_splitter_kwargs = copy.deepcopy(batch_request)
             for param_name in self.splitter.param_names:
                 # If the option appears twice (e.g. from asset regex and from splitter) then don't remove.
                 if batch_request_options_counts[param_name] == 1:
-                    batch_request_copy_without_splitter_kwargs.options.pop(
-                        param_name
-                    )
+                    batch_request_copy_without_splitter_kwargs.options.pop(param_name)
                 else:
                     # TODO: Better warning here, or can we pass splitter info differently
                     print(
@@ -328,7 +328,9 @@ class _FilePathDataAsset(DataAsset):
             )
         return batch_definition_list
 
-    def _batch_spec_options_from_batch_request(self, batch_request: BatchRequest) -> dict:
+    def _batch_spec_options_from_batch_request(
+        self, batch_request: BatchRequest
+    ) -> dict:
         batch_spec_options = {
             "reader_method": self._get_reader_method(),
             "reader_options": self.dict(
