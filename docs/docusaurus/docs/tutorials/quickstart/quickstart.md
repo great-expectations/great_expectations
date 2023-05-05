@@ -33,19 +33,21 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 2. Open Jupyter Notebook and run the following command to import the `great_expectations` module:
 
     ```python 
-    name="tutorials/quickstart/quickstart.py import_gx"
+    import great_expectations as gx
     ```
 
 3. Run the following command to import the `DataContext` object:
 
     ```python 
-    name="tutorials/quickstart/quickstart.py get_context"
+    context = gx.get_context()
     ```
 
 4. Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
 
     ```python 
-    name="tutorials/quickstart/quickstart.py connect_to_data"
+    validator = context.sources.pandas_default.read_csv(
+    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
+    )
     ```
 
     The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
@@ -53,7 +55,8 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 5. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation detects a range of values in the `passenger_count` column (using `auto=True`).
 
     ```python 
-    name="tutorials/quickstart/quickstart.py create_expectation"
+    validator.expect_column_values_to_not_be_null("pickup_datetime")
+    validator.expect_column_values_to_be_between("passenger_count", auto=True)
     ```
     The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
 
@@ -62,19 +65,24 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 6. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations: 
 
     ```python 
-    name="tutorials/quickstart/quickstart.py create_checkpoint"
+    checkpoint = gx.checkpoint.SimpleCheckpoint(
+    name="my_quickstart_checkpoint",
+    data_context=context,
+    validator=validator,
+    )
     ```
 
 7. Run the following command to return the Validation results:
 
     ```python 
-    name="tutorials/quickstart/quickstart.py run_checkpoint"
+    checkpoint_result = checkpoint.run()
     ```
 
 8. Run the following command to view an HTML representation of the Validation results:
 
     ```python 
-    name="tutorials/quickstart/quickstart.py view_results"
+    validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
+    context.open_data_docs(resource_identifier=validation_result_identifier)
     ```
 
 ## Related documentation
