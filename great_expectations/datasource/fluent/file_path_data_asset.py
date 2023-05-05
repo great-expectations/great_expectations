@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import logging
+from collections import Counter
 from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
@@ -20,6 +21,7 @@ import pydantic
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -27,6 +29,9 @@ from great_expectations.datasource.fluent.batch_request import (
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
+)
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+    get_batch_definition_for_splitter,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
@@ -39,6 +44,7 @@ from great_expectations.datasource.fluent.interfaces import (
 from great_expectations.datasource.fluent.spark_generic_splitters import (
     Splitter,
     SplitterColumnValue,
+    SplitterDatetimePart,
     SplitterYear,
     SplitterYearAndMonth,
 )
@@ -47,7 +53,6 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
     from great_expectations.core.batch import BatchDefinition, BatchMarkers
-    from great_expectations.core.id_dict import BatchSpec
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -110,6 +115,17 @@ class _FilePathDataAsset(DataAsset):
         """
 
         extra = pydantic.Extra.allow
+
+    # example = """
+    #     logs/
+    #     logs / 2023 - 05 - 03 /
+    #     logs/2023-05-04/
+    #     logs/2023-05-04/parquet.1
+    #     logs/2023-05-04/parquet.2
+    #     logs/2023-05-04/parquet.3
+    # """
+    #
+    # regex = "logs/{year}-{month}-{day}/"
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -224,6 +240,15 @@ class _FilePathDataAsset(DataAsset):
                 f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
+    # TODO: This method should be different between file and directory data asset types
+    #  use inheritance instead
+    def _get_path_for_batch_definition(self):
+        if hasattr(self, "data_directory"):
+            path = self.data_directory
+        else:
+            raise Exception("Not sure what to pass here yet")
+        return path
+
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> List[Batch]:
@@ -235,10 +260,92 @@ class _FilePathDataAsset(DataAsset):
 
         # TODO: I think this is where to look to find the missing batch_definitions
         #  There are no batch_definitions here after adding the splitter.
-        batch_definition_list: List[
-            BatchDefinition
-        ] = self._data_connector.get_batch_definition_list(batch_request=batch_request)
-        breakpoint()
+        # TODO: THIS IS A HACK TO GET THINGS WORKING:
+        if batch_request.options.get("passenger_count") == 2:
+            # break if we've already added a splitter and are trying to get a batch definition list with the splitter
+            # breakpoint()
+            pass
+        if self.splitter:
+            # self._data_connector._get_unfiltered_batch_definition_list_fn = (
+            #     file_get_unfiltered_batch_definition_list_fn
+            # )
+            # TODO: This works: (kind of):
+            # BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='directory_csv_asset', options={'passenger_count': 2})
+            if hasattr(self, "data_directory"):
+                batch_definition_list: List[
+                    BatchDefinition
+                ] = get_batch_definition_for_splitter(
+                    data_connector=self._data_connector,
+                    batch_request=batch_request,
+                    path=self._get_path_for_batch_definition(),
+                )
+            else:
+                # breakpoint()
+                # no path in batch_request
+                # batch_request = BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='file_csv_asset', options={'year': '2020', 'month': '10', 'passenger_count': 2})
+                # TODO: ****************************************************************************************
+                # TODO: Remove the splitter kwargs from the batch_request and add them back later
+                # self.splitter.batch_request_options_to_batch_spec_kwarg_identifiers(batch_request.options)
+                # splitter_kwargs = {}
+                # for param_name in self.splitter.param_names:
+                #     splitter_kwargs[param_name] = batch_request.options.pop(param_name)
+                batch_request_options_counts = Counter(self.batch_request_options)
+                batch_request_copy_without_splitter_kwargs = copy.deepcopy(
+                    batch_request
+                )
+                for param_name in self.splitter.param_names:
+                    # TODO: Maybe don't pop if the splitter kwargs match the asset.batch_request_options (e.g. if they are in there twice)?
+                    if batch_request_options_counts[param_name] == 1:
+                        batch_request_copy_without_splitter_kwargs.options.pop(
+                            param_name
+                        )
+                    else:
+                        # TODO: Better warning here, or can we pass splitter info differently
+                        print(
+                            "Warning, you are using the same splitter kwarg name as a regex name"
+                        )
+                # batch_request_copy_without_splitter_kwargs = BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='file_csv_asset', options={'year': '2020', 'month': '10'})
+
+                # splitter_kwargs = {param_name: batch_request.options.pop(param_name) for param_name in self.splitter.param_names}
+
+                # TODO: ****************************************************************************************
+                batch_definition_list: List[
+                    BatchDefinition
+                ] = self._data_connector.get_batch_definition_list(
+                    batch_request=batch_request_copy_without_splitter_kwargs
+                )
+                # breakpoint()
+            # TODO: Is the difference here that we need to stick the path into the batch_definition?
+            # breakpoint()
+            # Without path:
+            # batch_definition_list = [{'datasource_name': 'spark_filesystem_datasource', 'data_connector_name': 'fluent', 'data_asset_name': 'directory_csv_asset', 'batch_identifiers': {'passenger_count': 2}}]
+            # With path:
+            # batch_definition_list = [{'datasource_name': 'spark_filesystem_datasource', 'data_connector_name': 'fluent', 'data_asset_name': 'directory_csv_asset', 'batch_identifiers': {'passenger_count': 2, 'path': PosixPath('samples_2020')}}]
+
+            # TODO: BatchRequest here is:
+            # BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='directory_csv_asset', options={'passenger_count': 2})
+            # breakpoint()
+            # batch_definition_list: List[
+            #     BatchDefinition
+            # ] = self._data_connector.get_batch_definition_list(
+            #     batch_request=batch_request
+            # )
+            # Here: batch_definition_list = []
+            # breakpoint()
+        else:
+            # breakpoint()
+            # TODO: BatchRequest here is:
+            # BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='directory_csv_asset', options={})
+            # with file based it is:
+            # batch_request = BatchRequest(datasource_name='spark_filesystem_datasource', data_asset_name='file_csv_asset', options={'year': '2020', 'month': '10'})
+            batch_definition_list: List[
+                BatchDefinition
+            ] = self._data_connector.get_batch_definition_list(
+                batch_request=batch_request
+            )
+            # breakpoint()
+            # Leads to path in batch_identifiers
+            # batch_definition_list=[{'datasource_name': 'spark_filesystem_datasource', 'data_connector_name': 'fluent', 'data_asset_name': 'directory_csv_asset', 'batch_identifiers': {'path': PosixPath('samples_2020')}}]
         batch_list: List[Batch] = []
 
         batch_spec: BatchSpec
@@ -247,10 +354,31 @@ class _FilePathDataAsset(DataAsset):
         batch_markers: BatchMarkers
         batch_metadata: BatchMetadata
         batch: Batch
+        if self.splitter:
+            # breakpoint()
+            pass
         for batch_definition in batch_definition_list:
-            batch_spec = self._data_connector.build_batch_spec(
-                batch_definition=batch_definition
-            )
+            if self.splitter:
+                # breakpoint()
+                # '/Users/anthonyburdi/src/gx/great_expectations/tests/test_sets/taxi_yellow_tripdata_samples/samples_2020'
+                # batch_spec_params = {
+                #     # "path": self.data_directory
+                #     "path": "/Users/anthonyburdi/src/gx/great_expectations/tests/test_sets/taxi_yellow_tripdata_samples/samples_2020"
+                # }  # TODO: AJB What goes here? Data directory. But need to make it absolute or get execution engine to take a non absolute path / pathlib.Path
+                # batch_spec = PathBatchSpec(**batch_spec_params)
+                # Note: if no "path" then we get *** KeyError: 'path':
+                batch_spec = self._data_connector.build_batch_spec(
+                    batch_definition=batch_definition
+                )
+                # breakpoint()
+            else:
+                # breakpoint()
+                batch_spec = self._data_connector.build_batch_spec(
+                    batch_definition=batch_definition
+                )
+                # BatchSpec here is PathBatchSpec:
+                # {'path': '/Users/anthonyburdi/src/gx/great_expectations/tests/test_sets/taxi_yellow_tripdata_samples/samples_2020'}
+                # breakpoint()
             batch_spec_options = {
                 "reader_method": self._get_reader_method(),
                 "reader_options": self.dict(
@@ -279,9 +407,10 @@ class _FilePathDataAsset(DataAsset):
                     )
                 )
             batch_spec.update(batch_spec_options)
-            breakpoint()
+            # breakpoint()
             if self.splitter:
-                breakpoint()
+                # breakpoint()
+                pass
 
             batch_data, batch_markers = execution_engine.get_batch_data_and_markers(
                 batch_spec=batch_spec
@@ -310,6 +439,9 @@ class _FilePathDataAsset(DataAsset):
                 legacy_batch_spec=batch_spec,
                 legacy_batch_definition=batch_definition,
             )
+            if self.splitter:
+                # breakpoint()
+                pass
             batch_list.append(batch)
 
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
@@ -383,6 +515,24 @@ to use as its "include" directive for File-Path style DataAsset processing."""
         return self._add_splitter(
             SplitterYearAndMonth(
                 method_name="split_on_year_and_month", column_name=column_name
+            )
+        )
+
+    def add_splitter_datetime_part(
+        self: Self, column_name: str, datetime_parts: List[str]
+    ) -> Self:
+        """Associates a datetime part splitter with this sql asset.
+        Args:
+            column_name: Name of the date column where parts will be parsed out.
+            datetime_parts: A list of datetime parts to split on, specified as DatePart objects or as their string equivalent e.g. "year", "month", "week", "day", "hour", "minute", or "second"
+        Returns:
+            This sql asset so we can use this method fluently.
+        """
+        return self._add_splitter(
+            SplitterDatetimePart(
+                method_name="split_on_date_parts",
+                column_name=column_name,
+                datetime_parts=datetime_parts,
             )
         )
 

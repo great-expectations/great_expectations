@@ -191,7 +191,9 @@ class SqlAlchemyDataSplitter(DataSplitter):
     def split_on_column_value(column_name: str, batch_identifiers: dict) -> bool:
         """Split using the values in the named column"""
 
-        return sa.column(column_name) == batch_identifiers[column_name]
+        return (
+            sa.column(column_name) == batch_identifiers[column_name]
+        )  # batch_identifiers = {"passenger_count": 2}
 
     def split_on_converted_datetime(
         self,
@@ -736,6 +738,7 @@ class SqlAlchemyDataSplitter(DataSplitter):
         """
         return sa.select(sa.true())
 
+    # TODO: Here
     @staticmethod
     def get_split_query_for_data_for_batch_identifiers_for_split_on_column_value(
         selectable: sqlalchemy.Selectable,
