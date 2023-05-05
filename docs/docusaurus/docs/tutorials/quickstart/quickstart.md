@@ -6,6 +6,14 @@ tag: [tutorial, getting started]
 
 Use this quickstart to install Great Expectations, connect to sample data, build your first Expectation, validate your data, and review the validation results. This is a great place to start if you're new to Great Expectations and aren't sure if it's the right solution for you or your organization. 
 
+:::info Great Expectations Cloud
+
+This quickstart introduces you to the open source Python and command line version of Great Expectations. A Cloud interface will soon be available to simplify collaboration between data teams and domain experts.
+
+If you're interested in Great Expectations Cloud, you can participate in the Beta program. Participation in the program is limited. [Sign up for the Beta program](https://greatexpectations.io/cloud) to express your interest in participating and receive progress updates.
+
+:::
+
 ## Prerequisites
 
 - Python versions 3.7 to 3.10. See [Python downloads](https://www.python.org/downloads/).
