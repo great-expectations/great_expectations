@@ -117,8 +117,7 @@ def seed_cloud(
     logger.info(f"Seeded Datasources ->\n{pf(fds_config, depth=2)}")
     assert fds_config
 
-    cloud_api_fake.remove(responses.GET, dc_config_url)
-    cloud_api_fake.add(
+    cloud_api_fake.upsert(
         responses.GET,
         dc_config_url,
         json={
@@ -129,7 +128,9 @@ def seed_cloud(
             "datasources": fds_config,
         },
     )
-    return cloud_api_fake
+    yield cloud_api_fake
+
+    assert len(cloud_api_fake.calls) >= 1, f"{org_url_base} was never called"
 
 
 @pytest.fixture
