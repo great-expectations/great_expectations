@@ -598,8 +598,8 @@ class RuntimeBatchRequest(BatchRequestBase):
 
     @staticmethod
     def _validate_runtime_batch_request_specific_init_parameters(
-        runtime_parameters: dict,
-        batch_identifiers: dict,
+        runtime_parameters: Optional[dict],
+        batch_identifiers: Optional[dict],
         batch_spec_passthrough: Optional[dict] = None,
     ) -> None:
         # we either have both runtime_parameters and batch_identifiers, or neither
@@ -1079,6 +1079,12 @@ def _get_runtime_batch_request(
         else:
             # TODO: Raise a warning if kwargs exist
             pass
+
+        RuntimeBatchRequest._validate_runtime_batch_request_specific_init_parameters(
+            runtime_parameters=runtime_parameters,
+            batch_identifiers=batch_identifiers,
+            batch_spec_passthrough=batch_spec_passthrough,
+        )
 
         batch_request_as_dict = {
             "datasource_name": datasource_name,

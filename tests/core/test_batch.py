@@ -11,22 +11,24 @@ from great_expectations.datasource.fluent import BatchRequest as FluentBatchRequ
 
 
 @pytest.fixture()
-def base_fluent():
+def base_fluent() -> Dict[str, str]:
     return {"datasource_name": "ds", "data_asset_name": "da"}
 
 
 @pytest.fixture()
-def base_block(base_fluent):
+def base_block(base_fluent: Dict[str, str]) -> Dict[str, str]:
     """Basic block-style batch request args"""
-    base_fluent["data_connector_name"] = "dc"
-    return base_fluent
+    result = base_fluent.copy()
+    result["data_connector_name"] = "dc"
+    return result
 
 
 @pytest.fixture()
-def runtime_base_block(base_block):
+def runtime_base_block(base_block: Dict[str, str]) -> Dict[str, str]:
     """Basic block-style batch request args and a runtime parameter"""
-    base_block["path"] = "p"
-    return base_block
+    result = base_block.copy()
+    result["path"] = "p"
+    return result
 
 
 @pytest.mark.unit
@@ -111,18 +113,13 @@ def test_get_batch_request_from_acceptable_arguments_runtime_batch_identifiers_k
 
 
 @pytest.mark.unit
-def test_get_batch_request_from_acceptable_arguments_runtime_parameters_batch_identifiers_mismatch(
-    base_block: Dict[str, str], runtime_base_block: Dict[str, str]
+def test_get_batch_request_from_acceptable_arguments_runtime_parameters_no_batch_identifiers(
+    runtime_base_block: Dict[str, str]
 ):
     """Batch identifiers can be provided by batch identifiers or kwargs"""
     # testing no batch identifiers
     with pytest.raises(ValueError):
         get_batch_request_from_acceptable_arguments(**runtime_base_block)
-
-    # testing no runtime identifiers, but batch_identifiers
-    bids = {"a": 1, "b": 2}
-    with pytest.raises(ValueError):
-        get_batch_request_from_acceptable_arguments(**base_block, **bids)
 
 
 @pytest.mark.unit
