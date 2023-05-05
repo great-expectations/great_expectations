@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class _DirectoryDataAsset(_FilePathDataAsset):
+    """Used for accessing all the files in a directory as a single batch."""
 
     data_directory: pathlib.Path
 

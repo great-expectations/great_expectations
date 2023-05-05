@@ -22,6 +22,7 @@ import pydantic
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.datasource.fluent import SparkFilesystemDatasource
 from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
@@ -392,13 +393,8 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
 to use as its "include" directive for File-Path style DataAsset processing."""
         )
 
-    def test_splitter_connection(self) -> None:
-        # TODO: Implementation
-        pass
-
     def _add_splitter(self: Self, splitter: Splitter) -> Self:
         self.splitter = splitter
-        self.test_splitter_connection()
         return self
 
     def add_splitter_year(
