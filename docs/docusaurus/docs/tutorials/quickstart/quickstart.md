@@ -10,7 +10,7 @@ Use this quickstart to install Great Expectations, connect to sample data, build
 
 This quickstart introduces you to the open source Python and command line version of Great Expectations. A Cloud interface will soon be available to simplify collaboration between data teams and domain experts.
 
-If you're interested in participating in the Great Expectations Cloud Beta program, or you want to receive progress updates, you can [sign up for the Beta program](https://greatexpectations.io/cloud).
+If you're interested in participating in the Great Expectations Cloud Beta program, or you want to receive progress updates, [sign up for the Beta program](https://greatexpectations.io/cloud).
 
 :::
 
