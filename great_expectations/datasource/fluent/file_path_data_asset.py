@@ -117,17 +117,6 @@ class _FilePathDataAsset(DataAsset):
 
         extra = pydantic.Extra.allow
 
-    # example = """
-    #     logs/
-    #     logs / 2023 - 05 - 03 /
-    #     logs/2023-05-04/
-    #     logs/2023-05-04/parquet.1
-    #     logs/2023-05-04/parquet.2
-    #     logs/2023-05-04/parquet.3
-    # """
-    #
-    # regex = "logs/{year}-{month}-{day}/"
-
     def __init__(self, **data):
         super().__init__(**data)
 
