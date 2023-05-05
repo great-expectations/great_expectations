@@ -31,6 +31,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.metric_store import MetricStore
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -41,7 +42,6 @@ from great_expectations.exceptions import ClassInstantiationError, DataContextEr
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext, DataContext
-    from great_expectations.data_context.types.refs import GXCloudResourceRef
 
 logger = logging.getLogger(__name__)
 

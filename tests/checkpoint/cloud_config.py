@@ -30,22 +30,18 @@ def make_store_get(data_file_name, with_slack):
 
 def store_set(self, key, value, **kwargs):
     base_url = os.environ["GX_CLOUD_BASE_URL"]
+    org_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]
     if not base_url.endswith("/"):
         base_url += "/"
-    url = (
-        base_url
-        + "organizations/"
-        + os.environ["GX_CLOUD_ORGANIZATION_ID"]
-        + "/validation-results"
-    )
+    url = base_url + "organizations/" + org_id + "/validation-results"
     # This is incomplete but has the necessary info for the current tests.
     validation_result_json = {
         "data": {
             "attributes": {
                 "created_by_id": "934e0898-6a5c-4ffd-9125-89381a46d191",
-                "organization_id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                "organization_id": org_id,
                 "validation_result": {
-                    "display_url": f"{base_url}?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35",
+                    "display_url": f"{base_url}{org_id}/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35",
                 },
             }
         }

@@ -4790,9 +4790,10 @@ def test_use_validation_url_from_cloud(fake_cloud_context_basic):
     checkpoint_name = "my_checkpoint"
     checkpoint = context.get_checkpoint(checkpoint_name)
     checkpoint_result = context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id)
+    org_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]
     assert (
         checkpoint_result.validation_result_url
-        == "https://my_cloud_backend.com/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35"
+        == f"https://my_cloud_backend.com/{org_id}/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35"
     )
 
 
