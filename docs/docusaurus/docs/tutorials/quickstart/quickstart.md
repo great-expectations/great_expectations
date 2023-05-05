@@ -20,7 +20,7 @@ Use this quickstart to install Great Expectations, connect to sample data, build
     pip install great_expectations
     ```
 
-    It can take several minutes for the installation to complete.
+    It can take several minutes for the installation to complete. Jupyter Notebook is included with Great Expectations, and it lets you edit code and view the results of code runs.
 
 2. Open Jupyter Notebook and run the following command to import the `great_expectations` module:
 
