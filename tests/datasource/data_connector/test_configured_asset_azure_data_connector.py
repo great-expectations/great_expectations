@@ -21,7 +21,7 @@ from great_expectations.execution_engine import PandasExecutionEngine
 yaml = YAMLHandler()
 
 
-if not azure.storage:
+if not (azure.storage and azure.BlobServiceClient):
     pytest.skip(
         'Could not import "azure.storage.blob" from Microsoft Azure cloud',
         allow_module_level=True,
