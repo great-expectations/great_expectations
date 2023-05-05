@@ -630,7 +630,7 @@ def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monke
     # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.
 
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017
         PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
 
 

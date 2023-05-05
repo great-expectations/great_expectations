@@ -170,7 +170,7 @@ def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
 def test_cloud_missing_env_throws_exception(
     clear_env_vars, empty_ge_cloud_data_context_config
 ):
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017
         gx.get_context(cloud_mode=True),
 
 
