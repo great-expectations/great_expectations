@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import warnings
 from collections import OrderedDict
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -255,7 +256,7 @@ class ActionListValidationOperator(ValidationOperator):
                 )
             self.actions[action_config["name"]] = new_action
         if notify_before_store and self._using_cloud_context:
-            logger.warning(
+            warnings.warn(
                 f"The checkpoints action_list configuration has a notification, {notify_before_store}"
                 "configured without a StoreValidationResultAction configured. This means the notification can't"
                 "provide a link the the validation result. Please move all notification actions after "

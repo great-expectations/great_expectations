@@ -872,7 +872,28 @@ class StoreValidationResultAction(ValidationAction):
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
+        run_return_value = self._basic_run(
+            validation_result_suite,
+            validation_result_suite_identifier,
+            expectation_suite_identifier,
+            checkpoint_identifier,
+        )
+        if self._using_cloud_context and isinstance(
+            run_return_value, GXCloudResourceRef
+        ):
+            return self._run_cloud_post_process_resource_ref(
+                run_return_value, validation_result_suite_identifier
+            )
 
+    def _basic_run(
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GXCloudIdentifier
+        ],
+        expectation_suite_identifier,
+        checkpoint_identifier: Optional[GXCloudIdentifier],
+    ) -> Union[bool, GXCloudResourceRef]:
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
@@ -897,19 +918,24 @@ class StoreValidationResultAction(ValidationAction):
         if self._using_cloud_context and expectation_suite_identifier:
             expectation_suite_ge_cloud_id = expectation_suite_identifier.id
 
-        store_set_return_value = self.target_store.set(
+        return self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
             checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
-        if self._using_cloud_context:
-            store_set_return_value: GXCloudResourceRef
-            new_ge_cloud_id = store_set_return_value.id
-            validation_result_suite_identifier.id = new_ge_cloud_id
-            return store_set_return_value
 
-        return None
+    def _run_cloud_post_process_resource_ref(
+        self,
+        gx_cloud_resource_ref: GXCloudResourceRef,
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GXCloudIdentifier
+        ],
+    ):
+        store_set_return_value: GXCloudResourceRef
+        new_ge_cloud_id = gx_cloud_resource_ref.id
+        validation_result_suite_identifier.id = new_ge_cloud_id
+        return gx_cloud_resource_ref
 
 
 @public_api
