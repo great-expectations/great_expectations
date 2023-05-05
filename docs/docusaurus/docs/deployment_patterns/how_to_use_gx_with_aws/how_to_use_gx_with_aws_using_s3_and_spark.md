@@ -164,13 +164,15 @@ Great Expectations can work within many frameworks.  In this guide you will be s
 
 This guide will demonstrate each of the steps necessary to go from installing a new instance of Great Expectations to Validating your data for the first time and viewing your Validation Results as Data Docs.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Installed Python 3. (Great Expectations requires Python 3. For details on how to download and install Python on your platform, see [python.org](https://www.python.org/downloads/)).
-- Installed the AWS CLI. (For guidance on how install this, please see [Amazon's documentation on how to install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html))
-- Configured your AWS credentials.  (For guidance in doing this, please see [Amazon's documentation on configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
-- The ability to install Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.
-- Identified the S3 bucket and prefix where Expectations and Validation Results will be stored.
+- Python 3. To download and install Python, see [Python downloads](https://www.python.org/downloads/).
+- The AWS CLI. To download and install the AWS CLI, see [Installing or updating the latest version of the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).
+- AWS credentials. See [Configuring the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
+- Permissions to install the Python packages ([`boto3`](https://github.com/boto/boto3) and `great_expectations`) with pip.
+- An S3 bucket and prefix to store Expectations and Validation Results.
 
 </Prerequisites>
 

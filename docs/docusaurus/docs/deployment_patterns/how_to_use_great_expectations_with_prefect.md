@@ -10,12 +10,14 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 This guide will help you run a Great Expectations with [Prefect](https://prefect.io/)
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
-- [Connecting to Data](/docs/guides/connecting_to_your_data/connect_to_data_overview)
-- [Created an Expectation Suite](/docs/guides/expectations/create_expectations_overview)
-- [Prefect Quick Start guide](https://docs.prefect.io/core/getting_started/quick-start.html)
+- [A Great Expectations instance](/docs/guides/setup/setup_overview)
+- [A Data Connection](/docs/guides/connecting_to_your_data/connect_to_data_overview)
+- [An Expectation Suite](/docs/guides/expectations/create_expectations_overview)
+- A Prefect instance. See [Prefect Quick Start guide](https://docs.prefect.io/core/getting_started/quick-start.html)
 
 </Prerequisites>
 

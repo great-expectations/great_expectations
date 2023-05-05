@@ -6,7 +6,7 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you trigger emails as an <TechnicalTag tag="action" text="Action" /> . It will allow you to send an email including information about a <TechnicalTag tag="validation_result" text="Validation Result" />, including whether or not the <TechnicalTag tag="validation" text="Validation" /> succeeded.
 
-Prerequisites 
+## Prerequisites 
 
 * An email account configured on the SMTP server you're going to use to send email
 * Identified the email addresses for sent messages
