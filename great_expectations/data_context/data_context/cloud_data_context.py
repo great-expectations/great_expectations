@@ -65,6 +65,20 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+def _extract_fluent_datasources(config_dict: dict) -> dict:
+    """
+    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
+    We need to extract the fluent datasources otherwise the data context will attempt eager config
+    substitutions and other inappropriate operations.
+    """
+    datasources = config_dict.get("datasources", {})
+    fds_names: list[str] = []
+    for ds_name, ds in datasources.items():
+        if "type" in ds:
+            fds_names.append(ds_name)
+    return {name: datasources.pop(name) for name in fds_names}
+
+
 @public_api
 class CloudDataContext(SerializableDataContext):
     """Subclass of AbstractDataContext that contains functionality necessary to work in a GX Cloud-backed environment."""
@@ -255,6 +269,7 @@ class CloudDataContext(SerializableDataContext):
                 f"Bad request made to GX Cloud; {response.text}"
             )
         config = response.json()
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 
     @classmethod

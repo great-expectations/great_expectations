@@ -5,15 +5,18 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     ClassVar,
+    Dict,
     Generic,
     List,
     Optional,
     Type,
     TypeVar,
+    Union,
 )
 
 import pydantic
-from typing_extensions import Literal
+from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
+from typing_extensions import Literal, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
@@ -40,12 +43,20 @@ logger = logging.getLogger(__name__)
 # this enables us to include dataframe in the json schema
 _SparkDataFrameT = TypeVar("_SparkDataFrameT")
 
+SparkConfig: TypeAlias = Dict[
+    StrictStr, Union[StrictStr, StrictInt, StrictFloat, StrictBool]
+]
+
 
 class SparkDatasourceError(Exception):
     pass
 
 
 class _SparkDatasource(Datasource):
+    # instance attributes
+    spark_config: Union[SparkConfig, None] = None
+    force_reuse_spark_context: bool = True
+
     # Abstract Methods
     @property
     def execution_engine_type(self) -> Type[SparkDFExecutionEngine]:

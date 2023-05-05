@@ -9,6 +9,7 @@ import pydantic
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
     list_gcs_keys,
+    sanitize_prefix_for_gcs_and_s3,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilePathDataConnector,
@@ -74,14 +75,19 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         self._gcs_client: google.Client = gcs_client
 
         self._bucket_or_name = bucket_or_name
-        self._prefix = prefix
+
+        self._prefix: str = prefix
+        self._sanitized_prefix: str = sanitize_prefix_for_gcs_and_s3(text=prefix)
+
         self._delimiter = delimiter
         self._max_results = max_results
 
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
+            batching_regex=re.compile(
+                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
+            ),
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
@@ -193,7 +199,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
     def get_data_references(self) -> List[str]:
         query_options: dict = {
             "bucket_or_name": self._bucket_or_name,
-            "prefix": self._prefix,
+            "prefix": self._sanitized_prefix,
             "delimiter": self._delimiter,
             "max_results": self._max_results,
         }
