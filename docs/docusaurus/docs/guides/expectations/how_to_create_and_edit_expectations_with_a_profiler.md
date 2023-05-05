@@ -6,6 +6,14 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you create a new <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> by profiling your data with the User Configurable <TechnicalTag tag="profiler" text="Profiler" />.
 
+## Prerequisites
+
+- [A Great Expectations instance](/docs/guides/setup/setup_overview)
+- Completion of the [Quickstart](tutorials/quickstart/quickstart.md)
+- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
+- [A configured Datasource](/docs/guides/connecting_to_your_data/connect_to_data_overview)
+
+
 :::note
 
 The User Configurable Profiler makes it easier to produce a new Expectation Suite by building out a bunch of <TechnicalTag tag="expectation" text="Expectations" /> for your data.
