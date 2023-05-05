@@ -12,22 +12,9 @@ yaml: YAMLHandler = YAMLHandler()
 
 import boto3
 import pyspark as pyspark
-from pyspark import SparkContext
 
-# session = boto3.session.Session(profile_name='profile_name')
-# sts_connection = session.client('sts')
-# response = sts_connection.assume_role(RoleArn='arn:aws:iam:::role/role_name', RoleSessionName='role_name',DurationSeconds=3600)
-# credentials = response['Credentials']
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
-
-conf = pyspark.SparkConf()
-conf.set("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.1")
-sc = SparkContext.getOrCreate(conf=conf)
-# sc._jsc.hadoopConfiguration().set('fs.s3a.aws.credentials.provider', 'org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider')
-sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", AWS_ACCESS_KEY_ID)
-sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", AWS_SECRET_ACCESS_KEY)
-#'/Users/work/.sdkman/candidates/spark/current/python/pyspark'
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py imports">
 import great_expectations as gx
@@ -250,7 +237,7 @@ asset = datasource.add_csv_asset(
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py get_batch_request">
-request = asset.build_batch_request(batch_request_options={"year": "2021"})
+request = asset.build_batch_request({"year": "2021"})
 # </snippet>
 
 
