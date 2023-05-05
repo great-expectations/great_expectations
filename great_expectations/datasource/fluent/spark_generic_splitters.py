@@ -43,12 +43,12 @@ class _Splitter(Protocol):
         """
 
     def splitter_method_kwargs(self) -> Dict[str, Any]:
-        """A shim to our sqlalchemy execution engine splitter methods
+        """A shim to our spark execution engine splitter methods
 
         We translate any internal _Splitter state and what is passed in from
         a batch_request to the splitter_kwargs required by our execution engine
         data splitters defined in:
-        great_expectations.execution_engine.split_and_sample.sqlalchemy_data_splitter
+        great_expectations.execution_engine.split_and_sample.sparkdf_data_splitter
 
         Look at Splitter* classes for concrete examples.
         """
