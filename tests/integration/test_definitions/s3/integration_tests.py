@@ -83,13 +83,12 @@ deployment_patterns = [
         data_context_dir=None,
         backend_dependencies=[BackendDependencies.AWS],
     ),
-    # TODO: This will currently work locally, but the Azure CI/CD will need to be updated to enable
-    # IntegrationTestFixture(
-    #     name="deployment_pattern_spark_s3",
-    #     user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py",
-    #     data_context_dir=None,
-    #     backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
-    # )
+    IntegrationTestFixture(
+        name="deployment_pattern_spark_s3",
+        user_flow_script="tests/integration/docusaurus/deployment_patterns/aws_cloud_storage_spark.py",
+        data_context_dir=None,
+        backend_dependencies=[BackendDependencies.AWS, BackendDependencies.SPARK],
+    ),
 ]
 
 split_data = []

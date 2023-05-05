@@ -7,12 +7,14 @@ import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
 This guide will help you run a Great Expectations in [Flyte](https://flyte.org/)
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
-- [Connecting to Data](/docs/guides/connecting_to_your_data/connect_to_data_overview)
-- [Created an Expectation Suite](/docs/guides/expectations/create_expectations_overview)
-- Flyte [Getting Started Guide](https://docs.flyte.org/en/latest/getting_started.html) 
+- [A working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- [A Data Connection](/docs/guides/connecting_to_your_data/connect_to_data_overview)
+- [An Expectation Suite](/docs/guides/expectations/create_expectations_overview)
+- Flyte. See [Getting Started](https://docs.flyte.org/en/latest/getting_started.html) 
 
 </Prerequisites>
 
