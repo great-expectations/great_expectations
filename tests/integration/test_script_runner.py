@@ -307,7 +307,7 @@ fluent_datasources = [
     IntegrationTestFixture(
         name="validate_data_by_running_a_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py",
-        data_context_dir="tests/integration/fixtures/yellow_trip_data_fluent_pandas/great_expectations",
+        data_context_dir=None,
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
 ]

@@ -1,10 +1,6 @@
 import pathlib
-
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py get_context">
 import great_expectations as gx
 
-context = gx.get_context()
-# </snippet>
 data_directory = pathlib.Path(
     gx.__file__,
     "..",
@@ -14,39 +10,16 @@ data_directory = pathlib.Path(
     "taxi_yellow_tripdata_samples",
 ).resolve(strict=True)
 
-validator = context.get_validator(
-    datasource_name="taxi_source", data_asset_name="taxi_asset"
-)
-validator.expect_column_values_to_not_be_null("pickup_datetime")
-context.add_expectation_suite("taxi_suite")
-
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py create asset and get validator">
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py setup">
+# setup
 import sys
 import great_expectations as gx
 
-from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
-
 context = gx.get_context()
 
-checkpoint = gx.checkpoint.SimpleCheckpoint(
-    name="taxi_checkpoint", data_context=context, expectation_suite_name="taxi_suite"
-)
-
-result: CheckpointResult = context.run_checkpoint(
-    checkpoint_name="my_checkpoint",
-    batch_request=None,
-    run_name=None,
-)
-
-if not result["success"]:
-    print("Validation failed!")
-    sys.exit(1)
-
-print("Validation succeeded!")
-
-
+# starting from scratch, we add a datasource and asset
 datasource = context.sources.add_pandas_filesystem(
-    name="demo_pandas", base_directory=data_directory
+    name="taxi_source", base_directory=data_directory
 )
 
 asset = datasource.add_csv_asset(
@@ -55,29 +28,37 @@ asset = datasource.add_csv_asset(
     order_by=["-year", "month"],
 )
 
-batch_request = asset.build_batch_request({"year": "2020", "month": "04"})
+# use a validator to create an expectation suite
 validator = context.get_validator(
-    batch_request=batch_request,
-    create_expectation_suite_with_name="my_expectation_suite",
+    datasource_name="taxi_source", data_asset_name="yellow_tripdata"
 )
-# </snippet>
+validator.expect_column_values_to_not_be_null("pickup_datetime")
+context.add_expectation_suite("yellow_tripdata_suite")
 
-
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py create expectation suite">
-validator.expect_table_row_count_to_be_between(min_value=5000, max_value=20000)
-validator.save_expectation_suite(discard_failed_expectations=False)
-# </snippet>
-
-
-# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py create checkpoint batch_request">
+# create a checkpoint
 checkpoint = gx.checkpoint.SimpleCheckpoint(
     name="my_checkpoint",
     data_context=context,
-    validations=[
-        {
-            "batch_request": batch_request,
-            "expectation_suite_name": "my_expectation_suite",
-        },
-    ],
+    expectation_suite_name="yellow_tripdata_suite",
 )
+
+# add (save) the checkpoint to the data context
+context.add_checkpoint(checkpoint=checkpoint)
+cp = context.get_checkpoint(name="my_checkpoint")
+assert cp.name == "my_checkpoint"
+# </snippet>
+
+# <snippet name="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py checkpoint script">
+# context = gx.get_context()
+result = context.run_checkpoint(
+    checkpoint_name="my_checkpoint",
+    batch_request={"taxi_source", "yellow_tripdata"},
+    run_name=None,
+)
+
+if not result["success"]:
+    print("Validation failed!")
+    sys.exit(1)
+
+print("Validation succeeded!")
 # </snippet>
