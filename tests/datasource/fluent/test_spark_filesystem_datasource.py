@@ -11,6 +11,7 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
@@ -25,7 +26,6 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
 )
-from great_expectations.compatibility.pyspark import functions as F
 
 logger = logging.getLogger(__name__)
 
@@ -515,7 +515,7 @@ def directory_asset_with_no_splitter(
 ) -> DirectoryCSVAsset:
     asset = spark_filesystem_datasource.add_directory_csv_asset(
         name="directory_csv_asset_no_splitter",
-        data_directory="samples_2020",
+        data_directory="first_ten_trips_in_each_file",
         header=True,
         infer_schema=True,
     )
@@ -535,6 +535,7 @@ def expected_num_records_directory_asset_no_splitter_2020_passenger_count_2(
     expected_num_records = pre_splitter_batch_data.dataframe.filter(  # type: ignore[attr-defined]
         F.col("passenger_count") == 2
     ).count()
+    assert expected_num_records == 37, "Check that the referenced data hasn't changed"
     return expected_num_records
 
 
@@ -544,7 +545,7 @@ def directory_asset_with_column_value_splitter(
 ) -> DirectoryCSVAsset:
     asset = spark_filesystem_datasource.add_directory_csv_asset(
         name="directory_csv_asset_with_splitter",
-        data_directory="samples_2020",
+        data_directory="first_ten_trips_in_each_file",
         header=True,
         infer_schema=True,
     )
@@ -609,7 +610,7 @@ def file_asset_with_no_splitter(
 ) -> CSVAsset:
     asset = spark_filesystem_datasource.add_csv_asset(
         name="file_csv_asset_no_splitter",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        batching_regex=r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -622,7 +623,7 @@ def expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2(
 ) -> int:
 
     single_batch_batch_request = file_asset_with_no_splitter.build_batch_request(
-        {"year": "2020", "month": "10"}
+        {"year": "2020", "month": "11"}
     )
     single_batch_list = file_asset_with_no_splitter.get_batch_list_from_batch_request(
         single_batch_batch_request
@@ -630,7 +631,7 @@ def expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2(
     assert len(single_batch_list) == 1
     pre_splitter_batch_data = single_batch_list[0].data
     expected_num_records = pre_splitter_batch_data.dataframe.filter(F.col("passenger_count") == 2).count()  # type: ignore[attr-defined]
-    assert expected_num_records == 1258
+    assert expected_num_records == 2, "Check that the referenced data hasn't changed"
     return expected_num_records
 
 
@@ -639,7 +640,7 @@ def expected_num_records_file_asset_no_splitter_2020_10(
     file_asset_with_no_splitter: CSVAsset,
 ) -> int:
     single_batch_batch_request = file_asset_with_no_splitter.build_batch_request(
-        {"year": "2020", "month": "10"}
+        {"year": "2020", "month": "11"}
     )
     single_batch_list = file_asset_with_no_splitter.get_batch_list_from_batch_request(
         single_batch_batch_request
@@ -651,10 +652,10 @@ def expected_num_records_file_asset_no_splitter_2020_10(
         pre_splitter_batch_data.dataframe.filter(  # type: ignore[attr-defined]
             F.year(F.col("pickup_datetime")) == 2020
         )
-        .filter(F.month(F.col("pickup_datetime")) == 10)
+        .filter(F.month(F.col("pickup_datetime")) == 11)
         .count()
     )
-    assert expected_num_records == 10000
+    assert expected_num_records == 10, "Check that the referenced data hasn't changed"
     return expected_num_records
 
 
@@ -664,7 +665,7 @@ def file_asset_with_column_value_splitter(
 ) -> CSVAsset:
     asset = spark_filesystem_datasource.add_csv_asset(
         name="file_csv_asset_with_splitter",
-        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        batching_regex=r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
         header=True,
         infer_schema=True,
     )
@@ -692,7 +693,7 @@ class TestSplitterFileAsset:
     ):
         post_passenger_count_splitter_batch_request = (
             file_asset_with_column_value_splitter.build_batch_request(
-                {"year": "2020", "month": "10", "passenger_count": 2}
+                {"year": "2020", "month": "11", "passenger_count": 2}
             )
         )
         post_passenger_count_splitter_batch_list = (
@@ -715,7 +716,7 @@ class TestSplitterFileAsset:
 
         post_splitter_batch_request = (
             file_asset_with_column_value_splitter.build_batch_request(
-                {"year": "2020", "month": "10", "passenger_count": 2}
+                {"year": "2020", "month": "11", "passenger_count": 2}
             )
         )
         post_splitter_batch_list = (
@@ -764,7 +765,7 @@ class TestSplitterFileAsset:
         )
         post_splitter_batch_request = (
             asset_with_conflicting_splitter.build_batch_request(
-                {"year": "2020", "month": "10"}
+                {"year": "2020", "month": "11"}
             )
         )
         post_splitter_batches = (
@@ -788,7 +789,7 @@ class TestSplitterFileAsset:
         )
         post_splitter_batch_request = (
             asset_with_conflicting_splitter.build_batch_request(
-                {"year": "2020", "month": "10"}
+                {"year": "2020", "month": "11"}
             )
         )
         post_splitter_batches = (
