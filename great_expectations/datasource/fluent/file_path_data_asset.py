@@ -330,6 +330,14 @@ class _FilePathDataAsset(DataAsset):
     def _batch_spec_options_from_batch_request(
         self, batch_request: BatchRequest
     ) -> dict:
+        """Build a set of options for use in a batch spec from a batch request.
+
+        Args:
+            batch_request: Batch request to use to generate options.
+
+        Returns:
+            Dictionary containing batch spec options.
+        """
         batch_spec_options = {
             "reader_method": self._get_reader_method(),
             "reader_options": self.dict(
