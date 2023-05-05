@@ -46,7 +46,7 @@ def test_get_batch_request_from_acceptable_arguments_batch_request_passthrough()
 
 @pytest.mark.unit
 def test_get_batch_request_from_acceptable_arguments_runtime_parameter_conflicts_raise(
-    base_block: dict[str, str]
+    base_block: Dict[str, str]
 ):
     with pytest.raises(ValueError) as ve:
         runtime = base_block.copy()

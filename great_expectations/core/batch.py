@@ -17,7 +17,9 @@ from great_expectations.types import DictDot, SerializableDictDot, safe_deep_cop
 from great_expectations.util import deep_filter_properties_iterable, load_class
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import Batch as FluentBatch
+    from great_expectations.datasource.fluent.interfaces import (
+        Batch as FluentBatch,
+    )
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
