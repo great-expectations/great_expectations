@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import azure, google, aws
+from great_expectations.compatibility import aws, azure, google
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 
 # noinspection PyBroadException

@@ -4,12 +4,11 @@ import random
 from pathlib import Path
 from typing import List
 
-from great_expectations.compatibility import aws
 import pandas as pd
 import pytest
 from moto import mock_s3
 
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import aws, pyspark
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.batch_spec import AzureBatchSpec, GCSBatchSpec
 
