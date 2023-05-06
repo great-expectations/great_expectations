@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import azure, google
+from great_expectations.compatibility import azure, google, aws
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec, S3BatchSpec
 
 # noinspection PyBroadException
@@ -452,6 +452,10 @@ def test_get_batch_data(test_df):
         PandasExecutionEngine().get_batch_data(RuntimeDataBatchSpec())
 
 
+@pytest.mark.skipif(
+    not aws.boto3,
+    reason="Unable to load AWS connection object. Please install boto3 and botocore.",
+)
 def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
     bucket, keys = test_s3_files_compressed
     path = keys[0]
@@ -463,8 +467,11 @@ def test_get_batch_s3_compressed_files(test_s3_files_compressed, test_df_small):
 
 
 @pytest.mark.skipif(
-    not is_library_loadable(library_name="pyarrow")
-    and not is_library_loadable(library_name="fastparquet"),
+    not aws.boto3
+    or (
+        not is_library_loadable(library_name="pyarrow")
+        and not is_library_loadable(library_name="fastparquet")
+    ),
     reason="pyarrow and fastparquet are not installed",
 )
 def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
@@ -477,6 +484,10 @@ def test_get_batch_s3_parquet(test_s3_files_parquet, test_df_small):
     assert df.dataframe.shape == test_df_small.shape
 
 
+@pytest.mark.skipif(
+    not aws.boto3,
+    reason="Unable to load AWS connection object. Please install boto3 and botocore.",
+)
 def test_get_batch_with_no_s3_configured():
     batch_spec = S3BatchSpec(
         path="s3a://i_dont_exist",

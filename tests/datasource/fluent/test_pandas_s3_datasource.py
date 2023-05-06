@@ -39,7 +39,11 @@ from great_expectations.compatibility import aws
 pytestmark = [
     pytest.mark.skipif(
         PANDAS_VERSION < 1.2, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
-    )
+    ),
+    pytest.mark.skipif(
+        not aws.boto3,
+        reason="Unable to load AWS connection object. Please install boto3 and botocore.",
+    ),
 ]
 
 
@@ -62,6 +66,7 @@ def aws_credentials() -> None:
     os.environ["AWS_SESSION_TOKEN"] = "testing"
 
 
+@pytest.mark.skipif(not aws.boto3)
 @pytest.fixture
 def s3_mock(aws_credentials, aws_region_name: str) -> BaseClient:
     with mock_s3():
