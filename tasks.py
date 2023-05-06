@@ -15,6 +15,7 @@ import os
 import pathlib
 import shutil
 import sys
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Union
 
 import invoke
@@ -651,3 +652,82 @@ def _exit_with_error_if_not_run_from_correct_dir(
             exit_message,
             code=1,
         )
+
+
+@dataclass
+class GreatExpectationsExample:
+    name: str
+    docker_container_name: str
+    docker_path: pathlib.Path
+    dockerfile_path: pathlib.Path
+
+
+EXAMPLES = [
+    GreatExpectationsExample(
+        name="pandas",
+        docker_container_name="pandas_filesystem",
+        docker_path=pathlib.Path("examples/pandas_filesystem/"),
+        dockerfile_path=pathlib.Path("examples/pandas_filesystem/Dockerfile"),
+    )
+]
+
+EXAMPLE_NAMES_TO_COMMAND_MAP: dict[str, GreatExpectationsExample] = {
+    ex.name: ex for ex in EXAMPLES
+}
+
+
+@invoke.task(
+    name="example",
+    help={
+        "name": "Name of the example you'd like to run.",
+        "list": "List available examples.",
+    },
+)
+def example_task(
+    ctx: Context,
+    name: str = "",
+    list: bool = False,
+    build: bool = False,
+    tag: str = "latest",
+    py: float = PYTHON_VERSION_DEFAULT,
+):
+    """Set up an example environment to exercise Great Expectations on sample data or connect to your own data."""
+    if list:
+        print(f"Available examples: {','.join(EXAMPLE_NAMES_TO_COMMAND_MAP.keys())}")
+        list_exit_message = (
+            "Run `invoke example -n <example_name>` to start up the example."
+        )
+        raise invoke.Exit(list_exit_message, code=0)
+
+    _exit_with_error_if_not_in_repo_root(task_name="example")
+
+    example = EXAMPLE_NAMES_TO_COMMAND_MAP.get(name)
+    if not example.docker_container_name:
+        exit_message = f"The example name: {name} does not exist. Run `invoke example --list` to get a list of available examples."
+        raise invoke.Exit(exit_message, code=1)
+
+    # TODO: This should be a single command. Always rebuild? Or check if exists and build if it doesn't e.g. using `docker images`?
+    cmds = ["docker"]
+
+    if build:
+        cmds.extend(
+            [
+                "buildx",
+                "build",
+                "-f",
+                # "Dockerfile",
+                str(example.dockerfile_path.resolve()),
+                f"--tag {example.docker_container_name}:{tag}",
+                *[
+                    f"--build-arg {arg}"
+                    for arg in ["SOURCE=local", f"PYTHON_VERSION={py}"]
+                ],
+                # str(example.docker_path.resolve()),
+                ".",
+                # "--progress=plain --no-cache"
+            ]
+        )
+    else:
+        cmds.extend(["run", "-it", f"{example.docker_container_name}:{tag}", "bash"])
+    print(cmds)
+    ctx.run(" ".join(cmds), echo=True, pty=True)
