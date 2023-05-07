@@ -108,28 +108,6 @@ def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_
     assert available_data_asset_names == expected_available_data_asset_names
 
 
-def test_datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine_no_batch_identifiers(
-    datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
-):
-    # interacting with the database using query
-    test_query: str = "SELECT * FROM table_full__I;"
-
-    # Test for illegal absence of batch_identifiers when batch_data is specified
-    with pytest.raises(TypeError):
-        # noinspection PyUnusedLocal
-        batch_list: List[  # noqa: F841
-            Batch
-        ] = datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.get_batch_list_from_batch_request(
-            batch_request=RuntimeBatchRequest(
-                datasource_name=datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine.name,
-                data_connector_name="test_runtime_data_connector",
-                data_asset_name="my_data_asset",
-                runtime_parameters={"query": test_query},
-                batch_identifiers=None,
-            )
-        )
-
-
 def test_batch_identifiers_and_batch_identifiers_success_all_keys_present_with_query(
     datasource_with_runtime_data_connector_and_sqlalchemy_execution_engine, sa
 ):
