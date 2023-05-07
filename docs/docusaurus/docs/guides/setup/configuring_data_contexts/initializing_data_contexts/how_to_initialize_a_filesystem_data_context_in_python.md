@@ -38,20 +38,22 @@ For purposes of this example, we will assume that we have an empty folder to ini
 path_to_empty_folder = '/my_gx_project/'
 ```
 
-### 3. Run GX's `get_context(...)` method
+### 3. Create a GX context
 
-We will provide our empty folder's path to the GX library's `get_context(...)` method as the `context_root_dir` parameter.  Because we are providing a path to an empty folder `get_context(...)` will initialize a Filesystem Data Context at that location.
+We will provide our empty folder's path to the GX library's `FileDataContext.create(...)` method as the `project_root_dir` parameter.  Because we are providing a path to an empty folder `FileDataContext.create(...)` will initialize a Filesystem Data Context at that location.
 
-For convenience, the `get_context(...)` method will then instantiate and return the newly initialized Data Context, which we can keep in a Python variable.
+For convenience, the `FileDataContext.create(...)` method will then instantiate and return the newly initialized Data Context, which we can keep in a Python variable.
 
 ```python title="Python code"
-context = gx.get_context(context_root_dir=path_to_empty_folder)
+from great_expectations.data_context import FileDataContext
+
+context = FileDataContext.create(project_root_dir=path_to_empty_folder)
 ```
 
 :::info What if the folder is not empty?
-If the `context_root_dir` provided to the `get_context(...)` method points to a folder that does not already have a Data Context present, the `get_context(...)` method will initialize a Filesystem Data Context at that location even if other files and folders are present.  This allows you to easily initialize a Filesystem Data Context in a folder that contains your source data or other project related contents.
+If the `project_root_dir` provided to the `FileDataContext.create(...)` method points to a folder that does not already have a Data Context present, the `FileDataContext.create(...)` method will initialize a Filesystem Data Context at that location even if other files and folders are present.  This allows you to easily initialize a Filesystem Data Context in a folder that contains your source data or other project related contents.
 
-If a Data Context already exists at the provided `path`, the `get_context(...)` method will not re-initialize it.  Instead, `get_context(...)` will simply instantiate and return the existing Data Context as is.
+If a Data Context already exists at the provided `project_root_dir`, the `FileDataContext.create(...)` method will not re-initialize it.  Instead, `FileDataContext.create(...)` will simply instantiate and return the existing Data Context as is.
 :::
 
 
