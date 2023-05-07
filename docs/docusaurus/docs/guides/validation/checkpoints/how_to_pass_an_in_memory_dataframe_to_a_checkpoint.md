@@ -18,28 +18,23 @@ This guide will help you pass an in-memory DataFrame to an existing <TechnicalTa
 ### 1. Set up Great Expectations
 #### Import the required libraries and load your DataContext
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py imports"
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py setup"
 ```
 
-This will retrieve a context based on your configuration, or create an ephemeral (in-memory) <TechnicalTag tag="datacontext" text="DataContext" /> if no configuration is found.
-
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py get_context"
-```
-
-### 2. Use a DataFrame to create and run a Checkpoint
-
-You can create a Pandas DataFrame asset and address it using a `datasource_name` and `data_asset_name` as you would any other asset. Here we are using the `add_checkpoint` convenience method on the DataContext.
-
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py simple_checkpoint_add_dataframe"
-```
+### 2. Read a DataFrame and create a Checkpoint
 
 The following example uses the `read_*` method on the PandasDatasource to directly return a <TechnicalTag tag="validator" text="Validator" />. Validators can be used to interactively build an Expectation Suite, as described in [How to create Expectations interactively in Python](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
 The Validator can be passed directly to a SimpleCheckpoint
 
-```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py simple_checkpoint_read_dataframe"
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py read_dataframe"
 ```
 
-`batch_metadata` is an optional parameter that can associate meta-data with the batch (or DataFrame). This can be useful in distinguishing Validation results when working with DataFrames.
+Alternatively, you can use the `add_*` methods to add the asset, then retrieve a <TechnicalTag tag="batch_request" text="Batch Request" />. This method is more consistent with how other Data Assets work, and can more easily integrate with other Batch Request workflows.
+
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py add_dataframe"
+```
+
+In both examples, `batch_metadata` is an optional parameter that can associate meta-data with the batch (or DataFrame). This can be useful in distinguishing Validation results when working with DataFrames.
 
 ## Additional Notes
 To view the full script used in this page, see it on GitHub:
