@@ -17,15 +17,15 @@ First we create the Checkpoint configuration:
   ]}>
 
   <TabItem value="yaml">
-  
+
   <YamlTabCreate />
-  
+
   </TabItem>
 
   <TabItem value="python">
-  
+
   <PythonTabCreate />
-  
+
   </TabItem>
 </Tabs>
 
@@ -40,15 +40,15 @@ Once we have defined our Checkpoint configuration, we can test our syntax using 
   ]}>
 
   <TabItem value="yaml">
-  
+
   <YamlTabTest />
-  
+
   </TabItem>
 
   <TabItem value="python">
-  
+
   <PythonTabTest />
-  
+
   </TabItem>
 </Tabs>
 

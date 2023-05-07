@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import logging
-from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -17,8 +18,11 @@ class SlackRenderer(Renderer):
         data_docs_pages=None,
         notify_with=None,
         show_failed_expectations: bool = False,
-        validation_result_urls: List[str] = [],
+        validation_result_urls: list[str] | None = None,
     ):
+        if validation_result_urls is None:
+            validation_result_urls = []
+
         default_text = (
             "No validation occurred. Please ensure you passed a validation_result."
         )
@@ -212,7 +216,7 @@ class SlackRenderer(Renderer):
             )
         return report_element
 
-    def create_failed_expectations_text(self, validation_results: List[dict]) -> str:
+    def create_failed_expectations_text(self, validation_results: list[dict]) -> str:
         failed_expectations_str = "\n*Failed Expectations*:\n"
         for expectation in validation_results:
             if not expectation["success"]:

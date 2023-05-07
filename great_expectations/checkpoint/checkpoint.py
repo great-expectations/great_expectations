@@ -43,7 +43,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.cloud_constants import (
-    CLOUD_APP_DEFAULT_BASE_URL,
     GXCloudRESTResource,
 )
 from great_expectations.data_context.types.base import (
@@ -64,6 +63,9 @@ from great_expectations.validation_operators.types.validation_operator_result im
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
+    )
     from great_expectations.validator.validator import Validator
 
 
@@ -140,7 +142,9 @@ class BaseCheckpoint(ConfigPeer):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -315,23 +319,29 @@ class BaseCheckpoint(ConfigPeer):
                 run_result: dict
                 validation_result: Optional[ExpectationSuiteValidationResult]
                 meta: ExpectationSuiteValidationResultMeta
+                validation_result_url: str | None = None
                 for run_result in run_results.values():
                     validation_result = run_result.get("validation_result")
                     if validation_result:
                         meta = validation_result.meta
                         id = self.ge_cloud_id
                         meta["checkpoint_id"] = id
+                    # TODO: We only currently support 1 validation_result_url per checkpoint and use the first one we
+                    #       encounter. Since checkpoints can have more than 1 validation result, we will need to update
+                    #       this and the consumers.
+                    if not validation_result_url:
+                        if (
+                            "actions_results" in run_result
+                            and "store_validation_result"
+                            in run_result["actions_results"]
+                            and "validation_result_url"
+                            in run_result["actions_results"]["store_validation_result"]
+                        ):
+                            validation_result_url = run_result["actions_results"][
+                                "store_validation_result"
+                            ]["validation_result_url"]
 
                 checkpoint_run_results.update(run_results)
-
-        # Generate a URL to the validation result details page in GX Cloud
-        validation_result_url: str | None = None
-        for key in checkpoint_run_results:
-            if isinstance(key, GXCloudIdentifier) and key.id:
-                validation_result_url = (
-                    f"{CLOUD_APP_DEFAULT_BASE_URL}?validationResultId={key.id}"
-                )
-                break
 
         return CheckpointResult(
             validation_result_url=validation_result_url,
@@ -441,7 +451,7 @@ class BaseCheckpoint(ConfigPeer):
             )
 
             batch_request: Union[
-                BatchRequest, RuntimeBatchRequest
+                BatchRequest, FluentBatchRequest, RuntimeBatchRequest
             ] = substituted_validation_dict.get("batch_request")
             expectation_suite_name: str = substituted_validation_dict.get(
                 "expectation_suite_name"
@@ -736,7 +746,9 @@ class Checkpoint(BaseCheckpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -816,7 +828,9 @@ constructor arguments.
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -1363,7 +1377,9 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -1430,7 +1446,9 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,

@@ -4,13 +4,18 @@ title: How to update Data Docs after Validating a Checkpoint
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to update <TechnicalTag tag="data_docs" text="Data Docs" /> sites with new <TechnicalTag tag="validation_result" text="Validation Results" /> from running a <TechnicalTag tag="checkpoint" text="Checkpoint" />.
 
+## Prerequisites
+
 <Prerequisites>
 
- - [Created at least one Expectation Suite](../../expectations/index.md#core-skills)
- - [Created at least one Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md).
+ - [A minimum of one Expectation Suite](../../expectations/index.md#core-skills)
+ - [A minimum of one Checkpoint](../checkpoints/how_to_create_a_new_checkpoint.md).
 
 </Prerequisites>
 

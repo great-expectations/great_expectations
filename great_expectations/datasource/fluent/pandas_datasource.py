@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 import logging
 import sqlite3
 from pprint import pformat as pf
@@ -33,6 +32,7 @@ from great_expectations.compatibility.sqlalchemy import (
 )
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -42,7 +42,6 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchRequest,
     DataAsset,
     Datasource,
     _DataAssetT,
@@ -199,11 +198,12 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
+                batch_slice=batch_request._batch_slice_input,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+                f"{pf(expect_batch_request_form.dict())}\n"
+                f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
     def json(

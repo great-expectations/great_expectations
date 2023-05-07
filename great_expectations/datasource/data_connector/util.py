@@ -303,7 +303,7 @@ def sanitize_prefix(text: str) -> str:
     return os.path.join(text, "")  # noqa: PTH118
 
 
-def sanitize_prefix_for_s3(text: str) -> str:
+def sanitize_prefix_for_gcs_and_s3(text: str) -> str:
     """
     Takes in a given user-prefix and cleans it to work with file-system traversal methods
     (i.e. add '/' to the end of a string meant to represent a directory)

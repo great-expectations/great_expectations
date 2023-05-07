@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 import datetime
 import json
 import logging
@@ -31,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 def _get_fluent_batch_request_class() -> Type[FluentBatchRequest]:
     """Using this function helps work around circular import dependncies."""
-    module_name = "great_expectations.datasource.fluent.interfaces"
+    module_name = "great_expectations.datasource.fluent.batch_request"
     class_name = "BatchRequest"
     return load_class(class_name=class_name, module_name=module_name)
 
@@ -864,7 +863,7 @@ class Batch(SerializableDictDot):
 
 def materialize_batch_request(
     batch_request: Optional[Union[BatchRequestBase, dict]] = None,
-) -> Optional[BatchRequestBase]:
+) -> Optional[FluentBatchRequest | BatchRequestBase]:
     def _is_fluent_batch_request(args: dict[str, Any]) -> bool:
         from great_expectations.datasource.fluent.constants import _DATA_CONNECTOR_NAME
 
@@ -926,7 +925,7 @@ def get_batch_request_as_dict(
         batch_request = batch_request.to_dict()
 
     if isinstance(batch_request, _get_fluent_batch_request_class()):
-        batch_request = dataclasses.asdict(batch_request)
+        batch_request = batch_request.dict()
 
     return batch_request
 
