@@ -624,6 +624,10 @@ def test_get_batch_data_with_gcs_batch_spec(
     assert df.dataframe.shape == (3, 3)
 
 
+@pytest.mark.skipif(
+    not google.storage,
+    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+)
 def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
     # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
     # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
