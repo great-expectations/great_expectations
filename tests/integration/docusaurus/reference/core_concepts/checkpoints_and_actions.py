@@ -1,7 +1,7 @@
 import os
 
 import great_expectations as gx
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations.datasource.fluent import (
     BatchRequest as FluentBatchRequest,
 )
 from great_expectations.core.expectation_validation_result import (
