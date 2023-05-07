@@ -3,7 +3,6 @@ from typing import Dict, List
 import pytest
 
 import great_expectations
-import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
