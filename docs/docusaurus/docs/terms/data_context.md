@@ -59,7 +59,7 @@ The Data Context provides a primary entry point to all of Great Expectations' AP
 
 #### Configuration management
 
-The Data Context makes it easy to manage configuration of its own top-level components. It includes basic CRUD operations for all of the core components for a Great Expectations deployment (Datasources, Expectation Suites, Checkpoints) and provides access and default integrations with Data Docs, your Stores, Plugins, etc.  It also provides convenience methods such as `test_yaml_config()` for testing configurations.  For more information on configuring Data Context components and the `test_yaml_config()` method, please see our guide on [how to configure DataContext components using test_yaml_config](../guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
+The Data Context makes it easy to manage configuration of its own top-level components. It includes basic CRUD operations for all of the core components for a Great Expectations deployment (Datasources, Expectation Suites, Checkpoints) and provides access and default integrations with Data Docs, your Stores, Plugins, etc.
 
 #### Component management and config storage
 
@@ -112,8 +112,6 @@ Here's a typical example:
 
 Running `test_yaml_config()` will show some feedback on the configuration. The helpful output can include any result 
 from the "self check" of an artifact produced using that configuration.  You should note, however, that `test_yaml_config()` never overwrites the underlying configuration.  If you make edits in the course of your work, you will have to explicitly save the configuration before running `test_yaml_config()`.
-
-For more detailed guidance on using the `test_yaml_config()` method, please see our guide on [how to configure DataContext components using test_yaml_config](../guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
 
 ## More details
 

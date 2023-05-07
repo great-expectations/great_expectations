@@ -72,6 +72,4 @@ While some source data systems provide their own means of configuring credential
 
 </summary>
 
-- [How to configure DataContext components using `test_yaml_config()`](/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config)
-
 </details>
