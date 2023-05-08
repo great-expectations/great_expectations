@@ -330,12 +330,17 @@ filterwarnings = [
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
     "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
+
+    # --------------------------------------- Great Expectations Warnings ----------------------------------
     # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Validator-level will not be persisted:UserWarning",
     # This warning is for configuring the result_format parameter at the Expectation-level, which will not be persisted,
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Expectation-level will not be persisted:UserWarning",
+    # This warning can be emitted when configuring splitters with fluent datasources
+    "ignore:The same option name is applied for your batch regex and splitter config:UserWarning",
+    # --------------------------------------- Great Expectations Warnings ----------------------------------
 
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
     # Ignores in this section are for items in Great Expectations that are deprecated but not yet removed. Once the
