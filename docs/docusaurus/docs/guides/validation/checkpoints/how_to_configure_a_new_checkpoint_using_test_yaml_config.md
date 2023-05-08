@@ -40,7 +40,7 @@ This code will list the available Expectation Suites:
 ```
 
 ### 3. Creating your Checkpoint
-The following YAML (inline as a Python string) defines a `SimpleCheckpoint` as a starting point:
+Run the following YAML (inline as a Python string) to define `SimpleCheckpoint` as the starting point:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py create_checkpoint"
 ```
