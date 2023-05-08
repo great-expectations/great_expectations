@@ -49,11 +49,11 @@ class Subscriber:
 
     def _callback_handler(
         self,
-        on_message: OnMessageCallback,
         channel: Channel,
         method_frame: Basic.Deliver,
         header_frame: BasicProperties,
         body: bytes,
+        on_message: OnMessageCallback,
     ) -> None:
         """Called by Pika when a message is received.
 
