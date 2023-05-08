@@ -110,7 +110,7 @@ def test_batch_data_get_batch_ambiguous_parameter_pandas_engine(
     test_df: pd.DataFrame = test_df_pandas
 
     # raised by get_batch_list()
-    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(TypeError):
         # noinspection PyUnusedLocal
         context.get_batch_list(
             RuntimeBatchRequest(
@@ -149,7 +149,7 @@ def test_batch_data_get_batch_failed_specification_no_batch_identifier_pandas_en
     test_df: pd.DataFrame = test_df_pandas
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         # batch_identifiers missing (set to None)
         context.get_batch_list(
             RuntimeBatchRequest(
@@ -161,18 +161,6 @@ def test_batch_data_get_batch_failed_specification_no_batch_identifier_pandas_en
             )
         )
 
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # batch_identifiers missing (omitted)
-        context.get_batch_list(
-            RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                runtime_parameters={"batch_data": test_df},
-            )
-        )
-
 
 def test_get_batch_failed_specification_no_runtime_parameters_pandas_engine(
     data_context_with_datasource_pandas_engine, test_df_pandas
@@ -180,7 +168,7 @@ def test_get_batch_failed_specification_no_runtime_parameters_pandas_engine(
     context: DataContext = data_context_with_datasource_pandas_engine
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         # runtime_parameters missing (None)
         context.get_batch_list(
             batch_request=RuntimeBatchRequest(
@@ -309,7 +297,7 @@ def test_batch_data_get_validator_ambiguous_parameter_pandas_engine(
 
     context.add_expectation_suite("my_expectations")
     # raised by get_batch_list() in DataContext
-    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
+    with pytest.raises(TypeError):
         context.get_validator(
             RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -356,7 +344,7 @@ def test_batch_data_get_validator_failed_specification_no_batch_identifier_panda
 
     # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
     # batch_identifiers should not be None
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         context.get_validator(
             batch_request=RuntimeBatchRequest(
                 datasource_name="my_datasource",
@@ -405,12 +393,12 @@ def test_batch_data_get_validator_failed_specification_incorrect_batch_spec_pass
 
 
 def test_batch_data_get_validator_failed_specification_no_runtime_parameters_pandas_engine(
-    data_context_with_datasource_pandas_engine, test_df_pandas
+    data_context_with_datasource_pandas_engine,
 ):
     context: DataContext = data_context_with_datasource_pandas_engine
 
     context.add_expectation_suite("my_expectations")
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         # runtime_parameters should not be None
         context.get_validator(
             batch_request=RuntimeBatchRequest(

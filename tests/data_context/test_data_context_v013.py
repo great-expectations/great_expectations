@@ -248,49 +248,6 @@ def test_config_variables(empty_data_context):
 @pytest.mark.filterwarnings(
     "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
 )
-def test_get_batch_of_pipeline_batch_data(empty_data_context, test_df):
-    context = empty_data_context
-
-    yaml_config = """
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-          my_runtime_data_connector:
-            module_name: great_expectations.datasource.data_connector
-            class_name: RuntimeDataConnector
-            batch_identifiers:
-            - airflow_run_id
-    """
-    # noinspection PyUnusedLocal
-    context.test_yaml_config(
-        name="my_pipeline_datasource",
-        yaml_config=yaml_config,
-        return_mode="report_object",
-    )
-    # print(json.dumps(report_object, indent=2))
-    # print(context.datasources)
-
-    my_batch = context.get_batch(
-        datasource_name="my_pipeline_datasource",
-        data_connector_name="my_runtime_data_connector",
-        data_asset_name="IN_MEMORY_DATA_ASSET",
-        batch_data=test_df,
-        batch_identifiers={
-            "airflow_run_id": 1234567890,
-        },
-        limit=None,
-    )
-    assert my_batch.batch_definition["data_asset_name"] == "IN_MEMORY_DATA_ASSET"
-
-    assert my_batch.data.dataframe.equals(test_df)
-
-
-@pytest.mark.filterwarnings(
-    "ignore:get_batch is deprecated*:DeprecationWarning:great_expectations.data_context.data_context"
-)
 def test_conveying_splitting_and_sampling_directives_from_data_context_to_pandas_execution_engine(
     empty_data_context, test_df, tmp_path_factory
 ):

@@ -13,7 +13,8 @@ from great_expectations.data_context.types.base import (
     DataContextConfig,
     InMemoryStoreBackendDefaults,
 )
-from great_expectations.exceptions import ConfigNotFoundError, GXCloudConfigurationError
+from great_expectations.exceptions import ConfigNotFoundError
+from great_expectations.exceptions.exceptions import GXCloudConfigurationError
 from tests.test_utils import working_directory
 
 GX_CLOUD_PARAMS_ALL = {
