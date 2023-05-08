@@ -341,38 +341,41 @@ class JSONAsset(_SparkGenericFilePathAsset):
     # Overridden inherited instance fields
     type: Literal["json"] = "json"
     timezone: str = Field(alias="timeZone")
-    primitives_as_string: bool = Field(False, alias="primitivesAsString")
-    prefers_decimal: bool = Field(False, alias="prefersDecimal")
-    allow_comments: bool = Field(False, alias="allowComments")
+    primitives_as_string: Optional[Union[bool, str]] = Field(None, alias="primitivesAsString")
+    prefers_decimal: Optional[Union[bool, str]] = Field(None, alias="prefersDecimal")
+    allow_comments: Optional[Union[bool, str]] = Field(None, alias="allowComments")
 
-    allow_unquoted_field_names: bool = Field(False, alias="allowUnquotedFieldNames")
-    allow_single_quotes: bool = Field(True, alias="allowSingleQuotes")
-    allow_numeric_leading_zeros: bool = Field(False, alias="allowNumericLeadingZeros")
-    allow_backslash_escaping_any_character: bool = Field(
-        False, alias="allowBackslashEscapingAnyCharacter"
+    allow_unquoted_field_names: Optional[Union[bool, str]] = Field(None, alias="allowUnquotedFieldNames")
+    allow_single_quotes: Optional[Union[bool, str]] = Field(None, alias="allowSingleQuotes")
+    allow_numeric_leading_zeros: Optional[Union[bool, str]] = Field(None, alias="allowNumericLeadingZeros")
+    allow_backslash_escaping_any_character: Optional[Union[bool, str]] = Field(
+        None, alias="allowBackslashEscapingAnyCharacter"
     )
     mode: Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"] = Field("PERMISSIVE")
-    column_name_of_corrupt_record: str = Field(alias="columnNameOfCorruptRecord")
-    date_format: str = Field("yyyy-MM-dd", alias="dateFormat")
-    timestamp_format: str = Field(
+    column_name_of_corrupt_record: Optional[str] = Field(None, alias="columnNameOfCorruptRecord")
+    date_format: Optional[str] = Field("yyyy-MM-dd", alias="dateFormat")
+    timestamp_format: Optional[str] = Field(
         "yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]", alias="timestampFormat"
     )
     timestamp_ntz_format: str = Field(
         "yyyy-MM-dd'T'HH:mm:ss[.SSS]", alias="timestampNTZFormat"
     )
     # TODO: Remove? Does enableDateTimeParsingFallback exist in pyspark source code?
-    # enable_date_time_parsing_fallback: bool = Field(
-    #     alias="enableDateTimeParsingFallback"
-    # )
-    multi_line: bool = Field(False, alias="multiLine")
-    allow_unquoted_control_chars: bool = Field(False, alias="allowUnquotedControlChars")
+    enable_date_time_parsing_fallback: bool = Field(
+        alias="enableDateTimeParsingFallback"
+    )
+    multi_line: Optional[Union[bool, str]] = Field(None, alias="multiLine")
+    allow_unquoted_control_chars: Optional[Union[bool, str]] = Field(None, alias="allowUnquotedControlChars")
     encoding: str
-    line_sep: str = Field(alias="lineSep")
-    sampling_ratio: float = Field(1.0, alias="samplingRatio")
-    drop_field_if_all_null: bool = Field(False, alias="dropFieldIfAllNull")
-    locale: str
-    allow_non_numeric_numbers: bool = Field(True, alias="allowNonNumericNumbers")
-    merge_schema: bool = Field(False, alias="mergeSchema")
+    line_sep: Optional[str] = Field(None, alias="lineSep")
+    sampling_ratio: Optional[Union[float, str]] = Field(None, alias="samplingRatio")
+    drop_field_if_all_null: Optional[Union[bool, str]] = Field(None, alias="dropFieldIfAllNull")
+    locale: Optional[str] = None
+    allow_non_numeric_numbers: Optional[Union[bool, str]] = Field(None, alias="allowNonNumericNumbers")
+    # TODO: What is the default for merge_schema? Is it optional? Doesn't appear in `.json()` reader method.
+    merge_schema: Optional[bool] = Field(None, alias="mergeSchema")
+    allow_numeric_leading_zero: Union[bool, str, None] = Field(None,
+                                                               alias="allowNumericLeadingZero")
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -387,6 +390,7 @@ class JSONAsset(_SparkGenericFilePathAsset):
         return (
             super()
             ._get_reader_options_include()
+            # TODO: Update:
             .union(
                 {
                     "timeZone",
@@ -544,36 +548,44 @@ class _SparkFilePathDatasource(_SparkDatasource):
     assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []  # type: ignore[assignment]
 
 
-def _get_mismatches(asset_fields, method_annotations, verbose=False):
+def _get_mismatches(asset_fields, method_annotations, method_param_names: list[str], verbose=False):
     """
 
     Args:
         asset_fields: Fields from the asset e.g. CSVAsset
         method_annotations: Fields from the method e.g. pyspark.sql.DataFrameReader.csv
+        method_param_names: Names of the param names of the method e.g. pyspark.sql.DataFrameReader.csv
+        verbose: True for more detailed output.
 
     Returns:
         Nothing, just prints.
+    """
+
+    # TODO: Warn instead of bad annotation for literal strings vs str e.g.:
+    """
+    BAD ANNOTATION: mode
+    For field mode asset_field.annotation typing.Literal['PERMISSIVE', 'DROPMALFORMED', 'FAILFAST'] should == annotation typing.Union[str, NoneType] but doesn't
+    BAD ANNOTATION: unescapedQuoteHandling
+    For field unescapedQuoteHandling asset_field.annotation typing.Literal['STOP_AT_CLOSING_QUOTE', 'BACK_TO_DELIMITER', 'STOP_AT_DELIMITER', 'SKIP_VALUE', 'RAISE_ERROR'] should == annotation typing.Union[str, NoneType] but doesn't
     """
 
     def print_red(text: str) -> None:
         print(colored(text, "red"))
 
     aliases = {af.alias for name, af in asset_fields.items()}
+    aliases_to_remove = {"id", "type", "name", "batch_metadata", "batching_regex"}
+    aliases_to_check = aliases - aliases_to_remove
+    for alias in aliases_to_check:
+        if alias not in method_param_names:
+            print_red(f"FIELD NOT FOUND: param alias: {alias} not found in method param names: {method_param_names}")
+    # TODO: Remove non spark fields e..g `id`, `batch_metadata`
+    print_green(f"Aliases (for _get_reader_options_include()): {aliases}")
     for param, annotation in method_annotations.items():
         # print(param, annotation)
-        asset_field = asset_fields.get(param)
-        if not asset_field:
-            # Try the snake version
-            if verbose:
-                print(
-                    f"trying snake version for param {param} (snake version: {camel_to_snake(param)})"
-                )
-            asset_field = asset_fields.get(camel_to_snake(param))
-            if asset_field:
-                if verbose:
-                    print(
-                        f"needed snake version for param: {param} for asset_field: {asset_field}"
-                    )
+
+
+
+        asset_field = asset_fields.get(param) or asset_fields.get(camel_to_snake(param))
 
         if asset_field:
             # if asset_field.type_ == annotation:
@@ -596,6 +608,7 @@ def _get_mismatches(asset_fields, method_annotations, verbose=False):
                 print(
                     f"For field {param} asset_field.annotation {asset_field.annotation} should == annotation {annotation} but doesn't"
                 )
+
             # print(f"asset_field.annotation {asset_field.annotation}")
             # print(f"asset_field.default {asset_field.default}")
 
@@ -730,6 +743,7 @@ if __name__ == "__main__":
         #                                         required=False, default='STOP_AT_DELIMITER',
         #                                         alias='unescapedQuoteHandling')}
         # print("Building field list from spark function def")
+        method_param_names = [n for n in inspect.signature(spark_method).parameters.keys()]
         method_annotations = spark_method.__annotations__
         if method_annotations.get("return"):
             method_annotations.pop("return")
@@ -755,6 +769,7 @@ if __name__ == "__main__":
 
         _get_mismatches(
             asset_fields=asset_fields,
+            method_param_names=method_param_names,
             method_annotations=method_annotations,
             verbose=verbose,
         )
