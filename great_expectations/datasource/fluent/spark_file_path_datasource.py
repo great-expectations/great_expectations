@@ -99,106 +99,114 @@ def csv(
 
 
 class CSVAsset(_SparkGenericFilePathAsset):
-    # The options below are available as of spark v3.4.0
-    # See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
-    # Type hints and parameters taken from source code since they differ from the documentation
-    # linked above: https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604
-    """
-    def csv(
-        self,
-        path: PathOrPaths,
-        schema: Optional[Union[StructType, str]] = None,
-        sep: Optional[str] = None,
-        encoding: Optional[str] = None,
-        quote: Optional[str] = None,
-        escape: Optional[str] = None,
-        comment: Optional[str] = None,
-        header: Optional[Union[bool, str]] = None,
-        inferSchema: Optional[Union[bool, str]] = None,
-        ignoreLeadingWhiteSpace: Optional[Union[bool, str]] = None,
-        ignoreTrailingWhiteSpace: Optional[Union[bool, str]] = None,
-        nullValue: Optional[str] = None,
-        nanValue: Optional[str] = None,
-        positiveInf: Optional[str] = None,
-        negativeInf: Optional[str] = None,
-        dateFormat: Optional[str] = None,
-        timestampFormat: Optional[str] = None,
-        maxColumns: Optional[Union[int, str]] = None,
-        maxCharsPerColumn: Optional[Union[int, str]] = None,
-        maxMalformedLogPerPartition: Optional[Union[int, str]] = None,
-        mode: Optional[str] = None,
-        columnNameOfCorruptRecord: Optional[str] = None,
-        multiLine: Optional[Union[bool, str]] = None,
-        charToEscapeQuoteEscaping: Optional[str] = None,
-        samplingRatio: Optional[Union[float, str]] = None,
-        enforceSchema: Optional[Union[bool, str]] = None,
-        emptyValue: Optional[str] = None,
-        locale: Optional[str] = None,
-        lineSep: Optional[str] = None,
-        pathGlobFilter: Optional[Union[bool, str]] = None,
-        recursiveFileLookup: Optional[Union[bool, str]] = None,
-        modifiedBefore: Optional[Union[bool, str]] = None,
-        modifiedAfter: Optional[Union[bool, str]] = None,
-        unescapedQuoteHandling: Optional[str] = None,
-    ) -> "DataFrame":
-    """
     type: Literal["csv"] = "csv"
+
+    # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0) appear in comment above
+    # parameter for reference (from https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)
+    # See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
+    # path: PathOrPaths,
+    # NA - path determined by asset
+    # schema: Optional[Union[StructType, str]] = None,
+    # schema shadows pydantic BaseModel attribute
+    spark_schema: Optional[Union[pyspark_types.StructType, str]] = Field(
+        None, alias="schema"
+    )
+    # sep: Optional[str] = None,
     sep: Union[str, None] = None
+    # encoding: Optional[str] = None,
     encoding: Optional[str] = None
+    # quote: Optional[str] = None,
     quote: Optional[str] = None
+    # escape: Optional[str] = None,
     escape: Optional[str] = None
+    # comment: Optional[str] = None,
     comment: Optional[str] = None
+    # header: Optional[Union[bool, str]] = None,
     header: Optional[Union[bool, str]] = None
+    # inferSchema: Optional[Union[bool, str]] = None,
     infer_schema: Optional[Union[bool, str]] = Field(None, alias="inferSchema")
-    prefer_date: bool = Field(True, alias="preferDate")
-    enforce_schema: Optional[Union[bool, str]] = Field(True, alias="enforceSchema")
+    # ignoreLeadingWhiteSpace: Optional[Union[bool, str]] = None,
     ignore_leading_white_space: Optional[Union[bool, str]] = Field(
         None, alias="ignoreLeadingWhiteSpace"
     )
+    # ignoreTrailingWhiteSpace: Optional[Union[bool, str]] = None,
     ignore_trailing_white_space: Optional[Union[bool, str]] = Field(
         None, alias="ignoreTrailingWhiteSpace"
     )
+    # nullValue: Optional[str] = None,
     null_value: Optional[str] = Field(None, alias="nullValue")
+    # nanValue: Optional[str] = None,
     nan_value: Optional[str] = Field(None, alias="nanValue")
+    # positiveInf: Optional[str] = None,
     positive_inf: Optional[str] = Field(None, alias="positiveInf")
+    # negativeInf: Optional[str] = None,
     negative_inf: Optional[str] = Field(None, alias="negativeInf")
+    # dateFormat: Optional[str] = None,
     date_format: Optional[str] = Field(None, alias="dateFormat")
+    # timestampFormat: Optional[str] = None,
     timestamp_format: Optional[str] = Field(None, alias="timestampFormat")
-    timestamp_ntz_format: str = Field(
-        "yyyy-MM-dd'T'HH:mm:ss[.SSS]", alias="timestampNTZFormat"
-    )
-    # TODO: This does not appear in the spark source code, alert if there are extraneous params here:
-    # enable_date_time_parsing_fallback: bool = Field(
-    #     alias="enableDateTimeParsingFallback"
-    # )
+    # maxColumns: Optional[Union[int, str]] = None,
     max_columns: Optional[Union[int, str]] = Field(None, alias="maxColumns")
+    # maxCharsPerColumn: Optional[Union[int, str]] = None,
     max_chars_per_column: Optional[Union[int, str]] = Field(
         None, alias="maxCharsPerColumn"
     )
-    max_malformed_log_per_partition: Union[int, str, None] = Field(
+    # maxMalformedLogPerPartition: Optional[Union[int, str]] = None,
+    max_malformed_log_per_partition: Optional[Union[int, str]] = Field(
         None, alias="maxMalformedLogPerPartition"
     )
-    # TODO: Change mode? mode: Optional[str] = None,
-    mode: Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"] = Field("PERMISSIVE")
+    # mode: Optional[str] = None,
+    mode: Optional[Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"]] = None
+    # columnNameOfCorruptRecord: Optional[str] = None,
     column_name_of_corrupt_record: Optional[str] = Field(
         None, alias="columnNameOfCorruptRecord"
     )
+    # multiLine: Optional[Union[bool, str]] = None,
     multi_line: Optional[Union[bool, str]] = Field(None, alias="multiLine")
+    # charToEscapeQuoteEscaping: Optional[str] = None,
     char_to_escape_quote_escaping: Optional[str] = Field(
         None, alias="charToEscapeQuoteEscaping"
     )
+    # samplingRatio: Optional[Union[float, str]] = None,
     sampling_ratio: Optional[Union[float, str]] = Field(None, alias="samplingRatio")
+    # enforceSchema: Optional[Union[bool, str]] = None,
+    enforce_schema: Optional[Union[bool, str]] = Field(None, alias="enforceSchema")
+    # emptyValue: Optional[str] = None,
     empty_value: Optional[str] = Field(None, alias="emptyValue")
+    # locale: Optional[str] = None,
     locale: Optional[str] = None
+    # lineSep: Optional[str] = None,
     line_sep: Optional[str] = Field(None, alias="lineSep")
-    # TODO: Change unescapedQuoteHandling: Optional[str] = None,?
-    unescaped_quote_handling: Literal[
-        "STOP_AT_CLOSING_QUOTE",
-        "BACK_TO_DELIMITER",
-        "STOP_AT_DELIMITER",
-        "SKIP_VALUE",
-        "RAISE_ERROR",
-    ] = Field("STOP_AT_DELIMITER", alias="unescapedQuoteHandling")
+    # pathGlobFilter: Optional[Union[bool, str]] = None,
+    # Inherited from _SparkGenericFilePathAsset
+    # recursiveFileLookup: Optional[Union[bool, str]] = None,
+    # Inherited from _SparkGenericFilePathAsset
+    # modifiedBefore: Optional[Union[bool, str]] = None,
+    # Inherited from _SparkGenericFilePathAsset
+    # modifiedAfter: Optional[Union[bool, str]] = None,
+    # Inherited from _SparkGenericFilePathAsset
+    # unescapedQuoteHandling: Optional[str] = None,
+    unescaped_quote_handling: Optional[
+        Literal[
+            "STOP_AT_CLOSING_QUOTE",
+            "BACK_TO_DELIMITER",
+            "STOP_AT_DELIMITER",
+            "SKIP_VALUE",
+            "RAISE_ERROR",
+        ]
+    ] = Field(None, alias="unescapedQuoteHandling")
+
+    # vvv Docs <> Source Code mismatch
+    # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-csv.html
+    # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604
+    # prefer_date: bool = Field(True, alias="preferDate")
+    # timestamp_ntz_format: str = Field(
+    #     "yyyy-MM-dd'T'HH:mm:ss[.SSS]", alias="timestampNTZFormat"
+    # )
+    # enable_date_time_parsing_fallback: bool = Field(
+    #     alias="enableDateTimeParsingFallback"
+    # )
+    # ^^^ Docs <> Source Code mismatch
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -219,6 +227,7 @@ class CSVAsset(_SparkGenericFilePathAsset):
             ._get_reader_options_include()
             .union(
                 {
+                    "schema",
                     "sep",
                     "encoding",
                     "quote",
@@ -226,8 +235,6 @@ class CSVAsset(_SparkGenericFilePathAsset):
                     "comment",
                     "header",
                     "inferSchema",
-                    "preferDate",
-                    "enforceSchema",
                     "ignoreLeadingWhiteSpace",
                     "ignoreTrailingWhiteSpace",
                     "nullValue",
@@ -236,19 +243,32 @@ class CSVAsset(_SparkGenericFilePathAsset):
                     "negativeInf",
                     "dateFormat",
                     "timestampFormat",
-                    "timestampNTZFormat",
-                    "enableDateTimeParsingFallback",
                     "maxColumns",
                     "maxCharsPerColumn",
+                    "maxMalformedLogPerPartition",
                     "mode",
                     "columnNameOfCorruptRecord",
                     "multiLine",
                     "charToEscapeQuoteEscaping",
                     "samplingRatio",
+                    "enforceSchema",
                     "emptyValue",
                     "locale",
                     "lineSep",
                     "unescapedQuoteHandling",
+                    # Inherited vvv
+                    # "pathGlobFilter",
+                    # "recursiveFileLookup",
+                    # "modifiedBefore",
+                    # "modifiedAfter",
+                    # Inherited ^^^
+                    # vvv Docs <> Source Code mismatch
+                    # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-csv.html
+                    # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604
+                    # "preferDate",
+                    # "timestampNTZFormat",
+                    # "enableDateTimeParsingFallback",
+                    # ^^^ Docs <> Source Code mismatch
                 }
             )
         )
@@ -346,7 +366,8 @@ class JSONAsset(_SparkGenericFilePathAsset):
     # Overridden inherited instance fields
     type: Literal["json"] = "json"
 
-    # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0)
+    # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0) appear in comment above
+    # parameter for reference (from https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309)
     # path: Union[str, List[str], RDD[str]],
     # NA - path determined by asset
     # schema: Optional[Union[StructType, str]] = None,
