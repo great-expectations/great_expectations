@@ -59,7 +59,7 @@ The Data Context provides a primary entry point to all of Great Expectations' AP
 
 #### Configuration management
 
-The Data Context makes it easy to manage configuration of its own top-level components. It includes basic CRUD operations for all of the core components for a Great Expectations deployment (Datasources, Expectation Suites, Checkpoints) and provides access and default integrations with Data Docs, your Stores, Plugins, etc.
+A Data Context includes basic create, read, update, and delete (CRUD) operations for the core components of a Great Expectations deployment. This includes Datasources, Expectation Suites, and Checkpoints. In addition, a Data Context allows you to access and integrate Data Docs, Stores, Plugins, and so on.
 
 #### Component management and config storage
 
