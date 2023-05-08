@@ -92,26 +92,6 @@ If you’re using Great Expectations Cloud, you’d set up cloud environment var
 
 That’s it! You now have access to all the goodness of a DataContext.
 
-### Interactively testing configurations from your Data Context
-
-Especially during the beginning of a Great Expecations project, it is often incredibly useful to rapidly iterate over
-configurations of key Data Context components. The `test_yaml_config()` feature makes that easy.
-
-`test_yaml_config()` is a convenience method for configuring the moving parts of a Great Expectations deployment. It
-allows you to quickly test out configs for Datasources, Checkpoints, and each type of Store (ExpectationStores,
-ValidationResultStores, and MetricsStores). For many deployments of Great Expectations, these components (plus
-Expectations) are the only ones you'll need.
-
-Here's a typical example:
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py yaml"
-```
-
-```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py test_yaml_config"
-```
-
-Running `test_yaml_config()` will show some feedback on the configuration. The helpful output can include any result 
-from the "self check" of an artifact produced using that configuration.  You should note, however, that `test_yaml_config()` never overwrites the underlying configuration.  If you make edits in the course of your work, you will have to explicitly save the configuration before running `test_yaml_config()`.
 
 ## More details
 
