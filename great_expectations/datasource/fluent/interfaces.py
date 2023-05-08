@@ -62,10 +62,7 @@ if TYPE_CHECKING:
     from great_expectations.core.config_provider import _ConfigurationProvider
     from great_expectations.data_context import AbstractDataContext as GXDataContext
     from great_expectations.datasource.data_connector.batch_filter import BatchSlice
-    from great_expectations.datasource.fluent.batch_request import (
-        BatchRequest,
-        BatchRequestOptions,
-    )
+    from great_expectations.datasource.fluent import BatchRequest, BatchRequestOptions
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
@@ -561,6 +558,14 @@ class Datasource(
                 self._data_context._save_project_config(self)
             except TypeError as type_err:
                 warnings.warn(str(type_err), GxSerializationWarning)
+
+    def _rebuild_asset_data_connectors(self) -> None:
+        """If Datasource required a data_connector we need to build the data_connector for each asset"""
+        if self.data_connector_type:
+            for data_asset in self.assets:
+                # check if data_connector exist before rebuilding?
+                connect_options = getattr(data_asset, "connect_options", {})
+                self._build_data_connector(data_asset, **connect_options)
 
     @staticmethod
     def parse_order_by_sorters(

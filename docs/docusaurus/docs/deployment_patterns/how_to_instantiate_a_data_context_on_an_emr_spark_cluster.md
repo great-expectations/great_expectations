@@ -11,6 +11,7 @@ This guide will help you instantiate a Data Context on an EMR Spark cluster.
 
 The guide demonstrates the recommended path for instantiating a Data Context without a full configuration directory and without using the Great Expectations [command line interface (CLI)](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md).
 
+## Prerequisites
 
 <Prerequisites>
 

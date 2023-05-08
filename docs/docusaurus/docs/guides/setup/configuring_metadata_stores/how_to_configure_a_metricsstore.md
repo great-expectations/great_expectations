@@ -10,6 +10,12 @@ Saving <TechnicalTag tag="metric" text="Metrics" /> during <TechnicalTag tag="va
 
 Storing metrics is still an **experimental** feature of Great Expectations, and we expect configuration and capability to evolve rapidly.
 
+## Prerequisites
+
+- [A Great Expectations instance](/docs/guides/setup/setup_overview)
+- Completion of the [Quickstart](tutorials/quickstart/quickstart.md)
+- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
+
 ## Steps
 
 ### 1. Adding a MetricStore

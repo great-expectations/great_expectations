@@ -10,9 +10,9 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
-:::note Prerequisites
-- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
-:::
+## Prerequisites
+
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 
 ## The Create Expectations process
 

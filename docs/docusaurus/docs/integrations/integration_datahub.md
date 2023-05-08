@@ -15,17 +15,16 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 * Support/Contact: https://slack.datahubproject.io/
 :::
 
-### Introduction
 This integration allows you to push the results of running Expectations into DataHub (https://datahubproject.io/). DataHub is a metadata platform which enables search & discovery, federated governance, and data observability for the Modern Data Stack.
 
 
 ### Technical background
 There is a custom Action named `DataHubValidationAction` which allows you to view Expectation Results inside of DataHub.
 
-:::note Prerequisites
- - Create a [Great Expectations Checkpoint](https://docs.greatexpectations.io/docs/terms/checkpoint)
- - [Deploy an instance of DataHub](https://datahubproject.io/docs/quickstart)
-:::
+### Prerequisites
+
+ - A [Great Expectations Checkpoint](https://docs.greatexpectations.io/docs/terms/checkpoint)
+ - [A DataHub instance](https://datahubproject.io/docs/quickstart)
 
 `DataHubValidationAction` pushes Expectations metadata to DataHub. This includes
 

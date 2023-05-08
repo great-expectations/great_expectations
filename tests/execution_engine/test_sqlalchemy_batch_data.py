@@ -2,13 +2,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
-from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
+from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
+from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 try:
     sqlalchemy = pytest.importorskip("sqlalchemy")
@@ -18,9 +17,8 @@ except ImportError:
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
     SqlAlchemyBatchData,
 )
+from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine
 from tests.test_utils import get_sqlite_temp_table_names
-
-from tests.sqlalchemy_test_doubles import MockSaEngine, Dialect
 
 pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
@@ -54,7 +52,7 @@ def test_instantiation_with_query(sqlite_view_engine, test_df):
     query: str = "SELECT * FROM test_table_0"
     # If create_temp_table=False, a new temp table should NOT be created
     # noinspection PyUnusedLocal
-    batch_data = SqlAlchemyBatchData(
+    SqlAlchemyBatchData(
         execution_engine=sqlite_view_engine,
         query=query,
         create_temp_table=False,
