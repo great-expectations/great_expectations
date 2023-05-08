@@ -116,7 +116,7 @@ module.exports = {
             },
             {
               label: 'SLACK',
-              to: 'https://greatexpectations.io/slack'
+              to: 'https://discourse.greatexpectations.io/'
             },
             {
               label: 'GITHUB',
