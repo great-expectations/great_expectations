@@ -4,6 +4,7 @@ import difflib
 import functools
 import logging
 import pathlib
+import random
 import uuid
 from collections import defaultdict
 from pprint import pformat as pf
@@ -13,6 +14,7 @@ import pytest
 import responses
 
 from great_expectations import get_context
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
@@ -33,6 +35,8 @@ if TYPE_CHECKING:
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
 
+
+YAML = YAMLHandler()
 
 logger = logging.getLogger(__file__)
 
@@ -326,6 +330,23 @@ def test_context_add_or_update_datasource(
 
     updated_datasource: SqliteDatasource = context.datasources[datasource.name]  # type: ignore[assignment]
     assert updated_datasource.connection_string == "sqlite:///"
+
+
+def test_delete_removes_datasource_from_yaml(seeded_file_context: FileDataContext):
+    random_datasource = random.choice(
+        list(seeded_file_context.fluent_datasources.values())
+    )
+    print(f"Delete -> '{random_datasource.name}'\n")
+
+    seeded_file_context.delete_datasource(random_datasource.name)
+
+    yaml_path = pathlib.Path(
+        seeded_file_context.root_directory, seeded_file_context.GX_YML
+    ).resolve(strict=True)
+    yaml_contents = YAML.load(yaml_path.read_text())
+    print(f"{pf(yaml_contents, depth=2)}")
+
+    assert random_datasource.name not in yaml_contents["fluent_datasources"]
 
 
 if __name__ == "__main__":
