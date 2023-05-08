@@ -19,8 +19,6 @@ if TYPE_CHECKING:
         SortersDefinition,
     )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        AvroAsset,
-        BinaryFileAsset,
         CSVAsset,
         DirectoryCSVAsset,
         JSONAsset,

@@ -232,15 +232,9 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
         )
 
 
-class DirectoryCSVAsset(
-    _SparkGenericFilePathAssetMixin, _DirectoryDataAssetMixin, CSVAsset
-):
+class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
     # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"
-
-    class Config:
-        extra = pydantic.Extra.forbid
-        allow_population_by_field_name = True
 
     @classmethod
     def _get_reader_method(cls) -> str:
@@ -253,8 +247,7 @@ class DirectoryCSVAsset(
         See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
         """
         return (
-            super(_SparkGenericFilePathAssetMixin, self)._get_reader_options_include()
-            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
             | super(CSVAsset, self)._get_reader_options_include()
         )
 
