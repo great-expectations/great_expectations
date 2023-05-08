@@ -5,14 +5,17 @@ title: "Validate Data: Overview"
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
 
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
-:::note Prerequisites
-- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
-:::
+Prerequisites
+
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 
 ## The Validate Data process
 

@@ -1,15 +1,17 @@
+from __future__ import annotations
+
 import logging
+import warnings
 from collections import OrderedDict
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.util import send_slack_notification
 from great_expectations.core.async_executor import AsyncExecutor
-from great_expectations.core.batch import Batch  # noqa: TCH001
 from great_expectations.core.run_identifier import RunIdentifier
-from great_expectations.data_asset import DataAsset  # noqa: TCH001
 from great_expectations.data_asset.util import parse_result_format
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -19,6 +21,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.validation_operators.types.validation_operator_result import (
     ValidationOperatorResult,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.batch import Batch
+    from great_expectations.data_asset import DataAsset
 
 logger = logging.getLogger(__name__)
 
@@ -190,7 +196,7 @@ class ActionListValidationOperator(ValidationOperator):
         data_context,
         action_list,
         name,
-        result_format={"result_format": "SUMMARY"},
+        result_format={"result_format": "SUMMARY"},  # noqa: B006 # mutable default
     ) -> None:
         super().__init__()
         self.data_context = data_context
@@ -207,6 +213,11 @@ class ActionListValidationOperator(ValidationOperator):
 
         self.action_list = action_list
         self.actions = OrderedDict()
+        # For a great expectations cloud context it's important that we store the validation result before we send
+        # notifications. That's because we want to provide a link to the validation result and the validation result
+        # page won't get created until we run the store action.
+        store_action_detected = False
+        notify_before_store: Optional[str] = None
         for action_config in action_list:
             assert isinstance(action_config, dict)
             # NOTE: Eugene: 2019-09-23: need a better way to validate an action config:
@@ -216,6 +227,19 @@ class ActionListValidationOperator(ValidationOperator):
                         action_config.keys()
                     )
                 )
+
+            if "class_name" in action_config["action"]:
+                if (
+                    action_config["action"]["class_name"]
+                    == "StoreValidationResultAction"
+                ):
+                    store_action_detected = True
+                elif (
+                    action_config["action"]["class_name"].endswith("NotificationAction")
+                    and not store_action_detected
+                ):
+                    # We currently only support SlackNotifications but setting this for any notification.
+                    notify_before_store = action_config["action"]["class_name"]
 
             config = action_config["action"]
             module_name = "great_expectations.validation_operators"
@@ -231,6 +255,13 @@ class ActionListValidationOperator(ValidationOperator):
                     class_name=config["class_name"],
                 )
             self.actions[action_config["name"]] = new_action
+        if notify_before_store and self._using_cloud_context:
+            warnings.warn(
+                f"The checkpoints action_list configuration has a notification, {notify_before_store}"
+                "configured without a StoreValidationResultAction configured. This means the notification can't"
+                "provide a link the the validation result. Please move all notification actions after "
+                "StoreValidationResultAction in your configuration."
+            )
 
     @property
     def _using_cloud_context(self) -> bool:
@@ -458,10 +489,21 @@ class ActionListValidationOperator(ValidationOperator):
                     checkpoint_identifier=checkpoint_identifier,
                 )
 
+                # Transform action_result if it not a dictionary.
+                if isinstance(action_result, GXCloudResourceRef):
+                    transformed_result = {
+                        "id": action_result.id,
+                        "validation_result_url": action_result.response["data"][
+                            "attributes"
+                        ]["validation_result"]["display_url"],
+                    }
+                elif action_result is None:
+                    transformed_result = {}
+                else:
+                    transformed_result = action_result
+
                 # add action_result
-                batch_actions_results[action["name"]] = (
-                    {} if action_result is None else action_result
-                )
+                batch_actions_results[action["name"]] = transformed_result
                 batch_actions_results[action["name"]]["class"] = action["action"][
                     "class_name"
                 ]
@@ -622,7 +664,7 @@ class WarningAndFailureExpectationSuitesValidationOperator(
         slack_webhook=None,
         notify_on="all",
         notify_with=None,
-        result_format={"result_format": "SUMMARY"},
+        result_format={"result_format": "SUMMARY"},  # noqa: B006 # mutable default
     ) -> None:
         super().__init__(data_context, action_list, name)
 

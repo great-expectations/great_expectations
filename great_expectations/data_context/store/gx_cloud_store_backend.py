@@ -339,6 +339,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
         if id or resource is GXCloudRESTResource.DATA_CONTEXT_VARIABLES:
+            # _update returns a bool
             return self._update(id=id, value=value)
 
         resource_type = self.ge_cloud_resource_type
@@ -369,10 +370,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             object_id = response_json["data"]["id"]
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
+            # This method is where posts get made for all cloud store endpoints. We pass
+            # the response_json back up to the caller because the specific resource may
+            # want to parse resource specific data out of the response.
             return GXCloudResourceRef(
                 resource_type=resource_type,
                 id=object_id,
                 url=object_url,
+                response_json=response_json,
             )
         except requests.HTTPError as http_exc:
             raise StoreBackendError(

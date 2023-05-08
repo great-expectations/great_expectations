@@ -26,6 +26,7 @@ from great_expectations.core.config_provider import (
     _ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
+from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudEnvironmentVariable,
@@ -58,9 +59,24 @@ if TYPE_CHECKING:
         ConfigurationIdentifier,
         ExpectationSuiteIdentifier,
     )
+    from great_expectations.datasource.fluent import Datasource as FluentDatasource
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
+
+
+def _extract_fluent_datasources(config_dict: dict) -> dict:
+    """
+    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
+    We need to extract the fluent datasources otherwise the data context will attempt eager config
+    substitutions and other inappropriate operations.
+    """
+    datasources = config_dict.get("datasources", {})
+    fds_names: list[str] = []
+    for ds_name, ds in datasources.items():
+        if "type" in ds:
+            fds_names.append(ds_name)
+    return {name: datasources.pop(name) for name in fds_names}
 
 
 @public_api
@@ -103,6 +119,7 @@ class CloudDataContext(SerializableDataContext):
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
 
+        self._check_if_latest_version()
         self._cloud_config = self.get_cloud_config(
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
@@ -117,6 +134,10 @@ class CloudDataContext(SerializableDataContext):
             context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
         )
+
+    def _check_if_latest_version(self) -> None:
+        checker = _VersionChecker(__version__)
+        checker.check_if_using_latest_gx()
 
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
@@ -248,6 +269,7 @@ class CloudDataContext(SerializableDataContext):
                 f"Bad request made to GX Cloud; {response.text}"
             )
         config = response.json()
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 
     @classmethod
@@ -820,11 +842,24 @@ class CloudDataContext(SerializableDataContext):
 
         return expectation_suite
 
-    def _save_project_config(self) -> None:
+    def _save_project_config(
+        self, _fds_datasource: FluentDatasource | None = None
+    ) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
 
         Explicitly override base class implementation to retain legacy behavior.
         """
-        logger.info(f"{type(self).__name__}._save_project_config() is a NoOp")
-        # TODO: this may be adjusted as part of fluent datasources save flow
+        # 042723 kilo59
+        # Currently CloudDataContext and FileDataContext diverge in how FDS are persisted.
+        # FileDataContexts don't use the DatasourceStore at all to save or hydrate FDS configs.
+        # CloudDataContext does use DatasourceStore in order to make use of the Cloud http clients.
+        # The intended future state is for a new FluentDatasourceStore that can fully encapsulate
+        # the different requirements for FDS vs BDS.
+        # At which time `_save_project_config` will revert to being a no-op operation on the CloudDataContext.
+        if _fds_datasource:
+            self._datasource_store.set(key=None, value=_fds_datasource)
+        else:
+            logger.debug(
+                "CloudDataContext._save_project_config() has no `fds_datasource` to update"
+            )

@@ -10,12 +10,6 @@ import logging
 from typing import TYPE_CHECKING, Dict, List, Union
 
 import requests
-from typing_extensions import Final
-
-from great_expectations.data_context.cloud_constants import CLOUD_APP_DEFAULT_BASE_URL
-from great_expectations.data_context.types.refs import (
-    GXCloudResourceRef,  # noqa: TCH001
-)
 
 try:
     import pypd
@@ -37,6 +31,7 @@ from great_expectations.core.expectation_validation_result import (
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.metric_store import MetricStore
+from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
     GXCloudIdentifier,
@@ -294,9 +289,16 @@ class SlackNotificationAction(ValidationAction):
             isinstance(validation_result_suite_identifier, GXCloudIdentifier)
             and validation_result_suite_identifier.id
         ):
-            cloud_base_url: Final[str] = CLOUD_APP_DEFAULT_BASE_URL
-            validation_result_url = f"{cloud_base_url}?validationResultId={validation_result_suite_identifier.id}"
-            validation_result_urls.append(validation_result_url)
+            # To send a notification with a link to the validation result, we need to have created the validation
+            # result in cloud. If the user has configured the store action after the notification action, they will
+            # get a warning that no link will be provided. See the __init__ method for ActionListValidationOperator.
+            if (
+                "store_validation_result" in payload
+                and "validation_result_url" in payload["store_validation_result"]
+            ):
+                validation_result_urls.append(
+                    payload["store_validation_result"]["validation_result_url"]
+                )
 
         if (
             self.notify_on == "all"
@@ -851,7 +853,7 @@ class StoreValidationResultAction(ValidationAction):
         self,
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
-    ) -> None:
+    ) -> Optional[GXCloudResourceRef]:
         super().__init__(data_context)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
@@ -870,7 +872,28 @@ class StoreValidationResultAction(ValidationAction):
         checkpoint_identifier: Optional[GXCloudIdentifier] = None,
     ):
         logger.debug("StoreValidationResultAction.run")
+        run_return_value = self._basic_run(
+            validation_result_suite,
+            validation_result_suite_identifier,
+            expectation_suite_identifier,
+            checkpoint_identifier,
+        )
+        if self._using_cloud_context and isinstance(
+            run_return_value, GXCloudResourceRef
+        ):
+            return self._run_cloud_post_process_resource_ref(
+                run_return_value, validation_result_suite_identifier
+            )
 
+    def _basic_run(
+        self,
+        validation_result_suite: ExpectationSuiteValidationResult,
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GXCloudIdentifier
+        ],
+        expectation_suite_identifier,
+        checkpoint_identifier: Optional[GXCloudIdentifier],
+    ) -> Union[bool, GXCloudResourceRef]:
         if validation_result_suite is None:
             logger.warning(
                 f"No validation_result_suite was passed to {type(self).__name__} action. Skipping action."
@@ -895,16 +918,24 @@ class StoreValidationResultAction(ValidationAction):
         if self._using_cloud_context and expectation_suite_identifier:
             expectation_suite_ge_cloud_id = expectation_suite_identifier.id
 
-        return_val = self.target_store.set(
+        return self.target_store.set(
             validation_result_suite_identifier,
             validation_result_suite,
             checkpoint_id=checkpoint_ge_cloud_id,
             expectation_suite_id=expectation_suite_ge_cloud_id,
         )
-        if self._using_cloud_context:
-            return_val: GXCloudResourceRef
-            new_ge_cloud_id = return_val.id
-            validation_result_suite_identifier.id = new_ge_cloud_id
+
+    def _run_cloud_post_process_resource_ref(
+        self,
+        gx_cloud_resource_ref: GXCloudResourceRef,
+        validation_result_suite_identifier: Union[
+            ValidationResultIdentifier, GXCloudIdentifier
+        ],
+    ):
+        store_set_return_value: GXCloudResourceRef
+        new_ge_cloud_id = gx_cloud_resource_ref.id
+        validation_result_suite_identifier.id = new_ge_cloud_id
+        return gx_cloud_resource_ref
 
 
 @public_api

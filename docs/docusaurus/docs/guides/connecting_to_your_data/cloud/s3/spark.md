@@ -18,6 +18,8 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 This guide will help you connect to your data stored on AWS S3 using Spark.
 This will allow you to <TechnicalTag tag="validation" text="Validate" /> and explore your data.
 
+## Prerequisites
+
 <Prerequisites>
 
 - Access to data on an AWS S3 bucket

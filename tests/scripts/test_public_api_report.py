@@ -3,13 +3,15 @@ import pathlib
 from typing import List, Union
 
 import pytest
+from docs.sphinx_api_docs_source.include_exclude_definition import (
+    IncludeExcludeDefinition,
+)
 from docs.sphinx_api_docs_source.public_api_report import (
     CodeParser,
     CodeReferenceFilter,
     Definition,
     DocsExampleParser,
     FileContents,
-    IncludeExcludeDefinition,
     PublicAPIChecker,
     PublicAPIReport,
     _get_import_names,

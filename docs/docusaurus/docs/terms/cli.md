@@ -7,6 +7,10 @@ import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 
 ## Overview
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+
 ### Definition
 
 CLI stands for Command Line Interface.

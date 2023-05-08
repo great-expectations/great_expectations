@@ -95,7 +95,6 @@ module.exports = {
               value: '<h4>Data Context Configuration</h4>',
               defaultStyle: true
             },
-            'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
             'guides/setup/configuring_data_contexts/how_to_configure_credentials'
           ]
         },
@@ -329,7 +328,7 @@ module.exports = {
           items: [
             'guides/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters',
             'guides/expectations/advanced/how_to_dynamically_load_evaluation_parameters_from_a_database',
-            'guides/expectations/advanced/how_to_compare_two_tables_with_the_user_configurable_profiler'
+            'guides/expectations/advanced/how_to_compare_two_tables_with_the_onboarding_data_assistant'
           ]
         },
         {
@@ -444,73 +443,14 @@ module.exports = {
     },
     {
       type: 'category',
-      label: 'Contributing',
-      link: { type: 'doc', id: 'contributing/contributing' },
-      items: [
-        {
-          type: 'category',
-          label: 'Contributing basics',
-          items: [
-            { type: 'doc', id: 'contributing/contributing_setup' },
-            { type: 'doc', id: 'contributing/contributing_checklist' },
-            { type: 'doc', id: 'contributing/contributing_github' },
-            { type: 'doc', id: 'contributing/contributing_test' },
-            { type: 'doc', id: 'contributing/contributing_maturity' },
-            { type: 'doc', id: 'contributing/contributing_misc' }
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Contributing specifics',
-          items: [
-            {
-              type: 'category',
-              label: 'How to contribute how-to guides',
-              items: [
-                { type: 'doc', id: 'guides/miscellaneous/how_to_write_a_how_to_guide' },
-                { type: 'doc', id: 'guides/miscellaneous/how_to_template' }
-              ]
-            },
-            {
-              type: 'category',
-              label: 'How to contribute integration documentation',
-              items: [
-                'integrations/contributing_integration',
-                { type: 'doc', id: 'integrations/integration_template', label: 'TEMPLATE Integration Document' }
-              ]
-            },
-            { type: 'doc', id: 'guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations' },
-            { type: 'doc', id: 'contributing/contributing_package' }
-          ]
-        },
-        {
-          type: 'category',
-          label: 'Style guides',
-          items: [
-            { type: 'doc', id: 'contributing/style_guides/docs_style' },
-            { type: 'doc', id: 'contributing/style_guides/code_style' },
-            { type: 'doc', id: 'contributing/style_guides/cli_and_notebooks_style' }
-          ]
-        },
-        'contributing/index'
-      ]
-    },
-    {
-      type: 'category',
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
-        {
-          type: 'category',
-          label: 'Supplemental documentation',
-          link: { type: 'doc', id: 'reference/supplemental_documentation' },
-          items: [
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_great_expectations_cli' },
-            { type: 'doc', id: 'guides/miscellaneous/how_to_use_the_project_check_config_command' },
-            { type: 'doc', id: 'reference/customize_your_deployment' },
-            { type: 'doc', id: 'reference/usage_statistics' }
-          ]
-        },
+    'contributing/contributing_maturity',
+    'guides/miscellaneous/how_to_use_the_great_expectations_cli',
+    'guides/miscellaneous/how_to_use_the_project_check_config_command',
+    'reference/customize_your_deployment',
+    'reference/usage_statistics',
         {
           type: 'category',
           label: 'API documentation',
@@ -581,6 +521,7 @@ module.exports = {
       ]
     },
     { type: 'doc', id: 'changelog' },
-    { type: 'doc', id: 'guides/miscellaneous/migration_guide' }
+    { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
+    'contributing/contributing',
   ]
 }

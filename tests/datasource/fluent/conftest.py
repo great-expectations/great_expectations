@@ -178,7 +178,12 @@ def _get_fake_db_callback(
     item = _CLOUD_API_FAKE_DB.get(url, MISSING)
     logger.info(f"body -->\n{pf(item, depth=2)}")
     if item is MISSING:
-        result = _CallbackResult(404, headers={}, body=f"NotFound at {url}")
+        errors = ErrorPayload(
+            errors=[
+                {"code": "mock 404", "detail": f"NotFound at {url}", "source": None}
+            ]
+        )
+        result = _CallbackResult(404, headers={}, body=json.dumps(errors))
     else:
         result = _CallbackResult(200, headers=_DEFAULT_HEADERS, body=json.dumps(item))
 
@@ -347,7 +352,10 @@ def empty_file_context(file_dc_config_dir_init) -> FileDataContext:
 @pytest.fixture(
     params=["empty_cloud_context_fluent", "empty_file_context"], ids=["cloud", "file"]
 )
-def empty_contexts(request: FixtureRequest) -> FileDataContext | CloudDataContext:
+def empty_contexts(
+    request: FixtureRequest,
+    cloud_storage_get_client_doubles,
+) -> FileDataContext | CloudDataContext:
     context_fixture: FileDataContext | CloudDataContext = request.getfixturevalue(
         request.param
     )

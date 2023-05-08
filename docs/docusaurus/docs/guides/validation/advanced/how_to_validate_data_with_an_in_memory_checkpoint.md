@@ -12,13 +12,14 @@ import InProgress from '/docs/components/warnings/_in_progress.md'
 
 This guide will demonstrate how to Validate data using a Checkpoint that is configured and run entirely in-memory.  This workflow is appropriate for environments or workflows where a user does not want to or cannot use a Checkpoint Store, e.g. in a [hosted environment](../../../deployment_patterns/how_to_instantiate_a_data_context_hosted_environments.md).
 
+## Prerequisites
 
 <Prerequisites>
 
-- Have a Data Context
-- Have an Expectation Suite
-- Have a Datasource
-- Have a basic understanding of Checkpoints
+- A Data Context
+- An Expectation Suite
+- A Datasource
+- A basic understanding of Checkpoints
 
 </Prerequisites>
 

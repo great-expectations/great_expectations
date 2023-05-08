@@ -13,12 +13,12 @@ from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
 )
 from great_expectations.data_context import AbstractDataContext
 from great_expectations.datasource.fluent import (
+    BatchRequest,
     PandasFilesystemDatasource,
     SparkFilesystemDatasource,
     SqliteDatasource,
 )
 from great_expectations.datasource.fluent.interfaces import (
-    BatchRequest,
     DataAsset,
     Datasource,
 )

@@ -25,34 +25,44 @@ def data_context_parameterized_expectation_suite_with_usage_statistics_enabled(
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../test_fixtures")
-    os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(asset_config_path, "my_dag_node"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir, "great_expectations_v013_basic_with_usage_stats_enabled.yml"
         ),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir,
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
-        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+        os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
-    shutil.copy(
-        os.path.join(fixture_dir, "custom_pandas_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_pandas_dataset.py")),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),
-        str(os.path.join(context_path, "plugins", "custom_sparkdf_dataset.py")),
+        os.path.join(fixture_dir, "custom_pandas_dataset.py"),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_pandas_dataset.py"
+            )
+        ),
+    )
+    shutil.copy(
+        os.path.join(fixture_dir, "custom_sparkdf_dataset.py"),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", "custom_sparkdf_dataset.py"
+            )
+        ),
     )
     return gx.get_context(context_root_dir=context_path)
 
@@ -62,7 +72,7 @@ def test_preserve_comments_in_yml_after_adding_datasource(
 ):
     # Skipping this test for now, because the order of the contents of the returned CommentedMap is inconsistent.
     pytest.skip("KNOWN ISSUE")
-    config_filepath = os.path.join(
+    config_filepath = os.path.join(  # noqa: PTH118
         data_context_parameterized_expectation_suite_with_usage_statistics_enabled.root_directory,
         "great_expectations.yml",
     )
