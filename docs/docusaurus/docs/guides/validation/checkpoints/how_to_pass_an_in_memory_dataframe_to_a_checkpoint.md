@@ -29,12 +29,12 @@ The Validator can be passed directly to a SimpleCheckpoint
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py read_dataframe"
 ```
 
-Alternatively, you can use the `add_*` methods to add the asset, then retrieve a <TechnicalTag tag="batch_request" text="Batch Request" />. This method is more consistent with how other Data Assets work, and can more easily integrate in-memory data with other Batch Request workflows and configuration.
+Alternatively, you can use `add_*` methods to add the asset and then retrieve a <TechnicalTag tag="batch_request" text="Batch Request" />. This method is consistent with how other Data Assets work, and can integrate in-memory data with other Batch Request workflows and configurations.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py add_dataframe"
 ```
 
-In both examples, `batch_metadata` is an optional parameter that can associate meta-data with the batch (or DataFrame). This can be useful in distinguishing Validation results when working with DataFrames.
+In both examples, `batch_metadata` is an optional parameter that can associate meta-data with the batch or DataFrame. When you work with DataFrames, this can help you distinguish Validation results.
 
 ## Additional Notes
 To view the full script used in this page, see it on GitHub:
