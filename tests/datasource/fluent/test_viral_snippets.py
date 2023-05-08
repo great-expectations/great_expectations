@@ -356,7 +356,7 @@ def test_sources_delete_removes_datasource_from_yaml(
     yaml_contents = YAML.load(yaml_path.read_text())
     print(f"{pf(yaml_contents, depth=2)}")
 
-    assert random_datasource.name not in yaml_contents["fluent_datasources"]
+    assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[union] # always dict
 
 
 def test_ctx_delete_removes_datasource_from_yaml(
@@ -373,7 +373,7 @@ def test_ctx_delete_removes_datasource_from_yaml(
     yaml_contents = YAML.load(yaml_path.read_text())
     print(f"{pf(yaml_contents, depth=2)}")
 
-    assert random_datasource.name not in yaml_contents["fluent_datasources"]
+    assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[union] # always dict
 
 
 if __name__ == "__main__":
