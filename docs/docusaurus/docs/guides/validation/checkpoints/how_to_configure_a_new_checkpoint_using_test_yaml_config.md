@@ -34,7 +34,7 @@ Your Checkpoint configuration includes Data Assets and Expectation Suites. Run t
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py asset_names"
 ```
 
-This code will list the available Expectation Suites:
+Run the following command to list the Expectation Suites:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py suite_names"
 ```
