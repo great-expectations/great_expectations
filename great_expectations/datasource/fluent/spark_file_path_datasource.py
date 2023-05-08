@@ -17,7 +17,7 @@ from typing_extensions import Literal
 
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.directory_data_asset import (
-    _DirectoryDataAsset,
+    _DirectoryDataAssetMixin,
 )
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _SparkGenericFilePathAsset(_FilePathDataAsset):
+class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
     # TODO: ignoreCorruptFiles and ignoreMissingFiles appear in the docs https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html but not in the reader method signatures (e.g. https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)
     # ignore_corrupt_files: bool = Field(alias="ignoreCorruptFiles")
     # ignore_missing_files: bool = Field(alias="ignoreMissingFiles")
@@ -56,7 +56,7 @@ class _SparkGenericFilePathAsset(_FilePathDataAsset):
         }
 
 
-class CSVAsset(_SparkGenericFilePathAsset):
+class CSVAsset(_SparkGenericFilePathAssetMixin):
     type: Literal["csv"] = "csv"
 
     # vvv spark parameters for pyspark.sql.DataFrameReader.csv() (ordered as in pyspark v3.4.0) appear in comment above
@@ -136,13 +136,13 @@ class CSVAsset(_SparkGenericFilePathAsset):
     # lineSep: Optional[str] = None,
     line_sep: Optional[str] = Field(None, alias="lineSep")
     # pathGlobFilter: Optional[Union[bool, str]] = None,
-    # Inherited from _SparkGenericFilePathAsset
+    # Inherited from _SparkGenericFilePathAssetMixin
     # recursiveFileLookup: Optional[Union[bool, str]] = None,
-    # Inherited from _SparkGenericFilePathAsset
+    # Inherited from _SparkGenericFilePathAssetMixin
     # modifiedBefore: Optional[Union[bool, str]] = None,
-    # Inherited from _SparkGenericFilePathAsset
+    # Inherited from _SparkGenericFilePathAssetMixin
     # modifiedAfter: Optional[Union[bool, str]] = None,
-    # Inherited from _SparkGenericFilePathAsset
+    # Inherited from _SparkGenericFilePathAssetMixin
     # unescapedQuoteHandling: Optional[str] = None,
     unescaped_quote_handling: Optional[
         Literal[
@@ -232,7 +232,9 @@ class CSVAsset(_SparkGenericFilePathAsset):
         )
 
 
-class DirectoryCSVAsset(_DirectoryDataAsset, CSVAsset):
+class DirectoryCSVAsset(
+    _SparkGenericFilePathAssetMixin, _DirectoryDataAssetMixin, CSVAsset
+):
     # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"
 
@@ -251,27 +253,23 @@ class DirectoryCSVAsset(_DirectoryDataAsset, CSVAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
         """
         return (
-            super()
-            ._get_reader_options_include()
-            .union(
-                {
-                    "data_directory",
-                }
-            )
+            super(_SparkGenericFilePathAssetMixin, self)._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(CSVAsset, self)._get_reader_options_include()
         )
 
 
-class ParquetAsset(_SparkGenericFilePathAsset):
+class ParquetAsset(_SparkGenericFilePathAssetMixin):
     type: Literal["parquet"] = "parquet"
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
-    datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(
-        alias="datetimeRebaseMode"
+    merge_schema: Optional[Union[bool, str]] = Field(None, alias="mergeSchema")
+    datetime_rebase_mode: Optional[Literal["EXCEPTION", "CORRECTED", "LEGACY"]] = Field(
+        None, alias="datetimeRebaseMode"
     )
-    int_96_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(
-        alias="int96RebaseMode"
+    int_96_rebase_mode: Optional[Literal["EXCEPTION", "CORRECTED", "LEGACY"]] = Field(
+        None, alias="int96RebaseMode"
     )
-    merge_schema: bool = Field(False, alias="mergeSchema")
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -294,7 +292,7 @@ class ParquetAsset(_SparkGenericFilePathAsset):
         )
 
 
-class ORCAsset(_SparkGenericFilePathAsset):
+class ORCAsset(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
     type: Literal["orc"] = "orc"
@@ -317,7 +315,7 @@ class ORCAsset(_SparkGenericFilePathAsset):
         return super()._get_reader_options_include().union({"mergeSchema"})
 
 
-class JSONAsset(_SparkGenericFilePathAsset):
+class JSONAsset(_SparkGenericFilePathAssetMixin):
     # Overridden inherited instance fields
     type: Literal["json"] = "json"
 
@@ -383,13 +381,13 @@ class JSONAsset(_SparkGenericFilePathAsset):
     # locale: Optional[str] = None,
     locale: Optional[str] = None
     # pathGlobFilter: Optional[Union[bool, str]] = None,
-    # Inherited from _SparkGenericFilePathAsset
+    # Inherited from _SparkGenericFilePathAssetMixin
     # recursiveFileLookup: Optional[Union[bool, str]] = None,
-    # Inherited from _SparkGenericFilePathAsset
+    # Inherited from _SparkGenericFilePathAssetMixin
     # modifiedBefore: Optional[Union[bool, str]] = None,
-    # Inherited from _SparkGenericFilePathAsset
+    # Inherited from _SparkGenericFilePathAssetMixin
     # modifiedAfter: Optional[Union[bool, str]] = None,
-    # Inherited from _SparkGenericFilePathAsset
+    # Inherited from _SparkGenericFilePathAssetMixin
     # allowNonNumericNumbers: Optional[Union[bool, str]] = None,
     allow_non_numeric_numbers: Optional[Union[bool, str]] = Field(
         None, alias="allowNonNumericNumbers"
@@ -460,7 +458,7 @@ class JSONAsset(_SparkGenericFilePathAsset):
         )
 
 
-class TextAsset(_SparkGenericFilePathAsset):
+class TextAsset(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
     type: Literal["text"] = "text"
@@ -487,7 +485,7 @@ class TextAsset(_SparkGenericFilePathAsset):
 # TODO: Enable using "format" instead of method with reader name:
 #  df = spark.read.format("avro").load("examples/src/main/resources/users.avro")
 # class AvroAsset(_FilePathDataAsset):
-#     # Note: AvroAsset does not support generic options, so it does not inherit from _SparkGenericFilePathAsset
+#     # Note: AvroAsset does not support generic options, so it does not inherit from _SparkGenericFilePathAssetMixin
 #     # The options below are available as of spark v3.4.0
 #     # See https://spark.apache.org/docs/latest/sql-data-sources-avro.html for more info.
 #     type: Literal["avro"] = "avro"
@@ -523,7 +521,7 @@ class TextAsset(_SparkGenericFilePathAsset):
 # TODO: Enable using "format" instead of method with reader name:
 #  spark.read.format("binaryFile").option("pathGlobFilter", "*.png").load("/path/to/data")
 # class BinaryFileAsset(_FilePathDataAsset):
-#     # Note: BinaryFileAsset does not support generic options, so it does not inherit from _SparkGenericFilePathAsset
+#     # Note: BinaryFileAsset does not support generic options, so it does not inherit from _SparkGenericFilePathAssetMixin
 #     # The options below are available as of spark v3.4.0
 #     # See https://spark.apache.org/docs/latest/sql-data-sources-binaryFile.html for more info.
 #     type: Literal["binary_file"] = "binary_file"

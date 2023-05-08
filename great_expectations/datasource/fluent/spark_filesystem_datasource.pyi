@@ -255,18 +255,30 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
-        ignore_corrupt_files: bool = ...,
-        ignore_missing_files: bool = ...,
-        path_glob_filter: str = ...,
-        recursive_file_lookup: bool = False,
-        modified_before: str = "",
-        modified_after: str = "",
+        merge_schema: Optional[Union[bool, str]] = None,
+        path_glob_filter: Optional[Union[bool, str]] = None,
+        modified_before: Optional[Union[bool, str]] = None,
+        modified_after: Optional[Union[bool, str]] = None,
+        recursive_file_lookup: Optional[Union[bool, str]] = None,
         # Spark Generic File Reader Options ^^^
+        # vvv spark parameters for pyspark.sql.DataFrameReader.parquet() (ordered as in pyspark v3.4.0)
+        # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
         # Parquet Specific Options vvv
-        datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"],
-        int_96_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"],
-        merge_schema: bool = ...,
+        datetime_rebase_mode: Optional[
+            Literal["EXCEPTION", "CORRECTED", "LEGACY"]
+        ] = None,
+        int_96_rebase_mode: Optional[
+            Literal["EXCEPTION", "CORRECTED", "LEGACY"]
+        ] = None,
         # Parquet Specific Options ^^^
+        # vvv Docs <> Source Code mismatch
+        # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
+        # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L473
+        # Spark Generic File Reader Options vvv
+        # ignore_corrupt_files: bool = ...,
+        # ignore_missing_files: bool = ...,
+        # Spark Generic File Reader Options ^^^
+        # ^^^ Docs <> Source Code mismatch
     ) -> ParquetAsset: ...
     def add_orc_asset(
         self,
