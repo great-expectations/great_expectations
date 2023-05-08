@@ -793,6 +793,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         _call_store = False allows for local deletes without deleting the persisted storage datasource.
         This should generally be avoided.
         """
+        self.fluent_config.pop(datasource_name, None)
         datasource = self.datasources.get(datasource_name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
@@ -801,7 +802,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             # Raise key error instead?
             logger.info(f"No Datasource '{datasource_name}' to delete")
         self.datasources.pop(datasource_name, None)
-        # self.fluent_config.pop(datasource_name, None)
 
     def set_config(self, project_config: DataContextConfig) -> None:
         self._project_config = project_config
@@ -1696,6 +1696,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
+        self.fluent_config.pop(datasource_name, None)
 
     @overload
     def add_checkpoint(
