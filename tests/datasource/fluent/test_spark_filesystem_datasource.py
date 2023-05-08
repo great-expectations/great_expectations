@@ -108,18 +108,18 @@ def test_add_parquet_asset_to_datasource(
     assert asset.merge_schema is False
 
 
-add_csv_tests = [
+add_csv_asset = [
+    pytest.param(
+        "add_csv_asset",
+        {},
+        id="csv_min_params",
+    ),
     pytest.param(
         "add_csv_asset",
         {
             "path_glob_filter": "some_str",
         },
         id="csv",
-    ),
-    pytest.param(
-        "add_csv_asset",
-        {},
-        id="csv_no_params",
     ),
     pytest.param(
         "add_csv_asset",
@@ -174,8 +174,9 @@ add_csv_tests = [
     ),
 ]
 
+
 add_asset_test_params = []
-add_asset_test_params += add_csv_tests
+add_asset_test_params += add_csv_asset
 
 
 @pytest.mark.unit
@@ -194,6 +195,96 @@ def test_add_asset_with_asset_specific_params(
     assert asset.name == "asset_name"
     for param, value in add_method_params.items():
         assert getattr(asset, param) == value
+
+
+add_directory_csv_asset = [
+    pytest.param(
+        "add_directory_csv_asset",
+        {"data_directory": "some_directory"},
+        id="directory_csv_min_params",
+    ),
+    pytest.param(
+        "add_directory_csv_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_csv_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_csv_asset",
+        {
+            "data_directory": "some_directory",
+            "sep": "sep",
+            "encoding": "encoding",
+            "quote": "quote",
+            "escape": "escape",
+            "comment": "comment",
+            "header": "header",
+            "infer_schema": "infer_schema",
+            "ignore_leading_white_space": "ignore_leading_white_space",
+            "ignore_trailing_white_space": "ignore_trailing_white_space",
+            "null_value": "null_value",
+            "nan_value": "nan_value",
+            "positive_inf": "positive_inf",
+            "negative_inf": "negative_inf",
+            "date_format": "date_format",
+            "timestamp_format": "timestamp_format",
+            "max_columns": "max_columns",
+            "max_chars_per_column": "max_chars_per_column",
+            "max_malformed_log_per_partition": "max_malformed_log_per_partition",
+            "mode": "PERMISSIVE",
+            "column_name_of_corrupt_record": "column_name_of_corrupt_record",
+            "multi_line": "multi_line",
+            "char_to_escape_quote_escaping": "char_to_escape_quote_escaping",
+            "sampling_ratio": "sampling_ratio",
+            "enforce_schema": "enforce_schema",
+            "empty_value": "empty_value",
+            "locale": "locale",
+            "line_sep": "line_sep",
+            "path_glob_filter": "path_glob_filter",
+            "recursive_file_lookup": "recursive_file_lookup",
+            "modified_before": "modified_before",
+            "modified_after": "modified_after",
+            "unescaped_quote_handling": "STOP_AT_CLOSING_QUOTE",
+        },
+        id="directory_csv_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_csv_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_csv_fail_extra_params",
+    ),
+]
+
+add_directory_asset_test_params = []
+add_directory_asset_test_params += add_directory_csv_asset
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "add_method_name,add_method_params",
+    add_directory_asset_test_params,
+)
+def test_add_directory_asset_with_asset_specific_params(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+    add_method_name: str,
+    add_method_params: dict[str, str | bool | int | float],
+):
+    asset = getattr(spark_filesystem_datasource, add_method_name)(
+        name="asset_name", **add_method_params
+    )
+    assert asset.name == "asset_name"
+    for param, value in add_method_params.items():
+        if param == "data_directory":
+            assert getattr(asset, param) == pathlib.Path(value)
+        else:
+            assert getattr(asset, param) == value
 
 
 @pytest.mark.unit
