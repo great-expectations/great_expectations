@@ -481,69 +481,6 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"wholetext", "lineSep"})
 
 
-# TODO: Enable using "format" instead of method with reader name:
-#  df = spark.read.format("avro").load("examples/src/main/resources/users.avro")
-# class AvroAsset(_FilePathDataAsset):
-#     # Note: AvroAsset does not support generic options, so it does not inherit from _SparkGenericFilePathAssetMixin
-#     # The options below are available as of spark v3.4.0
-#     # See https://spark.apache.org/docs/latest/sql-data-sources-avro.html for more info.
-#     type: Literal["avro"] = "avro"
-#     avro_schema: str = Field(None, alias="avroSchema")
-#     ignore_extension: bool = Field(True, alias="ignoreExtension")
-#     datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = Field(
-#         alias="datetimeRebaseMode"
-#     )
-#     positional_field_matching: bool = Field(False, alias="positionalFieldMatching")
-#
-#     class Config:
-#         extra = pydantic.Extra.forbid
-#         allow_population_by_field_name = True
-#
-#     @classmethod
-#     def _get_reader_method(cls) -> str:
-#         # return cls.type
-#         return "avro"
-#
-#     def _get_reader_options_include(self) -> set[str] | None:
-#         """These options are available as of spark v3.4.0
-#
-#         See https://spark.apache.org/docs/latest/sql-data-sources-avro.html for more info.
-#         """
-#         return {
-#             "avroSchema",
-#             "ignoreExtension",
-#             "datetimeRebaseMode",
-#             "positionalFieldMatching",
-#         }
-
-
-# TODO: Enable using "format" instead of method with reader name:
-#  spark.read.format("binaryFile").option("pathGlobFilter", "*.png").load("/path/to/data")
-# class BinaryFileAsset(_FilePathDataAsset):
-#     # Note: BinaryFileAsset does not support generic options, so it does not inherit from _SparkGenericFilePathAssetMixin
-#     # The options below are available as of spark v3.4.0
-#     # See https://spark.apache.org/docs/latest/sql-data-sources-binaryFile.html for more info.
-#     type: Literal["binary_file"] = "binary_file"
-#     path_glob_filter: str = Field(alias="pathGlobFilter")
-#
-#     class Config:
-#         extra = pydantic.Extra.forbid
-#         allow_population_by_field_name = True
-#
-#     @classmethod
-#     def _get_reader_method(cls) -> str:
-#         return cls.type
-#
-#     def _get_reader_options_include(self) -> set[str] | None:
-#         """These options are available as of spark v3.4.0
-#
-#         See https://spark.apache.org/docs/latest/sql-data-sources-binaryFile.html for more info.
-#         """
-#         return {
-#             "pathGlobFilter",
-#         }
-
-
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -554,10 +491,6 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     ORCAsset,
     JSONAsset,
     TextAsset,
-    # TODO: Fix AvroAsset
-    # AvroAsset,
-    # TODO: Fix BinaryFileAsset
-    # BinaryFileAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     CSVAsset,
@@ -566,10 +499,6 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     ORCAsset,
     JSONAsset,
     TextAsset,
-    # TODO: Fix AvroAsset
-    # AvroAsset,
-    # TODO: Fix BinaryFileAsset
-    # BinaryFileAsset,
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.

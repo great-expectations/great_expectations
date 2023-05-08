@@ -412,38 +412,3 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> TextAsset: ...
-    def add_avro_asset(
-        self,
-        name: str,
-        *,
-        batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
-        glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
-        # Spark Generic File Reader Options vvv
-        # Avro does not support generic file reader options.
-        # Spark Generic File Reader Options ^^^
-        # Avro Specific Options vvv
-        avro_schema: str = None,
-        ignore_extension: bool = True,
-        datetime_rebase_mode: Literal["EXCEPTION", "CORRECTED", "LEGACY"] = ...,
-        positional_field_matching: bool = False,
-        # Avro Specific Options ^^^
-    ) -> AvroAsset: ...
-    def add_binary_file_asset(
-        self,
-        name: str,
-        *,
-        batch_metadata: Optional[BatchMetadata] = ...,
-        batching_regex: re.Pattern | str = r".*",
-        glob_directive: str = "**/*",
-        order_by: Optional[SortersDefinition] = ...,
-        # Spark Generic File Reader Options vvv
-        # BinaryFileAsset does not support generic file reader options.
-        # Spark Generic File Reader Options ^^^
-        # BinaryFileAsset Specific Options vvv
-        path_glob_filter: str = ...,
-        # BinaryFileAsset Specific Options ^^^
-    ) -> BinaryFileAsset: ...
-
-    # TODO: Auto generate pyi content from pydantic model that includes default
