@@ -28,7 +28,7 @@ Run the following command in the first cell to load the necessary modules and in
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py setup"
 ```
 
-### 2. Listing Assets
+### 2. List Assets
 Your Checkpoint configuration includes Data Assets and Expectation Suites. Run the following command to list the available asset names:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py asset_names"
