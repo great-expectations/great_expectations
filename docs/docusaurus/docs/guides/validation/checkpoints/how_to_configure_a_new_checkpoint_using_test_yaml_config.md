@@ -4,7 +4,7 @@ title: How to configure a new Checkpoint using test_yaml_config
 import Prerequsities from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-This how-to guide demonstrates advanced examples for configuring a <TechnicalTag tag="checkpoint" text="Checkpoint" /> using `test_yaml_config`. **Note:** For a basic guide on creating a new Checkpoint, please see [How to create a new Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
+Use the information provided here to learn how to configure a <TechnicalTag tag="checkpoint" text="Checkpoint" /> using `test_yaml_config`. To create a new Checkpoint,  see [How to create a new Checkpoint](../../../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
 
 `test_yaml_config` is a convenience method for configuring the moving parts of a Great Expectations deployment. It allows you to quickly test out configs for <TechnicalTag tag="datasource" text="Datasources" />, <TechnicalTag tag="store" text="Stores" />, and Checkpoints. `test_yaml_config` is primarily intended for use within a notebook, where you can iterate through an edit-run-check loop in seconds.
 
