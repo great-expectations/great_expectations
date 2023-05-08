@@ -1692,6 +1692,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         datasource = self.get_datasource(datasource_name=datasource_name)
 
         if isinstance(datasource, FluentDatasource):
+            # Note: this results in some unnecessary dict lookups
             self._delete_fluent_datasource(datasource_name)
         elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
