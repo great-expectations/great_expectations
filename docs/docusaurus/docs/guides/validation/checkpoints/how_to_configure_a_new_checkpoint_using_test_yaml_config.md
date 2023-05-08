@@ -53,7 +53,7 @@ Once you have your YAML configuration, you can test it to make sure it's correct
 
 Tweaking the above configuration and testing with the above cell will help ensure your configuration changes are correct.
 
-### 5. Saving your Checkpoint
+### 5. Save your Checkpoint
 To save your Checkpoint, add it to the Data Context:
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py save_checkpoint"
 ```
