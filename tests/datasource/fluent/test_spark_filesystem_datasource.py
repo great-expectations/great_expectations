@@ -9,6 +9,9 @@ from typing import List
 
 import pytest
 
+
+import pydantic
+
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.compatibility.pyspark import functions as F
@@ -112,12 +115,66 @@ def test_add_parquet_asset_to_datasource(
         pytest.param(
             "add_csv_asset",
             {
-                "ignore_corrupt_files": True,
-                "ignore_missing_files": True,
                 "path_glob_filter": "some_str",
             },
             id="csv",
-        )
+        ),
+        pytest.param(
+            "add_csv_asset",
+            {},
+            id="csv_no_params",
+        ),
+        pytest.param(
+            "add_csv_asset",
+            {
+                "sep": "sep",
+                "encoding": "encoding",
+                "quote": "quote",
+                "escape": "escape",
+                "comment": "comment",
+                "header": "header",
+                "infer_schema": "infer_schema",
+                "ignore_leading_white_space": "ignore_leading_white_space",
+                "ignore_trailing_white_space": "ignore_trailing_white_space",
+                "null_value": "null_value",
+                "nan_value": "nan_value",
+                "positive_inf": "positive_inf",
+                "negative_inf": "negative_inf",
+                "date_format": "date_format",
+                "timestamp_format": "timestamp_format",
+                "max_columns": "max_columns",
+                "max_chars_per_column": "max_chars_per_column",
+                "max_malformed_log_per_partition": "max_malformed_log_per_partition",
+                "mode": "PERMISSIVE",
+                "column_name_of_corrupt_record": "column_name_of_corrupt_record",
+                "multi_line": "multi_line",
+                "char_to_escape_quote_escaping": "char_to_escape_quote_escaping",
+                "sampling_ratio": "sampling_ratio",
+                "enforce_schema": "enforce_schema",
+                "empty_value": "empty_value",
+                "locale": "locale",
+                "line_sep": "line_sep",
+                "path_glob_filter": "path_glob_filter",
+                "recursive_file_lookup": "recursive_file_lookup",
+                "modified_before": "modified_before",
+                "modified_after": "modified_after",
+                "unescaped_quote_handling": "STOP_AT_CLOSING_QUOTE",
+            },
+            id="csv_all_params_pyspark_3_4_0",
+        ),
+        pytest.param(
+            "add_csv_asset",
+            {
+                "this_param_does_not_exist": "param_does_not_exist",
+                "path_glob_filter": "some_str",
+            },
+            marks=pytest.mark.xfail(
+                reason="param_does_not_exist",
+                strict=True,
+                raises=pydantic.ValidationError,
+            ),
+            id="csv_fail_extra_params",
+        ),
     ],
 )
 def test_add_asset_with_asset_specific_params(
