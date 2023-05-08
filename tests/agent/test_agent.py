@@ -12,7 +12,7 @@ from great_expectations.agent.message_service.subscriber import SubscriberError
 def gx_agent_config(monkeypatch):
     config = GXAgentConfig(
         organization_id="92b8af7b-f89a-426a-8d79-1d451aea413b",
-        broker_url="test-broker-url",
+        broker_url="amqps://user:pass@great_expectations.io:5671",
     )
     env_vars = {
         "GE_CLOUD_ORGANIZATION_ID": config.organization_id,
@@ -62,9 +62,7 @@ def test_gx_agent_run_starts_subscriber(
     subscriber.assert_called_with(client=client())
 
 
-def test_gx_agent_run_invokes_consume(
-    get_context, subscriber, client, gx_agent_config
-):
+def test_gx_agent_run_invokes_consume(get_context, subscriber, client, gx_agent_config):
     """Expect GXAgent.run to invoke subscriber.consume with the correct arguments."""
     agent = GXAgent()
     agent.run()

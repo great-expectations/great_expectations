@@ -1,9 +1,8 @@
 import os
-from dataclasses import dataclass
 from typing import Dict, Optional
 
-from pika.exceptions import AMQPError
-
+from pydantic.dataclasses import dataclass
+from pydantic import AmqpDsn
 from great_expectations import get_context
 from great_expectations.agent.event_handler import ShutdownRequest, EventHandler
 from great_expectations.agent.message_service.rabbit_mq_client import (
@@ -25,14 +24,13 @@ HandlerMap = Dict[str, OnMessageCallback]
 @dataclass(frozen=True)
 class GXAgentConfig:
     """GXAgent configuration.
-
     Attributes:
         organization_id: GX Cloud organization identifier
         broker_url: address of broker service
     """
 
     organization_id: str
-    broker_url: str
+    broker_url: AmqpDsn
 
 
 class GXAgent:
