@@ -92,7 +92,7 @@ config = {
         exclude=["contrib*", "docs*", "tests*", "examples*", "scripts*"]
     ),
     "entry_points": {
-        "console_scripts": ["great_expectations=great_expectations.cli:main"]
+        "console_scripts": ["great_expectations=great_expectations.cli:main", "gx-agent=great_expectations.agent:run"]
     },
     "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
     "name": "great_expectations",
