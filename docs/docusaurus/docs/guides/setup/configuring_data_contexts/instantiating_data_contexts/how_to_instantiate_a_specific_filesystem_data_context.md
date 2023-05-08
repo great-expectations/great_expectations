@@ -14,8 +14,6 @@ import GxImport from '/docs/components/setup/python_environment/_gx_import.md'
 <!--- ### 3. Verify the content of the Data Context -->
 import DataContextVerifyContents from '/docs/components/setup/data_context/_data_context_verify_contents.md'
 
-## Introduction
-
 A <TechnicalTag tag="data_context" text="Data Context" /> contains the configurations for <TechnicalTag tag="expectation" text="Expectations" />, <TechnicalTag tag="store" text="Metadata Stores" />, <TechnicalTag tag="data_docs" text="Data Docs" />, <TechnicalTag tag="checkpoint" text="Checkpoints" />, and all things related to working with Great Expectations.  
 
 If you are using GX for multiple projects you may wish to utilize a different Data Context for each one.  This guide will demonstrate how to instantiate a specific Filesystem Data Context so that you can switch between sets of previously defined GX configurations.
@@ -24,10 +22,7 @@ If you are using GX for multiple projects you may wish to utilize a different Da
 
 <Prerequisites requirePython = {false} requireInstallation = {true} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- A previously initialized Filesystem Data Context
-    - [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python)
-    - [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli))
-- A passion for data quality
+- A previously initialized Filesystem Data Context. See [How to initialize a Filesystem Data Context in Python](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python), or [How to initialize a new Data Context with the CLI](/docs/guides/setup/configuring_data_contexts/how_to_configure_a_new_data_context_with_the_cli).
 
 </Prerequisites>
 
@@ -81,13 +76,13 @@ If you are content with the default configuration of your Data Context, you can 
 
 ### Related guides
 
+To initialize and instantiate a temporary Data Context, see: [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
+
 <!-- TODO
 To instantiate an existing Data Context, reference:
 - How to quickly instantiate a Data Context
 - How to instantiate a specific Filesystem Data Context
 
-To initialize and instantiate a temporary Data Context, see:
-- How to explicitly instantiate an in-memory Ephemeral Data Context
 -->
 
 <!-- TODO

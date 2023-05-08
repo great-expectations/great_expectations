@@ -8,7 +8,7 @@ from great_expectations.core.id_dict import BatchSpec
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import BatchDefinition
-    from great_expectations.datasource.fluent.interfaces import BatchRequest
+    from great_expectations.datasource.fluent import BatchRequest
 
 
 logger = logging.getLogger(__name__)

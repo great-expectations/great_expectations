@@ -26,21 +26,13 @@ Then load data into the `Validator`.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py get validator 1"
 ```
-
 </TabItem>
-
 <TabItem value="batch_request">
-
 Add the name of the <TechnicalTag tag="data_asset" text="Data Asset" /> to the `data_asset_name` in your `BatchRequest`.
-
 ```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py batch request 2"
 ```
-
 Then load data into the `Validator`.
-
 ```python name="tests/integration/docusaurus/connecting_to_your_data/cloud/s3/spark/inferred_and_runtime_yaml_example.py get validator 2"
 ```
-
 </TabItem>
-
 </Tabs>

@@ -23,7 +23,7 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeAlias
 
 from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
@@ -53,8 +53,8 @@ if TYPE_CHECKING:
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type]
 
-MappingIntStrAny = Mapping[Union[int, str], Any]
-AbstractSetIntStr = AbstractSet[Union[int, str]]
+MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
+AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 logger: Logger
 _PandasDataFrameT = TypeVar("_PandasDataFrameT")
 
@@ -69,7 +69,7 @@ class _PandasDataAsset(DataAsset):
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]: ...
-    def build_batch_request(
+    def build_batch_request(  # type: ignore[override]
         self, options: Optional[BatchRequestOptions] = ...
     ) -> BatchRequest: ...
     def _validate_batch_request(self, batch_request: BatchRequest) -> None: ...

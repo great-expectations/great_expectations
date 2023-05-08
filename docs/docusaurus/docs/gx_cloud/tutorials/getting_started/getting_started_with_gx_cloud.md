@@ -11,8 +11,6 @@ import SetupAndInstallForHostedData from '/docs/components/setup/link_lists/_set
 import SetupAndInstallForCloudData from '/docs/components/setup/link_lists/_setup_and_install_for_cloud_data.md'
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 
-## Introduction
-
 Few things are as daunting as taking your first steps with a new piece of software. This guide will introduce you to GX Cloud and demonstrate the ease with which you can implement the basic GX workflow. We will walk you through the entire process of connecting to your data, building your first Expectation based off of an initial Batch of that data, validating your data with that Expectation, and finally reviewing the results of your validation.
 
 Once you have completed this guide you will have a foundation in the basics of using GX Cloud. In the future you will be able to adapt GX to suit your specific needs by customizing the execution of the individual steps you will learn here.
@@ -24,7 +22,6 @@ Once you have completed this guide you will have a foundation in the basics of u
 - Installed Great Expectations OSS on your machine.
 - Followed invitation email instructions from the GX team after signing up for Early Access.
 - Successfully logged in to GX Cloud at [https://app.greatexpectations.io](https://app.greatexpectations.io).
-- A passion for data quality.
 
 </Prerequisites>
 
@@ -163,7 +160,7 @@ expectation_suite.add_expectation(
 print(expectation_suite)
 
 # Save the Expectation Suite
-context.update_expectation_suite(expectation_suite=expectation_suite)
+context.save_expectation_suite(expectation_suite=expectation_suite)
 ```
 
 With the Expectation defined above, we are stating that we _expect_ the column of your choice to always be populated. That is: none of the column's values should be null.

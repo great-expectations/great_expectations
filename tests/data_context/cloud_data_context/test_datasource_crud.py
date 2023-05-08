@@ -47,7 +47,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
     save_changes: bool,
     config_includes_name_setting: str,
     empty_base_data_context_in_cloud_mode: BaseDataContext,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
     fake_datasource_id: str,
     fake_data_connector_id: str,
@@ -67,7 +67,9 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 
     # Setup
     datasource_name = datasource_config_with_names_and_ids.name
-    datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
+    datasource_config_with_name: DatasourceConfig = copy.deepcopy(
+        block_config_datasource_config
+    )
     datasource_config_with_name.name = datasource_name
 
     with mock.patch(
@@ -83,7 +85,9 @@ def test_base_data_context_in_cloud_mode_add_datasource(
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
-            expected_datasource_config = datasourceConfigSchema.dump(datasource_config)
+            expected_datasource_config = datasourceConfigSchema.dump(
+                block_config_datasource_config
+            )
             stored_datasource = context.add_datasource(
                 name=datasource_name,
                 **expected_datasource_config,
@@ -166,7 +170,7 @@ def test_base_data_context_in_cloud_mode_add_datasource(
 def test_data_context_in_cloud_mode_add_datasource(
     config_includes_name_setting: str,
     empty_data_context_in_cloud_mode: DataContext,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
     fake_datasource_id: str,
     fake_data_connector_id: str,
@@ -185,7 +189,9 @@ def test_data_context_in_cloud_mode_add_datasource(
 
     # Setup
     datasource_name = datasource_config_with_names_and_ids.name
-    datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
+    datasource_config_with_name: DatasourceConfig = copy.deepcopy(
+        block_config_datasource_config
+    )
     datasource_config_with_name.name = datasource_name
 
     with mock.patch(
@@ -201,7 +207,9 @@ def test_data_context_in_cloud_mode_add_datasource(
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
-            expected_datasource_config = datasourceConfigSchema.dump(datasource_config)
+            expected_datasource_config = datasourceConfigSchema.dump(
+                block_config_datasource_config
+            )
             stored_datasource = context.add_datasource(
                 name=datasource_name,
                 **expected_datasource_config,
@@ -275,7 +283,7 @@ def test_data_context_in_cloud_mode_add_datasource(
 def test_cloud_data_context_add_datasource(
     config_includes_name_setting: str,
     empty_cloud_data_context: CloudDataContext,
-    datasource_config: DatasourceConfig,
+    block_config_datasource_config: DatasourceConfig,
     datasource_config_with_names_and_ids: DatasourceConfig,
     fake_datasource_id: str,
     fake_data_connector_id: str,
@@ -294,7 +302,9 @@ def test_cloud_data_context_add_datasource(
 
     # Setup
     datasource_name = datasource_config_with_names_and_ids.name
-    datasource_config_with_name: DatasourceConfig = copy.deepcopy(datasource_config)
+    datasource_config_with_name: DatasourceConfig = copy.deepcopy(
+        block_config_datasource_config
+    )
     datasource_config_with_name.name = datasource_name
 
     with mock.patch(
@@ -310,7 +320,9 @@ def test_cloud_data_context_add_datasource(
         # Call add_datasource with and without the name field included in the datasource config
         stored_datasource: BaseDatasource
         if config_includes_name_setting == "name_supplied_separately":
-            expected_datasource_config = datasourceConfigSchema.dump(datasource_config)
+            expected_datasource_config = datasourceConfigSchema.dump(
+                block_config_datasource_config
+            )
             stored_datasource = context.add_datasource(
                 name=datasource_name,
                 **expected_datasource_config,

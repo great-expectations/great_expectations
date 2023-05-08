@@ -4,6 +4,9 @@ title: How to collect OpenLineage metadata using an Action
 
 import Prerequisites from '../../../guides/connecting_to_your_data/components/prerequisites.jsx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 [OpenLineage](https://openlineage.io) is an open framework for collection and analysis of data lineage. It tracks the movement of data over time, tracing relationships between datasets. Data engineers can use data lineage metadata to determine the root cause of failures, identify performance bottlenecks, and simulate the effects of planned changes.
 
@@ -13,6 +16,8 @@ Enhancing the metadata in OpenLineage with results from an <TechnicalTag tag="ex
 * is there something in common among failed assertions that seem otherwise unrelated?
 
 This guide will explain how to use an <TechnicalTag tag="action" text="Action" /> to emit results to an OpenLineage backend, where their effect on related datasets can be studied.
+
+## Prerequisites
 
 <Prerequisites>
 

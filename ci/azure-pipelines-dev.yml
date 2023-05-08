@@ -154,6 +154,8 @@ stages:
       - script: |
           python -m pip install --upgrade pip
           pip install --requirement requirements-types.txt
+        name: InstallDependencies
+      - script: |
           invoke type-check --ci --pretty --python-version $(python.version)
         name: StaticTypeCheck
       - script: |
@@ -199,7 +201,8 @@ stages:
     - job: public_api_report
       steps:
         - script: |
-            python docs/sphinx_api_docs_source/public_api_report.py
+            pip install --requirement reqs/requirements-dev-test.txt
+            invoke public-api
           name: PublicAPIReport
 
   - stage: import_ge
@@ -227,34 +230,8 @@ stages:
              python -c "import great_expectations as gx; print('Successfully imported GX Version:', gx.__version__)"
            displayName: 'Import Great Expectations'
 
-  - stage: runme_script_runner_tests
-    dependsOn: scope_check
-    pool:
-      vmImage: 'ubuntu-20.04'
-
-    jobs:
-      - job: runme_script_runner_tests
-
-        steps:
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '3.7'
-            displayName: 'Use Python 3.7'
-
-          - script: |
-              pip install --constraint constraints-dev.txt ".[test]"
-              pip uninstall -y sqlalchemy
-            displayName: 'Install GX and required dependencies (i.e. not sqlalchemy)'
-
-          # tests containing the name "RUNME" are run
-          - script: |
-              pytest -v --no-sqlalchemy --docs-tests -m integration -k "RUNME" tests/integration/test_script_runner.py
-            displayName: 'Run Flagged Tests'
-
-
-
   - stage: required
-    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests, runme_script_runner_tests]
+    dependsOn: [scope_check, lint, import_ge, custom_checks, unit_tests]
     pool:
       vmImage: 'ubuntu-20.04'
 
@@ -289,7 +266,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest $(pytest_args) \
+              pytest -rs $(pytest_args) \
                 --no-sqlalchemy \
                 --ignore 'tests/cli' \
                 --ignore 'tests/integration/usage_statistics' \
@@ -347,12 +324,12 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[dev]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt ".[test, postgresql, spark]" pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
               # Run pytest
-              pytest $(pytest_args) \
+              pytest -rs $(pytest_args) \
                 --postgresql \
                 --spark \
                 --ignore 'tests/cli' \
@@ -407,7 +384,7 @@ stages:
 
           # Due to the relatively small number of usage_stats tests, we deem it appropriate to test them in their entirely through pytest
           - script: |
-              pytest --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
+              pytest -rs --no-sqlalchemy --aws-integration -v tests/integration/usage_statistics
 
             displayName: 'pytest'
             env:
@@ -457,7 +434,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest tests/test_definitions tests/expectations \
+              pytest -rs tests/test_definitions tests/expectations \
                 --mysql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -497,7 +474,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest tests/test_definitions tests/expectations \
+              pytest -rs tests/test_definitions tests/expectations \
                 --mssql \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -543,7 +520,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest tests/test_definitions tests/expectations \
+              pytest -rs tests/test_definitions tests/expectations \
                 --trino \
                 --napoleon-docstrings \
                 --junitxml=junit/test-results.xml \
@@ -586,7 +563,7 @@ stages:
 
           - script: |
               # Run pytest
-              pytest --postgresql --spark --aws-integration tests/cli
+              pytest -rs --postgresql --spark --aws-integration tests/cli
 
             displayName: 'pytest'
             env:

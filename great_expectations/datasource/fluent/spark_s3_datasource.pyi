@@ -27,7 +27,7 @@ logger: Logger
 
 class SparkS3Datasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
+    data_connector_type: ClassVar[Type[S3DataConnector]] = ...
 
     # instance attributes
     type: Literal["spark_s3"] = "spark_s3"

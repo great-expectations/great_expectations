@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-import dataclasses
 import logging
 from pprint import pformat as pf
 from typing import (
@@ -20,6 +19,10 @@ import pydantic
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core._docs_decorators import public_api
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest,
+    BatchRequestOptions,
+)
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
@@ -29,8 +32,6 @@ from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchRequest,
-    BatchRequestOptions,
     DataAsset,
     TestConnectionError,
 )
@@ -41,7 +42,10 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
         DataConnector,
     )
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+        BatchSlice,
+    )
     from great_expectations.execution_engine import (
         PandasExecutionEngine,
         SparkDFExecutionEngine,
@@ -134,14 +138,18 @@ class _FilePathDataAsset(DataAsset):
 
     @public_api
     def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
+        self,
+        options: Optional[BatchRequestOptions] = None,
+        batch_slice: Optional[BatchSlice] = None,
     ) -> BatchRequest:
         """A batch request that can be used to obtain batches for this DataAsset.
 
         Args:
-            options: A dict that can be used to limit the number of batches returned from the asset.
+            options: A dict that can be used to filter the batch groups returned from the asset.
                 The dict structure depends on the asset type. The available keys for dict can be obtained by
                 calling batch_request_options.
+            batch_slice: A python slice that can be used to limit the sorted batches by index.
+                e.g. `batch_slice = "[-5:]"` will request only the last 5 batches after the options filter is applied.
 
         Returns:
             A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
@@ -172,6 +180,7 @@ class _FilePathDataAsset(DataAsset):
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
             options=options or {},
+            batch_slice=batch_slice,
         )
 
     def _validate_batch_request(self, batch_request: BatchRequest) -> None:
@@ -190,11 +199,12 @@ class _FilePathDataAsset(DataAsset):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options=options,
+                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+                f"{pf(expect_batch_request_form.dict())}\n"
+                f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
     def get_batch_list_from_batch_request(
