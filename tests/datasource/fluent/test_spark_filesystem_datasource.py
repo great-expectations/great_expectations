@@ -97,6 +97,8 @@ add_csv_asset = [
     pytest.param(
         "add_csv_asset",
         {
+            # TODO: Enable spark_schema:
+            # "schema": "schema",
             "sep": "sep",
             "encoding": "encoding",
             "quote": "quote",
@@ -219,7 +221,8 @@ add_json_asset = [
     pytest.param(
         "add_json_asset",
         {
-            "spark_schema": "spark_schema",
+            # TODO: Enable spark_schema:
+            # "spark_schema": "spark_schema",
             "primitives_as_string": "primitives_as_string",
             "prefers_decimal": "prefers_decimal",
             "allow_comments": "allow_comments",
@@ -227,7 +230,7 @@ add_json_asset = [
             "allow_single_quotes": "allow_single_quotes",
             "allow_numeric_leading_zero": "allow_numeric_leading_zero",
             "allow_backslash_escaping_any_character": "allow_backslash_escaping_any_character",
-            "mode": "mode",
+            "mode": "PERMISSIVE",
             "column_name_of_corrupt_record": "column_name_of_corrupt_record",
             "date_format": "date_format",
             "timestamp_format": "timestamp_format",
@@ -296,8 +299,7 @@ add_asset_test_params = []
 add_asset_test_params += add_csv_asset
 add_asset_test_params += add_parquet_asset
 add_asset_test_params += add_orc_asset
-# TODO: Enable:
-# add_asset_test_params += add_json_asset
+add_asset_test_params += add_json_asset
 add_asset_test_params += add_text_asset
 
 
@@ -334,6 +336,8 @@ add_directory_csv_asset = [
         "add_directory_csv_asset",
         {
             "data_directory": "some_directory",
+            # TODO: Enable spark_schema:
+            # "spark_schema": "spark_schema",
             "sep": "sep",
             "encoding": "encoding",
             "quote": "quote",

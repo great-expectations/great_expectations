@@ -50,6 +50,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # path: PathOrPaths,
         # NA - path determined by asset
         # schema: Optional[Union[StructType, str]] = None,
+        spark_schema: Optional[Union[pyspark_types.StructType, str]] = None,
         # sep: Optional[str] = None,
         sep: Optional[str] = None,
         # encoding: Optional[str] = None,
@@ -154,6 +155,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # path: PathOrPaths,
         # NA - path determined by asset
         # schema: Optional[Union[StructType, str]] = None,
+        spark_schema: Optional[Union[pyspark_types.StructType, str]] = None,
         # sep: Optional[str] = None,
         sep: Optional[str] = None,
         # encoding: Optional[str] = None,
