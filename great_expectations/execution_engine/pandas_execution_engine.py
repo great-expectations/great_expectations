@@ -183,6 +183,7 @@ class PandasExecutionEngine(ExecutionEngine):
                     )
                 )
             self._gcs = google.storage.Client(credentials=credentials, **gcs_options)
+        # This exception handling causes a TypeError if google dependency not installed
         except (TypeError, AttributeError, google.DefaultCredentialsError):
             self._gcs = None
 
