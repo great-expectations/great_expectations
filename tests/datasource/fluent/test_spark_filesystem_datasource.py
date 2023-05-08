@@ -11,6 +11,7 @@ import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
@@ -20,6 +21,7 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
+    DirectoryCSVAsset,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
@@ -224,7 +226,15 @@ def test_csv_asset_with_non_string_batching_regex_named_parameters(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("samples_2020", id="str"),
+        pytest.param(pathlib.Path("samples_2020"), id="pathlib.Path"),
+    ],
+)
 def test_get_batch_list_from_directory_one_batch(
+    path: PathStr,
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
     """What does this test and why?
@@ -232,7 +242,7 @@ def test_get_batch_list_from_directory_one_batch(
     A "directory" asset should only have a single batch."""
     asset = spark_filesystem_datasource.add_directory_csv_asset(
         name="csv_asset",
-        data_directory="samples_2020",
+        data_directory=path,
         header=True,
         infer_schema=True,
     )
@@ -242,7 +252,15 @@ def test_get_batch_list_from_directory_one_batch(
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("samples_2020", id="str"),
+        pytest.param(pathlib.Path("samples_2020"), id="pathlib.Path"),
+    ],
+)
 def test_get_batch_list_from_directory_merges_files(
+    path: PathStr,
     spark_filesystem_datasource: SparkFilesystemDatasource,
 ):
     """What does this test and why?
@@ -253,7 +271,7 @@ def test_get_batch_list_from_directory_merges_files(
     """
     asset = spark_filesystem_datasource.add_directory_csv_asset(
         name="csv_asset",
-        data_directory="samples_2020",
+        data_directory=path,
         header=True,
         infer_schema=True,
     )
@@ -518,3 +536,296 @@ def test_add_csv_asset_with_batch_metadata(
         **batch_options,
         **asset_specified_metadata,
     }
+
+
+@pytest.fixture
+def directory_asset_with_no_splitter(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+) -> DirectoryCSVAsset:
+    asset = spark_filesystem_datasource.add_directory_csv_asset(
+        name="directory_csv_asset_no_splitter",
+        data_directory="first_ten_trips_in_each_file",
+        header=True,
+        infer_schema=True,
+    )
+    return asset
+
+
+@pytest.fixture
+def expected_num_records_directory_asset_no_splitter_2020_passenger_count_2(
+    directory_asset_with_no_splitter: DirectoryCSVAsset,
+) -> int:
+    pre_splitter_batches = (
+        directory_asset_with_no_splitter.get_batch_list_from_batch_request(
+            directory_asset_with_no_splitter.build_batch_request()
+        )
+    )
+    pre_splitter_batch_data = pre_splitter_batches[0].data
+    expected_num_records = pre_splitter_batch_data.dataframe.filter(  # type: ignore[attr-defined]
+        F.col("passenger_count") == 2
+    ).count()
+    assert expected_num_records == 37, "Check that the referenced data hasn't changed"
+    return expected_num_records
+
+
+@pytest.fixture
+def directory_asset_with_column_value_splitter(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+) -> DirectoryCSVAsset:
+    asset = spark_filesystem_datasource.add_directory_csv_asset(
+        name="directory_csv_asset_with_splitter",
+        data_directory="first_ten_trips_in_each_file",
+        header=True,
+        infer_schema=True,
+    )
+    asset_with_passenger_count_splitter = asset.add_splitter_column_value(
+        column_name="passenger_count"
+    )
+    return asset_with_passenger_count_splitter
+
+
+class TestSplitterDirectoryAsset:
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_directory_asset_batch_request_options(
+        self, directory_asset_with_column_value_splitter: DirectoryCSVAsset
+    ):
+        assert directory_asset_with_column_value_splitter.batch_request_options == (
+            "path",
+            "passenger_count",
+        )
+
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_directory_asset_one_batch(
+        self, directory_asset_with_column_value_splitter: DirectoryCSVAsset
+    ):
+        post_passenger_count_splitter_batch_request = (
+            directory_asset_with_column_value_splitter.build_batch_request(
+                {"passenger_count": 2}
+            )
+        )
+        post_passenger_count_splitter_batch_list = directory_asset_with_column_value_splitter.get_batch_list_from_batch_request(
+            post_passenger_count_splitter_batch_request
+        )
+        post_splitter_expected_num_batches = 1
+        assert (
+            len(post_passenger_count_splitter_batch_list)
+            == post_splitter_expected_num_batches
+        )
+
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_directory_asset_one_batch_size(
+        self,
+        directory_asset_with_column_value_splitter: DirectoryCSVAsset,
+        expected_num_records_directory_asset_no_splitter_2020_passenger_count_2: int,
+    ):
+
+        post_splitter_batch_request = (
+            directory_asset_with_column_value_splitter.build_batch_request(
+                {"passenger_count": 2}
+            )
+        )
+        post_splitter_batch_list = directory_asset_with_column_value_splitter.get_batch_list_from_batch_request(
+            post_splitter_batch_request
+        )
+        post_splitter_batch_data = post_splitter_batch_list[0].data
+
+        assert post_splitter_batch_data.dataframe.count() == expected_num_records_directory_asset_no_splitter_2020_passenger_count_2  # type: ignore[attr-defined]
+        assert post_splitter_batch_data.dataframe.filter(F.col("passenger_count") != 2).count() == 0  # type: ignore[attr-defined]
+
+
+@pytest.fixture
+def file_asset_with_no_splitter(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+) -> CSVAsset:
+    asset = spark_filesystem_datasource.add_csv_asset(
+        name="file_csv_asset_no_splitter",
+        batching_regex=r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        header=True,
+        infer_schema=True,
+    )
+    return asset
+
+
+@pytest.fixture
+def expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2(
+    file_asset_with_no_splitter: CSVAsset,
+) -> int:
+
+    single_batch_batch_request = file_asset_with_no_splitter.build_batch_request(
+        {"year": "2020", "month": "11"}
+    )
+    single_batch_list = file_asset_with_no_splitter.get_batch_list_from_batch_request(
+        single_batch_batch_request
+    )
+    assert len(single_batch_list) == 1
+    pre_splitter_batch_data = single_batch_list[0].data
+    expected_num_records = pre_splitter_batch_data.dataframe.filter(F.col("passenger_count") == 2).count()  # type: ignore[attr-defined]
+    assert expected_num_records == 2, "Check that the referenced data hasn't changed"
+    return expected_num_records
+
+
+@pytest.fixture
+def expected_num_records_file_asset_no_splitter_2020_10(
+    file_asset_with_no_splitter: CSVAsset,
+) -> int:
+    single_batch_batch_request = file_asset_with_no_splitter.build_batch_request(
+        {"year": "2020", "month": "11"}
+    )
+    single_batch_list = file_asset_with_no_splitter.get_batch_list_from_batch_request(
+        single_batch_batch_request
+    )
+
+    pre_splitter_batch_data = single_batch_list[0].data
+
+    expected_num_records = (
+        pre_splitter_batch_data.dataframe.filter(  # type: ignore[attr-defined]
+            F.year(F.col("pickup_datetime")) == 2020
+        )
+        .filter(F.month(F.col("pickup_datetime")) == 11)
+        .count()
+    )
+    assert expected_num_records == 10, "Check that the referenced data hasn't changed"
+    return expected_num_records
+
+
+@pytest.fixture
+def file_asset_with_column_value_splitter(
+    spark_filesystem_datasource: SparkFilesystemDatasource,
+) -> CSVAsset:
+    asset = spark_filesystem_datasource.add_csv_asset(
+        name="file_csv_asset_with_splitter",
+        batching_regex=r"first_ten_trips_in_each_file/yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+        header=True,
+        infer_schema=True,
+    )
+    asset_with_passenger_count_splitter = asset.add_splitter_column_value(
+        column_name="passenger_count"
+    )
+    return asset_with_passenger_count_splitter
+
+
+class TestSplitterFileAsset:
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_file_asset_batch_request_options(
+        self, file_asset_with_column_value_splitter: CSVAsset
+    ):
+        assert file_asset_with_column_value_splitter.batch_request_options == (
+            "year",
+            "month",
+            "path",
+            "passenger_count",
+        )
+
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_file_asset_one_batch(
+        self, file_asset_with_column_value_splitter: CSVAsset
+    ):
+        post_passenger_count_splitter_batch_request = (
+            file_asset_with_column_value_splitter.build_batch_request(
+                {"year": "2020", "month": "11", "passenger_count": 2}
+            )
+        )
+        post_passenger_count_splitter_batch_list = (
+            file_asset_with_column_value_splitter.get_batch_list_from_batch_request(
+                post_passenger_count_splitter_batch_request
+            )
+        )
+        post_splitter_expected_num_batches = 1
+        assert (
+            len(post_passenger_count_splitter_batch_list)
+            == post_splitter_expected_num_batches
+        )
+
+    @pytest.mark.unit
+    def test_get_batch_list_from_batch_request_with_splitter_file_asset_one_batch_size(
+        self,
+        file_asset_with_column_value_splitter: CSVAsset,
+        expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2: int,
+    ):
+
+        post_splitter_batch_request = (
+            file_asset_with_column_value_splitter.build_batch_request(
+                {"year": "2020", "month": "11", "passenger_count": 2}
+            )
+        )
+        post_splitter_batch_list = (
+            file_asset_with_column_value_splitter.get_batch_list_from_batch_request(
+                post_splitter_batch_request
+            )
+        )
+
+        # Make sure we only have passenger_count == 2 in our batch data
+        post_splitter_batch_data = post_splitter_batch_list[0].data
+
+        assert (
+            post_splitter_batch_data.dataframe.filter(F.col("passenger_count") == 2).count()  # type: ignore[attr-defined]
+            == expected_num_records_file_asset_no_splitter_2020_10_passenger_count_2
+        )
+        assert (
+            post_splitter_batch_data.dataframe.filter(F.col("passenger_count") != 2).count()  # type: ignore[attr-defined]
+            == 0
+        )
+
+    @pytest.mark.unit
+    def test_add_file_csv_asset_with_splitter_conflicting_identifier_batch_request_options(
+        self, file_asset_with_no_splitter: CSVAsset
+    ):
+        asset_with_conflicting_splitter = (
+            file_asset_with_no_splitter.add_splitter_year_and_month(
+                column_name="pickup_datetime"
+            )
+        )
+        assert asset_with_conflicting_splitter.batch_request_options == (
+            "year",
+            "month",
+            "path",
+            "year",
+            "month",
+        )
+
+    @pytest.mark.unit
+    def test_add_file_csv_asset_with_splitter_conflicting_identifier_gets_one_batch(
+        self, file_asset_with_no_splitter: CSVAsset
+    ):
+        asset_with_conflicting_splitter = (
+            file_asset_with_no_splitter.add_splitter_year_and_month(
+                column_name="pickup_datetime"
+            )
+        )
+        post_splitter_batch_request = (
+            asset_with_conflicting_splitter.build_batch_request(
+                {"year": "2020", "month": "11"}
+            )
+        )
+        post_splitter_batches = (
+            asset_with_conflicting_splitter.get_batch_list_from_batch_request(
+                post_splitter_batch_request
+            )
+        )
+        post_splitter_expected_num_batches = 1
+        assert len(post_splitter_batches) == post_splitter_expected_num_batches
+
+    @pytest.mark.unit
+    def test_add_file_csv_asset_with_splitter_conflicting_identifier_gets_correct_data(
+        self,
+        file_asset_with_no_splitter: CSVAsset,
+        expected_num_records_file_asset_no_splitter_2020_10: int,
+    ):
+        asset_with_conflicting_splitter = (
+            file_asset_with_no_splitter.add_splitter_year_and_month(
+                column_name="pickup_datetime"
+            )
+        )
+        post_splitter_batch_request = (
+            asset_with_conflicting_splitter.build_batch_request(
+                {"year": "2020", "month": "11"}
+            )
+        )
+        post_splitter_batches = (
+            asset_with_conflicting_splitter.get_batch_list_from_batch_request(
+                post_splitter_batch_request
+            )
+        )
+        post_splitter_batch_data = post_splitter_batches[0].data
+
+        assert post_splitter_batch_data.dataframe.count() == expected_num_records_file_asset_no_splitter_2020_10  # type: ignore[attr-defined]

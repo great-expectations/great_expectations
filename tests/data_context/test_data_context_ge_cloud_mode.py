@@ -41,7 +41,7 @@ def test_data_context_ge_cloud_mode_makes_successful_request_to_cloud_api(
             cloud_organization_id=ge_cloud_runtime_organization_id,
             cloud_access_token=ge_cloud_access_token,
         )
-    except:  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
+    except Exception:  # Not concerned with constructor output (only evaluating interaction with requests during __init__)
         pass
 
     called_with_url = f"{ge_cloud_runtime_base_url}/organizations/{ge_cloud_runtime_organization_id}/data-context-configuration"

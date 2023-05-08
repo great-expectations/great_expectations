@@ -329,5 +329,5 @@ def test_resolve_metrics_with_incomplete_metric_input():
     }
 
     # Ensuring that incomplete metrics given raises a GreatExpectationsError
-    with pytest.raises(gx_exceptions.GreatExpectationsError) as error:
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
         engine.resolve_metrics(metrics_to_resolve=(desired_metric,), metrics={})

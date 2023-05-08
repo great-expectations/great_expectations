@@ -14,6 +14,7 @@ from great_expectations.data_context.types.base import (
     InMemoryStoreBackendDefaults,
 )
 from great_expectations.exceptions import ConfigNotFoundError
+from great_expectations.exceptions.exceptions import GXCloudConfigurationError
 from tests.test_utils import working_directory
 
 GX_CLOUD_PARAMS_ALL = {
@@ -170,7 +171,7 @@ def test_cloud_context_disabled(set_up_cloud_envs, tmp_path: pathlib.Path):
 def test_cloud_missing_env_throws_exception(
     clear_env_vars, empty_ge_cloud_data_context_config
 ):
-    with pytest.raises(Exception):
+    with pytest.raises(GXCloudConfigurationError):
         gx.get_context(cloud_mode=True),
 
 
