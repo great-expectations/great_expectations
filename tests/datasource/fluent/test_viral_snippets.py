@@ -361,6 +361,7 @@ def test_ctx_delete_removes_datasource_from_yaml(seeded_file_context: FileDataCo
     print(f"Delete -> '{random_datasource.name}'\n")
 
     seeded_file_context.delete_datasource(random_datasource.name)
+    seeded_file_context._save_project_config()
 
     yaml_path = pathlib.Path(
         seeded_file_context.root_directory, seeded_file_context.GX_YML
