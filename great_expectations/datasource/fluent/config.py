@@ -176,7 +176,6 @@ class GxConfig(FluentBaseModel):
             result = ds_dicts.pop(datasource_name, default)
 
         self.fluent_datasources = list(ds_dicts.values())
-        assert datasource_name not in self.get_datasource_names()
         return result
 
     # noinspection PyNestedDecorators
