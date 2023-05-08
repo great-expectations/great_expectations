@@ -13,21 +13,21 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility.pyspark import types as pyspark_types
     from great_expectations.datasource.fluent import BatchMetadata
     from great_expectations.datasource.fluent.interfaces import (
         SortersDefinition,
     )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
-        DirectoryCSVAsset,
-        ORCAsset,
-        ParquetAsset,
-        JSONAsset,
-        TextAsset,
         AvroAsset,
         BinaryFileAsset,
+        CSVAsset,
+        DirectoryCSVAsset,
+        JSONAsset,
+        ORCAsset,
+        ParquetAsset,
+        TextAsset,
     )
-    from great_expectations.compatibility.pyspark import types as pyspark_types
 
 logger: Logger
 

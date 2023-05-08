@@ -6,10 +6,10 @@ from typing import (
     TYPE_CHECKING,
     ClassVar,
     List,
+    Optional,
     Sequence,
     Type,
     Union,
-    Optional,
 )
 
 import pydantic
@@ -22,8 +22,8 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
 )
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import DataAsset
     from great_expectations.compatibility.pyspark import types as pyspark_types
+    from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
 logger = logging.getLogger(__name__)
@@ -700,6 +700,7 @@ def _get_mismatches(
 if __name__ == "__main__":
     verbose = False
     import re
+
     from termcolor import colored
 
     p1 = re.compile(r"(.)([A-Z][a-z]+)")
@@ -716,6 +717,7 @@ if __name__ == "__main__":
         print(colored(text, "red"))
 
     import inspect
+
     from great_expectations.compatibility.pyspark import pyspark
 
     for asset in _SPARK_FILE_PATH_ASSET_TYPES:
