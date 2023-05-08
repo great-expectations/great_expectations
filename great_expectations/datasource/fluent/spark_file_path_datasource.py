@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import ast
 import logging
 import pathlib
 from typing import (
@@ -24,13 +23,14 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset
+    from great_expectations.compatibility.pyspark import types as pyspark_types
 
 
 logger = logging.getLogger(__name__)
 
 
 class _SparkGenericFilePathAsset(_FilePathDataAsset):
-    # TODO: ignoreCorruptFiles and ignoreMissingFiles appear in the docs but not in the method signatures (e.g. https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)
+    # TODO: ignoreCorruptFiles and ignoreMissingFiles appear in the docs https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html but not in the reader method signatures (e.g. https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)
     # ignore_corrupt_files: bool = Field(alias="ignoreCorruptFiles")
     # ignore_missing_files: bool = Field(alias="ignoreMissingFiles")
 
@@ -43,12 +43,14 @@ class _SparkGenericFilePathAsset(_FilePathDataAsset):
 
     def _get_reader_options_include(self) -> set[str] | None:
         return {
-            "ignoreCorruptFiles",
             "ignoreMissingFiles",
             "pathGlobFilter",
-            "recursiveFileLookup",
             "modifiedBefore",
             "modifiedAfter",
+            # vvv Missing from method signatures but appear in documentation:
+            # "ignoreCorruptFiles",
+            # "recursiveFileLookup",
+            # ^^^ Missing from method signatures but appear in documentation:
         }
 
 
@@ -340,42 +342,92 @@ class ORCAsset(_SparkGenericFilePathAsset):
 class JSONAsset(_SparkGenericFilePathAsset):
     # Overridden inherited instance fields
     type: Literal["json"] = "json"
-    timezone: str = Field(alias="timeZone")
-    primitives_as_string: Optional[Union[bool, str]] = Field(None, alias="primitivesAsString")
-    prefers_decimal: Optional[Union[bool, str]] = Field(None, alias="prefersDecimal")
-    allow_comments: Optional[Union[bool, str]] = Field(None, alias="allowComments")
 
-    allow_unquoted_field_names: Optional[Union[bool, str]] = Field(None, alias="allowUnquotedFieldNames")
-    allow_single_quotes: Optional[Union[bool, str]] = Field(None, alias="allowSingleQuotes")
-    allow_numeric_leading_zeros: Optional[Union[bool, str]] = Field(None, alias="allowNumericLeadingZeros")
+    # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0)
+    # path: Union[str, List[str], RDD[str]],
+    # NA - path determined by asset
+    # schema: Optional[Union[StructType, str]] = None,
+    # schema shadows pydantic BaseModel attribute
+    spark_schema: Optional[Union[pyspark_types.StructType, str]] = Field(
+        None, alias="schema"
+    )
+    # primitivesAsString: Optional[Union[bool, str]] = None,
+    primitives_as_string: Optional[Union[bool, str]] = Field(
+        None, alias="primitivesAsString"
+    )
+    # prefersDecimal: Optional[Union[bool, str]] = None,
+    prefers_decimal: Optional[Union[bool, str]] = Field(None, alias="prefersDecimal")
+    # allowComments: Optional[Union[bool, str]] = None,
+    allow_comments: Optional[Union[bool, str]] = Field(None, alias="allowComments")
+    # allowUnquotedFieldNames: Optional[Union[bool, str]] = None,
+    allow_unquoted_field_names: Optional[Union[bool, str]] = Field(
+        None, alias="allowUnquotedFieldNames"
+    )
+    # allowSingleQuotes: Optional[Union[bool, str]] = None,
+    allow_single_quotes: Optional[Union[bool, str]] = Field(
+        None, alias="allowSingleQuotes"
+    )
+    # allowNumericLeadingZero: Optional[Union[bool, str]] = None,
+    allow_numeric_leading_zero: Optional[Union[bool, str]] = Field(
+        None, alias="allowNumericLeadingZero"
+    )
+    # allowBackslashEscapingAnyCharacter: Optional[Union[bool, str]] = None,
     allow_backslash_escaping_any_character: Optional[Union[bool, str]] = Field(
         None, alias="allowBackslashEscapingAnyCharacter"
     )
-    mode: Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"] = Field("PERMISSIVE")
-    column_name_of_corrupt_record: Optional[str] = Field(None, alias="columnNameOfCorruptRecord")
-    date_format: Optional[str] = Field("yyyy-MM-dd", alias="dateFormat")
-    timestamp_format: Optional[str] = Field(
-        "yyyy-MM-dd'T'HH:mm:ss[.SSS][XXX]", alias="timestampFormat"
+    # mode: Optional[str] = None,
+    mode: Optional[Literal["PERMISSIVE", "DROPMALFORMED", "FAILFAST"]] = None
+    # columnNameOfCorruptRecord: Optional[str] = None,
+    column_name_of_corrupt_record: Optional[str] = Field(
+        None, alias="columnNameOfCorruptRecord"
     )
-    timestamp_ntz_format: str = Field(
-        "yyyy-MM-dd'T'HH:mm:ss[.SSS]", alias="timestampNTZFormat"
-    )
-    # TODO: Remove? Does enableDateTimeParsingFallback exist in pyspark source code?
-    enable_date_time_parsing_fallback: bool = Field(
-        alias="enableDateTimeParsingFallback"
-    )
+    # dateFormat: Optional[str] = None,
+    date_format: Optional[str] = Field(None, alias="dateFormat")
+    # timestampFormat: Optional[str] = None,
+    timestamp_format: Optional[str] = Field(None, alias="timestampFormat")
+    # multiLine: Optional[Union[bool, str]] = None,
     multi_line: Optional[Union[bool, str]] = Field(None, alias="multiLine")
-    allow_unquoted_control_chars: Optional[Union[bool, str]] = Field(None, alias="allowUnquotedControlChars")
-    encoding: str
+    # allowUnquotedControlChars: Optional[Union[bool, str]] = None,
+    allow_unquoted_control_chars: Optional[Union[bool, str]] = Field(
+        None, alias="allowUnquotedControlChars"
+    )
+    # lineSep: Optional[str] = None,
     line_sep: Optional[str] = Field(None, alias="lineSep")
+    # samplingRatio: Optional[Union[float, str]] = None,
     sampling_ratio: Optional[Union[float, str]] = Field(None, alias="samplingRatio")
-    drop_field_if_all_null: Optional[Union[bool, str]] = Field(None, alias="dropFieldIfAllNull")
+    # dropFieldIfAllNull: Optional[Union[bool, str]] = None,
+    drop_field_if_all_null: Optional[Union[bool, str]] = Field(
+        None, alias="dropFieldIfAllNull"
+    )
+    # encoding: Optional[str] = None,
+    encoding: Optional[str] = None
+    # locale: Optional[str] = None,
     locale: Optional[str] = None
-    allow_non_numeric_numbers: Optional[Union[bool, str]] = Field(None, alias="allowNonNumericNumbers")
-    # TODO: What is the default for merge_schema? Is it optional? Doesn't appear in `.json()` reader method.
-    merge_schema: Optional[bool] = Field(None, alias="mergeSchema")
-    allow_numeric_leading_zero: Union[bool, str, None] = Field(None,
-                                                               alias="allowNumericLeadingZero")
+    # pathGlobFilter: Optional[Union[bool, str]] = None,
+    # Inherited from _SparkGenericFilePathAsset
+    # recursiveFileLookup: Optional[Union[bool, str]] = None,
+    # Inherited from _SparkGenericFilePathAsset
+    # modifiedBefore: Optional[Union[bool, str]] = None,
+    # Inherited from _SparkGenericFilePathAsset
+    # modifiedAfter: Optional[Union[bool, str]] = None,
+    # Inherited from _SparkGenericFilePathAsset
+    # allowNonNumericNumbers: Optional[Union[bool, str]] = None,
+    allow_non_numeric_numbers: Optional[Union[bool, str]] = Field(
+        None, alias="allowNonNumericNumbers"
+    )
+    # ^^^ spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0)
+
+    # vvv Docs <> Source Code mismatch
+    # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-json.html
+    # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309
+    # timezone: str = Field(alias="timeZone")
+    # timestamp_ntz_format: str = Field(
+    #     "yyyy-MM-dd'T'HH:mm:ss[.SSS]", alias="timestampNTZFormat"
+    # )
+    # enable_date_time_parsing_fallback: bool = Field(
+    #     alias="enableDateTimeParsingFallback"
+    # )
+    # ^^^ Docs <> Source Code mismatch
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -390,32 +442,40 @@ class JSONAsset(_SparkGenericFilePathAsset):
         return (
             super()
             ._get_reader_options_include()
-            # TODO: Update:
             .union(
                 {
-                    "timeZone",
                     "primitivesAsString",
                     "prefersDecimal",
                     "allowComments",
                     "allowUnquotedFieldNames",
                     "allowSingleQuotes",
-                    "allowNumericLeadingZeros",
+                    "allowNumericLeadingZero",
                     "allowBackslashEscapingAnyCharacter",
                     "mode",
                     "columnNameOfCorruptRecord",
                     "dateFormat",
                     "timestampFormat",
-                    "timestampNTZFormat",
-                    "enableDateTimeParsingFallback",
                     "multiLine",
                     "allowUnquotedControlChars",
-                    "encoding",
                     "lineSep",
                     "samplingRatio",
                     "dropFieldIfAllNull",
+                    "encoding",
                     "locale",
                     "allowNonNumericNumbers",
-                    "mergeSchema",
+                    # Inherited vvv
+                    # "pathGlobFilter",
+                    # "recursiveFileLookup",
+                    # "modifiedBefore",
+                    # "modifiedAfter",
+                    # Inherited ^^^
+                    # vvv Docs <> Source Code mismatch
+                    # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-json.html
+                    # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309
+                    # "enableDateTimeParsingFallback",
+                    # "timeZone",
+                    # "timestampNTZFormat",
+                    # ^^^ Docs <> Source Code mismatch
                 }
             )
         )
@@ -548,7 +608,9 @@ class _SparkFilePathDatasource(_SparkDatasource):
     assets: List[_SPARK_FILE_PATH_ASSET_TYPES_UNION] = []  # type: ignore[assignment]
 
 
-def _get_mismatches(asset_fields, method_annotations, method_param_names: list[str], verbose=False):
+def _get_mismatches(
+    asset_fields, method_annotations, method_param_names: list[str], verbose=False
+):
     """
 
     Args:
@@ -577,13 +639,13 @@ def _get_mismatches(asset_fields, method_annotations, method_param_names: list[s
     aliases_to_check = aliases - aliases_to_remove
     for alias in aliases_to_check:
         if alias not in method_param_names:
-            print_red(f"FIELD NOT FOUND: param alias: {alias} not found in method param names: {method_param_names}")
+            print_red(
+                f"FIELD NOT FOUND: param alias: {alias} not found in method param names: {method_param_names}"
+            )
     # TODO: Remove non spark fields e..g `id`, `batch_metadata`
     print_green(f"Aliases (for _get_reader_options_include()): {aliases}")
     for param, annotation in method_annotations.items():
         # print(param, annotation)
-
-
 
         asset_field = asset_fields.get(param) or asset_fields.get(camel_to_snake(param))
 
@@ -743,7 +805,9 @@ if __name__ == "__main__":
         #                                         required=False, default='STOP_AT_DELIMITER',
         #                                         alias='unescapedQuoteHandling')}
         # print("Building field list from spark function def")
-        method_param_names = [n for n in inspect.signature(spark_method).parameters.keys()]
+        method_param_names = [
+            n for n in inspect.signature(spark_method).parameters.keys()
+        ]
         method_annotations = spark_method.__annotations__
         if method_annotations.get("return"):
             method_annotations.pop("return")
