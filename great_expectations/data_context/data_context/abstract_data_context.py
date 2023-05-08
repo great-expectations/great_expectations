@@ -1700,6 +1700,9 @@ class AbstractDataContext(ConfigPeer, ABC):
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
 
+        if save_changes:
+            self._save_project_config()
+
     @overload
     def add_checkpoint(
         self,
