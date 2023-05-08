@@ -95,7 +95,6 @@ module.exports = {
               value: '<h4>Data Context Configuration</h4>',
               defaultStyle: true
             },
-            'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
             'guides/setup/configuring_data_contexts/how_to_configure_credentials'
           ]
         },

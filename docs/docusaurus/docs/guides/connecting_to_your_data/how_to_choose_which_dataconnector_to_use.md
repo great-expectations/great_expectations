@@ -13,7 +13,6 @@ This guide demonstrates how to choose which <TechnicalTag tag="data_connector" t
 <Prerequisites>
 
 - [An understanding of Datasource basics](../../terms/datasource.md)
-- [An understanding of how to configure a Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 </Prerequisites>
 
