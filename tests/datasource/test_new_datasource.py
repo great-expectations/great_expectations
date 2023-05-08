@@ -493,7 +493,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
         },
         "batch_identifiers": None,
     }
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         batch_request = RuntimeBatchRequest(**batch_request)
 
         # noinspection PyUnusedLocal

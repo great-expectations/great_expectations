@@ -624,13 +624,17 @@ def test_get_batch_data_with_gcs_batch_spec(
     assert df.dataframe.shape == (3, 3)
 
 
+@pytest.mark.skipif(
+    not google.storage,
+    reason="Could not import 'storage' from google.cloud in pandas_execution_engine.py",
+)
 def test_get_batch_data_with_gcs_batch_spec_no_credentials(gcs_batch_spec, monkeypatch):
     # If PandasExecutionEngine contains no credentials for GCS, we will still instantiate _gcs engine,
     # but will raise Exception when trying get_batch_data(). The only situation where it would work is if we are running in a Google Cloud container.
     # TODO : Determine how we can test the scenario where we are running PandasExecutionEngine from within Google Cloud env.
 
     monkeypatch.delenv("GOOGLE_APPLICATION_CREDENTIALS", raising=False)
-    with pytest.raises(Exception):
+    with pytest.raises(gx_exceptions.ExecutionEngineError):
         PandasExecutionEngine().get_batch_data(batch_spec=gcs_batch_spec)
 
 

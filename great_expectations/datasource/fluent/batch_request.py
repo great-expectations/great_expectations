@@ -121,6 +121,8 @@ class BatchRequest(pydantic.BaseModel):
 
     @pydantic.validator("options", pre=True)
     def _validate_options(cls, options) -> BatchRequestOptions:
+        if options is None:
+            return {}
         if not isinstance(options, dict):
             raise TypeError("BatchRequestOptions must take the form of a dictionary.")
         if any(not isinstance(key, str) for key in options):
