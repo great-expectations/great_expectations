@@ -9,12 +9,14 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 This guide will explain how to host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on Google Cloud Storage. We recommend using IP-based access, which is achieved by deploying a simple Google App Engine app. Data Docs can also be served on Google Cloud Storage if the contents of the bucket are set to be publicly readable, but this is strongly discouraged.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects)
-- [Installed and initialized the Google Cloud SDK (in order to use the gcloud CLI)](https://cloud.google.com/sdk/docs/quickstarts)
-- [Set up the gsutil command line tool](https://cloud.google.com/storage/docs/gsutil_install)
-- Have permissions to: list and create buckets, deploy Google App Engine apps, add app firewall rules
+- [A Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects)
+- [The Google Cloud SDK](https://cloud.google.com/sdk/docs/quickstarts)
+- [The gsutil command line tool](https://cloud.google.com/storage/docs/gsutil_install)
+- Permissions to list and create buckets, deploy Google App Engine apps, add app firewall rules
 
 </Prerequisites>
 

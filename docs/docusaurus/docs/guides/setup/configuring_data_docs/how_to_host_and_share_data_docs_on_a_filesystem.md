@@ -9,9 +9,11 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 This guide will explain how to host and share <TechnicalTag relative="../../../" tag="data_docs" text="Data Docs" /> on a filesystem.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- [A Great Expectations instance](/docs/guides/setup/setup_overview)
 
 </Prerequisites>
 
