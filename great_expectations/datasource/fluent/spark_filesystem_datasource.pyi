@@ -255,7 +255,6 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
-        merge_schema: Optional[Union[bool, str]] = None,
         path_glob_filter: Optional[Union[bool, str]] = None,
         modified_before: Optional[Union[bool, str]] = None,
         modified_after: Optional[Union[bool, str]] = None,
@@ -264,6 +263,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # vvv spark parameters for pyspark.sql.DataFrameReader.parquet() (ordered as in pyspark v3.4.0)
         # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
         # Parquet Specific Options vvv
+        merge_schema: Optional[Union[bool, str]] = None,
         datetime_rebase_mode: Optional[
             Literal["EXCEPTION", "CORRECTED", "LEGACY"]
         ] = None,
@@ -289,16 +289,22 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
-        ignore_corrupt_files: bool = ...,
-        ignore_missing_files: bool = ...,
-        path_glob_filter: str = ...,
-        recursive_file_lookup: bool = False,
-        modified_before: str = "",
-        modified_after: str = "",
+        path_glob_filter: Optional[Union[bool, str]] = None,
+        modified_before: Optional[Union[bool, str]] = None,
+        modified_after: Optional[Union[bool, str]] = None,
+        recursive_file_lookup: Optional[Union[bool, str]] = None,
         # Spark Generic File Reader Options ^^^
         # ORC Specific Options vvv
-        merge_schema: bool = ...,
+        merge_schema: Optional[Union[bool, str]] = None,
         # ORC Specific Options ^^^
+        # vvv Docs <> Source Code mismatch
+        # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
+        # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L473
+        # Spark Generic File Reader Options vvv
+        # ignore_corrupt_files: bool = ...,
+        # ignore_missing_files: bool = ...,
+        # Spark Generic File Reader Options ^^^
+        # ^^^ Docs <> Source Code mismatch
     ) -> ORCAsset: ...
     def add_json_asset(
         self,

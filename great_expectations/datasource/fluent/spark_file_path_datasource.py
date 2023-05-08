@@ -304,7 +304,6 @@ class ORCAsset(_SparkGenericFilePathAssetMixin):
 
     @classmethod
     def _get_reader_method(cls) -> str:
-        # return cls.type
         return "orc"
 
     def _get_reader_options_include(self) -> set[str] | None:
