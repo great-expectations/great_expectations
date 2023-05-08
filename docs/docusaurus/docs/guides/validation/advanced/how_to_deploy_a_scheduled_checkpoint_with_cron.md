@@ -9,10 +9,12 @@ import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
 This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text="Checkpoint" /> with cron.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
-- You have created a Checkpoint.
+- [A Great Expectations instance](/docs/guides/setup/setup_overview).
+- A Checkpoint.
 
 </Prerequisites>
 

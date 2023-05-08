@@ -17,7 +17,7 @@ import AdditionalResources from './components_how_to_create_a_new_checkpoint/_ad
 
 In this guide, we will use the SimpleCheckpoint class, which takes care of some defaults.
 
-To modify this configuration for your use case, replace the `batch_request` and `expectation_suite_name` with your own.
+To modify this code sample for your use case, replace the `batch_request` and `expectation_suite_name` with your own.
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
