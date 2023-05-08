@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import logging
 import os
+import pathlib
 import pickle
+import shutil
 import unittest
 from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 from unittest import mock
@@ -34,6 +38,7 @@ from great_expectations.util import (
     deep_filter_properties_iterable,
 )
 from great_expectations.validator.validator import Validator
+from tests.checkpoint import cloud_config
 
 if TYPE_CHECKING:
     from great_expectations.core.data_context_key import DataContextKey
@@ -4696,6 +4701,100 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
 
     actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
     assert expected_validation_id == actual_validation_id
+
+
+@pytest.fixture()
+def _fake_cloud_context_setup(tmp_path, monkeypatch):
+    data_dir = tmp_path
+    # When setting up a checkpoint, we validate that there is data in the data directory
+    # so we create a file.
+    data_file = "yellow_tripdata_sample_2019-01.csv"
+    data_file_path = (
+        pathlib.Path(__file__)
+        / ".."
+        / ".."
+        / "test_sets"
+        / "taxi_yellow_tripdata_samples"
+        / data_file
+    ).resolve()
+    shutil.copy(str(data_file_path), data_dir)
+
+    monkeypatch.setenv("GX_CLOUD_BASE_URL", "https://my_cloud_backend.com")
+    monkeypatch.setenv(
+        "GX_CLOUD_ORGANIZATION_ID", "11111111-1111-1111-1111-123456789012"
+    )
+    monkeypatch.setenv("GX_CLOUD_ACCESS_TOKEN", "token")
+
+    monkeypatch.setattr(
+        gx.data_context.CloudDataContext,
+        "retrieve_data_context_config_from_cloud",
+        cloud_config.make_retrieve_data_context_config_from_cloud(data_dir),
+    )
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_set",
+        cloud_config.store_set,
+    )
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "list_keys",
+        cloud_config.list_keys,
+    )
+    yield data_dir, data_file
+
+
+@pytest.fixture()
+def fake_cloud_context_basic(_fake_cloud_context_setup, monkeypatch):
+    data_dir, data_file = _fake_cloud_context_setup
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_get",
+        cloud_config.make_store_get(data_file, with_slack=False),
+    )
+    context = gx.data_context.CloudDataContext()
+    yield context
+
+
+@pytest.fixture()
+def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
+    data_dir, data_file = _fake_cloud_context_setup
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_get",
+        cloud_config.make_store_get(data_file, with_slack=True),
+    )
+    slack_counter = cloud_config.CallCounter()
+    monkeypatch.setattr(
+        gx.checkpoint.actions,
+        "send_slack_notification",
+        cloud_config.make_send_slack_notifications(slack_counter),
+    )
+    context = gx.data_context.CloudDataContext()
+    yield context, slack_counter
+
+
+@pytest.mark.integration
+@pytest.mark.cloud
+def test_use_validation_url_from_cloud(fake_cloud_context_basic):
+    context = fake_cloud_context_basic
+    checkpoint_name = "my_checkpoint"
+    checkpoint = context.get_checkpoint(checkpoint_name)
+    checkpoint_result = context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id)
+    org_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]
+    assert (
+        checkpoint_result.validation_result_url
+        == f"https://my_cloud_backend.com/{org_id}/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35"
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.cloud
+def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack):
+    context, slack_counter = fake_cloud_context_with_slack
+    checkpoint_name = "my_checkpoint"
+    checkpoint = context.get_checkpoint(checkpoint_name)
+    context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id)
+    assert slack_counter.count == 1
 
 
 ### SparkDF Tests

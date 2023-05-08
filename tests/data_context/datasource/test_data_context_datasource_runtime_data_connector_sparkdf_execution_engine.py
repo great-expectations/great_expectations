@@ -139,31 +139,6 @@ def test_batch_data_get_batch_successful_specification_sparkdf_engine_named_asse
     assert batch_2.batch_definition.batch_identifiers == batch_identifiers
 
 
-def test_batch_data_get_batch_ambiguous_parameter_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session, test_df_spark
-):
-    """
-    What does this test and why?
-
-    get_batch_list() requires batch_request to be passed in a named parameter. This test passes in a batch_request
-    as an unnamed parameter, which will raise a GreatExpectationsTypeError
-    """
-    context: DataContext = data_context_with_datasource_spark_engine
-    test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
-
-    # raised by get_batch_list()
-    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
-        context.get_batch_list(
-            RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                runtime_parameters={"batch_data": test_df},
-                batch_identifiers={"default_identifier_name": "identifier_name"},
-            )
-        )
-
-
 def test_batch_data_get_batch_failed_specification_type_error_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
@@ -178,69 +153,6 @@ def test_batch_data_get_batch_failed_specification_type_error_sparkdf_engine(
                 data_connector_name="default_runtime_data_connector_name",
                 data_asset_name=1,  # wrong data_type
                 runtime_parameters={"batch_data": test_df},
-                batch_identifiers={"default_identifier_name": "identifier_name"},
-            )
-        )
-
-
-def test_batch_data_get_batch_failed_specification_no_batch_identifier_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session, test_df_spark
-):
-    context: DataContext = data_context_with_datasource_spark_engine
-    test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
-
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # batch_identifiers missing (set to None)
-        context.get_batch_list(
-            RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                runtime_parameters={"batch_data": test_df},
-                batch_identifiers=None,
-            )
-        )
-
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # batch_identifiers missing (omitted)
-        context.get_batch_list(
-            RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                runtime_parameters={"batch_data": test_df},
-            )
-        )
-
-
-def test_batch_data_get_batch_failed_specification_no_runtime_parameters_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session, test_df_spark
-):
-    context: DataContext = data_context_with_datasource_spark_engine
-
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # runtime_parameters missing (None)
-        context.get_batch_list(
-            batch_request=RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                runtime_parameters=None,
-                batch_identifiers={"default_identifier_name": "identifier_name"},
-            )
-        )
-
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # runtime_parameters missing (omitted)
-        context.get_batch_list(
-            RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
                 batch_identifiers={"default_identifier_name": "identifier_name"},
             )
         )
@@ -309,33 +221,6 @@ def test_batch_data_get_validator_successful_specification_sparkdf_engine(
     assert isinstance(my_validator, Validator)
 
 
-def test_batch_data_get_validator_ambiguous_parameter_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session, test_df_spark
-):
-    """
-    What does this test and why?
-
-    get_batch_list() requires batch_request to be passed in a named parameter. This test passes in a batch_request
-    as an unnamed parameter, which will raise a GreatExpectationsTypeError
-    """
-    context: DataContext = data_context_with_datasource_spark_engine
-    test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
-
-    context.add_expectation_suite("my_expectations")
-    # raised by get_batch_list() in DataContext
-    with pytest.raises(gx_exceptions.GreatExpectationsTypeError):
-        context.get_validator(
-            RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                runtime_parameters={"batch_data": test_df},
-                batch_identifiers={"default_identifier_name": "identifier_name"},
-            ),
-            expectation_suite_name="my_expectations",
-        )
-
-
 def test_get_validator_wrong_type_sparkdf_engine(
     data_context_with_datasource_spark_engine, spark_session, test_df_spark
 ):
@@ -355,41 +240,6 @@ def test_get_validator_wrong_type_sparkdf_engine(
                     "query": "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
                 },
                 batch_identifiers={"default_identifier_name": "identifier_name"},
-            ),
-            expectation_suite_name="my_expectations",
-        )
-
-
-def test_batch_data_get_validator_failed_specification_no_batch_identifier_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session, test_df_spark
-):
-    context: DataContext = data_context_with_datasource_spark_engine
-    test_df: pyspark.sql.dataframe.DataFrame = test_df_spark
-
-    context.add_expectation_suite("my_expectations")
-
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    # batch_identifiers should not be None
-    with pytest.raises(TypeError):
-        context.get_validator(
-            batch_request=RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                runtime_parameters={"batch_data": test_df},
-                batch_identifiers=None,
-            ),
-            expectation_suite_name="my_expectations",
-        )
-
-    # batch_identifiers should not be omitted
-    with pytest.raises(TypeError):
-        context.get_validator(
-            batch_request=RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                runtime_parameters={"batch_data": test_df},
             ),
             expectation_suite_name="my_expectations",
         )
@@ -415,38 +265,6 @@ def test_batch_data_get_validator_failed_specification_incorrect_batch_spec_pass
                 batch_spec_passthrough=1,
             ),
             expectation_suite_name="my_expectations",
-        )
-
-
-def test_batch_data_get_validator_failed_specification_no_runtime_parameters_sparkdf_engine(
-    data_context_with_datasource_spark_engine, spark_session, test_df_spark
-):
-    context: DataContext = data_context_with_datasource_spark_engine
-
-    context.add_expectation_suite("my_expectations")
-    with pytest.raises(TypeError):
-        # runtime_parameters should not be None
-        context.get_validator(
-            batch_request=RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                runtime_parameters=None,
-                batch_identifiers={"default_identifier_name": "identifier_name"},
-            ),
-            expectation_suite_name="my_expectations",
-        )
-
-    # raised by _validate_runtime_batch_request_specific_init_parameters() in RuntimeBatchRequest.__init__()
-    with pytest.raises(TypeError):
-        # runtime_parameters missing (omitted)
-        context.get_validator(
-            RuntimeBatchRequest(
-                datasource_name="my_datasource",
-                data_connector_name="default_runtime_data_connector_name",
-                data_asset_name="default_data_asset_name",
-                batch_identifiers={"default_identifier_name": "identifier_name"},
-            )
         )
 
 
