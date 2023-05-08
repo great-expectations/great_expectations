@@ -1,6 +1,6 @@
 # isort:skip_file
-import os
 import pandas as pd
+import pathlib
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py imports">
 import great_expectations as gx
@@ -24,8 +24,7 @@ csv_file_path = "/path/to/data/directory/yellow_tripdata_2020-08.csv"
 # </snippet>
 
 filename = "yellow_tripdata_sample_2020-08.csv"
-data_dir = os.path.join(os.path.dirname(os.getcwd()), "data")
-csv_file_path = os.path.join("dbfs:", data_dir, filename)
+csv_file_path = pathlib.Path("./data", filename).resolve()
 pandas_df = pd.read_csv(csv_file_path)
 df = spark.createDataFrame(data=pandas_df)
 
