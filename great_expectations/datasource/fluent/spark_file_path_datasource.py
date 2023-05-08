@@ -462,7 +462,7 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
     # See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
     type: Literal["text"] = "text"
     wholetext: bool = Field(False)
-    line_sep: str = Field(alias="lineSep")
+    line_sep: Optional[str] = Field(None, alias="lineSep")
 
     class Config:
         extra = pydantic.Extra.forbid

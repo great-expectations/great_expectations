@@ -124,15 +124,15 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
                 "RAISE_ERROR",
             ]
         ] = None,
-        # vvv Docs <> Source Code mismatch
+        # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
         # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309
         # Spark Generic File Reader Options vvv
         # ignore_corrupt_files: bool = ...,
         # ignore_missing_files: bool = ...,
         # Spark Generic File Reader Options ^^^
-        # ^^^ Docs <> Source Code mismatch
-        # vvv Docs <> Source Code mismatch
+        # ^^^ pyspark Docs <> Source Code mismatch
+        # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-csv.html
         # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604
         # CSV Specific Options vvv
@@ -140,7 +140,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # timestamp_ntz_format: Optional[str] = None,
         # enable_date_time_parsing_fallback: Optional[bool] = None,
         # CSV Specific Options ^^^
-        # ^^^ Docs <> Source Code mismatch
+        # ^^^ pyspark Docs <> Source Code mismatch
     ) -> CSVAsset: ...
     def add_directory_csv_asset(
         self,
@@ -228,15 +228,15 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
                 "RAISE_ERROR",
             ]
         ] = None,
-        # vvv Docs <> Source Code mismatch
+        # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
         # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309
         # Spark Generic File Reader Options vvv
         # ignore_corrupt_files: bool = ...,
         # ignore_missing_files: bool = ...,
         # Spark Generic File Reader Options ^^^
-        # ^^^ Docs <> Source Code mismatch
-        # vvv Docs <> Source Code mismatch
+        # ^^^ pyspark Docs <> Source Code mismatch
+        # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-csv.html
         # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604
         # CSV Specific Options vvv
@@ -244,7 +244,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # timestamp_ntz_format: Optional[str] = None,
         # enable_date_time_parsing_fallback: Optional[bool] = None,
         # CSV Specific Options ^^^
-        # ^^^ Docs <> Source Code mismatch
+        # ^^^ pyspark Docs <> Source Code mismatch
     ) -> DirectoryCSVAsset: ...
     def add_parquet_asset(
         self,
@@ -271,14 +271,14 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
             Literal["EXCEPTION", "CORRECTED", "LEGACY"]
         ] = None,
         # Parquet Specific Options ^^^
-        # vvv Docs <> Source Code mismatch
+        # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
         # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L473
         # Spark Generic File Reader Options vvv
         # ignore_corrupt_files: bool = ...,
         # ignore_missing_files: bool = ...,
         # Spark Generic File Reader Options ^^^
-        # ^^^ Docs <> Source Code mismatch
+        # ^^^ pyspark Docs <> Source Code mismatch
     ) -> ParquetAsset: ...
     def add_orc_asset(
         self,
@@ -297,14 +297,14 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # ORC Specific Options vvv
         merge_schema: Optional[Union[bool, str]] = None,
         # ORC Specific Options ^^^
-        # vvv Docs <> Source Code mismatch
+        # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
         # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L473
         # Spark Generic File Reader Options vvv
         # ignore_corrupt_files: bool = ...,
         # ignore_missing_files: bool = ...,
         # Spark Generic File Reader Options ^^^
-        # ^^^ Docs <> Source Code mismatch
+        # ^^^ pyspark Docs <> Source Code mismatch
     ) -> ORCAsset: ...
     def add_json_asset(
         self,
@@ -365,15 +365,15 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         modified_after: Optional[Union[bool, str]] = None,
         # allowNonNumericNumbers: Optional[Union[bool, str]] = None,
         allow_non_numeric_numbers: Optional[Union[bool, str]] = None,
-        # vvv Docs <> Source Code mismatch
+        # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
         # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309
         # Spark Generic File Reader Options vvv
         # ignore_corrupt_files: bool = ...,
         # ignore_missing_files: bool = ...,
         # Spark Generic File Reader Options ^^^
-        # ^^^ Docs <> Source Code mismatch
-        # vvv Docs <> Source Code mismatch
+        # ^^^ pyspark Docs <> Source Code mismatch
+        # vvv pyspark Docs <> Source Code mismatch
         # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-json.html
         # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309
         # JSON Specific Options vvv
@@ -381,7 +381,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # timestamp_ntz_format: str = "yyyy-MM-dd'T'HH:mm:ss[.SSS]",
         # enable_date_time_parsing_fallback: bool = ...,
         # JSON Specific Options ^^^
-        # ^^^ Docs <> Source Code mismatch
+        # ^^^ pyspark Docs <> Source Code mismatch
     ) -> JSONAsset: ...
     def add_text_asset(
         self,
@@ -392,17 +392,25 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         glob_directive: str = "**/*",
         order_by: Optional[SortersDefinition] = ...,
         # Spark Generic File Reader Options vvv
-        ignore_corrupt_files: bool = ...,
-        ignore_missing_files: bool = ...,
-        path_glob_filter: str = ...,
-        recursive_file_lookup: bool = False,
-        modified_before: str = "",
-        modified_after: str = "",
+        path_glob_filter: Optional[Union[bool, str]] = None,
+        modified_before: Optional[Union[bool, str]] = None,
+        modified_after: Optional[Union[bool, str]] = None,
+        recursive_file_lookup: Optional[Union[bool, str]] = None,
         # Spark Generic File Reader Options ^^^
         # Text Specific Options vvv
-        wholetext: bool = ...,
-        line_sep: str = ...,
+        # wholetext: bool = False,
+        wholetext: bool = False,
+        # lineSep: Optional[str] = None,
+        line_sep: Optional[str] = None,
         # Text Specific Options ^^^
+        # vvv pyspark Docs <> Source Code mismatch
+        # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
+        # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L309
+        # Spark Generic File Reader Options vvv
+        # ignore_corrupt_files: bool = ...,
+        # ignore_missing_files: bool = ...,
+        # Spark Generic File Reader Options ^^^
+        # ^^^ pyspark Docs <> Source Code mismatch
     ) -> TextAsset: ...
     def add_avro_asset(
         self,
