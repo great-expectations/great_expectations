@@ -1691,12 +1691,13 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         datasource = self.get_datasource(datasource_name=datasource_name)
 
-        if save_changes and not isinstance(datasource, FluentDatasource):
+        if isinstance(datasource, FluentDatasource):
+            self._delete_fluent_datasource(datasource_name)
+        elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
-        self.fluent_config.pop(datasource_name, None)
 
     @overload
     def add_checkpoint(
