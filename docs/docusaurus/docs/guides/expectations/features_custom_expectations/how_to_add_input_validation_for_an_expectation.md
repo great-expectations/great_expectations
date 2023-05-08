@@ -5,6 +5,8 @@ title: How to add input validation and type checking for a Custom Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+## Prerequisites
+
 <Prerequisites>
 
  - [Created a Custom Expectation](../creating_custom_expectations/overview.md)

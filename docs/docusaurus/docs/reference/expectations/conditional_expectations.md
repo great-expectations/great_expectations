@@ -2,6 +2,10 @@
 title: Conditional Expectations
 ---
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+
 
 Sometimes one may hold an Expectation not for a dataset in its entirety but only for a particular subset. Alternatively,
 what one expects of some variable may depend on the value of another. One may, for example, expect a column that holds

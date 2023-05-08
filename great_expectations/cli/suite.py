@@ -13,6 +13,8 @@ from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
     SUITE_EDIT_FLUENT_DATASOURCE_ERROR,
     SUITE_EDIT_FLUENT_DATASOURCE_WARNING,
+    SUITE_NEW_FLUENT_DATASOURCE_ERROR,
+    SUITE_NEW_FLUENT_DATASOURCE_WARNING,
 )
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
@@ -141,6 +143,16 @@ def suite_new(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    # only fluent datasources
+    if len(context.datasources) > 0 and len(context.datasources) == len(
+        context.fluent_datasources
+    ):
+        cli_message(f"<red>{SUITE_NEW_FLUENT_DATASOURCE_ERROR}</red>")
+        sys.exit(1)
+    # some fluent datasources
+    if 0 < len(context.fluent_datasources) < len(context.datasources):
+        cli_message(f"<yellow>{SUITE_NEW_FLUENT_DATASOURCE_WARNING}</yellow>")
 
     # Only set to true if `--profile` or `--profile <PROFILER_NAME>`
     profile: bool = _determine_profile(profiler_name)

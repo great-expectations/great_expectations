@@ -21,9 +21,11 @@ from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
+)
+from great_expectations.datasource.fluent.interfaces import (
     Sorter,
     TestConnectionError,
 )

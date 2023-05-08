@@ -10,11 +10,15 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 <UniversalMap setup='inactive' connect='inactive' create='active' validate='inactive'/>
 
-:::note Prerequisites
-- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
-:::
+## Prerequisites
+
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 
 ## The Create Expectations process
+
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 Although creating <TechnicalTag tag="expectation" text="Expectations" /> is an integral part of Great Expectations, there are a few workflows you can potentially follow to do so.  These workflows represent various ways of creating Expectations, although they converge in the end when you will save and test those Expectations.
 

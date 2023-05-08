@@ -202,10 +202,8 @@ class SparkDFExecutionEngine(ExecutionEngine):
             force_reuse_spark_context=force_reuse_spark_context,
         )
 
-        spark_config = dict(spark_config)
         spark_config.update({k: v for (k, v) in spark.sparkContext.getConf().getAll()})
 
-        self._spark_config = spark_config
         self.spark = spark
 
         azure_options: dict = kwargs.pop("azure_options", {})
@@ -243,6 +241,9 @@ class SparkDFExecutionEngine(ExecutionEngine):
             raise GreatExpectationsError(
                 "SparkDFExecutionEngine requires batch data that is either a DataFrame or a SparkDFBatchData object"
             )
+
+        if self._persist:
+            batch_data.dataframe.persist()
 
         super().load_batch_data(batch_id=batch_id, batch_data=batch_data)
 

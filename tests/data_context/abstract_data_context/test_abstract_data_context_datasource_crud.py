@@ -2,6 +2,7 @@ from typing import Optional, Union
 from unittest import mock
 
 import pytest
+from typing_extensions import Final
 
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.data_context import AbstractDataContext
@@ -33,9 +34,12 @@ class StubConfigurationProvider(_ConfigurationProvider):
         return self._config_values
 
 
+_STUB_CONFIG_PROVIDER: Final = StubConfigurationProvider()
+
+
 class FakeAbstractDataContext(AbstractDataContext):
     def __init__(
-        self, config_provider: StubConfigurationProvider = StubConfigurationProvider()
+        self, config_provider: StubConfigurationProvider = _STUB_CONFIG_PROVIDER
     ) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()

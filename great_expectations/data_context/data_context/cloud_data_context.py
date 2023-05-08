@@ -26,6 +26,7 @@ from great_expectations.core.config_provider import (
     _ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
+from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudEnvironmentVariable,
@@ -62,6 +63,20 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
+
+
+def _extract_fluent_datasources(config_dict: dict) -> dict:
+    """
+    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
+    We need to extract the fluent datasources otherwise the data context will attempt eager config
+    substitutions and other inappropriate operations.
+    """
+    datasources = config_dict.get("datasources", {})
+    fds_names: list[str] = []
+    for ds_name, ds in datasources.items():
+        if "type" in ds:
+            fds_names.append(ds_name)
+    return {name: datasources.pop(name) for name in fds_names}
 
 
 @public_api
@@ -104,6 +119,7 @@ class CloudDataContext(SerializableDataContext):
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
 
+        self._check_if_latest_version()
         self._cloud_config = self.get_cloud_config(
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
@@ -118,6 +134,10 @@ class CloudDataContext(SerializableDataContext):
             context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
         )
+
+    def _check_if_latest_version(self) -> None:
+        checker = _VersionChecker(__version__)
+        checker.check_if_using_latest_gx()
 
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
@@ -249,6 +269,7 @@ class CloudDataContext(SerializableDataContext):
                 f"Bad request made to GX Cloud; {response.text}"
             )
         config = response.json()
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 
     @classmethod
