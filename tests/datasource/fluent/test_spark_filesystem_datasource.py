@@ -280,11 +280,45 @@ add_json_asset = [
     ),
 ]
 
+add_text_asset = [
+    pytest.param(
+        "add_text_asset",
+        {},
+        id="text_min_params",
+    ),
+    pytest.param(
+        "add_text_asset",
+        {
+            "wholetext": True,
+            "line_sep": "line_sep",
+            "path_glob_filter": "path_glob_filter",
+            "recursive_file_lookup": "recursive_file_lookup",
+            "modified_before": "modified_before",
+            "modified_after": "modified_after",
+        },
+        id="text_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_text_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="text_fail_extra_params",
+    ),
+]
+
 add_asset_test_params = []
 add_asset_test_params += add_csv_asset
 add_asset_test_params += add_parquet_asset
 add_asset_test_params += add_orc_asset
+# TODO: Enable:
 # add_asset_test_params += add_json_asset
+add_asset_test_params += add_text_asset
 
 
 @pytest.mark.unit
