@@ -45,7 +45,7 @@ The following YAML (inline as a Python string) defines a `SimpleCheckpoint` as a
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py create_checkpoint"
 ```
 
-### 4. Testing your Checkpoint Configuration
+### 4. Test your Checkpoint Configuration
 When you have your YAML configuration, run the following command to test it and ensure it's correct:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py test_checkpoint"
