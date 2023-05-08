@@ -230,11 +230,61 @@ add_orc_asset = [
     ),
 ]
 
+add_json_asset = [
+    pytest.param(
+        "add_json_asset",
+        {},
+        id="json_min_params",
+    ),
+    pytest.param(
+        "add_json_asset",
+        {
+            "spark_schema": "spark_schema",
+            "primitives_as_string": "primitives_as_string",
+            "prefers_decimal": "prefers_decimal",
+            "allow_comments": "allow_comments",
+            "allow_unquoted_field_names": "allow_unquoted_field_names",
+            "allow_single_quotes": "allow_single_quotes",
+            "allow_numeric_leading_zero": "allow_numeric_leading_zero",
+            "allow_backslash_escaping_any_character": "allow_backslash_escaping_any_character",
+            "mode": "mode",
+            "column_name_of_corrupt_record": "column_name_of_corrupt_record",
+            "date_format": "date_format",
+            "timestamp_format": "timestamp_format",
+            "multi_line": "multi_line",
+            "allow_unquoted_control_chars": "allow_unquoted_control_chars",
+            "line_sep": "line_sep",
+            "sampling_ratio": "sampling_ratio",
+            "drop_field_if_all_null": "drop_field_if_all_null",
+            "encoding": "encoding",
+            "locale": "locale",
+            "path_glob_filter": "path_glob_filter",
+            "recursive_file_lookup": "recursive_file_lookup",
+            "modified_before": "modified_before",
+            "modified_after": "modified_after",
+            "allow_non_numeric_numbers": "allow_non_numeric_numbers",
+        },
+        id="json_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_json_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="json_fail_extra_params",
+    ),
+]
 
 add_asset_test_params = []
 add_asset_test_params += add_csv_asset
 add_asset_test_params += add_parquet_asset
 add_asset_test_params += add_orc_asset
+# add_asset_test_params += add_json_asset
 
 
 @pytest.mark.unit

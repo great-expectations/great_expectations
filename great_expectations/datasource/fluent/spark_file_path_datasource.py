@@ -32,9 +32,12 @@ logger = logging.getLogger(__name__)
 
 
 class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
-    # TODO: ignoreCorruptFiles and ignoreMissingFiles appear in the docs https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html but not in the reader method signatures (e.g. https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)
+    # vvv Docs <> Source Code mismatch
+    # ignoreCorruptFiles and ignoreMissingFiles appear in the docs https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
+    # but not in any reader method signatures (e.g. https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604)
     # ignore_corrupt_files: bool = Field(alias="ignoreCorruptFiles")
     # ignore_missing_files: bool = Field(alias="ignoreMissingFiles")
+    # ^^^ Docs <> Source Code mismatch
 
     path_glob_filter: Optional[Union[bool, str]] = Field(None, alias="pathGlobFilter")
     recursive_file_lookup: Optional[Union[bool, str]] = Field(
@@ -448,6 +451,10 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
                 }
             )
         )
+
+
+# Update since schema param is shadowed:
+# JSONAsset.update_forward_refs()
 
 
 class TextAsset(_SparkGenericFilePathAssetMixin):
