@@ -9,7 +9,7 @@ from great_expectations.agent.message_service.subscriber import SubscriberError
 
 
 @pytest.fixture
-def cloud_agent_config(monkeypatch):
+def gx_agent_config(monkeypatch):
     config = GXAgentConfig(
         organization_id="92b8af7b-f89a-426a-8d79-1d451aea413b",
         broker_url="test-broker-url",
@@ -42,18 +42,18 @@ def subscriber():
         yield subscriber
 
 
-def test_cloud_agent_gets_env_vars_on_init(get_context, cloud_agent_config):
+def test_gx_agent_gets_env_vars_on_init(get_context, gx_agent_config):
     agent = GXAgent()
-    assert agent._config == cloud_agent_config
+    assert agent._config == gx_agent_config
 
 
-def test_cloud_agent_initializes_cloud_context(get_context, cloud_agent_config):
+def test_gx_agent_initializes_cloud_context(get_context, gx_agent_config):
     GXAgent()
     get_context.assert_called_with(cloud_mode=True)
 
 
-def test_cloud_agent_run_starts_subscriber(
-    get_context, subscriber, client, cloud_agent_config
+def test_gx_agent_run_starts_subscriber(
+    get_context, subscriber, client, gx_agent_config
 ):
     """Expect GXAgent.run to invoke the Subscriber class with the correct arguments."""
     agent = GXAgent()
@@ -62,20 +62,20 @@ def test_cloud_agent_run_starts_subscriber(
     subscriber.assert_called_with(client=client())
 
 
-def test_cloud_agent_run_invokes_consume(
-    get_context, subscriber, client, cloud_agent_config
+def test_gx_agent_run_invokes_consume(
+    get_context, subscriber, client, gx_agent_config
 ):
     """Expect GXAgent.run to invoke subscriber.consume with the correct arguments."""
     agent = GXAgent()
     agent.run()
 
     subscriber().consume.assert_called_with(
-        queue=cloud_agent_config.organization_id, on_message=agent._handle_event
+        queue=gx_agent_config.organization_id, on_message=agent._handle_event
     )
 
 
-def test_cloud_agent_run_closes_subscriber(
-    get_context, subscriber, client, cloud_agent_config
+def test_gx_agent_run_closes_subscriber(
+    get_context, subscriber, client, gx_agent_config
 ):
     """Expect GXAgent.run to invoke subscriber.close."""
     agent = GXAgent()
@@ -85,7 +85,7 @@ def test_cloud_agent_run_closes_subscriber(
 
 
 def test_gx_agent_run_handles_client_error_on_init(
-    get_context, subscriber, client, cloud_agent_config
+    get_context, subscriber, client, gx_agent_config
 ):
     client.side_effect = ClientError
     agent = GXAgent()
@@ -93,7 +93,7 @@ def test_gx_agent_run_handles_client_error_on_init(
 
 
 def test_gx_agent_run_handles_subscriber_error_on_init(
-    get_context, subscriber, client, cloud_agent_config
+    get_context, subscriber, client, gx_agent_config
 ):
     subscriber.side_effect = SubscriberError
     agent = GXAgent()
@@ -101,7 +101,7 @@ def test_gx_agent_run_handles_subscriber_error_on_init(
 
 
 def test_gx_agent_run_handles_subscriber_error_on_consume(
-    get_context, subscriber, client, cloud_agent_config
+    get_context, subscriber, client, gx_agent_config
 ):
     subscriber.consume.side_effect = SubscriberError
     agent = GXAgent()
@@ -109,7 +109,7 @@ def test_gx_agent_run_handles_subscriber_error_on_consume(
 
 
 def test_gx_agent_run_handles_subscriber_error_on_close(
-    get_context, subscriber, client, cloud_agent_config
+    get_context, subscriber, client, gx_agent_config
 ):
     subscriber.close.side_effect = SubscriberError
     agent = GXAgent()
