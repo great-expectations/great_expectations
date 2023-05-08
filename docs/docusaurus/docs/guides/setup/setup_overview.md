@@ -21,7 +21,7 @@ If you're not interested in managing your own configuration or infrastructure, t
 
 ## Prerequisites
 
-- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md).
 
 
 ## The Setup process

@@ -16,10 +16,10 @@ This guide will demonstrate how to Validate data using a Checkpoint that is conf
 
 <Prerequisites>
 
-- Have a Data Context
-- Have an Expectation Suite
-- Have a Datasource
-- Have a basic understanding of Checkpoints
+- A Data Context
+- An Expectation Suite
+- A Datasource
+- A basic understanding of Checkpoints
 
 </Prerequisites>
 

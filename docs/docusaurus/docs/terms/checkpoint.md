@@ -8,14 +8,6 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 import TechnicalTag from '../term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs'; import TabItem from '@theme/TabItem';
 
-import InProgress from '/docs/components/warnings/_in_progress.md'
-
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
-
-<InProgress />
-
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
 ## Overview
@@ -72,10 +64,9 @@ The classes that implement Checkpoints are in the `great_expectations.checkpoint
 
 ### Creating a Checkpoint
 
-The simplest way to create a Checkpoint is from the CLI.  The following command will, when **run in the terminal from the root folder of your Data Context**, present you with a Jupyter Notebook which will guide you through the steps of creating a Checkpoint:
+In its most basic form, a Checkpoint accepts an `expectation_suite_name` identfying the test suite to run, and a `batch_request` identifying the data to test. Checkpoint can be directly directly in Python as follows:
 
-```markdown Title: "Terminal command"
-great_expectations checkpoint new my_checkpoint
+```python name="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py create checkpoint batch_request"
 ```
 
 For an in-depth guide on Checkpoint creation, see our [guide on how to create a new Checkpoint](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md).
@@ -180,9 +171,6 @@ This configuration specifies four top-level keys ("expectation_suite_name", "act
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets"
 ```
 
-```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results just the text"
-```
-
 </TabItem>
 <TabItem value="tab2">
 This configuration omits the "validations" key from the YAML, which means a "validations " list must be provided when the Checkpoint is run. Because "action_list", "evaluation_parameters", and "runtime_configuration" appear as top-level keys in the YAML configuration, these keys may be omitted from the validation dictionaries, unless a non-default value is desired. When run, this Checkpoint will perform two validations of two different batches of data, with each batch of data validated against a different Expectation Suite ("my_expectation_suite" and "my_other_expectation_suite", respectively). Each Validation will trigger the same set of actions and use the same <TechnicalTag relative="../" tag="evaluation_parameter" text="Evaluation Parameters" /> and runtime configuration.
@@ -202,9 +190,6 @@ This configuration omits the "validations" key from the YAML, which means a "val
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_2"
 ```
 
-```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_2 just the text"
-```
-
 </TabItem>
 <TabItem value="tab3">
 This configuration references the Checkpoint detailed in the previous example ("Keys passed at runtime"), allowing the runtime call to be much slimmer.
@@ -222,9 +207,6 @@ This configuration references the Checkpoint detailed in the previous example ("
 **Results**:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py validation_results_suites_data_assets_3"
-```
-
-```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py documentation_results_3 just the text"
 ```
 
 </TabItem>
@@ -249,9 +231,6 @@ This configuration specifies the SimpleCheckpoint class under the "class_name" k
 **Results**:
 
 ```python name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py assert_suite_2"
-```
-
-```console name="tests/integration/docusaurus/reference/core_concepts/checkpoints_and_actions.py simple checkpoint doc results"
 ```
 
 </TabItem>

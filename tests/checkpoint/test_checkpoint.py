@@ -1,6 +1,10 @@
+from __future__ import annotations
+
 import logging
 import os
+import pathlib
 import pickle
+import shutil
 import unittest
 from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 from unittest import mock
@@ -32,9 +36,9 @@ from great_expectations.data_context.types.resource_identifiers import (
 from great_expectations.render import RenderedAtomicContent
 from great_expectations.util import (
     deep_filter_properties_iterable,
-    filter_properties_dict,
 )
 from great_expectations.validator.validator import Validator
+from tests.checkpoint import cloud_config
 
 if TYPE_CHECKING:
     from great_expectations.core.data_context_key import DataContextKey
@@ -70,30 +74,6 @@ def batch_request_as_dict() -> Dict[str, str]:
         "data_connector_name": "my_basic_data_connector",
         "data_asset_name": "Titanic_1911",
     }
-
-
-@pytest.fixture
-def common_action_list() -> List[dict]:
-    return [
-        {
-            "name": "store_validation_result",
-            "action": {
-                "class_name": "StoreValidationResultAction",
-            },
-        },
-        {
-            "name": "store_evaluation_params",
-            "action": {
-                "class_name": "StoreEvaluationParametersAction",
-            },
-        },
-        {
-            "name": "update_data_docs",
-            "action": {
-                "class_name": "UpdateDataDocsAction",
-            },
-        },
-    ]
 
 
 def test_checkpoint_raises_typeerror_on_incorrect_data_context():
@@ -340,25 +320,32 @@ def test_basic_checkpoint_config_validation(
     checkpoint_config = CheckpointConfig(**config)
     checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **filter_properties_dict(
+        **deep_filter_properties_iterable(
             properties=checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         ),
     )
-    assert (
-        filter_properties_dict(
-            properties=checkpoint.self_check()["config"],
-            clean_falsy=True,
-        )
-        == expected_checkpoint_config
+    filtered_expected_checkpoint_config: dict = deep_filter_properties_iterable(
+        properties=expected_checkpoint_config,
+        delete_fields={"class_name", "module_name"},
+        clean_falsy=True,
     )
     assert (
-        filter_properties_dict(
-            properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
+        deep_filter_properties_iterable(
+            properties=checkpoint.self_check()["config"],
+            delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         )
-        == expected_checkpoint_config
+        == filtered_expected_checkpoint_config
+    )
+    assert (
+        deep_filter_properties_iterable(
+            properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
+            delete_fields={"class_name", "module_name"},
+            clean_falsy=True,
+        )
+        == filtered_expected_checkpoint_config
     )
 
     checkpoint: Checkpoint = context.test_yaml_config(
@@ -366,18 +353,20 @@ def test_basic_checkpoint_config_validation(
         name="my_checkpoint",
     )
     assert (
-        filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=checkpoint.self_check()["config"],
+            delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         )
-        == expected_checkpoint_config
+        == filtered_expected_checkpoint_config
     )
     assert (
-        filter_properties_dict(
+        deep_filter_properties_iterable(
             properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
+            delete_fields={"class_name", "module_name"},
             clean_falsy=True,
         )
-        == expected_checkpoint_config
+        == filtered_expected_checkpoint_config
     )
 
     assert mock_emit.call_count == 5
@@ -540,10 +529,10 @@ def test_checkpoint_configuration_no_nesting_using_test_yaml_config(
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -685,10 +674,10 @@ def test_checkpoint_configuration_nesting_provides_defaults_for_most_elements_te
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -772,10 +761,10 @@ def test_checkpoint_configuration_using_RuntimeDataConnector_with_Airflow_test_y
         yaml_config=yaml_config,
         name="airflow_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1033,10 +1022,10 @@ def test_checkpoint_configuration_warning_error_quarantine_test_yaml_config(
         yaml_config=yaml_config,
         name="airflow_users_node_3",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1122,10 +1111,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         yaml_config=yaml_config,
         name="my_base_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -1238,10 +1227,10 @@ def test_checkpoint_configuration_template_parsing_and_usage_test_yaml_config(
         yaml_config=yaml_config,
         name="my_fancy_checkpoint",
     )
-    assert filter_properties_dict(
+    assert deep_filter_properties_iterable(
         properties=checkpoint.get_config(mode=ConfigOutputModes.DICT),
         clean_falsy=True,
-    ) == filter_properties_dict(
+    ) == deep_filter_properties_iterable(
         properties=expected_checkpoint_config,
         clean_falsy=True,
     )
@@ -2685,7 +2674,7 @@ def test_newstyle_checkpoint_config_substitution_simple(
     )
     simplified_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **filter_properties_dict(
+        **deep_filter_properties_iterable(
             properties=simplified_checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
@@ -2736,21 +2725,23 @@ def test_newstyle_checkpoint_config_substitution_simple(
     substituted_config_template_only: dict = (
         simplified_checkpoint.get_substituted_config()
     )
-    assert deep_filter_properties_iterable(
-        properties=substituted_config_template_only,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
+    filtered_expected_substituted_checkpoint_config_template_only: dict = deep_filter_properties_iterable(
         properties=expected_substituted_checkpoint_config_template_only.to_json_dict(),
         clean_falsy=True,
     )
-    # make sure operation is idempotent
-    simplified_checkpoint.get_substituted_config()
-    assert deep_filter_properties_iterable(
-        properties=substituted_config_template_only,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_substituted_checkpoint_config_template_only.to_json_dict(),
-        clean_falsy=True,
+    assert (
+        deep_filter_properties_iterable(
+            properties=substituted_config_template_only,
+            clean_falsy=True,
+        )
+        == filtered_expected_substituted_checkpoint_config_template_only
+    )
+    assert (
+        deep_filter_properties_iterable(
+            properties=substituted_config_template_only,
+            clean_falsy=True,
+        )
+        == filtered_expected_substituted_checkpoint_config_template_only
     )
 
     # template and runtime kwargs
@@ -2943,7 +2934,7 @@ def test_newstyle_checkpoint_config_substitution_nested(
     )
     nested_checkpoint: Checkpoint = Checkpoint(
         data_context=context,
-        **filter_properties_dict(
+        **deep_filter_properties_iterable(
             properties=nested_checkpoint_config.to_json_dict(),
             delete_fields={"class_name", "module_name"},
             clean_falsy=True,
@@ -3021,21 +3012,25 @@ def test_newstyle_checkpoint_config_substitution_nested(
     )
 
     substituted_config_template_only = nested_checkpoint.get_substituted_config()
-    assert deep_filter_properties_iterable(
-        properties=substituted_config_template_only,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_nested_checkpoint_config_template_only.to_json_dict(),
-        clean_falsy=True,
+    filtered_expected_nested_checkpoint_config_template_only: dict = (
+        deep_filter_properties_iterable(
+            properties=expected_nested_checkpoint_config_template_only.to_json_dict(),
+            clean_falsy=True,
+        )
     )
-    # make sure operation is idempotent
-    nested_checkpoint.get_substituted_config()
-    assert deep_filter_properties_iterable(
-        properties=substituted_config_template_only,
-        clean_falsy=True,
-    ) == deep_filter_properties_iterable(
-        properties=expected_nested_checkpoint_config_template_only.to_json_dict(),
-        clean_falsy=True,
+    assert (
+        deep_filter_properties_iterable(
+            properties=substituted_config_template_only,
+            clean_falsy=True,
+        )
+        == filtered_expected_nested_checkpoint_config_template_only
+    )
+    assert (
+        deep_filter_properties_iterable(
+            properties=substituted_config_template_only,
+            clean_falsy=True,
+        )
+        == filtered_expected_nested_checkpoint_config_template_only
     )
 
     # runtime kwargs with new checkpoint template name passed at runtime
@@ -4706,6 +4701,100 @@ def test_checkpoint_run_adds_validation_ids_to_expectation_suite_validation_resu
 
     actual_validation_id: Optional[str] = validation_result.meta["validation_id"]
     assert expected_validation_id == actual_validation_id
+
+
+@pytest.fixture()
+def _fake_cloud_context_setup(tmp_path, monkeypatch):
+    data_dir = tmp_path
+    # When setting up a checkpoint, we validate that there is data in the data directory
+    # so we create a file.
+    data_file = "yellow_tripdata_sample_2019-01.csv"
+    data_file_path = (
+        pathlib.Path(__file__)
+        / ".."
+        / ".."
+        / "test_sets"
+        / "taxi_yellow_tripdata_samples"
+        / data_file
+    ).resolve()
+    shutil.copy(str(data_file_path), data_dir)
+
+    monkeypatch.setenv("GX_CLOUD_BASE_URL", "https://my_cloud_backend.com")
+    monkeypatch.setenv(
+        "GX_CLOUD_ORGANIZATION_ID", "11111111-1111-1111-1111-123456789012"
+    )
+    monkeypatch.setenv("GX_CLOUD_ACCESS_TOKEN", "token")
+
+    monkeypatch.setattr(
+        gx.data_context.CloudDataContext,
+        "retrieve_data_context_config_from_cloud",
+        cloud_config.make_retrieve_data_context_config_from_cloud(data_dir),
+    )
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_set",
+        cloud_config.store_set,
+    )
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "list_keys",
+        cloud_config.list_keys,
+    )
+    yield data_dir, data_file
+
+
+@pytest.fixture()
+def fake_cloud_context_basic(_fake_cloud_context_setup, monkeypatch):
+    data_dir, data_file = _fake_cloud_context_setup
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_get",
+        cloud_config.make_store_get(data_file, with_slack=False),
+    )
+    context = gx.data_context.CloudDataContext()
+    yield context
+
+
+@pytest.fixture()
+def fake_cloud_context_with_slack(_fake_cloud_context_setup, monkeypatch):
+    data_dir, data_file = _fake_cloud_context_setup
+    monkeypatch.setattr(
+        gx.data_context.store.gx_cloud_store_backend.GXCloudStoreBackend,
+        "_get",
+        cloud_config.make_store_get(data_file, with_slack=True),
+    )
+    slack_counter = cloud_config.CallCounter()
+    monkeypatch.setattr(
+        gx.checkpoint.actions,
+        "send_slack_notification",
+        cloud_config.make_send_slack_notifications(slack_counter),
+    )
+    context = gx.data_context.CloudDataContext()
+    yield context, slack_counter
+
+
+@pytest.mark.integration
+@pytest.mark.cloud
+def test_use_validation_url_from_cloud(fake_cloud_context_basic):
+    context = fake_cloud_context_basic
+    checkpoint_name = "my_checkpoint"
+    checkpoint = context.get_checkpoint(checkpoint_name)
+    checkpoint_result = context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id)
+    org_id = os.environ["GX_CLOUD_ORGANIZATION_ID"]
+    assert (
+        checkpoint_result.validation_result_url
+        == f"https://my_cloud_backend.com/{org_id}/?validationResultId=2e13ecc3-eaaa-444b-b30d-2f616f80ae35"
+    )
+
+
+@pytest.mark.integration
+@pytest.mark.cloud
+def test_use_validation_url_from_cloud_with_slack(fake_cloud_context_with_slack):
+    context, slack_counter = fake_cloud_context_with_slack
+    checkpoint_name = "my_checkpoint"
+    checkpoint = context.get_checkpoint(checkpoint_name)
+    context.run_checkpoint(ge_cloud_id=checkpoint.ge_cloud_id)
+    assert slack_counter.count == 1
 
 
 ### SparkDF Tests

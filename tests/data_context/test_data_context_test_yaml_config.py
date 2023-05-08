@@ -81,7 +81,7 @@ SELECT EXISTS (
     "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
 )
 def test_config_with_yaml_error(mock_emit, caplog, empty_data_context_stats_enabled):
-    with pytest.raises(Exception):
+    with pytest.raises(Exception):  # noqa: B017
         # noinspection PyUnusedLocal
         empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
