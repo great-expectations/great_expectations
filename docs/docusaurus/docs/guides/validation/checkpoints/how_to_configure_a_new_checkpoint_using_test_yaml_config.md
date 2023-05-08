@@ -23,7 +23,7 @@ Use the information provided here to learn how to configure a <TechnicalTag tag=
 `test_yaml_config` supports iteratively testing configuration to help zeroing in on the Checkpoint configuration you want. As an iterative workflow, it is particularly well suited to notebooks.
 
 ### 1. Setup
-This code in your first cell will load the necessary modules and initialize your <TechnicalTag tag="data_context" text="Data Context"/>:
+Run the following command in the first cell to load the necessary modules and initialize your <TechnicalTag tag="data_context" text="Data Context"/>:
 
 ```python name="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py setup"
 ```
