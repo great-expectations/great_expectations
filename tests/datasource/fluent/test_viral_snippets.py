@@ -332,12 +332,17 @@ def test_context_add_or_update_datasource(
     assert updated_datasource.connection_string == "sqlite:///"
 
 
+@pytest.fixture
+def random_datasource(seeded_file_context: FileDataContext) -> Datasource:
+    datasource = random.choice(list(seeded_file_context.fluent_datasources.values()))
+    logger.info(f"Random DS - {pf(datasource.dict(), depth=1)}")
+    return datasource
+
+
 def test_sources_delete_removes_datasource_from_yaml(
+    random_datasource: Datasource,
     seeded_file_context: FileDataContext,
 ):
-    random_datasource = random.choice(
-        list(seeded_file_context.fluent_datasources.values())
-    )
     print(f"Delete -> '{random_datasource.name}'\n")
 
     ds_delete_method: Callable[[str], None] = getattr(
@@ -354,10 +359,9 @@ def test_sources_delete_removes_datasource_from_yaml(
     assert random_datasource.name not in yaml_contents["fluent_datasources"]
 
 
-def test_ctx_delete_removes_datasource_from_yaml(seeded_file_context: FileDataContext):
-    random_datasource = random.choice(
-        list(seeded_file_context.fluent_datasources.values())
-    )
+def test_ctx_delete_removes_datasource_from_yaml(
+    random_datasource: Datasource, seeded_file_context: FileDataContext
+):
     print(f"Delete -> '{random_datasource.name}'\n")
 
     seeded_file_context.delete_datasource(random_datasource.name)
