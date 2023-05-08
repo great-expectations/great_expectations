@@ -87,5 +87,5 @@ class _VersionChecker:
         logger.warning(
             f"You are using great_expectations version {self._user_version}; "
             f"however, version {pypi_version} is available.\nYou should consider "
-            "upgrading via `pip install great_expectations --upgrade`\n."
+            "upgrading via `pip install great_expectations --upgrade`.\n"
         )
