@@ -16,24 +16,24 @@ spark = get_or_create_spark_application()
 context = gx.get_context()
 # </snippet>
 
-filename = "yellow_tripdata_sample_2019-01.csv"
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource">
+dataframe_datasource = context.sources.add_or_update_spark(
+    name="my_spark_in_memory_datasource",
+)
+csv_file_path = "/path/to/data/directory/yellow_tripdata_2020-08.csv"
+# </snippet>
+
+filename = "yellow_tripdata_sample_2020-08.csv"
 data_dir = os.path.join(os.path.dirname(os.getcwd()), "data")
-pandas_df = pd.read_csv(os.path.join(data_dir, filename))
+csv_file_path = os.path.join("dbfs:", data_dir, filename)
+pandas_df = pd.read_csv(csv_file_path)
 df = spark.createDataFrame(data=pandas_df)
 
 assert len(pandas_df) == df.count() == 10000
 assert len(pandas_df.columns) == len(df.columns) == 18
 
-# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource">
-dataframe_datasource = context.sources.add_or_update_spark(
-    name="my_spark_in_memory_datasource",
-)
-# </snippet>
-
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add data asset">
-df = spark.read.csv(
-    "/FileStore/yellow_tripdata/yellow_tripdata_2020_08.csv", header=True
-)
+df = spark.read.csv(csv_file_path, header=True)
 dataframe_asset = dataframe_datasource.add_dataframe_asset(
     name="yellow_tripdata",
     dataframe=df,
