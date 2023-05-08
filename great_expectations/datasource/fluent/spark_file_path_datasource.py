@@ -253,6 +253,7 @@ class CSVAsset(_SparkGenericFilePathAsset):
             )
         )
 
+
 class DirectoryCSVAsset(_DirectoryDataAsset):
     # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"
