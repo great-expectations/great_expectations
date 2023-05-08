@@ -117,13 +117,6 @@ add_csv_asset = [
     pytest.param(
         "add_csv_asset",
         {
-            "path_glob_filter": "some_str",
-        },
-        id="csv",
-    ),
-    pytest.param(
-        "add_csv_asset",
-        {
             "sep": "sep",
             "encoding": "encoding",
             "quote": "quote",
@@ -174,9 +167,44 @@ add_csv_asset = [
     ),
 ]
 
+add_parquet_asset = [
+    pytest.param(
+        "add_parquet_asset",
+        {},
+        id="parquet_min_params",
+    ),
+    pytest.param(
+        "add_parquet_asset",
+        {
+            "merge_schema": "merge_schema",
+            "datetime_rebase_mode": "EXCEPTION",
+            "int_96_rebase_mode": "EXCEPTION",
+            "path_glob_filter": "path_glob_filter",
+            "recursive_file_lookup": "recursive_file_lookup",
+            "modified_before": "modified_before",
+            "modified_after": "modified_after",
+        },
+        id="parquet_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_parquet_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+            "path_glob_filter": "some_str",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="parquet_fail_extra_params",
+    ),
+]
+
 
 add_asset_test_params = []
 add_asset_test_params += add_csv_asset
+add_asset_test_params += add_parquet_asset
 
 
 @pytest.mark.unit
