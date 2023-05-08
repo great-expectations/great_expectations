@@ -156,7 +156,6 @@ add_csv_asset = [
         "add_csv_asset",
         {
             "this_param_does_not_exist": "param_does_not_exist",
-            "path_glob_filter": "some_str",
         },
         marks=pytest.mark.xfail(
             reason="param_does_not_exist",
@@ -190,7 +189,6 @@ add_parquet_asset = [
         "add_parquet_asset",
         {
             "this_param_does_not_exist": "param_does_not_exist",
-            "path_glob_filter": "some_str",
         },
         marks=pytest.mark.xfail(
             reason="param_does_not_exist",
@@ -201,10 +199,42 @@ add_parquet_asset = [
     ),
 ]
 
+add_orc_asset = [
+    pytest.param(
+        "add_orc_asset",
+        {},
+        id="orc_min_params",
+    ),
+    pytest.param(
+        "add_orc_asset",
+        {
+            "merge_schema": "merge_schema",
+            "path_glob_filter": "path_glob_filter",
+            "recursive_file_lookup": "recursive_file_lookup",
+            "modified_before": "modified_before",
+            "modified_after": "modified_after",
+        },
+        id="orc_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_orc_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="orc_fail_extra_params",
+    ),
+]
+
 
 add_asset_test_params = []
 add_asset_test_params += add_csv_asset
 add_asset_test_params += add_parquet_asset
+add_asset_test_params += add_orc_asset
 
 
 @pytest.mark.unit

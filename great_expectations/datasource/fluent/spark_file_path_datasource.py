@@ -289,7 +289,7 @@ class ORCAsset(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
     type: Literal["orc"] = "orc"
-    merge_schema: Union[bool, None] = Field(False, alias="mergeSchema")
+    merge_schema: Optional[Union[bool, str]] = Field(False, alias="mergeSchema")
 
     class Config:
         extra = pydantic.Extra.forbid
