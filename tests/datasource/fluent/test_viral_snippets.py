@@ -8,7 +8,7 @@ import random
 import uuid
 from collections import defaultdict
 from pprint import pformat as pf
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import pytest
 import responses
@@ -332,7 +332,29 @@ def test_context_add_or_update_datasource(
     assert updated_datasource.connection_string == "sqlite:///"
 
 
-def test_delete_removes_datasource_from_yaml(seeded_file_context: FileDataContext):
+def test_sources_delete_removes_datasource_from_yaml(
+    seeded_file_context: FileDataContext,
+):
+    random_datasource = random.choice(
+        list(seeded_file_context.fluent_datasources.values())
+    )
+    print(f"Delete -> '{random_datasource.name}'\n")
+
+    ds_delete_method: Callable[[str], None] = getattr(
+        seeded_file_context.sources, f"delete_{random_datasource.type}"
+    )
+    ds_delete_method(random_datasource.name)
+
+    yaml_path = pathlib.Path(
+        seeded_file_context.root_directory, seeded_file_context.GX_YML
+    ).resolve(strict=True)
+    yaml_contents = YAML.load(yaml_path.read_text())
+    print(f"{pf(yaml_contents, depth=2)}")
+
+    assert random_datasource.name not in yaml_contents["fluent_datasources"]
+
+
+def test_ctx_delete_removes_datasource_from_yaml(seeded_file_context: FileDataContext):
     random_datasource = random.choice(
         list(seeded_file_context.fluent_datasources.values())
     )
