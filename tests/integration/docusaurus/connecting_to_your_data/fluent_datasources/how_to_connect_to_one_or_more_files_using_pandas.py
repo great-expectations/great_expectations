@@ -49,4 +49,4 @@ datasource.add_csv_asset(name=asset_name, batching_regex=filename_as_regex)
 print(datasource)
 # </snippet>
 
-assert asset_name in datasource.assets
+assert datasource.get_asset(asset_name)
