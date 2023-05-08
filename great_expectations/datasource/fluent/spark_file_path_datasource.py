@@ -175,7 +175,6 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
 
     @classmethod
     def _get_reader_method(cls) -> str:
-        # return cls.type
         return "csv"
 
     def _get_reader_options_include(self) -> set[str] | None:
@@ -273,7 +272,6 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
 
     @classmethod
     def _get_reader_method(cls) -> str:
-        # return cls.type
         return "parquet"
 
     def _get_reader_options_include(self) -> set[str] | None:
@@ -407,7 +405,6 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
 
     @classmethod
     def _get_reader_method(cls) -> str:
-        # return cls.type
         return "json"
 
     def _get_reader_options_include(self) -> set[str] | None:
@@ -470,7 +467,6 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
 
     @classmethod
     def _get_reader_method(cls) -> str:
-        # return cls.type
         return "text"
 
     def _get_reader_options_include(self) -> set[str] | None:
