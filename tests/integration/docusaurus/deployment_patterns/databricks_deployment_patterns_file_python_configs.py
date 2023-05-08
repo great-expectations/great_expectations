@@ -1,5 +1,5 @@
 # isort:skip_file
-import os
+import pathlib
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports">
 import great_expectations as gx
@@ -16,7 +16,7 @@ base_directory = "/path/to/data/directory/"
 # </snippet>
 
 # For this test script, change base_directory to location where test runner data is located
-base_directory = os.path.join("dbfs:", os.getcwd(), "data/")
+base_directory = pathlib.Path("dbfs:", "./data/")
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource">
 dbfs_datasource = context.sources.add_or_update_spark_dbfs(
