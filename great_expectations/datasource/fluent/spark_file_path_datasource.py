@@ -15,9 +15,6 @@ import pydantic
 from pydantic import Field
 from typing_extensions import Literal
 
-from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
-)
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.directory_data_asset import (
     _DirectoryDataAssetMixin,
@@ -27,8 +24,10 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
 )
 
 if TYPE_CHECKING:
+    from great_expectations.compatibility.pyspark import (
+        types as pyspark_types,
+    )
     from great_expectations.datasource.fluent.interfaces import DataAsset
-
 
 logger = logging.getLogger(__name__)
 
