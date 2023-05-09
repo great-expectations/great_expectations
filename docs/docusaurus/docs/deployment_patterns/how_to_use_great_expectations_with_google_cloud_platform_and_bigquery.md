@@ -172,7 +172,7 @@ Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Cont
 
 In the example, we have created a Datasource named `my_bigquery_datasource`, using the `add_or_update_sql` method and passing in a connection string.
 
-For more details on how to configure the BigQuery Datasource, please refer to [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery.md)
+For more details on how to configure the BigQuery Datasource, please refer to [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery)
 
 </TabItem>
 </Tabs>
