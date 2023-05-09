@@ -19,7 +19,6 @@ This guide will help you <TechnicalTag tag="validation" text="Validate" /> your 
 
 The best way to Validate data in production with Great Expectations is using a <TechnicalTag tag="checkpoint" text="Checkpoint" />. The advantage of using a Checkpoint is ease of use, due to its principal capability of combining the existing configuration in order to set up and perform the Validation:
 - <TechnicalTag tag="expectation_suite" text="Expectation Suites" />
-- <TechnicalTag tag="data_connector" text="Data Connectors" />
 - <TechnicalTag tag="batch_request" text="Batch Requests" />
 - <TechnicalTag tag="action" text="Actions" />
 

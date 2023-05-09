@@ -49,7 +49,7 @@ Any Plugin dropped into the `plugins` folder can be imported with a standard Pyt
 
 If a Plugin can't be directly used from an import, it can typically be used by editing the relevant configuration file to reference it.  This typically involves setting the `module_name` for an object to the module name of the Plugin (as you would type it in an import statement) and the `class_name` for that same object to the class name that is implemented in the Plugin file.
 
-For example, say you created a Plugin to extend the functionality of a <TechnicalTag relative="../" tag="data_connector" text="Data Connector" /> so that it works with a specific source data system that otherwise wouldn't be supported in Great Expectations.  In this example, you have created `my_custom_data_connector.py` that implements the class `MyCustomDataConnector`.  To use that Plugin in place of a standard Data Connector, you would edit the configuration for the corresponding <TechnicalTag relative="../" tag="datasource" text="Datasource" /> in your `great_expectations.yml` file to contain an entry like the following:
+For example, say you created a Plugin to extend the functionality of a Data Connector so that it works with a specific source data system that otherwise wouldn't be supported in Great Expectations.  In this example, you have created `my_custom_data_connector.py` that implements the class `MyCustomDataConnector`.  To use that Plugin in place of a standard Data Connector, you would edit the configuration for the corresponding <TechnicalTag relative="../" tag="datasource" text="Datasource" /> in your `great_expectations.yml` file to contain an entry like the following:
 
 ```yaml
 datasources:

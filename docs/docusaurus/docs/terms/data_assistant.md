@@ -73,13 +73,12 @@ Data Assistants were designed to make creating Expectations easier for users of 
 Data Assistants are multi-batch aware out of the box.  However, not every use case requires multiple Batches.  For more information on when it is best to work with either a single Batch or multiple Batches of data in a Batch Request, please see the following guide:
 - [How to choose between working with a single or multiple Batches of data](../guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md)
 
-To take advantage of the multi-batch awareness of Data Assistants, your <TechnicalTag tag="datasource" text="Datasources" /> need to be configured so that you can acquire multiple Batches in a single Batch Request.  For guidance on how to configure your Datasources to be capable of returning multiple Batches, please see the following documentation that matches the Datasource type you are working with:
-- [How to configure a Pandas Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.md)
-- [How to configure a Spark Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.md)
-- [How to configure a SQL Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+To take advantage of the multi-batch awareness of Data Assistants, your <TechnicalTag tag="datasource" text="Datasources" /> need to include Data Assets that can return multiple Batches in a single Batch Request.  For guidance on how to configure your Data Assets to be capable of returning multiple Batches, please see the following documentation that matches the source data system you are working with:
+- [How to organize Batches in a file-based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset)
+- [How to organize Batches in a SQL-based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
 
-For guidance on how to request multiple Batches in a single Batch Request, please see the guide:
-- [How to get one or more Batches of data from a configured Datasource](../guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
+For guidance on how to request Batches with a Batch Request, please see the guide:
+- [How to get request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
 
 For an overview of working with the Onboarding Data Assistant, please see the guide:
 - [How to create an Expectation Suite with the Onboarding Data Assistant](../guides/expectations/data_assistants/how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.md)
