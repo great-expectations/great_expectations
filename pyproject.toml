@@ -305,6 +305,7 @@ extend-exclude = [
 [tool.ruff.flake8-type-checking]
 # pydantic models use annotations at runtime
 runtime-evaluated-base-classes = ["pydantic.BaseModel"]
+runtime-evaluated-decorators = ["pydantic.dataclasses.dataclass"]
 
 [tool.ruff.mccabe]
 max-complexity = 15
