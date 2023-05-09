@@ -12,7 +12,7 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory">
-base_directory = "/path/to/data/directory/"
+base_directory = "/example_data/nyctaxi/tripdata/yellow/"
 # </snippet>
 
 # For this test script, change base_directory to location where test runner data is located
@@ -25,10 +25,17 @@ dbfs_datasource = context.sources.add_or_update_spark_dbfs(
 )
 # </snippet>
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose batching regex">
+batching_regex = r"yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv.gz"
+# </snippet>
+
+# For this test script, change batching_regex to location where test runner data is located
+batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
+
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add data asset">
 csv_asset = dbfs_datasource.add_csv_asset(
     name="yellow_tripdata",
-    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+    batching_regex=batching_regex,
     header=True,
 )
 # </snippet>

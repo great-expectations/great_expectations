@@ -144,10 +144,14 @@ df = spark.read.format("csv")\
   <TabItem value="file">
 
 Add the Datasource:
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory"
+```
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource"
 ```
 
 Add the Data Asset:
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose batching regex"
+```
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add data asset"
 ```
 
@@ -160,6 +164,8 @@ Then we build a `BatchRequest` using the `DataAsset` we configured earlier to us
   <TabItem value="dataframe">
 
 Add the Datasource:
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py choose base directory"
+```
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource"
 ```
 
