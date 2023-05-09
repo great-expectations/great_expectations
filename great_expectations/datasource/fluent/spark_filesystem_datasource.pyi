@@ -7,13 +7,12 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Type, Union
 
 from typing_extensions import Literal
 
+from great_expectations.compatibility.pyspark import (
+    types as pyspark_types,  # noqa: TCH001
+)
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
-)
-
-from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

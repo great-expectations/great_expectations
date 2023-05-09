@@ -15,16 +15,15 @@ import pydantic
 from pydantic import Field
 from typing_extensions import Literal
 
+from great_expectations.compatibility.pyspark import (
+    types as pyspark_types,  # noqa: TCH001
+)
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.directory_data_asset import (
     _DirectoryDataAssetMixin,
 )
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
-)
-
-from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:
@@ -175,6 +174,8 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     class Config:
         extra = pydantic.Extra.forbid
         allow_population_by_field_name = True
+        # pyspark types (from pyspark_types) are not currently validated
+        arbitrary_types_allowed = True
 
     @classmethod
     def _get_reader_method(cls) -> str:
@@ -405,6 +406,8 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     class Config:
         extra = pydantic.Extra.forbid
         allow_population_by_field_name = True
+        # pyspark types (from pyspark_types) are not currently validated
+        arbitrary_types_allowed = True
 
     @classmethod
     def _get_reader_method(cls) -> str:

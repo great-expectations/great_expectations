@@ -7,10 +7,8 @@ import re
 from dataclasses import dataclass
 from typing import List
 
-import pytest
-
-
 import pydantic
+import pytest
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
