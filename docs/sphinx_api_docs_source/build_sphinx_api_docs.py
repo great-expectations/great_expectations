@@ -234,6 +234,7 @@ class SphinxInvokeDocsBuilder:
         doc = soup.find("section")
         doc["class"] = "sphinx-api-doc"
 
+        # possible location where tags are being modified
         # Change style to styles to avoid rendering errors
         tags_with_style = doc.find_all("col", style=lambda value: value in value)
         for tag in tags_with_style:
@@ -584,6 +585,7 @@ class SphinxInvokeDocsBuilder:
 
         return doc
 
+    # this might be more of a place too
     def _clean_up_code_blocks(self, doc: str) -> str:
         """Revert escaped characters in code blocks.
 
@@ -591,10 +593,11 @@ class SphinxInvokeDocsBuilder:
         Also quotes use a different quote character. This method cleans up
         these items so that the code block is rendered appropriately.
         """
-        doc = doc.replace("&lt;", "<").replace("&gt;", ">")
-        doc = (
-            doc.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
-        )
-        doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
+        # what happens when we dont do this
+        # doc = doc.replace("&lt;", "<").replace("&gt;", ">")
+        # doc = (
+        #     doc.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
+        # )
+        # doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
         doc = doc.replace("${", r"\${")
         return doc
