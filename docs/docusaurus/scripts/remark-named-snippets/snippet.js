@@ -68,9 +68,22 @@ function parseFile (file) {
   // and add it to our result snippets.
   let snippets = []
 
+  // providing functions here. 
+  // hooks (like on click, on hover, etc)
   const parser = new htmlparser2.Parser({
+    // this is the hook that is triggered
+
+    /*
+<snippet>
+regex = “…<year>”
+</snippet>
+    */
+   // this is triggered again
+   // short-circuits exectution
     onopentag (tagname, attrs) {
+      // if snippet at the top of stack doesn't have content
       if (tagname !== 'snippet') {
+        this.ontext("\<year\>")
         return
       }
 
@@ -85,7 +98,7 @@ function parseFile (file) {
       // If we have nested snippets, all snippets on the stack need to be updated
       // to reflect any nested content
       for (let i = 0; i < stack.length; i++) {
-        stack[i].contents += text
+        stack[i].contents += text.html(text)
       }
     },
     onclosetag (tagname) {
@@ -140,10 +153,10 @@ function sanitizeText (text) {
 
   function replaceTags(text) {
     var tagsToReplace = {
-        '<': 'aaa',
-        '>': 'bbb'
+        '<': '&lt;',
+        '>': '&gt;'
     };
-    return text.replace(/[<>]/g, function(tag) {
+    return text.replace(/[&<>]/g, function(tag) {
         return tagsToReplace[tag] || tag;
     });
   }
