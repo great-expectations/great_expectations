@@ -144,7 +144,7 @@ function sanitizeText (text) {
     }
     return line
   }
-
+  // this may need some more misc clean up or too much clean up
   // Apply unindent and misc cleanup
   return text
     .split('\n')
