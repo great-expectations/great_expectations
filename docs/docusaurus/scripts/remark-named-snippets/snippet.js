@@ -69,8 +69,6 @@ function parseFile(file) {
   let snippets = []
 
   const parser = new htmlparser2.Parser({
-    // this is the hook that is triggered
-
     onopentag(tagname, attrs) {
       // if snippet at the top of stack doesn't have content
       if (tagname !== 'snippet') {
@@ -91,7 +89,7 @@ function parseFile(file) {
       // If we have nested snippets, all snippets on the stack need to be updated
       // to reflect any nested content
       for (let i = 0; i < stack.length; i++) {
-        stack[i].contents += text.html(text)
+        stack[i].contents += text
       }
     },
     onclosetag(tagname) {
@@ -144,7 +142,7 @@ function sanitizeText(text) {
     }
   }
 
-
+  // Apply unintent and misc cleanup
   function unindent(line) {
     if (line.startsWith(indent)) {
       line = line.substring(indent.length, text.length)
