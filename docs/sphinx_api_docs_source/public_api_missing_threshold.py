@@ -101,6 +101,7 @@ ITEMS_IGNORED_FROM_PUBLIC_API = [
     "File: great_expectations/validator/validation_graph.py Name: resolve",
     "File: great_expectations/datasource/new_datasource.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/datasource/fluent/config.py Name: yaml",
+    "File: great_expectations/datasource/fluent/config.py Name: pop",
     "File: great_expectations/datasource/fluent/spark_datasource.py Name: get_batch_list_from_batch_request",
     "File: great_expectations/datasource/fluent/fluent_base_model.py Name: yaml",
     "File: great_expectations/datasource/fluent/sql_datasource.py Name: get_batch_list_from_batch_request",

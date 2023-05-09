@@ -68,7 +68,7 @@ function parseFile (file) {
   // and add it to our result snippets.
   let snippets = []
 
-  // providing functions here. 
+  // providing functions here.
   // hooks (like on click, on hover, etc)
   const parser = new htmlparser2.Parser({
     // this is the hook that is triggered
@@ -83,7 +83,9 @@ regex = “…<year>”
     onopentag (tagname, attrs) {
       // if snippet at the top of stack doesn't have content
       if (tagname !== 'snippet') {
-        this.ontext("\<year\>")
+        // If we see a non-snippet tag, we want to make sure we still append the literal text to our parsed results.
+        // This is particularly relevant around regex in our docs
+        this.ontext(`<${tagname}>`)
         return
       }
 
