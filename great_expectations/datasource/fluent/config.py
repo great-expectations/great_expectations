@@ -32,7 +32,7 @@ from great_expectations.datasource.fluent.constants import (
 )
 from great_expectations.datasource.fluent.fluent_base_model import FluentBaseModel
 from great_expectations.datasource.fluent.interfaces import (
-    Datasource,  # noqa: TCH001
+    Datasource,
 )
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
