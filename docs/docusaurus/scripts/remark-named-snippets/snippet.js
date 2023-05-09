@@ -143,7 +143,7 @@ function sanitizeText (text) {
         '<': '&lt;',
         '>': '&gt;'
     };
-    return text.replace(/[&<>]/g, function(tag) {
+    return text.replace(/[<>]/g, function(tag) {
         return tagsToReplace[tag] || tag;
     });
   }
