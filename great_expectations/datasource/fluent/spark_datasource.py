@@ -30,6 +30,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    _DataAssetT,
 )
 
 if TYPE_CHECKING:
@@ -56,6 +57,12 @@ class _SparkDatasource(Datasource):
     # instance attributes
     spark_config: Union[SparkConfig, None] = None
     force_reuse_spark_context: bool = True
+
+    @staticmethod
+    def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
+        # Only update forward refs if pyspark types are available.
+        if pyspark:
+            asset_type.update_forward_refs()
 
     # Abstract Methods
     @property
