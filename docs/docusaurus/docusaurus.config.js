@@ -115,7 +115,7 @@ module.exports = {
               to: 'https://greatexpectations.io/community'
             },
             {
-              label: 'SLACK',
+              label: 'COMMUNITY FORUM',
               to: 'https://discourse.greatexpectations.io/'
             },
             {
