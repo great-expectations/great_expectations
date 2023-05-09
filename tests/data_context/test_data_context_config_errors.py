@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import pathlib
 import shutil
 from typing import Callable
@@ -20,7 +19,7 @@ def build_local_dir(tmp_path: pathlib.Path) -> Callable:
         local_dir = tmp_path / "root"
         if fixture_subdir:
             fixture_path = file_relative_path(
-                __file__, os.path.join(BASE_DIR, fixture_subdir)
+                __file__, str(pathlib.Path(BASE_DIR) / fixture_subdir)
             )
             shutil.copytree(fixture_path, local_dir)
         return local_dir
