@@ -238,64 +238,6 @@ module.exports = {
             'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset'
           ]
         },
-        {
-          type: 'category',
-          label: 'Advanced Datasource configuration',
-          items: [
-            {
-              type: 'category',
-              label: 'Filesystem block-configuration',
-              items: [
-                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
-                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'In-memory block-configuration',
-              items: [
-                'guides/connecting_to_your_data/in_memory/pandas',
-                'guides/connecting_to_your_data/in_memory/spark'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Cloud block-configuration',
-              items: [
-                'guides/connecting_to_your_data/cloud/s3/pandas',
-                'guides/connecting_to_your_data/cloud/s3/spark',
-                'guides/connecting_to_your_data/cloud/gcs/pandas',
-                'guides/connecting_to_your_data/cloud/gcs/spark',
-                'guides/connecting_to_your_data/cloud/azure/pandas',
-                'guides/connecting_to_your_data/cloud/azure/spark'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'SQL database block-configuration',
-              items: [
-                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource',
-                'guides/connecting_to_your_data/database/athena',
-                'guides/connecting_to_your_data/database/bigquery',
-                'guides/connecting_to_your_data/database/mssql',
-                'guides/connecting_to_your_data/database/mysql',
-                'guides/connecting_to_your_data/database/postgres',
-                'guides/connecting_to_your_data/database/redshift',
-                'guides/connecting_to_your_data/database/snowflake',
-                'guides/connecting_to_your_data/database/sqlite',
-                'guides/connecting_to_your_data/database/trino'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Block-configuration compatible Batch Requests',
-              items: [
-                'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource',
-                'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe'
-              ]
-            }
-          ]
-        },
         { type: 'doc', id: 'guides/connecting_to_your_data/index', label: 'Index' }
       ]
     },
@@ -445,11 +387,11 @@ module.exports = {
       label: 'Reference',
       link: { type: 'doc', id: 'reference/reference_overview' },
       items: [
-    'contributing/contributing_maturity',
-    'guides/miscellaneous/how_to_use_the_great_expectations_cli',
-    'guides/miscellaneous/how_to_use_the_project_check_config_command',
-    'reference/customize_your_deployment',
-    'reference/usage_statistics',
+        'contributing/contributing_maturity',
+        'guides/miscellaneous/how_to_use_the_great_expectations_cli',
+        'guides/miscellaneous/how_to_use_the_project_check_config_command',
+        'reference/customize_your_deployment',
+        'reference/usage_statistics',
         {
           type: 'category',
           label: 'API documentation',
@@ -476,7 +418,6 @@ module.exports = {
             'terms/data_context',
             'terms/data_asset',
             'terms/data_assistant',
-            'terms/data_connector',
             'terms/data_docs',
             'terms/evaluation_parameter',
             'terms/execution_engine',
@@ -521,6 +462,6 @@ module.exports = {
     },
     { type: 'doc', id: 'changelog' },
     { type: 'doc', id: 'guides/miscellaneous/migration_guide' },
-    'contributing/contributing',
+    'contributing/contributing'
   ]
 }
