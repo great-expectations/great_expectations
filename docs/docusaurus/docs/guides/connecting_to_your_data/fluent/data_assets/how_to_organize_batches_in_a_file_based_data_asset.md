@@ -76,14 +76,6 @@ Please reference the appropriate one of these guides:
 
 </details>
 
-:::caution Datasources defined with the block-config method
-
-If you are using a Datasource that was created with the advanced block-config method please follow the appropriate guide from:
-- [how to configure a Spark Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [how to configure a Pandas Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
-
-:::
-
 ## Steps
 
 ### 1. Import GX and instantiate a Data Context

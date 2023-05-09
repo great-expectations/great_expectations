@@ -233,13 +233,13 @@ df = spark.read.format("csv")\
   ]}>
   <TabItem value="file-yaml">
 
-Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and Data Connector by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
 <details>
   <summary>What does this configuration contain?</summary>
 Here we are setting up a Datasource using a SparkDFExecutionEngine (which loads the data into a spark dataframe to process the validations). We also configure a Data Connector using a few helpful parameters. Here is a summary of some key parameters, but you can also find more information in our "Connecting to your data" docs, especially the "Core skills" and "Filesystem" sections:
   <ul>
-    <li>class_name: Here we reference one of the two DBFS data connectors InferredAssetDBFSDataConnector (ConfiguredAssetDBFSDataConnector is also available) which handle the translation from /dbfs/ to dbfs:/ style paths for you. For more information on the difference between Configured/Inferred, see <a href='/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use'>How to choose which DataConnector to use.</a></li>
+    <li>class_name: Here we reference one of the two DBFS data connectors InferredAssetDBFSDataConnector (ConfiguredAssetDBFSDataConnector is also available) which handle the translation from /dbfs/ to dbfs:/ style paths for you. For more information on the difference between Configured/Inferred, see <a href='/docs/0.15.50/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use'>How to choose which DataConnector to use.</a></li>
     <li>base_directory: Where your files are located, here we reference the file path in DBFS we copied our data to earlier.</li>
     <li>glob_directive: This allows you to select files within that base_directory that match a <a href="https://docs.python.org/3/library/glob.html">glob</a> pattern.</li>
     <li>default_regex: Here we specify the group_names corresponding to the groups in the regex defined in the pattern - we can use these later to filter so that we can apply our Checkpoint to a specific Batch (using this configuration, each file is a Batch).</li>
@@ -266,13 +266,13 @@ Then we create a `BatchRequest` using the `DataAsset` we configured earlier to u
 
   <TabItem value="file-python">
 
-Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and Data Connector by running the following code. In this example, we are using a `InferredAssetDBFSDataConnector` so that we can access and validate each of our files as a `Data Asset`, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
 <details>
   <summary>What does this configuration contain?</summary>
 Here we are setting up a Datasource using a SparkDFExecutionEngine (which loads the data into a spark dataframe to process the validations). We also configure a Data Connector using a few helpful parameters. Here is a summary of some key parameters, but you can also find more information in our "Connecting to your data" docs, especially the "Core skills" and "Filesystem" sections:
   <ul>
-    <li>class_name: Here we reference one of the two DBFS data connectors InferredAssetDBFSDataConnector (ConfiguredAssetDBFSDataConnector is also available) which handle the translation from /dbfs/ to dbfs:/ style paths for you. For more information on the difference between Configured/Inferred, see <a href='/docs/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use'>How to choose which DataConnector to use.</a></li>
+    <li>class_name: Here we reference one of the two DBFS data connectors InferredAssetDBFSDataConnector (ConfiguredAssetDBFSDataConnector is also available) which handle the translation from /dbfs/ to dbfs:/ style paths for you. For more information on the difference between Configured/Inferred, see <a href='/docs/0.15.50/guides/connecting_to_your_data/how_to_choose_which_dataconnector_to_use'>How to choose which DataConnector to use.</a></li>
     <li>base_directory: Where your files are located, here we reference the file path in DBFS we copied our data to earlier.</li>
     <li>glob_directive: This allows you to select files within that base_directory that match a <a href="https://docs.python.org/3/library/glob.html">glob</a> pattern.</li>
     <li>default_regex: Here we specify the group_names corresponding to the groups in the regex defined in the pattern - we can use these later to filter so that we can apply our Checkpoint to a specific Batch (using this configuration, each file is a Batch).</li>
@@ -299,7 +299,7 @@ Then we create a `BatchRequest` using the `DataAsset` we configured earlier to u
 
   <TabItem value="dataframe-yaml">
 
-Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and Data Connector by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
 Datasource configuration:
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_yaml_configs.py datasource config"
@@ -322,7 +322,7 @@ Then we create a `BatchRequest` using the `DataAsset` we configured earlier to u
 
   <TabItem value="dataframe-python">
 
-Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and <TechnicalTag tag="data_connector" text="Data Connector"/> by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
+Here we add a <TechnicalTag tag="datasource" text="Datasource"/> and Data Connector by running the following code. In this example, we are using a `RuntimeDataConnector` so that we can access and validate our loaded dataframe, but instead you may use any of the other types of `Data Connectors`, `Partitioners`, `Splitters`, `Samplers`, `Queries` available to you (check out our documentation on "Connecting to your data" for more information).
 
 Datasource configuration:
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py datasource config"

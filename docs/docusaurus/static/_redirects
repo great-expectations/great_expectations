@@ -271,3 +271,27 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 
 # Getting rid of the test_yaml_config doc, which was focused on datasources
 /docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config /docs/docusaurus/docs/guides/connecting_to_your_data/connect_to_data_overview.md
+
+# Redirects for Block-Config docs
+/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource /docs/guides/0.15.50/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource
+/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource /docs/guides/0.15.50/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource
+/docs/guides/connecting_to_your_data/in_memory/pandas /docs/guides/0.15.50/connecting_to_your_data/in_memory/pandas
+/docs/guides/connecting_to_your_data/in_memory/spark /docs/guides/0.15.50/connecting_to_your_data/in_memory/spark
+/docs/guides/connecting_to_your_data/cloud/s3/pandas /docs/guides/0.15.50/connecting_to_your_data/cloud/s3/pandas
+/docs/guides/connecting_to_your_data/cloud/s3/spark /docs/guides/0.15.50/connecting_to_your_data/cloud/s3/spark
+/docs/guides/connecting_to_your_data/cloud/gcs/pandas /docs/guides/0.15.50/connecting_to_your_data/cloud/gcs/pandas
+/docs/guides/connecting_to_your_data/cloud/gcs/spark /docs/guides/0.15.50/connecting_to_your_data/cloud/gcs/spark
+/docs/guides/connecting_to_your_data/cloud/azure/pandas /docs/guides/0.15.50/connecting_to_your_data/cloud/azure/pandas
+/docs/guides/connecting_to_your_data/cloud/azure/spark /docs/guides/0.15.50/connecting_to_your_data/cloud/azure/spark
+/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource /docs/guides/0.15.50/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource
+/docs/guides/connecting_to_your_data/database/athena /docs/guides/0.15.50/connecting_to_your_data/database/athena
+/docs/guides/connecting_to_your_data/database/bigquery /docs/guides/0.15.50/connecting_to_your_data/database/bigquery
+/docs/guides/connecting_to_your_data/database/mssql /docs/guides/0.15.50/connecting_to_your_data/database/mssql
+/docs/guides/connecting_to_your_data/database/mysql /docs/guides/0.15.50/connecting_to_your_data/database/mysql
+/docs/guides/connecting_to_your_data/database/postgres /docs/guides/0.15.50/connecting_to_your_data/database/postgres
+/docs/guides/connecting_to_your_data/database/redshift /docs/guides/0.15.50/connecting_to_your_data/database/redshift
+/docs/guides/connecting_to_your_data/database/snowflake /docs/guides/0.15.50/connecting_to_your_data/database/snowflake
+/docs/guides/connecting_to_your_data/database/sqlite /docs/guides/0.15.50/connecting_to_your_data/database/sqlite
+/docs/guides/connecting_to_your_data/database/trino /docs/guides/0.15.50/connecting_to_your_data/database/trino
+/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource /docs/guides/0.15.50/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource
+/docs/guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe /docs/guides/0.15.50/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe

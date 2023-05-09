@@ -1,6 +1,8 @@
 ---
 title: Customize your deployment
 ---
+import LinksConnectToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
+
 Customizing your deployment by upgrading specific components of your deployment is a straight forward task. Data Contexts make this modular, so that you can add or swap out one component at a time. Most of these changes are quick, incremental steps—so you can upgrade from a basic demo deployment to a full production deployment at your own pace and be confident that your Data Context will continue to work at every step along the way.
 
 This reference guide is designed to present you with clear options for upgrading your deployment. For specific implementation steps, please check out the linked How-to guides.
@@ -57,17 +59,7 @@ By default, Validation Results are stored locally, in an uncommitted directory. 
 ## Connecting to Data
 Great Expectations allows you to connect to data in a wide variety of sources, and the list is constantly getting longer. If you have an idea for a source not listed here, please speak up in the public discussion forum.
 
-* [How to connect to a Athena database](../guides/connecting_to_your_data/database/athena.md)
-* [How to connect to a BigQuery database](../guides/connecting_to_your_data/database/bigquery.md)
-* [How to connect to a MSSQL database](../guides/connecting_to_your_data/database/mssql.md)
-* [How to connect to a MySQL database](../guides/connecting_to_your_data/database/mysql.md)
-* [How to connect to a Postgres database](../guides/connecting_to_your_data/database/postgres.md)
-* [How to connect to a Redshift database](../guides/connecting_to_your_data/database/redshift.md)
-* [How to connect to a Snowflake database](../guides/connecting_to_your_data/database/snowflake.md)
-* [How to connect to a SQLite database](../guides/connecting_to_your_data/database/sqlite.md)
-* [How to connect to data on a filesystem using Spark](../guides/connecting_to_your_data/filesystem/spark.md)
-* [How to connect to data on S3 using Spark](../guides/connecting_to_your_data/cloud/s3/spark.md)
-* [How to connect to data on GCS using Spark](../guides/connecting_to_your_data/cloud/gcs/spark.md)
+<LinksConnectToDataFluently />
 
 ## Options for hosting Data Docs
 By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure Blob Storage), configured to share a static website.

@@ -36,7 +36,7 @@ tools and services that spans everything else MLOps.
 
 ZenML ships with a couple of builtin pipeline steps that take care of everything
 from configuring temporary <TechnicalTag tag="datasource" text="Datasources" />,
-<TechnicalTag tag="data_connector" text="Data Connectors" />, 
+Data Connectors, 
 and <TechnicalTag tag="batch_request" text="Runtime Batch Requests" /> 
 to access in-memory datasets to setting up and running <TechnicalTag tag="profiler" text="Profilers" />, <TechnicalTag tag="validator" text="Validators" /> and <TechnicalTag tag="checkpoint" text="Checkpoints" />, to generating the <TechnicalTag tag="data_docs" text="Data Docs" /> 
 for you. These details are abstracted away from you and all you have left

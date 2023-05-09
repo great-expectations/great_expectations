@@ -307,7 +307,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 :::tip
 
-Datasources can be configured in many customized ways.  For additional information on how to configure a SQL datasource such as the one used to connect to your Redshift data, please see our guide on [how to configure a SQL Datasource](../../../docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
+Datasources can be configured in many customized ways.  For additional information on how to configure a SQL datasource such as the one used to connect to your Redshift data, please see our guide on [how to configure a SQL Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
 
 :::
 
