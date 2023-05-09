@@ -13,14 +13,14 @@ data_directory = pathlib.Path(
     "taxi_yellow_tripdata_samples",
 ).resolve(strict=True)
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py imports">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py imports">
 import great_expectations as gx
 
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 # </snippet>
 
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py add_datasource">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py add_datasource">
 datasource_name = "my_new_datasource"
 datasource = context.sources.add_pandas_filesystem(
     name=datasource_name, base_directory=data_directory
@@ -28,26 +28,26 @@ datasource = context.sources.add_pandas_filesystem(
 # </snippet>
 
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py get_asset">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py get_asset">
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 asset = datasource.add_csv_asset(
     name="taxi_2019_by_month", batching_regex=batching_regex
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py batch_request">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py batch_request">
 request = asset.build_batch_request()
 # </snippet>
 
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py create_expectation_suite">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py create_expectation_suite">
 expectation_suite_name = "my_suite"
 suite = context.add_or_update_expectation_suite(
     expectation_suite_name=expectation_suite_name
 )
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py create_expectation_1">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py create_expectation_1">
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
 # Create an Expectation
@@ -81,7 +81,7 @@ expectation_configuration = ExpectationConfiguration(
 suite.add_expectation(expectation_configuration=expectation_configuration)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py create_expectation_2">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py create_expectation_2">
 expectation_configuration = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_in_set",
     kwargs={
@@ -93,7 +93,7 @@ expectation_configuration = ExpectationConfiguration(
 suite.add_expectation(expectation_configuration=expectation_configuration)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py create_expectation_3">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py create_expectation_3">
 expectation_configuration = ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={
@@ -110,6 +110,8 @@ expectation_configuration = ExpectationConfiguration(
 suite.add_expectation(expectation_configuration=expectation_configuration)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py save_expectation_suite">
+# TODO: update or replace expectation
+
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py save_expectation_suite">
 context.save_expectation_suite(expectation_suite=suite)
 # </snippet>
