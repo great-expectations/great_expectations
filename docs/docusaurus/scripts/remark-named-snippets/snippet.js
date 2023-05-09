@@ -140,8 +140,8 @@ function sanitizeText (text) {
 
   function replaceTags(text) {
     var tagsToReplace = {
-        '<': '&lt;',
-        '>': '&gt;'
+        '<': 'aaa',
+        '>': 'bbb'
     };
     return text.replace(/[<>]/g, function(tag) {
         return tagsToReplace[tag] || tag;
