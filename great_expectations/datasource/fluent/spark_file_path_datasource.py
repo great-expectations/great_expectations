@@ -23,10 +23,11 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
 
+from great_expectations.compatibility.pyspark import (
+    SerializableStructType,  # noqa: TCH001
+)
+
 if TYPE_CHECKING:
-    from great_expectations.compatibility.pyspark import (
-        types as pyspark_types,
-    )
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
 logger = logging.getLogger(__name__)
@@ -70,7 +71,7 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     # NA - path determined by asset
     # schema: Optional[Union[StructType, str]] = None,
     # schema shadows pydantic BaseModel attribute
-    spark_schema: Optional[Union[pyspark_types.StructType, str]] = Field(
+    spark_schema: Optional[Union[SerializableStructType, str]] = Field(
         None, alias="schema"
     )
     # sep: Optional[str] = None,
@@ -321,7 +322,7 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     # NA - path determined by asset
     # schema: Optional[Union[StructType, str]] = None,
     # schema shadows pydantic BaseModel attribute
-    spark_schema: Optional[Union[pyspark_types.StructType, str]] = Field(
+    spark_schema: Optional[Union[SerializableStructType, str]] = Field(
         None, alias="schema"
     )
     # primitivesAsString: Optional[Union[bool, str]] = None,
