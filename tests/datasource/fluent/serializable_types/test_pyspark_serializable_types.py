@@ -15,9 +15,34 @@ def skip_if_spark_not_selected(test_backends) -> None:
         pytest.skip("No spark backend selected.")
 
 
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "fields_or_struct_type,serialized_output",
-    [pytest.param([], {"fields": [], "type": "struct"}, id="empty_list")],
+    [
+        pytest.param([], {"fields": [], "type": "struct"}, id="empty_list"),
+        pytest.param(
+            [pyspark_types.StructField("f1", pyspark_types.StringType(), True)],
+            {
+                "fields": [
+                    {"metadata": {}, "name": "f1", "nullable": True, "type": "string"}
+                ],
+                "type": "struct",
+            },
+            id="fields_list",
+        ),
+        pytest.param(
+            pyspark_types.StructType(
+                [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
+            ),
+            {
+                "fields": [
+                    {"metadata": {}, "name": "f1", "nullable": True, "type": "string"}
+                ],
+                "type": "struct",
+            },
+            id="struct_type",
+        ),
+    ],
 )
 def test_serializable_struct_type(
     fields_or_struct_type: pyspark_types.StructType
@@ -32,39 +57,7 @@ def test_serializable_struct_type(
     assert sst == serialized_output
 
 
-def test_serializable_struct_type_from_empty_list(skip_if_spark_not_selected):
-    sst = SerializableStructType([])
-    assert isinstance(sst.struct_type, pyspark_types.StructType)
-    assert isinstance(sst, dict)
-    assert sst == {"fields": [], "type": "struct"}
-
-
-def test_serializable_struct_type_from_fields(skip_if_spark_not_selected):
-    sst = SerializableStructType(
-        [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
-    )
-    assert isinstance(sst.struct_type, pyspark_types.StructType)
-    assert isinstance(sst, dict)
-    assert sst == {
-        "fields": [{"metadata": {}, "name": "f1", "nullable": True, "type": "string"}],
-        "type": "struct",
-    }
-
-
-def test_serializable_struct_type_from_struct_type(skip_if_spark_not_selected):
-    struct_type = pyspark_types.StructType(
-        [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
-    )
-
-    sst = SerializableStructType(struct_type)
-    assert isinstance(sst.struct_type, pyspark_types.StructType)
-    assert isinstance(sst, dict)
-    assert sst == {
-        "fields": [{"metadata": {}, "name": "f1", "nullable": True, "type": "string"}],
-        "type": "struct",
-    }
-
-
+@pytest.mark.unit
 @pytest.mark.parametrize(
     "fields_or_struct_type,serialized_output",
     [pytest.param([], {"fields": [], "type": "struct"}, id="empty_list")],
