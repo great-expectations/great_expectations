@@ -170,6 +170,7 @@ def test_suite_new_non_interactive_with_suite_name_prompted_default_runs_noteboo
     monkeypatch,
     titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
 ):
+    # NOTE: There is a race condition in this test
     context = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
     monkeypatch.chdir(os.path.dirname(context.root_directory))
 
