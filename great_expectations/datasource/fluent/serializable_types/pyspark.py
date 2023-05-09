@@ -25,12 +25,18 @@ class SerializableStructType(dict):
         super().__init__(**json_value)
 
     @classmethod
-    def validate(cls, v):
+    def validate(
+        cls,
+        fields_or_struct_type: pyspark.sql.types.StructType
+        | list[pyspark.sql.types.StructField]
+        | None,
+    ):
         """If already StructType then return otherwise try to create a StructType."""
-        if isinstance(v, pyspark.sql.types.StructType):
-            return v
+        if isinstance(fields_or_struct_type, pyspark.sql.types.StructType):
+            json_value = fields_or_struct_type.jsonValue()
+            return cls(**json_value)
         else:
-            return cls(v)
+            return cls(fields_or_struct_type)
 
     @classmethod
     def __get_validators__(cls):
