@@ -12,7 +12,7 @@ Use this quickstart to install Great Expectations, connect to sample data, build
 
 :::note Great Expectations Cloud
 
-This quickstart introduces you to the open source Python and command line version of Great Expectations. A Cloud interface will soon be available to simplify collaboration between data teams and domain experts.
+This quickstart introduces you to the open source Python version of Great Expectations. A Cloud interface will soon be available to simplify collaboration between data teams and domain experts.
 
 If you're interested in participating in the Great Expectations Cloud Beta program, or you want to receive progress updates, [**sign up for the Beta program**](https://greatexpectations.io/cloud).
 
@@ -24,7 +24,7 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 - pip
 - An internet browser
 
-## Install Great Expectations and validate data
+## Install GX
 
 1. Run the following command in an empty base directory inside a Python virtual environment:
 
@@ -34,7 +34,7 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 
     It can take several minutes for the installation to complete. Jupyter Notebook is included with Great Expectations, and it lets you edit code and view the results of code runs.
 
-2. Open Jupyter Notebook and run the following command to import the `great_expectations` module:
+2. Open Jupyter Notebook, a command line, or a terminal and then run the following command to import the `great_expectations` module:
 
     ```python name="tutorials/quickstart/quickstart.py import_gx"
     ```
@@ -51,7 +51,9 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 
     The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
 
-5. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation detects a range of values in the `passenger_count` column (using `auto=True`).
+## Create Expectations
+
+1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column. 
 
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```
@@ -59,17 +61,19 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 
     To analyze Validator data, you can create multiple Expectations that call multiple methods with the `validator.expect_*` syntax.
 
-6. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations: 
+## Connect to data
+
+1. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations: 
 
     ```python name="tutorials/quickstart/quickstart.py create_checkpoint"
     ```
 
-7. Run the following command to return the Validation results:
+2. Run the following command to return the Validation results:
 
     ```python name="tutorials/quickstart/quickstart.py run_checkpoint"
     ```
 
-8. Run the following command to view an HTML representation of the Validation results:
+3. Run the following command to view an HTML representation of the Validation results:
 
     ```python name="tutorials/quickstart/quickstart.py view_results"
     ```
