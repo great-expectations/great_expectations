@@ -23,8 +23,11 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
 
+from great_expectations.compatibility.pyspark import (
+    types as pyspark_types,  # noqa: TCH001
+)
+
 if TYPE_CHECKING:
-    from great_expectations.compatibility.pyspark import types as pyspark_types
     from great_expectations.datasource.fluent.interfaces import DataAsset
 
 
