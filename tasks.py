@@ -654,7 +654,6 @@ def _exit_with_error_if_not_run_from_correct_dir(
 
 
 @invoke.task(
-    name="link_checker",
     aliases=("links",),
     help={"skip_external": "Skip external link checks (is slow), default is True"},
 )
