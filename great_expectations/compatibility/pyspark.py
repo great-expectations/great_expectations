@@ -70,3 +70,22 @@ try:
     from pyspark.sql.utils import AnalysisException
 except (ImportError, AttributeError):
     AnalysisException = SPARK_NOT_IMPORTED  # type: ignore[assignment,misc]
+
+
+class StructTypeValidator(pyspark.sql.types.StructType):
+    """Custom type implementing pydantic validation."""
+
+    @classmethod
+    def validate(cls, v):
+        """If already StructType then return otherwise try to create a StructType."""
+        if isinstance(v, pyspark.sql.types.StructType):
+            return v
+        else:
+            return cls(v)
+
+    @classmethod
+    def __get_validators__(cls):
+        # one or more validators may be yielded which will be called in the
+        # order to validate the input, each validator will receive as an input
+        # the value returned from the previous validator
+        yield cls.validate

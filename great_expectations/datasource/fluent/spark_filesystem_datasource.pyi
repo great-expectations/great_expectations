@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Type, Union
 from typing_extensions import Literal
 
 from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
+    StructTypeValidator,  # noqa: TCH001
 )
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -52,7 +52,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # path: PathOrPaths,
         # NA - path determined by asset
         # schema: Optional[Union[StructType, str]] = None,
-        spark_schema: Optional[Union[pyspark_types.StructType, str]] = None,
+        spark_schema: Optional[Union[StructTypeValidator, str]] = None,
         # sep: Optional[str] = None,
         sep: Optional[str] = None,
         # encoding: Optional[str] = None,
@@ -157,7 +157,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # path: PathOrPaths,
         # NA - path determined by asset
         # schema: Optional[Union[StructType, str]] = None,
-        spark_schema: Optional[Union[pyspark_types.StructType, str]] = None,
+        spark_schema: Optional[Union[StructTypeValidator, str]] = None,
         # sep: Optional[str] = None,
         sep: Optional[str] = None,
         # encoding: Optional[str] = None,
@@ -320,7 +320,7 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # path: Union[str, List[str], RDD[str]],
         # NA - path determined by asset
         # schema: Optional[Union[StructType, str]] = None,
-        spark_schema: Optional[Union[pyspark_types.StructType, str]] = None,
+        spark_schema: Optional[Union[StructTypeValidator, str]] = None,
         # primitivesAsString: Optional[Union[bool, str]] = None,
         primitives_as_string: Optional[Union[bool, str]] = None,
         # prefersDecimal: Optional[Union[bool, str]] = None,

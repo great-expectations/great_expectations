@@ -16,7 +16,7 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
+    StructTypeValidator,  # noqa: TCH001
 )
 from great_expectations.datasource.fluent import _SparkDatasource
 from great_expectations.datasource.fluent.directory_data_asset import (
@@ -71,7 +71,7 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     # NA - path determined by asset
     # schema: Optional[Union[StructType, str]] = None,
     # schema shadows pydantic BaseModel attribute
-    spark_schema: Optional[Union[pyspark_types.StructType, str]] = Field(
+    spark_schema: Optional[Union[StructTypeValidator, str]] = Field(
         None, alias="schema"
     )
     # sep: Optional[str] = None,
@@ -174,8 +174,6 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     class Config:
         extra = pydantic.Extra.forbid
         allow_population_by_field_name = True
-        # pyspark types (from pyspark_types) are not currently validated
-        arbitrary_types_allowed = True
 
     @classmethod
     def _get_reader_method(cls) -> str:
@@ -322,7 +320,7 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     # NA - path determined by asset
     # schema: Optional[Union[StructType, str]] = None,
     # schema shadows pydantic BaseModel attribute
-    spark_schema: Optional[Union[pyspark_types.StructType, str]] = Field(
+    spark_schema: Optional[Union[StructTypeValidator, str]] = Field(
         None, alias="schema"
     )
     # primitivesAsString: Optional[Union[bool, str]] = None,
@@ -406,8 +404,6 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     class Config:
         extra = pydantic.Extra.forbid
         allow_population_by_field_name = True
-        # pyspark types (from pyspark_types) are not currently validated
-        arbitrary_types_allowed = True
 
     @classmethod
     def _get_reader_method(cls) -> str:
