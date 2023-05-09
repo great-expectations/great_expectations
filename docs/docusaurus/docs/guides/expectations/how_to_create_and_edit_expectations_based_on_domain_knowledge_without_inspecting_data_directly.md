@@ -112,7 +112,7 @@ We will the `add_expectation_suite()` method to create an empty ExpectationSuite
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py create_expectation_suite"
 ```
 
-### 4. Create Expectation Configurations in the helper notebook
+### 4. Create Expectation Configurations
 
 You are adding Expectation configurations to the suite. Since there is no sample Batch of data, no <TechnicalTag tag="validation" text="Validation" /> happens during this process. To illustrate how to do this, consider a hypothetical example. Suppose that you have a table with the columns ``account_id``, ``user_id``, ``transaction_id``, ``transaction_type``, and ``transaction_amt_usd``. Then the following code snipped adds an Expectation that the columns of the actual table will appear in the order specified above:
 
@@ -137,8 +137,6 @@ You can see all the available Expectations in the [Expectation Gallery](https://
 TODO this is where we will add some more information about updating the stuff
 
 ### 6. (Optional) Save your Expectations for future use
-
-The Expectations you create with the interactive method are saved in an Expectation Suite on the Validator object.  Validators do not persist outside the current Python session and for this reason these Expectations will not be kept unless you save them to your Data Context.  This can be ideal if you are using a Validator for quick data validation and exploration, but in most cases you'll want to reuse your newly created Expectation Suite in future Python sessions.
 
 To keep your Expectations for future use, you save them to your Data Context.  A Filesystem or Cloud Data Context persists outside the current Python session, so saving the Expectation Suite in your Data Context's Expectations Store ensures you can access it in the future:
 
