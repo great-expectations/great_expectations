@@ -302,6 +302,16 @@ extend-exclude = [
     "TID251",  # flake8-banned-api
 ]
 
+[tool.ruff.flake8-type-checking]
+# pydantic models use annotations at runtime
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
+    ]
+runtime-evaluated-decorators = [
+    "pydantic.dataclasses.dataclass",
+    ]
+
 [tool.ruff.mccabe]
 max-complexity = 15
 
