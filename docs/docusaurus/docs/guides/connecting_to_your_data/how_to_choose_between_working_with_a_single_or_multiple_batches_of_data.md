@@ -15,7 +15,6 @@ By the end of this guide, you will know when it will be most beneficial to be wo
 <Prerequisites>
 
 - [An understanding of Datasource basics](../../terms/datasource.md)
-- [An understanding of how to request data with a Batch Request](./how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 
 </Prerequisites>
 
@@ -107,4 +106,6 @@ Congratulations!  At this point you should have a solid understanding of when to
 ## Additional Information
 
 For more detailed information on how to use Batch Requests to return a specific Batch of data from a configured Datasource, please see:
-- [How to get one or more Batches of data from a configured Datasource](./how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
+- [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset)
+- [How to organize Batches in a file-based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_file_based_data_asset)
+- [How to organize Batches in a SQL-based Data Asset](/docs/guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset)
