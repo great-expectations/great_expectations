@@ -138,6 +138,16 @@ function sanitizeText (text) {
     }
   }
 
+  function replaceTags(text) {
+    var tagsToReplace = {
+        '<': '&lt;',
+        '>': '&gt;'
+    };
+    return text.replace(/[&<>]/g, function(tag) {
+        return tagsToReplace[tag] || tag;
+    });
+  }
+
   function unindent (line) {
     if (line.startsWith(indent)) {
       line = line.substring(indent.length, text.length)
@@ -146,6 +156,8 @@ function sanitizeText (text) {
   }
   // this may need some more misc clean up or too much clean up
   // Apply unindent and misc cleanup
+  text = replaceTags(text)
+
   return text
     .split('\n')
     .filter((l) => !(l.trim() === '#')) // Remove any nested snippet remnants

@@ -599,6 +599,6 @@ class SphinxInvokeDocsBuilder:
             doc.replace("“", '"').replace("”", '"').replace("‘", "'").replace("’", "'")
         )
         doc = doc.replace("<cite>{", "`").replace("}</cite>", "`")
-        doc = doc.replace("?P<", "~~~")
+        # doc = doc.replace("?P<", "~~~")
         doc = doc.replace("${", r"\${")
         return doc
