@@ -257,7 +257,7 @@
 /docs/contributing/contributing_setup https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md
 /docs/contributing/contributing_checklist /docs/contributing/contributing
 /docs/contributing/contributing_github https://github.com/great-expectations/great_expectations/tree/develop/docs
-/docs/contributing/contributing_test /https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md
+/docs/contributing/contributing_test https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md
 /docs/contributing/contributing_misc https://github.com/great-expectations/great_expectations/tree/develop/docs
 /docs/guides/miscellaneous/how_to_write_a_how_to_guide https://github.com/great-expectations/great_expectations/tree/develop/docs
 /docs/guides/miscellaneous/how_to_template https://github.com/great-expectations/great_expectations/tree/develop/docs
@@ -265,6 +265,9 @@
 /docs/integrations/integration_template https://github.com/great-expectations/great_expectations/tree/develop/docs
 docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_great_expectations https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md
 /docs/contributing/contributing_package https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_PACKAGES.md
+
+# removing How to Validate data with an in-memory Checkpoint
+/docs/guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint.md /docs/guides/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.md
 
 # Getting rid of the test_yaml_config doc, which was focused on datasources
 /docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config /docs/docusaurus/docs/guides/connecting_to_your_data/connect_to_data_overview.md

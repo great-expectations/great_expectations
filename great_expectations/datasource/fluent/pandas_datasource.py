@@ -568,14 +568,15 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         dataframe: pd.DataFrame,
-        **kwargs,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
-        """Adds a DataFrameAsset to this PandasDatasource.
+        """Adds a Dataframe DataAsset to this PandasDatasource object.
 
         Args:
-            name: The name given to the DataFrameAsset.
-            dataframe: The pandas DataFrame to attach to the returned DataFrameAsset.
-            batch_metadata: A dictionary of metadata to associate with the DataFrameAsset batch.
+            name: The name of the Dataframe asset. This can be any arbitrary string.
+            dataframe: The Dataframe containing the data for this data asset.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
 
         Returns:
             The DataFameAsset that has been added to this datasource.
@@ -583,32 +584,33 @@ class PandasDatasource(_PandasDatasource):
         asset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
-            **kwargs,
+            batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset=asset)
 
+    @public_api
     def read_dataframe(
         self,
         dataframe: pd.DataFrame,
         asset_name: Optional[str] = None,
-        **kwargs,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> Validator:
-        """Adds a DataFrameAsset to this PandasDatasource and returns a Validator.
+        """Reads a Dataframe and returns a Validator associated with it.
 
         Args:
-            dataframe: The pandas DataFrame to attach to the returned DataFrameAsset.
-            asset_name: The name given to the DataFrameAsset associated with the Validator.
-                        If no asset_name is provided, a default asset_name will be used.
-            batch_metadata: A dictionary of metadata to associate with the DataFrameAsset batch.
+            dataframe: The Dataframe containing the data for this data asset.
+            asset_name: The name of the Dataframe asset, should you wish to use it again.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
 
         Returns:
-            The Validator produced by this datasource and DataFrameAsset.
+            A Validator using an ephemeral DataFrameAsset and the "default" Expectation Suite.
         """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
             dataframe=dataframe,
-            **kwargs,
+            batch_metadata=batch_metadata or {},
         )
         return self._get_validator(asset=asset)
 

@@ -36,7 +36,7 @@ from typing_extensions import Final, Literal, TypeAlias
 
 from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.interfaces import (
-    DataAsset,  # noqa: TCH001
+    DataAsset,
 )
 
 try:

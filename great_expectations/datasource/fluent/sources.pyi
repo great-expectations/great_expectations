@@ -16,7 +16,7 @@ from typing import (
 from typing_extensions import Final, TypeAlias
 
 from great_expectations.data_context import (
-    AbstractDataContext as GXDataContext,  # noqa: TCH001
+    AbstractDataContext as GXDataContext,
 )
 from great_expectations.datasource.fluent.spark_datasource import SparkConfig
 
@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.sqlite_datasource import SqliteDsn
 
-SourceFactoryFn: TypeAlias = Callable[..., "Datasource"]
+SourceFactoryFn: TypeAlias = Callable[..., Datasource]
 logger: Logger
 DEFAULT_PANDAS_DATASOURCE_NAME: Final[str]
 DEFAULT_PANDAS_DATA_ASSET_NAME: Final[str]
