@@ -16,7 +16,7 @@ from typing import (
 from typing_extensions import Final, TypeAlias
 
 from great_expectations.data_context import (
-    AbstractDataContext as GXDataContext,  # noqa: TCH001
+    AbstractDataContext as GXDataContext,
 )
 from great_expectations.datasource.fluent.spark_datasource import SparkConfig
 
