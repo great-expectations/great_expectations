@@ -23,8 +23,8 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
 
-from great_expectations.compatibility.pyspark import (
-    SerializableStructType,  # noqa: TCH001
+from great_expectations.datasource.fluent.serializable_types.pyspark import (
+    SerializableStructType,
 )
 
 if TYPE_CHECKING:
