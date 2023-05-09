@@ -23,7 +23,9 @@ dataframe_datasource = context.sources.add_or_update_spark(
 csv_file_path = "/path/to/data/directory/yellow_tripdata_2020-08.csv"
 # </snippet>
 
-csv_file_path = pathlib.Path("dbfs:", "./data", "yellow_tripdata_sample_2020-08.csv")
+csv_file_path = pathlib.Path(
+    "dbfs:", pathlib.Path.cwd(), "data", "yellow_tripdata_sample_2020-08.csv"
+)
 pandas_df = pd.read_csv(csv_file_path)
 df = spark.createDataFrame(data=pandas_df)
 
