@@ -200,7 +200,7 @@ def test_get_checkpoint_no_identifier_raises_error(
     context = empty_cloud_data_context
 
     with pytest.raises(ValueError):
-        checkpoint = context.get_checkpoint()
+        context.get_checkpoint()
 
 
 @pytest.mark.cloud

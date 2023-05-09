@@ -2,11 +2,14 @@
 title: Deploying Great Expectations in a hosted environment without file system or CLI
 ---
 
-By default, creating a standard deployment of Great Expectations relies on two components:
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
-1. The Great Expectations [CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
-2. The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for Validation Results, etc.
+<CLIRemoval />
 
+By default, creating a standard deployment of Great Expectations relies on the following components:
+
+- The Great Expectations [CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
+- The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for Validation Results, etc.
 
 However, you might not have these components available in hosted environments, such as Databricks, AWS EMR, Google Cloud Composer, and others. This workflow guide will outline the main steps required to successfully use Great Expectations in a hosted environment.
 

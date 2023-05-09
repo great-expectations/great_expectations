@@ -992,7 +992,7 @@ def validate(
         return data_asset.validate(
             expectation_suite=expectation_suite,
             data_context=data_context,
-            *args,
+            *args,  # noqa: B026 # star-arg-unpacking-after-keyword-arg
             **kwargs,
         )
 

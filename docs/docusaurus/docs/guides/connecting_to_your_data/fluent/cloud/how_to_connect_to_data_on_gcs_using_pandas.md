@@ -17,8 +17,6 @@ import BatchingRegexExplaination from '/docs/components/connect_to_data/cloud/_b
 <!-- Next steps -->
 import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_steps/_after_create_non_sql_datasource.md'
 
-## Introduction
-
 In this guide we will demonstrate how to use Pandas to connect to data stored on Google Cloud Storage.  In our examples, we will specifically be connecting to csv files.  However, Great Expectations supports most types of files that Pandas has read methods for.
 
 ## Prerequisites
@@ -27,7 +25,6 @@ In this guide we will demonstrate how to use Pandas to connect to data stored on
 
 - [An installation of GX set up to work with GCS](/docs/guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs)
 - Access to data on a GCS bucket
-- A passion for data quality
 
 </Prerequisites> 
 
@@ -99,4 +96,4 @@ For more information on Google Cloud and authentication, please visit the follow
 
 ### Related reading
 
-For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+For more details regarding storing credentials for use with GX, please see our guide: [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)

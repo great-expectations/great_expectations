@@ -9,29 +9,15 @@ import IfYouStillNeedToSetupGx from '/docs/components/prerequisites/_if_you_stil
 import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
 import AdmonitionConvertToFileContext from '/docs/components/setup/data_context/_admonition_convert_to_file_context.md'
 
-## Introduction
-
 An Ephemeral Data Context is a temporary, in-memory Data Context.  They are ideal for doing data exploration and initial analysis when you do not want to save anything to an existing project, or for when you need to work in a hosted environment such as an EMR Spark Cluster.
 
 ## Prerequisites
 
 <Prerequisites>
 
-- A working installation of Great Expectations
-- A passion for Data Quality
+- A Great Expectations instance. See [Setup: Overview](../../setup_overview.md).
 
 </Prerequisites> 
-
-<details>
-<summary>
-
-### If you still need to set up and install GX...
-
-</summary>
-
-<IfYouStillNeedToSetupGx />
-
-</details>
 
 ## Steps
 

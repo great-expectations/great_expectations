@@ -8,6 +8,10 @@ from great_expectations.datasource.fluent.interfaces import (
     Sorter,
     BatchMetadata,
 )
+from great_expectations.datasource.fluent.batch_request import (
+    BatchRequest,
+    BatchRequestOptions,
+)
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasource,
     _PandasDatasource,

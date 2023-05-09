@@ -228,6 +228,8 @@ select = [
     "PYI", # flake8-pyi - type stub files
     # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
     "PTH", # use-pathlib - use pathlib for os.path and glob operations
+    # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
+    "B", # bugbear - common python bugs & design issues
 ]
 ignore = [
     # https://beta.ruff.rs/docs/rules/#pyflakes-f
@@ -256,6 +258,12 @@ ignore = [
     "TID252",  # Relative imports from parent modules are banned
     # https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
     "PTH123", # pathlib-open - this would force pathlib usage anytime open or with open was used.
+    # https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
+    # TODO: enable these
+    "B904", # raise-without-from-inside-except
+    "B028", # no-explicit-stacklevel - https://beta.ruff.rs/docs/rules/no-explicit-stacklevel/
+    "B007", # unused-loop-control-variable
+    "B009", # get-attr-with-constant
 ]
 extend-exclude = [
     "docs/*",
@@ -264,12 +272,9 @@ extend-exclude = [
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
-    "tests/checkpoint", # 15 warnings
     "tests/cli", # 34 warnings
     "tests/data_asset", # 10 warnings
-    "tests/data_context", # 127 warnings
     "tests/dataset", # 10 warnings
-    "tests/execution_engine",  # 23 warnings
     "tests/expectations", # 56 warnings
     "tests/integration", # 114 warnings
     "tests/rule_based_profiler", # 28 warnings
@@ -325,12 +330,17 @@ filterwarnings = [
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
     "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
+
+    # --------------------------------------- Great Expectations Warnings ----------------------------------
     # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Validator-level will not be persisted:UserWarning",
     # This warning is for configuring the result_format parameter at the Expectation-level, which will not be persisted,
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Expectation-level will not be persisted:UserWarning",
+    # This warning can be emitted when configuring splitters with fluent datasources
+    "ignore:The same option name is applied for your batch regex and splitter config:UserWarning",
+    # --------------------------------------- Great Expectations Warnings ----------------------------------
 
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
     # Ignores in this section are for items in Great Expectations that are deprecated but not yet removed. Once the
@@ -373,6 +383,10 @@ filterwarnings = [
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+
+    # Warnings related to GCS Data Connectors
+    "ignore:In order to access blobs with a ConfiguredAssetGCSDataConnector:UserWarning",
+    "ignore:In order to access blobs with an InferredAssetGCSDataConnector:UserWarning",
 
     # python
     # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.

@@ -5,6 +5,9 @@ title: "Setup: Overview"
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import UniversalMap from '@site/docs/images/universal_map/_universal_map.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
 
@@ -12,15 +15,14 @@ import UniversalMap from '@site/docs/images/universal_map/_universal_map.mdx';
 
 <!-- Only keep one of the 'To best understand this document' lines.  For processes like the Universal Map steps, use the first one.  For processes like the Architecture Reviews, use the second one. -->
 
-:::note Prerequisites
-- Completing the [Quickstart guide](tutorials/quickstart/quickstart.md) is recommended.
-:::
-
 Getting started with Great Expectations is quick and easy.  Once you have completed setup for your production deployment, you will have access to all the features of Great Expectations from a single entry point: Your <TechnicalTag relative="../" tag="data_context" text="Data Context" />.  You will also have your <TechnicalTag relative="../" tag="store" text="Stores" /> and <TechnicalTag relative="../" tag="data_docs" text="Data Docs" /> configured in the manner most suitable for your project's purposes.
 
-### The alternative to manual Setup
+If you're not interested in managing your own configuration or infrastructure, then Great Expectations Cloud may be of interest to you. You can learn more about Great Expectations Cloud — our fully managed SaaS offering — by signing up for [our weekly cloud workshop](https://greatexpectations.io/cloud). You’ll get to preview our newest features and apply for our private Alpha program!
 
-If you're not interested in managing your own configuration or infrastructure then Great Expectations Cloud may be of interest to you. You can learn more about Great Expectations Cloud — our fully managed SaaS offering — by signing up for [our weekly cloud workshop!](https://greatexpectations.io/cloud) You’ll get to see our newest features and apply for our private Alpha program!
+## Prerequisites
+
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md).
+
 
 ## The Setup process
 

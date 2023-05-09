@@ -10,9 +10,11 @@ Based on the result, they then calculate the percentage of rows that gave a posi
 
 This guide will walk you through the process of creating a Custom `SetBasedColumnMapExpectation`.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](./overview.md).
+- Completion of the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 

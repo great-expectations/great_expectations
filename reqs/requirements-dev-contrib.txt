@@ -3,4 +3,4 @@ black[jupyter]==22.3.0
 invoke>=2.0.0
 mypy==1.2.0
 pre-commit>=2.21.0
-ruff==0.0.262
+ruff==0.0.265

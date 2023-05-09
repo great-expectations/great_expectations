@@ -5,26 +5,29 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     ClassVar,
+    Dict,
     Generic,
     List,
     Optional,
     Type,
     TypeVar,
+    Union,
 )
 
 import pydantic
-from typing_extensions import Literal
+from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
+from typing_extensions import Literal, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import pyspark
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchRequest,
     DataAsset,
     Datasource,
 )
@@ -40,12 +43,20 @@ logger = logging.getLogger(__name__)
 # this enables us to include dataframe in the json schema
 _SparkDataFrameT = TypeVar("_SparkDataFrameT")
 
+SparkConfig: TypeAlias = Dict[
+    StrictStr, Union[StrictStr, StrictInt, StrictFloat, StrictBool]
+]
+
 
 class SparkDatasourceError(Exception):
     pass
 
 
 class _SparkDatasource(Datasource):
+    # instance attributes
+    spark_config: Union[SparkConfig, None] = None
+    force_reuse_spark_context: bool = True
+
     # Abstract Methods
     @property
     def execution_engine_type(self) -> Type[SparkDFExecutionEngine]:
@@ -134,7 +145,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
-                batch_slice=batch_request.batch_slice,
+                batch_slice=batch_request._batch_slice_input,  # type: ignore[attr-defined]
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
@@ -206,6 +217,7 @@ class SparkDatasource(_SparkDatasource):
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
+    @public_api
     def add_dataframe_asset(
         self,
         name: str,

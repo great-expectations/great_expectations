@@ -1324,7 +1324,7 @@ def build_spark_engine(
         df = spark.createDataFrame(data=data, schema=schema)
 
     conf: Iterable[Tuple[str, str]] = spark.sparkContext.getConf().getAll()
-    spark_config: Dict[str, str] = dict(conf)
+    spark_config: Dict[str, Any] = dict(conf)
     execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
         batch_data_dict={
@@ -2119,9 +2119,6 @@ def generate_expectation_tests(  # noqa: C901 - 43
                         }
                     )
                     continue
-
-            except Exception:
-                continue
 
             for test in d["tests"]:
                 if not should_we_generate_this_test(
