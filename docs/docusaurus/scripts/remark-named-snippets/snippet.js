@@ -71,6 +71,9 @@ function parseFile (file) {
   const parser = new htmlparser2.Parser({
     onopentag (tagname, attrs) {
       if (tagname !== 'snippet') {
+        // If we see a non-snippet tag, we want to make sure we still append the literal text to our parsed results.
+        // This is particularly relevant around regex in our docs
+        this.ontext(`<${tagname}>`)
         return
       }
 
