@@ -4,15 +4,17 @@ import difflib
 import functools
 import logging
 import pathlib
+import random
 import uuid
 from collections import defaultdict
 from pprint import pformat as pf
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import pytest
 import responses
 
 from great_expectations import get_context
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context import FileDataContext
 from great_expectations.datasource.fluent.config import GxConfig
 from great_expectations.datasource.fluent.interfaces import (
@@ -33,6 +35,8 @@ if TYPE_CHECKING:
 # apply markers to entire test module
 pytestmark = [pytest.mark.integration]
 
+
+YAML = YAMLHandler()
 
 logger = logging.getLogger(__file__)
 
@@ -326,6 +330,49 @@ def test_context_add_or_update_datasource(
 
     updated_datasource: SqliteDatasource = context.datasources[datasource.name]  # type: ignore[assignment]
     assert updated_datasource.connection_string == "sqlite:///"
+
+
+@pytest.fixture
+def random_datasource(seeded_file_context: FileDataContext) -> Datasource:
+    datasource = random.choice(list(seeded_file_context.fluent_datasources.values()))
+    logger.info(f"Random DS - {pf(datasource.dict(), depth=1)}")
+    return datasource
+
+
+def test_sources_delete_removes_datasource_from_yaml(
+    random_datasource: Datasource,
+    seeded_file_context: FileDataContext,
+):
+    print(f"Delete -> '{random_datasource.name}'\n")
+
+    ds_delete_method: Callable[[str], None] = getattr(
+        seeded_file_context.sources, f"delete_{random_datasource.type}"
+    )
+    ds_delete_method(random_datasource.name)
+
+    yaml_path = pathlib.Path(
+        seeded_file_context.root_directory, seeded_file_context.GX_YML
+    ).resolve(strict=True)
+    yaml_contents = YAML.load(yaml_path.read_text())
+    print(f"{pf(yaml_contents, depth=2)}")
+
+    assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
+
+
+def test_ctx_delete_removes_datasource_from_yaml(
+    random_datasource: Datasource, seeded_file_context: FileDataContext
+):
+    print(f"Delete -> '{random_datasource.name}'\n")
+
+    seeded_file_context.delete_datasource(random_datasource.name)
+
+    yaml_path = pathlib.Path(
+        seeded_file_context.root_directory, seeded_file_context.GX_YML
+    ).resolve(strict=True)
+    yaml_contents = YAML.load(yaml_path.read_text())
+    print(f"{pf(yaml_contents, depth=2)}")
+
+    assert random_datasource.name not in yaml_contents["fluent_datasources"]  # type: ignore[operator] # always dict
 
 
 if __name__ == "__main__":
