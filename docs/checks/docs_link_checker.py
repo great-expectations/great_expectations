@@ -374,7 +374,7 @@ def scan_docs(
         message.append("------------- Broken Link Report -------------")
         message.append("----------------------------------------------")
         for line in result:
-            message.append(line)
+            message.append(str(line))
 
         return 1, "\n".join(message)
     else:
