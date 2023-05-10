@@ -19,6 +19,11 @@ base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 
 # For this test script, change base_directory to location where test runner data is located
 base_directory = "/dbfs/data/"
+original_umask = os.umask(0)
+try:
+    os.makedirs(base_directory)
+finally:
+    os.umask(original_umask)
 os.makedirs(base_directory)
 shutil.copytree(str(pathlib.Path(pathlib.Path.cwd(), "data")), base_directory)
 
