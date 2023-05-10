@@ -12,10 +12,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, cast
 import click
 
 from great_expectations import exceptions as gx_exceptions
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint  # noqa: TCH001
-from great_expectations.checkpoint.types.checkpoint_result import (
-    CheckpointResult,  # noqa: TCH001
-)
 from great_expectations.cli.batch_request import get_batch_request
 from great_expectations.cli.cli_messages import SECTION_SEPARATOR
 from great_expectations.cli.pretty_printing import cli_colorize_string, cli_message
@@ -31,16 +27,20 @@ from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
-from great_expectations.datasource import BaseDatasource  # noqa: TCH001
+from great_expectations.datasource import BaseDatasource
 from great_expectations.util import get_context
-from great_expectations.validator.validator import Validator  # noqa: TCH001
 
 if TYPE_CHECKING:
+    from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+    from great_expectations.checkpoint.types.checkpoint_result import (
+        CheckpointResult,
+    )
     from great_expectations.core.batch import JSONValues
     from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.fluent.interfaces import (
         Datasource as FluentDatasource,
     )
+    from great_expectations.validator.validator import Validator
 
 
 logger = logging.getLogger(__name__)
@@ -412,7 +412,14 @@ def load_data_context_with_error_handling(
     context: Optional[FileDataContext]
     ge_config_version: float
     try:
-        directory = directory or FileDataContext.find_context_root_dir()
+        if directory:
+            # Without this check, FileDataContext will possibly scaffold a project structure.
+            # As we want CLI users to follow the `init` workflow, we should exit early if we can't find a context YAML.
+            if not FileDataContext._find_context_yml_file(directory):
+                raise gx_exceptions.ConfigNotFoundError()
+        else:
+            directory = FileDataContext.find_context_root_dir()
+
         context = get_context(context_root_dir=directory)
         ge_config_version = context.get_config().config_version  # type: ignore[union-attr] # could be dict, str
 
