@@ -9,6 +9,7 @@ import io
 import json
 import logging
 import os
+import pathlib
 import pstats
 import re
 import sys
@@ -56,9 +57,7 @@ from typing_extensions import Literal, TypeGuard
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.compatibility import sqlalchemy
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy as sa,
-)
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core._docs_decorators import deprecated_argument, public_api
 from great_expectations.exceptions import (
     GXCloudConfigurationError,
@@ -80,9 +79,11 @@ if TYPE_CHECKING:
     import numpy.typing as npt
 
     from great_expectations.alias_types import PathStr
-    from great_expectations.data_context import CloudDataContext, FileDataContext
-    from great_expectations.data_context.data_context.abstract_data_context import (
+    from great_expectations.data_context import (
         AbstractDataContext,
+        CloudDataContext,
+        EphemeralDataContext,
+        FileDataContext,
     )
     from great_expectations.data_context.types.base import DataContextConfig
 
@@ -1702,54 +1703,54 @@ def convert_ndarray_decimal_to_float_dtype(data: np.ndarray) -> np.ndarray:
 
 @overload
 def get_context(  # type: ignore[misc] # overlapping overload false positive?
-    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: PathStr = ...,
-    runtime_environment: Optional[dict] = ...,
+    runtime_environment: dict | None = ...,
     cloud_base_url: None = ...,
     cloud_access_token: None = ...,
     cloud_organization_id: None = ...,
-    cloud_mode: Optional[Literal[False]] = ...,
+    cloud_mode: Literal[False] | None = ...,
     # <GX_RENAME> Deprecated as of 0.15.37
     ge_cloud_base_url: None = ...,
     ge_cloud_access_token: None = ...,
     ge_cloud_organization_id: None = ...,
-    ge_cloud_mode: Optional[Literal[False]] = ...,
+    ge_cloud_mode: Literal[False] | None = ...,
 ) -> FileDataContext:
     ...
 
 
 @overload
 def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
+    project_config: DataContextConfig | Mapping | None = ...,
     context_root_dir: None = ...,
-    runtime_environment: Optional[dict] = ...,
-    cloud_base_url: Optional[str] = ...,
-    cloud_access_token: Optional[str] = ...,
-    cloud_organization_id: Optional[str] = ...,
+    runtime_environment: dict | None = ...,
+    cloud_base_url: str | None = ...,
+    cloud_access_token: str | None = ...,
+    cloud_organization_id: str | None = ...,
     cloud_mode: Literal[True] = ...,
     # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = ...,
-    ge_cloud_access_token: Optional[str] = ...,
-    ge_cloud_organization_id: Optional[str] = ...,
-    ge_cloud_mode: Optional[bool] = ...,
+    ge_cloud_base_url: str | None = ...,
+    ge_cloud_access_token: str | None = ...,
+    ge_cloud_organization_id: str | None = ...,
+    ge_cloud_mode: bool | None = ...,
 ) -> CloudDataContext:
     ...
 
 
 @overload
 def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = ...,
-    context_root_dir: Optional[PathStr] = ...,
-    runtime_environment: Optional[dict] = ...,
-    cloud_base_url: Optional[str] = ...,
-    cloud_access_token: Optional[str] = ...,
-    cloud_organization_id: Optional[str] = ...,
-    cloud_mode: Optional[bool] = ...,
+    project_config: DataContextConfig | Mapping | None = ...,
+    context_root_dir: PathStr | None = ...,
+    runtime_environment: dict | None = ...,
+    cloud_base_url: str | None = ...,
+    cloud_access_token: str | None = ...,
+    cloud_organization_id: str | None = ...,
+    cloud_mode: bool | None = ...,
     # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = ...,
-    ge_cloud_access_token: Optional[str] = ...,
-    ge_cloud_organization_id: Optional[str] = ...,
-    ge_cloud_mode: Optional[bool] = ...,
+    ge_cloud_base_url: str | None = ...,
+    ge_cloud_access_token: str | None = ...,
+    ge_cloud_organization_id: str | None = ...,
+    ge_cloud_mode: bool | None = ...,
 ) -> AbstractDataContext:
     ...
 
@@ -1760,18 +1761,18 @@ def get_context(
 @deprecated_argument(argument_name="ge_cloud_organization_id", version="0.15.37")
 @deprecated_argument(argument_name="ge_cloud_mode", version="0.15.37")
 def get_context(
-    project_config: Optional[Union[DataContextConfig, Mapping]] = None,
-    context_root_dir: Optional[PathStr] = None,
-    runtime_environment: Optional[dict] = None,
-    cloud_base_url: Optional[str] = None,
-    cloud_access_token: Optional[str] = None,
-    cloud_organization_id: Optional[str] = None,
-    cloud_mode: Optional[bool] = None,
+    project_config: DataContextConfig | Mapping | None = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
     # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = None,
-    ge_cloud_access_token: Optional[str] = None,
-    ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_mode: Optional[bool] = None,
+    ge_cloud_base_url: str | None = None,
+    ge_cloud_access_token: str | None = None,
+    ge_cloud_organization_id: str | None = None,
+    ge_cloud_mode: bool | None = None,
 ) -> AbstractDataContext:
     """Method to return the appropriate Data Context depending on parameters and environment.
 
@@ -1857,24 +1858,74 @@ def get_context(
     Raises:
         GXCloudConfigurationError: Cloud mode enabled, but missing configuration.
     """
-    from great_expectations.data_context.data_context import (
-        CloudDataContext,
-        EphemeralDataContext,
-        FileDataContext,
+    project_config = _prepare_project_config(project_config)
+
+    # First, check for GX Cloud conditions
+    cloud_context = _get_cloud_context(
+        project_config=project_config,
+        context_root_dir=context_root_dir,
+        runtime_environment=runtime_environment,
+        cloud_mode=cloud_mode,
+        cloud_base_url=cloud_base_url,
+        cloud_access_token=cloud_access_token,
+        cloud_organization_id=cloud_organization_id,
+        ge_cloud_mode=ge_cloud_mode,
+        ge_cloud_base_url=ge_cloud_base_url,
+        ge_cloud_access_token=ge_cloud_access_token,
+        ge_cloud_organization_id=ge_cloud_organization_id,
     )
-    from great_expectations.data_context.types.base import (
-        DataContextConfig,
-        InMemoryStoreBackendDefaults,
+    if cloud_context:
+        return cloud_context
+
+    # Second, check for a context_root_dir to determine if using a filesystem
+    file_context = _get_file_context(
+        project_config=project_config,
+        context_root_dir=context_root_dir,
+        runtime_environment=runtime_environment,
     )
+    if file_context:
+        return file_context
+
+    # Finally, default to ephemeral
+    return _get_ephemeral_context(
+        project_config=project_config,
+        runtime_environment=runtime_environment,
+    )
+
+
+def _prepare_project_config(
+    project_config: DataContextConfig | Mapping | None,
+) -> DataContextConfig | None:
+    from great_expectations.data_context.data_context import AbstractDataContext
+    from great_expectations.data_context.types.base import DataContextConfig
 
     # If available and applicable, convert project_config mapping into a rich config type
     if project_config:
-        project_config = EphemeralDataContext.get_or_create_data_context_config(
+        project_config = AbstractDataContext.get_or_create_data_context_config(
             project_config
         )
     assert project_config is None or isinstance(
         project_config, DataContextConfig
     ), "project_config must be of type Optional[DataContextConfig]"
+
+    return project_config
+
+
+def _get_cloud_context(
+    project_config: DataContextConfig | Mapping | None = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: str | None = None,
+    ge_cloud_access_token: str | None = None,
+    ge_cloud_organization_id: str | None = None,
+    ge_cloud_mode: bool | None = None,
+) -> CloudDataContext | None:
+    from great_expectations.data_context.data_context import CloudDataContext
 
     # Chetan - 20221208 - not formally deprecating these values until a future date
     (
@@ -1893,7 +1944,6 @@ def get_context(
         ge_cloud_organization_id=ge_cloud_organization_id,
     )
 
-    # First, check for GX Cloud conditions
     config_available = CloudDataContext.is_cloud_config_available(
         cloud_base_url=cloud_base_url,
         cloud_access_token=cloud_access_token,
@@ -1916,8 +1966,40 @@ def get_context(
             "GX Cloud Mode enabled, but missing env vars: GX_CLOUD_ORGANIZATION_ID, GX_CLOUD_ACCESS_TOKEN"
         )
 
-    # Second, check for which type of local
-    # Prioritize FileDataContext but default to EphemeralDataContext if no context_root_dir
+    return None
+
+
+def _resolve_cloud_args(
+    cloud_base_url: str | None = None,
+    cloud_access_token: str | None = None,
+    cloud_organization_id: str | None = None,
+    cloud_mode: bool | None = None,
+    # <GX_RENAME> Deprecated as of 0.15.37
+    ge_cloud_base_url: str | None = None,
+    ge_cloud_access_token: str | None = None,
+    ge_cloud_organization_id: str | None = None,
+    ge_cloud_mode: bool | None = None,
+) -> tuple[str | None, str | None, str | None, bool | None]:
+    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
+    cloud_access_token = (
+        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
+    )
+    cloud_organization_id = (
+        cloud_organization_id
+        if cloud_organization_id is not None
+        else ge_cloud_organization_id
+    )
+    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
+    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
+
+
+def _get_file_context(
+    project_config: DataContextConfig | None = None,
+    context_root_dir: PathStr | None = None,
+    runtime_environment: dict | None = None,
+) -> FileDataContext | None:
+    from great_expectations.data_context.data_context import FileDataContext
+
     if not context_root_dir:
         try:
             context_root_dir = FileDataContext.find_context_root_dir()
@@ -1925,11 +2007,25 @@ def get_context(
             logger.info("Could not find local context root directory")
 
     if context_root_dir:
+        context_root_dir = pathlib.Path(context_root_dir).absolute()
         return FileDataContext(
             project_config=project_config,
             context_root_dir=context_root_dir,
             runtime_environment=runtime_environment,
         )
+
+    return None
+
+
+def _get_ephemeral_context(
+    project_config: DataContextConfig | None = None,
+    runtime_environment: dict | None = None,
+) -> EphemeralDataContext:
+    from great_expectations.data_context.data_context import EphemeralDataContext
+    from great_expectations.data_context.types.base import (
+        DataContextConfig,
+        InMemoryStoreBackendDefaults,
+    )
 
     if not project_config:
         project_config = DataContextConfig(
@@ -1942,30 +2038,6 @@ def get_context(
         project_config=project_config,
         runtime_environment=runtime_environment,
     )
-
-
-def _resolve_cloud_args(
-    cloud_base_url: Optional[str] = None,
-    cloud_access_token: Optional[str] = None,
-    cloud_organization_id: Optional[str] = None,
-    cloud_mode: Optional[bool] = None,
-    # <GX_RENAME> Deprecated as of 0.15.37
-    ge_cloud_base_url: Optional[str] = None,
-    ge_cloud_access_token: Optional[str] = None,
-    ge_cloud_organization_id: Optional[str] = None,
-    ge_cloud_mode: Optional[bool] = None,
-) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[bool]]:
-    cloud_base_url = cloud_base_url if cloud_base_url is not None else ge_cloud_base_url
-    cloud_access_token = (
-        cloud_access_token if cloud_access_token is not None else ge_cloud_access_token
-    )
-    cloud_organization_id = (
-        cloud_organization_id
-        if cloud_organization_id is not None
-        else ge_cloud_organization_id
-    )
-    cloud_mode = cloud_mode if cloud_mode is not None else ge_cloud_mode
-    return cloud_base_url, cloud_access_token, cloud_organization_id, cloud_mode
 
 
 def is_sane_slack_webhook(url: str) -> bool:
