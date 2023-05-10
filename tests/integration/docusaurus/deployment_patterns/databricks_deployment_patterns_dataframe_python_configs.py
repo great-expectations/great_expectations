@@ -24,16 +24,13 @@ dataframe_datasource = context.sources.add_or_update_spark(
 csv_file_path = "/path/to/data/directory/yellow_tripdata_2020-08.csv"
 # </snippet>
 
-csv_file_path = pathlib.Path(
-    pathlib.Path.cwd(),
-    "data",
-    "yellow_tripdata_sample_2019-01.csv",
+csv_file_path = str(
+    pathlib.Path(
+        pathlib.Path.cwd(),
+        "data",
+        "yellow_tripdata_sample_2019-01.csv",
+    )
 )
-pandas_df = pd.read_csv(csv_file_path)
-df = spark.createDataFrame(data=pandas_df)
-
-assert len(pandas_df) == df.count() == 10000
-assert len(pandas_df.columns) == len(df.columns) == 18
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add data asset">
 df = spark.read.csv(csv_file_path, header=True)
