@@ -2,10 +2,10 @@
 
 This repository contains the following templates that you can use to create Great Expectations documentation:
 
-- [how-to](how_to_template.md)
-- [tutorial](tutorial_template.md)
-- [conceptual](conceptual_template.md)
-- [reference](reference_template.md)
+- how-to
+- tutorial
+- conceptual
+- reference
 
 These templates are intended for use by Great Expectations employees. If you're not a Great Expectations employee and want to contribute to Great Expectations documentation, see the [README](https://github.com/great-expectations/great_expectations/blob/develop/docs/README.md) in the `docs` repository.
 
