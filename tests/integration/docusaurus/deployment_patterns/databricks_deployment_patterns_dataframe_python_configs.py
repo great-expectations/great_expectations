@@ -1,6 +1,4 @@
 # isort:skip_file
-import os
-import pandas as pd
 import pathlib
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py imports">

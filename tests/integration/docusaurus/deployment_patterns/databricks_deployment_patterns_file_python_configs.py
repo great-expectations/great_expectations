@@ -1,5 +1,7 @@
 # isort:skip_file
+import os
 import pathlib
+import shutil
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports">
 import great_expectations as gx
@@ -12,11 +14,13 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory">
-base_directory = "dbfs/example_data/nyctaxi/tripdata/yellow/"
+base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 # </snippet>
 
 # For this test script, change base_directory to location where test runner data is located
-base_directory = pathlib.Path(pathlib.Path.cwd(), "data")
+os.mkdir("/dbfs/data/")
+shutil.copytree(str(pathlib.Path(pathlib.Path.cwd(), "data")), "/dbfs/data/")
+base_directory = "/dbfs/data/"
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource">
 dbfs_datasource = context.sources.add_or_update_spark_dbfs(
@@ -94,3 +98,5 @@ checkpoint_result = context.run_checkpoint(
     ],
 )
 # </snippet>
+
+os.rmdir("/dbfs/data/")
