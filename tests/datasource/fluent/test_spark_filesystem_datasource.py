@@ -91,8 +91,10 @@ if pyspark_types:
     spark_schema = pyspark_types.StructType(
         [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
     )
+    additional_params = {"spark_schema": spark_schema}
 else:
-    spark_schema = {}
+    additional_params = {}
+
 add_csv_asset = [
     pytest.param(
         "add_csv_asset",
@@ -102,7 +104,6 @@ add_csv_asset = [
     pytest.param(
         "add_csv_asset",
         {
-            "spark_schema": spark_schema,
             "sep": "sep",
             "encoding": "encoding",
             "quote": "quote",
@@ -135,7 +136,9 @@ add_csv_asset = [
             "modified_before": "modified_before",
             "modified_after": "modified_after",
             "unescaped_quote_handling": "STOP_AT_CLOSING_QUOTE",
-        },
+        }.update(
+            additional_params  # type: ignore[arg-type]
+        ),
         id="csv_all_params_pyspark_3_4_0",
     ),
     pytest.param(
@@ -225,7 +228,6 @@ add_json_asset = [
     pytest.param(
         "add_json_asset",
         {
-            "spark_schema": spark_schema,
             "primitives_as_string": "primitives_as_string",
             "prefers_decimal": "prefers_decimal",
             "allow_comments": "allow_comments",
@@ -249,7 +251,9 @@ add_json_asset = [
             "modified_before": "modified_before",
             "modified_after": "modified_after",
             "allow_non_numeric_numbers": "allow_non_numeric_numbers",
-        },
+        }.update(
+            additional_params  # type: ignore[arg-type]
+        ),
         id="json_all_params_pyspark_3_4_0",
     ),
     pytest.param(
@@ -314,7 +318,7 @@ add_asset_test_params += add_text_asset
 def test_add_asset_with_asset_specific_params(
     spark_filesystem_datasource: SparkFilesystemDatasource,
     add_method_name: str,
-    add_method_params: dict[str, str | bool | int | float],
+    add_method_params: dict,
 ):
     asset = getattr(spark_filesystem_datasource, add_method_name)(
         name="asset_name", **add_method_params
@@ -343,7 +347,6 @@ add_directory_csv_asset = [
         "add_directory_csv_asset",
         {
             "data_directory": "some_directory",
-            "spark_schema": spark_schema,
             "sep": "sep",
             "encoding": "encoding",
             "quote": "quote",
@@ -376,7 +379,9 @@ add_directory_csv_asset = [
             "modified_before": "modified_before",
             "modified_after": "modified_after",
             "unescaped_quote_handling": "STOP_AT_CLOSING_QUOTE",
-        },
+        }.update(
+            additional_params  # type: ignore[arg-type]
+        ),
         id="directory_csv_all_params_pyspark_3_4_0",
     ),
     pytest.param(
@@ -406,7 +411,7 @@ add_directory_asset_test_params += add_directory_csv_asset
 def test_add_directory_asset_with_asset_specific_params(
     spark_filesystem_datasource: SparkFilesystemDatasource,
     add_method_name: str,
-    add_method_params: dict[str, str | bool | int | float],
+    add_method_params: dict,
 ):
     asset = getattr(spark_filesystem_datasource, add_method_name)(
         name="asset_name", **add_method_params
