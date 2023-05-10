@@ -410,34 +410,31 @@ class SerializableDataContext(AbstractDataContext):
 
     @classmethod
     def _find_context_yml_file(
-        cls, search_start_dir: Optional[PathStr] = None
-    ) -> Optional[str]:
+        cls, search_start_dir: PathStr | None = None
+    ) -> str | None:
         """Search for the yml file starting here and moving upward."""
         yml_path = None
         if search_start_dir is None:
-            search_start_dir = os.getcwd()  # noqa: PTH109
+            search_start_dir = pathlib.Path.cwd()
+        search_start_dir = pathlib.Path(search_start_dir)
 
         for i in range(4):
             logger.debug(
                 f"Searching for config file {search_start_dir} ({i} layer deep)"
             )
 
-            potential_ge_dir = os.path.join(  # noqa: PTH118
-                search_start_dir, cls.GX_DIR
-            )
+            potential_gx_dir = search_start_dir / cls.GX_DIR
 
-            if os.path.isdir(potential_ge_dir):  # noqa: PTH112
-                potential_yml = os.path.join(  # noqa: PTH118
-                    potential_ge_dir, cls.GX_YML
-                )
-                if os.path.isfile(potential_yml):  # noqa: PTH113
+            if potential_gx_dir.is_dir():
+                potential_yml = potential_gx_dir / cls.GX_YML
+                if potential_yml.is_file():
                     yml_path = potential_yml
                     logger.debug(f"Found config file at {str(yml_path)}")
                     break
             # move up one directory
-            search_start_dir = os.path.dirname(search_start_dir)  # noqa: PTH120
+            search_start_dir = search_start_dir.parent
 
-        return yml_path
+        return str(yml_path) if yml_path else None
 
     @classmethod
     def does_config_exist_on_disk(cls, context_root_dir: PathStr) -> bool:

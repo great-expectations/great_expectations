@@ -819,7 +819,7 @@ def test_data_context_updates_expectation_suite_names(
     assert fetched_expectation_suite.expectation_suite_name == "a_third_suite_name"
 
 
-def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
+def test_data_context_create_does_not_raise_error_or_warning_if_gx_dir_exists(
     tmp_path_factory,
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
@@ -830,82 +830,82 @@ def test_data_context_create_does_not_raise_error_or_warning_if_ge_dir_exists(
 def empty_context(tmp_path_factory) -> FileDataContext:
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    assert os.path.isdir(ge_dir)  # noqa: PTH112
+    gx_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    assert os.path.isdir(gx_dir)  # noqa: PTH112
     assert os.path.isfile(  # noqa: PTH113
-        os.path.join(ge_dir, FileDataContext.GX_YML)  # noqa: PTH118
+        os.path.join(gx_dir, FileDataContext.GX_YML)  # noqa: PTH118
     )
-    context = DataContext(ge_dir)
+    context = DataContext(gx_dir)
     assert isinstance(context, FileDataContext)
     return context
 
 
 def test_data_context_is_project_scaffolded(empty_context):
-    ge_dir = empty_context.root_directory
-    assert FileDataContext.is_project_scaffolded(ge_dir) is True
+    gx_dir = empty_context.root_directory
+    assert FileDataContext.is_project_scaffolded(gx_dir) is True
 
 
 def test_data_context_does_ge_yml_exist_returns_true_when_it_does_exist(empty_context):
-    ge_dir = empty_context.root_directory
-    assert FileDataContext.does_config_exist_on_disk(ge_dir) is True
+    gx_dir = empty_context.root_directory
+    assert FileDataContext.does_config_exist_on_disk(gx_dir) is True
 
 
 def test_data_context_does_ge_yml_exist_returns_false_when_it_does_not_exist(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
+    gx_dir = empty_context.root_directory
     # mangle project
-    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))  # noqa: PTH118
-    assert FileDataContext.does_config_exist_on_disk(ge_dir) is False
+    safe_remove(os.path.join(gx_dir, empty_context.GX_YML))  # noqa: PTH118
+    assert FileDataContext.does_config_exist_on_disk(gx_dir) is False
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_true_when_it_has_a_datasource_configured_in_yml_file_on_disk(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
+    gx_dir = empty_context.root_directory
     empty_context.add_datasource("arthur", **{"class_name": "PandasDatasource"})
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is True
+        FileDataContext._does_project_have_a_datasource_in_config_file(gx_dir) is True
     )
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_datasource_configured_in_yml_file_on_disk(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
+    gx_dir = empty_context.root_directory
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
+        FileDataContext._does_project_have_a_datasource_in_config_file(gx_dir) is False
     )
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_yml_file(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
-    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))  # noqa: PTH118
+    gx_dir = empty_context.root_directory
+    safe_remove(os.path.join(gx_dir, empty_context.GX_YML))  # noqa: PTH118
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
+        FileDataContext._does_project_have_a_datasource_in_config_file(gx_dir) is False
     )
 
 
-def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_ge_dir(
+def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_it_does_not_have_a_gx_dir(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
-    safe_remove(os.path.join(ge_dir))  # noqa: PTH118
+    gx_dir = empty_context.root_directory
+    safe_remove(os.path.join(gx_dir))  # noqa: PTH118
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
+        FileDataContext._does_project_have_a_datasource_in_config_file(gx_dir) is False
     )
 
 
 def test_data_context_does_project_have_a_datasource_in_config_file_returns_false_when_the_project_has_an_invalid_config_file(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
-    with open(os.path.join(ge_dir, FileDataContext.GX_YML), "w") as yml:  # noqa: PTH118
+    gx_dir = empty_context.root_directory
+    with open(os.path.join(gx_dir, FileDataContext.GX_YML), "w") as yml:  # noqa: PTH118
         yml.write("this file: is not a valid ge config")
     assert (
-        FileDataContext._does_project_have_a_datasource_in_config_file(ge_dir) is False
+        FileDataContext._does_project_have_a_datasource_in_config_file(gx_dir) is False
     )
 
 
@@ -913,94 +913,94 @@ def test_data_context_is_project_initialized_returns_true_when_its_valid_context
     empty_context,
 ):
     context = empty_context
-    ge_dir = context.root_directory
+    gx_dir = context.root_directory
     context.add_datasource("arthur", class_name="PandasDatasource")
     context.add_expectation_suite("dent")
     assert len(context.list_expectation_suites()) == 1
 
-    assert FileDataContext.is_project_initialized(ge_dir) is True
+    assert FileDataContext.is_project_initialized(gx_dir) is True
 
 
 def test_data_context_is_project_initialized_returns_true_when_its_valid_context_has_one_datasource_and_no_suites(
     empty_context,
 ):
     context = empty_context
-    ge_dir = context.root_directory
+    gx_dir = context.root_directory
     context.add_datasource("arthur", class_name="PandasDatasource")
     assert len(context.list_expectation_suites()) == 0
 
-    assert FileDataContext.is_project_initialized(ge_dir) is False
+    assert FileDataContext.is_project_initialized(gx_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_its_valid_context_has_no_datasource(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
-    assert FileDataContext.is_project_initialized(ge_dir) is False
+    gx_dir = empty_context.root_directory
+    assert FileDataContext.is_project_initialized(gx_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_yml_is_missing(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
+    gx_dir = empty_context.root_directory
     # mangle project
-    safe_remove(os.path.join(ge_dir, empty_context.GX_YML))  # noqa: PTH118
+    safe_remove(os.path.join(gx_dir, empty_context.GX_YML))  # noqa: PTH118
 
-    assert FileDataContext.is_project_initialized(ge_dir) is False
+    assert FileDataContext.is_project_initialized(gx_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_dir_is_missing(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
+    gx_dir = empty_context.root_directory
     # mangle project
     shutil.rmtree(
-        os.path.join(ge_dir, empty_context.GX_UNCOMMITTED_DIR)  # noqa: PTH118
+        os.path.join(gx_dir, empty_context.GX_UNCOMMITTED_DIR)  # noqa: PTH118
     )
 
-    assert FileDataContext.is_project_initialized(ge_dir) is False
+    assert FileDataContext.is_project_initialized(gx_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_data_docs_dir_is_missing(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
+    gx_dir = empty_context.root_directory
     # mangle project
     shutil.rmtree(
         os.path.join(  # noqa: PTH118
-            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs"
+            gx_dir, empty_context.GX_UNCOMMITTED_DIR, "data_docs"
         )
     )
 
-    assert FileDataContext.is_project_initialized(ge_dir) is False
+    assert FileDataContext.is_project_initialized(gx_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_uncommitted_validations_dir_is_missing(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
+    gx_dir = empty_context.root_directory
     # mangle project
     shutil.rmtree(
         os.path.join(  # noqa: PTH118
-            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"
+            gx_dir, empty_context.GX_UNCOMMITTED_DIR, "validations"
         )
     )
 
-    assert FileDataContext.is_project_initialized(ge_dir) is False
+    assert FileDataContext.is_project_initialized(gx_dir) is False
 
 
 def test_data_context_is_project_initialized_returns_false_when_config_variable_yml_is_missing(
     empty_context,
 ):
-    ge_dir = empty_context.root_directory
+    gx_dir = empty_context.root_directory
     # mangle project
     safe_remove(
         os.path.join(  # noqa: PTH118
-            ge_dir, empty_context.GX_UNCOMMITTED_DIR, "config_variables.yml"
+            gx_dir, empty_context.GX_UNCOMMITTED_DIR, "config_variables.yml"
         )
     )
 
-    assert FileDataContext.is_project_initialized(ge_dir) is False
+    assert FileDataContext.is_project_initialized(gx_dir) is False
 
 
 def test_data_context_create_raises_warning_and_leaves_existing_yml_untouched(
@@ -1029,8 +1029,8 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     FileDataContext.create(project_path)
 
     # mangle the existing setup
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
+    gx_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    uncommitted_dir = os.path.join(gx_dir, "uncommitted")  # noqa: PTH118
     shutil.rmtree(uncommitted_dir)
 
     with pytest.warns(
@@ -1038,7 +1038,7 @@ def test_data_context_create_makes_uncommitted_dirs_when_all_are_missing(
     ):
         # re-run create to simulate onboarding
         FileDataContext.create(project_path)
-    obs = gen_directory_tree_str(ge_dir)
+    obs = gen_directory_tree_str(gx_dir)
 
     assert os.path.isdir(  # noqa: PTH112
         uncommitted_dir
@@ -1092,10 +1092,10 @@ great_expectations/
             .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    gx_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
 
     FileDataContext.create(project_path)
-    fixture = gen_directory_tree_str(ge_dir)
+    fixture = gen_directory_tree_str(gx_dir)
 
     assert fixture == expected
 
@@ -1105,7 +1105,7 @@ great_expectations/
         # re-run create to simulate onboarding
         FileDataContext.create(project_path)
 
-    obs = gen_directory_tree_str(ge_dir)
+    obs = gen_directory_tree_str(gx_dir)
     assert obs == expected
 
 
@@ -1118,14 +1118,14 @@ uncommitted/
         .ge_store_backend_id
 """
     project_path = str(tmp_path_factory.mktemp("stuff"))
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
+    gx_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    uncommitted_dir = os.path.join(gx_dir, "uncommitted")  # noqa: PTH118
     FileDataContext.create(project_path)
     fixture = gen_directory_tree_str(uncommitted_dir)
     assert fixture == expected
 
     # Test that all exist
-    assert FileDataContext.all_uncommitted_directories_exist(ge_dir)
+    assert FileDataContext.all_uncommitted_directories_exist(gx_dir)
 
     # remove a few
     shutil.rmtree(os.path.join(uncommitted_dir, "data_docs"))  # noqa: PTH118
@@ -1156,8 +1156,8 @@ def test_data_context_create_does_not_overwrite_existing_config_variables_yml(
 ):
     project_path = str(tmp_path_factory.mktemp("data_context"))
     FileDataContext.create(project_path)
-    ge_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")  # noqa: PTH118
+    gx_dir = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    uncommitted_dir = os.path.join(gx_dir, "uncommitted")  # noqa: PTH118
     config_vars_yml = os.path.join(  # noqa: PTH118
         uncommitted_dir, "config_variables.yml"
     )

@@ -259,8 +259,8 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo"))
     FileDataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
-    context = get_context(context_root_dir=ge_dir)
+    gx_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
+    context = get_context(context_root_dir=gx_dir)
 
     context._project_config["data_docs_sites"] = {
         "my_rad_site": {
@@ -275,11 +275,11 @@ def test_existing_local_data_docs_urls_returns_single_url_from_customized_local_
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()
-    context = get_context(context_root_dir=ge_dir)
+    context = get_context(context_root_dir=gx_dir)
     context.build_data_docs()
 
     expected_path = os.path.join(  # noqa: PTH118
-        ge_dir, "uncommitted/data_docs/some/local/path/index.html"
+        gx_dir, "uncommitted/data_docs/some/local/path/index.html"
     )
     assert os.path.isfile(expected_path)  # noqa: PTH113
 
@@ -292,8 +292,8 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
 ):
     empty_directory = str(tmp_path_factory.mktemp("yo_yo_ma"))
     FileDataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
-    context = get_context(context_root_dir=ge_dir)
+    gx_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
+    context = get_context(context_root_dir=gx_dir)
 
     context._project_config["data_docs_sites"] = {
         "my_rad_site": {
@@ -315,9 +315,9 @@ def test_existing_local_data_docs_urls_returns_multiple_urls_from_customized_loc
     # TODO Workaround project config programmatic config manipulation
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()
-    context = get_context(context_root_dir=ge_dir)
+    context = get_context(context_root_dir=gx_dir)
     context.build_data_docs()
-    data_docs_dir = os.path.join(ge_dir, "uncommitted/data_docs/")  # noqa: PTH118
+    data_docs_dir = os.path.join(gx_dir, "uncommitted/data_docs/")  # noqa: PTH118
 
     path_1 = os.path.join(data_docs_dir, "some/path/index.html")  # noqa: PTH118
     path_2 = os.path.join(data_docs_dir, "another/path/index.html")  # noqa: PTH118
@@ -341,8 +341,8 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     # TODO What's the latest and greatest way to use configs rather than my hackery?
     empty_directory = str(tmp_path_factory.mktemp("empty"))
     FileDataContext.create(empty_directory)
-    ge_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
-    context = get_context(context_root_dir=ge_dir)
+    gx_dir = os.path.join(empty_directory, FileDataContext.GX_DIR)  # noqa: PTH118
+    context = get_context(context_root_dir=gx_dir)
     config = context.get_config()
     config.data_docs_sites = {
         "local_site": {
@@ -360,8 +360,8 @@ def test_build_data_docs_skipping_index_does_not_build_index(
     #  statefulness issues by writing to disk and re-upping a new context
     context._save_project_config()
     del context
-    context = get_context(context_root_dir=ge_dir)
-    data_docs_dir = os.path.join(ge_dir, "uncommitted", "data_docs")  # noqa: PTH118
+    context = get_context(context_root_dir=gx_dir)
+    data_docs_dir = os.path.join(gx_dir, "uncommitted", "data_docs")  # noqa: PTH118
     index_path = os.path.join(data_docs_dir, "index.html")  # noqa: PTH118
     assert not os.path.isfile(index_path)  # noqa: PTH113
 

@@ -59,15 +59,15 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
     if directory is None:
         directory = os.getcwd()  # noqa: PTH109
     target_directory = os.path.abspath(directory)  # noqa: PTH100
-    ge_dir = _get_full_path_to_ge_dir(target_directory)
+    gx_dir = _get_full_path_to_gx_dir(target_directory)
     cli_message(GREETING)
 
-    if FileDataContext.does_config_exist_on_disk(ge_dir):
-        message = f"""Warning. An existing `{FileDataContext.GX_YML}` was found here: {ge_dir}."""
+    if FileDataContext.does_config_exist_on_disk(gx_dir):
+        message = f"""Warning. An existing `{FileDataContext.GX_YML}` was found here: {gx_dir}."""
         warnings.warn(message)
         try:
             project_file_structure_exists = FileDataContext.is_project_scaffolded(
-                ge_dir
+                gx_dir
             )
             if project_file_structure_exists:
                 cli_message(PROJECT_IS_COMPLETE)
@@ -118,7 +118,7 @@ def init(ctx: click.Context, usage_stats: bool) -> None:
     sys.exit(0)
 
 
-def _get_full_path_to_ge_dir(target_directory: str) -> str:
+def _get_full_path_to_gx_dir(target_directory: str) -> str:
     return os.path.abspath(  # noqa: PTH100
         os.path.join(target_directory, FileDataContext.GX_DIR)  # noqa: PTH118
     )

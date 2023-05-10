@@ -367,19 +367,19 @@ def simulated_project_directories(tmp_path_factory):
     test_dir = tmp_path_factory.mktemp("projects", numbered=False)
     assert os.path.isabs(test_dir)
 
-    ge_dir = os.path.join(test_dir, "pipeline1", "great_expectations")
-    os.makedirs(ge_dir)
-    assert os.path.isdir(ge_dir)
+    gx_dir = os.path.join(test_dir, "pipeline1", "great_expectations")
+    os.makedirs(gx_dir)
+    assert os.path.isdir(gx_dir)
 
     data_dir = os.path.join(test_dir, "data", "pipeline1")
     os.makedirs(data_dir)
     assert os.path.isdir(data_dir)
 
-    yield ge_dir, data_dir
+    yield gx_dir, data_dir
     shutil.rmtree(test_dir)
 
 
-def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_relative_data_path(
+def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_gx_directory_and_relative_data_path(
     monkeypatch, simulated_project_directories
 ):
     """
@@ -393,17 +393,17 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_g
     data: ../../data/pipeline1
     expected results in yaml: ../../data/pipeline1
     """
-    ge_dir, data_dir = simulated_project_directories
-    monkeypatch.chdir(ge_dir)
-    assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)
+    gx_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(gx_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(gx_dir)
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, os.path.join("..", "..", "data", "pipeline1")
+        gx_dir, os.path.join("..", "..", "data", "pipeline1")
     )
     assert obs == os.path.join("..", "..", "data", "pipeline1")
 
 
-def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_ge_directory_and_absolute_data_path(
+def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_gx_directory_and_absolute_data_path(
     monkeypatch, simulated_project_directories
 ):
     """
@@ -417,12 +417,12 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_within_g
     data: /projects/data/pipeline1
     expected results in yaml: ../../data/pipeline1
     """
-    ge_dir, data_dir = simulated_project_directories
-    monkeypatch.chdir(ge_dir)
-    assert str(os.path.abspath(os.path.curdir)) == str(ge_dir)
+    gx_dir, data_dir = simulated_project_directories
+    monkeypatch.chdir(gx_dir)
+    assert str(os.path.abspath(os.path.curdir)) == str(gx_dir)
 
     absolute_path = os.path.abspath(os.path.join("..", "..", "data", "pipeline1"))
-    obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
+    obs = get_relative_path_from_config_file_to_base_path(gx_dir, absolute_path)
     assert obs == os.path.join("..", "..", "data", "pipeline1")
 
 
@@ -440,13 +440,13 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent
     data: ../data/pipeline1
     expected results in yaml: ../../data/pipeline1
     """
-    ge_dir, data_dir = simulated_project_directories
-    adjacent_dir = os.path.dirname(ge_dir)
+    gx_dir, data_dir = simulated_project_directories
+    adjacent_dir = os.path.dirname(gx_dir)
     monkeypatch.chdir(adjacent_dir)
     assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, os.path.join("..", "data", "pipeline1")
+        gx_dir, os.path.join("..", "data", "pipeline1")
     )
     assert obs == os.path.join("..", "..", "data", "pipeline1")
 
@@ -465,13 +465,13 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_adjacent
     data: /projects/data/pipeline1
     expected results in yaml: ../../data/pipeline1
     """
-    ge_dir, data_dir = simulated_project_directories
-    adjacent_dir = os.path.dirname(ge_dir)
+    gx_dir, data_dir = simulated_project_directories
+    adjacent_dir = os.path.dirname(gx_dir)
     monkeypatch.chdir(adjacent_dir)
     assert str(os.path.abspath(os.path.curdir)) == str(adjacent_dir)
 
     absolute_path = os.path.abspath(os.path.join("..", "data", "pipeline1"))
-    obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
+    obs = get_relative_path_from_config_file_to_base_path(gx_dir, absolute_path)
     assert obs == os.path.join("..", "..", "data", "pipeline1")
 
 
@@ -490,12 +490,12 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     data: ../../projects/data/pipeline1
     expected results in yaml: ../../data/pipeline1
     """
-    ge_dir, data_dir = simulated_project_directories
+    gx_dir, data_dir = simulated_project_directories
     monkeypatch.chdir(misc_directory)
     assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
 
     obs = get_relative_path_from_config_file_to_base_path(
-        ge_dir, os.path.join("..", "..", "projects", "data", "pipeline1")
+        gx_dir, os.path.join("..", "..", "projects", "data", "pipeline1")
     )
     assert obs == os.path.join("..", "..", "data", "pipeline1")
 
@@ -515,14 +515,14 @@ def test_get_relative_path_from_config_file_to_data_base_file_path_from_misc_dir
     data: /projects/data/pipeline1
     expected results in yaml: ../../data/pipeline1
     """
-    ge_dir, data_dir = simulated_project_directories
+    gx_dir, data_dir = simulated_project_directories
     monkeypatch.chdir(misc_directory)
     assert str(os.path.abspath(os.path.curdir)) == str(misc_directory)
 
     absolute_path = os.path.abspath(
         os.path.join("..", "..", "projects", "data", "pipeline1")
     )
-    obs = get_relative_path_from_config_file_to_base_path(ge_dir, absolute_path)
+    obs = get_relative_path_from_config_file_to_base_path(gx_dir, absolute_path)
     assert obs == os.path.join("..", "..", "data", "pipeline1")
 
 

@@ -183,17 +183,17 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     initialized_project,
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
+    gx_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
     # mangle the project to remove all traces of a suite and validations
-    _remove_all_datasources(ge_dir)
-    os.remove(os.path.join(ge_dir, "expectations", "Titanic", "warning.json"))
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
-    validations_dir = os.path.join(ge_dir, uncommitted_dir, "validations")
+    _remove_all_datasources(gx_dir)
+    os.remove(os.path.join(gx_dir, "expectations", "Titanic", "warning.json"))
+    uncommitted_dir = os.path.join(gx_dir, "uncommitted")
+    validations_dir = os.path.join(gx_dir, uncommitted_dir, "validations")
     shutil.rmtree(validations_dir)
     os.mkdir(validations_dir)
     shutil.rmtree(os.path.join(uncommitted_dir, "data_docs", "local_site"))
-    context = get_context(context_root_dir=ge_dir)
+    context = get_context(context_root_dir=gx_dir)
     assert not context.list_expectation_suites()
 
     data_folder_path = os.path.join(project_dir, "data")
@@ -236,10 +236,10 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     )
     assert "Great Expectations is now set up." in stdout
 
-    config = _load_config_file(os.path.join(ge_dir, FileDataContext.GX_YML))
+    config = _load_config_file(os.path.join(gx_dir, FileDataContext.GX_YML))
     assert "data__dir" in config["datasources"].keys()
 
-    context = get_context(context_root_dir=ge_dir)
+    context = get_context(context_root_dir=gx_dir)
     assert len(context.list_datasources()) == 1
     assert context.list_datasources()[0]["name"] == "data__dir"
     assert context.list_datasources()[0]["class_name"] == "PandasDatasource"
@@ -249,8 +249,8 @@ def test_init_on_existing_project_with_no_datasources_should_continue_init_flow_
     assert_no_logging_messages_or_tracebacks(caplog, result)
 
 
-def _remove_all_datasources(ge_dir):
-    config_path = os.path.join(ge_dir, FileDataContext.GX_YML)
+def _remove_all_datasources(gx_dir):
+    config_path = os.path.join(gx_dir, FileDataContext.GX_YML)
 
     config = _load_config_file(config_path)
     config["datasources"] = {}
@@ -258,7 +258,7 @@ def _remove_all_datasources(ge_dir):
     with open(config_path, "w") as f:
         yaml.dump(config, f)
 
-    context = get_context(context_root_dir=ge_dir)
+    context = get_context(context_root_dir=gx_dir)
     assert context.list_datasources() == []
 
 
@@ -317,9 +317,9 @@ def test_init_on_existing_project_with_multiple_datasources_exist_do_nothing(
     mock_webbrowser, caplog, monkeypatch, initialized_project, filesystem_csv_2
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
+    gx_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
 
-    context = get_context(context_root_dir=ge_dir)
+    context = get_context(context_root_dir=gx_dir)
     context.add_datasource(
         "another_datasource",
         module_name="great_expectations.datasource",
@@ -450,14 +450,14 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     initialized_project,
 ):
     project_dir = initialized_project
-    ge_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
-    uncommitted_dir = os.path.join(ge_dir, "uncommitted")
+    gx_dir = os.path.join(project_dir, FileDataContext.GX_DIR)
+    uncommitted_dir = os.path.join(gx_dir, "uncommitted")
 
     data_folder_path = os.path.join(project_dir, "data")
     data_path = os.path.join(project_dir, "data", "Titanic.csv")
 
     # mangle the setup to remove all traces of any suite
-    expectations_dir = os.path.join(ge_dir, "expectations")
+    expectations_dir = os.path.join(gx_dir, "expectations")
     data_docs_dir = os.path.join(uncommitted_dir, "data_docs")
     validations_dir = os.path.join(uncommitted_dir, "validations")
 
@@ -465,7 +465,7 @@ def test_init_on_existing_project_with_datasource_with_no_suite_create_one(
     _delete_and_recreate_dir(data_docs_dir)
     _delete_and_recreate_dir(validations_dir)
 
-    context = get_context(context_root_dir=ge_dir)
+    context = get_context(context_root_dir=gx_dir)
     assert context.list_expectation_suites() == []
 
     runner = CliRunner(mix_stderr=False)
