@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import pathlib
 
+import pandas as pd
 import pydantic
 import pytest
+from responses import RequestsMock
 
 from great_expectations.checkpoint import SimpleCheckpoint
-from great_expectations.data_context import AbstractDataContext
+from great_expectations.data_context import AbstractDataContext, CloudDataContext, FileDataContext
 from great_expectations.datasource.fluent import (
     BatchRequest,
     PandasFilesystemDatasource,
@@ -503,3 +505,18 @@ def test_batch_request_error_messages(
 
     with pytest.raises(ValueError):
         batch_request.batch_slice = True  # type: ignore[assignment]
+
+
+@pytest.mark.integration
+def test_data_frame(
+    cloud_api_fake: RequestsMock,
+    empty_cloud_context_fluent: CloudDataContext,
+):
+    context = empty_cloud_context_fluent
+
+    # context = empty_data_context
+    df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
+
+    dataframe_asset = context.sources.add_or_update_pandas(name="fluent_pandas_datasource").add_dataframe_asset(name="my_df_asset", dataframe=df)
+
+    assert dataframe_asset is not None

@@ -327,7 +327,7 @@ XMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
+    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(default=None, exclude=True, repr=False)
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -586,7 +586,8 @@ class PandasDatasource(_PandasDatasource):
             dataframe=dataframe,
             batch_metadata=batch_metadata or {},
         )
-        return self._add_asset(asset=asset)
+        self._add_asset(asset=asset)
+        return asset
 
     @public_api
     def read_dataframe(
