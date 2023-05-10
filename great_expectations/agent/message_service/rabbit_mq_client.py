@@ -1,6 +1,8 @@
 import ssl
 
 import pika
+from pika import BlockingConnection
+from pika.adapters.blocking_connection import BlockingChannel
 from pika.exceptions import AMQPError, ChannelError
 
 
@@ -11,6 +13,9 @@ class RabbitMQClient:
         connection: an instance of pika.BlockingConnection
         channel: an instance of pika.adapters.blocking_connection.BlockingChannel
     """
+
+    connection: BlockingConnection
+    channel: BlockingChannel
 
     def __init__(self, url: str):
         try:

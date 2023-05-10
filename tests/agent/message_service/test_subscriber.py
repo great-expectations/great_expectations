@@ -2,6 +2,7 @@ from unittest.mock import Mock, ANY
 
 import pytest
 
+from great_expectations.agent.message_service.rabbit_mq_client import RabbitMQClient
 from great_expectations.agent.message_service.subscriber import (
     Subscriber,
     SubscriberError,
@@ -11,7 +12,7 @@ from tests.agent.message_service.conftest import AMQP_CHANNEL_AND_CONNECTION_ERR
 
 
 def test_subscriber_has_client_attribute():
-    client = Mock()
+    client = Mock(autospec=RabbitMQClient)
 
     subscriber = Subscriber(client=client)
 
@@ -19,7 +20,7 @@ def test_subscriber_has_client_attribute():
 
 
 def test_subscriber_consume_calls_basic_consume():
-    client = Mock()
+    client = Mock(autospec=RabbitMQClient)
     subscriber = Subscriber(client=client)
     queue = "test-queue"
 
@@ -34,7 +35,7 @@ def test_subscriber_consume_calls_basic_consume():
 
 
 def test_subscriber_consume_calls_start_consuming():
-    client = Mock()
+    client = Mock(autospec=RabbitMQClient)
     subscriber = Subscriber(client=client)
     queue = "test-queue"
 
@@ -47,7 +48,7 @@ def test_subscriber_consume_calls_start_consuming():
 
 
 def test_subscriber_close_closes_channel():
-    client = Mock()
+    client = Mock(autospec=RabbitMQClient)
     subscriber = Subscriber(client=client)
 
     subscriber.close()
@@ -56,7 +57,7 @@ def test_subscriber_close_closes_channel():
 
 
 def test_subscriber_close_closes_connection():
-    client = Mock()
+    client = Mock(autospec=RabbitMQClient)
     subscriber = Subscriber(client=client)
 
     subscriber.close()
@@ -66,7 +67,7 @@ def test_subscriber_close_closes_connection():
 
 @pytest.mark.parametrize("error", AMQP_CHANNEL_AND_CONNECTION_ERRORS)
 def test_subscriber_close_handles_amqp_errors_from_channel(error):
-    client = Mock()
+    client = Mock(autospec=RabbitMQClient)
     client.channel.close.side_effect = error
     subscriber = Subscriber(client=client)
 
@@ -76,7 +77,7 @@ def test_subscriber_close_handles_amqp_errors_from_channel(error):
 
 @pytest.mark.parametrize("error", AMQP_CHANNEL_AND_CONNECTION_ERRORS)
 def test_subscriber_close_handles_amqp_errors_from_connection(error):
-    client = Mock()
+    client = Mock(autospec=RabbitMQClient)
     client.connection.close.side_effect = error
     subscriber = Subscriber(client=client)
 
