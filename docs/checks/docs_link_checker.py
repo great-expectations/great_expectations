@@ -10,6 +10,7 @@ The above command:
     - -s docs (also --site-prefix): The site path prefix, used to resolve abosulte paths (ex: in http://blah/docs, it is the docs part)
     - --skip-external: If present, external (http) links are not checked
 """
+from __future__ import annotations
 
 import glob
 import logging
@@ -254,27 +255,27 @@ class LinkChecker:
         if self._external_link_pattern.match(link):
             result = self._check_external_link(link, file)
         elif self._is_image_link(match.group(0)):
-            match = self._relative_image_pattern.match(link)
+            match = self._relative_image_pattern.match(link)  # type: ignore[assignment]
             if match:
                 result = self._check_relative_image(link, file, match.group("path"))
             else:
-                match = self._absolute_image_pattern.match(link)
+                match = self._absolute_image_pattern.match(link)  # type: ignore[assignment]
                 if match:
                     result = self._check_absolute_image(link, file, match.group("path"))
                 else:
                     result = LinkReport(link, file, "Invalid image link format")
         else:
-            match = self._relative_link_pattern.match(link)
+            match = self._relative_link_pattern.match(link)  # type: ignore[assignment]
             if match:
                 result = self._check_relative_link(link, file, match.group("path"))
             else:
-                match = self._absolute_link_pattern.match(link)
+                match = self._absolute_link_pattern.match(link)  # type: ignore[assignment]
                 if match:
                     result = self._check_absolute_link(
                         link, file, match.group("path"), match.group("version")
                     )
                 else:
-                    match = self._docroot_link_pattern.match(link)
+                    match = self._docroot_link_pattern.match(link)  # type: ignore[assignment]
                     if match:
                         result = self._check_docroot_link(
                             link, file, match.group("path")
