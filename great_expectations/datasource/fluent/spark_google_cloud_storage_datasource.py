@@ -28,7 +28,6 @@ from great_expectations.datasource.fluent.spark_datasource import (
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         _SPARK_FILE_PATH_ASSET_TYPES_UNION,
-        CSVAsset,
     )
 
 
