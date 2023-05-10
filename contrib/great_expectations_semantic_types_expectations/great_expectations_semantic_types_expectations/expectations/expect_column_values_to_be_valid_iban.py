@@ -1,9 +1,15 @@
 from typing import Optional
 
 from schwifty import IBAN
+from schwifty.exceptions import SchwiftyException
 
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+    SparkDFExecutionEngine,
+)
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
@@ -11,44 +17,52 @@ from great_expectations.expectations.metrics import (
 )
 
 
-# This method compares a string to the valid IBAN format.
 def is_valid_iban(iban: str) -> bool:
     try:
         IBAN(iban)
         return True
-    except Exception:
+    except SchwiftyException:
         return False
 
 
-# This class defines a Metric to support your Expectation.
-# For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidIban(ColumnMapMetricProvider):
+@F.udf(pyspark.types.BooleanType())
+def is_valid_iban_udf(iban: str) -> bool:
+    return is_valid_iban(iban)
 
-    # This is the id string that will be used to reference your metric.
+
+class ColumnValuesToBeValidIban(ColumnMapMetricProvider):
     condition_metric_name = "column_values.valid_iban"
 
-    # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column.apply(lambda x: is_valid_iban(x))
+        return column.apply(is_valid_iban)
+
+    @column_condition_partial(engine=SparkDFExecutionEngine)
+    def _spark(cls, column, **kwargs):
+        return is_valid_iban_udf(column)
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(cls, column, _dialect, **kwargs):
     #     raise NotImplementedError
 
-    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-    # @column_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, column, **kwargs):
-    #     raise NotImplementedError
 
-
-# This class defines the Expectation itself
 class ExpectColumnValuesToBeValidIban(ColumnMapExpectation):
     """Expect column values to be valid IBAN format."""
 
-    # These examples will be shown in the public gallery.
-    # They will also be executed as unit tests for your Expectation.
+    map_metric = "column_values.valid_iban"
+
+    success_keys = ("mostly",)
+
+    default_kwarg_values = {}
+
+    library_metadata = {
+        "maturity": "experimental",
+        "tags": ["experimental", "hackathon", "typed-entities"],
+        "contributors": ["@voidforall", "@mkopec87"],
+        "requirements": ["schwifty"],
+    }
+
     examples = [
         {
             "data": {
@@ -90,16 +104,6 @@ class ExpectColumnValuesToBeValidIban(ColumnMapExpectation):
         }
     ]
 
-    # This is the id string of the Metric used by this Expectation.
-    # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_iban"
-
-    # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    success_keys = ("mostly",)
-
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -114,28 +118,6 @@ class ExpectColumnValuesToBeValidIban(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
-    # This object contains metadata for display in the public Gallery
-    library_metadata = {
-        "maturity": "experimental",
-        "tags": ["experimental", "hackathon", "typed-entities"],
-        "contributors": [
-            "@voidforall",
-        ],
-        "requirements": ["schwifty"],
-    }
 
 
 if __name__ == "__main__":

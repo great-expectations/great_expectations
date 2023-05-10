@@ -1,12 +1,11 @@
 import os
 
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
-yaml = YAML()
-yaml.default_flow_style = False
+yaml = YAMLHandler()
 
 
 @pytest.fixture(scope="function")
@@ -16,7 +15,9 @@ def totally_empty_data_context(tmp_path_factory):
     # However, as of 2019/08/22, most tests still use filesystem-based fixtures.
     # TODO: Where appropriate, switch DataContext tests to the new method.
     project_root_dir = str(tmp_path_factory.mktemp("totally_empty_data_context"))
-    os.mkdir(os.path.join(project_root_dir, "great_expectations"))
+    os.mkdir(  # noqa: PTH102
+        os.path.join(project_root_dir, "great_expectations")  # noqa: PTH118
+    )
 
     config = {
         "config_version": 2,
@@ -38,12 +39,17 @@ def totally_empty_data_context(tmp_path_factory):
         "validation_operators": {},
     }
     with open(
-        os.path.join(project_root_dir, "great_expectations/great_expectations.yml"), "w"
+        os.path.join(  # noqa: PTH118
+            project_root_dir, "great_expectations/great_expectations.yml"
+        ),
+        "w",
     ) as config_file:
         yaml.dump(config, config_file)
 
     context = gx.get_context(
-        context_root_dir=os.path.join(project_root_dir, "great_expectations")
+        context_root_dir=os.path.join(  # noqa: PTH118
+            project_root_dir, "great_expectations"
+        )
     )
     # print(json.dumps(context._project_config, indent=2))
     return context

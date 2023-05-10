@@ -91,7 +91,7 @@ like this:
 .. code-block:: yaml
 
     data_warehouse:
-      drivername: postgres
+      drivername: postgresql
       host: warehouse.ourcompany.biz
       port: '5432'
       username: bob

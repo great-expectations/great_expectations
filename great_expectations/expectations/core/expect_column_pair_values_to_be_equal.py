@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnPairMapExpectation,
     InvalidExpectationConfigurationError,
@@ -91,10 +92,26 @@ class ExpectColumnPairValuesToBeEqual(ColumnPairMapExpectation):
         "column_B",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Ensures both column_A and column_B have been provided."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_pair_values_to_be_equal` it is required that the `configuration.kwargs` contain both
+        `column_A` and `column_B` keys.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:

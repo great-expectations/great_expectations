@@ -13,6 +13,7 @@ config_version: 3.0
 # Datasources tell Great Expectations where your data lives and how to get it.
 # You can use the CLI command `great_expectations datasource new` to help you
 # add a new datasource. Read more at https://docs.greatexpectations.io/en/latest/reference/core_concepts/datasource.html
+# <snippet name="tests/test_fixtures/configuration_for_testing_v2_v3_migration/postgresql/v3/great_expectations/great_expectations.yml datasources">
 datasources:
   my_postgres_datasource:
     module_name: great_expectations.datasource
@@ -31,6 +32,7 @@ datasources:
         module_name: great_expectations.datasource.data_connector
         class_name: InferredAssetSqlDataConnector
         include_schema_name: true
+# </snippet>
 
 # This config file supports variable substitution which enables: 1) keeping
 # secrets out of source control & 2) environment-based configuration changes

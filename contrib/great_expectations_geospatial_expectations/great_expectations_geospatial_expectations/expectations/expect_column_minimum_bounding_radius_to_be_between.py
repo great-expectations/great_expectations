@@ -4,23 +4,16 @@ import pandas as pd
 import pygeos as geos
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import (
-    ExecutionEngine,
-    PandasExecutionEngine,
-    SparkDFExecutionEngine,
-    SqlAlchemyExecutionEngine,
-)
-from great_expectations.expectations.expectation import ColumnExpectation
+from great_expectations.execution_engine import ExecutionEngine, PandasExecutionEngine
+from great_expectations.expectations.expectation import ColumnAggregateExpectation
 from great_expectations.expectations.metrics import (
     ColumnAggregateMetricProvider,
-    column_aggregate_partial,
     column_aggregate_value,
 )
 
 
 # This class defines a Metric to support your Expectation.
-# For most ColumnExpectations, the main business logic for calculation will live in this class.
+# For most ColumnAggregateExpectations, the main business logic for calculation will live in this class.
 class ColumnAggregateGeometryBoundingRadius(ColumnAggregateMetricProvider):
 
     # This is the id string that will be used to reference your Metric.
@@ -64,7 +57,7 @@ class ColumnAggregateGeometryBoundingRadius(ColumnAggregateMetricProvider):
 
 
 # This class defines the Expectation itself
-class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnExpectation):
+class ExpectColumnMinimumBoundingRadiusToBeBetween(ColumnAggregateExpectation):
     """
     Expect that column values as geometry points to be contained within a bounding circle with a given radius (or diameter).
 

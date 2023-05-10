@@ -57,7 +57,7 @@ def assert_how_to_buttons(
         "profiling_results": [action_card, show_walkthrough_button, walkthrough_modal],
     }
 
-    data_docs_site_dir = os.path.join(
+    data_docs_site_dir = os.path.join(  # noqa: PTH118
         context._context_root_directory,
         context._project_config.data_docs_sites["local_site"]["store_backend"][
             "base_directory"
@@ -67,15 +67,15 @@ def assert_how_to_buttons(
     page_paths_dict = {
         "index_pages": [index_page_locator_info[7:]],
         "expectation_suites": [
-            os.path.join(data_docs_site_dir, link_dict["filepath"])
+            os.path.join(data_docs_site_dir, link_dict["filepath"])  # noqa: PTH118
             for link_dict in index_links_dict.get("expectations_links", [])
         ],
         "validation_results": [
-            os.path.join(data_docs_site_dir, link_dict["filepath"])
+            os.path.join(data_docs_site_dir, link_dict["filepath"])  # noqa: PTH118
             for link_dict in index_links_dict.get("validations_links", [])
         ],
         "profiling_results": [
-            os.path.join(data_docs_site_dir, link_dict["filepath"])
+            os.path.join(data_docs_site_dir, link_dict["filepath"])  # noqa: PTH118
             for link_dict in index_links_dict.get("profiling_links", [])
         ],
     }
@@ -242,13 +242,13 @@ def test_configuration_driven_site_builder(
     assert len(index_links_dict["profiling_links"]) == 5
 
     # save documentation locally
-    os.makedirs("./tests/render/output", exist_ok=True)
-    os.makedirs("./tests/render/output/documentation", exist_ok=True)
+    os.makedirs("./tests/render/output", exist_ok=True)  # noqa: PTH103
+    os.makedirs("./tests/render/output/documentation", exist_ok=True)  # noqa: PTH103
 
-    if os.path.isdir("./tests/render/output/documentation"):
+    if os.path.isdir("./tests/render/output/documentation"):  # noqa: PTH112
         shutil.rmtree("./tests/render/output/documentation")
     shutil.copytree(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             site_builder_data_context_v013_with_html_store_titanic_random.root_directory,
             "uncommitted/data_docs/",
         ),
@@ -261,7 +261,7 @@ def test_configuration_driven_site_builder(
     # will not be updated without our call to site builder
 
     expectation_suite_path_component = expectation_suite_name.replace(".", "/")
-    validation_result_page_path = os.path.join(
+    validation_result_page_path = os.path.join(  # noqa: PTH118
         site_builder.site_index_builder.target_store.store_backends[
             ValidationResultIdentifier
         ].full_base_directory,
@@ -289,7 +289,7 @@ def test_configuration_driven_site_builder(
     # verify that an additional validation result HTML file was generated
     assert len(index_links_dict["validations_links"]) == 2
 
-    site_builder.site_index_builder.target_store.store_backends[
+    _ = site_builder.site_index_builder.target_store.store_backends[
         ValidationResultIdentifier
     ].full_base_directory
 
@@ -301,7 +301,7 @@ def test_configuration_driven_site_builder(
     # verify that the new method of the site builder that returns the URL of the HTML file that renders
     # a resource
 
-    new_validation_result_page_path = os.path.join(
+    new_validation_result_page_path = os.path.join(  # noqa: PTH118
         site_builder.site_index_builder.target_store.store_backends[
             ValidationResultIdentifier
         ].full_base_directory,
@@ -318,7 +318,7 @@ def test_configuration_driven_site_builder(
     html_url = site_builder.get_resource_url()
     assert (
         "file://"
-        + os.path.join(
+        + os.path.join(  # noqa: PTH118
             site_builder.site_index_builder.target_store.store_backends[
                 ValidationResultIdentifier
             ].full_base_directory,
@@ -548,7 +548,7 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
     batch_kwargs = context.build_batch_kwargs(
         datasource=datasource_name,
         batch_kwargs_generator=generator_name,
-        name=data_asset_name,
+        data_asset_name=data_asset_name,
     )
 
     expectation_suite_name = "{}.{}.{}.{}".format(
@@ -590,15 +590,15 @@ def test_configuration_driven_site_builder_without_how_to_buttons(
 def test_site_builder_with_custom_site_section_builders_config(tmp_path_factory):
     """Test that site builder can handle partially specified custom site_section_builders config"""
     base_dir = str(tmp_path_factory.mktemp("project_dir"))
-    project_dir = os.path.join(base_dir, "project_path")
-    os.mkdir(project_dir)
+    project_dir = os.path.join(base_dir, "project_path")  # noqa: PTH118
+    os.mkdir(project_dir)  # noqa: PTH102
 
     # fixture config swaps site section builder source stores and specifies custom run_name_filters
     shutil.copy(
         file_relative_path(
             __file__, "../test_fixtures/great_expectations_custom_local_site_config.yml"
         ),
-        str(os.path.join(project_dir, "great_expectations.yml")),
+        str(os.path.join(project_dir, "great_expectations.yml")),  # noqa: PTH118
     )
     context = get_context(context_root_dir=project_dir)
     local_site_config = context._project_config.data_docs_sites.get("local_site")
@@ -654,7 +654,7 @@ def test_site_builder_usage_statistics_enabled(
         },
     )
     site_builder_return_obj = site_builder.build()
-    index_page_path = site_builder_return_obj[0]
+    index_page_path = site_builder_return_obj[0][7:]  # strip prefix "file:///"
     links_dict = site_builder_return_obj[1]
     expectation_suite_pages = [
         file_relative_path(index_page_path, expectation_suite_link_dict["filepath"])
@@ -672,7 +672,7 @@ def test_site_builder_usage_statistics_enabled(
     expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z&dataContextId=f43d4897-385f-4366-82b0-1a8eda2bf79c"
 
     for page_path in page_paths_to_check:
-        with open(page_path[7:]) as f:
+        with open(page_path) as f:
             page_contents = f.read()
             assert expected_logo_url in page_contents
 
@@ -705,7 +705,7 @@ def test_site_builder_usage_statistics_disabled(
         },
     )
     site_builder_return_obj = site_builder.build()
-    index_page_path = site_builder_return_obj[0]
+    index_page_path = site_builder_return_obj[0][7:]  # strip prefix "file:///"
     links_dict = site_builder_return_obj[1]
     expectation_suite_pages = [
         file_relative_path(index_page_path, expectation_suite_link_dict["filepath"])
@@ -723,7 +723,7 @@ def test_site_builder_usage_statistics_disabled(
     expected_logo_url = "https://great-expectations-web-assets.s3.us-east-2.amazonaws.com/logo-long.png?d=20190924T231836.000000Z"
 
     for page_path in page_paths_to_check:
-        with open(page_path[7:]) as f:
+        with open(page_path) as f:
             page_contents = f.read()
             assert expected_logo_url in page_contents
             assert data_context_id not in page_contents

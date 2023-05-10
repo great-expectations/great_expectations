@@ -1,15 +1,18 @@
 from typing import Any, Dict, List, Optional
 
-from contrib.capitalone_dataprofiler_expectations.capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result.data_profiler_structured_data_assistant_result import (
+from capitalone_dataprofiler_expectations.rule_based_profiler.data_assistant_result import (
     DataProfilerStructuredDataAssistantResult,
 )
+from capitalone_dataprofiler_expectations.rule_based_profiler.domain_builder.data_profiler_column_domain_builder import (
+    DataProfilerColumnDomainBuilder,
+)
+
 from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
 from great_expectations.rule_based_profiler.data_assistant import DataAssistant
 from great_expectations.rule_based_profiler.data_assistant_result import (
     DataAssistantResult,
 )
 from great_expectations.rule_based_profiler.domain_builder import (
-    ColumnDomainBuilder,
     DomainBuilder,
 )
 from great_expectations.rule_based_profiler.expectation_configuration_builder import (
@@ -89,16 +92,12 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         rule.
         """
 
-        column_domain_builder: DomainBuilder = ColumnDomainBuilder(
-            include_column_names=None,
-            exclude_column_names=None,
-            include_column_name_suffixes=None,
-            exclude_column_name_suffixes=None,
-            semantic_type_filter_module_name=None,
-            semantic_type_filter_class_name=None,
-            include_semantic_types=None,
-            exclude_semantic_types=None,
-            data_context=None,
+        """
+        Subject to inclusion/exclusion arguments, "DataProfilerColumnDomainBuilder" emits "Domain" object for every
+        column name in profiler report; GreatExpectations "table.columns" metric is used to validate column existence.
+        """
+        data_profiler_column_domain_builder: DomainBuilder = (
+            DataProfilerColumnDomainBuilder()
         )
 
         data_profiler_profile_report_metric_single_batch_parameter_builder_for_metrics: ParameterBuilder = DataAssistant.commonly_used_parameter_builders.build_metric_single_batch_parameter_builder(
@@ -191,7 +190,7 @@ class DataProfilerStructuredDataAssistant(DataAssistant):
         rule = Rule(
             name="numeric_rule",
             variables=variables,
-            domain_builder=column_domain_builder,
+            domain_builder=data_profiler_column_domain_builder,
             parameter_builders=parameter_builders,
             expectation_configuration_builders=expectation_configuration_builders,
         )

@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 import numpy as np
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.util import get_sql_dialect_floating_point_infinity_value
 from great_expectations.execution_engine import (
@@ -9,7 +10,6 @@ from great_expectations.execution_engine import (
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import (
     MetricProvider,
     metric_value,
@@ -193,7 +193,7 @@ class ColumnValuesBetweenCount(MetricProvider):
                 condition = sa.and_(column >= min_value, column <= max_value)
 
         return execution_engine.engine.execute(
-            sa.select([sa.func.count()]).select_from(selectable).where(condition)
+            sa.select(sa.func.count()).select_from(selectable).where(condition)
         ).scalar()
 
     @metric_value(engine=SparkDFExecutionEngine)

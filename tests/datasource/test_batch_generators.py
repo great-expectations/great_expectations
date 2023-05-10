@@ -9,7 +9,7 @@ from great_expectations.datasource.batch_kwargs_generator import (
 try:
     from unittest import mock
 except ImportError:
-    from unittest import mock
+    from unittest import mock  # noqa: F401
 
 
 def test_file_kwargs_generator(
@@ -44,7 +44,7 @@ def test_file_kwargs_generator(
         for batch_kwargs in generator.get_iterator(data_asset_name="f1")
     ]
     assert len(f1_batches) == 1
-    expected_batches = [{"path": os.path.join(base_dir, "f1.csv")}]
+    expected_batches = [{"path": os.path.join(base_dir, "f1.csv")}]  # noqa: PTH118
     for batch in expected_batches:
         assert batch["path"] in f1_batches
 
@@ -54,8 +54,8 @@ def test_file_kwargs_generator(
     ]
     assert len(f3_batches) == 2
     expected_batches = [
-        {"path": os.path.join(base_dir, "f3", "f3_20190101.csv")},
-        {"path": os.path.join(base_dir, "f3", "f3_20190102.csv")},
+        {"path": os.path.join(base_dir, "f3", "f3_20190101.csv")},  # noqa: PTH118
+        {"path": os.path.join(base_dir, "f3", "f3_20190102.csv")},  # noqa: PTH118
     ]
     for batch in expected_batches:
         assert batch["path"] in f3_batches
@@ -69,25 +69,25 @@ def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
 
     basedir = str(tmp_path_factory.mktemp("test_glob_reader_generator"))
 
-    with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
+    with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f2.csv"), "w") as outfile:
+    with open(os.path.join(basedir, "f2.csv"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f3.blarg"), "w") as outfile:
+    with open(os.path.join(basedir, "f3.blarg"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f4.blarg"), "w") as outfile:
+    with open(os.path.join(basedir, "f4.blarg"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f5.blarg"), "w") as outfile:
+    with open(os.path.join(basedir, "f5.blarg"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f6.blarg"), "w") as outfile:
+    with open(os.path.join(basedir, "f6.blarg"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f7.xls"), "w") as outfile:
+    with open(os.path.join(basedir, "f7.xls"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f8.parquet"), "w") as outfile:
+    with open(os.path.join(basedir, "f8.parquet"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f9.xls"), "w") as outfile:
+    with open(os.path.join(basedir, "f9.xls"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f0.json"), "w") as outfile:
+    with open(os.path.join(basedir, "f0.json"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
 
     g2 = GlobReaderBatchKwargsGenerator(
@@ -102,11 +102,11 @@ def test_glob_reader_generator(basic_pandas_datasource, tmp_path_factory):
 
     blargs_kwargs = [x["path"] for x in g2.get_iterator(data_asset_name="blargs")]
     real_blargs = [
-        os.path.join(basedir, "f1.blarg"),
-        os.path.join(basedir, "f3.blarg"),
-        os.path.join(basedir, "f4.blarg"),
-        os.path.join(basedir, "f5.blarg"),
-        os.path.join(basedir, "f6.blarg"),
+        os.path.join(basedir, "f1.blarg"),  # noqa: PTH118
+        os.path.join(basedir, "f3.blarg"),  # noqa: PTH118
+        os.path.join(basedir, "f4.blarg"),  # noqa: PTH118
+        os.path.join(basedir, "f5.blarg"),  # noqa: PTH118
+        os.path.join(basedir, "f6.blarg"),  # noqa: PTH118
     ]
     for kwargs in real_blargs:
         assert kwargs in blargs_kwargs
@@ -119,37 +119,41 @@ def test_file_kwargs_generator_extensions(tmp_path_factory):
     basedir = str(tmp_path_factory.mktemp("test_file_kwargs_generator_extensions"))
 
     # Do not include: invalid extension
-    with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:
+    with open(os.path.join(basedir, "f1.blarg"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
     # Include
-    with open(os.path.join(basedir, "f2.csv"), "w") as outfile:
+    with open(os.path.join(basedir, "f2.csv"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
     # Do not include: valid subdir, but no valid files in it
-    os.mkdir(os.path.join(basedir, "f3"))
-    with open(os.path.join(basedir, "f3", "f3_1.blarg"), "w") as outfile:
+    os.mkdir(os.path.join(basedir, "f3"))  # noqa: PTH102, PTH118
+    with open(
+        os.path.join(basedir, "f3", "f3_1.blarg"), "w"  # noqa: PTH118
+    ) as outfile:
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f3", "f3_2.blarg"), "w") as outfile:
+    with open(
+        os.path.join(basedir, "f3", "f3_2.blarg"), "w"  # noqa: PTH118
+    ) as outfile:
         outfile.write("\n\n\n")
     # Include: valid subdir with valid files
-    os.mkdir(os.path.join(basedir, "f4"))
-    with open(os.path.join(basedir, "f4", "f4_1.csv"), "w") as outfile:
+    os.mkdir(os.path.join(basedir, "f4"))  # noqa: PTH102, PTH118
+    with open(os.path.join(basedir, "f4", "f4_1.csv"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f4", "f4_2.csv"), "w") as outfile:
+    with open(os.path.join(basedir, "f4", "f4_2.csv"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
     # Do not include: valid extension, but dot prefix
-    with open(os.path.join(basedir, ".f5.csv"), "w") as outfile:
+    with open(os.path.join(basedir, ".f5.csv"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
 
     # Include: valid extensions
-    with open(os.path.join(basedir, "f6.tsv"), "w") as outfile:
+    with open(os.path.join(basedir, "f6.tsv"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f7.xls"), "w") as outfile:
+    with open(os.path.join(basedir, "f7.xls"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f8.parquet"), "w") as outfile:
+    with open(os.path.join(basedir, "f8.parquet"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f9.xls"), "w") as outfile:
+    with open(os.path.join(basedir, "f9.xls"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
-    with open(os.path.join(basedir, "f0.json"), "w") as outfile:
+    with open(os.path.join(basedir, "f0.json"), "w") as outfile:  # noqa: PTH118
         outfile.write("\n\n\n")
 
     g1 = SubdirReaderBatchKwargsGenerator(datasource="foo", base_directory=basedir)

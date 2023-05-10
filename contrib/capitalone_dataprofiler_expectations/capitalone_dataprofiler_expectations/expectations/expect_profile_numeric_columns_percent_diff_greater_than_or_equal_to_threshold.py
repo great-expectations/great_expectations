@@ -35,7 +35,7 @@ class DataProfilerProfileNumericColumnsPercentDiffGreaterThanOrEqualToThreshold(
     )
 
     @metric_value(engine=PandasExecutionEngine)
-    def _pandas(
+    def _pandas(  # noqa: C901 - 22
         cls,
         execution_engine: PandasExecutionEngine,
         metric_domain_kwargs: Dict,
@@ -229,7 +229,7 @@ class ExpectProfileNumericColumnsPercentDiffGreaterThanOrEqualToThreshold(
         "/example_profiles/expect_profile_diff_less_than_threshold_profile.pkl"
     )
 
-    dir_path = os.path.dirname(os.path.abspath(__file__))
+    dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
     profile_path = dir_path + profile_path
 
     example_profile.save(filepath=profile_path)

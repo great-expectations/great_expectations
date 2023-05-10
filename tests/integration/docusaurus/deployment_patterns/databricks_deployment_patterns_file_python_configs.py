@@ -1,13 +1,16 @@
 import os
 
-from ruamel import yaml
-
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports">
 from great_expectations.core.batch import BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     FilesystemStoreBackendDefaults,
 )
 from great_expectations.util import get_context
+
+yaml = YAMLHandler()
+# </snippet>
 
 # 1. Install Great Expectations
 # %pip install great-expectations
@@ -18,17 +21,21 @@ from great_expectations.util import get_context
 
 # CODE vvvvv vvvvv
 # This root directory is for use in Databricks
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py root directory">
 root_directory = "/dbfs/great_expectations/"
+# </snippet>
 
 # For testing purposes only, we change the root_directory to an ephemeral location created by our test runner
 root_directory = os.path.join(os.getcwd(), "dbfs_temp_directory")
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py set up context">
 data_context_config = DataContextConfig(
     store_backend_defaults=FilesystemStoreBackendDefaults(
         root_directory=root_directory
     ),
 )
 context = get_context(project_config=data_context_config)
+# </snippet>
 # CODE ^^^^^ ^^^^^
 
 # ASSERTIONS vvvvv vvvvv
@@ -48,6 +55,7 @@ assert os.listdir(uncommitted_directory) == ["validations"]
 
 # CODE vvvvv vvvvv
 # Python Version
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py datasource_config">
 my_spark_datasource_config = {
     "name": "insert_your_datasource_name_here",
     "class_name": "Datasource",
@@ -72,6 +80,7 @@ my_spark_datasource_config = {
         },
     },
 }
+# </snippet>
 
 # For this test script, change base_directory to location where test runner data is located
 my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_here"][
@@ -95,10 +104,15 @@ my_spark_datasource_config["data_connectors"]["insert_your_data_connector_name_h
 #     root_directory, "../../../../test_sets/taxi_yellow_tripdata_samples/first_3_files/"
 # )
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py test datasource_config">
 context.test_yaml_config(yaml.dump(my_spark_datasource_config))
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource_config">
 context.add_datasource(**my_spark_datasource_config)
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py create batch request">
 batch_request = BatchRequest(
     datasource_name="insert_your_datasource_name_here",
     data_connector_name="insert_your_data_connector_name_here",
@@ -110,6 +124,7 @@ batch_request = BatchRequest(
         },
     },
 )
+# </snippet>
 
 # For the purposes of this script, the data_asset_name includes "sample"
 batch_request.data_asset_name = "yellow_tripdata_sample"
@@ -156,24 +171,28 @@ assert (
 
 # 5. Create expectations
 # CODE vvvvv vvvvv
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py get validator">
 expectation_suite_name = "insert_your_expectation_suite_name_here"
-context.create_expectation_suite(
-    expectation_suite_name=expectation_suite_name, overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name=expectation_suite_name)
 validator = context.get_validator(
     batch_request=batch_request,
     expectation_suite_name=expectation_suite_name,
 )
 
 print(validator.head())
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add expectations">
 validator.expect_column_values_to_not_be_null(column="passenger_count")
 
 validator.expect_column_values_to_be_between(
     column="congestion_surcharge", min_value=0, max_value=1000
 )
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py save suite">
 validator.save_expectation_suite(discard_failed_expectations=False)
+# </snippet>
 # CODE ^^^^^ ^^^^^
 
 # NOTE: The following code is only for testing and can be ignored by users.
@@ -185,6 +204,7 @@ assert len(suite.expectations) == 2
 
 # 6. Validate your data
 # CODE vvvvv vvvvv
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py checkpoint config">
 my_checkpoint_name = "insert_your_checkpoint_name_here"
 checkpoint_config = {
     "name": my_checkpoint_name,
@@ -211,19 +231,26 @@ checkpoint_config = {
         }
     ],
 }
+# </snippet>
 
 # For the purposes of this script, the data_asset_name includes "sample"
 checkpoint_config["validations"][0]["batch_request"][
     "data_asset_name"
 ] = "yellow_tripdata_sample"
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py test checkpoint config">
 my_checkpoint = context.test_yaml_config(yaml.dump(checkpoint_config))
+# </snippet>
 
-context.add_checkpoint(**checkpoint_config)
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add checkpoint config">
+context.add_or_update_checkpoint(**checkpoint_config)
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py run checkpoint">
 checkpoint_result = context.run_checkpoint(
     checkpoint_name=my_checkpoint_name,
 )
+# </snippet>
 # CODE ^^^^^ ^^^^^
 
 # NOTE: The following code is only for testing and can be ignored by users.

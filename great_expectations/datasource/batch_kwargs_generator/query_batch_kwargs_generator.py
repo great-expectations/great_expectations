@@ -1,6 +1,5 @@
 import logging
 import os
-import warnings
 
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
@@ -10,16 +9,6 @@ from great_expectations.datasource.types import SqlAlchemyDatasourceQueryBatchKw
 from great_expectations.exceptions import BatchKwargsError, ClassInstantiationError
 
 logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine import reflection
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    reflection = None
-    logger.debug("Unable to import sqlalchemy.")
 
 
 class QueryBatchKwargsGenerator(BatchKwargsGenerator):
@@ -84,7 +73,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
             if root_directory:
                 query_store_backend = {
                     "class_name": "TupleFilesystemStoreBackend",
-                    "base_directory": os.path.join(
+                    "base_directory": os.path.join(  # noqa: PTH118
                         datasource.data_context.root_directory,
                         "datasources",
                         datasource.name,
@@ -134,20 +123,9 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
         return iter_
 
-    # TODO: deprecate generator_asset argument, remove default on query arg
-    def add_query(self, generator_asset=None, query=None, data_asset_name=None) -> None:
+    # TODO: remove default on query arg
+    def add_query(self, query=None, data_asset_name=None) -> None:
         assert query, "Please provide a query."
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
-            data_asset_name = generator_asset
 
         # Backends must have a tuple key; we use only a single-element tuple
         self._store_backend.set((data_asset_name,), query)
@@ -176,20 +154,7 @@ class QueryBatchKwargsGenerator(BatchKwargsGenerator):
 
         return SqlAlchemyDatasourceQueryBatchKwargs(batch_kwargs)
 
-    # TODO: deprecate generator_asset argument
-    def get_available_partition_ids(
-        self, generator_asset=None, data_asset_name=None
-    ) -> None:
-        assert (generator_asset and not data_asset_name) or (
-            not generator_asset and data_asset_name
-        ), "Please provide either generator_asset or data_asset_name."
-        if generator_asset:
-            # deprecated-v0.11.0
-            warnings.warn(
-                "The 'generator_asset' argument is deprecated as of v0.11.0 and will be removed in v0.16. "
-                "Please use 'data_asset_name' instead.",
-                DeprecationWarning,
-            )
+    def get_available_partition_ids(self, data_asset_name=None) -> None:
         raise BatchKwargsError(
             "QueryBatchKwargsGenerator cannot identify partitions.", {}
         )

@@ -1,9 +1,10 @@
 import os
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
 
 db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
 CONNECTION_STRING = f"mssql+pyodbc://sa:ReallyStrongPwd1234%^&*@{db_hostname}:1433/test_ci?driver=ODBC Driver 17 for SQL Server&charset=utf8&autocommit=true"
@@ -19,6 +20,7 @@ load_data_into_test_database(
 
 context = gx.get_context()
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py datasource config">
 datasource_config = {
     "name": "my_mssql_datasource",
     "class_name": "Datasource",
@@ -37,14 +39,19 @@ datasource_config = {
         },
     },
 }
+# </snippet>
 
 # Please note this override is only to provide good UX for docs and tests.
 # In normal usage you'd set your path directly in the yaml above.
 datasource_config["execution_engine"]["connection_string"] = CONNECTION_STRING
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py test datasource config">
 context.test_yaml_config(yaml.dump(datasource_config))
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mssql_python_example.py add datasource config">
 context.add_datasource(**datasource_config)
+# </snippet>
 
 # Here is a RuntimeBatchRequest using a query
 batch_request = RuntimeBatchRequest(
@@ -55,9 +62,7 @@ batch_request = RuntimeBatchRequest(
     batch_identifiers={"default_identifier_name": "default_identifier"},
 )
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )
@@ -72,9 +77,7 @@ batch_request = BatchRequest(
     data_connector_name="default_inferred_data_connector_name",
     data_asset_name="dbo.taxi_data",  # this is the name of the table you want to retrieve
 )
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )

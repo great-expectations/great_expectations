@@ -36,6 +36,10 @@ class DataContextError(GreatExpectationsError):
     pass
 
 
+class ExpectationSuiteError(DataContextError):
+    pass
+
+
 class CheckpointError(DataContextError):
     pass
 
@@ -45,6 +49,12 @@ class CheckpointNotFoundError(CheckpointError):
 
 
 class StoreBackendError(DataContextError):
+    pass
+
+
+class StoreBackendTransientError(StoreBackendError):
+    """The result of a timeout or other networking issues"""
+
     pass
 
 
@@ -64,6 +74,10 @@ class MissingTopLevelConfigKeyError(GreatExpectationsValidationError):
     pass
 
 
+class RenderingError(GreatExpectationsError):
+    pass
+
+
 class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
     def __init__(self, message, validation_error=None, field_name=None) -> None:
         if validation_error is not None:
@@ -71,7 +85,7 @@ class InvalidBaseYamlConfigError(GreatExpectationsValidationError):
                 validation_error
                 and validation_error.messages
                 and isinstance(validation_error.messages, dict)
-                and all([key is None for key in validation_error.messages.keys()])
+                and all(key is None for key in validation_error.messages.keys())
             ):
                 validation_error.messages = list(
                     itertools.chain.from_iterable(validation_error.messages.values())
@@ -352,10 +366,9 @@ class BatchSpecError(DataContextError):
 
 
 class DatasourceError(DataContextError):
-    def __init__(self, datasource_name, message) -> None:
-        self.message = "Cannot initialize datasource {}, error: {}".format(
-            datasource_name,
-            message,
+    def __init__(self, datasource_name: str, message: str) -> None:
+        self.message = (
+            f"Cannot initialize datasource {datasource_name}, error: {message}"
         )
         super().__init__(self.message)
 
@@ -369,6 +382,10 @@ class DatasourceInitializationError(DatasourceError):
 
 
 class DatasourceKeyPairAuthBadPassphraseError(DatasourceInitializationError):
+    pass
+
+
+class DatasourceNotFoundError(DataContextError):
     pass
 
 

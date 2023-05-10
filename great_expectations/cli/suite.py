@@ -10,9 +10,16 @@ from great_expectations import exceptions as gx_exceptions
 from great_expectations.cli import toolkit
 
 # noinspection PyPep8Naming
+from great_expectations.cli.cli_messages import (
+    SUITE_EDIT_FLUENT_DATASOURCE_ERROR,
+    SUITE_EDIT_FLUENT_DATASOURCE_WARNING,
+    SUITE_NEW_FLUENT_DATASOURCE_ERROR,
+    SUITE_NEW_FLUENT_DATASOURCE_WARNING,
+)
 from great_expectations.cli.mark import Mark as mark
 from great_expectations.cli.pretty_printing import cli_message, cli_message_list
-from great_expectations.core import ExpectationSuite
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.core import ExpectationSuite  # noqa: TCH001
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.usage_statistics.anonymizers.types.base import (
     CLISuiteInteractiveFlagCombinations,
@@ -22,7 +29,9 @@ from great_expectations.core.usage_statistics.usage_statistics import (
     edit_expectation_suite_usage_statistics,
 )
 from great_expectations.core.usage_statistics.util import send_usage_message
-from great_expectations.render.renderer.notebook_renderer import BaseNotebookRenderer
+from great_expectations.render.renderer.notebook_renderer import (
+    BaseNotebookRenderer,  # noqa: TCH001
+)
 from great_expectations.render.renderer.v3.suite_edit_notebook_renderer import (
     SuiteEditNotebookRenderer,
 )
@@ -30,9 +39,8 @@ from great_expectations.render.renderer.v3.suite_profile_notebook_renderer impor
     SuiteProfileNotebookRenderer,
 )
 
-try:
-    from sqlalchemy.exc import SQLAlchemyError
-except ImportError:
+SQLAlchemyError = sqlalchemy.SQLAlchemyError
+if not SQLAlchemyError:
     # We'll redefine this error in code below to catch ProfilerError, which is caught above, so SA errors will
     # just fall through
     SQLAlchemyError = gx_exceptions.ProfilerError
@@ -135,6 +143,16 @@ def suite_new(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    # only fluent datasources
+    if len(context.datasources) > 0 and len(context.datasources) == len(
+        context.fluent_datasources
+    ):
+        cli_message(f"<red>{SUITE_NEW_FLUENT_DATASOURCE_ERROR}</red>")
+        sys.exit(1)
+    # some fluent datasources
+    if 0 < len(context.fluent_datasources) < len(context.datasources):
+        cli_message(f"<yellow>{SUITE_NEW_FLUENT_DATASOURCE_WARNING}</yellow>")
 
     # Only set to true if `--profile` or `--profile <PROFILER_NAME>`
     profile: bool = _determine_profile(profiler_name)
@@ -546,6 +564,16 @@ def suite_edit(
     """
     context: DataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
+
+    # only fluent datasources
+    if len(context.datasources) > 0 and len(context.datasources) == len(
+        context.fluent_datasources
+    ):
+        cli_message(f"<red>{SUITE_EDIT_FLUENT_DATASOURCE_ERROR}</red>")
+        sys.exit(1)
+    # some fluent datasources
+    if 0 < len(context.fluent_datasources) < len(context.datasources):
+        cli_message(f"<yellow>{SUITE_EDIT_FLUENT_DATASOURCE_WARNING}</yellow>")
 
     interactive_mode: CLISuiteInteractiveFlagCombinations = (
         _process_suite_edit_flags_and_prompt(
@@ -976,8 +1004,8 @@ def suite_list(ctx: click.Context) -> None:
 
 
 def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
-    return os.path.abspath(
-        os.path.join(
+    return os.path.abspath(  # noqa: PTH100
+        os.path.join(  # noqa: PTH118
             context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
         )
     )

@@ -73,8 +73,8 @@ def test_all_expectations_using_test_definitions():
     #
     # As this behavior is implemented, the `UNSUPPORTED_EXPECTATIONS` list will be updated to reflect GX's current capabilities.
 
-    dir_path = os.path.dirname(os.path.abspath(__file__))
-    pattern = os.path.join(
+    dir_path = os.path.dirname(os.path.abspath(__file__))  # noqa: PTH120, PTH100
+    pattern = os.path.join(  # noqa: PTH118
         dir_path, "..", "..", "tests", "test_definitions", "*", "expect*.json"
     )
     test_files = glob.glob(pattern)
@@ -145,7 +145,9 @@ def test_all_expectations_using_test_definitions():
 
     with open(
         file_relative_path(
-            __file__, "./output/test_render_bullet_list_content_block.json"
+            __file__,
+            "./output/test_render_bullet_list_content_block.json",
+            strict=False,
         ),
         "w",
     ) as f:

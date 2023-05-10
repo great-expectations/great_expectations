@@ -4,18 +4,23 @@ import logging
 from typing import TYPE_CHECKING, Dict, Iterable, List, Optional, Set, Union
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain
-from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
-    AttributedResolvedMetrics,
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.core.metric_function_types import (
+    SummarizationMetricNameSuffixes,
 )
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.rule_based_profiler.attributed_resolved_metrics import (
+    AttributedResolvedMetrics,  # noqa: TCH001
+)
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.helpers.util import (
     NP_EPSILON,
     get_parameter_value_and_validate_return_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricComputationResult,
-    MetricValues,
+    MetricComputationResult,  # noqa: TCH001
+    MetricValues,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import ParameterBuilder
 from great_expectations.rule_based_profiler.parameter_container import (
@@ -208,7 +213,7 @@ class RegexPatternStringParameterBuilder(ParameterBuilder):
 
         # Obtain resolved metrics and metadata for all metric configurations and available Batch objects simultaneously.
         metric_computation_result = self.get_metrics(
-            metric_name="column_values.match_regex.unexpected_count",
+            metric_name=f"column_values.match_regex.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
             metric_domain_kwargs=self.metric_domain_kwargs,
             metric_value_kwargs=match_regex_metric_value_kwargs_list,
             limit=None,

@@ -1,10 +1,11 @@
 import os
 from typing import List
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
 
 CREDENTIAL = os.getenv("AZURE_ACCESS_KEY", "")
 
@@ -64,9 +65,7 @@ batch_request = BatchRequest(
 # In normal usage you'd set your data asset name directly in the BatchRequest above.
 batch_request.data_asset_name = "taxi_data"
 
-context.create_expectation_suite(
-    expectation_suite_name="test_suite", overwrite_existing=True
-)
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 validator = context.get_validator(
     batch_request=batch_request, expectation_suite_name="test_suite"
 )

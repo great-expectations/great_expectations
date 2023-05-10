@@ -2,6 +2,7 @@ from typing import Optional, Union
 from unittest import mock
 
 import pytest
+from typing_extensions import Final
 
 from great_expectations.core.config_provider import _ConfigurationProvider
 from great_expectations.data_context import AbstractDataContext
@@ -33,9 +34,12 @@ class StubConfigurationProvider(_ConfigurationProvider):
         return self._config_values
 
 
+_STUB_CONFIG_PROVIDER: Final = StubConfigurationProvider()
+
+
 class FakeAbstractDataContext(AbstractDataContext):
     def __init__(
-        self, config_provider: StubConfigurationProvider = StubConfigurationProvider()
+        self, config_provider: StubConfigurationProvider = _STUB_CONFIG_PROVIDER
     ) -> None:
         """Override __init__ with only the needed attributes."""
         self._datasource_store = StubDatasourceStore()
@@ -79,7 +83,7 @@ def test_save_datasource_empty_store(datasource_config_with_names: DatasourceCon
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names,
-    ) as mock_set:
+    ) as mock_set, pytest.deprecated_call():
 
         saved_datasource: Union[
             LegacyDatasource, BaseDatasource
@@ -120,7 +124,7 @@ def test_save_datasource_overwrites_on_name_collision(
         "great_expectations.data_context.store.datasource_store.DatasourceStore.set",
         autospec=True,
         return_value=datasource_config_with_names,
-    ) as mock_set:
+    ) as mock_set, pytest.deprecated_call():
 
         context.save_datasource(datasource_to_save)
 

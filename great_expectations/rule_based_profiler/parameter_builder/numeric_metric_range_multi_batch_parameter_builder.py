@@ -20,8 +20,10 @@ from typing import (
 import numpy as np
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.core.domain import Domain
-from great_expectations.rule_based_profiler.config import ParameterBuilderConfig
+from great_expectations.core.domain import Domain  # noqa: TCH001
+from great_expectations.rule_based_profiler.config import (
+    ParameterBuilderConfig,  # noqa: TCH001
+)
 from great_expectations.rule_based_profiler.estimators.bootstrap_numeric_range_estimator import (
     BootstrapNumericRangeEstimator,
 )
@@ -36,7 +38,7 @@ from great_expectations.rule_based_profiler.estimators.numeric_range_estimation_
     NumericRangeEstimationResult,
 )
 from great_expectations.rule_based_profiler.estimators.numeric_range_estimator import (
-    NumericRangeEstimator,
+    NumericRangeEstimator,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.estimators.quantiles_numeric_range_estimator import (
     QuantilesNumericRangeEstimator,
@@ -49,7 +51,7 @@ from great_expectations.rule_based_profiler.helpers.util import (
     integer_semantic_domain_type,
 )
 from great_expectations.rule_based_profiler.metric_computation_result import (
-    MetricValues,
+    MetricValues,  # noqa: TCH001
 )
 from great_expectations.rule_based_profiler.parameter_builder import (
     MetricMultiBatchParameterBuilder,
@@ -748,14 +750,12 @@ detected.
 
         distribution_boundary: Optional[Union[int, float]]
         if not all(
-            [
-                (
-                    distribution_boundary is None
-                    or is_numeric(value=distribution_boundary)
-                    or isinstance(distribution_boundary, datetime.datetime)
-                )
-                for distribution_boundary in truncate_values.values()
-            ]
+            (
+                distribution_boundary is None
+                or is_numeric(value=distribution_boundary)
+                or isinstance(distribution_boundary, datetime.datetime)
+            )
+            for distribution_boundary in truncate_values.values()
         ):
             raise gx_exceptions.ProfilerExecutionError(
                 message=f"""The directive "truncate_values" for {self.__class__.__name__} must specify the

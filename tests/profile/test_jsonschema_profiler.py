@@ -370,7 +370,7 @@ def test_profile_simple_schema(empty_data_context, simple_schema):
         },
     ]
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
@@ -440,7 +440,7 @@ def test_profile_boolean_schema(empty_data_context, boolean_types_schema):
         },
     ]
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_enum_schema(empty_data_context, enum_types_schema):
@@ -524,7 +524,7 @@ def test_profile_enum_schema(empty_data_context, enum_types_schema):
         },
     ]
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema):
@@ -747,7 +747,7 @@ def test_profile_string_lengths_schema(empty_data_context, string_lengths_schema
         },
     ]
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema):
@@ -1268,7 +1268,7 @@ def test_profile_integer_ranges_schema(empty_data_context, integer_ranges_schema
     ]
     # fmt: on
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
@@ -1681,7 +1681,7 @@ def test_profile_number_ranges_schema(empty_data_context, number_ranges_schema):
     ]
     # fmt: on
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_has_profile_create_expectations_from_complex_schema(
@@ -1949,7 +1949,7 @@ def test_has_profile_create_expectations_from_complex_schema(
     ]
     # fmt: on
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)
 
 
 def test_null_fields_schema(empty_data_context, null_fields_schema):
@@ -2089,4 +2089,4 @@ def test_null_fields_schema(empty_data_context, null_fields_schema):
     ]
     # fmt: on
     context = empty_data_context
-    context.save_expectation_suite(obs)
+    context.add_expectation_suite(expectation_suite=obs)

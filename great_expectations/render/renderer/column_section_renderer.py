@@ -219,7 +219,7 @@ diagnose and repair the underlying issue.  Detailed information follows:
                 **{
                     "content_block_type": "bullet_list",
                     "header": RenderedStringTemplateContent(
-                        **{
+                        **{  # type: ignore[arg-type]
                             "content_block_type": "string_template",
                             "string_template": {
                                 "template": 'Expectation types <span class="mr-3 triangle"></span>',

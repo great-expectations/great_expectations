@@ -1,60 +1,74 @@
-"""
-This is a template for creating custom ColumnMapExpectations.
-For detailed instructions on how to use it, please see:
-    https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_column_map_expectations
-"""
-import json
 from typing import Optional
 
-import schwifty
+from schwifty import BIC
+from schwifty.exceptions import SchwiftyException
 
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
-from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.execution_engine import PandasExecutionEngine
+from great_expectations.execution_engine import (
+    PandasExecutionEngine,
+)
+
+# SparkDFExecutionEngine,
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
 
+# from great_expectations.compatibility.pyspark import functions as F
+# from great_expectations.compatibility import pyspark
+
 
 def is_valid_bic(bic_code: str) -> bool:
     try:
-        bic = schwifty.BIC(bic_code)
+        BIC(bic_code)
         return True
-    except Exception as e:
+    except SchwiftyException:
         return False
 
 
-# This class defines a Metric to support your Expectation.
-# For most ColumnMapExpectations, the main business logic for calculation will live in this class.
-class ColumnValuesToBeValidBic(ColumnMapMetricProvider):
+# @F.udf(pyspark.types.BooleanType())
+# def is_valid_bic_udf(bic: str) -> bool:
+#     return is_valid_bic(bic)
 
-    # This is the id string that will be used to reference your metric.
+
+class ColumnValuesToBeValidBic(ColumnMapMetricProvider):
     condition_metric_name = "column_values.valid_bic"
 
-    # This method implements the core logic for the PandasExecutionEngine
     @column_condition_partial(engine=PandasExecutionEngine)
     def _pandas(cls, column, **kwargs):
-        return column.apply(lambda x: is_valid_bic(x))
+        return column.apply(is_valid_bic)
+
+    # @column_condition_partial(engine=SparkDFExecutionEngine)
+    # def _spark(cls, column, **kwargs):
+    #     return is_valid_bic_udf(column)
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     # def _sqlalchemy(cls, column, _dialect, **kwargs):
     #     raise NotImplementedError
 
-    # This method defines the business logic for evaluating your metric when using a SparkDFExecutionEngine
-    # @column_condition_partial(engine=SparkDFExecutionEngine)
-    # def _spark(cls, column, **kwargs):
-    #     raise NotImplementedError
 
-
-# This class defines the Expectation itself
 class ExpectColumnValuesToBeValidBic(ColumnMapExpectation):
     """Expect column values to be valid BIC (Business Identifier Code)."""
 
-    # These examples will be shown in the public gallery.
-    # They will also be executed as unit tests for your Expectation.
+    map_metric = "column_values.valid_bic"
+
+    success_keys = ("mostly",)
+
+    default_kwarg_values = {}
+
+    library_metadata = {
+        "maturity": "experimental",
+        "tags": [
+            "hackathon-22",
+            "experimental",
+            "typed-entities",
+        ],
+        "contributors": ["@szecsip", "@mkopec87"],
+        "requirements": ["schwifty"],
+    }
+
     examples = [
         {
             "data": {
@@ -96,16 +110,6 @@ class ExpectColumnValuesToBeValidBic(ColumnMapExpectation):
         }
     ]
 
-    # This is the id string of the Metric used by this Expectation.
-    # For most Expectations, it will be the same as the `condition_metric_name` defined in your Metric class above.
-    map_metric = "column_values.valid_bic"
-
-    # This is a list of parameter names that can affect whether the Expectation evaluates to True or False
-    success_keys = ("mostly",)
-
-    # This dictionary contains default values for any parameters that should have default values
-    default_kwarg_values = {}
-
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
@@ -121,34 +125,6 @@ class ExpectColumnValuesToBeValidBic(ColumnMapExpectation):
         """
 
         super().validate_configuration(configuration)
-        configuration = configuration or self.configuration
-
-        # # Check other things in configuration.kwargs and raise Exceptions if needed
-        # try:
-        #     assert (
-        #         ...
-        #     ), "message"
-        #     assert (
-        #         ...
-        #     ), "message"
-        # except AssertionError as e:
-        #     raise InvalidExpectationConfigurationError(str(e))
-
-        return True
-
-    # This object contains metadata for display in the public Gallery
-    library_metadata = {
-        "maturity": "experimental",
-        "tags": [
-            "hackathon-22",
-            "experimental",
-            "typed-entities",
-        ],  # Tags for this Expectation in the Gallery
-        "contributors": [  # Github handles for all contributors to this Expectation.
-            "@szecsip",  # Don't forget to add your github handle here!
-        ],
-        "requirements": ["schwifty"],
-    }
 
 
 if __name__ == "__main__":

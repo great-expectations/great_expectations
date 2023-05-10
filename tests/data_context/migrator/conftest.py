@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
+from typing_extensions import Final
 
 from great_expectations.core import ExpectationSuite, ExpectationSuiteValidationResult
 from great_expectations.data_context.data_context_variables import (
@@ -29,7 +30,7 @@ class StubUsageStats:
 
 
 class StubCheckpointStore:
-    def get_checkpoint(self, name: str, ge_cloud_id: Optional[str]) -> CheckpointConfig:
+    def get_checkpoint(self, name: str, id: Optional[str]) -> CheckpointConfig:
         return CheckpointConfig(name=name, class_name="Checkpoint")
 
 
@@ -72,6 +73,9 @@ class StubConfigurationProvider:
         return config
 
 
+_ANONYMIZED_USAGE_STATS_CONFIG: Final = AnonymizedUsageStatisticsConfig(enabled=True)
+
+
 class StubBaseDataContext:
     """Stub for testing ConfigurationBundle."""
 
@@ -81,7 +85,7 @@ class StubBaseDataContext:
         self,
         anonymized_usage_statistics_config: Optional[
             AnonymizedUsageStatisticsConfig
-        ] = AnonymizedUsageStatisticsConfig(enabled=True),
+        ] = _ANONYMIZED_USAGE_STATS_CONFIG,
         checkpoint_names: Tuple[Optional[str]] = ("my_checkpoint",),
         expectation_suite_names: Tuple[Optional[str]] = ("my_suite",),
         profiler_names: Tuple[Optional[str]] = ("my_profiler",),
@@ -200,7 +204,7 @@ def empty_serialized_configuration_bundle() -> dict:
             },
             "notebooks": None,
             "plugins_directory": None,
-            "stores": None,
+            "stores": {},
             "validations_store_name": None,
         },
         "datasources": [],
@@ -235,7 +239,7 @@ def serialized_configuration_bundle() -> dict:
             },
             "notebooks": None,
             "plugins_directory": None,
-            "stores": None,
+            "stores": {},
             "validations_store_name": None,
         },
         "datasources": [

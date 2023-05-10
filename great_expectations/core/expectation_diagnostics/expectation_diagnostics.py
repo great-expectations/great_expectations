@@ -1,17 +1,14 @@
 from __future__ import annotations
 
 import inspect
-import os
 import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from typing import List, Sequence, Tuple, Union
 
-from typing_extensions import Final
-
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.expectation_diagnostics.expectation_test_data_cases import (
-    ExpectationTestDataCases,
+    ExpectationTestDataCases,  # noqa: TCH001
 )
 from great_expectations.core.expectation_diagnostics.supporting_types import (
     AugmentedLibraryMetadata,
@@ -28,22 +25,7 @@ from great_expectations.core.expectation_diagnostics.supporting_types import (
 )
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.exceptions import InvalidExpectationConfigurationError
-from great_expectations.expectations.registry import get_expectation_impl
 from great_expectations.types import SerializableDictDot
-from great_expectations.util import camel_to_snake, lint_code
-
-BLACK_IMPORTED: Final[bool] = True
-ISORT_IMPORTED: Final[bool] = True
-
-try:
-    import black  # noqa: F401
-except ImportError:
-    BLACK_IMPORTED = False  # type: ignore[misc] # Final assignment
-
-try:
-    import isort
-except ImportError:
-    ISORT_IMPORTED = False  # type: ignore[misc] # Final assignment
 
 
 @dataclass(frozen=True)
@@ -452,115 +434,6 @@ class ExpectationDiagnostics(SerializableDictDot):
             # message="Has all four statement Renderers: question, descriptive, prescriptive, diagnostic",
             message="Has both statement Renderers: prescriptive and diagnostic",
             passed=passed,
-        )
-
-    @staticmethod
-    def _check_linting(expectation_instance) -> ExpectationDiagnosticCheckMessage:
-        """Check if linting checks pass for Expectation"""
-        sub_messages: List[ExpectationDiagnosticCheckMessageDict] = []
-        message: str = "Passes all linting checks"
-        passed: bool = False
-        black_ok: bool = False
-        isort_ok: bool = False
-        file_and_class_names_ok: bool = False
-        rx_expectation_instance_repr = re.compile(r"<.*\.([^\.]*) object at .*")
-
-        try:
-            expectation_camel_name = rx_expectation_instance_repr.match(  # type: ignore[union-attr] # could be None
-                repr(expectation_instance)
-            ).group(
-                1
-            )
-        except AttributeError:
-            sub_messages.append(
-                {
-                    "message": "Arg passed to _check_linting was not an instance of an Expectation, so cannot check linting",
-                    "passed": False,
-                }
-            )
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=passed,
-                sub_messages=sub_messages,
-            )
-
-        impl = get_expectation_impl(camel_to_snake(expectation_camel_name))
-        try:
-            source_file_path = inspect.getfile(impl)
-        except TypeError:
-            sub_messages.append(
-                {
-                    "message": "inspect.getfile(impl) raised a TypeError (impl is a built-in class)",
-                    "passed": False,
-                }
-            )
-            return ExpectationDiagnosticCheckMessage(
-                message=message,
-                passed=passed,
-                sub_messages=sub_messages,
-            )
-
-        snaked_impl_name = camel_to_snake(impl.__name__)
-        source_file_base_no_ext = os.path.basename(source_file_path).rsplit(".", 1)[0]
-        with open(source_file_path) as fp:
-            code = fp.read()
-
-        if snaked_impl_name != source_file_base_no_ext:
-            sub_messages.append(
-                {
-                    "message": f"The snake_case of {impl.__name__} ({snaked_impl_name}) does not match filename part ({source_file_base_no_ext})",
-                    "passed": False,
-                }
-            )
-        else:
-            file_and_class_names_ok = True
-
-        if not BLACK_IMPORTED:
-            sub_messages.append(
-                {
-                    "message": "Could not find 'black', so cannot check linting",
-                    "passed": False,
-                }
-            )
-
-        if not ISORT_IMPORTED:
-            sub_messages.append(
-                {
-                    "message": "Could not find 'isort', so cannot check linting",
-                    "passed": False,
-                }
-            )
-
-        if BLACK_IMPORTED and ISORT_IMPORTED:
-            blacked_code = lint_code(code)
-            if code != blacked_code:
-                sub_messages.append(
-                    {
-                        "message": "Your code would be reformatted with black",
-                        "passed": False,
-                    }
-                )
-            else:
-                black_ok = True
-            isort_ok = isort.check_code(
-                code,
-                **isort.profiles.black,  # type: ignore[arg-type]
-                ignore_whitespace=True,
-                known_local_folder=["great_expectations"],
-            )
-            if not isort_ok:
-                sub_messages.append(
-                    {
-                        "message": "Your code would be reformatted with isort",
-                        "passed": False,
-                    }
-                )
-
-        passed = black_ok and isort_ok and file_and_class_names_ok
-        return ExpectationDiagnosticCheckMessage(
-            message=message,
-            passed=passed,
-            sub_messages=sub_messages,
         )
 
     @staticmethod

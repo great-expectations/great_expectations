@@ -2,6 +2,7 @@ import re
 from pprint import pprint
 from typing import Callable, Dict, Union
 
+import pandas as pd
 import pytest
 
 from great_expectations.core import ExpectationValidationResult
@@ -218,6 +219,52 @@ def test_atomic_diagnostic_observed_value_expect_column_kl_divergence_to_be_less
                 "expected_partition": {
                     "values": [1, 2, 4],
                     "weights": [0.3754, 0.615, 0.0096],
+                },
+            },
+        },
+    }
+    rendered_content = get_diagnostic_rendered_content(update_dict)
+
+    res = rendered_content.to_json_dict()
+    pprint(res)
+
+    # replace version of vega-lite in res to match snapshot test
+    res["value"]["graph"]["$schema"] = re.sub(
+        r"v\d*\.\d*\.\d*", "v4.8.1", res["value"]["graph"]["$schema"]
+    )
+    snapshot.assert_match(res)
+
+
+def test_atomic_diagnostic_observed_value_with_boolean_column_expect_column_kl_divergence_to_be_less_than(
+    snapshot, get_diagnostic_rendered_content
+):
+    # Please note that the vast majority of Expectations are calling `Expectation._atomic_diagnostic_observed_value()`
+    # As such, the specific expectation_type used here is irrelevant and is simply used to trigger the parent class.
+    expectation_config = {
+        "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+        "kwargs": {
+            "column": "boolean_event",
+            "partition_object": {
+                "bins": [True, False],
+                "weights": [0.5, 0.5],
+            },
+            "threshold": 0.1,
+        },
+        "meta": {},
+        "ge_cloud_id": "4b53c4d5-90ba-467a-b7a7-379640bbd729",
+    }
+    update_dict = {
+        "expectation_config": ExpectationConfiguration(**expectation_config),
+        "result": {
+            "observed_value": 0.0,
+            "details": {
+                "observed_partition": {
+                    "values": [True, False],
+                    "weights": [0.5, 0.5],
+                },
+                "expected_partition": {
+                    "values": [True, False],
+                    "weights": [0.5, 0.5],
                 },
             },
         },

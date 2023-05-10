@@ -1,9 +1,9 @@
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnPairMapMetricProvider,
     column_pair_condition_partial,
@@ -32,7 +32,8 @@ class ColumnPairValuesEqual(ColumnPairMapMetricProvider):
     @column_pair_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column_A, column_B, **kwargs):
         row_wise_cond = sa.and_(
-            column_A == column_B, sa.not_(sa.or_(column_A == None, column_B == None))
+            column_A == column_B,
+            sa.not_(sa.or_(column_A == None, column_B == None)),  # noqa: E711
         )
         return row_wise_cond
 

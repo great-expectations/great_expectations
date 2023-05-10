@@ -1,6 +1,7 @@
 {
   "expectation_type" : "expect_column_most_common_value_to_be_in_set",
   "datasets" : [{
+    "dataset_name": "expect_column_most_common_value_to_be_in_set_1",
     "data" : {
       "x" : [1,1,2,2,3,null, null, null, null, null],
       "y" : ["hello", "jello", "mello", "hello", "jello", "mello", "hello", "jello", "mello", "jello"],

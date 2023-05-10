@@ -2,23 +2,31 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import TYPE_CHECKING, Dict, List, Mapping, Optional, Tuple, Union, cast
+import warnings
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Union,
+    cast,
+)
 
 import requests
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import __version__
 from great_expectations.core import ExpectationSuite
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.config_provider import (
     _CloudConfigurationProvider,
     _ConfigurationProvider,
 )
 from great_expectations.core.serializer import JsonConfigSerializer
-from great_expectations.core.usage_statistics.events import UsageStatsEvents
-from great_expectations.core.usage_statistics.usage_statistics import (
-    save_expectation_suite_usage_statistics,
-    usage_statistics_enabled_method,
-)
+from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     CLOUD_DEFAULT_BASE_URL,
     GXCloudEnvironmentVariable,
@@ -38,26 +46,42 @@ from great_expectations.data_context.types.base import (
     datasourceConfigSchema,
 )
 from great_expectations.data_context.types.refs import GXCloudResourceRef
-from great_expectations.data_context.types.resource_identifiers import (
-    ConfigurationIdentifier,
-    GXCloudIdentifier,
-)
+from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions.exceptions import DataContextError
-from great_expectations.render.renderer.site_builder import SiteBuilder
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
 
 if TYPE_CHECKING:
     from great_expectations.alias_types import PathStr
     from great_expectations.checkpoint.checkpoint import Checkpoint
+    from great_expectations.data_context.store.datasource_store import DatasourceStore
+    from great_expectations.data_context.types.resource_identifiers import (
+        ConfigurationIdentifier,
+        ExpectationSuiteIdentifier,
+    )
+    from great_expectations.datasource.fluent import Datasource as FluentDatasource
+    from great_expectations.render.renderer.site_builder import SiteBuilder
 
 logger = logging.getLogger(__name__)
 
 
+def _extract_fluent_datasources(config_dict: dict) -> dict:
+    """
+    When pulling from cloud config, FDS and BSD are nested under the `"datasources" key`.
+    We need to extract the fluent datasources otherwise the data context will attempt eager config
+    substitutions and other inappropriate operations.
+    """
+    datasources = config_dict.get("datasources", {})
+    fds_names: list[str] = []
+    for ds_name, ds in datasources.items():
+        if "type" in ds:
+            fds_names.append(ds_name)
+    return {name: datasources.pop(name) for name in fds_names}
+
+
+@public_api
 class CloudDataContext(SerializableDataContext):
-    """
-    Subclass of AbstractDataContext that contains functionality necessary to hydrate state from cloud
-    """
+    """Subclass of AbstractDataContext that contains functionality necessary to work in a GX Cloud-backed environment."""
 
     def __init__(
         self,
@@ -95,6 +119,7 @@ class CloudDataContext(SerializableDataContext):
             ge_cloud_organization_id=ge_cloud_organization_id,
         )
 
+        self._check_if_latest_version()
         self._cloud_config = self.get_cloud_config(
             cloud_base_url=cloud_base_url,
             cloud_access_token=cloud_access_token,
@@ -109,6 +134,10 @@ class CloudDataContext(SerializableDataContext):
             context_root_dir=self._context_root_directory,
             runtime_environment=runtime_environment,
         )
+
+    def _check_if_latest_version(self) -> None:
+        checker = _VersionChecker(__version__)
+        checker.check_if_using_latest_gx()
 
     def _init_project_config(
         self, project_config: Optional[Union[DataContextConfig, Mapping]]
@@ -200,12 +229,14 @@ class CloudDataContext(SerializableDataContext):
         cls, context_root_dir: Optional[PathStr]
     ) -> str:
         if context_root_dir is None:
-            context_root_dir = os.getcwd()
+            context_root_dir = os.getcwd()  # noqa: PTH109
             logger.info(
                 f'context_root_dir was not provided - defaulting to current working directory "'
                 f'{context_root_dir}".'
             )
-        return os.path.abspath(os.path.expanduser(context_root_dir))
+        return os.path.abspath(  # noqa: PTH100
+            os.path.expanduser(context_root_dir)  # noqa: PTH111
+        )
 
     @classmethod
     def retrieve_data_context_config_from_cloud(
@@ -238,6 +269,7 @@ class CloudDataContext(SerializableDataContext):
                 f"Bad request made to GX Cloud; {response.text}"
             )
         config = response.json()
+        config["fluent_datasources"] = _extract_fluent_datasources(config)
         return DataContextConfig(**config)
 
     @classmethod
@@ -361,7 +393,7 @@ class CloudDataContext(SerializableDataContext):
             conf_file_option=conf_file_option,
         )
 
-    def _init_datasource_store(self) -> None:
+    def _init_datasource_store(self) -> DatasourceStore:
         from great_expectations.data_context.store.datasource_store import (
             DatasourceStore,
         )
@@ -369,8 +401,9 @@ class CloudDataContext(SerializableDataContext):
             GXCloudStoreBackend,
         )
 
-        store_name: str = "datasource_store"  # Never explicitly referenced but adheres
+        # Never explicitly referenced but adheres
         # to the convention set by other internal Stores
+        store_name = DataContextConfigDefaults.DEFAULT_DATASOURCE_STORE_NAME.value
         store_backend: dict = {"class_name": GXCloudStoreBackend.__name__}
         runtime_environment: dict = {
             "root_directory": self.root_directory,
@@ -385,7 +418,7 @@ class CloudDataContext(SerializableDataContext):
             runtime_environment=runtime_environment,
             serializer=JsonConfigSerializer(schema=datasourceConfigSchema),
         )
-        self._datasource_store = datasource_store
+        return datasource_store
 
     def list_expectation_suite_names(self) -> List[str]:
         """
@@ -459,7 +492,7 @@ class CloudDataContext(SerializableDataContext):
         self,
         expectation_suite_name: str,
         overwrite_existing: bool = False,
-        **kwargs: Optional[dict],
+        **kwargs,
     ) -> ExpectationSuite:
         """Build a new expectation suite and save it into the data_context expectation store.
 
@@ -471,6 +504,12 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             A new (empty) expectation suite.
         """
+        # deprecated-v0.15.48
+        warnings.warn(
+            "create_expectation_suite is deprecated as of v0.15.49 and will be removed in v0.18. "
+            "Please use add_expectation_suite or add_or_update_expectation_suite instead.",
+            DeprecationWarning,
+        )
         if not isinstance(overwrite_existing, bool):
             raise ValueError("Parameter overwrite_existing must be of type BOOL")
 
@@ -500,19 +539,20 @@ class CloudDataContext(SerializableDataContext):
 
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=cloud_id,
+            id=cloud_id,
         )
 
         response: Union[bool, GXCloudResourceRef] = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.cloud_id
+            expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
 
     def delete_expectation_suite(
         self,
-        expectation_suite_name: Optional[str] = None,
-        ge_cloud_id: Optional[str] = None,
+        expectation_suite_name: str | None = None,
+        ge_cloud_id: str | None = None,
+        id: str | None = None,
     ) -> bool:
         """Delete specified expectation suite from data_context expectation store.
 
@@ -522,9 +562,13 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             True for Success and False for Failure.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        del ge_cloud_id
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=ge_cloud_id,
+            id=id,
         )
 
         return self.expectations_store.remove_key(key)
@@ -545,9 +589,14 @@ class CloudDataContext(SerializableDataContext):
         Returns:
             An existing ExpectationSuite
         """
+        if ge_cloud_id is None and expectation_suite_name is None:
+            raise ValueError(
+                "ge_cloud_id and expectation_suite_name cannot both be None"
+            )
+
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=ge_cloud_id,
+            id=ge_cloud_id,
             resource_name=expectation_suite_name,
         )
 
@@ -566,11 +615,7 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite.render()
         return expectation_suite
 
-    @usage_statistics_enabled_method(
-        event_name=UsageStatsEvents.DATA_CONTEXT_SAVE_EXPECTATION_SUITE,
-        args_payload_fn=save_expectation_suite_usage_statistics,
-    )
-    def save_expectation_suite(
+    def _save_expectation_suite(
         self,
         expectation_suite: ExpectationSuite,
         expectation_suite_name: Optional[str] = None,
@@ -578,26 +623,10 @@ class CloudDataContext(SerializableDataContext):
         include_rendered_content: Optional[bool] = None,
         **kwargs: Optional[dict],
     ) -> None:
-        """Save the provided expectation suite into the DataContext.
-
-        Args:
-            expectation_suite: The suite to save.
-            expectation_suite_name: The name of this Expectation Suite. If no name is provided, the name will be read
-                from the suite.
-            overwrite_existing: Whether to overwrite the suite if it already exists.
-            include_rendered_content: Whether to save the prescriptive rendered content for each expectation.
-
-        Returns:
-            None
-        """
-        id = (
-            str(expectation_suite.ge_cloud_id)
-            if expectation_suite.ge_cloud_id
-            else None
-        )
+        id = expectation_suite.ge_cloud_id
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=id,
+            id=id,
             resource_name=expectation_suite.expectation_suite_name,
         )
 
@@ -615,12 +644,12 @@ class CloudDataContext(SerializableDataContext):
 
         response = self.expectations_store.set(key, expectation_suite, **kwargs)  # type: ignore[func-returns-value]
         if isinstance(response, GXCloudResourceRef):
-            expectation_suite.ge_cloud_id = response.cloud_id
+            expectation_suite.ge_cloud_id = response.id
 
     def _validate_suite_unique_constaints_before_save(
         self, key: GXCloudIdentifier
     ) -> None:
-        ge_cloud_id = key.cloud_id
+        ge_cloud_id = key.id
         if ge_cloud_id:
             if self.expectations_store.has_key(key):  # noqa: W601
                 raise gx_exceptions.DataContextError(
@@ -636,53 +665,50 @@ class CloudDataContext(SerializableDataContext):
                 "expectation_suite, set overwrite_existing=True."
             )
 
-    @property
-    def root_directory(self) -> Optional[str]:
-        """The root directory for configuration objects in the data context; the location in which
-        ``great_expectations.yml`` is located.
-
-        Why does this exist in AbstractDataContext? CloudDataContext and FileDataContext both use it
-
-        """
-        return self._context_root_directory
-
     def add_checkpoint(
         self,
-        name: str,
-        config_version: Optional[Union[int, float]] = None,
-        template_name: Optional[str] = None,
-        module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
-        run_name_template: Optional[str] = None,
-        expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[dict] = None,
-        action_list: Optional[List[dict]] = None,
-        evaluation_parameters: Optional[dict] = None,
-        runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[dict]] = None,
-        profilers: Optional[List[dict]] = None,
+        name: str | None = None,
+        config_version: int | float | None = None,
+        template_name: str | None = None,
+        module_name: str | None = None,
+        class_name: str | None = None,
+        run_name_template: str | None = None,
+        expectation_suite_name: str | None = None,
+        batch_request: dict | None = None,
+        action_list: list[dict] | None = None,
+        evaluation_parameters: dict | None = None,
+        runtime_configuration: dict | None = None,
+        validations: list[dict] | None = None,
+        profilers: list[dict] | None = None,
         # Next two fields are for LegacyCheckpoint configuration
-        validation_operator_name: Optional[str] = None,
-        batches: Optional[List[dict]] = None,
+        validation_operator_name: str | None = None,
+        batches: list[dict] | None = None,
         # the following four arguments are used by SimpleCheckpoint
-        site_names: Optional[Union[str, List[str]]] = None,
-        slack_webhook: Optional[str] = None,
-        notify_on: Optional[str] = None,
-        notify_with: Optional[Union[str, List[str]]] = None,
-        ge_cloud_id: Optional[str] = None,
-        expectation_suite_ge_cloud_id: Optional[str] = None,
-        default_validation_id: Optional[str] = None,
+        site_names: str | list[str] | None = None,
+        slack_webhook: str | None = None,
+        notify_on: str | None = None,
+        notify_with: str | list[str] | None = None,
+        ge_cloud_id: str | None = None,
+        expectation_suite_ge_cloud_id: str | None = None,
+        default_validation_id: str | None = None,
+        id: str | None = None,
+        expectation_suite_id: str | None = None,
+        checkpoint: Checkpoint | None = None,
     ) -> Checkpoint:
         """
         See `AbstractDataContext.add_checkpoint` for more information.
         """
+        # <GX_RENAME>
+        id = self._resolve_id_and_ge_cloud_id(id=id, ge_cloud_id=ge_cloud_id)
+        expectation_suite_id = self._resolve_id_and_ge_cloud_id(
+            id=expectation_suite_id, ge_cloud_id=expectation_suite_ge_cloud_id
+        )
+        del ge_cloud_id
+        del expectation_suite_ge_cloud_id
 
-        from great_expectations.checkpoint.checkpoint import Checkpoint
-
-        checkpoint: Checkpoint = Checkpoint.construct_from_config_args(
-            data_context=self,
-            checkpoint_store_name=self.checkpoint_store_name,  # type: ignore[arg-type]
+        checkpoint = self._resolve_add_checkpoint_args(
             name=name,
+            id=id,
             config_version=config_version,
             template_name=template_name,
             module_name=module_name,
@@ -695,27 +721,26 @@ class CloudDataContext(SerializableDataContext):
             runtime_configuration=runtime_configuration,
             validations=validations,
             profilers=profilers,
-            # Next two fields are for LegacyCheckpoint configuration
             validation_operator_name=validation_operator_name,
             batches=batches,
-            # the following four arguments are used by SimpleCheckpoint
             site_names=site_names,
             slack_webhook=slack_webhook,
             notify_on=notify_on,
             notify_with=notify_with,
-            ge_cloud_id=ge_cloud_id,
-            expectation_suite_ge_cloud_id=expectation_suite_ge_cloud_id,
+            expectation_suite_id=expectation_suite_id,
             default_validation_id=default_validation_id,
+            checkpoint=checkpoint,
         )
 
         checkpoint_config = self.checkpoint_store.create(
             checkpoint_config=checkpoint.config
         )
 
-        checkpoint = Checkpoint.instantiate_from_config_with_runtime_args(
+        from great_expectations.checkpoint.checkpoint import Checkpoint
+
+        return Checkpoint.instantiate_from_config_with_runtime_args(
             checkpoint_config=checkpoint_config, data_context=self  # type: ignore[arg-type]
         )
-        return checkpoint
 
     def list_checkpoints(self) -> Union[List[str], List[ConfigurationIdentifier]]:
         return self.checkpoint_store.list_checkpoints(ge_cloud_mode=True)
@@ -750,6 +775,22 @@ class CloudDataContext(SerializableDataContext):
         )
         return site_builder
 
+    def _determine_key_for_suite_update(
+        self, name: str, id: str | None
+    ) -> Union[ExpectationSuiteIdentifier, GXCloudIdentifier]:
+        """
+        Note that this explicitly overriding the `AbstractDataContext` helper method called
+        in `self.update_expectation_suite()`.
+
+        The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
+        instead of the usual `ExpectationSuiteIdentifier` for `Store` interaction.
+        """
+        return GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+            id=id,
+            resource_name=name,
+        )
+
     def _determine_key_for_profiler_save(
         self, name: str, id: Optional[str]
     ) -> Union[ConfigurationIdentifier, GXCloudIdentifier]:
@@ -760,9 +801,7 @@ class CloudDataContext(SerializableDataContext):
         The only difference here is the creation of a Cloud-specific `GXCloudIdentifier`
         instead of the usual `ConfigurationIdentifier` for `Store` interaction.
         """
-        return GXCloudIdentifier(
-            resource_type=GXCloudRESTResource.PROFILER, cloud_id=id
-        )
+        return GXCloudIdentifier(resource_type=GXCloudRESTResource.PROFILER, id=id)
 
     @classmethod
     def _load_cloud_backed_project_config(
@@ -772,3 +811,55 @@ class CloudDataContext(SerializableDataContext):
         assert cloud_config is not None
         config = cls.retrieve_data_context_config_from_cloud(cloud_config=cloud_config)
         return config
+
+    def _persist_suite_with_store(
+        self,
+        expectation_suite: ExpectationSuite,
+        overwrite_existing: bool,
+        **kwargs,
+    ) -> ExpectationSuite:
+        cloud_id: str | None
+        if expectation_suite.ge_cloud_id:
+            cloud_id = expectation_suite.ge_cloud_id
+        else:
+            cloud_id = None
+
+        key = GXCloudIdentifier(
+            resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
+            resource_name=expectation_suite.expectation_suite_name,
+            id=cloud_id,
+        )
+
+        persistence_fn: Callable
+        if overwrite_existing:
+            persistence_fn = self.expectations_store.add_or_update
+        else:
+            persistence_fn = self.expectations_store.add
+
+        response = persistence_fn(key=key, value=expectation_suite, **kwargs)
+        if isinstance(response, GXCloudResourceRef):
+            expectation_suite.ge_cloud_id = response.id
+
+        return expectation_suite
+
+    def _save_project_config(
+        self, _fds_datasource: FluentDatasource | None = None
+    ) -> None:
+        """
+        See parent 'AbstractDataContext._save_project_config()` for more information.
+
+        Explicitly override base class implementation to retain legacy behavior.
+        """
+        # 042723 kilo59
+        # Currently CloudDataContext and FileDataContext diverge in how FDS are persisted.
+        # FileDataContexts don't use the DatasourceStore at all to save or hydrate FDS configs.
+        # CloudDataContext does use DatasourceStore in order to make use of the Cloud http clients.
+        # The intended future state is for a new FluentDatasourceStore that can fully encapsulate
+        # the different requirements for FDS vs BDS.
+        # At which time `_save_project_config` will revert to being a no-op operation on the CloudDataContext.
+        if _fds_datasource:
+            self._datasource_store.set(key=None, value=_fds_datasource)
+        else:
+            logger.debug(
+                "CloudDataContext._save_project_config() has no `fds_datasource` to update"
+            )

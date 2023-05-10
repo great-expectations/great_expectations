@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Callable, List, Optional, Union
 
@@ -61,7 +63,7 @@ class InlineRenderer(Renderer):
             A list of RenderedAtomicContent objects for a given ExpectationConfiguration or ExpectationValidationResult.
         """
         expectation_type: str
-        renderer_typs: List[AtomicRendererType]
+        renderer_types: List[AtomicRendererType]
         if isinstance(render_object, ExpectationConfiguration):
             expectation_type = render_object.expectation_type
             renderer_types = [AtomicRendererType.PRESCRIPTIVE]
@@ -121,68 +123,87 @@ class InlineRenderer(Renderer):
         renderer_rendered_content: RenderedAtomicContent
         rendered_content: List[RenderedAtomicContent] = []
         for renderer_name in try_renderer_names:
-            try:
-                renderer_rendered_content = self._get_renderer_atomic_rendered_content(
-                    render_object=render_object,
-                    renderer_name=renderer_name,
-                    expectation_type=expectation_type,
-                )
-                rendered_content.append(renderer_rendered_content)
-            except Exception as e:
-                logger.info(
-                    f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type} with exception message: {str(e)}".'
-                )
-                failed_renderer_type: str
-                if renderer_name.startswith(AtomicRendererType.PRESCRIPTIVE):
-                    failed_renderer_type = AtomicPrescriptiveRendererType.FAILED
-                    logger.info(
-                        f'Renderer "{failed_renderer_type}" will be used to render prescriptive content.'
-                    )
-                else:
-                    failed_renderer_type = AtomicDiagnosticRendererType.FAILED
-                    logger.info(
-                        f'Renderer "{failed_renderer_type}" will be used to render diagnostic content.'
-                    )
-
-                renderer_rendered_content = (
-                    InlineRenderer._get_renderer_atomic_rendered_content(
-                        render_object=render_object,
-                        renderer_name=failed_renderer_type,
-                        expectation_type=expectation_type,
-                    )
-                )
-                rendered_content.append(renderer_rendered_content)
+            renderer_rendered_content = self._get_renderer_atomic_rendered_content(
+                render_object=render_object,
+                renderer_name=renderer_name,
+                expectation_type=expectation_type,
+            )
+            rendered_content.append(renderer_rendered_content)
 
         return rendered_content
 
     @staticmethod
     def _get_renderer_atomic_rendered_content(
-        render_object: Union[ExpectationConfiguration, ExpectationValidationResult],
-        renderer_name: Union[
-            str, AtomicDiagnosticRendererType, AtomicPrescriptiveRendererType
-        ],
+        render_object: ExpectationConfiguration | ExpectationValidationResult,
+        renderer_name: str
+        | AtomicDiagnosticRendererType
+        | AtomicPrescriptiveRendererType,
         expectation_type: str,
     ) -> RenderedAtomicContent:
-        renderer_impl: Optional[RendererImpl] = get_renderer_impl(
-            object_name=expectation_type, renderer_type=renderer_name
-        )
-        if renderer_impl:
-            renderer_fn: Callable[
-                ..., Union[RenderedAtomicContent, RenderedContent]
-            ] = renderer_impl.renderer
-            if isinstance(render_object, ExpectationConfiguration):
-                renderer_rendered_content = renderer_fn(configuration=render_object)
-            else:
-                renderer_rendered_content = renderer_fn(result=render_object)
-        else:
-            raise InlineRendererError(
-                f"renderer_name: {renderer_name} was not found in the registry for expectation_type: {expectation_type}"
+        renderer_impl: Optional[RendererImpl]
+        try:
+            renderer_impl = get_renderer_impl(
+                object_name=expectation_type, renderer_type=renderer_name
             )
+            if renderer_impl:
+                renderer_rendered_content = (
+                    InlineRenderer._get_rendered_content_from_renderer_impl(
+                        renderer_impl=renderer_impl,
+                        render_object=render_object,
+                    )
+                )
+            else:
+                raise InlineRendererError(
+                    f"renderer_name: {renderer_name} was not found in the registry for expectation_type: {expectation_type}"
+                )
 
-        assert isinstance(
-            renderer_rendered_content, RenderedAtomicContent
-        ), f"The renderer: {renderer_name} for expectation: {expectation_type} should return RenderedAtomicContent."
+            assert isinstance(
+                renderer_rendered_content, RenderedAtomicContent
+            ), f"The renderer: {renderer_name} for expectation: {expectation_type} should return RenderedAtomicContent."
+        except Exception as e:
+            error_message = f'Renderer "{renderer_name}" failed to render Expectation "{expectation_type} with exception message: {str(e)}".'
+            logger.info(error_message)
 
+            failure_renderer: AtomicPrescriptiveRendererType | AtomicDiagnosticRendererType
+            if renderer_name.startswith(AtomicRendererType.PRESCRIPTIVE):
+                failure_renderer = AtomicPrescriptiveRendererType.FAILED
+                failure_renderer_message = f'Renderer "{failure_renderer}" will be used to render prescriptive content.'
+            else:
+                failure_renderer = AtomicDiagnosticRendererType.FAILED
+                failure_renderer_message = f'Renderer "{failure_renderer}" will be used to render diagnostic content.'
+            logger.info(failure_renderer_message)
+
+            renderer_impl = get_renderer_impl(
+                object_name=expectation_type, renderer_type=failure_renderer
+            )
+            if renderer_impl:
+                renderer_rendered_content = (
+                    InlineRenderer._get_rendered_content_from_renderer_impl(
+                        renderer_impl=renderer_impl,
+                        render_object=render_object,
+                    )
+                )
+                renderer_rendered_content.exception = error_message
+            else:
+                raise InlineRendererError(
+                    f'Renderer "{failure_renderer}" was not found in the registry.'
+                )
+
+        return renderer_rendered_content
+
+    @staticmethod
+    def _get_rendered_content_from_renderer_impl(
+        renderer_impl: RendererImpl,
+        render_object: ExpectationConfiguration | ExpectationValidationResult,
+    ) -> RenderedAtomicContent:
+        renderer_fn: Callable[
+            ..., RenderedAtomicContent | RenderedContent
+        ] = renderer_impl.renderer
+        if isinstance(render_object, ExpectationConfiguration):
+            renderer_rendered_content = renderer_fn(configuration=render_object)
+        else:
+            renderer_rendered_content = renderer_fn(result=render_object)
+        assert isinstance(renderer_rendered_content, RenderedAtomicContent)
         return renderer_rendered_content
 
     def get_rendered_content(

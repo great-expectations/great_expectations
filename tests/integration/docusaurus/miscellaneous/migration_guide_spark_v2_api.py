@@ -1,13 +1,11 @@
 import os
 
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import file_relative_path
 
+yaml = YAMLHandler()
 context = gx.get_context()
-
-yaml = yaml.YAML(typ="safe")
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(
@@ -94,9 +92,10 @@ updated_configuration = actual_checkpoint_yaml
 updated_configuration["batches"][0]["batch_kwargs"]["path"] = file_relative_path(
     __file__, "data/Titanic.csv"
 )
+updated_configuration["name"] = "test_updated_v2_checkpoint"
 
 # run checkpoint
 context.add_checkpoint(**updated_configuration)
-results = context.run_checkpoint(checkpoint_name="test_v2_checkpoint")
+results = context.run_checkpoint(checkpoint_name="test_updated_v2_checkpoint")
 
 assert results["success"] is True

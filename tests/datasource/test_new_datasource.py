@@ -6,18 +6,8 @@ from typing import Any, Dict, List, Optional, Union
 import pandas as pd
 import pytest
 
-from great_expectations.util import is_candidate_subset_of_target
-
-try:
-    pyspark = pytest.importorskip("pyspark")
-    from pyspark.sql.types import Row
-except ImportError:
-    pyspark = None
-    Row = None
-
-from ruamel.yaml import YAML
-
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -25,6 +15,7 @@ from great_expectations.core.batch import (
     IDDict,
     RuntimeBatchRequest,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import (
     file_relative_path,
     instantiate_class_from_config,
@@ -33,9 +24,10 @@ from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
 from great_expectations.datasource.new_datasource import Datasource
+from great_expectations.util import is_candidate_subset_of_target
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture
@@ -102,9 +94,8 @@ execution_engine:
     class_name: SparkDFExecutionEngine
     spark_config:
         spark.master: local[*]
-        spark.executor.memory: 6g
+        spark.executor.memory: 450m
         spark.driver.memory: 6g
-        spark.ui.showConsoleProgress: false
         spark.sql.shuffle.partitions: 2
         spark.default.parallelism: 4
 data_connectors:
@@ -236,30 +227,32 @@ def test_basic_pandas_datasource_v013_self_check(basic_pandas_datasource_v013):
     }
 
 
-def test_basic_spark_datasource_self_check(basic_spark_datasource):
+def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
+    """What does this test do and why?
+
+    We are testing that the spark application referenced in the datasource
+    is the same one as the global spark application.
+    """
     report: dict = basic_spark_datasource.self_check()
 
     # The structure of this config is dynamic based on PySpark version;
     # we deem asserting certain key-value pairs sufficient for purposes of this test
-    expected_spark_config: Dict[str, str] = {
+    expected_spark_config: Dict[str, Any] = {
         "spark.app.name": "default_great_expectations_spark_application",
-        "spark.default.parallelism": "4",
+        "spark.default.parallelism": 4,
         "spark.driver.memory": "6g",
-        "spark.executor.id": "driver",
-        "spark.executor.memory": "6g",
+        "spark.executor.memory": "450m",
         "spark.master": "local[*]",
-        "spark.rdd.compress": "True",
-        "spark.serializer.objectStreamReset": "100",
-        "spark.sql.catalogImplementation": "hive",
-        "spark.sql.shuffle.partitions": "2",
-        "spark.submit.deployMode": "client",
-        "spark.ui.showConsoleProgress": "False",
     }
     actual_spark_config: Dict[str, Any] = report["execution_engine"]["spark_config"]
 
     assert is_candidate_subset_of_target(
         candidate=expected_spark_config, target=actual_spark_config
     )
+
+
+def test_basic_spark_datasource_self_check(basic_spark_datasource):
+    report: dict = basic_spark_datasource.self_check()
 
     # Remove Spark-specific information so we can assert against the rest of the payload
     report["execution_engine"].pop("spark_config")
@@ -406,7 +399,7 @@ def test_get_batch_list_from_batch_request(basic_pandas_datasource_v013):
         data_connector_name
     ].base_directory
     titanic_csv_destination_file_path: str = str(
-        os.path.join(base_directory, "Titanic_19120414.csv")
+        os.path.join(base_directory, "Titanic_19120414.csv")  # noqa: PTH118
     )
     shutil.copy(titanic_csv_source_file_path, titanic_csv_destination_file_path)
 
@@ -500,11 +493,11 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
         },
         "batch_identifiers": None,
     }
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         batch_request = RuntimeBatchRequest(**batch_request)
 
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -534,7 +527,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -564,7 +557,7 @@ def test_get_batch_with_pipeline_style_batch_request_incompatible_batch_data_and
     batch_request = RuntimeBatchRequest(**batch_request)
     with pytest.raises(gx_exceptions.ExecutionEngineError):
         # noinspection PyUnusedLocal
-        batch_list: List[
+        batch_list: List[  # noqa: F841
             Batch
         ] = basic_spark_datasource.get_batch_list_from_batch_request(
             batch_request=batch_request
@@ -593,7 +586,7 @@ def test_get_available_data_asset_names_with_configured_asset_filesystem_data_co
     }
     batch_request = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
-    batch_list: List[
+    batch_list: List[  # noqa: F841
         Batch
     ] = basic_pandas_datasource_v013.get_batch_list_from_batch_request(
         batch_request=batch_request
@@ -712,9 +705,9 @@ def test_get_available_data_asset_names_with_single_partition_file_data_connecto
     }
     batch_request = RuntimeBatchRequest(**batch_request)
     # noinspection PyUnusedLocal
-    batch_list: List[Batch] = datasource.get_batch_list_from_batch_request(
-        batch_request=batch_request
-    )
+    batch_list: List[  # noqa: F841
+        Batch
+    ] = datasource.get_batch_list_from_batch_request(batch_request=batch_request)
 
     expected_data_asset_names: dict = {
         "test_runtime_data_connector": [data_asset_name],
@@ -810,7 +803,8 @@ def test__data_source_batch_spec_passthrough(tmp_path_factory):
         tmp_path_factory.mktemp("test__data_source_v013_batch_spec_passthrough")
     )
     with open(
-        os.path.join(base_directory, "csv_with_extra_header_rows.csv"), "w"
+        os.path.join(base_directory, "csv_with_extra_header_rows.csv"),  # noqa: PTH118
+        "w",
     ) as f_:
         f_.write(
             """--- extra ---
@@ -913,9 +907,8 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
             class_name: SparkDFExecutionEngine
             spark_config:
                 spark.master: local[*]
-                spark.executor.memory: 6g
+                spark.executor.memory: 450m
                 spark.driver.memory: 6g
-                spark.ui.showConsoleProgress: false
                 spark.sql.shuffle.partitions: 2
                 spark.default.parallelism: 4
         data_connectors:
@@ -949,7 +942,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
         BatchRequest(**batch_request)
     )
     # check that the batch_spec_passthrough has worked
-    assert batch[0].data.dataframe.head() == Row(x="1", y="2")
+    assert batch[0].data.dataframe.head() == pyspark.Row(x="1", y="2")
 
 
 @pytest.mark.integration
@@ -960,7 +953,7 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_batch_request(
     # copy files into tmp directory
     taxi_file: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "test_sets",
             "taxi_yellow_tripdata_samples",
@@ -1025,7 +1018,7 @@ def test_spark_with_batch_spec_passthrough_and_schema_in_datasource_config(
     # copy files into tmp directory
     taxi_file: str = file_relative_path(
         __file__,
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             "..",
             "test_sets",
             "taxi_yellow_tripdata_samples",

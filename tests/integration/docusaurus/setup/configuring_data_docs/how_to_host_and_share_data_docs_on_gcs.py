@@ -1,10 +1,10 @@
 import os
 import subprocess
 
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 context = gx.get_context()
 
 # NOTE: The following code is only for testing and depends on an environment
@@ -34,6 +34,13 @@ except Exception as e:
     pass
 
 create_data_docs_directory = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket command">
+gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
+# </snippet>
+"""
+
+# Overwrite the version with the snippet tags
+create_data_docs_directory = """
 gsutil mb -p <YOUR GCP PROJECT NAME> -l US-EAST1 -b on gs://<YOUR GCS BUCKET NAME>/
 """
 create_data_docs_directory = create_data_docs_directory.replace(
@@ -51,6 +58,13 @@ result = subprocess.run(
 stderr = result.stderr.decode("utf-8")
 
 create_data_docs_directory_output = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py create bucket output">
+Creating gs://<YOUR GCS BUCKET NAME>/...
+# </snippet>
+"""
+
+# Overwrite the version with the snippet tags
+create_data_docs_directory_output = """
 Creating gs://<YOUR GCS BUCKET NAME>/...
 """
 create_data_docs_directory_output = create_data_docs_directory_output.replace(
@@ -59,6 +73,15 @@ create_data_docs_directory_output = create_data_docs_directory_output.replace(
 
 assert create_data_docs_directory_output.strip() in stderr
 
+app_yaml = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py app yaml">
+runtime: python37
+env_variables:
+  CLOUD_STORAGE_BUCKET: <YOUR GCS BUCKET NAME>
+# </snippet>
+"""
+
+# Overwrite the version with the snippet tags
 app_yaml = """
 runtime: python37
 env_variables:
@@ -75,6 +98,14 @@ app_yaml_file_path = os.path.join(team_gcs_app_directory, "app.yaml")
 with open(app_yaml_file_path, "w") as f:
     yaml.dump(app_yaml, f)
 
+requirements_txt = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py requirements.txt">
+flask>=1.1.0
+google-cloud-storage
+# </snippet>
+"""
+
+# Overwrite the version with the snippet tags
 requirements_txt = """
 flask>=1.1.0
 google-cloud-storage
@@ -124,9 +155,22 @@ with open(main_py_file_path, "w") as f:
     f.write(main_py)
 
 gcloud_login_command = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud login and set project">
+gcloud auth login && gcloud config set project <YOUR GCP PROJECT NAME>
+# </snippet>
+"""
+
+# Overwrite the version with the snippet tags
+gcloud_login_command = """
 gcloud auth login && gcloud config set project <YOUR GCP PROJECT NAME>
 """
 
+gcloud_app_deploy_command = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py gcloud app deploy">
+gcloud app deploy
+# </snippet>
+"""
+# Overwrite the version with the snippet tags
 gcloud_app_deploy_command = """
 gcloud app deploy
 """
@@ -137,6 +181,7 @@ result = subprocess.Popen(
 )
 
 data_docs_site_yaml = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py data docs sites yaml">
 data_docs_sites:
   local_site:
     class_name: SiteBuilder
@@ -154,6 +199,7 @@ data_docs_sites:
       bucket: <YOUR GCS BUCKET NAME>
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
+# </snippet>
 """
 data_docs_site_yaml = data_docs_site_yaml.replace(
     "<YOUR GCP PROJECT NAME>", gcp_project
@@ -165,13 +211,19 @@ great_expectations_yaml_file_path = os.path.join(
     context.root_directory, "great_expectations.yml"
 )
 with open(great_expectations_yaml_file_path) as f:
-    great_expectations_yaml = yaml.safe_load(f)
-great_expectations_yaml["data_docs_sites"] = yaml.safe_load(data_docs_site_yaml)[
+    great_expectations_yaml = yaml.load(f)
+great_expectations_yaml["data_docs_sites"] = yaml.load(data_docs_site_yaml)[
     "data_docs_sites"
 ]
 with open(great_expectations_yaml_file_path, "w") as f:
     yaml.dump(great_expectations_yaml, f)
 
+build_data_docs_command = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs command">
+great_expectations docs build --site-name gs_site
+# </snippet>
+"""
+# Overwrite the version with the snippet tags
 build_data_docs_command = """
 great_expectations docs build --site-name gs_site
 """
@@ -184,6 +236,7 @@ result = subprocess.Popen(
 stdout = result.stdout.read().decode("utf-8")
 
 build_data_docs_output = """
+# <snippet name="tests/integration/docusaurus/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs.py build data docs output">
 The following Data Docs sites will be built:
 
  - gs_site: https://storage.googleapis.com/<YOUR GCS BUCKET NAME>/index.html
@@ -192,6 +245,7 @@ Would you like to proceed? [Y/n]: Y
 Building Data Docs...
 
 Done building Data Docs
+# </snippet>
 """
 
 assert (

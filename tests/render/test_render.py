@@ -97,7 +97,9 @@ def test_smoke_render_profiling_results_page_renderer(titanic_profiled_evrs_1):
     rendered = ProfilingResultsPageRenderer().render(titanic_profiled_evrs_1)
     with open(
         file_relative_path(
-            __file__, "./output/test_render_profiling_results_page_renderer.json"
+            __file__,
+            "./output/test_render_profiling_results_page_renderer.json",
+            strict=False,
         ),
         "w",
     ) as outfile:
@@ -127,6 +129,7 @@ def test_render_profiling_results_column_section_renderer(titanic_profiled_evrs_
                 "./output/test_render_profiling_results_column_section_renderer__"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -145,7 +148,9 @@ def test_smoke_render_validation_results_page_renderer(titanic_profiler_evrs):
     rendered = ValidationResultsPageRenderer().render(titanic_profiler_evrs)
     with open(
         file_relative_path(
-            __file__, "./output/test_render_validation_results_page_renderer.json"
+            __file__,
+            "./output/test_render_validation_results_page_renderer.json",
+            strict=False,
         ),
         "w",
     ) as outfile:
@@ -174,6 +179,7 @@ def test_render_validation_results_column_section_renderer(titanic_profiler_evrs
                 "./output/test_render_validation_results_column_section_renderer__"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -210,6 +216,7 @@ def test_render_expectation_suite_column_section_renderer(
                 "./output/test_render_expectation_suite_column_section_renderer"
                 + column
                 + ".json",
+                strict=False,
             ),
             "w",
         ) as outfile:
@@ -291,7 +298,9 @@ def test_render_profiled_fixture_expectation_suite(
 
     with open(
         file_relative_path(
-            __file__, "./output/test_render_profiled_fixture_expectation_suite.html"
+            __file__,
+            "./output/test_render_profiled_fixture_expectation_suite.html",
+            strict=False,
         ),
         "wb",
     ) as f:
@@ -316,6 +325,7 @@ def test_render_profiled_fixture_expectation_suite_with_distribution(
         file_relative_path(
             __file__,
             "./output/titanic_dataset_profiler_expectation_suite_with_distribution.html",
+            strict=False,
         ),
         "wb",
     ) as f:
@@ -332,7 +342,9 @@ def test_render_profiling_results(titanic_profiled_evrs_1):
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(__file__, "./output/test_render_profiling_results.html"),
+        file_relative_path(
+            __file__, "./output/test_render_profiling_results.html", strict=False
+        ),
         "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
@@ -348,7 +360,9 @@ def test_render_validation_results(titanic_profiled_evrs_1):
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(__file__, "./output/test_render_validation_results.html"),
+        file_relative_path(
+            __file__, "./output/test_render_validation_results.html", strict=False
+        ),
         "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
@@ -378,6 +392,7 @@ def test_smoke_render_profiling_results_page_renderer_with_exception(
         file_relative_path(
             __file__,
             "./output/test_render_profiling_results_column_section_renderer_with_exception.html",
+            strict=False,
         ),
         "wb",
     ) as outfile:
@@ -400,7 +415,8 @@ def test_full_oobe_flow():
     rendered_page = DefaultJinjaPageView().render(rendered_content)
 
     with open(
-        file_relative_path(__file__, "./output/test_full_oobe_flow.html"), "wb"
+        file_relative_path(__file__, "./output/test_full_oobe_flow.html", strict=False),
+        "wb",
     ) as f:
         f.write(rendered_page.encode("utf-8"))
 
@@ -481,6 +497,9 @@ def test_render_string_template():
     assert res == expected
 
 
+@pytest.mark.filterwarnings(
+    ""
+)  # Make sure warnings are emitted during this tests even if ignored in pytest ini
 def test_render_types_module_deprecation_warning():
     with warnings.catch_warnings(record=True) as w:
         CollapseContent(collapse=True)

@@ -6,15 +6,11 @@ from collections import OrderedDict
 from functools import lru_cache
 from typing import Any, Dict, Optional
 
-import great_expectations.exceptions as gx_exceptions
-from great_expectations.data_context.types.base import BaseYamlConfig
+from typing_extensions import Final
 
-try:
-    from azure.identity import DefaultAzureCredential
-    from azure.keyvault.secrets import SecretClient
-except ImportError:
-    SecretClient = None
-    DefaultAzureCredential = None
+import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import azure, google
+from great_expectations.data_context.types.base import BaseYamlConfig
 
 try:
     import boto3
@@ -23,12 +19,12 @@ except ImportError:
     boto3 = None
     ClientError = None
 
-try:
-    from google.cloud import secretmanager
-except ImportError:
-    secretmanager = None
 
 logger = logging.getLogger(__name__)
+
+TEMPLATE_STR_REGEX: Final[re.Pattern] = re.compile(
+    r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)"
+)
 
 
 class _ConfigurationSubstitutor:
@@ -125,9 +121,7 @@ class _ConfigurationSubstitutor:
 
         # 1. Make substitutions for non-escaped patterns
         try:
-            match = re.finditer(
-                r"(?<!\\)\$\{(.*?)\}|(?<!\\)\$([_a-zA-Z][_a-zA-Z0-9]*)", template_str
-            )
+            match = re.finditer(TEMPLATE_STR_REGEX, template_str)
         except TypeError:
             # If the value is not a string (e.g., a boolean), we should return it as is
             return template_str
@@ -276,14 +270,14 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.GCP_PATTERN}(?:\/versions\/([a-z0-9]+))?(?:\|([^\|]+))?$"
         )
-        if not secretmanager:
+        if not google.secretmanager:
             logger.error(
                 "secretmanager is not installed, please install great_expectations with gcp extra > "
                 "pip install great_expectations[gcp]"
             )
             raise ImportError("Could not import secretmanager from google.cloud")
 
-        client = secretmanager.SecretManagerServiceClient()
+        client = google.secretmanager.SecretManagerServiceClient()
         matches = regex.match(value)
 
         if not matches:
@@ -333,7 +327,7 @@ class _ConfigurationSubstitutor:
         regex = re.compile(
             rf"{self.AZURE_PATTERN}(?:\/([a-f0-9]{32}))?(?:\|([^\|]+))?$"
         )
-        if not SecretClient:
+        if not azure.SecretClient:
             logger.error(
                 "SecretClient is not installed, please install great_expectations with azure_secrets extra > "
                 "pip install great_expectations[azure_secrets]"
@@ -350,8 +344,8 @@ class _ConfigurationSubstitutor:
         secret_name = matches.group(2)
         secret_version = matches.group(3)
         secret_key = matches.group(4)
-        credential = DefaultAzureCredential()
-        client = SecretClient(vault_url=keyvault_uri, credential=credential)
+        credential = azure.DefaultAzureCredential()
+        client = azure.SecretClient(vault_url=keyvault_uri, credential=credential)
         secret = client.get_secret(name=secret_name, version=secret_version).value
         if secret_key:
             secret = json.loads(secret)[secret_key]

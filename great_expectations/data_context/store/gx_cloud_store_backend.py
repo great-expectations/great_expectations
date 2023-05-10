@@ -16,7 +16,7 @@ from great_expectations.data_context.cloud_constants import (
 from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.types.refs import GXCloudResourceRef
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
-from great_expectations.exceptions import StoreBackendError
+from great_expectations.exceptions import StoreBackendError, StoreBackendTransientError
 from great_expectations.util import bidict, filter_properties_dict, hyphen
 
 logger = logging.getLogger(__name__)
@@ -100,7 +100,9 @@ def get_user_friendly_error_message(
             support_message.append(json.dumps(errors))
 
     except json.JSONDecodeError:
-        support_message.append(f"Please contact superconductive at {SUPPORT_EMAIL}")
+        support_message.append(
+            f"Please contact the Great Expectations team at {SUPPORT_EMAIL}"
+        )
     return " ".join(support_message)
 
 
@@ -243,7 +245,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
-            raise StoreBackendError(
+            raise StoreBackendTransientError(
                 "Unable to get object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
 
@@ -251,7 +253,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         pass
 
     # TODO: GG 20220810 return the `ResponsePayload`
-    def _update(self, ge_cloud_id: str, value: Any) -> bool:
+    def _update(self, id: str, value: Any) -> bool:
         resource_type = self.ge_cloud_resource_type
         organization_id = self.ge_cloud_credentials["organization_id"]
         attributes_key = self.PAYLOAD_ATTRIBUTES_KEYS[resource_type]
@@ -269,9 +271,9 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             resource_name=self.ge_cloud_resource_name,
         )
 
-        if ge_cloud_id:
-            data["data"]["id"] = ge_cloud_id
-            url = urljoin(f"{url}/", ge_cloud_id)
+        if id:
+            data["data"]["id"] = id
+            url = urljoin(f"{url}/", id)
 
         try:
             response = self._session.put(url, json=data)
@@ -296,7 +298,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
-            raise StoreBackendError(
+            raise StoreBackendTransientError(
                 "Unable to update object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
@@ -329,18 +331,16 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         **kwargs: dict,
     ) -> Union[bool, GXCloudResourceRef]:
         # Each resource type has corresponding attribute key to include in POST body
-        ge_cloud_resource = key[0]
-        ge_cloud_id: str = key[1]
+        resource = key[0]
+        id: str = key[1]
 
-        # if key has ge_cloud_id, perform _update instead
+        # if key has an id, perform _update instead
 
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
-        if (
-            ge_cloud_id
-            or ge_cloud_resource is GXCloudRESTResource.DATA_CONTEXT_VARIABLES
-        ):
-            return self._update(ge_cloud_id=ge_cloud_id, value=value)
+        if id or resource is GXCloudRESTResource.DATA_CONTEXT_VARIABLES:
+            # _update returns a bool
+            return self._update(id=id, value=value)
 
         resource_type = self.ge_cloud_resource_type
         resource_name = self.ge_cloud_resource_name
@@ -370,10 +370,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             object_id = response_json["data"]["id"]
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
+            # This method is where posts get made for all cloud store endpoints. We pass
+            # the response_json back up to the caller because the specific resource may
+            # want to parse resource specific data out of the response.
             return GXCloudResourceRef(
                 resource_type=resource_type,
-                cloud_id=object_id,
+                id=object_id,
                 url=object_url,
+                response_json=response_json,
             )
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
@@ -381,7 +385,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
-            raise StoreBackendError(
+            raise StoreBackendTransientError(
                 "Unable to set object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
@@ -451,12 +455,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
     def get_url_for_key(  # type: ignore[override]
         self, key: Tuple[str, ...], protocol: Optional[Any] = None
     ) -> str:
-        ge_cloud_id = key[1]
+        id = key[1]
         url = construct_url(
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
             resource_name=self.ge_cloud_resource_name,
-            id=ge_cloud_id,
+            id=id,
         )
         return url
 
@@ -464,12 +468,12 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         if not isinstance(key, tuple):
             key = key.to_tuple()
 
-        ge_cloud_id = key[1]
+        id = key[1]
 
         data = {
             "data": {
                 "type": self.ge_cloud_resource_type,
-                "id": ge_cloud_id,
+                "id": id,
                 "attributes": {
                     "deleted": True,
                 },
@@ -480,7 +484,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             base_url=self.ge_cloud_base_url,
             organization_id=self.ge_cloud_credentials["organization_id"],
             resource_name=self.ge_cloud_resource_name,
-            id=ge_cloud_id,
+            id=id,
         )
 
         try:
@@ -494,7 +498,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
         except requests.Timeout as timeout_exc:
             logger.exception(timeout_exc)
-            raise StoreBackendError(
+            raise StoreBackendTransientError(
                 "Unable to delete object in GX Cloud Store Backend: This is likely a transient error. Please try again."
             )
         except Exception as e:
@@ -504,17 +508,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             )
 
     def _has_key(self, key: Tuple[str, ...]) -> bool:
-        # Due to list_keys being inconsistently sized (due to the possible of resource names),
-        # we remove any resource names and assert against key ids.
-
-        def _shorten_key(key) -> Tuple[str, str]:
-            if len(key) > 2:
-                key = key[:2]
-            return key
-
-        key = _shorten_key(key)
-        all_keys = set(map(_shorten_key, self.list_keys()))
-        return key in all_keys
+        try:
+            _ = self._get(key)
+        except StoreBackendTransientError:
+            raise
+        except StoreBackendError as e:
+            logger.info(f"Could not find object associated with key {key}: {e}")
+            return False
+        return True
 
     @property
     def config(self) -> dict:
@@ -528,6 +529,6 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         """Get the store backend specific implementation of the key. ignore resource_type since it is defined when initializing the cloud store backend."""
         return GXCloudIdentifier(
             resource_type=self.ge_cloud_resource_type,
-            cloud_id=id,
+            id=id,
             resource_name=name,
         )

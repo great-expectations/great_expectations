@@ -1,6 +1,11 @@
 import re
 from copy import deepcopy
 
+try:
+    import sqlalchemy as sa
+except ImportError:
+    sa = None
+
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit
@@ -21,7 +26,7 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.expectations.expectation import (
-    TableExpectation,
+    BatchExpectation,
     render_evaluation_parameter_string,
 )
 from great_expectations.expectations.metrics.metric_provider import metric_value
@@ -63,7 +68,7 @@ class TableChecksum(TableMetricProvider):
     #
     #     return len(columnslist)
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -102,7 +107,7 @@ class TableChecksum(TableMetricProvider):
         if DEBUG:
             logger.error("\n***********cksumquery***********\n" + cksumquery)
 
-        return int(execution_engine.engine.execute(cksumquery).scalar())
+        return int(execution_engine.engine.execute(sa.text(cksumquery)).scalar())
 
     # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(
@@ -191,7 +196,7 @@ class TableChecksumValues(TableMetricProvider):
     #
     #     return cksum_value_self, cksum_value_other
 
-    @metric_value(engine=SqlAlchemyExecutionEngine, metric_fn_type="value")
+    @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
         cls,
         execution_engine: SqlAlchemyExecutionEngine,
@@ -231,7 +236,7 @@ class TableChecksumValues(TableMetricProvider):
     ):
 
         # set ignore_columns to '' if it is not provided.
-        if "ignore_columns" in configuration.kwargs:
+        if configuration and "ignore_columns" in configuration.kwargs:
             runtime_configuration["ignore_columns"] = configuration.kwargs[
                 "ignore_columns"
             ]
@@ -242,9 +247,10 @@ class TableChecksumValues(TableMetricProvider):
         table_row_count_metric_config_other = deepcopy(metric.metric_domain_kwargs)
 
         # set table value to other_table_name in metric configuration.
-        table_row_count_metric_config_other["table"] = configuration.kwargs[
-            "other_table_name"
-        ]
+        if configuration:
+            table_row_count_metric_config_other["table"] = configuration.kwargs[
+                "other_table_name"
+            ]
 
         return {
             "table.checksum.self": MetricConfiguration(
@@ -258,8 +264,8 @@ class TableChecksumValues(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableChecksumToEqualOtherTable(TableExpectation):
-    """Expect the checksum table to equal the checksum of another table.
+class ExpectTableChecksumToEqualOtherTable(BatchExpectation):
+    """Expect the checksum for one batch table to equal the checksum of another table.
 
     expect_table_checksum_to_equal_other_table is a \
     [Table Expectation](https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_table_expectations).
@@ -297,7 +303,6 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "table_data_1",
                     "data": {
                         "columnone": [3, 5, 7],
                         "columntwo": [True, False, True],
@@ -306,7 +311,6 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                     },
                 },
                 {
-                    "dataset_name": "table_data_2",
                     "data": {
                         "columnone": [3, 5, 7],
                         "columntwo": [True, False, True],
@@ -315,7 +319,6 @@ class ExpectTableChecksumToEqualOtherTable(TableExpectation):
                     },
                 },
                 {
-                    "dataset_name": "table_data_3",
                     "data": {
                         "columnone": [3, 5, 7, 8],
                         "columntwo": [True, False, True, False],

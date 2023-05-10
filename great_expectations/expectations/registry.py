@@ -15,13 +15,8 @@ from typing import (
 )
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.id_dict import IDDict
-from great_expectations.render import (
-    AtomicDiagnosticRendererType,
-    AtomicPrescriptiveRendererType,
-    AtomicRendererType,
-)
-from great_expectations.validator.computed_metric import MetricValue
 
 if TYPE_CHECKING:
     from great_expectations.core import ExpectationConfiguration
@@ -32,7 +27,14 @@ if TYPE_CHECKING:
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.expectations.expectation import Expectation
     from great_expectations.expectations.metrics.metric_provider import MetricProvider
-    from great_expectations.render import RenderedAtomicContent, RenderedContent
+    from great_expectations.render import (
+        AtomicDiagnosticRendererType,
+        AtomicPrescriptiveRendererType,
+        AtomicRendererType,
+        RenderedAtomicContent,
+        RenderedContent,
+    )
+    from great_expectations.validator.computed_metric import MetricValue
 
 logger = logging.getLogger(__name__)
 
@@ -167,6 +169,32 @@ def register_expectation(expectation: Type[Expectation]) -> None:
     _registered_expectations[expectation_type] = expectation
 
 
+def register_core_expectations() -> None:
+    """As Expectation registration is the responsibility of MetaExpectation.__new__,
+    simply importing a given class will ensure that it is added to the Expectation
+    registry.
+
+    We use this JIT in the Validator to ensure that core Expectations are available
+    for usage when called upon.
+
+    Without this function, we need to hope that core Expectations are imported somewhere
+    in our import graph - if not, our registry will be empty and Validator workflows
+    will fail.
+    """
+    before_count = len(_registered_expectations)
+
+    # Implicitly calls MetaExpectation.__new__ as Expectations are loaded from core.__init__.py
+    # As __new__ calls upon register_expectation, this import builds our core registry
+    from great_expectations.expectations import core  # noqa: F401
+
+    after_count = len(_registered_expectations)
+
+    if before_count == after_count:
+        logger.debug("Already registered core expectations; no updates to registry")
+    else:
+        logger.debug(f"Registered {after_count-before_count} core expectations")
+
+
 def _add_response_key(res, key, value):
     if key in res:
         res[key].append(value)
@@ -175,6 +203,7 @@ def _add_response_key(res, key, value):
     return res
 
 
+@public_api
 def register_metric(
     metric_name: str,
     metric_domain_keys: Tuple[str, ...],
@@ -186,6 +215,21 @@ def register_metric(
         Union[MetricFunctionTypes, MetricPartialFunctionTypes]
     ] = None,
 ) -> dict:
+    """Register a Metric class for use as a callable metric within Expectations.
+
+    Args:
+        metric_name: A name identifying the metric. Metric Name must be globally unique in
+            a great_expectations installation.
+        metric_domain_keys: A tuple of the keys used to determine the domain of the metric.
+        metric_value_keys: A tuple of the keys used to determine the domain of the metric.
+        execution_engine: The execution_engine used to execute the metric.
+        metric_class: A valid Metric class containing logic to compute attributes of data.
+        metric_provider: The MetricProvider class from which the metric_class inherits.
+        metric_fn_type: The MetricFunctionType or MetricPartialFunctionType used to define the Metric class.
+
+    Returns:
+        A dictionary containing warnings thrown during registration if applicable, and the success status of registration.
+    """
     res: dict = {}
     execution_engine_name = execution_engine.__name__
     logger.debug(f"Registering metric: {metric_name}")

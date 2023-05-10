@@ -243,7 +243,7 @@ assert validation_result.result == {"observed_value": 2.75}
 
 # Checkpoint
 # NOTE: The following code is only for testing and can be ignored by users.
-context.create_expectation_suite(expectation_suite_name="test_suite")
+context.add_or_update_expectation_suite(expectation_suite_name="test_suite")
 test_suite = context.get_expectation_suite(expectation_suite_name="test_suite")
 
 expectation_config = ExpectationConfiguration(
@@ -255,10 +255,9 @@ expectation_config = ExpectationConfiguration(
 )
 test_suite.add_expectation(expectation_configuration=expectation_config)
 
-context.save_expectation_suite(
+test_suite.expectation_suite_name = "test_suite"
+context.add_or_update_expectation_suite(
     expectation_suite=test_suite,
-    expectation_suite_name="test_suite",
-    overwriting_existing=True,
 )
 
 # <snippet name="tests/integration/docusaurus/reference/core_concepts/result_format/result_format_checkpoint_example">
@@ -309,7 +308,7 @@ batch_request = {
 }
 
 checkpoint_config = CheckpointConfig(**checkpoint_dict)
-context.add_checkpoint(
+context.add_or_update_checkpoint(
     **filter_properties_dict(
         properties=checkpoint_config.to_json_dict(),
         clean_falsy=True,

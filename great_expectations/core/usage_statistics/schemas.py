@@ -1230,7 +1230,7 @@ def write_schema_to_file(target_dir: str) -> None:
     import os
 
     file: str = "usage_statistics_record_schema.json"
-    out: str = os.path.join(target_dir, file)
+    out: str = os.path.join(target_dir, file)  # noqa: PTH118
 
     with open(out, "w") as outfile:
         json.dump(anonymized_usage_statistics_record_schema, outfile, indent=2)

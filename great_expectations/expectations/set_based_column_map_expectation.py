@@ -3,9 +3,10 @@ from abc import ABC
 from typing import TYPE_CHECKING, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions.exceptions import (
     InvalidExpectationConfigurationError,
 )
@@ -41,7 +42,33 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+@public_api
 class SetColumnMapMetricProvider(ColumnMapMetricProvider):
+    """Base class for all SetColumnMapMetrics.
+
+    SetColumnMapMetric classes inheriting from SetColumnMapMetricProvider are ephemeral,
+    defined by their `set` attribute, and registered during the execution of their associated SetColumnMapExpectation.
+
+    Metric Registration Example:
+
+    ```python
+    map_metric = SetBasedColumnMapExpectation.register_metric(
+        set_camel_name='SolfegeScale',
+        set_=['do', 're', 'mi', 'fa', 'so', 'la', 'ti'],
+    )
+    ```
+
+    In some cases, subclasses of MetricProvider, such as SetColumnMapMetricProvider, will already
+    have correct values that may simply be inherited by Metric classes.
+
+    Args:
+        set_ (union[list, set]): A value set.
+        metric_name (str): The name of the registered metric. Must be globally unique in a great_expectations installation.
+            Constructed by the `register_metric(...)` function during Expectation execution.
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the metric.
+        condition_value_keys (tuple): A tuple of the keys used to determine the value of the metric.
+    """
+
     condition_value_keys = ()
 
     @column_condition_partial(engine=PandasExecutionEngine)
@@ -57,14 +84,51 @@ class SetColumnMapMetricProvider(ColumnMapMetricProvider):
         return column.isin(cls.set_)
 
 
+@public_api
 class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
+    """Base class for SetBasedColumnMapExpectations.
+
+    SetBasedColumnMapExpectations facilitate set-based comparisons as the core logic for a Map Expectation.
+
+    Example Definition:
+
+    ```python
+    ExpectColumnValuesToBeInSolfegeScaleSet(SetBasedColumnMapExpectation):
+        set_camel_name = SolfegeScale
+        set_ = ['do', 're', 'mi', 'fa', 'so', 'la', 'ti']
+        set_semantic_name = "the Solfege scale"
+        map_metric = SetBasedColumnMapExpectation.register_metric(
+            set_camel_name=set_camel_name,
+            set_=set_
+    )
+    ```
+
+    Args:
+        set_camel_name (str): A name describing a set of values, in camel case.
+        set_ (str): A value set.
+        set_semantic_name (optional[str]): A name for the semantic type representing the set being validated..
+        map_metric (str): The name of an ephemeral metric, as returned by `register_metric(...)`.
+
+    ---Documentation---
+        - https://docs.greatexpectations.io/docs/guides/expectations/creating_custom_expectations/how_to_create_custom_set_based_column_map_expectations
+    """
+
     @staticmethod
     def register_metric(
         set_camel_name: str,
         set_: str,
-    ):
+    ) -> str:
+        """Register an ephemeral metric using a constructed name with the logic provided by RegexColumnMapMetricProvider.
+
+        Args:
+            set_camel_name: A name describing a set of values, in camel case.
+            set_: A value set.
+
+        Returns:
+            map_metric: The constructed name of the ephemeral metric.
+        """
         set_snake_name = camel_to_snake(set_camel_name)
-        map_metric = "column_values.match_" + set_snake_name + "_set"
+        map_metric: str = "column_values.match_" + set_snake_name + "_set"
 
         # Define the class using `type`. This allows us to name it dynamically.
         new_column_set_metric_provider = type(  # noqa: F841 # never used
@@ -80,7 +144,16 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
-    ):
+    ) -> None:
+        """Raise an exception if the configuration is not viable for an expectation.
+
+        Args:
+            configuration: An ExpectationConfiguration
+
+        Raises:
+            InvalidExpectationConfigurationError: If no `set_` or `column` specified, or if `mostly` parameter
+                incorrectly defined.
+        """
         super().validate_configuration(configuration)
         try:
             assert (
@@ -100,8 +173,6 @@ class SetBasedColumnMapExpectation(ColumnMapExpectation, ABC):
 
         except AssertionError as e:
             raise InvalidExpectationConfigurationError(str(e))
-
-        return True
 
     # question, descriptive, prescriptive, diagnostic
     @classmethod

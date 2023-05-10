@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING, List, Optional
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 
@@ -176,13 +176,28 @@ class ExpectColumnValuesToNotMatchRegex(ColumnMapExpectation):
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """
+        Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_not_match_regex` it is required that:
+            - 'regex' kwarg is of type str or dict
+            - if dict, assert a key "$PARAMETER" is present
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                                  from the configuration attribute of the Expectation instance.
+
+        Raises:
+            `InvalidExpectationConfigurationError`: The configuration does not contain the values required by the
+                                  Expectation."
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
             assert "regex" in configuration.kwargs, "regex is required"
             assert isinstance(
                 configuration.kwargs["regex"], (str, dict)
-            ), "regex must be a string"
+            ), "regex must be a string or dict"
             if isinstance(configuration.kwargs["regex"], dict):
                 assert (
                     "$PARAMETER" in configuration.kwargs["regex"]

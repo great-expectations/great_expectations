@@ -1,0 +1,16 @@
+# contrib/ specific ruff linter overrides
+
+# root linter settings are defined in the file below
+extend = "../pyproject.toml"
+
+extend-ignore = [
+    # https://github.com/charliermarsh/ruff#flake8-type-checking-tch
+    # This is likely to be a high-touch rule that most contribs don't need to care about.
+    "TCH001",
+    # https://beta.ruff.rs/docs/rules/#flake8-tidy-imports-tid
+    "TID251",  # banned-api - is used to prevent opaque attribute errors caused by missing optional dependencies
+]
+
+[isort]
+known-first-party = ["great_expectations", "tests"]
+known-third-party = ["dataprofiler", "capitalone_dataprofiler_expectations"]

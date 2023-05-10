@@ -1,0 +1,93 @@
+{
+    "title": "PandasDatasource",
+    "description": "--Public API--Adds a single-batch pandas datasource to the data context.\n\nArgs:\n    name: The name of this datasource.\n    assets: An optional dictionary whose keys are Pandas DataAsset names and whose values\n        are Pandas DataAsset objects.",
+    "type": "object",
+    "properties": {
+        "type": {
+            "title": "Type",
+            "default": "pandas",
+            "enum": [
+                "pandas"
+            ],
+            "type": "string"
+        },
+        "name": {
+            "title": "Name",
+            "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
+        },
+        "assets": {
+            "title": "Assets",
+            "default": [],
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/_PandasDataAsset"
+            }
+        }
+    },
+    "required": [
+        "name"
+    ],
+    "additionalProperties": false,
+    "definitions": {
+        "Sorter": {
+            "title": "Sorter",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "title": "Key",
+                    "type": "string"
+                },
+                "reverse": {
+                    "title": "Reverse",
+                    "default": false,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "key"
+            ]
+        },
+        "_PandasDataAsset": {
+            "title": "_PandasDataAsset",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                }
+            },
+            "required": [
+                "name",
+                "type"
+            ]
+        }
+    }
+}

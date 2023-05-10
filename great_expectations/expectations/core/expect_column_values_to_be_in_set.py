@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
     InvalidExpectationConfigurationError,
@@ -39,7 +40,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 from great_expectations.expectations.expectation import (
@@ -380,13 +381,36 @@ class ExpectColumnValuesToBeInSet(ColumnMapExpectation):
 
         return new_block
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Validates that a value_set has been provided."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_in_set` it is required that:
+
+        - `value_set` has been provided.
+
+        - `value_set` is one of the following types: `list`, `set`, or `dict`
+
+        - If `value_set` is a `dict`, it is assumed to be an Evaluation Parameter, and therefore the
+          dictionary keys must be `$PARAMETER`.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
-        # supports extensibility by allowing value_set to not be provided in config but captured via child-class default_kwarg_values, e.g. parameterized expectations
+        # supports extensibility by allowing value_set to not be provided in config but captured via child-class
+        # default_kwarg_values, e.g. parameterized expectations
         value_set = configuration.kwargs.get(
             "value_set"
         ) or self.default_kwarg_values.get("value_set")

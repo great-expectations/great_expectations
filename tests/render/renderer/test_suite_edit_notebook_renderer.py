@@ -2,12 +2,8 @@ import json
 import os
 import shutil
 
-import nbformat
 import pytest
-from nbconvert.preprocessors import ExecutePreprocessor
 
-# noinspection PyProtectedMember
-from great_expectations.cli.v012.suite import _suite_edit
 from great_expectations.core.expectation_suite import (
     ExpectationSuite,
     ExpectationSuiteSchema,
@@ -30,56 +26,66 @@ def data_context_with_bad_notebooks(tmp_path_factory):
     created with DataContext.create()
     """
     project_path = str(tmp_path_factory.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
     custom_notebook_assets_dir = "notebook_assets"
 
-    os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(asset_config_path, "my_dag_node"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        os.path.join(  # noqa: PTH118
+            fixture_dir, "great_expectations_basic_with_bad_notebooks.yml"
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir,
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
-        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+        os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
 
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
     shutil.copytree(
-        os.path.join(fixture_dir, custom_notebook_assets_dir),
-        str(os.path.join(context_path, "plugins", custom_notebook_assets_dir)),
+        os.path.join(fixture_dir, custom_notebook_assets_dir),  # noqa: PTH118
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "plugins", custom_notebook_assets_dir
+            )
+        ),
     )
     return get_context(context_root_dir=context_path)
 
 
 def _create_custom_notebooks_context(path, ge_yml_name):
     project_path = str(path.mktemp("data_context"))
-    context_path = os.path.join(project_path, "great_expectations")
-    asset_config_path = os.path.join(context_path, "expectations")
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    asset_config_path = os.path.join(context_path, "expectations")  # noqa: PTH118
     fixture_dir = file_relative_path(__file__, "../../test_fixtures")
-    os.makedirs(
-        os.path.join(asset_config_path, "my_dag_node"),
+    os.makedirs(  # noqa: PTH103
+        os.path.join(asset_config_path, "my_dag_node"),  # noqa: PTH118
         exist_ok=True,
     )
     shutil.copy(
-        os.path.join(fixture_dir, ge_yml_name),
-        str(os.path.join(context_path, "great_expectations.yml")),
+        os.path.join(fixture_dir, ge_yml_name),  # noqa: PTH118
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
     shutil.copy(
-        os.path.join(
+        os.path.join(  # noqa: PTH118
             fixture_dir,
             "expectation_suites/parameterized_expectation_suite_fixture.json",
         ),
-        os.path.join(asset_config_path, "my_dag_node", "default.json"),
+        os.path.join(asset_config_path, "my_dag_node", "default.json"),  # noqa: PTH118
     )
-    os.makedirs(os.path.join(context_path, "plugins"), exist_ok=True)
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
     return context_path
 
 
@@ -149,7 +155,7 @@ def critical_suite_with_citations(empty_data_context) -> ExpectationSuite:
             "notes": {
                 "format": MetaNotesFormat.MARKDOWN,
                 "content": [
-                    "#### This is an _example_ suite\n\n- This suite was made by quickly glancing at 1000 rows of your data.\n- This is **not a production suite**. It is meant to show examples of expectations.\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\n"
+                    "#### This is an _example_ suite\n\n- This suite was made by quickly glancing at 1000 rows of your data.\n- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\n"
                 ],
             },
             "BasicSuiteBuilderProfiler": {
@@ -505,7 +511,7 @@ def test_render_without_batch_kwargs_uses_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This is **not a production suite**. It is meant to show examples of expectations.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -586,7 +592,7 @@ def test_render_with_no_column_cells(critical_suite_with_citations, empty_data_c
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This is **not a production suite**. It is meant to show examples of expectations.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {"path": "/home/foo/data/10k.csv", "datasource": "files_datasource"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -659,7 +665,7 @@ def test_render_without_batch_kwargs_and_no_batch_kwargs_in_citations_uses_blank
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This is **not a production suite**. It is meant to show examples of expectations.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -744,7 +750,7 @@ def test_render_with_batch_kwargs_and_no_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This is **not a production suite**. It is meant to show examples of expectations.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -828,7 +834,7 @@ def test_render_with_no_batch_kwargs_and_no_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This is **not a production suite**. It is meant to show examples of expectations.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -911,7 +917,7 @@ def test_render_with_batch_kwargs_overrides_batch_kwargs_in_citations(
                 "cell_type": "code",
                 "metadata": {},
                 "execution_count": None,
-                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This is **not a production suite**. It is meant to show examples of expectations.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
+                "source": 'import datetime\nimport great_expectations as gx\nimport great_expectations.jupyter_ux\nfrom great_expectations.checkpoint import LegacyCheckpoint\nfrom great_expectations.data_context.types.resource_identifiers import (\n    ValidationResultIdentifier,\n)\n\ncontext = gx.get_context()\n\n# Feel free to change the name of your suite here. Renaming this will not\n# remove the other one.\nexpectation_suite_name = "critical"\nsuite = context.get_expectation_suite(expectation_suite_name)\nsuite.expectations = []\nsuite.meta["notes"] = {\n    "format": "markdown",\n    "content": [\n        "#### This is an _example_ suite\\n\\n- This suite was made by quickly glancing at 1000 rows of your data.\\n- This Expectation Suite may not be a complete assessment of the quality of your data. You should review and edit the Expectations based on domain knowledge.\\n- Because this suite was auto-generated using a very basic profiler that does not know your data like you do, many of the expectations may not be meaningful.\\n"\n    ],\n}\nbatch_kwargs = {"foo": "bar", "datasource": "things"}\nbatch = context.get_batch(batch_kwargs, suite)\nbatch.head()',
                 "outputs": [],
             },
             {
@@ -1409,97 +1415,6 @@ def test_complex_suite(warning_suite, empty_data_context):
         obs_cell.pop("id", None)
         assert obs_cell == expected_cell
     assert obs == expected
-
-
-@pytest.mark.slow  # 5.42s
-def test_notebook_execution_with_pandas_backend(titanic_data_context_no_data_docs):
-    """
-    To set this test up we:
-
-    - create a suite
-    - add a few expectations (both table and column level)
-    - verify that no validations have happened
-    - create the suite edit notebook by hijacking the private cli method
-
-
-    We then:
-    - execute that notebook (Note this will raise various errors like
-    CellExecutionError if any cell in the notebook fails
-    - create a new context from disk
-    - verify that a validation has been run with our expectation suite
-    """
-    # Since we'll run the notebook, we use a context with no data docs to avoid
-    # the renderer's default behavior of building and opening docs, which is not
-    # part of this test.
-    context = titanic_data_context_no_data_docs
-    root_dir = context.root_directory
-    uncommitted_dir = os.path.join(root_dir, "uncommitted")
-    suite_name = "warning"
-
-    context.create_expectation_suite(suite_name)
-    csv_path = os.path.join(root_dir, "..", "data", "Titanic.csv")
-    batch_kwargs = {"datasource": "mydatasource", "path": csv_path}
-    batch = context.get_batch(batch_kwargs, suite_name)
-    batch.expect_table_column_count_to_equal(1)
-    batch.expect_table_row_count_to_equal(1313)
-    batch.expect_column_values_to_be_in_set("Sex", ["female", "male"])
-    batch.save_expectation_suite(discard_failed_expectations=False)
-
-    # Sanity check test setup
-    suite = context.get_expectation_suite(suite_name)
-    original_suite = suite
-    assert len(suite.expectations) == 3
-    assert context.list_expectation_suite_names() == [suite_name]
-    assert context.list_datasources() == [
-        {
-            "module_name": "great_expectations.datasource",
-            "class_name": "PandasDatasource",
-            "data_asset_type": {
-                "module_name": "great_expectations.dataset",
-                "class_name": "PandasDataset",
-            },
-            "batch_kwargs_generators": {
-                "mygenerator": {
-                    "class_name": "SubdirReaderBatchKwargsGenerator",
-                    "base_directory": "../data",
-                }
-            },
-            "name": "mydatasource",
-        }
-    ]
-    assert context.get_validation_result("warning") == {}
-
-    # Create notebook
-    json_batch_kwargs = json.dumps(batch_kwargs)
-    _suite_edit(
-        suite_name,
-        "mydatasource",
-        directory=root_dir,
-        jupyter=False,
-        batch_kwargs=json_batch_kwargs,
-        usage_event="test_notebook_execution",
-    )
-    edit_notebook_path = os.path.join(uncommitted_dir, "edit_warning.ipynb")
-    assert os.path.isfile(edit_notebook_path)
-
-    with open(edit_notebook_path) as f:
-        nb = nbformat.read(f, as_version=4)
-
-    # Run notebook
-    ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
-    ep.preprocess(nb, {"metadata": {"path": uncommitted_dir}})
-
-    # Assertions about output
-    context = get_context(context_root_dir=root_dir)
-    obs_validation_result = context.get_validation_result("warning")
-    assert obs_validation_result.statistics == {
-        "evaluated_expectations": 3,
-        "successful_expectations": 2,
-        "unsuccessful_expectations": 1,
-        "success_percent": 66.66666666666666,
-    }
-    suite = context.get_expectation_suite(suite_name)
-    assert suite == original_suite
 
 
 def test_notebook_execution_with_custom_notebooks_wrong_module(

@@ -83,7 +83,7 @@ def test_project_upgrade_already_up_to_date(v10_project_directory, caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "--v3-api", "project", "upgrade"],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -115,7 +115,6 @@ def test_upgrade_helper_intervention_on_cli_command(
     result: Result = runner.invoke(
         cli,
         [
-            "--v3-api",
             "checkpoint",
             "list",
         ],
@@ -197,7 +196,7 @@ def test_basic_project_upgrade(v10_project_directory, caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "--v3-api", "project", "upgrade"],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -304,7 +303,7 @@ def test_project_upgrade_with_manual_steps(
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "--v3-api", "project", "upgrade"],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -416,7 +415,7 @@ def test_project_upgrade_with_exception(v10_project_directory, caplog):
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        ["-c", v10_project_directory, "--v3-api", "project", "upgrade"],
+        ["-c", v10_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -514,7 +513,7 @@ def test_v2_to_v3_project_upgrade_with_all_manual_steps_checkpoints_datasources_
     runner: CliRunner = CliRunner(mix_stderr=False)
     result: Result = runner.invoke(
         cli,
-        ["-c", v20_project_directory, "--v3-api", "project", "upgrade"],
+        ["-c", v20_project_directory, "project", "upgrade"],
         input="\n",
         catch_exceptions=False,
     )
@@ -619,7 +618,6 @@ def test_v2_to_v3_project_upgrade_with_manual_steps_checkpoints(
         [
             "-c",
             v20_project_directory_with_v30_configuration_and_v20_checkpoints,
-            "--v3-api",
             "project",
             "upgrade",
         ],
@@ -733,7 +731,6 @@ def test_v2_to_v3_project_upgrade_without_manual_steps(
         [
             "-c",
             v20_project_directory_with_v30_configuration_and_no_checkpoints,
-            "--v3-api",
             "project",
             "upgrade",
         ],

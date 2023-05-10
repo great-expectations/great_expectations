@@ -2,13 +2,9 @@ import os
 from typing import List
 
 # noinspection PyUnresolvedReferences
-from contrib.experimental.great_expectations_experimental.rule_based_profiler.data_assistant import (
-    StatisticsDataAssistant,
-)
 from great_expectations.data_context.util import file_relative_path
 
 # noinspection PyUnresolvedReferences
-from tests.conftest import sa
 
 # constants used by the sql example
 pg_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
@@ -27,7 +23,7 @@ def load_data_into_postgres_database(sa):
     data_paths: List[str] = [
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "..",
                 "..",
@@ -62,7 +58,7 @@ def load_data_into_postgres_database(sa):
 
     # ensure we aren't appending to an existing table
     # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-    connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+    connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
     for data_path in data_paths:
         load_data_into_test_database(
             table_name=table_name,
@@ -78,7 +74,7 @@ def load_data_into_postgres_database(sa):
     data_paths: List[str] = [
         file_relative_path(
             __file__,
-            os.path.join(
+            os.path.join(  # noqa: PTH118
                 "..",
                 "..",
                 "..",
@@ -99,7 +95,7 @@ def load_data_into_postgres_database(sa):
 
     # ensure we aren't appending to an existing table
     # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-    connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+    connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
     for data_path in data_paths:
         load_data_into_test_database(
             table_name=table_name,

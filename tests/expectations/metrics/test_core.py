@@ -12,6 +12,7 @@ from great_expectations.core.batch import Batch
 from great_expectations.core.metric_function_types import (
     MetricPartialFunctionTypes,
     MetricPartialFunctionTypeSuffixes,
+    SummarizationMetricNameSuffixes,
 )
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -21,10 +22,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_Column,
-    quoted_name,
-)
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
@@ -38,6 +37,10 @@ from great_expectations.util import isclose
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
+
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 
 
 def test_metric_loads_pd():
@@ -200,9 +203,11 @@ def test_column_quoted_name_type_sa(sa):
     )
     table_columns_metric_id: Tuple[str, str, str] = table_columns_metric.id
     batch_column_list = metrics[table_columns_metric_id]
+
+    column_name: str
     quoted_batch_column_list = [
-        quoted_name(value=str(element), quote=True)
-        for element in metrics[table_columns_metric_id]
+        sqlalchemy.quoted_name(value=str(column_name), quote=True)
+        for column_name in batch_column_list
     ]
 
     column_name = "names"
@@ -210,21 +215,20 @@ def test_column_quoted_name_type_sa(sa):
     str_column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=batch_column_list,
-        execution_engine=PandasExecutionEngine(),
     )
     assert isinstance(str_column_name, str)
 
     quoted_column_name = get_dbms_compatible_column_names(
         column_names=column_name,
         batch_columns_list=quoted_batch_column_list,
-        execution_engine=engine,
     )
-    assert isinstance(quoted_column_name, sa.sql.elements.quoted_name)
+    assert sqlalchemy.quoted_name and isinstance(
+        quoted_column_name, sqlalchemy.quoted_name
+    )
     assert quoted_column_name.quote is True
 
     for column_name in [
         "non_existent_column",
-        "NAMES",
         '"NAMES"',
         '"Names"',
     ]:
@@ -234,19 +238,29 @@ def test_column_quoted_name_type_sa(sa):
             _ = get_dbms_compatible_column_names(
                 column_names=column_name,
                 batch_columns_list=batch_column_list,
-                execution_engine=engine,
             )
         assert (
             str(eee.value)
             == f'Error: The column "{column_name}" in BatchData does not exist.'
         )
+
+    quoted_batch_column_list = [
+        sqlalchemy.quoted_name(value=str(column_name), quote=True)
+        for column_name in [
+            "Names",
+            "names",
+        ]
+    ]
+    for column_name in [
+        "non_existent_column",
+        "NAMES",
+    ]:
         with pytest.raises(
             gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError
         ) as eee:
             _ = get_dbms_compatible_column_names(
                 column_names=column_name,
                 batch_columns_list=quoted_batch_column_list,
-                execution_engine=engine,
             )
         assert (
             str(eee.value)
@@ -1219,8 +1233,6 @@ def test_column_partition_metric_spark(spark_session):
 
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
-    from great_expectations.expectations.metrics.import_manager import sparktypes
-
     week_idx: int
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -1247,10 +1259,10 @@ def test_column_partition_metric_spark(spark_session):
                 ],
             },
         ),
-        schema=sparktypes.StructType(
+        schema=pyspark.types.StructType(
             [
-                sparktypes.StructField("a", sparktypes.IntegerType(), True),
-                sparktypes.StructField("b", sparktypes.TimestampType(), True),
+                pyspark.types.StructField("a", pyspark.types.IntegerType(), True),
+                pyspark.types.StructField("b", pyspark.types.TimestampType(), True),
             ]
         ),
         batch_id="my_id",
@@ -1691,7 +1703,7 @@ def test_map_value_set_sa(sa):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name=f"column_values.in_set.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1703,7 +1715,7 @@ def test_map_value_set_sa(sa):
         metrics_to_resolve=(aggregate_partial,), metrics=metrics
     )
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1719,7 +1731,7 @@ def test_map_value_set_sa(sa):
 def test_map_of_type_sa(sa):
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    df.to_sql(name="test", con=eng, index=False)
+    add_dataframe_to_db(df=df, name="test", con=eng, index=False)
     batch_data = SqlAlchemyBatchData(
         execution_engine=eng, table_name="test", source_table_name="test"
     )
@@ -1775,7 +1787,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name=f"column_values.in_set.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={
             "column": "a",
         },
@@ -1791,7 +1803,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     )
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={
             "column": "a",
         },
@@ -1831,7 +1843,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
 
     # Note: metric_dependencies is optional here in the config when called from a validator.
     aggregate_partial = MetricConfiguration(
-        metric_name=f"column_values.in_set.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1843,7 +1855,7 @@ def test_map_value_set_spark(spark_session, basic_spark_df_execution_engine):
     )
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.in_set.unexpected_count",
+        metric_name=f"column_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"value_set": [1, 2, 3]},
     )
@@ -1941,7 +1953,7 @@ def test_map_column_values_increasing_pd():
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.increasing.unexpected_count",
+        metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -1966,7 +1978,7 @@ def test_map_column_values_increasing_pd():
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.increasing.unexpected_rows",
+        metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -1981,9 +1993,7 @@ def test_map_column_values_increasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [4], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([4], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-02-21"]
 
 
@@ -2043,7 +2053,7 @@ def test_map_column_values_increasing_spark(spark_session):
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.increasing.unexpected_count",
+        metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2059,7 +2069,7 @@ def test_map_column_values_increasing_spark(spark_session):
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.increasing.unexpected_rows",
+        metric_name=f"column_values.increasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -2130,7 +2140,7 @@ def test_map_column_values_decreasing_pd():
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.unexpected_count",
+        metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2155,7 +2165,7 @@ def test_map_column_values_decreasing_pd():
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.unexpected_rows",
+        metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -2170,9 +2180,7 @@ def test_map_column_values_decreasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [3], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([3], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-03-20"]
 
 
@@ -2232,7 +2240,7 @@ def test_map_column_values_decreasing_spark(spark_session):
     )
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.unexpected_count",
+        metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2248,7 +2256,7 @@ def test_map_column_values_decreasing_spark(spark_session):
     assert metrics[unexpected_count_metric.id] == 1
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.decreasing.unexpected_rows",
+        metric_name=f"column_values.decreasing.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -2292,7 +2300,7 @@ def test_map_unique_column_exists_pd():
     metrics.update(results)
 
     unexpected_count_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2309,7 +2317,7 @@ def test_map_unique_column_exists_pd():
     assert metrics[unexpected_count_metric.id] == 2
 
     unexpected_rows_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_rows",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "SUMMARY", "partial_unexpected_count": 1}
@@ -2389,7 +2397,7 @@ def test_map_unique_column_exists_sa(sa):
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2405,7 +2413,7 @@ def test_map_unique_column_exists_sa(sa):
     assert results[desired_metric.id] == 2
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_values",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2422,7 +2430,7 @@ def test_map_unique_column_exists_sa(sa):
     assert results[desired_metric.id] == [3, 3]
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_value_counts",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2438,7 +2446,7 @@ def test_map_unique_column_exists_sa(sa):
     assert results[desired_metric.id] == [(3, 2)]
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_rows",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2515,7 +2523,7 @@ def test_map_unique_empty_query_sa(sa):
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2565,7 +2573,7 @@ def test_map_unique_column_exists_spark(spark_session):
 
     # unique is a *window* function so does not use the aggregate_fn version of unexpected count
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_count",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -2580,7 +2588,7 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == 2
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_values",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2597,7 +2605,7 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == [3, 3]
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_value_counts",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUE_COUNTS.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={
             "result_format": {"result_format": "BASIC", "partial_unexpected_count": 20}
@@ -2614,7 +2622,7 @@ def test_map_unique_column_exists_spark(spark_session):
     assert results[desired_metric.id] == [(3, 2)]
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.unique.unexpected_rows",
+        metric_name=f"column_values.unique.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}",
         metric_domain_kwargs={
             "column": "a",
         },
@@ -2738,7 +2746,7 @@ def test_z_score_under_threshold_pd():
     ) == [False, False, False]
     metrics.update(results)
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.unexpected_count",
+        metric_name=f"column_values.z_score.under_threshold.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
@@ -2845,7 +2853,7 @@ def test_z_score_under_threshold_spark(spark_session):
     metrics.update(results)
 
     aggregate_fn_metric = MetricConfiguration(
-        metric_name=f"column_values.z_score.under_threshold.unexpected_count.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_name=f"column_values.z_score.under_threshold.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
@@ -2858,7 +2866,7 @@ def test_z_score_under_threshold_spark(spark_session):
     metrics.update(results)
 
     desired_metric = MetricConfiguration(
-        metric_name="column_values.z_score.under_threshold.unexpected_count",
+        metric_name=f"column_values.z_score.under_threshold.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs={"double_sided": True, "threshold": 2},
     )
@@ -2882,7 +2890,7 @@ def test_table_metric_pd(caplog):
     results = engine.resolve_metrics(metrics_to_resolve=(desired_metric,))
     assert results == {desired_metric.id: 5}
     assert (
-        'Unexpected key(s) "column" found in domain_kwargs for domain type "table"'
+        'Unexpected key(s) "column" found in domain_kwargs for Domain type "table"'
         in caplog.text
     )
 
@@ -2920,9 +2928,15 @@ def test_map_column_pairs_equal_metric_pd():
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -3163,9 +3177,15 @@ def test_map_column_pairs_equal_metric_sa(sa):
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -3372,9 +3392,15 @@ def test_map_column_pairs_equal_metric_spark(spark_session):
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -3591,7 +3617,7 @@ def test_map_column_pairs_greater_metric_pd():
     )
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.unexpected_values",
+        metric_name=f"column_pair_values.a_greater_than_b.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3662,7 +3688,7 @@ def test_map_column_pairs_greater_metric_sa(sa):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.unexpected_values",
+        metric_name=f"column_pair_values.a_greater_than_b.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3734,7 +3760,7 @@ def test_map_column_pairs_greater_metric_spark(spark_session):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.a_greater_than_b.unexpected_values",
+        metric_name=f"column_pair_values.a_greater_than_b.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3841,7 +3867,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.unexpected_values",
+        metric_name=f"column_pair_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3892,7 +3918,7 @@ def test_map_column_pairs_in_set_metric_sa(sa):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.unexpected_values",
+        metric_name=f"column_pair_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -3965,7 +3991,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.unexpected_values",
+        metric_name=f"column_pair_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -4016,7 +4042,7 @@ def test_map_column_pairs_in_set_metric_spark(spark_session):
     metrics.update(results)
 
     unexpected_values_metric = MetricConfiguration(
-        metric_name="column_pair_values.in_set.unexpected_values",
+        metric_name=f"column_pair_values.in_set.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}",
         metric_domain_kwargs={
             "column_A": "a",
             "column_B": "b",
@@ -4173,7 +4199,7 @@ def test_column_median_metric_sa(sa, dataframe: pd.DataFrame, median: int):
     metrics.update(results)
 
     column_values_nonnull_count_metric = MetricConfiguration(
-        metric_name="column_values.null.unexpected_count",
+        metric_name=f"column_values.null.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}",
         metric_domain_kwargs={"column": "a"},
         metric_value_kwargs=None,
     )
@@ -4304,8 +4330,6 @@ def test_value_counts_metric_sa(sa):
 
 @pytest.mark.integration
 def test_value_counts_metric_spark(spark_session):
-    from great_expectations.expectations.metrics.import_manager import sparktypes
-
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -4314,10 +4338,10 @@ def test_value_counts_metric_spark(spark_session):
                 "b": [None, None, None, None, None, None, None],
             },
         ),
-        schema=sparktypes.StructType(
+        schema=pyspark.types.StructType(
             [
-                sparktypes.StructField("a", sparktypes.FloatType(), True),
-                sparktypes.StructField("b", sparktypes.NullType(), True),
+                pyspark.types.StructField("a", pyspark.types.FloatType(), True),
+                pyspark.types.StructField("b", pyspark.types.NullType(), True),
             ]
         ),
         batch_id="my_id",
@@ -4400,9 +4424,9 @@ def test_distinct_metric_spark(
         metrics=metrics,
     )
     metrics.update(results)
-    assert isinstance(
+    assert pyspark.Column and isinstance(
         metrics[column_distinct_values_count_metric_partial_fn.id][0],
-        pyspark_sql_Column,
+        pyspark.Column,
     )
 
     column_distinct_values_count_metric = MetricConfiguration(
@@ -4967,9 +4991,15 @@ def test_map_multicolumn_sum_equal_pd():
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -5173,9 +5203,15 @@ def test_map_multicolumn_sum_equal_sa(sa):
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
     condition_metric = MetricConfiguration(
@@ -5369,9 +5405,15 @@ def test_map_multicolumn_sum_equal_spark(spark_session):
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
     condition_metric = MetricConfiguration(
@@ -5563,9 +5605,15 @@ def test_map_compound_columns_unique_pd():
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -5783,9 +5831,15 @@ def test_map_compound_columns_unique_sa(sa):
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -5992,9 +6046,15 @@ def test_map_compound_columns_unique_spark(spark_session):
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     # First, assert Pass (no unexpected results).
 
@@ -6182,9 +6242,15 @@ def test_map_select_column_values_unique_within_record_pd():
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -6427,9 +6493,15 @@ def test_map_select_column_values_unique_within_record_sa(sa):
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,
@@ -6635,9 +6707,15 @@ def test_map_select_column_values_unique_within_record_spark(spark_session):
     condition_metric_name: str = (
         f"{metric_name}.{MetricPartialFunctionTypeSuffixes.CONDITION.value}"
     )
-    unexpected_count_metric_name: str = f"{metric_name}.unexpected_count"
-    unexpected_rows_metric_name: str = f"{metric_name}.unexpected_rows"
-    unexpected_values_metric_name: str = f"{metric_name}.unexpected_values"
+    unexpected_count_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+    )
+    unexpected_rows_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_ROWS.value}"
+    )
+    unexpected_values_metric_name: str = (
+        f"{metric_name}.{SummarizationMetricNameSuffixes.UNEXPECTED_VALUES.value}"
+    )
 
     condition_metric = MetricConfiguration(
         metric_name=condition_metric_name,

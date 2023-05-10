@@ -9,8 +9,8 @@ import nbformat
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.id_dict import BatchKwargs
 from great_expectations.data_context.types.base import (
-    NotebookConfig,
-    NotebookTemplateConfig,
+    NotebookConfig,  # noqa: TCH001
+    NotebookTemplateConfig,  # noqa: TCH001
 )
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import (
@@ -341,7 +341,9 @@ class SuiteEditNotebookRenderer(BaseNotebookRenderer):
             base_dir = batch_kwargs["path"]
             if base_dir[0:5] in ["s3://", "gs://"]:
                 return batch_kwargs
-            if not os.path.isabs(base_dir):
-                batch_kwargs["path"] = os.path.join("..", "..", base_dir)
+            if not os.path.isabs(base_dir):  # noqa: PTH117
+                batch_kwargs["path"] = os.path.join(  # noqa: PTH118
+                    "..", "..", base_dir
+                )
 
         return batch_kwargs

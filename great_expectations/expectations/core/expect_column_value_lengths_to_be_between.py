@@ -1,9 +1,10 @@
 from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
 )
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.expectations.expectation import (
     ColumnMapExpectation,
@@ -41,7 +42,7 @@ from great_expectations.rule_based_profiler.parameter_container import (
 )
 
 try:
-    import sqlalchemy as sa  # noqa: F401
+    import sqlalchemy as sa  # noqa: F401, TID251
 except ImportError:
     pass
 
@@ -236,10 +237,27 @@ class ExpectColumnValueLengthsToBeBetween(ColumnMapExpectation):
         "max_value",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
-        """Ensures that min_value and max_value are both set."""
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_value_lengths_to_be_between` it is required that the `configuration.kwargs` contain
+        `min_value` and/or `max_value`; both cannot be None.  Both `min_value` and `max_value` may be either an integer
+        or a `dict`; if a `dict`, it must include `$PARAMETER` as a key.
+
+         The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+         superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                Expectation.
+        """
         super().validate_configuration(configuration)
 
         configuration = configuration or self.configuration

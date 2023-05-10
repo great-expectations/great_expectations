@@ -6,10 +6,15 @@ from typing import TYPE_CHECKING, Dict, Optional
 import numpy as np
 import pandas as pd
 
-from great_expectations.core import (
-    ExpectationConfiguration,
-    ExpectationValidationResult,
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
 )
+from great_expectations.core import (
+    ExpectationConfiguration,  # noqa: TCH001
+    ExpectationValidationResult,  # noqa: TCH001
+)
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import (
     ExecutionEngine,
@@ -36,31 +41,15 @@ from great_expectations.render.util import (
 )
 from great_expectations.util import get_pyathena_potential_type
 from great_expectations.validator.metric_configuration import MetricConfiguration
-from great_expectations.validator.validator import ValidationDependencies
+from great_expectations.validator.validator import (
+    ValidationDependencies,  # noqa: TCH001
+)
 
 if TYPE_CHECKING:
     from great_expectations.render.renderer_configuration import AddParamArgs
 
 logger = logging.getLogger(__name__)
 
-try:
-    import pyspark.sql.types as sparktypes
-except ImportError as e:
-    logger.debug(str(e))
-    logger.debug(
-        "Unable to load spark context; install optional spark dependency for support."
-    )
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.dialects import registry
-
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sa = None
-    registry = None
 
 try:
     import sqlalchemy_redshift.dialect
@@ -72,7 +61,7 @@ BIGQUERY_GEO_SUPPORT = False
 try:
     import sqlalchemy_bigquery as sqla_bigquery
 
-    registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
+    sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "BigQueryDialect")
     bigquery_types_tuple = None
     try:
         from sqlalchemy_bigquery import GEOGRAPHY  # noqa: F401
@@ -94,7 +83,7 @@ except ImportError:
 
         # Sometimes "pybigquery.sqlalchemy_bigquery" fails to self-register in Azure (our CI/CD pipeline) in certain cases, so we do it explicitly.
         # (see https://stackoverflow.com/questions/53284762/nosuchmoduleerror-cant-load-plugin-sqlalchemy-dialectssnowflake)
-        registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
+        sqlalchemy.registry.register("bigquery", _BIGQUERY_MODULE_NAME, "dialect")
         try:
             getattr(sqla_bigquery, "INTEGER")
             bigquery_types_tuple = None
@@ -118,6 +107,12 @@ try:
 except ImportError:
     teradatasqlalchemy = None
 
+try:
+    import trino.sqlalchemy.datatype as trinotypes
+    import trino.sqlalchemy.dialect
+except ImportError:
+    trino = None
+
 
 class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
     """Expect a column to contain values of a specified data type.
@@ -140,7 +135,9 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             PandasDataset include any numpy dtype values (such as 'int64') or native python types (such as 'int'), \
             whereas valid types for a SqlAlchemyDataset include types named by the current driver such as 'INTEGER' \
             in most SQL dialects and 'TEXT' in dialects such as postgresql. Valid types for SparkDFDataset include \
-            'StringType', 'BooleanType' and other pyspark-defined type names.
+            'StringType', 'BooleanType' and other pyspark-defined type names. Note that the strings representing these \
+            types are sometimes case-sensitive. For instance, with a Pandas backend `timestamp` will be unrecognized and
+            fail the expectation, while `Timestamp` would pass with valid data.
 
     Keyword Args:
         mostly (None or a float between 0 and 1): \
@@ -196,9 +193,27 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         "type_",
     )
 
+    @public_api
     def validate_configuration(
         self, configuration: Optional[ExpectationConfiguration] = None
     ) -> None:
+        """Validates the configuration of an Expectation.
+
+        For `expect_column_values_to_be_of_type` it is required that:
+
+        - `_type` has been provided.
+
+        The configuration will also be validated using each of the `validate_configuration` methods in its Expectation
+        superclass hierarchy.
+
+        Args:
+            configuration: An `ExpectationConfiguration` to validate. If no configuration is provided, it will be pulled
+                           from the configuration attribute of the Expectation instance.
+
+        Raises:
+            InvalidExpectationConfigurationError: The configuration does not contain the values required by the
+                                                  Expectation.
+        """
         super().validate_configuration(configuration)
         configuration = configuration or self.configuration
         try:
@@ -398,7 +413,7 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         else:
             types = []
             try:
-                type_class = getattr(sparktypes, expected_type)
+                type_class = getattr(pyspark.types, expected_type)
                 types.append(type_class)
             except AttributeError:
                 logger.debug(f"Unrecognized type: {expected_type}")
@@ -418,10 +433,10 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
         runtime_configuration: Optional[dict] = None,
         **kwargs,
     ) -> ValidationDependencies:
-        # This calls TableExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
+        # This calls BatchExpectation.get_validation_dependencies to set baseline validation_dependencies for the aggregate version
         # of the expectation.
         # We need to keep this as super(ColumnMapExpectation, self), which calls
-        # TableExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
+        # BatchExpectation.get_validation_dependencies instead of ColumnMapExpectation.get_validation_dependencies.
         # This is because the map version of this expectation is only supported for Pandas, so we want the aggregate
         # version for the other backends.
         validation_dependencies: ValidationDependencies = super(
@@ -435,8 +450,8 @@ class ExpectColumnValuesToBeOfType(ColumnMapExpectation):
             column_name = configuration.kwargs.get("column")
             expected_type = configuration.kwargs.get("type_")
             metric_kwargs = get_metric_kwargs(
-                configuration=configuration,
                 metric_name="table.column_types",
+                configuration=configuration,
                 runtime_configuration=runtime_configuration,
             )
             metric_domain_kwargs = metric_kwargs.get("metric_domain_kwargs")
@@ -577,6 +592,19 @@ def _get_dialect_type_module(
             and teradatatypes is not None
         ):
             return teradatatypes
+    except (TypeError, AttributeError):
+        pass
+
+    # Trino types module
+    try:
+        if (
+            isinstance(
+                execution_engine.dialect,
+                trino.sqlalchemy.dialect.TrinoDialect,
+            )
+            and trinotypes is not None
+        ):
+            return trinotypes
     except (TypeError, AttributeError):
         pass
 

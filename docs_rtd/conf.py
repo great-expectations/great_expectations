@@ -22,7 +22,7 @@ import uuid
 
 from sphinx.ext.autodoc import between
 
-sys.path.insert(0, os.path.abspath("../"))
+sys.path.insert(0, os.path.abspath("../"))  # noqa: PTH100
 
 
 # -- General configuration ------------------------------------------------

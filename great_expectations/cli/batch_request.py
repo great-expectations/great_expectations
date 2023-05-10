@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import logging
 import re
-from typing import Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union
 
 import click
 from typing_extensions import Final
 
+from great_expectations.cli.pretty_printing import cli_message
+from great_expectations.datasource.data_connector import ConfiguredAssetSqlDataConnector
 from great_expectations.util import get_sqlalchemy_inspector
 
 try:
@@ -15,24 +19,22 @@ except (ImportError, ModuleNotFoundError):
 from great_expectations import exceptions as gx_exceptions
 from great_expectations.datasource import (
     BaseDatasource,
+    DataConnector,
     Datasource,
     SimpleSqlalchemyDatasource,
 )
-from great_expectations.execution_engine import SqlAlchemyExecutionEngine
+from great_expectations.execution_engine import (
+    SqlAlchemyExecutionEngine,  # noqa: TCH001
+)
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import filter_properties_dict
 
 logger = logging.getLogger(__name__)
 
-try:
-    import sqlalchemy
-    from sqlalchemy.engine.reflection import Inspector
-except ImportError:
-    logger.debug(
-        "Unable to load SqlAlchemy context; install optional sqlalchemy dependency for support"
-    )
-    sqlalchemy = None
-    Inspector = None
+
+if TYPE_CHECKING:
+    from great_expectations.compatibility import sqlalchemy
+
 
 DEFAULT_DATA_CONNECTOR_NAMES: Final[List[str]] = [
     "default_runtime_data_connector_name",
@@ -92,6 +94,10 @@ def get_batch_request(
             data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
             msg_prompt_enter_data_asset_name=msg_prompt_enter_data_asset_name,
         )
+        _print_configured_asset_sql_data_connector_message(
+            datasource=datasource,
+            data_connector_name=data_connector_name,  # type: ignore[arg-type] # could be none
+        )
     else:
         raise gx_exceptions.DataContextError(
             f"Datasource '{datasource.name}' of unsupported type {type(datasource)} was encountered."
@@ -122,6 +128,42 @@ def get_batch_request(
     filter_properties_dict(properties=batch_request, clean_falsy=True, inplace=True)
 
     return batch_request
+
+
+def _print_configured_asset_sql_data_connector_message(
+    datasource: BaseDatasource,
+    data_connector_name: str,
+    data_connector_type: Type = ConfiguredAssetSqlDataConnector,
+) -> None:
+    """Print a message if the data connector matches data connector type.
+
+    Args:
+        datasource: Datasource associated with data connector of interest.
+        data_connector_name: Name of the data connector of interest.
+        data_connector_type: Type of data connector to check against.
+    """
+    if _is_data_connector_of_type(datasource, data_connector_name, data_connector_type):
+        configured_asset_data_connector_message = f"Need to configure a new Data Asset? See how to add a new DataAsset to your {data_connector_type.__name__} here: https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource/"
+
+        cli_message(configured_asset_data_connector_message)
+
+
+def _is_data_connector_of_type(
+    datasource: BaseDatasource,
+    data_connector_name: str,
+    data_connector_type: Type = ConfiguredAssetSqlDataConnector,
+) -> bool:
+    """Determine whether a data connector is a ConfiguredAssetSqlDataConnector.
+
+    Args:
+        datasource: Datasource associated with data connector of interest.
+        data_connector_name: Name of the data connector of interest.
+        data_connector_type: Type of data connector to check against.
+    """
+    data_connector: DataConnector | None = datasource.data_connectors.get(
+        data_connector_name
+    )
+    return isinstance(data_connector, data_connector_type)
 
 
 def select_data_connector_name(
@@ -394,7 +436,7 @@ Would you like to continue?"""
 
 def _get_default_schema(datasource: SimpleSqlalchemyDatasource) -> str:
     execution_engine: SqlAlchemyExecutionEngine = datasource.execution_engine
-    inspector: Inspector = get_sqlalchemy_inspector(execution_engine.engine)
+    inspector: sqlalchemy.Inspector = get_sqlalchemy_inspector(execution_engine.engine)
     return inspector.default_schema_name
 
 

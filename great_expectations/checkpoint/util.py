@@ -225,7 +225,6 @@ def get_substituted_validation_dict(
         if validation_dict.get(attr) is not None:
             substituted_validation_dict[attr] = validation_dict[attr]
 
-    validate_validation_dict(substituted_validation_dict)
     return substituted_validation_dict
 
 
@@ -363,8 +362,14 @@ def substitute_runtime_config(source_config: dict, runtime_kwargs: dict) -> dict
         batch_request_from_runtime_kwargs = get_batch_request_as_dict(
             batch_request=batch_request_from_runtime_kwargs
         )
+
+        # If "batch_request" has Fluent Datasource form, "options" must be overwritten for DataAsset type compatibility.
+        updated_batch_request = copy.deepcopy(batch_request)
+        if batch_request_from_runtime_kwargs and "options" in updated_batch_request:
+            updated_batch_request["options"] = {}
+
         updated_batch_request = nested_update(
-            batch_request,
+            updated_batch_request,
             batch_request_from_runtime_kwargs,
             dedup=True,
         )
@@ -443,11 +448,11 @@ def get_updated_action_list(
     return list(base_action_list_dict.values())
 
 
-def batch_request_in_validations_contains_batch_data(
+def does_batch_request_in_validations_contain_batch_data(
     validations: Optional[List[dict]] = None,
 ) -> bool:
     if validations is not None:
-        for idx, val in enumerate(validations):
+        for val in validations:
             if (
                 val.get("batch_request") is not None
                 and isinstance(val.get("batch_request"), (dict, DictDot))
@@ -473,36 +478,19 @@ def get_validations_with_batch_request_as_dict(
     return validations
 
 
-def validate_validation_dict(validation_dict: dict) -> None:
-    if validation_dict.get("batch_request") is None:
+def validate_validation_dict(
+    validation_dict: dict, batch_request_required: bool = True
+) -> None:
+    if batch_request_required and validation_dict.get("batch_request") is None:
         raise gx_exceptions.CheckpointError("validation batch_request cannot be None")
+
     if not validation_dict.get("expectation_suite_name"):
         raise gx_exceptions.CheckpointError(
             "validation expectation_suite_name must be specified"
         )
+
     if not validation_dict.get("action_list"):
         raise gx_exceptions.CheckpointError("validation action_list cannot be empty")
-
-
-def send_cloud_notification(url: str, headers: dict):
-    """
-    Post a CloudNotificationAction to GX Cloud Backend for processing.
-    """
-    session = requests.Session()
-
-    try:
-        response = session.post(url=url, headers=headers)
-    except requests.ConnectionError:
-        logger.error(f"Failed to connect to Cloud backend after {10} retries.")
-    except Exception as e:
-        logger.error(str(e))
-    else:
-        if response.status_code != 200:
-            message = f"Cloud Notification request returned error {response.status_code}: {response.text}"
-            logger.error(message)
-            return {"cloud_notification_result": message}
-        else:
-            return {"cloud_notification_result": "Cloud notification succeeded."}
 
 
 def send_sns_notification(

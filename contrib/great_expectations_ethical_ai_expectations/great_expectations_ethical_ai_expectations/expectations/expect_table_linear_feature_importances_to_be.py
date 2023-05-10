@@ -1,5 +1,3 @@
-import json
-
 # This class defines a Metric to support your Expectation
 # For most Expectations, the main business logic for calculation will live here.
 # To learn about the relationship between Metrics and Expectations, please visit
@@ -13,10 +11,7 @@ from great_expectations.core import ExpectationConfiguration
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.exceptions import InvalidExpectationConfigurationError
 from great_expectations.execution_engine import PandasExecutionEngine
-from great_expectations.expectations.expectation import (
-    ExpectationConfiguration,
-    TableExpectation,
-)
+from great_expectations.expectations.expectation import BatchExpectation
 from great_expectations.expectations.metrics.metric_provider import (
     MetricConfiguration,
     metric_value,
@@ -78,7 +73,7 @@ class TableModelingRidgeFeatureImportances(TableMetricProvider):
 
 # This class defines the Expectation itself
 # The main business logic for calculation lives here.
-class ExpectTableLinearFeatureImportancesToBe(TableExpectation):
+class ExpectTableLinearFeatureImportancesToBe(BatchExpectation):
     """Expect Feature Importances of specified columns in table for Linear Regression to meet threshold."""
 
     # These examples will be shown in the public gallery, and also executed as unit tests for your Expectation
@@ -120,7 +115,7 @@ class ExpectTableLinearFeatureImportancesToBe(TableExpectation):
     library_metadata = {
         "tags": ["ai/ml", "fair-ai", "hackathon-22"],
         "contributors": ["@austiezr"],
-        "requirements": ["sklearn"],
+        "requirements": ["scikit-learn"],
     }
 
     metric_dependencies = ("table.modeling.linear.feature_importances",)
