@@ -125,17 +125,6 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
                         example_days_ago_dict[28]: 3,
                     }
                 ),
-                "column_datetime": generate_data_sample(
-                    {
-                        TODAY: 3,
-                        DAYS_AGO[7]: 2,
-                        DAYS_AGO[7].replace(hour=11): 1,
-                        DAYS_AGO[14]: 2,
-                        DAYS_AGO[14].replace(hour=10, minute=40): 1,
-                        DAYS_AGO[21]: 3,
-                        DAYS_AGO[28]: 3,
-                    }
-                ),
                 "column_current_zero": generate_data_sample(
                     {
                         TODAY_EXAMPLE: 0,
