@@ -2,6 +2,10 @@
 import os
 import pathlib
 import shutil
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pyfakefs.fake_filesystem import FakeFilesystem
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports">
 import great_expectations as gx
@@ -19,8 +23,10 @@ base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 
 # For this test script, change base_directory to location where test runner data is located
 base_directory = "/dbfs/data/"
-os.system(f"sudo mkdir -R {base_directory}")
-shutil.copytree(str(pathlib.Path(pathlib.Path.cwd(), "data")), base_directory)
+fs: FakeFilesystem
+fs.add_real_directory(
+    source_path=pathlib.Path(pathlib.Path.cwd(), "data"), target_path=base_directory
+)
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource">
 dbfs_datasource = context.sources.add_or_update_spark_dbfs(
