@@ -9,12 +9,10 @@ You can use an auto-initializing Expectation to automate parameter estimation in
 To complete this how-to, you'll complete the following tasks:
 
 - Verify if your Expectation is auto-initializing
-
 - Run an Expectation with `auto=True`
-
 - Save your expectation with calculated values
-
 - [First task](#first-task)
+
 
 <!-- To link to a specific section within this template, use the format provided in the last item in the list. --> 
 
