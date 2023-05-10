@@ -12,7 +12,7 @@ context = gx.get_context()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory">
-base_directory = "/example_data/nyctaxi/tripdata/yellow/"
+base_directory = "dbfs/example_data/nyctaxi/tripdata/yellow/"
 # </snippet>
 
 # For this test script, change base_directory to location where test runner data is located
