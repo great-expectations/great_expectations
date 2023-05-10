@@ -24,7 +24,10 @@ csv_file_path = "/path/to/data/directory/yellow_tripdata_2020-08.csv"
 # </snippet>
 
 csv_file_path = pathlib.Path(
-    pathlib.Path.cwd(), "dbfs_temp_directory/data", "yellow_tripdata_sample_2020-08.csv"
+    pathlib.Path.cwd(),
+    "dbfs_temp_directory",
+    "data",
+    "yellow_tripdata_sample_2019-01.csv",
 )
 pandas_df = pd.read_csv(csv_file_path)
 df = spark.createDataFrame(data=pandas_df)
