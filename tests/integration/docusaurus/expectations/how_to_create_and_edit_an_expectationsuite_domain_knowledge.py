@@ -13,7 +13,7 @@ data_directory = pathlib.Path(
     "taxi_yellow_tripdata_samples",
 ).resolve(strict=True)
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectatios_domain_knowledge.py get_data_context">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py get_data_context">
 import great_expectations as gx
 
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
@@ -24,17 +24,17 @@ context.sources.add_pandas(name="my_datasource",).add_csv_asset(
     name="my_data_asset", filepath_or_buffer="./data/yellow_tripdata_sample_2019-01.csv"
 )
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectatios_domain_knowledge.py get_data_asset_and_build_batch_request">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py get_data_asset_and_build_batch_request">
 data_asset = context.get_datasource("my_datasource").get_asset("my_data_asset")
 batch_request = data_asset.build_batch_request()
 # </snippet>
 
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectatios_domain_knowledge.py create_expectation_suite">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite">
 suite = context.add_expectation_suite(expectation_suite_name="my_suite")
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectatios_domain_knowledge.py create_expectation_1">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_1">
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
 # Create an Expectation
@@ -68,7 +68,7 @@ expectation_configuration = ExpectationConfiguration(
 suite.add_expectation(expectation_configuration=expectation_configuration)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectatios_domain_knowledge.py create_expectation_2">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_2">
 expectation_configuration = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_in_set",
     kwargs={
@@ -80,7 +80,7 @@ expectation_configuration = ExpectationConfiguration(
 suite.add_expectation(expectation_configuration=expectation_configuration)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectatios_domain_knowledge.py create_expectation_3">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_3">
 expectation_configuration = ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={
@@ -97,7 +97,7 @@ expectation_configuration = ExpectationConfiguration(
 suite.add_expectation(expectation_configuration=expectation_configuration)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectatios_domain_knowledge.py create_expectation_4">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_4">
 expectation_configuration = ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={
@@ -114,8 +114,8 @@ expectation_configuration = ExpectationConfiguration(
 suite.add_expectation(expectation_configuration=expectation_configuration)
 # </snippet>
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectatios_domain_knowledge.py save_expectation_suite">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py save_expectation_suite">
 context.save_expectation_suite(expectation_suite=suite)
 # </snippet>
 
-# how_to_create_and_edit_an_expectatios_domain_knowledge
+how_to_create_and_edit_an_expectationsuite_domain_knowledge.py
