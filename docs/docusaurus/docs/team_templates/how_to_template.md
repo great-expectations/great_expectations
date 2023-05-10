@@ -22,9 +22,9 @@ To complete this how-to, you'll complete the following tasks:
 
 <!-- List the items that need to be present or completed by the user before they start the tasks. Link to relevant information if it's available. What follows is an example provided for your reference. If there aren't any prerequisites, remove this section.-->
 
-- [A Great Expectations instance](/docs/guides/setup/setup_overview)
-- [A Data Connection](/docs/guides/connecting_to_your_data/connect_to_data_overview)
-- [An Expectation Suite](/docs/guides/expectations/create_expectations_overview) 
+- [A Great Expectations instance](../guides/setup/setup_overview.md)
+- [A Data Connection](../guides/connecting_to_your_data/connect_to_data_overview.md)
+- [An Expectation Suite](../guides/expectations/create_expectations_overview.md) 
 
 ## First task 
 
@@ -60,7 +60,7 @@ To complete this how-to, you'll complete the following tasks:
 
 <!-- If necessary, add a secondary task here. Use the same format that you used in the first task. What follows is an example provided for your reference. -->
 
-1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column. 
+1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column. 
 
     ```python name="tutorials/quickstart/quickstart.py create_expectation"
     ```
@@ -90,10 +90,10 @@ To complete this how-to, you'll complete the following tasks:
 
 <!-- List the secondary resources that can help the user get a better understanding of the subject matter discussed in this how-to. Don't add an introductory statement for the list. What follows is an example provided for your reference. If there aren't any related documents, remove this section.-->
 
-- [How to install Great Expectations locally](../../guides/setup/installation/local.md)
-- [How to set up GX to work with data on AWS S3](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
-- [How to set up GX to work with data in Azure Blob Storage](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
-- [How to set up GX to work with data on GCS](../../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
-- [How to set up GX to work with SQL databases](../../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md) 
-- [How to instantiate a Data Context on an EMR Spark Cluster](../../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
-- [How to use Great Expectations in Databricks](../../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
+- [How to install Great Expectations locally](../guides/setup/installation/local.md)
+- [How to set up GX to work with data on AWS S3](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_aws_s3.md)
+- [How to set up GX to work with data in Azure Blob Storage](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_in_abs.md)
+- [How to set up GX to work with data on GCS](../guides/setup/optional_dependencies/cloud/how_to_set_up_gx_to_work_with_data_on_gcs.md)
+- [How to set up GX to work with SQL databases](../guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases.md) 
+- [How to instantiate a Data Context on an EMR Spark Cluster](../deployment_patterns/how_to_instantiate_a_data_context_on_an_emr_spark_cluster.md)
+- [How to use Great Expectations in Databricks](../deployment_patterns/how_to_use_great_expectations_in_databricks.md)
