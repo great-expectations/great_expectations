@@ -1,11 +1,10 @@
 import great_expectations as gx
 
-
 print("Setting up")
 # Set up
 from great_expectations.data_context import FileDataContext
 
-context = FileDataContext.create(project_root_dir="/gx/great_expectations")
+context = FileDataContext.create(project_root_dir="/gx")
 
 # Connect to data
 # validator = context.sources.pandas_default.read_csv(
@@ -39,6 +38,7 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 )
 
 checkpoint_result = checkpoint.run()
+print(checkpoint_result)
 
 # View results
 validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
