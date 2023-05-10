@@ -230,11 +230,7 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
             # "enableDateTimeParsingFallback",
             # ^^^ Docs <> Source Code mismatch
         }
-        if parent_reader_options:
-            options_to_return = parent_reader_options.union(reader_options)
-        else:
-            options_to_return = reader_options
-        return options_to_return
+        return parent_reader_options.union(reader_options)
 
 
 class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
@@ -251,10 +247,6 @@ class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
 
         See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
         """
-        # directory_data_asset_reader_options = super(
-        #     _DirectoryDataAssetMixin, self
-        # )._get_reader_options_include()
-        # csv_asset_reader_options = super(CSVAsset, self)._get_reader_options_include()
         return (
             super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
             | super(CSVAsset, self)._get_reader_options_include()
