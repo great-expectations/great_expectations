@@ -307,7 +307,7 @@ class ORCAsset(_SparkGenericFilePathAssetMixin):
     def _get_reader_method(cls) -> str:
         return "orc"
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
         See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
@@ -478,7 +478,7 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
     def _get_reader_method(cls) -> str:
         return "text"
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
         See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
