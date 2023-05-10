@@ -335,16 +335,21 @@ class _FilePathDataAsset(DataAsset):
         Returns:
             Dictionary containing batch spec options.
         """
+        get_reader_options_include: set[str] | None = self._get_reader_options_include()
+        if not get_reader_options_include:
+            # Set to None if empty set to include any additional `extra_kwargs` passed to `add_*_asset`
+            get_reader_options_include = None
         batch_spec_options = {
             "reader_method": self._get_reader_method(),
             "reader_options": self.dict(
-                include=self._get_reader_options_include(),
+                include=get_reader_options_include,
                 exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                 exclude_unset=True,
                 by_alias=True,
                 config_provider=self._datasource._config_provider,
             ),
         }
+
         if self.splitter:
             batch_spec_options["splitter_method"] = self.splitter.method_name
             splitter_kwargs = self.splitter.splitter_method_kwargs()
@@ -378,7 +383,7 @@ class _FilePathDataAsset(DataAsset):
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
-    def _get_reader_options_include(self) -> Set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
             """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
 to use as its "include" directive for File-Path style DataAsset processing."""
