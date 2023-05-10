@@ -382,6 +382,12 @@ filterwarnings = [
     # Example Actual Warning: (found in test_golden_path_sql_datasource_configuration)
     # DeprecationWarning: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use get_batch_list instead.
     'ignore: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16.:DeprecationWarning',
+    # Example Actual Warning: (found in test_data_context)
+    # UserWarning: Warning. An existing `great_expectations.yml` was found here
+    'ignore: Warning. An existing `great_expectations.yml` was found here:UserWarning',
+    # Example Actual Warning: (found in test_data_context)
+    # UserWarning: Warning. An existing `config_variables.yml` was found here
+    'ignore: Warning. An existing `config_variables.yml` was found here:UserWarning',
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------

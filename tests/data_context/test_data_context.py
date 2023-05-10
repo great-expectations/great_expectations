@@ -702,16 +702,18 @@ def test__normalize_absolute_or_relative_path(
 
 
 def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
-    project_path = tmp_path / "data_context"
-    project_path.mkdir()
-    project_path = str(project_path)
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    os.makedirs(context_path, exist_ok=True)  # noqa: PTH103
-    assert os.path.isdir(context_path)  # noqa: PTH112
-    monkeypatch.chdir(context_path)
-    with pytest.raises(gx_exceptions.DataContextError) as err:
+    # `find_context_root_dir` iterates up the file tree to find a great_expectations.yml
+    # By deeply nesting our project path, we ensure we don't collide with any existing
+    # fixtures or side effects from other tests
+    project_path = tmp_path / "a" / "b" / "c" / "d" / "data_context"
+    project_path.mkdir(parents=True)
+
+    context_path = project_path / "great_expectations"
+    context_path.mkdir()
+    monkeypatch.chdir(str(context_path))
+
+    with pytest.raises(gx_exceptions.ConfigNotFoundError):
         FileDataContext.find_context_root_dir()
-    assert isinstance(err.value, gx_exceptions.ConfigNotFoundError)
 
     shutil.copy(
         file_relative_path(
@@ -722,8 +724,8 @@ def test_load_data_context_from_environment_variables(tmp_path, monkeypatch):
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
     )
-    monkeypatch.setenv("GX_HOME", context_path)
-    assert FileDataContext.find_context_root_dir() == context_path
+    monkeypatch.setenv("GX_HOME", str(context_path))
+    assert FileDataContext.find_context_root_dir() == str(context_path)
 
 
 def test_data_context_updates_expectation_suite_names(
@@ -836,6 +838,11 @@ def empty_context(tmp_path_factory) -> FileDataContext:
     context = DataContext(ge_dir)
     assert isinstance(context, FileDataContext)
     return context
+
+
+def test_data_context_is_project_scaffolded(empty_context):
+    ge_dir = empty_context.root_directory
+    assert FileDataContext.is_project_scaffolded(ge_dir) is True
 
 
 def test_data_context_does_ge_yml_exist_returns_true_when_it_does_exist(empty_context):
