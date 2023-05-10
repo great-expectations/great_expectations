@@ -61,7 +61,7 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
 work-around, until "type" naming convention and method for obtaining 'reader_method' from it are established."""
         )
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         return {
             "data_directory",
         }

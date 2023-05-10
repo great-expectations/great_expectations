@@ -180,7 +180,7 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
     def _get_reader_method(cls) -> str:
         return "csv"
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
         See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
@@ -239,18 +239,22 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
 
 class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
     # Overridden inherited instance fields
-    type: Literal["directory_csv"] = "directory_csv"
+    type: Literal["directory_csv"] = "directory_csv"  # type: ignore[assignment]
 
     @classmethod
     def _get_reader_method(cls) -> str:
         # Reader method is still "csv"
         return "csv"
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
         See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
         """
+        # directory_data_asset_reader_options = super(
+        #     _DirectoryDataAssetMixin, self
+        # )._get_reader_options_include()
+        # csv_asset_reader_options = super(CSVAsset, self)._get_reader_options_include()
         return (
             super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
             | super(CSVAsset, self)._get_reader_options_include()
