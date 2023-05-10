@@ -47,7 +47,7 @@ class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
     modified_before: Optional[Union[bool, str]] = Field(None, alias="modifiedBefore")
     modified_after: Optional[Union[bool, str]] = Field(None, alias="modifiedAfter")
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         return {
             "ignoreMissingFiles",
             "pathGlobFilter",
@@ -281,7 +281,7 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
     def _get_reader_method(cls) -> str:
         return "parquet"
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
         See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
@@ -416,7 +416,7 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
     def _get_reader_method(cls) -> str:
         return "json"
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         return (
             super()
             ._get_reader_options_include()
