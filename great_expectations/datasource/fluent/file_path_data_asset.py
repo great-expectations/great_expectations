@@ -232,10 +232,14 @@ class _FilePathDataAsset(DataAsset):
             batch_spec = self._data_connector.build_batch_spec(
                 batch_definition=batch_definition
             )
+            get_reader_options_include = self._get_reader_options_include()
+            if not get_reader_options_include:
+                # Set to None if empty set to include any additional `extra_kwargs` passed to `add_*_asset`
+                get_reader_options_include = None
             batch_spec_options = {
                 "reader_method": self._get_reader_method(),
                 "reader_options": self.dict(
-                    include=self._get_reader_options_include(),
+                    include=get_reader_options_include,
                     exclude=self._EXCLUDE_FROM_READER_OPTIONS,
                     exclude_unset=True,
                     by_alias=True,
