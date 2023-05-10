@@ -173,7 +173,7 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
                     "include_in_gallery": False,
                     "in": {
                         "column": "column_datetime",
-                        "run_date": TODAY_STR,
+                        "run_date": TODAY_EXAMPLE_STR,
                         "threshold": default_kwarg_values["threshold"],
                     },
                     "out": {"success": True},
