@@ -27,6 +27,7 @@ from great_expectations.data_context.types.base import CURRENT_GX_CONFIG_VERSION
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
 )
+from great_expectations.datasource import BaseDatasource
 from great_expectations.util import get_context
 
 if TYPE_CHECKING:
@@ -35,7 +36,7 @@ if TYPE_CHECKING:
         CheckpointResult,
     )
     from great_expectations.core.batch import JSONValues
-    from great_expectations.datasource import BaseDatasource, LegacyDatasource
+    from great_expectations.datasource import LegacyDatasource
     from great_expectations.datasource.fluent.interfaces import (
         Datasource as FluentDatasource,
     )
