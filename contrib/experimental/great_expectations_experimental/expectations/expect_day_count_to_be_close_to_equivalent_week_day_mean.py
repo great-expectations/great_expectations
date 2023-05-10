@@ -250,9 +250,9 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
             days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS
         ]
 
-        assert (
-            min(equivalent_previous_days)
-            > (datetime.today() - timedelta(METRIC_SAMPLE_LIMIT)),
+        assert min(equivalent_previous_days) > (
+            datetime.today() - timedelta(METRIC_SAMPLE_LIMIT)
+        ), (
             f"Data includes only up to {METRIC_SAMPLE_LIMIT} days prior to today ({datetime.today()}), "
             f"but 4 weeks before the given run_date is {min(equivalent_previous_days)}",
         )
