@@ -6,6 +6,9 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from typing_extensions import Literal
 
+from great_expectations.compatibility.pyspark import (
+    types as pyspark_types,  # noqa: TCH001
+)
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.datasource.fluent import SparkFilesystemDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -16,9 +19,6 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     TestConnectionError as TestConnectionError,
-)
-from great_expectations.compatibility.pyspark import (
-    types as pyspark_types,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:

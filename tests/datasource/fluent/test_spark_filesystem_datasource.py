@@ -5,7 +5,7 @@ import logging
 import pathlib
 import re
 from dataclasses import dataclass
-from typing import List
+from typing import List, cast
 
 import pydantic
 import pytest
@@ -13,6 +13,7 @@ import pytest
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.alias_types import PathStr
 from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
@@ -95,8 +96,9 @@ add_csv_asset = [
     pytest.param(
         "add_csv_asset",
         {
-            # TODO: Enable spark_schema:
-            # "schema": "schema",
+            "spark_schema": pyspark_types.StructType(
+                [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
+            ),
             "sep": "sep",
             "encoding": "encoding",
             "quote": "quote",
@@ -219,8 +221,9 @@ add_json_asset = [
     pytest.param(
         "add_json_asset",
         {
-            # TODO: Enable spark_schema:
-            # "spark_schema": "spark_schema",
+            "spark_schema": pyspark_types.StructType(
+                [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
+            ),
             "primitives_as_string": "primitives_as_string",
             "prefers_decimal": "prefers_decimal",
             "allow_comments": "allow_comments",
@@ -316,7 +319,11 @@ def test_add_asset_with_asset_specific_params(
     )
     assert asset.name == "asset_name"
     for param, value in add_method_params.items():
-        assert getattr(asset, param) == value
+        if param == "spark_schema":
+            struct_type = cast(pyspark_types.StructType, value)
+            assert getattr(asset, param) == struct_type.jsonValue()
+        else:
+            assert getattr(asset, param) == value
 
 
 add_directory_csv_asset = [
@@ -334,8 +341,9 @@ add_directory_csv_asset = [
         "add_directory_csv_asset",
         {
             "data_directory": "some_directory",
-            # TODO: Enable spark_schema:
-            # "spark_schema": "spark_schema",
+            "spark_schema": pyspark_types.StructType(
+                [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
+            ),
             "sep": "sep",
             "encoding": "encoding",
             "quote": "quote",
@@ -407,6 +415,9 @@ def test_add_directory_asset_with_asset_specific_params(
     for param, value in add_method_params.items():
         if param == "data_directory":
             assert getattr(asset, param) == pathlib.Path(str(value))
+        elif param == "spark_schema":
+            struct_type = cast(pyspark_types.StructType, value)
+            assert getattr(asset, param) == struct_type.jsonValue()
         else:
             assert getattr(asset, param) == value
 
