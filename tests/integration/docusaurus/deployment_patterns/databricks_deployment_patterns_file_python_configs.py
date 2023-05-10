@@ -19,7 +19,7 @@ base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 
 # For this test script, change base_directory to location where test runner data is located
 base_directory = "/dbfs/data/"
-os.mkdirs(base_directory)
+os.makedirs(base_directory)
 shutil.copytree(str(pathlib.Path(pathlib.Path.cwd(), "data")), base_directory)
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource">
