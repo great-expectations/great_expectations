@@ -87,6 +87,12 @@ def test_add_csv_asset_to_datasource(
     assert m1 is not None
 
 
+if pyspark_types:
+    spark_schema = pyspark_types.StructType(
+        [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
+    )
+else:
+    spark_schema = {}
 add_csv_asset = [
     pytest.param(
         "add_csv_asset",
@@ -96,9 +102,7 @@ add_csv_asset = [
     pytest.param(
         "add_csv_asset",
         {
-            "spark_schema": pyspark_types.StructType(
-                [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
-            ),
+            "spark_schema": spark_schema,
             "sep": "sep",
             "encoding": "encoding",
             "quote": "quote",
@@ -221,9 +225,7 @@ add_json_asset = [
     pytest.param(
         "add_json_asset",
         {
-            "spark_schema": pyspark_types.StructType(
-                [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
-            ),
+            "spark_schema": spark_schema,
             "primitives_as_string": "primitives_as_string",
             "prefers_decimal": "prefers_decimal",
             "allow_comments": "allow_comments",
@@ -341,9 +343,7 @@ add_directory_csv_asset = [
         "add_directory_csv_asset",
         {
             "data_directory": "some_directory",
-            "spark_schema": pyspark_types.StructType(
-                [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
-            ),
+            "spark_schema": spark_schema,
             "sep": "sep",
             "encoding": "encoding",
             "quote": "quote",
