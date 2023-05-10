@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
+        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
 
@@ -104,7 +105,7 @@ class SparkS3Datasource(_SparkFilePathDatasource):
 
     def _build_data_connector(
         self,
-        data_asset: CSVAsset,
+        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
         s3_prefix: str = "",
         s3_delimiter: str = "/",
         s3_max_keys: int = 1000,
