@@ -26,8 +26,8 @@ if TYPE_CHECKING:
     from botocore.client import BaseClient
 
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
         _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        CSVAsset,
     )
 
 
