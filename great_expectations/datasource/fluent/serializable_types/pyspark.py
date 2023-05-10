@@ -33,8 +33,7 @@ class SerializableStructType(dict):
     ):
         """If already StructType then return otherwise try to create a StructType."""
         if isinstance(fields_or_struct_type, pyspark.sql.types.StructType):
-            json_value = fields_or_struct_type.jsonValue()
-            return cls(**json_value)
+            return cls(fields_or_struct_type.fields)
         else:
             return cls(fields_or_struct_type)
 
