@@ -76,6 +76,8 @@ def do_config_check(
     upgrade_message: str = ""
     context: FileDataContext | None = None
     try:
+        # Without this check, FileDataContext will possibly scaffold a project structure.
+        # As we want CLI users to follow the `init` workflow, we should exit early if we can't find a context YAML.
         if not FileDataContext._find_context_yml_file(target_directory):
             raise gx_exceptions.ConfigNotFoundError()
 

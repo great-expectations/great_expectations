@@ -413,6 +413,8 @@ def load_data_context_with_error_handling(
     ge_config_version: float
     try:
         if directory:
+            # Without this check, FileDataContext will possibly scaffold a project structure.
+            # As we want CLI users to follow the `init` workflow, we should exit early if we can't find a context YAML.
             if not FileDataContext._find_context_yml_file(directory):
                 raise gx_exceptions.ConfigNotFoundError()
         else:
