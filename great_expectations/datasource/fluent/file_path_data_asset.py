@@ -335,7 +335,7 @@ class _FilePathDataAsset(DataAsset):
         Returns:
             Dictionary containing batch spec options.
         """
-        get_reader_options_include = self._get_reader_options_include()
+        get_reader_options_include: set[str] | None = self._get_reader_options_include()
         if not get_reader_options_include:
             # Set to None if empty set to include any additional `extra_kwargs` passed to `add_*_asset`
             get_reader_options_include = None
