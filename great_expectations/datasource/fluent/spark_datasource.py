@@ -19,7 +19,7 @@ from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
 from typing_extensions import Literal, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility.pyspark import pyspark, DataFrame
+from great_expectations.compatibility.pyspark import DataFrame, pyspark
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
