@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Optional
+from typing import Dict, Optional, TypeAlias
 
 from pydantic.dataclasses import dataclass
 from pydantic import AmqpDsn
@@ -18,7 +18,7 @@ from great_expectations.agent.models import Event
 from great_expectations.data_context import CloudDataContext
 
 
-HandlerMap = Dict[str, OnMessageCallback]
+HandlerMap: TypeAlias = Dict[str, OnMessageCallback]
 
 
 @dataclass(frozen=True)
