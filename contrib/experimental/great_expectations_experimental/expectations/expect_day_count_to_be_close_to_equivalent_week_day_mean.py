@@ -55,12 +55,12 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
 
     @metric_value(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(
-            cls,
-            execution_engine: SqlAlchemyExecutionEngine,
-            metric_domain_kwargs,
-            metric_value_kwargs,
-            metrics,
-            runtime_configuration,
+        cls,
+        execution_engine: SqlAlchemyExecutionEngine,
+        metric_domain_kwargs,
+        metric_value_kwargs,
+        metrics,
+        runtime_configuration,
     ):
         (
             selectable,
@@ -236,26 +236,24 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
     )
 
     def validate_configuration(
-            self, configuration: Optional[ExpectationConfiguration]
+        self, configuration: Optional[ExpectationConfiguration]
     ) -> None:
         # Setting up a configuration
         super().validate_configuration(configuration)
 
     def _validate(
-            self,
-            configuration: ExpectationConfiguration,
-            metrics: Dict,
-            runtime_configuration: dict = None,
-            execution_engine: ExecutionEngine = None,
+        self,
+        configuration: ExpectationConfiguration,
+        metrics: Dict,
+        runtime_configuration: dict = None,
+        execution_engine: ExecutionEngine = None,
     ):
 
         run_date_str = self.get_success_kwargs(configuration).get("run_date")
 
         run_date = datetime.strptime(run_date_str, date_format)
 
-        threshold = float(
-            self.get_success_kwargs(configuration).get("threshold")
-        )
+        threshold = float(self.get_success_kwargs(configuration).get("threshold"))
 
         days_ago_dict = get_days_ago_dict(run_date)
 
@@ -263,13 +261,20 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
             days_ago_dict[i] for i in FOUR_PREVIOUS_WEEKS
         ]
 
-        assert (min(equivalent_previous_days) > (datetime.today() - timedelta(METRIC_SAMPLE_LIMIT)),
-                f"Data includes only up to {METRIC_SAMPLE_LIMIT} days prior to today ({datetime.today()}), "
-                f"but 4 weeks before the given run_date is {min(equivalent_previous_days)}")
+        assert (
+            min(equivalent_previous_days)
+            > (datetime.today() - timedelta(METRIC_SAMPLE_LIMIT)),
+            f"Data includes only up to {METRIC_SAMPLE_LIMIT} days prior to today ({datetime.today()}), "
+            f"but 4 weeks before the given run_date is {min(equivalent_previous_days)}",
+        )
 
-        day_counts_dict = get_counts_per_day_as_dict(metrics, run_date_str, equivalent_previous_days)
+        day_counts_dict = get_counts_per_day_as_dict(
+            metrics, run_date_str, equivalent_previous_days
+        )
         run_date_count: int = day_counts_dict[run_date_str]
-        diff_fraction = get_diff_fraction(run_date_count, day_counts_dict, equivalent_previous_days)
+        diff_fraction = get_diff_fraction(
+            run_date_count, day_counts_dict, equivalent_previous_days
+        )
 
         if diff_fraction > threshold:
             msg = (
@@ -287,7 +292,9 @@ class ExpectDayCountToBeCloseToEquivalentWeekDayMean(ColumnAggregateExpectation)
         return {"success": success, "result": {"details": msg}}
 
 
-def get_counts_per_day_as_dict(metrics: dict, run_date: str, equivalent_previous_days: list) -> dict:
+def get_counts_per_day_as_dict(
+    metrics: dict, run_date: str, equivalent_previous_days: list
+) -> dict:
 
     equivalent_previous_days_str: List[str] = [
         datetime.strftime(i, date_format) for i in equivalent_previous_days
@@ -304,7 +311,9 @@ def get_counts_per_day_as_dict(metrics: dict, run_date: str, equivalent_previous
     return day_counts_dict
 
 
-def get_diff_fraction(run_date_count: int, day_counts_dict: dict, equivalent_previous_days: list) -> float:
+def get_diff_fraction(
+    run_date_count: int, day_counts_dict: dict, equivalent_previous_days: list
+) -> float:
     """
     Calculates the fractional difference between current and past average row counts (how much is the
     difference relative to the average).
