@@ -28,6 +28,24 @@ To complete this how-to, you'll complete the following tasks:
 
 <!-- In a numbered list, describe what the user must do to accomplish the task successfully. Avoid long narrative descriptions of functionality and behaviour. If the behaviour is obvious, it doesn't need to be described. Provide users with only the information they need to know. When necessary, provide or link to code samples. What follows is an example provided for your reference. -->
 
+1. Run the following command in an empty base directory inside a Python virtual environment:
+
+    ```bash title="Terminal input"
+    pip install great_expectations
+    ```
+
+    It can take several minutes for the installation to complete. Jupyter Notebook is included with Great Expectations, and it lets you edit code and view the results of code runs.
+
+2. Open Jupyter Notebook, a command line, or a terminal and then run the following command to import the `great_expectations` module:
+
+    ```python name="tutorials/quickstart/quickstart.py import_gx"
+    ```
+
+3. Run the following command to import the `DataContext` object:
+
+    ```python name="tutorials/quickstart/quickstart.py get_context"
+    ```
+
 ## Second task
 
 <!-- If necessary, add a secondary task here. Use the same format that you used in the first task. What follows is an example provided for your reference. -->
