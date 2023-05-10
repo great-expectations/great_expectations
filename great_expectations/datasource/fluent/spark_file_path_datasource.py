@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import pathlib
 from typing import TYPE_CHECKING, ClassVar, List, Sequence, Type, Union
 
 import pydantic
@@ -9,6 +8,9 @@ from pydantic import Field
 from typing_extensions import Literal
 
 from great_expectations.datasource.fluent import _SparkDatasource
+from great_expectations.datasource.fluent.directory_data_asset import (
+    _DirectoryDataAsset,
+)
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
@@ -33,14 +35,13 @@ class CSVAsset(_FilePathDataAsset):
     def _get_reader_method(self) -> str:
         return self.type
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         return {"header", "infer_schema"}
 
 
-class DirectoryCSVAsset(_FilePathDataAsset):
+class DirectoryCSVAsset(_DirectoryDataAsset):
     # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"
-    data_directory: pathlib.Path
     header: bool = False
     infer_schema: bool = Field(False, alias="InferSchema")
 
@@ -52,7 +53,7 @@ class DirectoryCSVAsset(_FilePathDataAsset):
         # Reader method is still "csv"
         return self.type.replace("directory_", "")
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         return {"data_directory", "header", "infer_schema"}
 
 
@@ -75,7 +76,7 @@ class ParquetAsset(_FilePathDataAsset):
     def _get_reader_method(self) -> str:
         return self.type
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
         See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.

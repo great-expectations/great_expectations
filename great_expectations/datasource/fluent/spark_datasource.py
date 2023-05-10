@@ -111,7 +111,7 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
             """Spark DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
         )
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
             """Spark DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
@@ -217,6 +217,7 @@ class SparkDatasource(_SparkDatasource):
     def test_connection(self, test_assets: bool = True) -> None:
         ...
 
+    @public_api
     def add_dataframe_asset(
         self,
         name: str,
