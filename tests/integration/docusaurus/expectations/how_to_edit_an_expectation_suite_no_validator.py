@@ -114,8 +114,6 @@ expectation_configuration = ExpectationConfiguration(
 suite.add_expectation(expectation_configuration=expectation_configuration)
 # </snippet>
 
-# TODO: update or replace expectation
-
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite_no_validator.py save_expectation_suite">
 context.save_expectation_suite(expectation_suite=suite)
 # </snippet>

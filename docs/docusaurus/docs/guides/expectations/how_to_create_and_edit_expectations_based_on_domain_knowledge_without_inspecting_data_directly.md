@@ -133,10 +133,7 @@ Here are a few more example expectations for this dataset:
 
 You can see all the available Expectations in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-### 5. (Optional) Repeat step 4 to edit Expectations or create additional Expectations
-TODO this is where we will add some more information about updating the stuff
-
-### 6. (Optional) Save your Expectations for future use
+### 5. Save your Expectations for future use
 
 To keep your Expectations for future use, you save them to your Data Context.  A Filesystem or Cloud Data Context persists outside the current Python session, so saving the Expectation Suite in your Data Context's Expectations Store ensures you can access it in the future:
 
