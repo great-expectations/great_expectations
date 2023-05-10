@@ -185,56 +185,56 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
 
         See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
         """
-        return (
-            super()
-            ._get_reader_options_include()
-            .union(
-                {
-                    "schema",
-                    "sep",
-                    "encoding",
-                    "quote",
-                    "escape",
-                    "comment",
-                    "header",
-                    "inferSchema",
-                    "ignoreLeadingWhiteSpace",
-                    "ignoreTrailingWhiteSpace",
-                    "nullValue",
-                    "nanValue",
-                    "positiveInf",
-                    "negativeInf",
-                    "dateFormat",
-                    "timestampFormat",
-                    "maxColumns",
-                    "maxCharsPerColumn",
-                    "maxMalformedLogPerPartition",
-                    "mode",
-                    "columnNameOfCorruptRecord",
-                    "multiLine",
-                    "charToEscapeQuoteEscaping",
-                    "samplingRatio",
-                    "enforceSchema",
-                    "emptyValue",
-                    "locale",
-                    "lineSep",
-                    "unescapedQuoteHandling",
-                    # Inherited vvv
-                    # "pathGlobFilter",
-                    # "recursiveFileLookup",
-                    # "modifiedBefore",
-                    # "modifiedAfter",
-                    # Inherited ^^^
-                    # vvv Docs <> Source Code mismatch
-                    # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-csv.html
-                    # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604
-                    # "preferDate",
-                    # "timestampNTZFormat",
-                    # "enableDateTimeParsingFallback",
-                    # ^^^ Docs <> Source Code mismatch
-                }
-            )
-        )
+        parent_reader_options = super()._get_reader_options_include()
+        reader_options = {
+            "schema",
+            "sep",
+            "encoding",
+            "quote",
+            "escape",
+            "comment",
+            "header",
+            "inferSchema",
+            "ignoreLeadingWhiteSpace",
+            "ignoreTrailingWhiteSpace",
+            "nullValue",
+            "nanValue",
+            "positiveInf",
+            "negativeInf",
+            "dateFormat",
+            "timestampFormat",
+            "maxColumns",
+            "maxCharsPerColumn",
+            "maxMalformedLogPerPartition",
+            "mode",
+            "columnNameOfCorruptRecord",
+            "multiLine",
+            "charToEscapeQuoteEscaping",
+            "samplingRatio",
+            "enforceSchema",
+            "emptyValue",
+            "locale",
+            "lineSep",
+            "unescapedQuoteHandling",
+            # Inherited vvv
+            # "pathGlobFilter",
+            # "recursiveFileLookup",
+            # "modifiedBefore",
+            # "modifiedAfter",
+            # Inherited ^^^
+            # vvv Docs <> Source Code mismatch
+            # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-csv.html
+            # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L604
+            # "preferDate",
+            # "timestampNTZFormat",
+            # "enableDateTimeParsingFallback",
+            # ^^^ Docs <> Source Code mismatch
+        }
+        if parent_reader_options:
+            options_to_return = parent_reader_options.union(reader_options)
+        else:
+            options_to_return = reader_options
+        return options_to_return
 
 
 class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
