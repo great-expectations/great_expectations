@@ -22,9 +22,8 @@ from great_expectations.datasource.fluent.directory_data_asset import (
 from great_expectations.datasource.fluent.file_path_data_asset import (
     _FilePathDataAsset,
 )
-
 from great_expectations.datasource.fluent.serializable_types.pyspark import (
-    SerializableStructType,
+    SerializableStructType,  # noqa: TCH001
 )
 
 if TYPE_CHECKING:
