@@ -117,5 +117,3 @@ suite.add_expectation(expectation_configuration=expectation_configuration)
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py save_expectation_suite">
 context.save_expectation_suite(expectation_suite=suite)
 # </snippet>
-
-how_to_create_and_edit_an_expectationsuite_domain_knowledge.py
