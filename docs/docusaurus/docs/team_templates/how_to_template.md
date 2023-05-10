@@ -18,17 +18,19 @@ To complete this how-to, you'll complete the following tasks:
 
 <!-- To link to a specific section within this template, use the format provided in the last item in the list. --> 
 
+
 ## Prerequisites
 
-<!-- List the items that need to be present or completed by the user before they start the tasks. Link to relevant information if it's available. What follows is an example provided for your reference. If there aren't any prerequisites, remove this section.-->
+<!-- List the items that need to be present or completed by the user before they start the tasks. Link to relevant information if it's available. What follows is an example provided for your reference. If there aren't any prerequisites, remove this section. -->
 
 - [A Great Expectations instance](../guides/setup/setup_overview.md)
 - [A Data Connection](../guides/connecting_to_your_data/connect_to_data_overview.md)
-- [An Expectation Suite](../guides/expectations/create_expectations_overview.md) 
+- [An Expectation Suite](../guides/expectations/create_expectations_overview.md)
+
 
 ## First task 
 
-<!-- Update the task heading. Use sentence case for headings and titles and avoid using -ing verb forms (gerunds) in headings or titles. Section headings should describe the type of content that's in the section. For example, Create an instance. For more information about the correct heading format, see [Headings and titles](https://developers.google.com/style/headings).-->
+<!-- Update the task heading. Use sentence case for headings and titles and avoid using -ing verb forms (gerunds) in headings or titles. Section headings should describe the type of content that's in the section. For example, Create an instance. For more information about the correct heading format, see [Headings and titles](https://developers.google.com/style/headings). -->
 
 <!-- In a numbered list, describe what the user must do to accomplish the task successfully. Avoid long narrative descriptions of functionality and behaviour. If the behaviour is obvious, it doesn't need to be described. Provide users with only the information they need to know. When necessary, provide or link to code samples. What follows is an example provided for your reference. -->
 
