@@ -336,14 +336,21 @@ class LinkChecker:
     help="Top-most folder in the docs URL for resolving absolute paths",
 )
 @click.option("--skip-external", is_flag=True)
-def scan_docs(
+def scan_docs_click(
     path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
 ) -> None:
+    code, message = scan_docs(path, docs_root, site_prefix, skip_external)
+    click.echo(message)
+    exit(code)
+
+
+def scan_docs(
+    path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
+) -> tuple[int, str]:
     if docs_root is None:
         docs_root = path
     elif not os.path.isdir(docs_root):  # noqa: PTH112
-        click.echo(f"Docs root path: {docs_root} is not a directory")
-        exit(1)
+        return 1, f"Docs root path: {docs_root} is not a directory"
 
     # prepare our return value
     result: List[LinkReport] = list()
@@ -359,24 +366,23 @@ def scan_docs(
         # else we support checking one file at a time
         result.extend(checker.check_file(path))
     else:
-        click.echo(f"Docs path: {path} is not a directory or file")
-        exit(1)
+        return 1, f"Docs path: {path} is not a directory or file"
 
     if result:
-        click.echo("----------------------------------------------")
-        click.echo("------------- Broken Link Report -------------")
-        click.echo("----------------------------------------------")
+        message: list[str] = []
+        message.append("----------------------------------------------")
+        message.append("------------- Broken Link Report -------------")
+        message.append("----------------------------------------------")
         for line in result:
-            click.echo(line)
+            message.append(line)
 
-        exit(1)
+        return 1, "\n".join(message)
     else:
-        click.echo("No broken links found")
-        exit(0)
+        return 0, "No broken links found"
 
 
 def main():
-    scan_docs()
+    scan_docs_click()
 
 
 if __name__ == "__main__":

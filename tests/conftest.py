@@ -10,7 +10,7 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from unittest import mock
 
 import numpy as np
@@ -128,7 +128,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="module")
 def spark_warehouse_session(tmp_path_factory):
     # Note this fixture will configure spark to use in-memory metastore
-    pyspark = pytest.importorskip("pyspark")  # noqa: F841
+    pyspark = pytest.importorskip("pyspark")
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
     spark: pyspark.SparkSession = get_or_create_spark_application(
@@ -432,7 +432,7 @@ def basic_spark_df_execution_engine(spark_session):
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
     conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
-    spark_config: Dict[str, str] = dict(conf)
+    spark_config: Dict[str, Any] = dict(conf)
     execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
     )
@@ -2312,7 +2312,7 @@ def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
 @pytest.fixture
 def titanic_sqlite_db(sa):
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -2329,7 +2329,7 @@ def titanic_sqlite_db(sa):
 @pytest.fixture
 def titanic_sqlite_db_connection_string(sa):
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -2371,7 +2371,7 @@ def titanic_expectation_suite(empty_data_context_stats_enabled):
 def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
@@ -2809,11 +2809,11 @@ def filesystem_csv(tmp_path_factory):
     os.makedirs(os.path.join(base_dir, "f3"), exist_ok=True)  # noqa: PTH118, PTH103
     with open(
         os.path.join(base_dir, "f3", "f3_20190101.csv"), "w"  # noqa: PTH118
-    ) as outfile:  # noqa: PTH118
+    ) as outfile:
         outfile.writelines(["a,b,c\n"])
     with open(
         os.path.join(base_dir, "f3", "f3_20190102.csv"), "w"  # noqa: PTH118
-    ) as outfile:  # noqa: PTH118
+    ) as outfile:
         outfile.writelines(["a,b,c\n"])
 
     return base_dir

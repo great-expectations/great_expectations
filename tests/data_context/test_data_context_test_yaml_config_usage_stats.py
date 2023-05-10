@@ -1,6 +1,7 @@
 from unittest import mock
 
 import pytest
+from ruamel.yaml.error import MarkedYAMLError
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations import DataContext
@@ -128,9 +129,9 @@ def test_test_yaml_config_usage_stats_class_name_not_provided(
     What does this test and why?
     If a class_name is not provided, and we have run into an error state in test_yaml_config() (likely because of the missing class_name) then we should report descriptive diagnostic info.
     """
-    with pytest.raises(Exception):
+    with pytest.raises((MarkedYAMLError, KeyError)):
         # noinspection PyUnusedLocal
-        my_expectation_store = empty_data_context_stats_enabled.test_yaml_config(
+        empty_data_context_stats_enabled.test_yaml_config(
             yaml_config="""
 module_name: great_expectations.data_context.store.expectations_store
 
@@ -164,7 +165,7 @@ def test_test_yaml_config_usage_stats_custom_config_class_name_not_provided(
     This should be the case even if we are passing in a custom config.
     """
     data_context: DataContext = empty_data_context_stats_enabled
-    with pytest.raises(Exception):
+    with pytest.raises((MarkedYAMLError, KeyError)):
         _ = data_context.test_yaml_config(
             yaml_config="""
 module_name: tests.data_context.fixtures.plugins.my_custom_expectations_store

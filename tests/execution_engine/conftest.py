@@ -4,14 +4,13 @@ import random
 from pathlib import Path
 from typing import List
 
-import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
 
-from great_expectations.core.batch_spec import AzureBatchSpec, GCSBatchSpec
+from great_expectations.compatibility import aws, pyspark
 from great_expectations.compatibility.pyspark import functions as F
-from great_expectations.compatibility import pyspark
+from great_expectations.core.batch_spec import AzureBatchSpec, GCSBatchSpec
 
 
 @pytest.fixture(scope="function")
@@ -26,7 +25,7 @@ def aws_credentials():
 @pytest.fixture
 def s3(aws_credentials):
     with mock_s3():
-        yield boto3.client("s3", region_name="us-east-1")
+        yield aws.boto3.client("s3", region_name="us-east-1")
 
 
 @pytest.fixture
@@ -106,7 +105,9 @@ def azure_batch_spec() -> AzureBatchSpec:
         "alpha-2.csv",
     ]
     path = keys[0]
-    full_path = os.path.join("mock_account.blob.core.windows.net", container, path)
+    full_path = os.path.join(  # noqa: PTH118
+        "mock_account.blob.core.windows.net", container, path
+    )
 
     batch_spec = AzureBatchSpec(
         path=full_path,
@@ -128,7 +129,7 @@ def gcs_batch_spec() -> GCSBatchSpec:
         "alpha-2.csv",
     ]
     path = keys[0]
-    full_path = os.path.join("gs://", bucket, path)
+    full_path = os.path.join("gs://", bucket, path)  # noqa: PTH118
 
     batch_spec = GCSBatchSpec(
         path=full_path,
@@ -211,7 +212,11 @@ def test_sparkdf(spark_session) -> pyspark.DataFrame:
 def test_folder_connection_path_tsv(tmp_path_factory) -> str:
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path_tsv"))
-    df1.to_csv(path_or_buf=os.path.join(path, "test.tsv"), sep="\t", index=False)
+    df1.to_csv(
+        path_or_buf=os.path.join(path, "test.tsv"),  # noqa: PTH118
+        sep="\t",
+        index=False,
+    )
     return str(path)
 
 
@@ -219,5 +224,5 @@ def test_folder_connection_path_tsv(tmp_path_factory) -> str:
 def test_folder_connection_path_parquet(tmp_path_factory) -> str:
     df1 = pd.DataFrame({"col_1": [1, 2, 3, 4, 5], "col_2": ["a", "b", "c", "d", "e"]})
     path = str(tmp_path_factory.mktemp("test_folder_connection_path_parquet"))
-    df1.to_parquet(path=os.path.join(path, "test.parquet"))
+    df1.to_parquet(path=os.path.join(path, "test.parquet"))  # noqa: PTH118
     return str(path)

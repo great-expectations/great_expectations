@@ -272,12 +272,9 @@ extend-exclude = [
     "versioneer*",
     "examples/*",
     # TODO: remove the items below and fix linting issues
-    "tests/checkpoint", # 15 warnings
     "tests/cli", # 34 warnings
     "tests/data_asset", # 10 warnings
-    "tests/data_context", # 127 warnings
     "tests/dataset", # 10 warnings
-    "tests/execution_engine",  # 23 warnings
     "tests/expectations", # 56 warnings
     "tests/integration", # 114 warnings
     "tests/rule_based_profiler", # 28 warnings
@@ -304,6 +301,16 @@ extend-exclude = [
 "great_expectations/compatibility/pyarrow.py" = [
     "TID251",  # flake8-banned-api
 ]
+
+[tool.ruff.flake8-type-checking]
+# pydantic models use annotations at runtime
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "great_expectations.datasource.fluent.fluent_base_model.FluentBaseModel",
+    ]
+runtime-evaluated-decorators = [
+    "pydantic.dataclasses.dataclass",
+    ]
 
 [tool.ruff.mccabe]
 max-complexity = 15
@@ -333,12 +340,17 @@ filterwarnings = [
     "ignore:stream argument is deprecated. Use stream parameter in request directly:DeprecationWarning",
     # We likely won't be updating to `marhsmallow` 4, these errors should be filtered out
     "error::marshmallow.warnings.RemovedInMarshmallow4Warning",
+
+    # --------------------------------------- Great Expectations Warnings ----------------------------------
     # This warning is for configuring the result_format parameter at the Validator-level, which will not be persisted,
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Validator-level will not be persisted:UserWarning",
     # This warning is for configuring the result_format parameter at the Expectation-level, which will not be persisted,
     # but is still useful for building the configuration.
     "ignore:`result_format` configured at the Expectation-level will not be persisted:UserWarning",
+    # This warning can be emitted when configuring splitters with fluent datasources
+    "ignore:The same option name is applied for your batch regex and splitter config:UserWarning",
+    # --------------------------------------- Great Expectations Warnings ----------------------------------
 
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
     # Ignores in this section are for items in Great Expectations that are deprecated but not yet removed. Once the
@@ -370,11 +382,21 @@ filterwarnings = [
     # Example Actual Warning: (found in test_golden_path_sql_datasource_configuration)
     # DeprecationWarning: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16. Please use get_batch_list instead.
     'ignore: get_batch is deprecated for the V3 Batch Request API as of v0.13.20 and will be removed in v0.16.:DeprecationWarning',
+    # Example Actual Warning: (found in test_data_context)
+    # UserWarning: Warning. An existing `great_expectations.yml` was found here
+    'ignore: Warning. An existing `great_expectations.yml` was found here:UserWarning',
+    # Example Actual Warning: (found in test_data_context)
+    # UserWarning: Warning. An existing `config_variables.yml` was found here
+    'ignore: Warning. An existing `config_variables.yml` was found here:UserWarning',
     # --------------------------------------- Great Expectations Deprecation Warnings ----------------------------------
 
     # --------------------------------------- TEMPORARY IGNORES --------------------------------------------------------
     # The warnings in this section should be addressed (fixed or ignored) but are ignored here temporarily to help allow
     # turning on "warnings are errors" so new warnings become errors and are addressed during PRs.
+
+    # Warnings related to GCS Data Connectors
+    "ignore:In order to access blobs with a ConfiguredAssetGCSDataConnector:UserWarning",
+    "ignore:In order to access blobs with an InferredAssetGCSDataConnector:UserWarning",
 
     # python
     # Example Actual Warning: FutureWarning: iteritems is deprecated and will be removed in a future version. Use .items instead.
