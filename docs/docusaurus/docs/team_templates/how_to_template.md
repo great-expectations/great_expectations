@@ -14,9 +14,9 @@ To complete this how-to, you'll complete the following tasks:
 
 - Save your expectation with calculated values
 
-<!-- To link to a specific section within this template, use the format provided in the following example. --> 
-
 - [First task](#first-task)
+
+<!-- To link to a specific section within this template, use the format provided in the last item in the list. --> 
 
 ## Prerequisites
 
