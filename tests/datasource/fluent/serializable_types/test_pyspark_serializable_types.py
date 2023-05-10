@@ -15,32 +15,35 @@ def skip_if_spark_not_selected(test_backends) -> None:
         pytest.skip("No spark backend selected.")
 
 
-struct_type_test_params = [
-    pytest.param(None, {"fields": [], "type": "struct"}, id="None"),
-    pytest.param([], {"fields": [], "type": "struct"}, id="empty_list"),
-    pytest.param(
-        [pyspark_types.StructField("f1", pyspark_types.StringType(), True)],
-        {
-            "fields": [
-                {"metadata": {}, "name": "f1", "nullable": True, "type": "string"}
-            ],
-            "type": "struct",
-        },
-        id="fields_list",
-    ),
-    pytest.param(
-        pyspark_types.StructType(
-            [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
+if pyspark_types:
+    struct_type_test_params = [
+        pytest.param(None, {"fields": [], "type": "struct"}, id="None"),
+        pytest.param([], {"fields": [], "type": "struct"}, id="empty_list"),
+        pytest.param(
+            [pyspark_types.StructField("f1", pyspark_types.StringType(), True)],
+            {
+                "fields": [
+                    {"metadata": {}, "name": "f1", "nullable": True, "type": "string"}
+                ],
+                "type": "struct",
+            },
+            id="fields_list",
         ),
-        {
-            "fields": [
-                {"metadata": {}, "name": "f1", "nullable": True, "type": "string"}
-            ],
-            "type": "struct",
-        },
-        id="struct_type",
-    ),
-]
+        pytest.param(
+            pyspark_types.StructType(
+                [pyspark_types.StructField("f1", pyspark_types.StringType(), True)]
+            ),
+            {
+                "fields": [
+                    {"metadata": {}, "name": "f1", "nullable": True, "type": "string"}
+                ],
+                "type": "struct",
+            },
+            id="struct_type",
+        ),
+    ]
+else:
+    struct_type_test_params = []
 
 
 @pytest.mark.unit
