@@ -4,7 +4,7 @@ from unittest import mock
 
 import pytest
 
-from great_expectations._get_context import _resolve_cloud_args as get_context_resolver
+from great_expectations.util import _resolve_cloud_args as get_context_resolver
 from great_expectations.data_context.data_context import (
     AbstractDataContext,
     CloudDataContext,
