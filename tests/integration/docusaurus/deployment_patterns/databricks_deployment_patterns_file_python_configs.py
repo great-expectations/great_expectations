@@ -21,10 +21,9 @@ base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 base_directory = "/dbfs/data/"
 original_umask = os.umask(0)
 try:
-    os.makedirs(base_directory)
+    os.makedirs(base_directory, 0o777)
 finally:
     os.umask(original_umask)
-os.makedirs(base_directory)
 shutil.copytree(str(pathlib.Path(pathlib.Path.cwd(), "data")), base_directory)
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource">
