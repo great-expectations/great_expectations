@@ -30,6 +30,7 @@ files = [
     "great_expectations",
     "tests/datasource/fluent",
     # "contrib" # ignore entire `contrib` package
+    "docs/checks", # We ignore docs, but not any CI checks written in python
     ]
 warn_unused_configs = true
 ignore_missing_imports = true
