@@ -18,7 +18,7 @@ base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 # </snippet>
 
 # For this test script, change base_directory to location where test runner data is located
-os.mkdir("/dbfs/data/")
+os.mkdirs("/dbfs/data/")
 shutil.copytree(str(pathlib.Path(pathlib.Path.cwd(), "data")), "/dbfs/data/")
 base_directory = "/dbfs/data/"
 
