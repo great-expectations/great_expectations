@@ -2,3 +2,5 @@ services:
   jupyter:
     image: gx/pandas_filesystem_example
     build: ./
+    ports:
+      - 8888:8888
