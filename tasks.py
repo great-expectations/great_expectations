@@ -667,7 +667,7 @@ EXAMPLES = [
         name="pandas",
         docker_container_name="pandas_filesystem",
         docker_path=pathlib.Path("examples/pandas_filesystem/"),
-        dockerfile_path=pathlib.Path("examples/pandas_filesystem/Dockerfile"),
+        dockerfile_path=pathlib.Path("examples/pandas_filesystem/Dockerfile.invoke"),
     )
 ]
 
