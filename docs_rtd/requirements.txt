@@ -38,7 +38,7 @@ jupyter-core==4.11.2
 lazy-object-proxy==1.4.3
 MarkupSafe==1.1.1
 mistune==0.8.4
-nbconvert==6.4.4
+nbconvert==6.5.1
 nbformat==5.8.0
 notebook==6.5.4
 numpy==1.22.0
