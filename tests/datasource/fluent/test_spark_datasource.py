@@ -72,7 +72,8 @@ def test_dataframe_asset(
     assert len(datasource.assets) == 2
 
     assert all(
-        asset.dataframe.toPandas().equals(pandas_df) for asset in datasource.assets
+        asset.dataframe is not None and asset.dataframe.toPandas().equals(pandas_df)
+        for asset in datasource.assets
     )
 
 
