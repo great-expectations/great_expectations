@@ -46,6 +46,7 @@ When you
 If you're using a Custom Expectation that is coming from the `Great Expectations Experimental` library, it will need to either be imported from there directly. To do this, we'll first need to `pip install great_expectations_experimental`.
 
 </TabItem>
+</Tabs>
 
 ## Usage
 
@@ -80,7 +81,7 @@ validator.expect_column_values_to_be_alphabetical(column="test")
 ```
 
 </TabItem>
-
+</Tabs>
 
 <div style={{"text-align":"center"}}>
 <p style={{"color":"#8784FF","font-size":"1.4em"}}><b>
