@@ -348,6 +348,12 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
 
+    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+        if self.dataframe is None:
+            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")
+
+        return super().build_batch_request()
+
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
     ) -> list[Batch]:
