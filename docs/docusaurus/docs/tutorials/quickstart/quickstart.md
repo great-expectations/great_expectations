@@ -63,7 +63,7 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 
     To analyze Validator data, you can create multiple Expectations that call multiple methods with the `validator.expect_*` syntax.
 
-## Connect to data
+## Validate data
 
 1. Run the following command to define a Checkpoint and examine the data to determine if it matches the defined Expectations: 
 
