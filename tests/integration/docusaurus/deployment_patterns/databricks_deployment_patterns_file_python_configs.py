@@ -14,12 +14,6 @@ from great_expectations.checkpoint import SimpleCheckpoint
 context = gx.get_context()
 # </snippet>
 
-fs = FakeFilesystem()
-
-context_root_dir = "/great_expectations"
-context = gx.get_context(context_root_dir=context_root_dir)
-fs.create_dir(context.root_directory)
-
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory">
 base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 # </snippet>
@@ -27,6 +21,7 @@ base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 # For this test script, change base_directory to location where test runner data is located
 data_directory = pathlib.Path(pathlib.Path.cwd(), "data")
 base_directory = "/dbfs/data/"
+fs = FakeFilesystem()
 fs.create_dir(base_directory)
 create_files_in_directory(
     directory=base_directory,
