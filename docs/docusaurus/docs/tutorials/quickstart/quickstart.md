@@ -38,12 +38,12 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
 
     ```python name="tutorials/quickstart/quickstart.py import_gx"
     ```
-
+## Create a DataContext
 3. Run the following command to import the `DataContext` object:
 
     ```python name="tutorials/quickstart/quickstart.py get_context"
     ```
-
+## Connect to Data
 4. Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
 
     ```python name="tutorials/quickstart/quickstart.py connect_to_data"
