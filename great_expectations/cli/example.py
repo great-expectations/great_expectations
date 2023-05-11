@@ -7,8 +7,7 @@ from great_expectations.cli.pretty_printing import cli_message
 
 
 @click.group(short_help="Examples")
-@click.pass_context
-def example(ctx: click.Context) -> None:
+def example() -> None:
     """
     Examples
 
@@ -20,8 +19,7 @@ def example(ctx: click.Context) -> None:
 
 
 @example.command(name="airflow")
-@click.pass_context
-def example_airflow(ctx: click.Context) -> None:
+def example_airflow() -> None:
     """Start an airflow example."""
     cli_message("<green>Setting up airflow example...</green>")
     repo_root = pathlib.Path(__file__).parents[2]
@@ -31,8 +29,7 @@ def example_airflow(ctx: click.Context) -> None:
 
 
 @example.command(name="pandas")
-@click.pass_context
-def example_pandas(ctx: click.Context) -> None:
+def example_pandas() -> None:
     """Start a pandas filesystem example."""
     cli_message("<green>Setting up pandas filesystem example...</green>")
     repo_root = pathlib.Path(__file__).parents[2]

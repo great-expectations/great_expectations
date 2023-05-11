@@ -25,6 +25,8 @@ mkdir ./dags ./plugins ./logs
 print_orange_header "Setting user/group for directories (for mac / linux)"
 echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
 
+# TODO: Only initialize if not already initialized
+
 print_orange_header "Initializing airflow"
 docker compose up airflow-init
 
