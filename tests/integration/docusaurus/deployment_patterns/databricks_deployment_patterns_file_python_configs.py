@@ -21,11 +21,6 @@ data_directory = pathlib.Path(pathlib.Path.cwd(), "data")
 base_directory = pathlib.Path("/dbfs/data/")
 fs = FakeFilesystem()
 fs.add_real_directory(source_path=data_directory, target_path=base_directory)
-csv_filename = "yellow_tripdata_sample_2019-01.csv"
-fs.add_real_file(
-    source_path=data_directory.joinpath(csv_filename),
-    target_path=base_directory.joinpath(csv_filename),
-)
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource">
 dbfs_datasource = context.sources.add_or_update_spark_dbfs(
