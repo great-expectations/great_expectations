@@ -350,6 +350,7 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
 
+    @public_api
     def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
         if self.dataframe is None:
             raise ValueError(
