@@ -192,7 +192,7 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
             "escape",
             "comment",
             "header",
-            "inferSchema",
+            "infer_schema",
             "ignoreLeadingWhiteSpace",
             "ignoreTrailingWhiteSpace",
             "nullValue",

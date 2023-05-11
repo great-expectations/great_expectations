@@ -17,13 +17,20 @@ from great_expectations.compatibility.pyspark import types as pyspark_types
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector,
 )
+from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition,
     TestConnectionError,
+    DataAsset,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
     DirectoryCSVAsset,
+    _SparkFilePathDatasource,
+    ParquetAsset,
+    ORCAsset,
+    JSONAsset,
+    TextAsset,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
@@ -332,6 +339,45 @@ def test_add_asset_with_asset_specific_params(
             assert getattr(asset, param) == struct_type.jsonValue()
         else:
             assert getattr(asset, param) == value
+
+
+assets = [
+    (CSVAsset, {"name": "asset_name"}),
+    (DirectoryCSVAsset, {"name": "asset_name", "data_directory": "data_directory"}),
+    (ParquetAsset, {"name": "asset_name"}),
+    (ORCAsset, {"name": "asset_name"}),
+    (JSONAsset, {"name": "asset_name"}),
+    (TextAsset, {"name": "asset_name"}),
+]
+
+
+@pytest.mark.unit
+def test_all_spark_file_path_asset_types_tested():
+    """Make sure all the available assets are contained in the fixture used for other tests."""
+    asset_types_in_fixture = {a[0] for a in assets}
+    assert asset_types_in_fixture == set(_SparkFilePathDatasource.asset_types)
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "asset_type,required_fields",
+    [
+        pytest.param(
+            asset_type,
+            required_fields,
+            id=asset_type.__name__,
+        )
+        for (asset_type, required_fields) in assets
+    ],
+)
+def test__get_reader_options_include(
+    asset_type: _FilePathDataAsset, required_fields: dict
+):
+    """Make sure options are in fields."""
+    fields = set(asset_type.__fields__.keys())
+    asset = asset_type.validate(required_fields)
+    for option in asset._get_reader_options_include():
+        assert option in fields
 
 
 add_directory_csv_asset = [
