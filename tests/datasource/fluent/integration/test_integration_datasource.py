@@ -8,8 +8,10 @@ import pytest
 from responses import RequestsMock
 
 from great_expectations.checkpoint import SimpleCheckpoint
-from great_expectations.compatibility import pyspark
-from great_expectations.data_context import AbstractDataContext, CloudDataContext, FileDataContext
+from great_expectations.data_context import (
+    AbstractDataContext,
+    CloudDataContext,
+)
 from great_expectations.datasource.fluent import (
     BatchRequest,
     PandasFilesystemDatasource,
@@ -517,7 +519,9 @@ def test_pandas_data_adding_dataframe_in_cloud_context(
 
     df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
 
-    dataframe_asset = context.sources.add_or_update_pandas(name="fluent_pandas_datasource").add_dataframe_asset(name="my_df_asset", dataframe=df)
+    dataframe_asset = context.sources.add_or_update_pandas(
+        name="fluent_pandas_datasource"
+    ).add_dataframe_asset(name="my_df_asset", dataframe=df)
     dataframe_asset.build_batch_request()
 
     assert "No error was raised above"
@@ -530,13 +534,16 @@ def test_spark_data_adding_dataframe_in_cloud_context(
     empty_cloud_context_fluent: CloudDataContext,
 ):
     from pyspark.sql import SparkSession  # isort:skip
+
     context = empty_cloud_context_fluent
 
-    spark = SparkSession.builder.appName("local").master("local[1]").getOrCreate()
+    SparkSession.builder.appName("local").master("local[1]").getOrCreate()
     df = pd.DataFrame({"column_name": [1, 2, 3, 4, 5]})
     spark_df = spark_session.createDataFrame(df)
 
-    dataframe_asset = context.sources.add_or_update_spark(name="fluent_pandas_datasource").add_dataframe_asset(name="my_df_asset", dataframe=spark_df)
+    dataframe_asset = context.sources.add_or_update_spark(
+        name="fluent_pandas_datasource"
+    ).add_dataframe_asset(name="my_df_asset", dataframe=spark_df)
     dataframe_asset.build_batch_request()
 
     assert "No error was raised above"

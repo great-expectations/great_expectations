@@ -140,6 +140,7 @@ def test_spark_config_passed_to_execution_engine(
         target=datasource.get_execution_engine().config["spark_config"],
     )
 
+
 def test_build_batch_request_raises_if_missing_dataframe(
     empty_data_context: AbstractDataContext,
     spark_session,
@@ -149,7 +150,9 @@ def test_build_batch_request_raises_if_missing_dataframe(
     pandas_df = test_df_pandas
     spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
 
-    dataframe_asset = empty_data_context.sources.add_spark(name="my_spark_datasource").add_dataframe_asset(
+    dataframe_asset = empty_data_context.sources.add_spark(
+        name="my_spark_datasource"
+    ).add_dataframe_asset(
         name="my_dataframe_asset",
         dataframe=spark_df,
     )
@@ -158,7 +161,6 @@ def test_build_batch_request_raises_if_missing_dataframe(
     with pytest.raises(ValueError) as e:
         dataframe_asset.build_batch_request()
 
-    assert (
-        "Cannot build batch request for dataframe asset without a dataframe"
-        in str(e.value)
+    assert "Cannot build batch request for dataframe asset without a dataframe" in str(
+        e.value
     )

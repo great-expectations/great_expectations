@@ -87,7 +87,9 @@ class _SparkDatasource(Datasource):
 class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(default=None, exclude=True, repr=False)
+    dataframe: Optional[_SparkDataFrameT] = pydantic.Field(
+        default=None, exclude=True, repr=False
+    )
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -126,7 +128,9 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         """
 
         if self.dataframe is None:
-            raise ValueError("Cannot build batch request for dataframe asset without a dataframe")
+            raise ValueError(
+                "Cannot build batch request for dataframe asset without a dataframe"
+            )
 
         return BatchRequest(
             datasource_name=self.datasource.name,
