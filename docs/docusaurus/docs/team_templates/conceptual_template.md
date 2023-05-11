@@ -8,7 +8,7 @@ title: <!-- Add the topic title here -->
 
 <!-- To add images to this template, add them to the images sub-folder in the `team_templates` folder and use underscores as delimiters in the filename. For example, `comments_box_with_comment`. Use the .png format for images. Use images sparingly. What follows is an example provided for your reference.  -->
 
-![Response dialog](images/comments_box_with_comment.png)
+![Response dialog](../team_templates/images/comments_box_with_comment.png)
 
 <!-- To add tables to this template, use the format provided in the following example. Add columns and rows as necessary. For more information about tables in Markdown, see [Tables](https://www.markdownguide.org/extended-syntax/#tables). -->
 
