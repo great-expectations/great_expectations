@@ -40,6 +40,8 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
 checkpoint_result = checkpoint.run()
 print(checkpoint_result)
 
+print("See above for checkpoint result ^^^")
+
 # View results
 validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
 # context.open_data_docs(resource_identifier=validation_result_identifier)

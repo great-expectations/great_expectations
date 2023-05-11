@@ -1,0 +1,4 @@
+services:
+  jupyter:
+    image: gx/pandas_filesystem_example
+    build: ./
