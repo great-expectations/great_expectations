@@ -152,7 +152,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             container=abs_container,
             name_starts_with=abs_name_starts_with,
             delimiter=abs_delimiter,
-            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
+            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
         )
 
         # build a more specific `_test_connection_error_message`
