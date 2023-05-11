@@ -9,14 +9,14 @@ print_orange () {
 print_orange "Downloading airflow base docker compose"
 curl -LfO 'https://airflow.apache.org/docs/apache-airflow/2.6.0/docker-compose.yaml'
 
-print_orange "Make directories to mount to containers"
+print_orange "Making directories to mount to containers"
 mkdir ./dags ./plugins ./logs
 
-print_orange "Set user/group for directories (for mac / linux)"
+print_orange "Setting user/group for directories (for mac / linux)"
 echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
 
-print_orange "Initialize airflow"
+print_orange "Initializing airflow"
 docker compose up airflow-init
 
-print_orange "Startup airflow containers"
+print_orange "Starting airflow containers"
 docker compose up
