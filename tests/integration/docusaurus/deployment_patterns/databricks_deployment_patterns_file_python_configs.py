@@ -1,11 +1,8 @@
 # isort:skip_file
-import os
 import pathlib
-import shutil
-from typing import TYPE_CHECKING
+from pyfakefs.fake_filesystem import FakeFilesystem
 
-if TYPE_CHECKING:
-    from pyfakefs.fake_filesystem import FakeFilesystem
+from tests.test_utils import create_files_in_directory
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports">
 import great_expectations as gx
@@ -17,15 +14,25 @@ from great_expectations.checkpoint import SimpleCheckpoint
 context = gx.get_context()
 # </snippet>
 
+fs = FakeFilesystem()
+
+context_root_dir = "/great_expectations"
+context = gx.get_context(context_root_dir=context_root_dir)
+fs.create_dir(context.root_directory)
+
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose base directory">
 base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 # </snippet>
 
 # For this test script, change base_directory to location where test runner data is located
+data_directory = pathlib.Path(pathlib.Path.cwd(), "data")
 base_directory = "/dbfs/data/"
-fs: FakeFilesystem
-fs.add_real_directory(
-    source_path=pathlib.Path(pathlib.Path.cwd(), "data"), target_path=base_directory
+fs.create_dir(base_directory)
+create_files_in_directory(
+    directory=base_directory,
+    file_name_list=[
+        str(path) for path in data_directory.glob("**/*") if path.is_file()
+    ],
 )
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource">
@@ -35,11 +42,19 @@ dbfs_datasource = context.sources.add_or_update_spark_dbfs(
 )
 # </snippet>
 
+# unable to successfully mock dbfs, so using filesystem for tests
+context.delete_datasource(datasource_name="my_spark_dbfs_datasource")
+base_directory = data_directory
+dbfs_datasource = context.sources.add_or_update_spark_filesystem(
+    name="my_spark_dbfs_datasource",
+    base_directory=base_directory,
+)
+
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose batching regex">
-batching_regex = r"yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv.gz"
+batching_regex = r"yellow_tripdata_(?P<year>\d{4})-(?P<month>\d{2})\.csv\.gz"
 # </snippet>
 
-# For this test script, change batching_regex to location where test runner data is located
+# For this test script, change batching_regex for location where test runner data is located
 batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv"
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add data asset">
@@ -47,6 +62,7 @@ csv_asset = dbfs_datasource.add_csv_asset(
     name="yellow_tripdata",
     batching_regex=batching_regex,
     header=True,
+    infer_schema=True,
 )
 # </snippet>
 
@@ -66,11 +82,7 @@ print(validator.head())
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add expectations">
-validator.expect_column_values_to_not_be_null(column="passenger_count")
-
-validator.expect_column_values_to_be_between(
-    column="congestion_surcharge", min_value=0, max_value=1000
-)
+validator.expect_table_column_count_to_equal(value=18)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py save suite">
@@ -104,5 +116,3 @@ checkpoint_result = context.run_checkpoint(
     ],
 )
 # </snippet>
-
-os.rmdir("/dbfs/data/")
