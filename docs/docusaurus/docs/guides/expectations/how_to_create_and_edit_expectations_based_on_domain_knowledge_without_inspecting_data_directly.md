@@ -7,6 +7,7 @@ keywords: [Expectations, Domain Knowledge]
 
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import PrerequisiteQuickstartGuideComplete from '/docs/components/prerequisites/_quickstart_completed.mdx'
+import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_still_need_to_setup_gx.md'
 import DataContextInitializeQuickOrFilesystem from '/docs/components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
 import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
@@ -92,27 +93,14 @@ If you're using an Ephemeral Data Context, your configurations will not persist 
 
 :::
 
-### 2. Use an existing Data Asset to create a Batch Request
-
-Add the following method to retrieve a previously configured Data Asset from the Data Context you initialized and create a Batch Request to identify the Batch of data that you'll use to validate your Expectations:
-
-```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py get_data_asset_and_build_batch_request"
-```
-
-:::info Limit the Batches returned by a Batch Request
-
-You can provide a dictionary as the `options` parameter of `build_batch_request()` to limit the Batches returned by a Batch Request.  If you leave the `options` parameter empty, your Batch Request will include all the Batches configured in the corresponding Data Asset.  For more information about Batch Requests, see [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset).
-
-:::
-
-### 3. Create an ExpectationSuite 
+### 2. Create an ExpectationSuite 
 
 We will the `add_expectation_suite()` method to create an empty ExpectationSuite.
 
 ```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite"
 ```
 
-### 4. Create Expectation Configurations
+### 3. Create Expectation Configurations
 
 You are adding Expectation configurations to the suite. Since there is no sample Batch of data, no <TechnicalTag tag="validation" text="Validation" /> happens during this process. To illustrate how to do this, consider a hypothetical example. Suppose that you have a table with the columns ``account_id``, ``user_id``, ``transaction_id``, ``transaction_type``, and ``transaction_amt_usd``. Then the following code snipped adds an Expectation that the columns of the actual table will appear in the order specified above:
 
@@ -133,7 +121,7 @@ Here are a few more example expectations for this dataset:
 
 You can see all the available Expectations in the [Expectation Gallery](https://greatexpectations.io/expectations).
 
-### 5. Save your Expectations for future use
+### 4. Save your Expectations for future use
 
 To keep your Expectations for future use, you save them to your Data Context.  A Filesystem or Cloud Data Context persists outside the current Python session, so saving the Expectation Suite in your Data Context's Expectations Store ensures you can access it in the future:
 

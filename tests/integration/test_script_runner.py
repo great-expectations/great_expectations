@@ -308,7 +308,6 @@ fluent_datasources = [
         name="how_to_create_and_edit_an_expectation_with_domain_knowledge",
         user_flow_script="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py",
         data_context_dir=None,
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     ),
 ]
 

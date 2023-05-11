@@ -20,16 +20,6 @@ context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
 # </snippet>
 
 
-context.sources.add_pandas(name="my_datasource",).add_csv_asset(
-    name="my_data_asset", filepath_or_buffer="./data/yellow_tripdata_sample_2019-01.csv"
-)
-
-# <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py get_data_asset_and_build_batch_request">
-data_asset = context.get_datasource("my_datasource").get_asset("my_data_asset")
-batch_request = data_asset.build_batch_request()
-# </snippet>
-
-
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_suite">
 suite = context.add_expectation_suite(expectation_suite_name="my_suite")
 # </snippet>
@@ -38,7 +28,7 @@ suite = context.add_expectation_suite(expectation_suite_name="my_suite")
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 
 # Create an Expectation
-expectation_configuration = ExpectationConfiguration(
+expectation_configuration_1 = ExpectationConfiguration(
     # Name of expectation type being added
     expectation_type="expect_table_columns_to_match_ordered_list",
     # These are the arguments of the expectation
@@ -65,11 +55,11 @@ expectation_configuration = ExpectationConfiguration(
     },
 )
 # Add the Expectation to the suite
-suite.add_expectation(expectation_configuration=expectation_configuration)
+suite.add_expectation(expectation_configuration=expectation_configuration_1)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_2">
-expectation_configuration = ExpectationConfiguration(
+expectation_configuration_2 = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_in_set",
     kwargs={
         "column": "transaction_type",
@@ -77,11 +67,11 @@ expectation_configuration = ExpectationConfiguration(
     },
     # Note optional comments omitted
 )
-suite.add_expectation(expectation_configuration=expectation_configuration)
+suite.add_expectation(expectation_configuration=expectation_configuration_2)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_3">
-expectation_configuration = ExpectationConfiguration(
+expectation_configuration_3 = ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={
         "column": "account_id",
@@ -94,11 +84,11 @@ expectation_configuration = ExpectationConfiguration(
         }
     },
 )
-suite.add_expectation(expectation_configuration=expectation_configuration)
+suite.add_expectation(expectation_configuration=expectation_configuration_3)
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py create_expectation_4">
-expectation_configuration = ExpectationConfiguration(
+expectation_configuration_4 = ExpectationConfiguration(
     expectation_type="expect_column_values_to_not_be_null",
     kwargs={
         "column": "user_id",
@@ -111,8 +101,15 @@ expectation_configuration = ExpectationConfiguration(
         }
     },
 )
-suite.add_expectation(expectation_configuration=expectation_configuration)
+suite.add_expectation(expectation_configuration=expectation_configuration_4)
 # </snippet>
+
+# Does the ExpectationSuite contain what we expect
+assert len(suite.expectations) == 4
+assert suite.expectations[0] == expectation_configuration_1
+assert suite.expectations[1] == expectation_configuration_2
+assert suite.expectations[2] == expectation_configuration_3
+assert suite.expectations[3] == expectation_configuration_4
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py save_expectation_suite">
 context.save_expectation_suite(expectation_suite=suite)
