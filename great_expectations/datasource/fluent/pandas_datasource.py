@@ -586,8 +586,7 @@ class PandasDatasource(_PandasDatasource):
             dataframe=dataframe,
             batch_metadata=batch_metadata or {},
         )
-        self._add_asset(asset=asset)
-        return asset
+        return self._add_asset(asset=asset)
 
     @public_api
     def read_dataframe(
