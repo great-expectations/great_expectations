@@ -341,7 +341,7 @@ def test_add_asset_with_asset_specific_params(
             assert getattr(asset, param) == value
 
 
-assets = [
+_SPARK_ASSET_TYPES = [
     (CSVAsset, {"name": "asset_name"}),
     (DirectoryCSVAsset, {"name": "asset_name", "data_directory": "data_directory"}),
     (ParquetAsset, {"name": "asset_name"}),
@@ -354,7 +354,7 @@ assets = [
 @pytest.mark.unit
 def test_all_spark_file_path_asset_types_tested():
     """Make sure all the available assets are contained in the fixture used for other tests."""
-    asset_types_in_fixture = {a[0] for a in assets}
+    asset_types_in_fixture = {a[0] for a in _SPARK_ASSET_TYPES}
     assert asset_types_in_fixture == set(_SparkFilePathDatasource.asset_types)
 
 
@@ -367,7 +367,7 @@ def test_all_spark_file_path_asset_types_tested():
             required_fields,
             id=asset_type.__name__,
         )
-        for (asset_type, required_fields) in assets
+        for (asset_type, required_fields) in _SPARK_ASSET_TYPES
     ],
 )
 def test__get_reader_options_include(

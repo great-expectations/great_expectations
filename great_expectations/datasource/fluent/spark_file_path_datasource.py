@@ -25,6 +25,7 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
 from great_expectations.datasource.fluent.serializable_types.pyspark import (
     SerializableStructType,  # noqa: TCH001
 )
+from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset
@@ -49,13 +50,13 @@ class _SparkGenericFilePathAssetMixin(_FilePathDataAsset):
 
     def _get_reader_options_include(self) -> set[str]:
         return {
-            "ignoreMissingFiles",
-            "pathGlobFilter",
-            "modifiedBefore",
-            "modifiedAfter",
+            "path_glob_filter",
+            "recursive_file_lookup",
+            "modified_before",
+            "modified_after",
             # vvv Missing from method signatures but appear in documentation:
             # "ignoreCorruptFiles",
-            # "recursiveFileLookup",
+            # "ignore_missing_files",
             # ^^^ Missing from method signatures but appear in documentation:
         }
 
@@ -185,7 +186,7 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
         """
         parent_reader_options = super()._get_reader_options_include()
         reader_options = {
-            "schema",
+            "spark_schema",
             "sep",
             "encoding",
             "quote",
@@ -193,32 +194,32 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
             "comment",
             "header",
             "infer_schema",
-            "ignoreLeadingWhiteSpace",
-            "ignoreTrailingWhiteSpace",
-            "nullValue",
-            "nanValue",
-            "positiveInf",
-            "negativeInf",
-            "dateFormat",
-            "timestampFormat",
-            "maxColumns",
-            "maxCharsPerColumn",
-            "maxMalformedLogPerPartition",
+            "ignore_leading_white_space",
+            "ignore_trailing_white_space",
+            "null_value",
+            "nan_value",
+            "positive_inf",
+            "negative_inf",
+            "date_format",
+            "timestamp_format",
+            "max_columns",
+            "max_chars_per_column",
+            "max_malformed_log_per_partition",
             "mode",
-            "columnNameOfCorruptRecord",
-            "multiLine",
-            "charToEscapeQuoteEscaping",
-            "samplingRatio",
-            "enforceSchema",
-            "emptyValue",
+            "column_name_of_corrupt_record",
+            "multi_line",
+            "char_to_escape_quote_escaping",
+            "sampling_ratio",
+            "enforce_schema",
+            "empty_value",
             "locale",
-            "lineSep",
-            "unescapedQuoteHandling",
+            "line_sep",
+            "unescaped_quote_handling",
             # Inherited vvv
-            # "pathGlobFilter",
-            # "recursiveFileLookup",
-            # "modifiedBefore",
-            # "modifiedAfter",
+            # "ignore_missing_files",
+            # "path_glob_filter",
+            # "modified_before",
+            # "modified_after",
             # Inherited ^^^
             # vvv Docs <> Source Code mismatch
             # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-csv.html
@@ -279,7 +280,13 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
         return (
             super()
             ._get_reader_options_include()
-            .union({"datetimeRebaseMode", "int96RebaseMode", "mergeSchema"})
+            .union(
+                {
+                    "datetime_rebase_mode",
+                    "int_96_rebase_mode",
+                    "merge_schema",
+                }
+            )
         )
 
 
@@ -302,7 +309,7 @@ class ORCAsset(_SparkGenericFilePathAssetMixin):
 
         See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
         """
-        return super()._get_reader_options_include().union({"mergeSchema"})
+        return super()._get_reader_options_include().union({"merge_schema"})
 
 
 class JSONAsset(_SparkGenericFilePathAssetMixin):
@@ -410,25 +417,25 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
             ._get_reader_options_include()
             .union(
                 {
-                    "primitivesAsString",
-                    "prefersDecimal",
-                    "allowComments",
-                    "allowUnquotedFieldNames",
-                    "allowSingleQuotes",
-                    "allowNumericLeadingZero",
-                    "allowBackslashEscapingAnyCharacter",
+                    "primitives_as_string",
+                    "prefers_decimal",
+                    "allow_comments",
+                    "allow_unquoted_field_names",
+                    "allow_single_quotes",
+                    "allow_numeric_leading_zero",
+                    "allow_backslash_escaping_any_character",
                     "mode",
-                    "columnNameOfCorruptRecord",
-                    "dateFormat",
-                    "timestampFormat",
-                    "multiLine",
-                    "allowUnquotedControlChars",
-                    "lineSep",
-                    "samplingRatio",
-                    "dropFieldIfAllNull",
+                    "column_name_of_corrupt_record",
+                    "date_format",
+                    "timestamp_format",
+                    "multi_line",
+                    "allow_unquoted_control_chars",
+                    "line_sep",
+                    "sampling_ratio",
+                    "drop_field_if_all_null",
                     "encoding",
                     "locale",
-                    "allowNonNumericNumbers",
+                    "allow_non_numeric_numbers",
                     # Inherited vvv
                     # "pathGlobFilter",
                     # "recursiveFileLookup",
@@ -445,10 +452,6 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
                 }
             )
         )
-
-
-# Update since schema param is shadowed:
-# JSONAsset.update_forward_refs()
 
 
 class TextAsset(_SparkGenericFilePathAssetMixin):
@@ -471,7 +474,7 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
 
         See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
         """
-        return super()._get_reader_options_include().union({"wholetext", "lineSep"})
+        return super()._get_reader_options_include().union({"wholetext", "line_sep"})
 
 
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
