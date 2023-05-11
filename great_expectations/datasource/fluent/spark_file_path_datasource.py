@@ -25,7 +25,6 @@ from great_expectations.datasource.fluent.file_path_data_asset import (
 from great_expectations.datasource.fluent.serializable_types.pyspark import (
     SerializableStructType,  # noqa: TCH001
 )
-from great_expectations.util import camel_to_snake
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import DataAsset

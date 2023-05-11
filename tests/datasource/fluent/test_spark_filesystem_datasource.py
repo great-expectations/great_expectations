@@ -21,16 +21,15 @@ from great_expectations.datasource.fluent.file_path_data_asset import _FilePathD
 from great_expectations.datasource.fluent.interfaces import (
     SortersDefinition,
     TestConnectionError,
-    DataAsset,
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
     DirectoryCSVAsset,
-    _SparkFilePathDatasource,
-    ParquetAsset,
-    ORCAsset,
     JSONAsset,
+    ORCAsset,
+    ParquetAsset,
     TextAsset,
+    _SparkFilePathDatasource,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
