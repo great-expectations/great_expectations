@@ -2,8 +2,6 @@
 import pathlib
 from pyfakefs.fake_filesystem import FakeFilesystem
 
-from tests.test_utils import create_files_in_directory
-
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py imports">
 import great_expectations as gx
 from great_expectations.checkpoint import SimpleCheckpoint
@@ -20,14 +18,13 @@ base_directory = "/dbfs/example_data/nyctaxi/tripdata/yellow/"
 
 # For this test script, change base_directory to location where test runner data is located
 data_directory = pathlib.Path(pathlib.Path.cwd(), "data")
-base_directory = "/dbfs/data/"
+base_directory = pathlib.Path("/dbfs/data/")
 fs = FakeFilesystem()
-fs.create_dir(base_directory)
-create_files_in_directory(
-    directory=base_directory,
-    file_name_list=[
-        str(path) for path in data_directory.glob("**/*") if path.is_file()
-    ],
+fs.add_real_directory(source_path=data_directory, target_path=base_directory)
+csv_filename = "yellow_tripdata_sample_2019-01.csv"
+fs.add_real_file(
+    source_path=data_directory.joinpath(csv_filename),
+    target_path=base_directory.joinpath(csv_filename),
 )
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py add datasource">
