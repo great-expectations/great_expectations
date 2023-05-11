@@ -7,7 +7,8 @@
         "y": [1, 2],
         "z": [0, 10],
         "n": [0, null],
-        "b": [true, false]
+        "b": [true, false],
+        "a": [2.2345, 1.123]
       },
       "schemas": {
         "spark": {
@@ -15,28 +16,32 @@
           "y": "IntegerType",
           "z": "IntegerType",
           "n": "IntegerType",
-          "b": "BooleanType"
+          "b": "BooleanType",
+          "a": "DecimalType"
         },
         "mssql": {
           "x": "FLOAT",
           "y": "INTEGER",
           "z": "INTEGER",
           "n": "INTEGER",
-          "b": "BIT"
+          "b": "BIT",
+          "a": "FLOAT"
         },
         "postgresql": {
           "x": "DOUBLE_PRECISION",
           "y": "INTEGER",
           "z": "INTEGER",
           "n": "INTEGER",
-          "b": "BOOLEAN"
+          "b": "BOOLEAN",
+          "a": "DOUBLE_PRECISION"
         },
         "snowflake": {
           "x": "DOUBLE",
           "y": "INTEGER",
           "z": "INTEGER",
           "n": "INTEGER",
-          "b": "BOOLEAN"
+          "b": "BOOLEAN",
+          "a": "DOUBLE"
         }
       },
       "tests": [{
@@ -51,6 +56,20 @@
           "out": {
             "success": true,
             "observed_value": 3.5
+          }
+        },
+        {
+          "title": "simple_mean_positive_range__spark_decimaltype",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "a",
+            "min_value": 2,
+            "max_value": 5
+          },
+          "out": {
+            "success": false,
+            "observed_value": 1.67875
           }
         },
         {
