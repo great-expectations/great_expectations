@@ -39,27 +39,29 @@ If you're interested in participating in the Great Expectations Cloud Beta progr
     ```python name="tutorials/quickstart/quickstart.py import_gx"
     ```
 ## Create a DataContext
-3. Run the following command to import the `DataContext` object:
+
+1. Run the following command to import the `DataContext` object:
 
     ```python name="tutorials/quickstart/quickstart.py get_context"
     ```
 ## Connect to Data
-4. Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
 
-    ```python name="tutorials/quickstart/quickstart.py connect_to_data"
-    ```
+Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
 
-    The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
+```python name="tutorials/quickstart/quickstart.py connect_to_data"
+```
+
+The example code uses the default Data Context Datasource for Pandas to access the `.csv` data in the file at the specified `path`.
 
 ## Create Expectations
 
-1. Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column. 
+Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses [`auto=True`](../../guides/expectations/how_to_use_auto_initializing_expectations.md#using-autotrue) to detect a range of values in the `passenger_count` column. 
 
-    ```python name="tutorials/quickstart/quickstart.py create_expectation"
-    ```
-    The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
+```python name="tutorials/quickstart/quickstart.py create_expectation"
+```
+The Expectation assumes the `pickup_datetime` column always contains data.  None of the column's values are null.
 
-    To analyze Validator data, you can create multiple Expectations that call multiple methods with the `validator.expect_*` syntax.
+To analyze Validator data, you can create multiple Expectations that call multiple methods with the `validator.expect_*` syntax.
 
 ## Connect to data
 
