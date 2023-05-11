@@ -36,10 +36,9 @@ dbfs_datasource = context.sources.add_or_update_spark_dbfs(
 
 # unable to successfully mock dbfs, so using filesystem for tests
 context.delete_datasource(datasource_name="my_spark_dbfs_datasource")
-base_directory = data_directory
 dbfs_datasource = context.sources.add_or_update_spark_filesystem(
     name="my_spark_dbfs_datasource",
-    base_directory=base_directory,
+    base_directory=data_directory,
 )
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose batching regex">
