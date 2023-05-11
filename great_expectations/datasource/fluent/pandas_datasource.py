@@ -592,7 +592,7 @@ class PandasDatasource(_PandasDatasource):
         Returns:
             The DataFameAsset that has been added to this datasource.
         """
-        asset = DataFrameAsset(
+        asset: DataFrameAsset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
             batch_metadata=batch_metadata or {},
