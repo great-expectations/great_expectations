@@ -8,6 +8,7 @@ from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     ClassVar,
     Dict,
     List,
@@ -28,6 +29,10 @@ from great_expectations.datasource.fluent.batch_request import (
 from great_expectations.datasource.fluent.constants import MATCH_ALL_PATTERN
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FILE_PATH_BATCH_SPEC_KEY,
+)
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+    file_get_unfiltered_batch_definition_list_fn,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector.regex_parser import (
     RegExParser,
@@ -376,6 +381,12 @@ class _FilePathDataAsset(DataAsset):
                 f"Could not connect to asset using {type(self._data_connector).__name__}: Got {type(e).__name__}"
             ) from e
         raise TestConnectionError(self._test_connection_error_message)
+
+    def get_unfiltered_batch_definition_list_fn(
+        self,
+    ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
+        return file_get_unfiltered_batch_definition_list_fn
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
