@@ -65,17 +65,18 @@ One way to copy Expectations into GCS is by using the ``gsutil cp`` command, whi
 ```
 
 
-### 5. Confirm that the new Expectations store has been added
+### 5. Confirm that the new Expectation Suites have been added
 
-Run the following:
+If you followed the optional step to copy your existing Expectation Suites to GCS, you can confirm that Great Expectations can find them by running the following Python code:
 
-```bash name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_stores_command"
+```python
+import great_expectations as gx
+
+context = gx.get_context()
+context.list_expectation_suite_names()
 ```
 
-Only the active Stores will be listed. Great Expectations will look for Expectations in GCS as long as we set the ``expectations_store_name`` variable to ``expectations_GCS_store``, and the config for ``expectations_store`` can be removed if you would like.
-
-```bash name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_an_expectation_store_in_gcs.py list_expectation_stores_output"
-```
+Your output should include the Expectations you copied to GCS. If you did not copy Expectations to the new Store, they will not be listed.
 
 
 ### 6. Confirm that Expectations can be accessed from GCS
