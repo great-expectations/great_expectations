@@ -66,7 +66,7 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 * [How to connect to a Snowflake database](../guides/connecting_to_your_data/database/snowflake.md)
 * [How to connect to a SQLite database](../guides/connecting_to_your_data/database/sqlite.md)
 * [How to connect to data on a filesystem using Spark](../guides/connecting_to_your_data/filesystem/spark.md)
-* [How to connect to data on S3 using Spark](../guides/connecting_to_your_data/cloud/s3/spark.md)
+* [How to connect to data on S3 using Spark](/docs/0.15.50/guides/connecting_to_your_data/cloud/s3/pandas)
 * [How to connect to data on GCS using Spark](../guides/connecting_to_your_data/cloud/gcs/spark.md)
 
 ## Options for hosting Data Docs
