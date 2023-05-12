@@ -1,5 +1,6 @@
 import copy
 import datetime
+from decimal import Decimal
 import logging
 from typing import Dict, Tuple, Union
 
@@ -76,8 +77,18 @@ def test_basic_metric_pd():
     assert results == {desired_metric.id: 3}
 
 
-def test_mean_metric_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
+@pytest.mark.parametrize(
+    "dataframe,result",
+    [
+        [pd.DataFrame({"a": [1, 2, 3, None]}), 2],
+        [
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            1.093905,
+        ],
+    ],
+)
+def test_mean_metric_pd(dataframe, result):
+    engine = build_pandas_engine(dataframe)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
@@ -99,11 +110,72 @@ def test_mean_metric_pd():
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert results == {desired_metric.id: 2}
+    assert results == {desired_metric.id: result}
 
 
-def test_stdev_metric_pd():
-    engine = build_pandas_engine(pd.DataFrame({"a": [1, 2, 3, None]}))
+@pytest.mark.parametrize(
+    "dataframe,result",
+    [
+        [ pd.DataFrame({"a": [1, 2, 3, None]}), 2],
+        [
+            pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+            1.093905,
+        ],
+    ],
+)
+def test_mean_metric_spark(spark_session, dataframe, result):
+    engine = build_spark_engine(spark=spark_session, df=dataframe, batch_id="my_id")
+
+    metrics: Dict[Tuple[str, str, str], MetricValue] = {}
+
+    table_columns_metric: MetricConfiguration
+    results: Dict[Tuple[str, str, str], MetricValue]
+
+    table_columns_metric, results = get_table_columns_metric(engine=engine)
+    metrics.update(results)
+
+    aggregate_fn_metric = MetricConfiguration(
+        metric_name=f"column.mean.{MetricPartialFunctionTypes.AGGREGATE_FN.metric_suffix}",
+        metric_domain_kwargs={
+            "column": "a",
+        },
+        metric_value_kwargs=None,
+    )
+    aggregate_fn_metric.metric_dependencies = {
+        "table.columns": table_columns_metric,
+    }
+    results = engine.resolve_metrics(metrics_to_resolve=(aggregate_fn_metric,))
+
+    desired_metric = MetricConfiguration(
+        metric_name="column.mean",
+        metric_domain_kwargs={},
+        metric_value_kwargs=None,
+    )
+    desired_metric.metric_dependencies = {
+        "metric_partial_fn": aggregate_fn_metric,
+    }
+    results = engine.resolve_metrics(
+        metrics_to_resolve=(desired_metric,), metrics=results
+    )
+
+    assert results == {desired_metric.id: result}
+
+
+
+@pytest.mark.parametrize(
+    "build_engine,dataframe,result",
+    [
+        [build_pandas_engine, pd.DataFrame({"a": [1, 2, 3, None]}), 1],
+        # Does not work with Decimals now. MetricResolutionError: unsupported operand type(s) for -: 'float' and 'decimal.Decimal'
+        # [
+        #     build_pandas_engine,
+        #     pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
+        #     1.093905,
+        # ],
+    ],
+)
+def test_stdev_metric_pd(build_engine, dataframe, result):
+    engine = build_engine(dataframe)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
 
@@ -125,7 +197,10 @@ def test_stdev_metric_pd():
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert results == {desired_metric.id: 1}
+    assert results == {desired_metric.id: result}
+
+
+# Add tests SQLAlchemy Spark for stdev and mean
 
 
 def test_column_value_lengths_min_metric_pd():
@@ -4102,7 +4177,6 @@ def test_table_metric_spark(spark_session):
     )
 
     assert results == {desired_metric.id: 3}
-
 
 def test_column_median_metric_pd():
     engine = build_pandas_engine(
