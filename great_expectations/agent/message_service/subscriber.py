@@ -61,26 +61,26 @@ class Subscriber:
         and pass results into on_message callback.
 
         Args:
-            on_message: the caller-provided callback
             channel: the instance of pika.channel.Channel that delivered the message.
             method_frame: pika object containing context on the delivered message like delivery_tag,
                 consumer_tag, redelivered, exchange, and routing_key.
             header_frame: pika object containing any header fields, such as correlation_id
             body: the message body in bytes
+            on_message: the caller-provided callback
         """
         try:
             event = parse_raw_as(Event, body)
             correlation_id = header_frame.correlation_id
-            # we've successfully parsed the message, so ack to remove it from the queue
-            # since we've acked, if our processing fails this message will be lost.
-            channel.basic_ack(delivery_tag=method_frame.delivery_tag)
             on_message(event, correlation_id)
+            channel.basic_ack(delivery_tag=method_frame.delivery_tag)
         except pydantic.ValidationError:
             print("Received unknown message - doing nothing.")
             # we don't understand the message, so assume no one does.
             # in the future, this should nack unknown messages and
             # return them to the queue.
             channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+        except RequeueMessageError:
+            channel.basic_nack(delivery_tag=method_frame.delivery_tag)
 
     def close(self):
         """Gracefully closes the Subscriber's connection.
@@ -96,4 +96,10 @@ class Subscriber:
 
 
 class SubscriberError(Exception):
+    ...
+
+
+class RequeueMessageError(Exception):
+    """Message can't be processed and should be requeued"""
+
     ...

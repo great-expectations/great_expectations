@@ -1,10 +1,11 @@
 import os
-from typing import Dict, Optional, TypeAlias
+from concurrent.futures.thread import ThreadPoolExecutor
+from typing import Dict, Optional
 
 from pydantic.dataclasses import dataclass
 from pydantic import AmqpDsn
 from great_expectations import get_context
-from great_expectations.agent.event_handler import ShutdownRequest, EventHandler
+from great_expectations.agent.event_handler import EventHandler
 from great_expectations.agent.message_service.rabbit_mq_client import (
     RabbitMQClient,
     ClientError,
@@ -13,12 +14,13 @@ from great_expectations.agent.message_service.subscriber import (
     Subscriber,
     OnMessageCallback,
     SubscriberError,
+    RequeueMessageError,
 )
 from great_expectations.agent.models import Event
 from great_expectations.data_context import CloudDataContext
 
 
-HandlerMap: TypeAlias = Dict[str, OnMessageCallback]
+HandlerMap = Dict[str, OnMessageCallback]
 
 
 @dataclass(frozen=True)
@@ -49,6 +51,13 @@ class GXAgent:
         self._context: CloudDataContext = get_context(cloud_mode=True)
         print("DataContext is ready.")
 
+        # Create a thread pool with a single worker, so we can run long-lived
+        # GX processes and maintain our connection to the broker. Note that
+        # the CloudDataContext cached here is used by the worker, therefore
+        # it isn't safe to increase the number of workers.
+        self._executor = ThreadPoolExecutor(max_workers=1)
+        self._current_task = None
+
     def run(self) -> None:
         """Open a connection to GX Cloud."""
 
@@ -65,9 +74,10 @@ class GXAgent:
             print("GX-Agent is ready.")
             # Open a blocking connection until encountering a shutdown event
             subscriber.consume(
-                queue=self._config.organization_id, on_message=self._handle_event
+                queue=self._config.organization_id,
+                on_message=self._handle_event_as_thread,
             )
-        except (KeyboardInterrupt, ShutdownRequest):
+        except KeyboardInterrupt:
             print("Received request to shutdown.")
         except (SubscriberError, ClientError) as e:
             print("Connection to GX Cloud has encountered an error.")
@@ -75,6 +85,26 @@ class GXAgent:
             print(e)
         finally:
             self._close_subscriber(subscriber)
+
+    def _handle_event_as_thread(self, event: Event, correlation_id: str) -> None:
+        """Schedule _handle_event to run in a thread.
+
+        Callback passed to Subscriber.consume which forwards events to
+        the EventHandler for processing.
+
+        Args:
+            event: pydantic model representing an event
+            correlation_id: stable identifier for an event across its lifecycle
+        Raises:
+            RequeueMessageError when the worker is busy
+        """
+
+        if self._can_accept_new_task() is not True:
+            # signal to Subscriber that we can't process this message right now
+            raise RequeueMessageError
+        self._current_task = self._executor.submit(
+            self._handle_event, event=event, correlation_id=correlation_id
+        )
 
     def _handle_event(self, event: Event, correlation_id: str) -> None:
         """Pass events to EventHandler.
@@ -93,6 +123,9 @@ class GXAgent:
 
         # TODO lakitu-139: record job as complete
         return
+
+    def _can_accept_new_task(self) -> bool:
+        return self._current_task is None or self._current_task.done()
 
     def _close_subscriber(self, subscriber: Optional[Subscriber]) -> None:
         """Ensure the subscriber has been closed."""
