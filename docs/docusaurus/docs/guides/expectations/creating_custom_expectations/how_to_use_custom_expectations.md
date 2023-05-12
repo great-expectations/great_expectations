@@ -21,7 +21,7 @@ This guide will walk you through the process of utilizing Custom Expectations, w
 
 </Prerequisites>
 
-There are slight differences when working with custom expectations or those contributed to GX.
+There are slight differences between working with custom Expectations and those contributed to GX.
 
 ## Installation
 
