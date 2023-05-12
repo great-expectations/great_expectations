@@ -81,12 +81,18 @@ Run the following code to set up a <TechnicalTag tag="data_context" text="Data C
   ]}>
   <TabItem value="file">
 
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py choose context_root_dir"
+```
+
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py set up context"
 ```
 
   </TabItem>
 
   <TabItem value="dataframe">
+
+```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py choose context_root_dir"
+```
 
 ```python name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py set up context"
 ```
