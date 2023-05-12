@@ -117,7 +117,7 @@ fluent_datasources:
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
-        InferSchema: True
+        inferSchema: True
         connect_options:
           glob_directive: "**/*.csv"
       my_csv_asset_with_default_connect_options:

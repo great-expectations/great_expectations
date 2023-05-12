@@ -1,5 +1,5 @@
 {
-    "title": "CSVAsset",
+    "title": "ORCAsset",
     "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
     "type": "object",
     "properties": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "csv",
+            "default": "orc",
             "enum": [
-                "csv"
+                "orc"
             ],
             "type": "string"
         },
@@ -116,39 +116,9 @@
                 }
             ]
         },
-        "schema": {
-            "title": "Schema",
-            "anyOf": [
-                {
-                    "type": "object"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "sep": {
-            "title": "Sep",
-            "type": "string"
-        },
-        "encoding": {
-            "title": "Encoding",
-            "type": "string"
-        },
-        "quote": {
-            "title": "Quote",
-            "type": "string"
-        },
-        "escape": {
-            "title": "Escape",
-            "type": "string"
-        },
-        "comment": {
-            "title": "Comment",
-            "type": "string"
-        },
-        "header": {
-            "title": "Header",
+        "mergeSchema": {
+            "title": "Mergeschema",
+            "default": false,
             "anyOf": [
                 {
                     "type": "boolean"
@@ -157,169 +127,6 @@
                     "type": "string"
                 }
             ]
-        },
-        "inferSchema": {
-            "title": "Inferschema",
-            "anyOf": [
-                {
-                    "type": "boolean"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "ignoreLeadingWhiteSpace": {
-            "title": "Ignoreleadingwhitespace",
-            "anyOf": [
-                {
-                    "type": "boolean"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "ignoreTrailingWhiteSpace": {
-            "title": "Ignoretrailingwhitespace",
-            "anyOf": [
-                {
-                    "type": "boolean"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "nullValue": {
-            "title": "Nullvalue",
-            "type": "string"
-        },
-        "nanValue": {
-            "title": "Nanvalue",
-            "type": "string"
-        },
-        "positiveInf": {
-            "title": "Positiveinf",
-            "type": "string"
-        },
-        "negativeInf": {
-            "title": "Negativeinf",
-            "type": "string"
-        },
-        "dateFormat": {
-            "title": "Dateformat",
-            "type": "string"
-        },
-        "timestampFormat": {
-            "title": "Timestampformat",
-            "type": "string"
-        },
-        "maxColumns": {
-            "title": "Maxcolumns",
-            "anyOf": [
-                {
-                    "type": "integer"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "maxCharsPerColumn": {
-            "title": "Maxcharspercolumn",
-            "anyOf": [
-                {
-                    "type": "integer"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "maxMalformedLogPerPartition": {
-            "title": "Maxmalformedlogperpartition",
-            "anyOf": [
-                {
-                    "type": "integer"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "mode": {
-            "title": "Mode",
-            "enum": [
-                "PERMISSIVE",
-                "DROPMALFORMED",
-                "FAILFAST"
-            ],
-            "type": "string"
-        },
-        "columnNameOfCorruptRecord": {
-            "title": "Columnnameofcorruptrecord",
-            "type": "string"
-        },
-        "multiLine": {
-            "title": "Multiline",
-            "anyOf": [
-                {
-                    "type": "boolean"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "charToEscapeQuoteEscaping": {
-            "title": "Chartoescapequoteescaping",
-            "type": "string"
-        },
-        "samplingRatio": {
-            "title": "Samplingratio",
-            "anyOf": [
-                {
-                    "type": "number"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "enforceSchema": {
-            "title": "Enforceschema",
-            "anyOf": [
-                {
-                    "type": "boolean"
-                },
-                {
-                    "type": "string"
-                }
-            ]
-        },
-        "emptyValue": {
-            "title": "Emptyvalue",
-            "type": "string"
-        },
-        "locale": {
-            "title": "Locale",
-            "type": "string"
-        },
-        "lineSep": {
-            "title": "Linesep",
-            "type": "string"
-        },
-        "unescapedQuoteHandling": {
-            "title": "Unescapedquotehandling",
-            "enum": [
-                "STOP_AT_CLOSING_QUOTE",
-                "BACK_TO_DELIMITER",
-                "STOP_AT_DELIMITER",
-                "SKIP_VALUE",
-                "RAISE_ERROR"
-            ],
-            "type": "string"
         }
     },
     "required": [
