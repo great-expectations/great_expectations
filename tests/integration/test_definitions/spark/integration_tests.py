@@ -58,12 +58,13 @@ databricks_deployment_patterns = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.SPARK],
     ),
-    IntegrationTestFixture(
-        name="databricks_deployment_patterns_file_python_configs",
-        user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        backend_dependencies=[BackendDependencies.SPARK],
-    ),
+    # unable to mock dbfs in CI
+    # IntegrationTestFixture(
+    #     name="databricks_deployment_patterns_file_python_configs",
+    #     user_flow_script="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_file_python_configs.py",
+    #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    #     backend_dependencies=[BackendDependencies.SPARK],
+    # ),
 ]
 
 emr_deployment_patterns = [
