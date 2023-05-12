@@ -63,7 +63,7 @@ stores:
 
 ### 4. Confirm that the location has been updated by running ``great_expectations store list``
 
-To make Great Expectations look for Validation Results on the new store, you must set the ``validations_store_name`` variable to the name of your Filesystem Validations Store, which in our example is `shared_validations_filesystem_store`.
+To make Great Expectations look for Validation Results in the new Store, you must set the ``validations_store_name`` variable to the name of your Filesystem Validations Store. In this example, it is `shared_validations_filesystem_store`.
 
 ### 5. Confirm that the Validation Results Store has been correctly configured
 
