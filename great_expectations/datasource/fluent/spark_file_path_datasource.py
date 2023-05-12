@@ -234,6 +234,10 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
 class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
     type: Literal["directory_csv"] = "directory_csv"  # type: ignore[assignment]
 
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "csv"
+
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -286,6 +290,10 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
 class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
     type: Literal["directory_parquet"] = "directory_parquet"  # type: ignore[assignment]
 
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "parquet"
+
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -321,6 +329,10 @@ class ORCAsset(_SparkGenericFilePathAssetMixin):
 
 class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
     type: Literal["directory_orc"] = "directory_orc"  # type: ignore[assignment]
+
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "orc"
 
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
@@ -477,6 +489,10 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
 class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
     type: Literal["directory_json"] = "directory_json"  # type: ignore[assignment]
 
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "json"
+
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -513,6 +529,10 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
 
 class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
     type: Literal["directory_text"] = "directory_text"  # type: ignore[assignment]
+
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "text"
 
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
