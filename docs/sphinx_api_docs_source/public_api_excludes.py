@@ -680,4 +680,11 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         reason="Deprecated v2 api Dataset is not included in the public API",
         filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
     ),
+    IncludeExcludeDefinition(
+        reason="Validate method on custom type not included in the public API",
+        name="validate",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/fluent/serializable_types/pyspark.py"
+        ),
+    ),
 ]
