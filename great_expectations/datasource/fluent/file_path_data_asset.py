@@ -385,6 +385,7 @@ class _FilePathDataAsset(DataAsset):
     def get_unfiltered_batch_definition_list_fn(
         self,
     ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
         return file_get_unfiltered_batch_definition_list_fn
 
     def _get_reader_method(self) -> str:
