@@ -14,7 +14,7 @@ import pytest
 
 import great_expectations as gx
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint
+from great_expectations.checkpoint import Checkpoint, LegacyCheckpoint, SimpleCheckpoint
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
 from great_expectations.core import ExpectationSuiteValidationResult
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
@@ -96,6 +96,66 @@ def test_checkpoint_with_config_version_has_action_list(empty_data_context):
     obs = checkpoint.action_list
     assert isinstance(obs, list)
     assert obs == [{"foo": "bar"}]
+
+
+def test_add_custom_checkpoint_extensions(
+    titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled,
+    common_action_list,
+):
+    context: FileDataContext = titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_empty_store_stats_enabled
+    context.add_expectation_suite(expectation_suite_name="my_expectation_suite")
+
+    checkpoint_config: dict = {
+        "class_name": "ExtendedCheckpoint",
+        "module_name": "extended_checkpoint",
+        "name": "my_checkpoint",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+    checkpoint = context.add_checkpoint(**checkpoint_config)
+    assert issubclass(checkpoint.__class__, Checkpoint)
+    assert checkpoint.__class__.__name__ == "ExtendedCheckpoint"
+
+    checkpoint_config: dict = {
+        "class_name": "ExtendedSimpleCheckpoint",
+        "module_name": "extended_checkpoint",
+        "name": "my_checkpoint",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+    checkpoint = context.add_checkpoint(**checkpoint_config)
+    assert issubclass(checkpoint.__class__, SimpleCheckpoint)
+    assert checkpoint.__class__.__name__ == "ExtendedSimpleCheckpoint"
+
+    checkpoint_config: dict = {
+        "class_name": "ExtendedLegacyCheckpoint",
+        "module_name": "extended_checkpoint",
+        "name": "my_checkpoint",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as icpce:
+        context.add_checkpoint(**checkpoint_config)
+
+    assert (
+        str(icpce.value)
+        == 'Extending "LegacyCheckpoint" is not allowed, because "LegacyCheckpoint" is deprecated.'
+    )
+
+    checkpoint_config: dict = {
+        "class_name": "ExtendedCheckpointIllegalBaseClass",
+        "module_name": "extended_checkpoint",
+        "name": "my_checkpoint",
+        "expectation_suite_name": "my_expectation_suite",
+        "action_list": common_action_list,
+    }
+    with pytest.raises(gx_exceptions.InvalidCheckpointConfigError) as icpce:
+        context.add_checkpoint(**checkpoint_config)
+
+    assert (
+        str(icpce.value)
+        == 'Custom class "ExtendedCheckpointIllegalBaseClass" must extend either "Checkpoint" or "SimpleCheckpoint" (exclusively).'
+    )
 
 
 @mock.patch(
@@ -431,7 +491,6 @@ def test_basic_checkpoint_config_validation(
         gx_exceptions.DataContextError,
         match=r'Checkpoint "my_checkpoint" must be called with a validator or contain either a batch_request or validations.',
     ):
-        # noinspection PyUnusedLocal
         context.run_checkpoint(
             checkpoint_name=checkpoint.name,
         )
@@ -1300,7 +1359,6 @@ def test_legacy_checkpoint_instantiates_and_produces_a_validation_result_when_ru
     filesystem_csv_data_context_with_validation_operators.add_expectation_suite(
         "my_suite"
     )
-    # noinspection PyUnusedLocal
     checkpoint.run()
 
     assert (
