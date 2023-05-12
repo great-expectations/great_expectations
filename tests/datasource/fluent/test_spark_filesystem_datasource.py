@@ -24,12 +24,13 @@ from great_expectations.datasource.fluent.interfaces import (
 )
 from great_expectations.datasource.fluent.spark_file_path_datasource import (
     CSVAsset,
+    DeltaAsset,
     DirectoryCSVAsset,
     JSONAsset,
     ORCAsset,
     ParquetAsset,
     TextAsset,
-    _SparkFilePathDatasource, DeltaAsset,
+    _SparkFilePathDatasource,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,

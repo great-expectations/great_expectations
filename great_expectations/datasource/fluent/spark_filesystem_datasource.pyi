@@ -22,12 +22,12 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
+        DeltaAsset,
         DirectoryCSVAsset,
         JSONAsset,
         ORCAsset,
         ParquetAsset,
         TextAsset,
-        DeltaAsset,
     )
 
 logger: Logger
