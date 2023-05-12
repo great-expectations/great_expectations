@@ -72,20 +72,259 @@
                 }
             ]
         },
+        "pathGlobFilter": {
+            "title": "Pathglobfilter",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "recursiveFileLookup": {
+            "title": "Recursivefilelookup",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "modifiedBefore": {
+            "title": "Modifiedbefore",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "modifiedAfter": {
+            "title": "Modifiedafter",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "schema": {
+            "title": "Schema",
+            "anyOf": [
+                {
+                    "type": "object"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "sep": {
+            "title": "Sep",
+            "type": "string"
+        },
+        "encoding": {
+            "title": "Encoding",
+            "type": "string"
+        },
+        "quote": {
+            "title": "Quote",
+            "type": "string"
+        },
+        "escape": {
+            "title": "Escape",
+            "type": "string"
+        },
+        "comment": {
+            "title": "Comment",
+            "type": "string"
+        },
+        "header": {
+            "title": "Header",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "inferSchema": {
+            "title": "Inferschema",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "ignoreLeadingWhiteSpace": {
+            "title": "Ignoreleadingwhitespace",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "ignoreTrailingWhiteSpace": {
+            "title": "Ignoretrailingwhitespace",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "nullValue": {
+            "title": "Nullvalue",
+            "type": "string"
+        },
+        "nanValue": {
+            "title": "Nanvalue",
+            "type": "string"
+        },
+        "positiveInf": {
+            "title": "Positiveinf",
+            "type": "string"
+        },
+        "negativeInf": {
+            "title": "Negativeinf",
+            "type": "string"
+        },
+        "dateFormat": {
+            "title": "Dateformat",
+            "type": "string"
+        },
+        "timestampFormat": {
+            "title": "Timestampformat",
+            "type": "string"
+        },
+        "maxColumns": {
+            "title": "Maxcolumns",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "maxCharsPerColumn": {
+            "title": "Maxcharspercolumn",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "maxMalformedLogPerPartition": {
+            "title": "Maxmalformedlogperpartition",
+            "anyOf": [
+                {
+                    "type": "integer"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "mode": {
+            "title": "Mode",
+            "enum": [
+                "PERMISSIVE",
+                "DROPMALFORMED",
+                "FAILFAST"
+            ],
+            "type": "string"
+        },
+        "columnNameOfCorruptRecord": {
+            "title": "Columnnameofcorruptrecord",
+            "type": "string"
+        },
+        "multiLine": {
+            "title": "Multiline",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "charToEscapeQuoteEscaping": {
+            "title": "Chartoescapequoteescaping",
+            "type": "string"
+        },
+        "samplingRatio": {
+            "title": "Samplingratio",
+            "anyOf": [
+                {
+                    "type": "number"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "enforceSchema": {
+            "title": "Enforceschema",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "emptyValue": {
+            "title": "Emptyvalue",
+            "type": "string"
+        },
+        "locale": {
+            "title": "Locale",
+            "type": "string"
+        },
+        "lineSep": {
+            "title": "Linesep",
+            "type": "string"
+        },
+        "unescapedQuoteHandling": {
+            "title": "Unescapedquotehandling",
+            "enum": [
+                "STOP_AT_CLOSING_QUOTE",
+                "BACK_TO_DELIMITER",
+                "STOP_AT_DELIMITER",
+                "SKIP_VALUE",
+                "RAISE_ERROR"
+            ],
+            "type": "string"
+        },
         "data_directory": {
             "title": "Data Directory",
             "type": "string",
             "format": "path"
-        },
-        "header": {
-            "title": "Header",
-            "default": false,
-            "type": "boolean"
-        },
-        "InferSchema": {
-            "title": "Inferschema",
-            "default": false,
-            "type": "boolean"
         }
     },
     "required": [
