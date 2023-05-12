@@ -26,8 +26,8 @@ if TYPE_CHECKING:
         JSONAsset,
         ORCAsset,
         ParquetAsset,
-        TextAsset,
-    )
+        TextAsset, DirectoryParquetAsset,
+)
 
 logger: Logger
 
@@ -282,6 +282,43 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> ParquetAsset: ...
+    def add_directory_parquet_asset(
+        self,
+        name: str,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: re.Pattern | str = r".*",
+        glob_directive: str = "**/*",
+        order_by: Optional[SortersDefinition] = ...,
+        # Spark Directory Reader Options vvv
+        data_directory: str | pathlib.Path = ...,
+        # Spark Directory Reader Options ^^^
+        # Spark Generic File Reader Options vvv
+        path_glob_filter: Optional[Union[bool, str]] = None,
+        modified_before: Optional[Union[bool, str]] = None,
+        modified_after: Optional[Union[bool, str]] = None,
+        recursive_file_lookup: Optional[Union[bool, str]] = None,
+        # Spark Generic File Reader Options ^^^
+        # vvv spark parameters for pyspark.sql.DataFrameReader.parquet() (ordered as in pyspark v3.4.0)
+        # See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
+        # Parquet Specific Options vvv
+        merge_schema: Optional[Union[bool, str]] = None,
+        datetime_rebase_mode: Optional[
+            Literal["EXCEPTION", "CORRECTED", "LEGACY"]
+        ] = None,
+        int_96_rebase_mode: Optional[
+            Literal["EXCEPTION", "CORRECTED", "LEGACY"]
+        ] = None,
+        # Parquet Specific Options ^^^
+        # vvv pyspark Docs <> Source Code mismatch
+        # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
+        # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L473
+        # Spark Generic File Reader Options vvv
+        # ignore_corrupt_files: bool = ...,
+        # ignore_missing_files: bool = ...,
+        # Spark Generic File Reader Options ^^^
+        # ^^^ pyspark Docs <> Source Code mismatch
+    ) -> DirectoryParquetAsset: ...
     def add_orc_asset(
         self,
         name: str,

@@ -235,11 +235,6 @@ class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
     # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"  # type: ignore[assignment]
 
-    @classmethod
-    def _get_reader_method(cls) -> str:
-        # Reader method is still "csv"
-        return "csv"
-
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
@@ -288,6 +283,19 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
             )
         )
 
+class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
+    # Overridden inherited instance fields
+    type: Literal["directory_parquet"] = "directory_parquet"  # type: ignore[assignment]
+
+    def _get_reader_options_include(self) -> set[str]:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
+        """
+        return (
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(ParquetAsset, self)._get_reader_options_include()
+        )
 
 class ORCAsset(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
@@ -483,6 +491,7 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     CSVAsset,
     DirectoryCSVAsset,
     ParquetAsset,
+    DirectoryParquetAsset,
     ORCAsset,
     JSONAsset,
     TextAsset,
@@ -491,13 +500,14 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     CSVAsset,
     DirectoryCSVAsset,
     ParquetAsset,
+    DirectoryParquetAsset,
     ORCAsset,
     JSONAsset,
     TextAsset,
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
-_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
+_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset, DirectoryParquetAsset,)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
