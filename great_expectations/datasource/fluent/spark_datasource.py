@@ -19,7 +19,7 @@ from pydantic import StrictBool, StrictFloat, StrictInt, StrictStr
 from typing_extensions import Literal, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
-from great_expectations.compatibility import pyspark
+from great_expectations.compatibility.pyspark import DataFrame, pyspark
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import RuntimeDataBatchSpec
 from great_expectations.datasource.fluent import BatchRequest
@@ -30,6 +30,7 @@ from great_expectations.datasource.fluent.interfaces import (
     Batch,
     DataAsset,
     Datasource,
+    _DataAssetT,
 )
 
 if TYPE_CHECKING:
@@ -56,6 +57,12 @@ class _SparkDatasource(Datasource):
     # instance attributes
     spark_config: Union[SparkConfig, None] = None
     force_reuse_spark_context: bool = True
+
+    @staticmethod
+    def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
+        # Only update forward refs if pyspark types are available.
+        if pyspark:
+            asset_type.update_forward_refs()
 
     # Abstract Methods
     @property
@@ -93,8 +100,8 @@ class DataFrameAsset(DataAsset, Generic[_SparkDataFrameT]):
         extra = pydantic.Extra.forbid
 
     @pydantic.validator("dataframe")
-    def _validate_dataframe(cls, dataframe: pyspark.DataFrame) -> pyspark.DataFrame:
-        if not (pyspark.DataFrame and isinstance(dataframe, pyspark.DataFrame)):  # type: ignore[truthy-function]
+    def _validate_dataframe(cls, dataframe: DataFrame) -> DataFrame:
+        if not (DataFrame and isinstance(dataframe, DataFrame)):  # type: ignore[truthy-function]
             raise ValueError("dataframe must be of type pyspark.sql.DataFrame")
 
         return dataframe
@@ -221,7 +228,7 @@ class SparkDatasource(_SparkDatasource):
     def add_dataframe_asset(
         self,
         name: str,
-        dataframe: pyspark.DataFrame,
+        dataframe: DataFrame,
         batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
         """Adds a Dataframe DataAsset to this SparkDatasource object.

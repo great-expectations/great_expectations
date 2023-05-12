@@ -72,6 +72,61 @@
                 }
             ]
         },
+        "pathGlobFilter": {
+            "title": "Pathglobfilter",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "recursiveFileLookup": {
+            "title": "Recursivefilelookup",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "modifiedBefore": {
+            "title": "Modifiedbefore",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "modifiedAfter": {
+            "title": "Modifiedafter",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "mergeSchema": {
+            "title": "Mergeschema",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
         "datetimeRebaseMode": {
             "title": "Datetimerebasemode",
             "enum": [
@@ -89,17 +144,10 @@
                 "LEGACY"
             ],
             "type": "string"
-        },
-        "mergeSchema": {
-            "title": "Mergeschema",
-            "default": false,
-            "type": "boolean"
         }
     },
     "required": [
-        "name",
-        "datetimeRebaseMode",
-        "int96RebaseMode"
+        "name"
     ],
     "additionalProperties": false,
     "definitions": {
