@@ -64,7 +64,7 @@ One way to copy Validation Results into GCS is by using the ``gsutil cp`` comman
 
 ### 5. Reference the new configuration
 
-To make Great Expectations look for Validation Results on the Azure store, you must set the ``validations_store_name`` variable to the name of your Azure Validations Store, which in our example is `validations_GCS_store`.
+To make Great Expectations look for Validation Results on the GCS store, you must set the ``validations_store_name`` variable to the name of your GCS Validations Store, which in our example is `validations_GCS_store`.
 
 ### 6. Confirm that the Validation Results Store has been correctly configured
 
