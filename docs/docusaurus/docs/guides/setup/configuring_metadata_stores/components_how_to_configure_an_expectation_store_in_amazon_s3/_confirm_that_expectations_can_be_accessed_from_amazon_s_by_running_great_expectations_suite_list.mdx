@@ -1,0 +1,16 @@
+If you followed the optional step to copy your existing Expectations to the S3 bucket, you can confirm that Great Expectations can find them by running the command:
+```bash title="Terminal input"
+great_expectations suite list
+```
+
+Your output should include the Expectations you copied to Amazon S3.  In the example, these Expectations were stored in Expectation Suites named ``exp1`` and ``exp2``.  This would result in the following output from the above command:
+
+```bash title="Terminal output"
+2 Expectation Suites found:
+- exp1
+- exp2
+```
+
+Your output should look similar, with the names of your Expectation Suites replacing the names from the example.
+
+If you did not copy Expectations to the new Store, you will see a message saying no Expectations were found.
