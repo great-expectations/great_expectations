@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _DirectoryDataAsset(_FilePathDataAsset):
+class _DirectoryDataAssetMixin(_FilePathDataAsset):
     """Used for accessing all the files in a directory as a single batch."""
 
     data_directory: pathlib.Path
@@ -33,7 +33,7 @@ class _DirectoryDataAsset(_FilePathDataAsset):
             batch_request: Batch request used to generate batch definitions.
 
         Returns:
-            List of batch definitions, in the case of a _DirectoryDataAsset the list contains a single item.
+            List of batch definitions, in the case of a _DirectoryDataAssetMixin the list contains a single item.
         """
         if self.splitter:
             # Currently non-sql asset splitters do not introspect the datasource for available
@@ -62,7 +62,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
     def _get_reader_options_include(self) -> set[str]:
-        raise NotImplementedError(
-            """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
-to use as its "include" directive for File-Path style DataAsset processing."""
-        )
+        return {
+            "data_directory",
+        }
