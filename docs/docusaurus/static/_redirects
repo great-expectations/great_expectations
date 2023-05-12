@@ -277,14 +277,19 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 
 /docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource /docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource
 /docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource /docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource
+
 /docs/guides/connecting_to_your_data/in_memory/pandas /docs/0.15.50/guides/connecting_to_your_data/in_memory/pandas
 /docs/guides/connecting_to_your_data/in_memory/spark /docs/0.15.50/guides/connecting_to_your_data/in_memory/spark
+
 /docs/guides/connecting_to_your_data/cloud/s3/pandas /docs/0.15.50/guides/connecting_to_your_data/cloud/s3/pandas
 /docs/guides/connecting_to_your_data/cloud/s3/spark /docs/0.15.50/guides/connecting_to_your_data/cloud/s3/spark
+
 /docs/guides/connecting_to_your_data/cloud/gcs/pandas /docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas
 /docs/guides/connecting_to_your_data/cloud/gcs/spark /docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/spark
+
 /docs/guides/connecting_to_your_data/cloud/azure/pandas /docs/0.15.50/guides/connecting_to_your_data/cloud/azure/pandas
 /docs/guides/connecting_to_your_data/cloud/azure/spark /docs/0.15.50/guides/connecting_to_your_data/cloud/azure/spark
+
 /docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource /docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource
 /docs/guides/connecting_to_your_data/database/athena /docs/0.15.50/guides/connecting_to_your_data/database/athena
 /docs/guides/connecting_to_your_data/database/bigquery /docs/0.15.50/guides/connecting_to_your_data/database/bigquery
@@ -295,5 +300,6 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 /docs/guides/connecting_to_your_data/database/snowflake /docs/0.15.50/guides/connecting_to_your_data/database/snowflake
 /docs/guides/connecting_to_your_data/database/sqlite /docs/0.15.50/guides/connecting_to_your_data/database/sqlite
 /docs/guides/connecting_to_your_data/database/trino /docs/0.15.50/guides/connecting_to_your_data/database/trino
+
 /docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource /docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource
 /docs/guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe /docs/0.15.50/guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe
