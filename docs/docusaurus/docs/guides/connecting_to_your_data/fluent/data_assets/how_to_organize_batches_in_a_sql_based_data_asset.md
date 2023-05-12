@@ -15,7 +15,6 @@ import AfterRequestDataFromADataAsset from '/docs/components/connect_to_data/nex
 import Prerequisites from '/docs/components/_prerequisites.jsx'
 import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
 import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
-import ConnectingToSqlDatasourcesBlockConfig from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_block_config.md'
 
 <!-- ### Import GX and instantiate a Data Context -->
 import ImportGxAndInstantiateADataContext from '/docs/components/setup/data_context/_import_gx_and_instantiate_a_data_context.md'
@@ -61,11 +60,6 @@ Please reference the appropriate one of these guides:
 Please reference the appropriate one of these guides:
 
 <ConnectingToSqlDatasourcesFluently />
-
-Or, for guides on using the block-config method for advanced SQL Datasource configurations, please see:
-
-<ConnectingToSqlDatasourcesBlockConfig />
-
 
 </details>
 -->
