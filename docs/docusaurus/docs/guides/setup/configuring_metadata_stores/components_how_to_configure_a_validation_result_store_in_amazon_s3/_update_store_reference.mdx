@@ -1,6 +1,6 @@
-To make Great Expectations look for Validation Results on the S3 bucket, you must set the ``validations_store_name`` variable to the name of your S3 Validations Store, which in our example is `validations_s3_store`.
+To make Great Expectations look for Validation Results in the S3 bucket, you must set the ``validations_store_name`` variable to the name of your S3 Validations Store. In this example, it is `validations_s3_store`.
 
-Additional options are available for a more fine-grained customization of the TupleS3StoreBackend.
+Additional options are available to customize the TupleS3StoreBackend further.
 
 ```yaml title="File contents: great_expectations.yml"
 class_name: ValidationsStore
@@ -13,7 +13,7 @@ store_backend:
     region_name: '<your_aws_region_name>'
 ```
 
-To configure IAM user, follow this configuration.
+The following code configures the IAM user.
 
 ```yaml title="File contents: great_expectations.yml"
 class_name: ExpectationsStore
@@ -27,7 +27,7 @@ store_backend:
     aws_session_token: ${AWS_ACCESS_KEY_ID}
 ```
 
-To configure IAM Assume Role, follow this configuration.
+The following code configures the IAM Assume Role.
 
 ```yaml title="File contents: great_expectations.yml"
 class_name: ExpectationsStore
