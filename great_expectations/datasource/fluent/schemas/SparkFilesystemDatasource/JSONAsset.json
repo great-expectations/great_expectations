@@ -1,5 +1,5 @@
 {
-    "title": "CSVAsset",
+    "title": "JSONAsset",
     "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
     "type": "object",
     "properties": {
@@ -9,9 +9,9 @@
         },
         "type": {
             "title": "Type",
-            "default": "csv",
+            "default": "json",
             "enum": [
-                "csv"
+                "json"
             ],
             "type": "string"
         },
@@ -127,28 +127,8 @@
                 }
             ]
         },
-        "sep": {
-            "title": "Sep",
-            "type": "string"
-        },
-        "encoding": {
-            "title": "Encoding",
-            "type": "string"
-        },
-        "quote": {
-            "title": "Quote",
-            "type": "string"
-        },
-        "escape": {
-            "title": "Escape",
-            "type": "string"
-        },
-        "comment": {
-            "title": "Comment",
-            "type": "string"
-        },
-        "header": {
-            "title": "Header",
+        "primitivesAsString": {
+            "title": "Primitivesasstring",
             "anyOf": [
                 {
                     "type": "boolean"
@@ -158,8 +138,8 @@
                 }
             ]
         },
-        "inferSchema": {
-            "title": "Inferschema",
+        "prefersDecimal": {
+            "title": "Prefersdecimal",
             "anyOf": [
                 {
                     "type": "boolean"
@@ -169,8 +149,8 @@
                 }
             ]
         },
-        "ignoreLeadingWhiteSpace": {
-            "title": "Ignoreleadingwhitespace",
+        "allowComments": {
+            "title": "Allowcomments",
             "anyOf": [
                 {
                     "type": "boolean"
@@ -180,8 +160,8 @@
                 }
             ]
         },
-        "ignoreTrailingWhiteSpace": {
-            "title": "Ignoretrailingwhitespace",
+        "allowUnquotedFieldNames": {
+            "title": "Allowunquotedfieldnames",
             "anyOf": [
                 {
                     "type": "boolean"
@@ -191,57 +171,33 @@
                 }
             ]
         },
-        "nullValue": {
-            "title": "Nullvalue",
-            "type": "string"
-        },
-        "nanValue": {
-            "title": "Nanvalue",
-            "type": "string"
-        },
-        "positiveInf": {
-            "title": "Positiveinf",
-            "type": "string"
-        },
-        "negativeInf": {
-            "title": "Negativeinf",
-            "type": "string"
-        },
-        "dateFormat": {
-            "title": "Dateformat",
-            "type": "string"
-        },
-        "timestampFormat": {
-            "title": "Timestampformat",
-            "type": "string"
-        },
-        "maxColumns": {
-            "title": "Maxcolumns",
+        "allowSingleQuotes": {
+            "title": "Allowsinglequotes",
             "anyOf": [
                 {
-                    "type": "integer"
+                    "type": "boolean"
                 },
                 {
                     "type": "string"
                 }
             ]
         },
-        "maxCharsPerColumn": {
-            "title": "Maxcharspercolumn",
+        "allowNumericLeadingZero": {
+            "title": "Allownumericleadingzero",
             "anyOf": [
                 {
-                    "type": "integer"
+                    "type": "boolean"
                 },
                 {
                     "type": "string"
                 }
             ]
         },
-        "maxMalformedLogPerPartition": {
-            "title": "Maxmalformedlogperpartition",
+        "allowBackslashEscapingAnyCharacter": {
+            "title": "Allowbackslashescapinganycharacter",
             "anyOf": [
                 {
-                    "type": "integer"
+                    "type": "boolean"
                 },
                 {
                     "type": "string"
@@ -261,6 +217,14 @@
             "title": "Columnnameofcorruptrecord",
             "type": "string"
         },
+        "dateFormat": {
+            "title": "Dateformat",
+            "type": "string"
+        },
+        "timestampFormat": {
+            "title": "Timestampformat",
+            "type": "string"
+        },
         "multiLine": {
             "title": "Multiline",
             "anyOf": [
@@ -272,8 +236,19 @@
                 }
             ]
         },
-        "charToEscapeQuoteEscaping": {
-            "title": "Chartoescapequoteescaping",
+        "allowUnquotedControlChars": {
+            "title": "Allowunquotedcontrolchars",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "lineSep": {
+            "title": "Linesep",
             "type": "string"
         },
         "samplingRatio": {
@@ -287,8 +262,8 @@
                 }
             ]
         },
-        "enforceSchema": {
-            "title": "Enforceschema",
+        "dropFieldIfAllNull": {
+            "title": "Dropfieldifallnull",
             "anyOf": [
                 {
                     "type": "boolean"
@@ -298,28 +273,24 @@
                 }
             ]
         },
-        "emptyValue": {
-            "title": "Emptyvalue",
+        "encoding": {
+            "title": "Encoding",
             "type": "string"
         },
         "locale": {
             "title": "Locale",
             "type": "string"
         },
-        "lineSep": {
-            "title": "Linesep",
-            "type": "string"
-        },
-        "unescapedQuoteHandling": {
-            "title": "Unescapedquotehandling",
-            "enum": [
-                "STOP_AT_CLOSING_QUOTE",
-                "BACK_TO_DELIMITER",
-                "STOP_AT_DELIMITER",
-                "SKIP_VALUE",
-                "RAISE_ERROR"
-            ],
-            "type": "string"
+        "allowNonNumericNumbers": {
+            "title": "Allownonnumericnumbers",
+            "anyOf": [
+                {
+                    "type": "boolean"
+                },
+                {
+                    "type": "string"
+                }
+            ]
         }
     },
     "required": [
