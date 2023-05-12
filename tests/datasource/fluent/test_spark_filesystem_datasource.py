@@ -29,7 +29,7 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
     ORCAsset,
     ParquetAsset,
     TextAsset,
-    _SparkFilePathDatasource, DirectoryParquetAsset, DirectoryJSONAsset, DirectoryORCAsset,
+    _SparkFilePathDatasource, DirectoryParquetAsset, DirectoryJSONAsset, DirectoryORCAsset, DirectoryTextAsset,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
@@ -286,6 +286,15 @@ add_json_asset = [
     ),
 ]
 
+add_text_asset_all_params = {
+            "wholetext": True,
+            "line_sep": "line_sep",
+            "path_glob_filter": "path_glob_filter",
+            "recursive_file_lookup": "recursive_file_lookup",
+            "modified_before": "modified_before",
+            "modified_after": "modified_after",
+        }
+
 add_text_asset = [
     pytest.param(
         "add_text_asset",
@@ -294,14 +303,7 @@ add_text_asset = [
     ),
     pytest.param(
         "add_text_asset",
-        {
-            "wholetext": True,
-            "line_sep": "line_sep",
-            "path_glob_filter": "path_glob_filter",
-            "recursive_file_lookup": "recursive_file_lookup",
-            "modified_before": "modified_before",
-            "modified_after": "modified_after",
-        },
+        add_text_asset_all_params,
         id="text_all_params_pyspark_3_4_0",
     ),
     pytest.param(
@@ -358,6 +360,7 @@ _SPARK_ASSET_TYPES = [
     (JSONAsset, {"name": "asset_name"}),
     (DirectoryJSONAsset, {"name": "asset_name", "data_directory": "data_directory"}),
     (TextAsset, {"name": "asset_name"}),
+    (DirectoryTextAsset, {"name": "asset_name", "data_directory": "data_directory"}),
 ]
 
 
@@ -539,12 +542,50 @@ add_directory_json_asset = [
     ),
 ]
 
+
+
+add_directory_text_asset = [
+    pytest.param(
+        "add_directory_text_asset",
+        {"data_directory": "some_directory"},
+        id="directory_text_min_params",
+    ),
+    pytest.param(
+        "add_directory_text_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_text_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_text_asset",
+        {
+            **add_text_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+        },
+        id="directory_text_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_text_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_text_fail_extra_params",
+    ),
+]
+
 add_directory_asset_test_params = []
 add_directory_asset_test_params += add_directory_csv_asset
 add_directory_asset_test_params += add_directory_parquet_asset
 add_directory_asset_test_params += add_directory_orc_asset
 add_directory_asset_test_params += add_directory_json_asset
-
+add_directory_asset_test_params += add_directory_text_asset
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "add_method_name,add_method_params",

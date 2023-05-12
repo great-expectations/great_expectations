@@ -507,6 +507,19 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"wholetext", "line_sep"})
 
 
+class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
+    type: Literal["directory_text"] = "directory_text"  # type: ignore[assignment]
+
+    def _get_reader_options_include(self) -> set[str]:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
+        """
+        return (
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(TextAsset, self)._get_reader_options_include()
+        )
+
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -520,6 +533,7 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     JSONAsset,
     DirectoryJSONAsset,
     TextAsset,
+    DirectoryTextAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     CSVAsset,
@@ -531,10 +545,11 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     JSONAsset,
     DirectoryJSONAsset,
     TextAsset,
+    DirectoryTextAsset,
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
-_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset, DirectoryParquetAsset, DirectoryORCAsset,)
+_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset, DirectoryParquetAsset, DirectoryORCAsset,DirectoryJSONAsset,DirectoryTextAsset,)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
