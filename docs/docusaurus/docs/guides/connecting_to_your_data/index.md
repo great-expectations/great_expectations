@@ -14,8 +14,8 @@ title: "Connect to Data: Index"
 - [How to get one or more Batches of data from a configured Datasource](../../guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 
 ## In memory
-- [How to connect to in-memory data in a Pandas dataframe](../../guides/connecting_to_your_data/in_memory/pandas.md)
-- [How to connect to in-memory data in a Spark dataframe](../../guides/connecting_to_your_data/in_memory/spark.md)
+- [How to connect to in-memory data in a Pandas dataframe](/docs/0.15.50/guides/connecting_to_your_data/in_memory/pandas)
+- [How to connect to in-memory data in a Spark dataframe](/docs/0.15.50/guides/connecting_to_your_data/in_memory/spark)
 
 ## Database
 - [How to connect to a Athena database](../../guides/connecting_to_your_data/database/athena.md)
