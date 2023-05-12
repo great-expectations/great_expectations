@@ -11,7 +11,7 @@ import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_stil
 import DataContextInitializeQuickOrFilesystem from '/docs/components/setup/link_lists/_data_context_initialize_quick_or_filesystem.mdx'
 import ConnectingToDataFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_data_fluently.md'
 
-To Validate data we must first define a set of Expectations for that data to be Validated against.  In this guide, you'll learn how to create Expectations and interactively edit them with feedback from Validating each against a Batch of data. Validating your Expectations as you define them allows you to quickly determine if the Expectations are suitable for our data, and identify where changes might be necessary.
+To Validate data we must first define a set of Expectations for that data to be Validated against.  In this guide, you'll learn how to create Expectations and interactively edit them Validating each against a Batch of data. Validating your Expectations as you define them allows you to quickly determine if the Expectations are suitable for our data, and identify where changes might be necessary.
 
 :::info Does this process edit my data?
 No.  The interactive method used to create and edit Expectations does not edit or alter the Batch data.
@@ -68,12 +68,12 @@ See one of the following guides:
 
 ### 1. Import the Great Expectations module and instantiate a Data Context
 
-For this guide we will be working with Python code in a Jupyter Notebook. Jupyter is included with GX and lets us easily edit code and immediately see the results of our changes.
+The simplest way to create a new Data Context is by using the `create()` method.
 
-Run the following code to import Great Expectations and instantiate a Data Context:
+From a Notebook or script where you want to deploy Great Expectations run the following command. Here the `full_path_to_project_directory` can be an empty directory where you intend to build your Great Expectations configuration.:
 
-<!-- ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py imports and data context"
-``` -->
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_context"
+```
 
 :::info Data Contexts and persisting data
 
@@ -81,53 +81,109 @@ If you're using an Ephemeral Data Context, your configurations will not persist 
 
 :::
 
-### 2. Use an existing Data Asset to create a Batch Request
+### 2. Create a Validator from Data 
 
-Add the following method to retrieve a previously configured Data Asset from the Data Context you initialized and create a Batch Request to identify the Batch of data that you'll use to validate your Expectations:
+Run the following command to connect to `.csv` data stored in the `great_expectations` GitHub repository:
 
-<!-- ```python name="tests/integration/docusaurus/validation/validator/how_to_create_and_edit_expectations_with_instant_feedback_fluent.py get_data_asset_and_build_batch_request"
-``` -->
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite create_validator"
+```
 
-:::info Limit the Batches returned by a Batch Request
+### 3. Create Expectations with Validator 
 
-You can provide a dictionary as the `options` parameter of `build_batch_request()` to limit the Batches returned by a Batch Request.  If you leave the `options` parameter empty, your Batch Request will include all the Batches configured in the corresponding Data Asset.  For more information about Batch Requests, see [How to request data from a Data Asset](/docs/guides/connecting_to_your_data/fluent/batch_requests/how_to_request_data_from_a_data_asset).
+Run the following command to create two Expectations. The first Expectation uses domain knowledge (the `pickup_datetime` shouldn't be null), and the second Expectation uses `auto=True` to detect a range of values in the `passenger_count` column.
 
-:::
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite add_2_expectations"
+```
 
-:::caution Batch Requests and Datasources built with the advanced block-config method
-
-If you are working with a Datasource that was created using the advanced block-config method, you will need to build your Batch Request differently than was demonstrated earlier.  For more information, please see our guide on [How to get one or more batches from a Datasource configured with the block-config method](/docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource).
-
-:::
-
-### 3. (Optional) Use the OnboardingDataAssistant to populate an ExpectationSuite
-
-Next use an Onboarding DataAssistant to populate an ExpectationSuite.
-
-* Description of Onboarding DataAssistant and linke
-* link to onboarding DataAssitant work 
-
-* Create ExpectationSuite
-* Run the Assistant 
-
+As part of the validator work, we will be adding it to an ExpectationSuite, which you can save later. 
 
 ### 4. View the Expectations in the Expectation Suite
-* There are a few ways to do this, with one of htem being print with ()
-* this way you will be able to see your 
-* they will also be able to see if any of the have values that you dont want 
 
-### 5. Create ExpectationConfiguration from the one that you want 
+There are a number of different ways that this can be done, with one way being using the `show_expectations_by_expectation_type()` function, which will use the `prettyprint` function to print the Suite to console in a way that can be easily visualized. 
 
-### 6. Add/Update With the COnfiguration 
-* Check that it isn'tthere using the find it and see that it isn't there. 
+First load the `ExpectationSuite` from the `Validator`: 
 
-### 7. Remove Configuration 
-* You can also remove a configuration ify ou dont want. 
-* * there are also remove all from a domain. 
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_and_show_suite"
+```
 
-### 8. Save ExpectationSuite to Context
-* When you are done with the the work, then you save yourExpectationSuite DAtaContext
-* this will save it to whatever store you have configured.
+Now use the `show_expectations_by_expectation_type()` to print the Suite to console or Jupyter Notebook.
+
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite show_expectations"
+```
+
+
+Your output will look something similar to this: 
+
+```bash 
+[ { 'expect_column_values_to_be_between': { 'auto': True,
+                                            'column': 'passenger_count',
+                                            'domain': 'column',
+                                            'max_value': 6,
+                                            'min_value': 1,
+                                            'mostly': 1.0,
+                                            'strict_max': False,
+                                            'strict_min': False}},
+  { 'expect_column_values_to_not_be_null': { 'column': 'pickup_datetime',
+                                             'domain': 'column'}}]
+```
+
+### 5. Instantiate ExpectationConfiguration 
+
+From the existing Expectation Suite, you will be able to create an ExpecationConfiguration using the configuration that you are interested in. Here is an example configuration of the first Expectation.
+
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_dict_1"
+```
+
+Here is the same configuration, but this time as a `ExpectationConfiguration` object.  
+
+It runs in the `passenger_count` column and expects and max and min values to be `6` and `1` respectively. 
+
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_expectation"
+```
+
+### 6. Update Configuration and ExpectationSuite
+
+Let's say that you are interested in adjusting the `max_value` of the Expectation to be `4` instead of `6`. Then you could create a new `ExpectationConfiguration` with the new value: 
+
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite updated_configuration"
+```
+
+And update the ExpectationSuite by calling `add_expectation()`. The `add_expectation()` function will perform an 'upsert' into the `ExpectationSuite`, meaning it will add update an existing Expectation if it already exists, or add a new one if it doesn't. 
+
+
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite updated_configuration"
+```
+
+You can check that the ExpectationSuite has been correctly updated by eitehr running the `show_expectations_by_expectation_type()` function again, or by running `find_expectation()` and confirming that the expected configuration exists in the suite.  The search will need to be performed with a new `ExpectationConfiguration`, but will not need to inclued all of the detailed `kwarg` values.
+
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite find_configuration"
+```
+
+### 7. (Optional) Remove Configuration 
+
+If you would like to remove an ExpectationConfiguration, you can use the `remove_configuration()` function. 
+
+The similar to `find_expectation()`, the `remove_configuration()` function needs to be called with an ExpectationConfiguration.
+
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite remove_configuration"
+```
+
+The output of `show_expectations_by_expectation_type()` should look like this: 
+Your output will look something similar to this: 
+
+```bash 
+[ 
+  { 'expect_column_values_to_not_be_null': { 'column': 'pickup_datetime',
+                                             'domain': 'column'}}]
+```
+
+### 8. Save ExpectationSuite 
+
+Finally, when you are done editing the `ExpectationSuite`, you can save it to your DataContext, by using the `save_suite()` function. 
+
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite save_suite"
+```
 
 ## for more information .
 * Please look at the API docs: which you can find here. 
+* For other ways

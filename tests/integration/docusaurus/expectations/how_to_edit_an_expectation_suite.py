@@ -5,155 +5,111 @@ from great_expectations.core.expectation_configuration import ExpectationConfigu
 
 from great_expectations.core.expectation_suite import ExpectationSuite
 
-temp_dir = tempfile.TemporaryDirectory()
-full_path_to_project_directory = pathlib.Path(temp_dir.name).resolve()
-data_directory = pathlib.Path(
-    gx.__file__,
-    "..",
-    "..",
-    "tests",
-    "test_sets",
-    "taxi_yellow_tripdata_samples",
-).resolve(strict=True)
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite create_asset">
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_context">
 import great_expectations as gx
 
-context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
+context = gx.get_context()
+# </snippet>
 
-# data_directory is the full path to a directory containing csv files
-datasource = context.sources.add_pandas_filesystem(
-    name="my_pandas_datasource", base_directory=data_directory
-)
-
-# The batching_regex should max files in the data_directory
-asset = datasource.add_csv_asset(
-    name="csv_asset",
-    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).csv",
-    order_by=["year", "month"],
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite create_validator">
+validator = context.sources.pandas_default.read_csv(
+    "https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv"
 )
 # </snippet>
 
-assert "my_pandas_datasource" in context.datasources
-assert context.datasources["my_pandas_datasource"].get_asset("csv_asset") is not None
 
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_asset">
-import great_expectations as gx
-import pathlib
-
-context = gx.get_context(
-    context_root_dir=(
-        pathlib.Path(full_path_to_project_directory) / "great_expectations"
-    )
-)
-asset = context.datasources["my_pandas_datasource"].get_asset("csv_asset")
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite add_2_expectations">
+validator.expect_column_values_to_not_be_null("pickup_datetime")
+validator.expect_column_values_to_be_between("passenger_count", auto=True)
 # </snippet>
 
-assert "my_pandas_datasource" in context.datasources
-assert context.datasources["my_pandas_datasource"].get_asset("csv_asset") is not None
-
-# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite name_suite">
-expectation_suite_name = "my_onboarding_assistant_suite"
-expectation_suite = context.add_expectation_suite(
-    expectation_suite_name=expectation_suite_name
-)
-batch_request = asset.build_batch_request({"year": "2019", "month": "02"})
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_suite">
+my_suite = validator.get_expectation_suite()
 # </snippet>
 
-assert context.get_expectation_suite(expectation_suite_name) is not None
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite show_suite">
+my_suite.show_expectations_by_expectation_type()
+# </snippet>
 
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_dict_1">
 
-# run the Data Assitant on excluded columns
-exclude_column_names = [
-    "VendorID",
-    "pickup_datetime",
-    "dropoff_datetime",
-    "RatecodeID",
-    "PULocationID",
-    "DOLocationID",
-    "payment_type",
-    "fare_amount",
-    "extra",
-    "mta_tax",
-    "tip_amount",
-    "tolls_amount",
-    "improvement_surcharge",
-    "congestion_surcharge",
-]
-
-data_assistant_result = context.assistants.onboarding.run(
-    batch_request=batch_request,
-    exclude_column_names=exclude_column_names,
-)
-
-data_assistant_suite: ExpectationSuite = data_assistant_result.get_expectation_suite(
-    expectation_suite_name="my_onboarding_assistant_suite"
-)
-# show the expectations
-data_assistant_suite.show_expectations_by_expectation_type()
-# pick one Expectation
-
-
-# want to update the value of one of them
-expectation_config_dict: dict = {
+{
     "expect_column_values_to_be_between": {
-        "column": "total_amount",
+        "auto": True,
+        "column": "passenger_count",
         "domain": "column",
-        "max_value": 3004.8,
-        "min_value": -59.8,
+        "max_value": 6,
+        "min_value": 1,
         "mostly": 1.0,
         "strict_max": False,
         "strict_min": False,
     }
 }
+# </snippet>
 
-# turn it into an ExpectationConfiguration object
-existing_config = ExpectationConfiguration(
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_configuration_1">
+config = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={
-        "column": "total_amount",
+        "auto": True,
+        "column": "passenger_count",
         "domain": "column",
-        "max_value": 3004.8,
-        "min_value": -59.8,
+        "max_value": 6,
+        "min_value": 1,
         "mostly": 1.0,
         "strict_max": False,
         "strict_min": False,
     },
 )
-# update the value (min_value parameter)
+# </snippet>
+
+
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite updated_configuration">
 updated_config = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={
-        "column": "total_amount",
+        "auto": True,
+        "column": "passenger_count",
         "domain": "column",
-        "max_value": 3004.8,
-        #'min_value': -59.8,
-        "min_value": -10,
+        "max_value": 4,
+        #'max_value': 6,
+        "min_value": 1,
         "mostly": 1.0,
         "strict_max": False,
         "strict_min": False,
     },
 )
-# add the expectation
-data_assistant_suite.add_expectation(updated_config)
+# </snippet>
 
-# find the expectation and see that it is updated
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite add_configuration">
+my_suite.add_expectation(updated_config)
+# </snippet>
+
+
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite find_configuration">
 config_to_search = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
-    kwargs={"column": "total_amount"},
+    kwargs={"column": "passenger_count"},
 )
 
-found_config = data_assistant_suite.find_expectations(config_to_search, "domain")
-assert found_config == [updated_config]
+found_expectation = my_suite.find_expectation(config_to_search, match_type="domain")
 
+# This assertion will succeed because the ExpectationConfiguration has been updated.
+assert found_expectation == [updated_config]
+# </snippet>
 
-# how we can remove the expectation
-data_assistant_suite.remove_expectation(
-    updated_config, match_type="domain", remove_multiple_matches=False
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite remove_configuration">
+config_to_remove = ExpectationConfiguration(
+    expectation_type="expect_column_values_to_be_between",
+    kwargs={"column": "passenger_count"},
 )
+my_suite.remove_expectation(
+    config_to_remove, match_type="domain", remove_multiple_matches=False
+)
+my_suite.show_expectations_by_expectation_type()
+# </snippet>
 
-found_config = data_assistant_suite.find_expectations(config_to_search, "domain")
-assert found_config == []
-
-# now that you have done this, have the updated ExpectationSuite
-context.save_expectation_suite(expectation_suite=data_assistant_suite)
+# <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite save_suite">
+context.save_expectation_suite(my_suite)
+# </snippet>
