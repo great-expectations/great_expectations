@@ -12,7 +12,7 @@ from great_expectations.core.util import get_or_create_spark_application
 spark = get_or_create_spark_application()
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py set up context">
-context = gx.get_context()
+context = gx.get_context(context_root_dir="/dbfs/great_expectations/")
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/databricks_deployment_patterns_dataframe_python_configs.py add datasource">
