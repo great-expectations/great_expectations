@@ -26,7 +26,7 @@ if TYPE_CHECKING:
         JSONAsset,
         ORCAsset,
         ParquetAsset,
-        TextAsset, DirectoryParquetAsset,
+        TextAsset, DirectoryParquetAsset, DirectoryORCAsset,
 )
 
 logger: Logger
@@ -345,6 +345,35 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> ORCAsset: ...
+    def add_directory_orc_asset(
+        self,
+        name: str,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: re.Pattern | str = r".*",
+        glob_directive: str = "**/*",
+        order_by: Optional[SortersDefinition] = ...,
+        # Spark Directory Reader Options vvv
+        data_directory: str | pathlib.Path = ...,
+        # Spark Directory Reader Options ^^^
+        # Spark Generic File Reader Options vvv
+        path_glob_filter: Optional[Union[bool, str]] = None,
+        modified_before: Optional[Union[bool, str]] = None,
+        modified_after: Optional[Union[bool, str]] = None,
+        recursive_file_lookup: Optional[Union[bool, str]] = None,
+        # Spark Generic File Reader Options ^^^
+        # ORC Specific Options vvv
+        merge_schema: Optional[Union[bool, str]] = None,
+        # ORC Specific Options ^^^
+        # vvv pyspark Docs <> Source Code mismatch
+        # The following parameters are mentioned in https://spark.apache.org/docs/latest/sql-data-sources-generic-options.html
+        # however do not appear in the source code https://github.com/apache/spark/blob/v3.4.0/python/pyspark/sql/readwriter.py#L473
+        # Spark Generic File Reader Options vvv
+        # ignore_corrupt_files: bool = ...,
+        # ignore_missing_files: bool = ...,
+        # Spark Generic File Reader Options ^^^
+        # ^^^ pyspark Docs <> Source Code mismatch
+    ) -> DirectoryORCAsset: ...
     def add_json_asset(
         self,
         name: str,

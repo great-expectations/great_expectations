@@ -232,7 +232,6 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
 
 
 class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
-    # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"  # type: ignore[assignment]
 
     def _get_reader_options_include(self) -> set[str]:
@@ -284,7 +283,6 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
         )
 
 class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
-    # Overridden inherited instance fields
     type: Literal["directory_parquet"] = "directory_parquet"  # type: ignore[assignment]
 
     def _get_reader_options_include(self) -> set[str]:
@@ -319,8 +317,20 @@ class ORCAsset(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"merge_schema"})
 
 
+class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
+    type: Literal["directory_orc"] = "directory_orc"  # type: ignore[assignment]
+
+    def _get_reader_options_include(self) -> set[str]:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
+        """
+        return (
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(ORCAsset, self)._get_reader_options_include()
+        )
+
 class JSONAsset(_SparkGenericFilePathAssetMixin):
-    # Overridden inherited instance fields
     type: Literal["json"] = "json"
 
     # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0) appear in comment above
@@ -493,6 +503,7 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     ParquetAsset,
     DirectoryParquetAsset,
     ORCAsset,
+    DirectoryORCAsset,
     JSONAsset,
     TextAsset,
 )
@@ -502,12 +513,13 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     ParquetAsset,
     DirectoryParquetAsset,
     ORCAsset,
+    DirectoryORCAsset,
     JSONAsset,
     TextAsset,
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
-_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset, DirectoryParquetAsset,)
+_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset, DirectoryParquetAsset, DirectoryORCAsset,)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):

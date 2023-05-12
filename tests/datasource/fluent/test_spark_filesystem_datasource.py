@@ -199,6 +199,14 @@ add_parquet_asset = [
     ),
 ]
 
+add_orc_asset_all_params = {
+    "merge_schema": "merge_schema",
+    "path_glob_filter": "path_glob_filter",
+    "recursive_file_lookup": "recursive_file_lookup",
+    "modified_before": "modified_before",
+    "modified_after": "modified_after",
+}
+
 add_orc_asset = [
     pytest.param(
         "add_orc_asset",
@@ -207,13 +215,7 @@ add_orc_asset = [
     ),
     pytest.param(
         "add_orc_asset",
-        {
-            "merge_schema": "merge_schema",
-            "path_glob_filter": "path_glob_filter",
-            "recursive_file_lookup": "recursive_file_lookup",
-            "modified_before": "modified_before",
-            "modified_after": "modified_after",
-        },
+        add_orc_asset_all_params,
         id="orc_all_params_pyspark_3_4_0",
     ),
     pytest.param(
@@ -457,9 +459,48 @@ add_directory_parquet_asset = [
     ),
 ]
 
+
+
+add_directory_orc_asset = [
+    pytest.param(
+        "add_directory_orc_asset",
+        {"data_directory": "some_directory"},
+        id="directory_orc_min_params",
+    ),
+    pytest.param(
+        "add_directory_orc_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_orc_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_orc_asset",
+        {
+            **add_orc_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+        },
+        id="directory_orc_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_orc_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_orc_fail_extra_params",
+    ),
+]
+
 add_directory_asset_test_params = []
 add_directory_asset_test_params += add_directory_csv_asset
 add_directory_asset_test_params += add_directory_parquet_asset
+add_directory_asset_test_params += add_directory_orc_asset
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
