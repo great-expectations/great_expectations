@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
+)
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+    make_directory_get_unfiltered_batch_definition_list_fn,
 )
 from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 
@@ -54,6 +58,13 @@ class _DirectoryDataAssetMixin(_FilePathDataAsset):
                 batch_request=batch_request
             )
         return batch_definition_list
+
+    def get_unfiltered_batch_definition_list_fn(
+        self,
+    ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+        return make_directory_get_unfiltered_batch_definition_list_fn(
+            self.data_directory
+        )
 
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
