@@ -232,12 +232,10 @@ class CSVAsset(_SparkGenericFilePathAssetMixin):
 
 
 class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
-    # Overridden inherited instance fields
     type: Literal["directory_csv"] = "directory_csv"  # type: ignore[assignment]
 
     @classmethod
     def _get_reader_method(cls) -> str:
-        # Reader method is still "csv"
         return "csv"
 
     def _get_reader_options_include(self) -> set[str]:
@@ -289,6 +287,24 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
         )
 
 
+class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
+    type: Literal["directory_parquet"] = "directory_parquet"  # type: ignore[assignment]
+
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "parquet"
+
+    def _get_reader_options_include(self) -> set[str]:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
+        """
+        return (
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(ParquetAsset, self)._get_reader_options_include()
+        )
+
+
 class ORCAsset(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
@@ -311,8 +327,25 @@ class ORCAsset(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"merge_schema"})
 
 
+class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
+    type: Literal["directory_orc"] = "directory_orc"  # type: ignore[assignment]
+
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "orc"
+
+    def _get_reader_options_include(self) -> set[str]:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
+        """
+        return (
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(ORCAsset, self)._get_reader_options_include()
+        )
+
+
 class JSONAsset(_SparkGenericFilePathAssetMixin):
-    # Overridden inherited instance fields
     type: Literal["json"] = "json"
 
     # vvv spark parameters for pyspark.sql.DataFrameReader.json() (ordered as in pyspark v3.4.0) appear in comment above
@@ -453,6 +486,24 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
         )
 
 
+class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
+    type: Literal["directory_json"] = "directory_json"  # type: ignore[assignment]
+
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "json"
+
+    def _get_reader_options_include(self) -> set[str]:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-json.html for more info.
+        """
+        return (
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(JSONAsset, self)._get_reader_options_include()
+        )
+
+
 class TextAsset(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
@@ -476,6 +527,24 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"wholetext", "line_sep"})
 
 
+class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
+    type: Literal["directory_text"] = "directory_text"  # type: ignore[assignment]
+
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "text"
+
+    def _get_reader_options_include(self) -> set[str]:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
+        """
+        return (
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(TextAsset, self)._get_reader_options_include()
+        )
+
+
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -483,21 +552,35 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     CSVAsset,
     DirectoryCSVAsset,
     ParquetAsset,
+    DirectoryParquetAsset,
     ORCAsset,
+    DirectoryORCAsset,
     JSONAsset,
+    DirectoryJSONAsset,
     TextAsset,
+    DirectoryTextAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     CSVAsset,
     DirectoryCSVAsset,
     ParquetAsset,
+    DirectoryParquetAsset,
     ORCAsset,
+    DirectoryORCAsset,
     JSONAsset,
+    DirectoryJSONAsset,
     TextAsset,
+    DirectoryTextAsset,
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
-_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset,)
+_SPARK_DIRECTORY_ASSET_CLASSES = (
+    DirectoryCSVAsset,
+    DirectoryParquetAsset,
+    DirectoryORCAsset,
+    DirectoryJSONAsset,
+    DirectoryTextAsset,
+)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
