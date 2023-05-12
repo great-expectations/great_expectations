@@ -323,7 +323,7 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
     def _get_reader_options_include(self) -> set[str]:
         """These options are available as of spark v3.4.0
 
-        See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
+        See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
         """
         return (
             super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
@@ -471,6 +471,19 @@ class JSONAsset(_SparkGenericFilePathAssetMixin):
         )
 
 
+class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
+    type: Literal["directory_json"] = "directory_json"  # type: ignore[assignment]
+
+    def _get_reader_options_include(self) -> set[str]:
+        """These options are available as of spark v3.4.0
+
+        See https://spark.apache.org/docs/latest/sql-data-sources-json.html for more info.
+        """
+        return (
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(JSONAsset, self)._get_reader_options_include()
+        )
+
 class TextAsset(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
@@ -505,6 +518,7 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     ORCAsset,
     DirectoryORCAsset,
     JSONAsset,
+    DirectoryJSONAsset,
     TextAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
@@ -515,6 +529,7 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     ORCAsset,
     DirectoryORCAsset,
     JSONAsset,
+    DirectoryJSONAsset,
     TextAsset,
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES

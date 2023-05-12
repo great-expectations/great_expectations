@@ -29,7 +29,7 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
     ORCAsset,
     ParquetAsset,
     TextAsset,
-    _SparkFilePathDatasource, DirectoryParquetAsset,
+    _SparkFilePathDatasource, DirectoryParquetAsset, DirectoryJSONAsset, DirectoryORCAsset,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
@@ -232,16 +232,7 @@ add_orc_asset = [
     ),
 ]
 
-add_json_asset = [
-    pytest.param(
-        "add_json_asset",
-        {},
-        id="json_min_params",
-    ),
-    pytest.param(
-        "add_json_asset",
-        {
-            **{
+add_json_asset_all_params = {
                 "primitives_as_string": "primitives_as_string",
                 "prefers_decimal": "prefers_decimal",
                 "allow_comments": "allow_comments",
@@ -265,7 +256,18 @@ add_json_asset = [
                 "modified_before": "modified_before",
                 "modified_after": "modified_after",
                 "allow_non_numeric_numbers": "allow_non_numeric_numbers",
-            },
+            }
+
+add_json_asset = [
+    pytest.param(
+        "add_json_asset",
+        {},
+        id="json_min_params",
+    ),
+    pytest.param(
+        "add_json_asset",
+        {
+            **add_json_asset_all_params,
             **additional_params,  # type: ignore[arg-type]
         },
         id="json_all_params_pyspark_3_4_0",
@@ -352,7 +354,9 @@ _SPARK_ASSET_TYPES = [
     (ParquetAsset, {"name": "asset_name"}),
     (DirectoryParquetAsset, {"name": "asset_name", "data_directory": "data_directory"}),
     (ORCAsset, {"name": "asset_name"}),
+    (DirectoryORCAsset, {"name": "asset_name", "data_directory": "data_directory"}),
     (JSONAsset, {"name": "asset_name"}),
+    (DirectoryJSONAsset, {"name": "asset_name", "data_directory": "data_directory"}),
     (TextAsset, {"name": "asset_name"}),
 ]
 
@@ -497,10 +501,49 @@ add_directory_orc_asset = [
     ),
 ]
 
+
+add_directory_json_asset = [
+    pytest.param(
+        "add_directory_json_asset",
+        {"data_directory": "some_directory"},
+        id="directory_json_min_params",
+    ),
+    pytest.param(
+        "add_directory_json_asset",
+        {"data_directory": pathlib.Path("some_directory")},
+        id="directory_json_min_params_pathlib",
+    ),
+    pytest.param(
+        "add_directory_json_asset",
+        {
+            **add_json_asset_all_params,
+            **{
+                "data_directory": "some_directory",
+            },
+            **additional_params,  # type: ignore[arg-type]
+        },
+        id="directory_json_all_params_pyspark_3_4_0",
+    ),
+    pytest.param(
+        "add_directory_json_asset",
+        {
+            "data_directory": "some_directory",
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="directory_json_fail_extra_params",
+    ),
+]
+
 add_directory_asset_test_params = []
 add_directory_asset_test_params += add_directory_csv_asset
 add_directory_asset_test_params += add_directory_parquet_asset
 add_directory_asset_test_params += add_directory_orc_asset
+add_directory_asset_test_params += add_directory_json_asset
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
