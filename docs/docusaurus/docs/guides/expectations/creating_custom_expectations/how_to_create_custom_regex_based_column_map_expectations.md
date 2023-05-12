@@ -11,9 +11,11 @@ This threshold is configured via the `mostly` parameter, which can be passed as 
 
 This guide will walk you through the process of creating a Custom `RegexBasedColumnMapExpectation`.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](./overview.md).
+- Completion of the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 

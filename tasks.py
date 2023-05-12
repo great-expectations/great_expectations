@@ -513,6 +513,7 @@ def type_schema(
 
     from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
+        BatchRequest,
         Datasource,
     )
     from great_expectations.datasource.fluent.sources import (
@@ -534,10 +535,13 @@ def type_schema(
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    for name, model in [
+    name_model = [
+        ("BatchRequest", BatchRequest),
         (Datasource.__name__, Datasource),
         *_iter_all_registered_types(),
-    ]:
+    ]
+
+    for name, model in name_model:
         if issubclass(model, Datasource):
             datasource_dir = schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)
@@ -647,3 +651,24 @@ def _exit_with_error_if_not_run_from_correct_dir(
             exit_message,
             code=1,
         )
+
+
+@invoke.task(
+    aliases=("links",),
+    help={"skip_external": "Skip external link checks (is slow), default is True"},
+)
+def link_checker(ctx: Context, skip_external: bool = True):
+    """Checks the Docusaurus docs for broken links"""
+    import docs.checks.docs_link_checker as checker
+
+    path: str = "docs/docusaurus/docs"
+    docs_root: str = "docs/docusaurus/docs"
+    site_prefix: str = "docs"
+
+    code, message = checker.scan_docs(
+        path=path,
+        docs_root=docs_root,
+        site_prefix=site_prefix,
+        skip_external=skip_external,
+    )
+    raise invoke.Exit(message, code)

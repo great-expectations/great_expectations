@@ -22,8 +22,6 @@ import TipFilesystemDatasourceNestedSourceDataFolders from '/docs/components/con
 <!-- ## Next steps -->
 import AfterCreateAndConfigureDataAsset from '/docs/components/connect_to_data/next_steps/_after_create_and_configure_data_asset.md'
 
-## Introduction
-
 In this guide we will demonstrate the ways in which Batches can be organized in a file-based Data Asset.  We will discuss how to use a regular expression to indicate which files should be returned as Batches.  We will also show how to add Batch Sorters to a Data Asset in order to specify the order in which Batches are returned.
 
 ## Prerequisites
@@ -32,7 +30,6 @@ In this guide we will demonstrate the ways in which Batches can be organized in 
 
 - A working installation of Great Expectations
 - A Datasource that connects to a location with source data files
-- A passion for data quality
 
 </Prerequisites>
 
@@ -82,8 +79,8 @@ Please reference the appropriate one of these guides:
 :::caution Datasources defined with the block-config method
 
 If you are using a Datasource that was created with the advanced block-config method please follow the appropriate guide from:
-- [how to configure a Spark Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
-- [how to configure a Pandas Datasource with the block-config method](/docs/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
+- [how to configure a Spark Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
+- [how to configure a Pandas Datasource with the block-config method](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
 
 :::
 

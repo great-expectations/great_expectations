@@ -31,7 +31,7 @@ _MISSING: Final = object()
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
+        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
 
@@ -127,7 +127,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
 
     def _build_data_connector(
         self,
-        data_asset: CSVAsset,
+        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
         abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
         abs_name_starts_with: str = "",
         abs_delimiter: str = "/",
@@ -152,7 +152,7 @@ class SparkAzureBlobStorageDatasource(_SparkFilePathDatasource):
             container=abs_container,
             name_starts_with=abs_name_starts_with,
             delimiter=abs_delimiter,
-            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
+            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_WASBS_URL_TEMPLATE.format,
         )
 
         # build a more specific `_test_connection_error_message`

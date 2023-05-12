@@ -10,6 +10,10 @@ import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 
 ## Overview
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+
 ### Definition
 
 A Data Assistant is a utility that asks questions about your data, gathering information to describe what is observed, and then presents <TechnicalTag tag="metric" text="Metrics" /> and proposes <TechnicalTag tag="expectation" text="Expectations" /> based on the answers.
@@ -70,8 +74,8 @@ Data Assistants are multi-batch aware out of the box.  However, not every use ca
 - [How to choose between working with a single or multiple Batches of data](../guides/connecting_to_your_data/how_to_choose_between_working_with_a_single_or_multiple_batches_of_data.md)
 
 To take advantage of the multi-batch awareness of Data Assistants, your <TechnicalTag tag="datasource" text="Datasources" /> need to be configured so that you can acquire multiple Batches in a single Batch Request.  For guidance on how to configure your Datasources to be capable of returning multiple Batches, please see the following documentation that matches the Datasource type you are working with:
-- [How to configure a Pandas Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource.md)
-- [How to configure a Spark Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource.md)
+- [How to configure a Pandas Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource)
+- [How to configure a Spark Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
 - [How to configure a SQL Datasource](../guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource.md)
 
 For guidance on how to request multiple Batches in a single Batch Request, please see the guide:

@@ -27,7 +27,7 @@ from great_expectations.datasource.fluent.spark_datasource import (
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
+        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
 
@@ -114,7 +114,7 @@ class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
 
     def _build_data_connector(
         self,
-        data_asset: CSVAsset,
+        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
         gcs_prefix: str = "",
         gcs_delimiter: str = "/",
         gcs_max_results: int = 1000,

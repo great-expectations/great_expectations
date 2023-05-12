@@ -166,6 +166,13 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
         filepath=pathlib.Path("great_expectations/data_asset/data_asset.py"),
     ),
     IncludeExcludeDefinition(
+        reason="False match for validator.validate()",
+        name="validate",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/data_connector/batch_filter.py"
+        ),
+    ),
+    IncludeExcludeDefinition(
         reason="Captured in AbstractDataContext",
         name="add_checkpoint",
         filepath=pathlib.Path(
@@ -672,5 +679,12 @@ DEFAULT_EXCLUDES: list[IncludeExcludeDefinition] = [
     IncludeExcludeDefinition(
         reason="Deprecated v2 api Dataset is not included in the public API",
         filepath=pathlib.Path("great_expectations/dataset/dataset.py"),
+    ),
+    IncludeExcludeDefinition(
+        reason="Validate method on custom type not included in the public API",
+        name="validate",
+        filepath=pathlib.Path(
+            "great_expectations/datasource/fluent/serializable_types/pyspark.py"
+        ),
     ),
 ]

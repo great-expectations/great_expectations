@@ -8,11 +8,13 @@ import TabItem from '@theme/TabItem';
 
 In this guide, you will utilize a <TechnicalTag tag="data_assistant" text="Data Assistant" /> to create an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> that can be used to gauge whether two tables are identical. This workflow can be used, for example, to validate migrated data.
 
+## Prerequisites
+
 <Prerequisites>
 
-- At least two configured [Datasources](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview) and [Assets](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table)
-- A basic understanding of [Expectation Configurations in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations)
-- Read the overview of <TechnicalTag tag="data_assistant" text="Data Assistants" />
+- A minimum of two configured [Datasources](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/connect_to_data_overview) and [Assets](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table)
+- A basic understanding of how to [configure Expectation in Great Expectations](https://docs.greatexpectations.io/docs/reference/expectations/expectations)
+- Completion of the <TechnicalTag tag="data_assistant" text="Data Assistants" /> overview
 
 </Prerequisites>
 

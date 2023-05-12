@@ -69,7 +69,7 @@ class DataAssistantRunner:
 
         self._profiler = self.get_profiler()
 
-        setattr(self, "run", self.run_impl())
+        self.run = self.run_impl()
 
     def get_profiler(self) -> BaseRuleBasedProfiler:
         """

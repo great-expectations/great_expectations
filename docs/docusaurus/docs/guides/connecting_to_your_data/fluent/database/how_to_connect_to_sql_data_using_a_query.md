@@ -10,55 +10,29 @@ import Prerequisites from '/docs/components/_prerequisites.jsx'
 
 import SetupAndInstallForSqlData from '/docs/components/setup/link_lists/_setup_and_install_for_sql_data.md'
 import ConnectingToSqlDatasourcesFluently from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_fluently.md'
-import ConnectingToSqlDatasourcesBlockConfig from '/docs/components/connect_to_data/link_lists/_connecting_to_sql_datasources_block_config.md'
 
+In this guide we will demonstrate how to connect Great Expectations to the data returned by a query in a generic SQL database.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, see [Dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
 
-## Introduction
-
-In this guide we will demonstrate how to connect Great Expectations to the data returned by a query in a generic SQL database.  GX uses SQLAlchemy to connect to SQL data, and therefore supports most SQL dialects that SQLAlchemy does.  For more information on the SQL dialects supported by SQLAlchemy, please see [SQLAlchemy's official documentation on dialects](https://docs.sqlalchemy.org/en/20/dialects/index.html).
-
-If you would like to connect to the contents of a SQL table instead of the results of a SQL query, please see [our guide on how to connect to a SQL table](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table), instead.
+To connect to the contents of a SQL table instead of the results of a SQL query, see [our guide on how to connect to a SQL table](/docs/guides/connecting_to_your_data/fluent/database/how_to_connect_to_a_sql_table), instead.
 
 ## Prerequisites
 
 <Prerequisites requirePython = {false} requireInstallation = {false} requireDataContext = {false} requireSourceData = {null} requireDatasource = {false} requireExpectationSuite = {false}>
 
-- An installation of GX set up to work with SQL
-- Source data stored in a SQL database
-- A passion for data quality
+- An installation of GX set up to work with SQL. See [How to set up GX to work with SQL databases](/docs/guides/setup/optional_dependencies/sql_databases/how_to_setup_gx_to_work_with_sql_databases).
+- Source data stored in a SQL database.
 
 </Prerequisites> 
 
-<details>
-<summary>
+### If you still need to connect a Datasource to a SQL database
 
-### If you still need to set up and install GX...
-
-</summary>
-
-Please reference the appropriate one of these guides:
-
-<SetupAndInstallForSqlData />
-
-</details>
-
-<details>
-<summary>
-
-### If you still need to connect a Datasource to a SQL database...
-
-</summary>
+<summary></summary>
 
 Please reference the appropriate one of these guides:
 
 <ConnectingToSqlDatasourcesFluently />
 
-Or, for guides on using the block-config method for advanced SQL Datasource configurations, please see:
-
-<ConnectingToSqlDatasourcesBlockConfig />
-
-
-</details>
+<details></details>
 
 :::caution Datasources defined with the block-config method
 

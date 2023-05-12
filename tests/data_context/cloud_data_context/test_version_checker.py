@@ -1,7 +1,6 @@
 import pytest
 import responses
 
-import great_expectations.data_context._version_checker as vc
 from great_expectations.data_context._version_checker import _VersionChecker
 
 # Set to some arbitrary value so tests will continue to work regardless of GX's actual version
@@ -10,9 +9,10 @@ _MOCK_PYPI_VERSION = "0.16.8"
 
 @pytest.fixture
 def enable_pypi_version_check():
-    vc._ENABLE_VERSION_CHECK_IN_TESTS = False
+    stashed_version = _VersionChecker._LATEST_GX_VERSION_CACHE
+    _VersionChecker._LATEST_GX_VERSION_CACHE = None
     yield
-    vc._ENABLE_VERSION_CHECK_IN_TESTS = True
+    _VersionChecker._LATEST_GX_VERSION_CACHE = stashed_version
 
 
 @pytest.mark.parametrize(

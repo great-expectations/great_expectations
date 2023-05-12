@@ -3,16 +3,21 @@ title: How to configure an Expectation Store to use Azure Blob Storage
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 By default, newly <TechnicalTag tag="profiling" text="Profiled" /> <TechnicalTag tag="expectation" text="Expectations" /> are stored as <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> in JSON format in the ``expectations/`` subdirectory of your ``great_expectations/`` folder. This guide will help you configure Great Expectations to store them in Azure Blob Storage.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
-- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
-- Configured an [Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
-- Create the Azure Blob container. If you also wish to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md) then you may set up this first and then use the ``$web`` existing container to store your Expectations.
-- Identify the prefix (folder) where Expectations will be stored (you don't need to create the folder, the prefix is just part of the Blob name).
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [An Azure Storage account](https://docs.microsoft.com/en-us/azure/storage/).
+- An Azure Blob container. If you need to [host and share Data Docs on Azure Blob Storage](../configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage.md), then you can set this up first and then use the ``$web`` existing container to store your Expectations.
+- A prefix (folder) where to store Expectations. You don't need to create the folder, the prefix is just part of the Blob name.
 
 </Prerequisites>
     

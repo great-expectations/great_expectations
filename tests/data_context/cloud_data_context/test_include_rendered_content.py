@@ -32,6 +32,8 @@ def test_cloud_backed_data_context_save_expectation_suite_include_rendered_conte
         resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
         id=ge_cloud_id,
         url="foo/bar/baz",
+        # response_json will not be empty but is not needed for this test.
+        response_json={},
     )
 
     with mock.patch(

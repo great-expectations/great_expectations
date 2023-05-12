@@ -9,9 +9,11 @@ They are evaluated for an entire Batch, and answer a semantic question about the
 
 This guide will walk you through the process of creating your own custom `BatchExpectation`.
 
+## Prerequisites
+
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](./overview.md).
+- Completion of the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 
