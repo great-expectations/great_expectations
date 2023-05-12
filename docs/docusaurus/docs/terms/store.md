@@ -14,10 +14,6 @@ import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
 ## Overview
 
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
-
 ### Definition
 
 A Store is a connector to store and retrieve information about metadata in Great Expectations.
@@ -73,13 +69,18 @@ Stores provide an API for Great Expectations to perform the retrieval and storag
 
 ### How to access
 
-You can find a list of almost all of your Stores in your `great_expectations.yml` file under the `stores` key.  Alternatively, from the root folder of your Data Context you can retrieve a list of Stores with a CLI command:
+You can find a list of almost all of your Stores in your `great_expectations.yml` file under the `stores` key.
 
-```markdown title="Console command"
-great_expectations store list
+For Data Docs Stores, they are configured under the `data_docs_sites` key in the `great_expectations.yml` file.  Each entry under `data_docs_sites` will have a `store_backend` key.  The information under `store_backend` will correspond to the Data Doc Store used by that site.
+
+You can also view your stores using Python as follows:
+
+```python
+import great_expectations as gx
+
+context = gx.get_context()
+context.stores
 ```
-
-Data Docs Stores are the one exception to the above.  They are instead configured under the `data_docs_sites` key in the `great_expectations.yml` file.  Each entry under `data_docs_sites` will have a `store_backend` key.  The information under `store_backend` will correspond to the Data Doc Store used by that site. Data Doc Stores are not listed by the `great_expectations store list` command.
 
 ### Configuration
 
