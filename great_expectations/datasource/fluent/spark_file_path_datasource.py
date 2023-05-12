@@ -569,6 +569,24 @@ class DeltaAsset(_FilePathDataAsset):
         return {"timestamp_as_of", "version_as_of"}
 
 
+class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAsset):
+    type: Literal["directory_delta"] = "directory_delta"  # type: ignore[assignment]
+
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "delta"
+
+    def _get_reader_options_include(self) -> set[str]:
+        """The options below are available as of 2023-05-12
+
+        See https://docs.databricks.com/delta/tutorial.html for more info.
+        """
+        return (
+            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
+            | super(DeltaAsset, self)._get_reader_options_include()
+        )
+
+
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -584,6 +602,7 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     TextAsset,
     DirectoryTextAsset,
     DeltaAsset,
+    DirectoryDeltaAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     CSVAsset,
@@ -597,6 +616,7 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     TextAsset,
     DirectoryTextAsset,
     DeltaAsset,
+    DirectoryDeltaAsset,
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
@@ -606,6 +626,7 @@ _SPARK_DIRECTORY_ASSET_CLASSES = (
     DirectoryORCAsset,
     DirectoryJSONAsset,
     DirectoryTextAsset,
+    DirectoryDeltaAsset,
 )
 
 
