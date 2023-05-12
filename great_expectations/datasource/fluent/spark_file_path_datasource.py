@@ -476,6 +476,30 @@ class TextAsset(_SparkGenericFilePathAssetMixin):
         return super()._get_reader_options_include().union({"wholetext", "line_sep"})
 
 
+class DeltaAsset(_FilePathDataAsset):
+    # The options below are available as of 2023-05-12
+    # See https://docs.databricks.com/delta/tutorial.html for more info.
+    type: Literal["delta"] = "delta"
+
+    timestamp_as_of: Optional[str] = Field(None, alias="timestampAsOf")
+    version_as_of: Optional[str] = Field(None, alias="versionAsOf")
+
+    class Config:
+        extra = pydantic.Extra.forbid
+        allow_population_by_field_name = True
+
+    @classmethod
+    def _get_reader_method(cls) -> str:
+        return "delta"
+
+    def _get_reader_options_include(self) -> set[str]:
+        """The options below are available as of 2023-05-12
+
+        See https://docs.databricks.com/delta/tutorial.html for more info.
+        """
+        return {"timestamp_as_of", "version_as_of"}
+
+
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -486,6 +510,7 @@ _SPARK_FILE_PATH_ASSET_TYPES = (
     ORCAsset,
     JSONAsset,
     TextAsset,
+    DeltaAsset,
 )
 _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     CSVAsset,
@@ -494,6 +519,7 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     ORCAsset,
     JSONAsset,
     TextAsset,
+    DeltaAsset,
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.

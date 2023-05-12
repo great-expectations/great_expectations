@@ -29,7 +29,7 @@ from great_expectations.datasource.fluent.spark_file_path_datasource import (
     ORCAsset,
     ParquetAsset,
     TextAsset,
-    _SparkFilePathDatasource,
+    _SparkFilePathDatasource, DeltaAsset,
 )
 from great_expectations.datasource.fluent.spark_filesystem_datasource import (
     SparkFilesystemDatasource,
@@ -310,12 +310,41 @@ add_text_asset = [
     ),
 ]
 
+add_delta_asset = [
+    pytest.param(
+        "add_delta_asset",
+        {},
+        id="delta_min_params",
+    ),
+    pytest.param(
+        "add_delta_asset",
+        {
+            "timestamp_as_of": "timestamp_as_of",
+            "version_as_of": "version_as_of",
+        },
+        id="delta_all_params_20230512",
+    ),
+    pytest.param(
+        "add_delta_asset",
+        {
+            "this_param_does_not_exist": "param_does_not_exist",
+        },
+        marks=pytest.mark.xfail(
+            reason="param_does_not_exist",
+            strict=True,
+            raises=pydantic.ValidationError,
+        ),
+        id="delta_fail_extra_params",
+    ),
+]
+
 add_asset_test_params = []
 add_asset_test_params += add_csv_asset
 add_asset_test_params += add_parquet_asset
 add_asset_test_params += add_orc_asset
 add_asset_test_params += add_json_asset
 add_asset_test_params += add_text_asset
+add_asset_test_params += add_delta_asset
 
 
 @pytest.mark.unit
@@ -347,6 +376,7 @@ _SPARK_ASSET_TYPES = [
     (ORCAsset, {"name": "asset_name"}),
     (JSONAsset, {"name": "asset_name"}),
     (TextAsset, {"name": "asset_name"}),
+    (DeltaAsset, {"name": "asset_name"}),
 ]
 
 
