@@ -282,6 +282,7 @@ class ParquetAsset(_SparkGenericFilePathAssetMixin):
             )
         )
 
+
 class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
     type: Literal["directory_parquet"] = "directory_parquet"  # type: ignore[assignment]
 
@@ -294,6 +295,7 @@ class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
             super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
             | super(ParquetAsset, self)._get_reader_options_include()
         )
+
 
 class ORCAsset(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
@@ -329,6 +331,7 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
             super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
             | super(ORCAsset, self)._get_reader_options_include()
         )
+
 
 class JSONAsset(_SparkGenericFilePathAssetMixin):
     type: Literal["json"] = "json"
@@ -484,6 +487,7 @@ class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
             | super(JSONAsset, self)._get_reader_options_include()
         )
 
+
 class TextAsset(_SparkGenericFilePathAssetMixin):
     # The options below are available as of spark v3.4.0
     # See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
@@ -520,6 +524,7 @@ class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
             | super(TextAsset, self)._get_reader_options_include()
         )
 
+
 # New asset types should be added to the _SPARK_FILE_PATH_ASSET_TYPES tuple,
 # and to _SPARK_FILE_PATH_ASSET_TYPES_UNION
 # so that the schemas are generated and the assets are registered.
@@ -549,7 +554,13 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
 ]
 # Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
 # tuple so that the appropriate directory related methods are called.
-_SPARK_DIRECTORY_ASSET_CLASSES = (DirectoryCSVAsset, DirectoryParquetAsset, DirectoryORCAsset,DirectoryJSONAsset,DirectoryTextAsset,)
+_SPARK_DIRECTORY_ASSET_CLASSES = (
+    DirectoryCSVAsset,
+    DirectoryParquetAsset,
+    DirectoryORCAsset,
+    DirectoryJSONAsset,
+    DirectoryTextAsset,
+)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
