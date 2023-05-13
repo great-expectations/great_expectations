@@ -13,6 +13,7 @@ from typing import (
     Tuple,
     Union,
     cast,
+    overload,
 )
 
 import requests
@@ -547,6 +548,33 @@ class CloudDataContext(SerializableDataContext):
             expectation_suite.ge_cloud_id = response.id
 
         return expectation_suite
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: str = ...,
+        ge_cloud_id: None = ...,
+        id: None = ...,
+    ) -> bool:
+        ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        ge_cloud_id: str = ...,
+        id: None = ...,
+    ) -> bool:
+        ...
+
+    @overload
+    def delete_expectation_suite(
+        self,
+        expectation_suite_name: None = ...,
+        ge_cloud_id: None = ...,
+        id: str = ...,
+    ) -> bool:
+        ...
 
     def delete_expectation_suite(
         self,
