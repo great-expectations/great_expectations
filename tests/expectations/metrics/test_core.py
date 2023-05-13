@@ -116,7 +116,7 @@ def test_mean_metric_pd(dataframe, result):
 @pytest.mark.parametrize(
     "dataframe,result",
     [
-        [ pd.DataFrame({"a": [1, 2, 3, None]}), 2],
+        [pd.DataFrame({"a": [1, 2, 3, None]}), 2],
         [
             pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
             1.093905,
@@ -159,7 +159,6 @@ def test_mean_metric_spark(spark_session, dataframe, result):
     )
 
     assert results == {desired_metric.id: result}
-
 
 
 @pytest.mark.parametrize(
@@ -4177,6 +4176,7 @@ def test_table_metric_spark(spark_session):
     )
 
     assert results == {desired_metric.id: 3}
+
 
 def test_column_median_metric_pd():
     engine = build_pandas_engine(

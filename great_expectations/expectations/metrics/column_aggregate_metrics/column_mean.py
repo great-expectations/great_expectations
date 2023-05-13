@@ -32,6 +32,11 @@ class ColumnMean(ColumnAggregateMetricProvider):
     def _spark(cls, column, _table, _column_name, **kwargs):
         """Spark Mean Implementation"""
         types = dict(_table.dtypes)
-        if types[_column_name] not in ("int", "float", "double", "bigint") and "decimal" not in types[_column_name]:
-            raise TypeError(f"Expected numeric column type for function mean(). Recieved type: {str(types[_column_name])}")
+        if (
+            types[_column_name] not in ("int", "float", "double", "bigint")
+            and "decimal" not in types[_column_name]
+        ):
+            raise TypeError(
+                f"Expected numeric column type for function mean(). Recieved type: {str(types[_column_name])}"
+            )
         return F.mean(column)
