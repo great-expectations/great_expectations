@@ -70,7 +70,7 @@ See one of the following guides:
 
 The simplest way to create a new Data Context is by using the `create()` method.
 
-From a Notebook or script where you want to deploy Great Expectations run the following command. Here the `full_path_to_project_directory` can be an empty directory where you intend to build your Great Expectations configuration.:
+From a Notebook or script where you want to deploy Great Expectations run the following command. Here the `full_path_to_project_directory` can be an empty directory where you intend to build your Great Expectations configuration.: 
 
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_context"
 ```
@@ -103,12 +103,12 @@ There are a number of different ways that this can be done, with one way being u
 
 First load the `ExpectationSuite` from the `Validator`: 
 
-```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_and_show_suite"
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite get_suite"
 ```
 
 Now use the `show_expectations_by_expectation_type()` to print the Suite to console or Jupyter Notebook.
 
-```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite show_expectations"
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite show_suite"
 ```
 
 
@@ -138,7 +138,7 @@ Here is the same configuration, but this time as a `ExpectationConfiguration` ob
 
 It runs in the `passenger_count` column and expects and max and min values to be `6` and `1` respectively. 
 
-```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_expectation"
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_configuration_1"
 ```
 
 ### 6. Update Configuration and ExpectationSuite
@@ -151,7 +151,7 @@ Let's say that you are interested in adjusting the `max_value` of the Expectatio
 And update the ExpectationSuite by calling `add_expectation()`. The `add_expectation()` function will perform an 'upsert' into the `ExpectationSuite`, meaning it will add update an existing Expectation if it already exists, or add a new one if it doesn't. 
 
 
-```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite updated_configuration"
+```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite add_configuration"
 ```
 
 You can check that the ExpectationSuite has been correctly updated by eitehr running the `show_expectations_by_expectation_type()` function again, or by running `find_expectation()` and confirming that the expected configuration exists in the suite.  The search will need to be performed with a new `ExpectationConfiguration`, but will not need to inclued all of the detailed `kwarg` values.
