@@ -118,8 +118,8 @@ def test_add_custom_checkpoint_extensions(
 
     checkpoint_config: dict = {
         "class_name": "ExtendedSimpleCheckpoint",
-        "module_name": "my_custom_extended_simple_checkpoint",
-        "name": "my_checkpoint",
+        "module_name": "extended_checkpoint",
+        "name": "my_custom_extended_simple_checkpoint",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -129,8 +129,8 @@ def test_add_custom_checkpoint_extensions(
 
     checkpoint_config: dict = {
         "class_name": "ExtendedLegacyCheckpoint",
-        "module_name": "my_custom_extended_legacy_checkpoint",
-        "name": "my_checkpoint",
+        "module_name": "extended_checkpoint",
+        "name": "my_custom_extended_legacy_checkpoint",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
@@ -144,8 +144,8 @@ def test_add_custom_checkpoint_extensions(
 
     checkpoint_config: dict = {
         "class_name": "ExtendedCheckpointIllegalBaseClass",
-        "module_name": "my_custom_extended_checkpoint_illegal_base_class",
-        "name": "my_checkpoint",
+        "module_name": "extended_checkpoint",
+        "name": "my_custom_extended_checkpoint_illegal_base_class",
         "expectation_suite_name": "my_expectation_suite",
         "action_list": common_action_list,
     }
