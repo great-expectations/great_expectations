@@ -472,6 +472,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         resource_object_name = key[2]
 
         try:
+            # prefer deletion by id if id present
             if id:
                 data = {
                     "data": {
