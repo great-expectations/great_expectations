@@ -326,11 +326,7 @@ def test_remove_key_with_id_and_name(
         mock_response.status_code = 200
 
         store_backend.remove_key(
-            (
-                "checkpoint",
-                "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
-                "checkpoint_name"
-            )
+            ("checkpoint", "0ccac18e-7631-4bdd-8a42-3c35cce574c6", "checkpoint_name")
         )
         mock_delete.assert_called_with(
             mock.ANY,  # requests.Session object
@@ -360,13 +356,7 @@ def test_remove_key_with_only_name(
         mock_response = mock_delete.return_value
         mock_response.status_code = 200
 
-        store_backend.remove_key(
-            (
-                "checkpoint",
-                "",
-                "checkpoint_name"
-            )
-        )
+        store_backend.remove_key(("checkpoint", "", "checkpoint_name"))
         mock_delete.assert_called_with(
             mock.ANY,  # requests.Session object
             f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
