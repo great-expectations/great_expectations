@@ -569,6 +569,7 @@ class CloudDataContext(SerializableDataContext):
         key = GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
             id=id,
+            resource_name=expectation_suite_name,
         )
 
         return self.expectations_store.remove_key(key)
