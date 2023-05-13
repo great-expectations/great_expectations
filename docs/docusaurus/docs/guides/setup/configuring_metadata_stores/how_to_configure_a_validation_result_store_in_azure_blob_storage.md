@@ -3,9 +3,6 @@ title: How to configure a Validation Result Store in Azure Blob Storage
 ---
 import Prerequisites from '../../connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx'
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system. This guide will help you configure a new storage location for Validation Results in Azure Blob Storage.
 
@@ -92,27 +89,9 @@ Finished[#############################################################]  100.000
 }
 ```
 
-### 5. Confirm that the new Validation Results Store has been added by running ``great_expectations store list``
+### 5. Reference the new configuration
 
-Notice the output contains two Validation stores: the original ``validations_store`` on the local filesystem and the ``validations_AZ_store`` we just configured.  This is ok, since Great Expectations will look for Validation Results in Azure Blob as long as we set the ``validations_store_name`` variable to ``validations_AZ_store``, and the config for ``validations_store`` can be removed if you would like.
-
-```bash
-great_expectations store list
-
-- name: validations_store
- class_name: ValidationsStore
- store_backend:
-   class_name: TupleFilesystemStoreBackend
-   base_directory: uncommitted/validations/
-
-- name: validations_AZ_store
- class_name: ValidationsStore
- store_backend:
-   class_name: TupleAzureBlobStoreBackend
-   connection_string: "DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=<YOUR-STORAGE-ACCOUNT-NAME>;AccountKey=<YOUR-STORAGE-ACCOUNT-KEY==>"
-   container: <blob-container>
-   prefix: validations
-```
+To make Great Expectations look for Validation Results on the Azure store, you must set the ``validations_store_name`` variable to the name of your Azure Validations Store, which in our example is `validations_AZ_store`.
 
 
 ### 6. Confirm that the Validation Results Store has been correctly configured

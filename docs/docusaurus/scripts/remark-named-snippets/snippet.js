@@ -112,10 +112,6 @@ function parseFile(file) {
 
   snippets = snippets.filter((s) => s.name)
 
-  const length = snippets.length
-  if (length) {
-    console.log(`Collected ${length} reference(s) from ${file}`)
-  }
   return snippets
 }
 
