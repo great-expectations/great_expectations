@@ -35,6 +35,30 @@
                     },
                     {
                         "$ref": "#/definitions/ParquetAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/DirectoryParquetAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/ORCAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/DirectoryORCAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/JSONAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/DirectoryJSONAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/TextAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/DirectoryTextAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/DeltaAsset"
                     }
                 ]
             }
@@ -387,15 +411,254 @@
                         }
                     ]
                 },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "schema": {
+                    "title": "Schema",
+                    "anyOf": [
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sep": {
+                    "title": "Sep",
+                    "type": "string"
+                },
+                "encoding": {
+                    "title": "Encoding",
+                    "type": "string"
+                },
+                "quote": {
+                    "title": "Quote",
+                    "type": "string"
+                },
+                "escape": {
+                    "title": "Escape",
+                    "type": "string"
+                },
+                "comment": {
+                    "title": "Comment",
+                    "type": "string"
+                },
                 "header": {
                     "title": "Header",
-                    "default": false,
-                    "type": "boolean"
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
                 },
-                "InferSchema": {
+                "inferSchema": {
                     "title": "Inferschema",
-                    "default": false,
-                    "type": "boolean"
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "ignoreLeadingWhiteSpace": {
+                    "title": "Ignoreleadingwhitespace",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "ignoreTrailingWhiteSpace": {
+                    "title": "Ignoretrailingwhitespace",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "nullValue": {
+                    "title": "Nullvalue",
+                    "type": "string"
+                },
+                "nanValue": {
+                    "title": "Nanvalue",
+                    "type": "string"
+                },
+                "positiveInf": {
+                    "title": "Positiveinf",
+                    "type": "string"
+                },
+                "negativeInf": {
+                    "title": "Negativeinf",
+                    "type": "string"
+                },
+                "dateFormat": {
+                    "title": "Dateformat",
+                    "type": "string"
+                },
+                "timestampFormat": {
+                    "title": "Timestampformat",
+                    "type": "string"
+                },
+                "maxColumns": {
+                    "title": "Maxcolumns",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "maxCharsPerColumn": {
+                    "title": "Maxcharspercolumn",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "maxMalformedLogPerPartition": {
+                    "title": "Maxmalformedlogperpartition",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mode": {
+                    "title": "Mode",
+                    "enum": [
+                        "PERMISSIVE",
+                        "DROPMALFORMED",
+                        "FAILFAST"
+                    ],
+                    "type": "string"
+                },
+                "columnNameOfCorruptRecord": {
+                    "title": "Columnnameofcorruptrecord",
+                    "type": "string"
+                },
+                "multiLine": {
+                    "title": "Multiline",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "charToEscapeQuoteEscaping": {
+                    "title": "Chartoescapequoteescaping",
+                    "type": "string"
+                },
+                "samplingRatio": {
+                    "title": "Samplingratio",
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "enforceSchema": {
+                    "title": "Enforceschema",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "emptyValue": {
+                    "title": "Emptyvalue",
+                    "type": "string"
+                },
+                "locale": {
+                    "title": "Locale",
+                    "type": "string"
+                },
+                "lineSep": {
+                    "title": "Linesep",
+                    "type": "string"
+                },
+                "unescapedQuoteHandling": {
+                    "title": "Unescapedquotehandling",
+                    "enum": [
+                        "STOP_AT_CLOSING_QUOTE",
+                        "BACK_TO_DELIMITER",
+                        "STOP_AT_DELIMITER",
+                        "SKIP_VALUE",
+                        "RAISE_ERROR"
+                    ],
+                    "type": "string"
                 }
             },
             "required": [
@@ -477,20 +740,259 @@
                         }
                     ]
                 },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "schema": {
+                    "title": "Schema",
+                    "anyOf": [
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "sep": {
+                    "title": "Sep",
+                    "type": "string"
+                },
+                "encoding": {
+                    "title": "Encoding",
+                    "type": "string"
+                },
+                "quote": {
+                    "title": "Quote",
+                    "type": "string"
+                },
+                "escape": {
+                    "title": "Escape",
+                    "type": "string"
+                },
+                "comment": {
+                    "title": "Comment",
+                    "type": "string"
+                },
+                "header": {
+                    "title": "Header",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "inferSchema": {
+                    "title": "Inferschema",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "ignoreLeadingWhiteSpace": {
+                    "title": "Ignoreleadingwhitespace",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "ignoreTrailingWhiteSpace": {
+                    "title": "Ignoretrailingwhitespace",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "nullValue": {
+                    "title": "Nullvalue",
+                    "type": "string"
+                },
+                "nanValue": {
+                    "title": "Nanvalue",
+                    "type": "string"
+                },
+                "positiveInf": {
+                    "title": "Positiveinf",
+                    "type": "string"
+                },
+                "negativeInf": {
+                    "title": "Negativeinf",
+                    "type": "string"
+                },
+                "dateFormat": {
+                    "title": "Dateformat",
+                    "type": "string"
+                },
+                "timestampFormat": {
+                    "title": "Timestampformat",
+                    "type": "string"
+                },
+                "maxColumns": {
+                    "title": "Maxcolumns",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "maxCharsPerColumn": {
+                    "title": "Maxcharspercolumn",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "maxMalformedLogPerPartition": {
+                    "title": "Maxmalformedlogperpartition",
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mode": {
+                    "title": "Mode",
+                    "enum": [
+                        "PERMISSIVE",
+                        "DROPMALFORMED",
+                        "FAILFAST"
+                    ],
+                    "type": "string"
+                },
+                "columnNameOfCorruptRecord": {
+                    "title": "Columnnameofcorruptrecord",
+                    "type": "string"
+                },
+                "multiLine": {
+                    "title": "Multiline",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "charToEscapeQuoteEscaping": {
+                    "title": "Chartoescapequoteescaping",
+                    "type": "string"
+                },
+                "samplingRatio": {
+                    "title": "Samplingratio",
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "enforceSchema": {
+                    "title": "Enforceschema",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "emptyValue": {
+                    "title": "Emptyvalue",
+                    "type": "string"
+                },
+                "locale": {
+                    "title": "Locale",
+                    "type": "string"
+                },
+                "lineSep": {
+                    "title": "Linesep",
+                    "type": "string"
+                },
+                "unescapedQuoteHandling": {
+                    "title": "Unescapedquotehandling",
+                    "enum": [
+                        "STOP_AT_CLOSING_QUOTE",
+                        "BACK_TO_DELIMITER",
+                        "STOP_AT_DELIMITER",
+                        "SKIP_VALUE",
+                        "RAISE_ERROR"
+                    ],
+                    "type": "string"
+                },
                 "data_directory": {
                     "title": "Data Directory",
                     "type": "string",
                     "format": "path"
-                },
-                "header": {
-                    "title": "Header",
-                    "default": false,
-                    "type": "boolean"
-                },
-                "InferSchema": {
-                    "title": "Inferschema",
-                    "default": false,
-                    "type": "boolean"
                 }
             },
             "required": [
@@ -573,6 +1075,214 @@
                         }
                     ]
                 },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mergeSchema": {
+                    "title": "Mergeschema",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "datetimeRebaseMode": {
+                    "title": "Datetimerebasemode",
+                    "enum": [
+                        "EXCEPTION",
+                        "CORRECTED",
+                        "LEGACY"
+                    ],
+                    "type": "string"
+                },
+                "int96RebaseMode": {
+                    "title": "Int96Rebasemode",
+                    "enum": [
+                        "EXCEPTION",
+                        "CORRECTED",
+                        "LEGACY"
+                    ],
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "DirectoryParquetAsset": {
+            "title": "DirectoryParquetAsset",
+            "description": "Used for accessing all the files in a directory as a single batch.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "directory_parquet",
+                    "enum": [
+                        "directory_parquet"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mergeSchema": {
+                    "title": "Mergeschema",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
                 "datetimeRebaseMode": {
                     "title": "Datetimerebasemode",
                     "enum": [
@@ -591,16 +1301,1259 @@
                     ],
                     "type": "string"
                 },
-                "mergeSchema": {
-                    "title": "Mergeschema",
-                    "default": false,
-                    "type": "boolean"
+                "data_directory": {
+                    "title": "Data Directory",
+                    "type": "string",
+                    "format": "path"
                 }
             },
             "required": [
                 "name",
-                "datetimeRebaseMode",
-                "int96RebaseMode"
+                "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "ORCAsset": {
+            "title": "ORCAsset",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "orc",
+                    "enum": [
+                        "orc"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mergeSchema": {
+                    "title": "Mergeschema",
+                    "default": false,
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "DirectoryORCAsset": {
+            "title": "DirectoryORCAsset",
+            "description": "Used for accessing all the files in a directory as a single batch.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "directory_orc",
+                    "enum": [
+                        "directory_orc"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mergeSchema": {
+                    "title": "Mergeschema",
+                    "default": false,
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "data_directory": {
+                    "title": "Data Directory",
+                    "type": "string",
+                    "format": "path"
+                }
+            },
+            "required": [
+                "name",
+                "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "JSONAsset": {
+            "title": "JSONAsset",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "json",
+                    "enum": [
+                        "json"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "schema": {
+                    "title": "Schema",
+                    "anyOf": [
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "primitivesAsString": {
+                    "title": "Primitivesasstring",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "prefersDecimal": {
+                    "title": "Prefersdecimal",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowComments": {
+                    "title": "Allowcomments",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowUnquotedFieldNames": {
+                    "title": "Allowunquotedfieldnames",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowSingleQuotes": {
+                    "title": "Allowsinglequotes",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowNumericLeadingZero": {
+                    "title": "Allownumericleadingzero",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowBackslashEscapingAnyCharacter": {
+                    "title": "Allowbackslashescapinganycharacter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mode": {
+                    "title": "Mode",
+                    "enum": [
+                        "PERMISSIVE",
+                        "DROPMALFORMED",
+                        "FAILFAST"
+                    ],
+                    "type": "string"
+                },
+                "columnNameOfCorruptRecord": {
+                    "title": "Columnnameofcorruptrecord",
+                    "type": "string"
+                },
+                "dateFormat": {
+                    "title": "Dateformat",
+                    "type": "string"
+                },
+                "timestampFormat": {
+                    "title": "Timestampformat",
+                    "type": "string"
+                },
+                "multiLine": {
+                    "title": "Multiline",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowUnquotedControlChars": {
+                    "title": "Allowunquotedcontrolchars",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "lineSep": {
+                    "title": "Linesep",
+                    "type": "string"
+                },
+                "samplingRatio": {
+                    "title": "Samplingratio",
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "dropFieldIfAllNull": {
+                    "title": "Dropfieldifallnull",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "encoding": {
+                    "title": "Encoding",
+                    "type": "string"
+                },
+                "locale": {
+                    "title": "Locale",
+                    "type": "string"
+                },
+                "allowNonNumericNumbers": {
+                    "title": "Allownonnumericnumbers",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "DirectoryJSONAsset": {
+            "title": "DirectoryJSONAsset",
+            "description": "Used for accessing all the files in a directory as a single batch.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "directory_json",
+                    "enum": [
+                        "directory_json"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "schema": {
+                    "title": "Schema",
+                    "anyOf": [
+                        {
+                            "type": "object"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "primitivesAsString": {
+                    "title": "Primitivesasstring",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "prefersDecimal": {
+                    "title": "Prefersdecimal",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowComments": {
+                    "title": "Allowcomments",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowUnquotedFieldNames": {
+                    "title": "Allowunquotedfieldnames",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowSingleQuotes": {
+                    "title": "Allowsinglequotes",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowNumericLeadingZero": {
+                    "title": "Allownumericleadingzero",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowBackslashEscapingAnyCharacter": {
+                    "title": "Allowbackslashescapinganycharacter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "mode": {
+                    "title": "Mode",
+                    "enum": [
+                        "PERMISSIVE",
+                        "DROPMALFORMED",
+                        "FAILFAST"
+                    ],
+                    "type": "string"
+                },
+                "columnNameOfCorruptRecord": {
+                    "title": "Columnnameofcorruptrecord",
+                    "type": "string"
+                },
+                "dateFormat": {
+                    "title": "Dateformat",
+                    "type": "string"
+                },
+                "timestampFormat": {
+                    "title": "Timestampformat",
+                    "type": "string"
+                },
+                "multiLine": {
+                    "title": "Multiline",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "allowUnquotedControlChars": {
+                    "title": "Allowunquotedcontrolchars",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "lineSep": {
+                    "title": "Linesep",
+                    "type": "string"
+                },
+                "samplingRatio": {
+                    "title": "Samplingratio",
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "dropFieldIfAllNull": {
+                    "title": "Dropfieldifallnull",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "encoding": {
+                    "title": "Encoding",
+                    "type": "string"
+                },
+                "locale": {
+                    "title": "Locale",
+                    "type": "string"
+                },
+                "allowNonNumericNumbers": {
+                    "title": "Allownonnumericnumbers",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "data_directory": {
+                    "title": "Data Directory",
+                    "type": "string",
+                    "format": "path"
+                }
+            },
+            "required": [
+                "name",
+                "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "TextAsset": {
+            "title": "TextAsset",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "text",
+                    "enum": [
+                        "text"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "wholetext": {
+                    "title": "Wholetext",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "lineSep": {
+                    "title": "Linesep",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "additionalProperties": false
+        },
+        "DirectoryTextAsset": {
+            "title": "DirectoryTextAsset",
+            "description": "Used for accessing all the files in a directory as a single batch.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "directory_text",
+                    "enum": [
+                        "directory_text"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "pathGlobFilter": {
+                    "title": "Pathglobfilter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "recursiveFileLookup": {
+                    "title": "Recursivefilelookup",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedBefore": {
+                    "title": "Modifiedbefore",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "modifiedAfter": {
+                    "title": "Modifiedafter",
+                    "anyOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "wholetext": {
+                    "title": "Wholetext",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "lineSep": {
+                    "title": "Linesep",
+                    "type": "string"
+                },
+                "data_directory": {
+                    "title": "Data Directory",
+                    "type": "string",
+                    "format": "path"
+                }
+            },
+            "required": [
+                "name",
+                "data_directory"
+            ],
+            "additionalProperties": false
+        },
+        "DeltaAsset": {
+            "title": "DeltaAsset",
+            "description": "Base model for most fluent datasource related pydantic models.\n\nAdds yaml dumping and parsing methods.\n\nExtra fields are not allowed.\n\nSerialization methods default to `exclude_unset = True` to prevent serializing\nconfigs full of mostly unset default values.\nAlso prevents passing along unset kwargs to BatchSpec.\nhttps://docs.pydantic.dev/usage/exporting_models/",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "delta",
+                    "enum": [
+                        "delta"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "timestampAsOf": {
+                    "title": "Timestampasof",
+                    "type": "string"
+                },
+                "versionAsOf": {
+                    "title": "Versionasof",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
             ],
             "additionalProperties": false
         }

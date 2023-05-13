@@ -71,7 +71,7 @@ import OptionalCopyExistingExpectationsToS3 from '@site/docs/guides/setup/config
 
 <!-- 1.4.5 (Optional) Verify that copied Expectations can be accessed from Amazon S3 -->
 
-import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_that_expectations_can_be_accessed_from_amazon_s_by_running_great_expectations_suite_list.mdx'
+import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_list.mdx'
 
 <!-- 1.5 Configure your Validation Results Store on Amazon S3 -->
 
@@ -85,7 +85,7 @@ import AddS3ValidationResultsStoreConfiguration from '@site/docs/guides/setup/co
 
 <!-- 1.5.3 Verify that the new Amazon S3 Validation Results Store has been added successfully -->
 
-import VerifyS3ValidationResultsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_confirm_that_the_new_validation_results_store_has_been_added_by_running_great_expectations_store_list.mdx'
+import VerifyS3ValidationResultsStoreExists from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_a_validation_result_store_in_amazon_s3/_update_store_reference.mdx'
 
 <!-- 1.5.4 (Optional) Copy existing Validation results to the Amazon S3 bucket -->
 
