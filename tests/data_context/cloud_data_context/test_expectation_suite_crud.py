@@ -366,7 +366,7 @@ def test_create_expectation_suite_namespace_collision_raises_error(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_delete_expectation_suite_deletes_suite_in_cloud(
+def test_delete_expectation_suite_by_id_deletes_suite_in_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
 ) -> None:
