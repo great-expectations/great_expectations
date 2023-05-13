@@ -387,6 +387,26 @@ def test_delete_expectation_suite_by_id_deletes_suite_in_cloud(
 
 @pytest.mark.unit
 @pytest.mark.cloud
+def test_delete_expectation_suite_by_name_deletes_suite_in_cloud(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+    suite_1: SuiteIdentifierTuple,
+) -> None:
+    context = empty_base_data_context_in_cloud_mode
+    suite_name = suite_1.name
+
+    with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
+        context.delete_expectation_suite(expectation_suite_name=suite_name)
+
+    assert (
+        mock_delete.call_args[0][1]
+        == "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392"
+        "-bcd1-f1e87ad5a79c/expectation-suites"
+    )
+    assert mock_delete.call_args[1]["params"] == {"name": suite_name}
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
 def test_delete_expectation_suite_nonexistent_suite_raises_error(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
