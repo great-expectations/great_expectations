@@ -280,7 +280,7 @@ def test_list_keys(
 
 @pytest.mark.cloud
 @pytest.mark.unit
-def test_remove_key(
+def test_remove_key_with_only_id(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend
     ],
