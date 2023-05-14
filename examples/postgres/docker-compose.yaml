@@ -24,20 +24,20 @@ services:
       - dbnet
     entrypoint: python load_data.py
 
-#  jupyter:
-#    image: gx/postgres_example_jupyter
-#    build:
-#      context: .
-#      dockerfile: ./jupyter.Dockerfile
-#    environment:
-#      CONNECTION_STRING: postgresql://postgres@db/gx_example_db
-#    depends_on:
-#      - db
-#      - db_setup
-#    networks:
-#      - dbnet
-#    ports:
-#      - 8888:8888
+  jupyter:
+    image: gx/postgres_example_jupyter
+    build:
+      context: .
+      dockerfile: ./jupyter.Dockerfile
+    environment:
+      CONNECTION_STRING: postgresql://postgres@db/gx_example_db
+    depends_on:
+      - db
+      - db_setup
+    networks:
+      - dbnet
+    ports:
+      - 8888:8888
 
 networks:
   dbnet:
