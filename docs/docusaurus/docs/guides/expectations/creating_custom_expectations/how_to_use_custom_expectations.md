@@ -21,7 +21,7 @@ This guide will walk you through the process of utilizing Custom Expectations, w
 
 </Prerequisites>
 
-There are slight differences between working with custom Expectations and those contributed to GX.
+ Custom Expectations and those contributed to GX are different.
 
 ## Installation
 
@@ -35,7 +35,7 @@ There are slight differences between working with custom Expectations and those 
 
 <TabItem value="custom-expectations">
 
-If you're using a Custom Expectation you've built, you'll need to place it in the `great_expectations/plugins/expectations` folder of your Great Expectations deployment.
+If you're using a Custom Expectation you've created, add it to the `great_expectations/plugins/expectations` folder of your Great Expectations deployment.
 
 When you
 
@@ -43,15 +43,16 @@ When you
 
 <TabItem value="contrib-expectations">
 
-If you're using a Custom Expectation that is coming from the `Great Expectations Experimental` library, it will need to either be imported from there directly. To do this, we'll first need to `pip install great_expectations_experimental`.
+If you're using a Custom Expectation from the `Great Expectations Experimental` library, you'll need to import it.  Before you import it, run `pip install great_expectations_experimental`.
 
 </TabItem>
 </Tabs>
 
 ## Usage
 
-When you instantiate your <TechnicalTag tag="data_context" text="Data Context"/>, it will automatically make all plugins in the directory available for use,
-allowing you to import your Custom Expectation from that directory whenever and wherever it will be used.
+When you instantiate your <TechnicalTag tag="data_context" text="Data Context"/>, all plugins in the directory are automatically available,
+and this allows you to import your Custom Expectation from other locations.
+
 This import will be needed when an <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is created, *and* when a <TechnicalTag tag="checkpoint" text="Checkpoint"/> is defined and run.
 
 <Tabs

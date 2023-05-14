@@ -26,8 +26,8 @@ import ConfirmList from './components_how_to_configure_an_expectation_store_in_a
 ### 4. Update your configuration file to include a new Store for Expectations on S3
 <UpdateYourConfigurationFileToIncludeANewStoreForExpectationsOnS />
 
-### 5. Copy existing Expectation JSON files to the S3 bucket (This step is optional)
+### 5. Copy existing Expectation JSON files to the S3 bucket (Optional)
 <CopyExistingExpectationJsonFilesToTheSBucketThisStepIsOptional />
 
-### 6. Confirm Expectation Suites are available
+### 6. Confirm Expectation Suite availability
 <ConfirmList />

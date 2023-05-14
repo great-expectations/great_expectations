@@ -902,8 +902,9 @@ constructor arguments.
 
         return self.run(**checkpoint_run_arguments)
 
-    @staticmethod
+    @classmethod
     def construct_from_config_args(
+        cls,
         data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
@@ -971,20 +972,13 @@ constructor arguments.
             "default_validation_id": default_validation_id,
         }
 
-        if class_name == "LegacyCheckpoint":
-            checkpoint_config.update(
-                {
-                    # Next two fields are for LegacyCheckpoint configuration
-                    "validation_operator_name": validation_operator_name,
-                    "batches": batches,
-                }
-            )
-            checkpoint_config = deep_filter_properties_iterable(
-                properties=checkpoint_config,
-                clean_falsy=True,
-            )
+        detault_checkpoints_module_name = "great_expectations.checkpoint"
 
-        if class_name == "SimpleCheckpoint":
+        klass = load_class(
+            class_name=class_name,
+            module_name=module_name or detault_checkpoints_module_name,
+        )
+        if issubclass(klass, SimpleCheckpoint):
             checkpoint_config.update(
                 {
                     # the following four keys are used by SimpleCheckpoint
@@ -994,10 +988,27 @@ constructor arguments.
                     "notify_with": notify_with,
                 }
             )
-            checkpoint_config = deep_filter_properties_iterable(
-                properties=checkpoint_config,
-                clean_falsy=True,
+        elif klass == LegacyCheckpoint:
+            checkpoint_config.update(
+                {
+                    # Next two fields are for LegacyCheckpoint configuration
+                    "validation_operator_name": validation_operator_name,
+                    "batches": batches,
+                }
             )
+        elif issubclass(klass, LegacyCheckpoint):
+            raise gx_exceptions.InvalidCheckpointConfigError(
+                'Extending "LegacyCheckpoint" is not allowed, because "LegacyCheckpoint" is deprecated.'
+            )
+        elif not issubclass(klass, Checkpoint):
+            raise gx_exceptions.InvalidCheckpointConfigError(
+                f'Custom class "{klass.__name__}" must extend either "Checkpoint" or "SimpleCheckpoint" (exclusively).'
+            )
+
+        checkpoint_config = deep_filter_properties_iterable(
+            properties=checkpoint_config,
+            clean_falsy=True,
+        )
 
         new_checkpoint: Checkpoint = instantiate_class_from_config(
             config=checkpoint_config,
@@ -1005,7 +1016,7 @@ constructor arguments.
                 "data_context": data_context,
             },
             config_defaults={
-                "module_name": "great_expectations.checkpoint",
+                "module_name": detault_checkpoints_module_name,
             },
         )
 
