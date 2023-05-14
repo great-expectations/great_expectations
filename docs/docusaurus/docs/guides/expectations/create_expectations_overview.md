@@ -34,7 +34,7 @@ When following one of the first two workflows, once you have saved your Expectat
 
 ### Creating Expectations interactively
 
-We provide an in-depth guide for interactively creating Expectations in our guide on [how to create and edit Expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
+To interactively create Expectations, see [How to create and edit Expectations with instant feedback from a sample batch of data](./how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data.md).
 
 ### Creating Expectations with Data Assistants
 
