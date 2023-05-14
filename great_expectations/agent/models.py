@@ -14,10 +14,4 @@ class RunOnboardingDataAssistantEvent(EventBase):
     data_asset_name: str
 
 
-class ShutdownEvent(EventBase):
-    type: Literal["shutdown"] = "shutdown"
-
-
-Event = Annotated[
-    Union[RunOnboardingDataAssistantEvent, ShutdownEvent], Field(discriminator="type")
-]
+Event = Annotated[Union[RunOnboardingDataAssistantEvent], Field(discriminator="type")]

@@ -28,24 +28,20 @@ class EventHandler:
 
         # ensure resources we create don't already exist
         try:
-            self._context.get_expectation_suite(
-                expectation_suite_name=suite_name
-            )
+            self._context.get_expectation_suite(expectation_suite_name=suite_name)
             raise ValueError(
-                f"Onboarding Assistant Expectation Suite `{suite_name}` already exists. " +
-                "Please rename or delete suite and try again"
+                f"Onboarding Assistant Expectation Suite `{suite_name}` already exists. "
+                + "Please rename or delete suite and try again"
             )
         except StoreBackendError:
             # resource is unique
             pass
 
         try:
-            self._context.get_checkpoint(
-                name=checkpoint_name
-            )
+            self._context.get_checkpoint(name=checkpoint_name)
             raise ValueError(
-                f"Onboarding Assistant Checkpoint `{checkpoint_name}` already exists. " +
-                "Please rename or delete Checkpoint and try again"
+                f"Onboarding Assistant Checkpoint `{checkpoint_name}` already exists. "
+                + "Please rename or delete Checkpoint and try again"
             )
         except StoreBackendError:
             # resource is unique
@@ -61,4 +57,6 @@ class EventHandler:
         expectation_suite = data_assistant_result.get_expectation_suite(
             expectation_suite_name=suite_name
         )
-        self._context.add_or_update_expectation_suite(expectation_suite=expectation_suite)
+        self._context.add_or_update_expectation_suite(
+            expectation_suite=expectation_suite
+        )
