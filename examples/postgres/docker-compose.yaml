@@ -12,33 +12,32 @@ services:
       - 5432:5432
 
   db_setup:
-    image: python
+    image: gx/db_setup
     build:
       context: .
       dockerfile: ./db_setup.Dockerfile
-    restart: no
     depends_on:
       - db
     environment:
       CONNECTION_STRING: postgresql://postgres@db/gx_example_db
     networks:
       - dbnet
-    entrypoint: python ./load_data.py
+    entrypoint: python load_data.py
 
-  jupyter:
-    image: gx/postgres_example_jupyter
-    build:
-      context: .
-      dockerfile: ./jupyter.Dockerfile
-    environment:
-      CONNECTION_STRING: postgresql://postgres@db/gx_example_db
-    depends_on:
-      - db
-      - db_setup
-    networks:
-      - dbnet
-    ports:
-      - 8888:8888
+#  jupyter:
+#    image: gx/postgres_example_jupyter
+#    build:
+#      context: .
+#      dockerfile: ./jupyter.Dockerfile
+#    environment:
+#      CONNECTION_STRING: postgresql://postgres@db/gx_example_db
+#    depends_on:
+#      - db
+#      - db_setup
+#    networks:
+#      - dbnet
+#    ports:
+#      - 8888:8888
 
 networks:
   dbnet:
