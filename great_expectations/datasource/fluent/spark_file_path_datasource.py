@@ -618,16 +618,6 @@ _SPARK_FILE_PATH_ASSET_TYPES_UNION = Union[
     DeltaAsset,
     DirectoryDeltaAsset,
 ]
-# Directory asset classes should be added to the _SPARK_DIRECTORY_ASSET_CLASSES
-# tuple so that the appropriate directory related methods are called.
-_SPARK_DIRECTORY_ASSET_CLASSES = (
-    DirectoryCSVAsset,
-    DirectoryParquetAsset,
-    DirectoryORCAsset,
-    DirectoryJSONAsset,
-    DirectoryTextAsset,
-    DirectoryDeltaAsset,
-)
 
 
 class _SparkFilePathDatasource(_SparkDatasource):
