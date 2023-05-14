@@ -168,6 +168,11 @@ except (ImportError, AttributeError):
     quoted_name = SQLALCHEMY_NOT_IMPORTED
 
 try:
+    from sqlalchemy.sql.elements import _anonymous_label
+except (ImportError, AttributeError):
+    _anonymous_label = SQLALCHEMY_NOT_IMPORTED
+
+try:
     from sqlalchemy.sql.elements import ColumnElement
 except (ImportError, AttributeError):
     ColumnElement = SQLALCHEMY_NOT_IMPORTED

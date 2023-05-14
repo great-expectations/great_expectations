@@ -40,7 +40,7 @@ from pydantic import dataclasses as pydantic_dc
 from typing_extensions import TypeAlias, TypeGuard
 
 from great_expectations.core.config_substitutor import _ConfigurationSubstitutor
-from great_expectations.core.id_dict import BatchSpec  # noqa: TCH001
+from great_expectations.core.id_dict import BatchSpec
 from great_expectations.datasource.fluent.fluent_base_model import (
     FluentBaseModel,
 )
@@ -430,6 +430,8 @@ class Datasource(
         kwargs = data_asset.dict(exclude_unset=True)
         logger.debug(f"{asset_type_name} - kwargs\n{pf(kwargs)}")
 
+        cls._update_asset_forward_refs(asset_type)
+
         asset_of_intended_type = asset_type(**kwargs)
         logger.debug(f"{asset_type_name} - {repr(asset_of_intended_type)}")
         return asset_of_intended_type
@@ -594,6 +596,23 @@ class Datasource(
                 else:
                     order_by_sorters.append(sorter)
         return order_by_sorters
+
+    @staticmethod
+    def _update_asset_forward_refs(asset_type: Type[_DataAssetT]) -> None:
+        """Update forward refs of an asset_type if necessary.
+
+        Note, this should be overridden in child datasource classes if forward
+        refs need to be updated. For example, in Spark datasources we need to
+        update forward refs only if the optional spark dependencies are installed
+        so this method is overridden. Here it is a no op.
+
+        Args:
+            asset_type: Asset type to update forward refs.
+
+        Returns:
+            None, asset refs is updated in place.
+        """
+        pass
 
     # Abstract Methods
     @property

@@ -165,6 +165,9 @@ if TYPE_CHECKING:
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequestOptions,
+    )
     from great_expectations.execution_engine import ExecutionEngine
     from great_expectations.render.renderer.site_builder import SiteBuilder
     from great_expectations.rule_based_profiler import RuleBasedProfilerResult
@@ -790,6 +793,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         _call_store = False allows for local deletes without deleting the persisted storage datasource.
         This should generally be avoided.
         """
+        self.fluent_config.pop(datasource_name, None)
         datasource = self.datasources.get(datasource_name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
@@ -958,7 +962,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             verify_dynamic_loading_support(module_name=module_name)
             class_name = kwargs.get("class_name", "Datasource")
             datasource_class = load_class(
-                module_name=module_name, class_name=class_name
+                class_name=class_name, module_name=module_name
             )
 
             # For any class that should be loaded, it may control its configuration construction
@@ -1687,11 +1691,17 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         datasource = self.get_datasource(datasource_name=datasource_name)
 
-        if save_changes and not isinstance(datasource, FluentDatasource):
+        if isinstance(datasource, FluentDatasource):
+            # Note: this results in some unnecessary dict lookups
+            self._delete_fluent_datasource(datasource_name)
+        elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
+
+        if save_changes:
+            self._save_project_config()
 
     @overload
     def add_checkpoint(
@@ -2649,6 +2659,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
         """Get the list of zero or more batches, based on a variety of flexible input types.
@@ -2686,6 +2697,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             splitter_method: The method used to split the Data Asset into Batches
             splitter_kwargs: Arguments for the splitting method
             batch_spec_passthrough: Arguments specific to the `ExecutionEngine` that aid in Batch retrieval
+            batch_request_options: Options for `FluentBatchRequest`
             **kwargs: Used to specify either `batch_identifiers` or `batch_filter_parameters`
 
         Returns:
@@ -2719,6 +2731,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
+            batch_request_options=batch_request_options,
             **kwargs,
         )
 
@@ -2743,9 +2756,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         path: Optional[str] = None,
         batch_filter_parameters: Optional[dict] = None,
         batch_spec_passthrough: Optional[dict] = None,
+        batch_request_options: Optional[Union[dict, BatchRequestOptions]] = None,
         **kwargs: Optional[dict],
     ) -> List[Batch]:
-        batch_request = get_batch_request_from_acceptable_arguments(
+        result = get_batch_request_from_acceptable_arguments(
             datasource_name=datasource_name,
             data_connector_name=data_connector_name,
             data_asset_name=data_asset_name,
@@ -2765,18 +2779,21 @@ class AbstractDataContext(ConfigPeer, ABC):
             path=path,
             batch_filter_parameters=batch_filter_parameters,
             batch_spec_passthrough=batch_spec_passthrough,
+            batch_request_options=batch_request_options,
             **kwargs,
         )
-        datasource_name = batch_request.datasource_name
-        if datasource_name in self.datasources:
-            datasource: Datasource = cast(Datasource, self.datasources[datasource_name])
-        else:
+        datasource_name = result.datasource_name
+        if datasource_name not in self.datasources:
             raise gx_exceptions.DatasourceError(
                 datasource_name,
                 "The given datasource could not be retrieved from the DataContext; "
                 "please confirm that your configuration is accurate.",
             )
-        return datasource.get_batch_list_from_batch_request(batch_request=batch_request)
+
+        datasource = self.datasources[
+            datasource_name
+        ]  # this can return one of three datasource types, including Fluent datasource types
+        return datasource.get_batch_list_from_batch_request(batch_request=result)  # type: ignore[union-attr, return-value, arg-type]
 
     @public_api
     @deprecated_method_or_class(

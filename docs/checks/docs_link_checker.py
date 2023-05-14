@@ -10,6 +10,7 @@ The above command:
     - -s docs (also --site-prefix): The site path prefix, used to resolve abosulte paths (ex: in http://blah/docs, it is the docs part)
     - --skip-external: If present, external (http) links are not checked
 """
+from __future__ import annotations
 
 import glob
 import logging
@@ -254,27 +255,27 @@ class LinkChecker:
         if self._external_link_pattern.match(link):
             result = self._check_external_link(link, file)
         elif self._is_image_link(match.group(0)):
-            match = self._relative_image_pattern.match(link)
+            match = self._relative_image_pattern.match(link)  # type: ignore[assignment]
             if match:
                 result = self._check_relative_image(link, file, match.group("path"))
             else:
-                match = self._absolute_image_pattern.match(link)
+                match = self._absolute_image_pattern.match(link)  # type: ignore[assignment]
                 if match:
                     result = self._check_absolute_image(link, file, match.group("path"))
                 else:
                     result = LinkReport(link, file, "Invalid image link format")
         else:
-            match = self._relative_link_pattern.match(link)
+            match = self._relative_link_pattern.match(link)  # type: ignore[assignment]
             if match:
                 result = self._check_relative_link(link, file, match.group("path"))
             else:
-                match = self._absolute_link_pattern.match(link)
+                match = self._absolute_link_pattern.match(link)  # type: ignore[assignment]
                 if match:
                     result = self._check_absolute_link(
                         link, file, match.group("path"), match.group("version")
                     )
                 else:
-                    match = self._docroot_link_pattern.match(link)
+                    match = self._docroot_link_pattern.match(link)  # type: ignore[assignment]
                     if match:
                         result = self._check_docroot_link(
                             link, file, match.group("path")
@@ -336,14 +337,21 @@ class LinkChecker:
     help="Top-most folder in the docs URL for resolving absolute paths",
 )
 @click.option("--skip-external", is_flag=True)
-def scan_docs(
+def scan_docs_click(
     path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
 ) -> None:
+    code, message = scan_docs(path, docs_root, site_prefix, skip_external)
+    click.echo(message)
+    exit(code)
+
+
+def scan_docs(
+    path: str, docs_root: Optional[str], site_prefix: str, skip_external: bool
+) -> tuple[int, str]:
     if docs_root is None:
         docs_root = path
     elif not os.path.isdir(docs_root):  # noqa: PTH112
-        click.echo(f"Docs root path: {docs_root} is not a directory")
-        exit(1)
+        return 1, f"Docs root path: {docs_root} is not a directory"
 
     # prepare our return value
     result: List[LinkReport] = list()
@@ -359,24 +367,23 @@ def scan_docs(
         # else we support checking one file at a time
         result.extend(checker.check_file(path))
     else:
-        click.echo(f"Docs path: {path} is not a directory or file")
-        exit(1)
+        return 1, f"Docs path: {path} is not a directory or file"
 
     if result:
-        click.echo("----------------------------------------------")
-        click.echo("------------- Broken Link Report -------------")
-        click.echo("----------------------------------------------")
+        message: list[str] = []
+        message.append("----------------------------------------------")
+        message.append("------------- Broken Link Report -------------")
+        message.append("----------------------------------------------")
         for line in result:
-            click.echo(line)
+            message.append(str(line))
 
-        exit(1)
+        return 1, "\n".join(message)
     else:
-        click.echo("No broken links found")
-        exit(0)
+        return 0, "No broken links found"
 
 
 def main():
-    scan_docs()
+    scan_docs_click()
 
 
 if __name__ == "__main__":

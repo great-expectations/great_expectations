@@ -13,7 +13,6 @@ This guide demonstrates how to configure a ConfiguredAssetDataConnector, and pro
 <Prerequisites>
 
 - [An understanding of Datasource version 0.13 or later basics](../../terms/datasource.md)
-- [An understanding of how to configure a Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 </Prerequisites>
 
@@ -105,8 +104,6 @@ context.test_yaml_config(yaml.dump(datasource_config))
 </TabItem>
 
 </Tabs>
-
-If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 ### 3. Add a ConfiguredAssetDataConnector to a Datasource configuration
 
