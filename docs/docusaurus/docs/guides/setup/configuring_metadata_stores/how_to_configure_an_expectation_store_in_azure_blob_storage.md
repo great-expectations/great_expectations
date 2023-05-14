@@ -101,7 +101,7 @@ context = gx.get_context()
 context.list_expectation_suite_names()
 ```
 
-Your output should include the Expectations you copied to Azure blob. If you did not copy Expectations to the new Store, they will not be listed.
+Your output should include the Expectations you copied to the Azure blob. Expectations that weren't copied to the new are not listed.
 
 ### 6. Confirm that Expectations can be accessed from Azure Blob Storage by running ``great_expectations suite list``
 

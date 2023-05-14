@@ -67,7 +67,7 @@ One way to copy Expectations into GCS is by using the ``gsutil cp`` command, whi
 
 ### 5. Confirm that the new Expectation Suites have been added
 
-If you followed the optional step to copy your existing Expectation Suites to GCS, you can confirm that Great Expectations can find them by running the following Python code:
+If you copied your existing Expectation Suites to GCS, run the following Python code to confirm that Great Expectations can find them:
 
 ```python
 import great_expectations as gx
@@ -76,7 +76,7 @@ context = gx.get_context()
 context.list_expectation_suite_names()
 ```
 
-Your output should include the Expectations you copied to GCS. If you did not copy Expectations to the new Store, they will not be listed.
+Your output should include the Expectations you copied to GCS. Expectations that weren't copied to the new Store, are not listed.
 
 
 ### 6. Confirm that Expectations can be accessed from GCS

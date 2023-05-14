@@ -66,7 +66,7 @@ stores:
 
 ### 4. Confirm that the new Expectation Suites have been added
 
-You can confirm that Great Expectations can find your Expectation Suites by running the following Python code:
+To confirm that Great Expectations can find your Expectation Suites, run the following Python code:
 
 ```python
 import great_expectations as gx
