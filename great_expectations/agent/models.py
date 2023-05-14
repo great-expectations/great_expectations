@@ -8,8 +8,10 @@ class EventBase(BaseModel):
     type: str
 
 
-class RunDataAssistantEvent(EventBase):
-    type: Literal["run-data-assistant"] = "run-data-assistant"
+class RunOnboardingDataAssistantEvent(EventBase):
+    type: Literal["run-onboarding-data-assistant"] = "run-onboarding-data-assistant"
+    datasource_name: str
+    data_asset_name: str
 
 
 class ShutdownEvent(EventBase):
@@ -17,5 +19,5 @@ class ShutdownEvent(EventBase):
 
 
 Event = Annotated[
-    Union[RunDataAssistantEvent, ShutdownEvent], Field(discriminator="type")
+    Union[RunOnboardingDataAssistantEvent, ShutdownEvent], Field(discriminator="type")
 ]
