@@ -5,9 +5,6 @@ title: "Setup: Overview"
 
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import UniversalMap from '@site/docs/images/universal_map/_universal_map.mdx';
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
 
@@ -56,17 +53,12 @@ See our [guides for the installation process](./index.md#installation) for more 
 
 Your Data Context contains the entirety of your Great Expectations project and provides the entry point for all of the primary methods you will use to configure and interact with Great Expectations.  At every step in your use of Great Expectations, the Data Context provides easy access to the key elements you will need to interact with.  Furthermore, the Data Context will internally manage various classes so that you don't have to.  Because of this, once you have completed the configurations in your Setup there will be relatively few objects you will need to manage to get Great Expectations working for you.
 
-That's why the first thing you'll do once you've installed Great Expectations will be to initialize your Data Context.
-
 ![what the data context does for you](../images/overview_illustrations/data_context_does_for_you.png)
 
-Initializing your Data Context is another one-line command.  Simply go to the root folder for your project and execute:
+This code will retrieve your Data Context:
 
-```markdown title="Terminal command:"
-great_expectations init
+```python name="tests/integration/docusaurus/setup/setup_overview.py setup"
 ```
-
-Running this command will initialize your Data Context in the directory that the command is run from.  It will create the folder structure a Data Context requires to organize your project.
 
 See our [guides for configuring your Data Context](./index.md#data-contexts) for more information.
 
@@ -92,11 +84,6 @@ Python files are treated as <TechnicalTag relative="../" tag="plugin" text="Plug
 
 ## Wrapping up
 
-That's all there is to the Setup step.  Once you have your Data Context initialized you will almost always start from your Data Context (as illustrated below) for everything else you do through Great Expectations.
-
-```markdown title="Python code:"
-import great_expectations as gx
-context = gx.get_context()
-```
+That's all there is to the Setup step.
 
 From here you will move on to the next step of working with Great Expectations: Connecting to Data.
