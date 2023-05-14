@@ -34,5 +34,27 @@ def example_pandas() -> None:
     cli_message("<green>Setting up pandas filesystem example...</green>")
     repo_root = pathlib.Path(__file__).parents[2]
     example_directory = repo_root / "examples" / "pandas_filesystem"
-    example_setup_commands = ["docker", "compose", "up"]
-    subprocess.run(example_setup_commands, cwd=example_directory)
+    setup_commands = ["docker", "compose", "up"]
+    subprocess.run(setup_commands, cwd=example_directory)
+
+@example.command(name="postgres")
+@click.option(
+    "--shutdown",
+    is_flag=True,
+    help="Stop example and clean up. Default false.",
+    default=False,
+)
+def example_postgres(shutdown: bool) -> None:
+    """Start a postgres database example."""
+    repo_root = pathlib.Path(__file__).parents[2]
+    example_directory = repo_root / "examples" / "postgres"
+    if shutdown:
+        cli_message("<green>Shutting down...</green>")
+        shutdown_commands = ["docker", "compose", "down"]
+        subprocess.run(shutdown_commands, cwd=example_directory)
+        cli_message("<green>Done shutting down...</green>")
+    else:
+        cli_message("<green>Setting up postgres database example...</green>")
+        cli_message("<green>Postgres db will be available at postgresql://postgres@db/gx_example_db</green>")
+        setup_commands = ["docker", "compose", "up"]
+        subprocess.run(setup_commands, cwd=example_directory)
