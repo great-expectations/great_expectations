@@ -1,4 +1,3 @@
-
 from pyspark.sql import types
 from great_expectations.compatibility.pyspark import functions as F
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
@@ -34,7 +33,13 @@ class ColumnMean(ColumnAggregateMetricProvider):
     def _spark(cls, column, _table, _column_name, **kwargs):
         """Spark Mean Implementation"""
         column_data_type = _table.schema[_column_name].dataType
-        if type(column_data_type) not in (types.DecimalType, types.IntegerType, types.DoubleType, types.FloatType, types.LongType):
+        if type(column_data_type) not in (
+            types.DecimalType,
+            types.IntegerType,
+            types.DoubleType,
+            types.FloatType,
+            types.LongType,
+        ):
             raise TypeError(
                 f"Expected numeric column type for function mean(). Recieved type: {column_data_type}"
             )
