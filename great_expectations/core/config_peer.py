@@ -48,9 +48,11 @@ class ConfigPeer(ABC):
     @overload
     def get_config(
         self,
-        mode: Literal[ConfigOutputModes.JSON_DICT]
-        | Literal[ConfigOutputModes.DICT]
-        | Literal[ConfigOutputModes.COMMENTED_MAP] = ...,
+        mode: Literal[
+            ConfigOutputModes.JSON_DICT,
+            ConfigOutputModes.DICT,
+            ConfigOutputModes.COMMENTED_MAP,
+        ] = ...,
         **kwargs,
     ) -> dict:
         ...
