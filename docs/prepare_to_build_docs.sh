@@ -20,6 +20,7 @@ print_orange_header () {
 }
 
 CURRENT_COMMIT=$(git rev-parse HEAD)
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 # git pull to get the latest tags
 git pull
 
@@ -90,8 +91,8 @@ print_orange_header "Installing api docs dependencies."
 print_orange_header "Building API docs for current version. Please ignore sphinx docstring errors in red/pink, for example: ERROR: Unexpected indentation."
 (cd ../../; invoke api-docs)
 
-print_orange_header "Check back out current commit before building the rest of the docs."
-git checkout "$CURRENT_COMMIT"
+print_orange_header "Check back out current branch before building the rest of the docs."
+git checkout "$CURRENT_BRANCH"
 git pull
 
 # Move versions.json back from outside of the repo
