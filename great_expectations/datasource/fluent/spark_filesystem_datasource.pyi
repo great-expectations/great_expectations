@@ -24,6 +24,7 @@ if TYPE_CHECKING:
         CSVAsset,
         DeltaAsset,
         DirectoryCSVAsset,
+        DirectoryDeltaAsset,
         DirectoryJSONAsset,
         DirectoryORCAsset,
         DirectoryParquetAsset,
@@ -610,3 +611,19 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         version_as_of: Optional[str] = None,
         # Delta Specific Options ^^^
     ) -> DeltaAsset: ...
+    def add_delta_directory_asset(
+        self,
+        name: str,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: re.Pattern | str = r".*",
+        glob_directive: str = "**/*",
+        order_by: Optional[SortersDefinition] = ...,
+        # Spark Directory Reader Options vvv
+        data_directory: str | pathlib.Path = ...,
+        # Spark Directory Reader Options ^^^
+        # Delta Specific Options vvv
+        timestamp_as_of: Optional[str] = None,
+        version_as_of: Optional[str] = None,
+        # Delta Specific Options ^^^
+    ) -> DirectoryDeltaAsset: ...
