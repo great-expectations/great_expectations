@@ -6,6 +6,8 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union, cast
 
+from typing_extensions import Literal
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -575,7 +577,7 @@ class BaseCheckpoint(ConfigPeer):
         if pretty_print:
             print(f"\nCheckpoint class name: {self.__class__.__name__}")
 
-        validations_present: bool = (
+        validations_present: bool = bool(
             self.validations
             and isinstance(self.validations, list)
             and len(self.validations) > 0
@@ -911,7 +913,7 @@ constructor arguments.
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
-        class_name: Optional[str] = None,
+        class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
@@ -1315,7 +1317,6 @@ class LegacyCheckpoint(Checkpoint):
     def _get_batches_to_validate(self, batches):
         batches_to_validate = []
         for batch in batches:
-
             batch_kwargs = batch["batch_kwargs"]
             suites = batch["expectation_suite_names"]
 
@@ -1406,7 +1407,6 @@ class SimpleCheckpoint(Checkpoint):
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> None:
-
         checkpoint_config: CheckpointConfig = self._configurator_class(
             name=name,
             data_context=data_context,
