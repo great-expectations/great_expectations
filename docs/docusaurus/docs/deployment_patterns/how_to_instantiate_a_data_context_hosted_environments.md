@@ -34,7 +34,7 @@ The following guides will contain examples for each environment we have tested o
 Step 2: Create Expectation Suites and add Expectations
 -------------------------------------------------------
 
-If you want to create an Expectation Suite in your environment without using the CLI, you can follow this guide from step 5 onward to add a Datasource and an Expectation Suite: [How to connect to a PostgreSQL database](../guides/connecting_to_your_data/database/postgres.md#5-configure-your-datasource)
+If you want to create an Expectation Suite in your environment without using the CLI, you can follow this guide from step 5 onward to add a Datasource and an Expectation Suite: [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource)
 
 You can then add Expectations to your Suite one at a time like this example:
 

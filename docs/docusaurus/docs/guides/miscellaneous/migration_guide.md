@@ -270,12 +270,12 @@ Migrating Datasource configurations that contain connections to databases involv
 
 Please check out the following docs for examples of V3-style Datasource configurations that will suit your needs:
 
-- [How to connect to a Athena database](../connecting_to_your_data/database/athena.md)
-- [How to connect to a BigQuery database](../connecting_to_your_data/database/bigquery.md)
-- [How to connect to a MySQL database](../connecting_to_your_data/database/mysql.md)
-- [How to connect to a Redshift database](../connecting_to_your_data/database/redshift.md)
-- [How to connect to a Snowflake database](../connecting_to_your_data/database/snowflake.md)
-- [How to connect to a SQLite database](../connecting_to_your_data/database/sqlite.md)
+- [How to connect to a Athena database](/docs/0.15.50/guides/connecting_to_your_data/database/athena)
+- [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery)
+- [How to connect to a MySQL database](/docs/0.15.50/guides/connecting_to_your_data/database/mysql)
+- [How to connect to a Redshift database](/docs/0.15.50/connecting_to_your_data/database/redshift)
+- [How to connect to a Snowflake database](/docs/0.15.50/connecting_to_your_data/database/snowflake)
+- [How to connect to a SQLite database](/docs/0.15.50/connecting_to_your_data/database/sqlite)
 
 </TabItem>
 </Tabs>
