@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from decimal import Decimal
 import locale
 import logging
 import os
@@ -11,7 +12,7 @@ import string
 import time
 import traceback
 import warnings
-from functools import wraps
+from functools import partial, wraps
 from logging import Logger
 from types import ModuleType
 from typing import (
@@ -805,6 +806,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
         "BooleanType": pyspark.types.BooleanType,
         "DataType": pyspark.types.DataType,
         "NullType": pyspark.types.NullType,
+        "DecimalType": partial(pyspark.types.DecimalType, 38, 18),
     }
 
     spark = get_or_create_spark_application(
@@ -856,6 +858,14 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                             vals.append(val)
                         else:
                             vals.append(float(val))
+                    data[col] = vals
+                elif type_ in ["DecimalType"]:
+                    vals = []
+                    for val in data[col]:
+                        if val is None:
+                            vals.append(val)
+                        else:
+                            vals.append(Decimal(val))
                     data[col] = vals
                 elif type_ in ["DateType", "TimestampType"]:
                     vals = []

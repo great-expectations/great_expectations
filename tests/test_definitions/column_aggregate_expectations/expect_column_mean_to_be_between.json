@@ -7,8 +7,7 @@
         "y": [1, 2],
         "z": [0, 10],
         "n": [0, null],
-        "b": [true, false],
-        "a": [2.2345, 1.123]
+        "b": [true, false]
       },
       "schemas": {
         "spark": {
@@ -16,32 +15,28 @@
           "y": "IntegerType",
           "z": "IntegerType",
           "n": "IntegerType",
-          "b": "BooleanType",
-          "a": "DecimalType"
+          "b": "BooleanType"
         },
         "mssql": {
           "x": "FLOAT",
           "y": "INTEGER",
           "z": "INTEGER",
           "n": "INTEGER",
-          "b": "BIT",
-          "a": "FLOAT"
+          "b": "BIT"
         },
         "postgresql": {
           "x": "DOUBLE_PRECISION",
           "y": "INTEGER",
           "z": "INTEGER",
           "n": "INTEGER",
-          "b": "BOOLEAN",
-          "a": "DOUBLE_PRECISION"
+          "b": "BOOLEAN"
         },
         "snowflake": {
           "x": "DOUBLE",
           "y": "INTEGER",
           "z": "INTEGER",
           "n": "INTEGER",
-          "b": "BOOLEAN",
-          "a": "DOUBLE"
+          "b": "BOOLEAN"
         }
       },
       "tests": [{
@@ -56,20 +51,6 @@
           "out": {
             "success": true,
             "observed_value": 3.5
-          }
-        },
-        {
-          "title": "simple_mean_positive_range__spark_decimaltype",
-          "include_in_gallery": true,
-          "exact_match_out": false,
-          "in": {
-            "column": "a",
-            "min_value": 2,
-            "max_value": 5
-          },
-          "out": {
-            "success": false,
-            "observed_value": 1.67875
           }
         },
         {
@@ -166,6 +147,34 @@
             "success": true
           },
           "_note": "vacuously true"
+        }
+      ]
+    },
+    {
+      "dataset_name": "expect_column_mean_to_be_between_decimal_type",
+      "data": {
+        "a": [2.2345, 1.123]
+      },
+      "schemas": {
+        "spark": {
+          "a": "DecimalType"
+        }
+      },
+      "tests": [
+        {
+          "title": "simple_mean_positive_range_decimal_type",
+          "include_in_gallery": true,
+          "exact_match_out": false,
+          "in": {
+            "column": "a",
+            "min_value": 2,
+            "max_value": 5
+          },
+          "out": {
+            "success": false,
+            "observed_value": 1.6787500000000002
+          },
+          "only_for": ["spark"]
         }
       ]
     },
