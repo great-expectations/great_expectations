@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import copy
-from decimal import Decimal
 import locale
 import logging
 import os
@@ -12,6 +11,7 @@ import string
 import time
 import traceback
 import warnings
+from decimal import Decimal
 from functools import partial, wraps
 from logging import Logger
 from types import ModuleType
