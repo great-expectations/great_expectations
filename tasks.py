@@ -594,6 +594,7 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
             code=1,
         )
 
+
 @invoke.task
 def api_docs(ctx: Context):
     """Build api documentation."""
@@ -611,6 +612,7 @@ def api_docs(ctx: Context):
 
     doc_builder.build_docs()
 
+
 @invoke.task(
     name="docs",
     help={
@@ -620,7 +622,13 @@ def api_docs(ctx: Context):
         "lint": "Run the linter",
     },
 )
-def docs(ctx: Context, build: bool = False, clean: bool = False, start: bool = False, lint: bool = False):
+def docs(
+    ctx: Context,
+    build: bool = False,
+    clean: bool = False,
+    start: bool = False,
+    lint: bool = False,
+):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
 
     repo_root = pathlib.Path(__file__).parent
@@ -636,7 +644,13 @@ def docs(ctx: Context, build: bool = False, clean: bool = False, start: bool = F
     if clean:
         rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
         ctx.run(" ".join(rm_cmds), echo=True)
-        rm_rf_cmds = ["rm", "-rf", "versioned_code", "versioned_docs", "versioned_sidebars"]
+        rm_rf_cmds = [
+            "rm",
+            "-rf",
+            "versioned_code",
+            "versioned_docs",
+            "versioned_sidebars",
+        ]
         ctx.run(" ".join(rm_rf_cmds), echo=True)
     elif lint:
         ctx.run(" ".join(["yarn lint"]), echo=True)
@@ -656,7 +670,6 @@ def docs(ctx: Context, build: bool = False, clean: bool = False, start: bool = F
             ctx.run(build_docs_cmd, echo=True)
 
     os.chdir(old_pwd)
-
 
 
 @invoke.task(
