@@ -32,19 +32,13 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,  # noqa: TCH001
-    ExpectationSuiteValidationResultMeta,  # noqa: TCH001
-)
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
     usage_statistics_enabled_method,
 )
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import (
-    GXCloudRESTResource,
-)
+from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.types.base import (
     CheckpointConfig,
     CheckpointValidationConfig,
@@ -57,14 +51,18 @@ from great_expectations.util import (
     load_class,
 )
 from great_expectations.validation_operators import ActionListValidationOperator
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,  # noqa: TCH001
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+        ExpectationSuiteValidationResultMeta,
+    )
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
+    )
+    from great_expectations.validation_operators.types.validation_operator_result import (
+        ValidationOperatorResult,
     )
     from great_expectations.validator.validator import Validator
 
@@ -188,39 +186,15 @@ class BaseCheckpoint(ConfigPeer):
         Returns:
             CheckpointResult
         """
-        if (
-            sum(bool(x) for x in [self._validator is not None, validator is not None])
-            > 1
-        ):
-            raise gx_exceptions.CheckpointError(
-                f'Checkpoint "{self.name}" has already been created with a validator and overriding it through run() is not allowed.'
-            )
-
-        if validator:
-            self._validator = validator
-
-        if self._validator:
-            if batch_request or _does_validation_contain_batch_request(
-                validations=validations
-            ):
-                raise gx_exceptions.CheckpointError(
-                    f'Checkpoint "{self.name}" has already been created with a validator and overriding it by supplying a batch_request and/or validations with a batch_request to run() is not allowed.'
-                )
-
-            if (
-                expectation_suite_name
-                or _does_validation_contain_expectation_suite_name(
-                    validations=validations
-                )
-            ):
-                raise gx_exceptions.CheckpointError(
-                    f'Checkpoint "{self.name}" has already been created with a validator and overriding its expectation_suite_name by supplying an expectation_suite_name and/or validations with an expectation_suite_name to run() is not allowed.'
-                )
-
-        if (run_id and run_name) or (run_id and run_time):
-            raise gx_exceptions.InvalidCheckpointConfigError(
-                "Please provide either a run_id or run_name and/or run_time"
-            )
+        self._validate_run_args(
+            expectation_suite_name=expectation_suite_name,
+            batch_request=batch_request,
+            validator=validator,
+            validations=validations,
+            run_id=run_id,
+            run_name=run_name,
+            run_time=run_time,
+        )
 
         # If no validations are provided, the combination of expectation_suite_name, batch_request,
         # and action_list are considered the "default" validation.
@@ -283,6 +257,76 @@ class BaseCheckpoint(ConfigPeer):
         # concurrency is enabled in the data context configuration) -- please see the below arguments used to initialize
         # AsyncExecutor and the corresponding AsyncExecutor docstring for more details on when multiple threads are
         # used.
+        (
+            checkpoint_run_results,
+            validation_result_url,
+        ) = self._run_validations_with_async_executor(
+            validations=validations,
+            run_id=run_id,
+            result_format=result_format,
+            substituted_runtime_config=substituted_runtime_config,
+        )
+
+        return CheckpointResult(
+            validation_result_url=validation_result_url,
+            run_id=run_id,
+            run_results=checkpoint_run_results,
+            checkpoint_config=self.config,
+        )
+
+    def _validate_run_args(
+        self,
+        expectation_suite_name: Optional[str] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
+        validator: Optional[Validator] = None,
+        validations: Optional[List[dict]] = None,
+        run_id: Optional[Union[str, RunIdentifier]] = None,
+        run_name: Optional[str] = None,
+        run_time: Optional[Union[str, datetime.datetime]] = None,
+    ) -> None:
+        if (
+            sum(bool(x) for x in [self._validator is not None, validator is not None])
+            > 1
+        ):
+            raise gx_exceptions.CheckpointError(
+                f'Checkpoint "{self.name}" has already been created with a validator and overriding it through run() is not allowed.'
+            )
+
+        if validator:
+            self._validator = validator
+
+        if self._validator:
+            if batch_request or _does_validation_contain_batch_request(
+                validations=validations
+            ):
+                raise gx_exceptions.CheckpointError(
+                    f'Checkpoint "{self.name}" has already been created with a validator and overriding it by supplying a batch_request and/or validations with a batch_request to run() is not allowed.'
+                )
+
+            if (
+                expectation_suite_name
+                or _does_validation_contain_expectation_suite_name(
+                    validations=validations
+                )
+            ):
+                raise gx_exceptions.CheckpointError(
+                    f'Checkpoint "{self.name}" has already been created with a validator and overriding its expectation_suite_name by supplying an expectation_suite_name and/or validations with an expectation_suite_name to run() is not allowed.'
+                )
+
+        if (run_id and run_name) or (run_id and run_time):
+            raise gx_exceptions.InvalidCheckpointConfigError(
+                "Please provide either a run_id or run_name and/or run_time"
+            )
+
+    def _run_validations_with_async_executor(
+        self,
+        validations: List[dict],
+        run_id: Optional[Union[str, RunIdentifier]],
+        result_format: Optional[Union[str, dict]],
+        substituted_runtime_config: dict,
+    ) -> tuple[dict, Optional[str]]:
         with AsyncExecutor(
             self.data_context.concurrency, max_workers=len(validations)
         ) as async_executor:
@@ -343,12 +387,7 @@ class BaseCheckpoint(ConfigPeer):
 
                 checkpoint_run_results.update(run_results)
 
-        return CheckpointResult(
-            validation_result_url=validation_result_url,
-            run_id=run_id,
-            run_results=checkpoint_run_results,
-            checkpoint_config=self.config,
-        )
+        return checkpoint_run_results, validation_result_url
 
     def get_substituted_config(
         self,
