@@ -67,7 +67,7 @@ class Subscriber:
             on_message: the caller-provided callback
         """
         try:
-            event = pydantic.parse_raw_as(Event, body)
+            event: Event = pydantic.parse_raw_as(Event, body)
             correlation_id = header_frame.correlation_id
             on_message(event, correlation_id)
             channel.basic_ack(delivery_tag=method_frame.delivery_tag)
