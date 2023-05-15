@@ -319,10 +319,7 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-        # TODO: <Alex>ALEX</Alex>
-        # util_script="tests/test_utils.py",
-        # backend_dependencies=[BackendDependencies.PANDAS],
-        # TODO: <Alex>ALEX</Alex>
+        backend_dependencies=[BackendDependencies.PANDAS],
     ),
 ]
 
