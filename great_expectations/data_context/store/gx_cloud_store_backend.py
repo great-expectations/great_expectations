@@ -469,7 +469,10 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             key = key.to_tuple()
 
         id = key[1]
-        resource_object_name = key[2]
+        if len(key) == 3:
+            resource_object_name = key[2]
+        else:
+            resource_object_name = None
 
         try:
             # prefer deletion by id if id present
