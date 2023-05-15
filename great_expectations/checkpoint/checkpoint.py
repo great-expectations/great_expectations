@@ -453,10 +453,10 @@ class BaseCheckpoint(ConfigPeer):
             batch_request: Union[
                 BatchRequest, FluentBatchRequest, RuntimeBatchRequest
             ] = substituted_validation_dict.get("batch_request")
-            expectation_suite_name: str = substituted_validation_dict.get(
+            expectation_suite_name: str | None = substituted_validation_dict.get(
                 "expectation_suite_name"
             )
-            expectation_suite_ge_cloud_id: str = substituted_validation_dict.get(
+            expectation_suite_ge_cloud_id: str | None = substituted_validation_dict.get(
                 "expectation_suite_ge_cloud_id"
             )
             include_rendered_content: Optional[bool] = substituted_validation_dict.get(
@@ -478,7 +478,7 @@ class BaseCheckpoint(ConfigPeer):
                 include_rendered_content=include_rendered_content,
             )
 
-            action_list: list = substituted_validation_dict.get("action_list")
+            action_list: list | None = substituted_validation_dict.get("action_list")
             runtime_configuration_validation = substituted_validation_dict.get(
                 "runtime_configuration", {}
             )
