@@ -15,7 +15,7 @@ data_directory = pathlib.Path(
 ).resolve(strict=True)
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources my_datasource">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_datasource">
 import great_expectations as gx
 
 context = gx.data_context.FileDataContext.create(full_path_to_project_directory)
@@ -33,19 +33,19 @@ my_asset = my_datasource.add_csv_asset(
 )
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources my_asset">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_asset">
 my_asset = context.get_datasource("my_datasource").get_asset("my_asset")
 # </snippet>
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources my_batch_request_options">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request_options">
 print(my_asset.batch_request_options)
 # </snippet>
 
 assert my_asset.batch_request_options == ("year", "month", "path")
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources my_batch_request">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_request">
 my_batch_request = my_asset.build_batch_request()
 # </snippet>
 
@@ -54,7 +54,7 @@ assert my_batch_request.data_asset_name == "my_asset"
 assert my_batch_request.options == {}
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources my_batch_list">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batch_list">
 batches = my_asset.get_batch_list_from_batch_request(my_batch_request)
 # </snippet>
 
@@ -67,7 +67,7 @@ for batch in batches:
     assert batch.data.dataframe.shape == (10000, 18)
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources print_batch_spec">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py print_batch_spec">
 for batch in batches:
     print(batch.batch_spec)
 # </snippet>
