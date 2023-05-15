@@ -615,10 +615,11 @@ def api_docs(ctx: Context):
     name="docs",
     help={
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
-        "clean": "Remove directories and files from versioned docs and code. Default False."
+        "clean": "Remove directories and files from versioned docs and code. Default False.",
+        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing."
     },
 )
-def docs(ctx: Context, build: bool=False, clean: bool=False):
+def docs(ctx: Context, build: bool = False, clean: bool = False, start: bool = False):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
 
     repo_root = pathlib.Path(__file__).parent
@@ -637,16 +638,19 @@ def docs(ctx: Context, build: bool=False, clean: bool=False):
         rm_rf_cmds = ["rm", "-rf", "versioned_code", "versioned_docs", "versioned_sidebars"]
         ctx.run(" ".join(rm_rf_cmds), echo=True)
     else:
-        print("Making sure docusaurus dependencies are installed.")
-        ctx.run(" ".join(["yarn install"]), echo=True)
-
-        if build:
-            build_docs_cmd = "../build_docs"
+        if start:
+            ctx.run(" ".join(["yarn start"]), echo=True)
         else:
-            build_docs_cmd = "../build_docs_locally.sh"
+            print("Making sure docusaurus dependencies are installed.")
+            ctx.run(" ".join(["yarn install"]), echo=True)
 
-        print(f"Running {build_docs_cmd} from:", docusaurus_dir)
-        ctx.run(build_docs_cmd, echo=True)
+            if build:
+                build_docs_cmd = "../build_docs"
+            else:
+                build_docs_cmd = "../build_docs_locally.sh"
+
+            print(f"Running {build_docs_cmd} from:", docusaurus_dir)
+            ctx.run(build_docs_cmd, echo=True)
 
     os.chdir(old_pwd)
 
