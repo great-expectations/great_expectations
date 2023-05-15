@@ -2800,7 +2800,7 @@ class CheckpointConfig(BaseYamlConfig):
 
     def __init__(
         self,
-        name: str,
+        name: Optional[str] = None,
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
