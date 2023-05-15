@@ -296,7 +296,10 @@ Run the following command to review the documentation requirements text file:
 ```console
 pip install -r docs/requirements.txt
 
-To build documentation, the command is `cd docs; make html`
+Run the follwoing command to build the documentation:
+
+```console
+cd docs; make html
 
 Documentation will be generated in `docs/build/html/` with the index.html as the index page.
 
