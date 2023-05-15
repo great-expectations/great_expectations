@@ -1386,6 +1386,7 @@ class SimpleCheckpoint(Checkpoint):
     """
 
     _configurator_class = SimpleCheckpointConfigurator
+    name: str
 
     # noinspection PyUnusedLocal
     def __init__(
