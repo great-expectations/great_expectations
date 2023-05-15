@@ -809,7 +809,8 @@ constructor arguments.
             template_name=template_name,
             run_name_template=run_name_template,
             expectation_suite_name=expectation_suite_name,
-            batch_request=batch_request,
+            batch_request=batch_request,  # type: ignore[arg-type] # FluentBatchRequest is not a dict
+            # TODO: check if `pydantic.BaseModel` and call `batch_request.dict()`??
             action_list=action_list,
             evaluation_parameters=evaluation_parameters,
             runtime_configuration=runtime_configuration,
