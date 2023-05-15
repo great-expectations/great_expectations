@@ -6,6 +6,8 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union, cast
 
+from typing_extensions import Literal
+
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
@@ -915,7 +917,7 @@ constructor arguments.
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
-        class_name: str = "Checkpoint",
+        class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
