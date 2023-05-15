@@ -6,7 +6,6 @@ keywords: [Expectations, ExpectationsSuite]
 ---
 
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import PrerequisiteQuickstartGuideComplete from '/docs/components/prerequisites/_quickstart_completed.mdx'
 import IfYouStillNeedToSetupGX from '/docs/components/prerequisites/_if_you_still_need_to_setup_gx.md'
 
 In this guide, you'll learn how to create Expectations and interactively edit the resulting Expectation Suite.
@@ -36,8 +35,6 @@ No.  The interactive method used to create and edit Expectations does not edit o
 
 </details>
 
-<details>
-<summary>
 
 ## Steps
 
@@ -98,7 +95,7 @@ Your output will look something similar to this:
 
 From the Expectation Suite, you will be able to create an ExpecationConfiguration object using the output from `show_expectations_by_expectation_type()` Here is the example output of the first Expectation in our suite.
 
-It runs the `expect_column_values_to_be_between` Expectation on the `passenger_count` column and expects and max and min values to be `6` and `1` respectively. 
+It runs the `expect_column_values_to_be_between` Expectation on the `passenger_count` column and expects and min and max values to be `1` and `6` respectively. 
 
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_dict_1"
 ```
@@ -156,5 +153,5 @@ If you would like to learn more about the functions available at the Expectation
 :::note Example Code
 
 To view the full script used for example code on this page, see it on GitHub:
-- [how_to_create_an_expectation_suite_with_the_onboarding_data_assistant.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py)
+- [how_to_edit_an_expectation_suite.py](../tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py)
 :::

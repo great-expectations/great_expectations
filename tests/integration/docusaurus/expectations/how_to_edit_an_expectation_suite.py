@@ -72,9 +72,9 @@ updated_config = ExpectationConfiguration(
         "auto": True,
         "column": "passenger_count",
         "domain": "column",
+        "min_value": 1,
         "max_value": 4,
         #'max_value': 6,
-        "min_value": 1,
         "mostly": 1.0,
         "strict_max": False,
         "strict_min": False,
@@ -86,14 +86,20 @@ updated_config = ExpectationConfiguration(
 my_suite.add_expectation(updated_config)
 # </snippet>
 
+assert len(my_suite.expectations) == 2
+assert my_suite.expectations[0] == ExpectationConfiguration(
+    expectation_type="expect_column_values_to_not_be_null",
+    kwargs={"column": "pickup_datetime"},
+)
+assert my_suite.expectations[1] == updated_config
+
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite find_configuration">
 config_to_search = ExpectationConfiguration(
     expectation_type="expect_column_values_to_be_between",
     kwargs={"column": "passenger_count"},
 )
-
-found_expectation = my_suite.find_expectation(config_to_search, match_type="domain")
+found_expectation = my_suite.find_expectations(config_to_search, match_type="domain")
 
 # This assertion will succeed because the ExpectationConfiguration has been updated.
 assert found_expectation == [updated_config]
@@ -109,6 +115,12 @@ my_suite.remove_expectation(
 )
 my_suite.show_expectations_by_expectation_type()
 # </snippet>
+
+assert len(my_suite.expectations) == 1
+assert my_suite.expectations[0] == ExpectationConfiguration(
+    expectation_type="expect_column_values_to_not_be_null",
+    kwargs={"column": "pickup_datetime"},
+)
 
 # <snippet name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite save_suite">
 context.save_expectation_suite(my_suite)
