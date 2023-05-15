@@ -9,14 +9,9 @@ import TechnicalTag from '../term_tags/_tag.mdx';
 import CreateHeader from '/docs/images/universal_map/_um_create_header.mdx';
 import ValidateHeader from '/docs/images/universal_map/_um_validate_header.mdx';
 
-
 <UniversalMap setup='inactive' connect='inactive' create='active' validate='active'/> 
 
 ## Overview
-
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 ### Definition
 
@@ -68,18 +63,6 @@ Each of the Expectation Suite methods that support a Create, Read, Update, or De
     - `domain` checks whether two Expectation Configurations apply to the same data. It results in the loosest match, and can use the least complete ExpectationConfiguration object. For example, for a column map Expectation, a `domain` **match_type** will check that the expectation_type matches, and that the column and any row_conditions that affect which rows are evaluated by the Expectation match.
     - `success` criteria are more exacting - in addition to the `domain` kwargs, these include those kwargs used when evaluating the success of an Expectation, like `mostly`, `max`, or `value_set`.
     -`runtime` are the most specific - in addition to `domain_kwargs` and `success_kwargs`, these include kwargs used for runtime configuration. Currently, these include `result_format`, `include_config`, and `catch_exceptions`
-
-### How to access
-
-You will rarely need to directly access an Expectation Suite.  If you do need to edit one, the simplest way is through the CLI.  To do so, run the command:
-
-```markdown title="Terminal command"
-great_expectations suite edit NAME_OF_YOUR_SUITE_HERE
-```
-
-This will open a Jupyter Notebook where each Expectation in the Expectation Suite is loaded as an individual cell.  You can edit, remove, and add Expectations in this list.  Running the cells will create the Expectations in a new Expectation Suite, which you can then save over the old Expectation Suite or save under a new name.  The Expectation Suite and any changes made will not be stored until you give the command for it to be saved, however.
-
-In almost all other circumstances you will simply pass the name of any relevant Expectation Suites to an object such as a Checkpoint that will manage accessing and using it for you.
 
 ### Saving Expectation Suites
 
