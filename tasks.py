@@ -642,7 +642,7 @@ def docs(ctx: Context, build: bool=False, clean: bool=False):
     if build:
         build_docs_cmd = "../build_docs"
     else:
-        build_docs_cmd = "../build_docs_locally"
+        build_docs_cmd = "../build_docs_locally.sh"
 
     print(f"Running {build_docs_cmd} from:", docusaurus_dir)
     ctx.run(build_docs_cmd, echo=True)
