@@ -68,7 +68,7 @@ def test_gx_agent_run_invokes_consume(get_context, subscriber, client, gx_agent_
     agent.run()
 
     subscriber().consume.assert_called_with(
-        queue=gx_agent_config.organization_id, on_message=agent._handle_event
+        queue=gx_agent_config.organization_id, on_message=agent._handle_event_as_thread
     )
 
 
