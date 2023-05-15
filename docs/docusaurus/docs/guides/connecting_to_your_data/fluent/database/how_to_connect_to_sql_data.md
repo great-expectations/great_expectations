@@ -37,7 +37,7 @@ GX supports a variety of different SQL source data systems.  However, most SQL d
 
 :::info Some examples of different connection strings:
 
-Here are examples of connection strings for various SQL dialects.
+The following are examples of connection strings for different SQL dialects:
 
 - AWS Athena: `awsathena+rest://@athena.<REGION>.amazonaws.com/<DATABASE>?s3_staging_dir=<S3_PATH>`
 - BigQuery: `bigquery://<GCP_PROJECT>/<BIGQUERY_DATASET>`
