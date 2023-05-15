@@ -272,7 +272,7 @@ Use the following information to use Spark for code testing.
 
 - The PATH or JAVA_HOME environment variables set correctly. See [Setting Java variables in Windows](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-windows) or [Setting Java variables in Linux](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-linux). 
 
-On Mac, if you installed Java via the download above, you can set PATH and JAVA_HOME using:
+On Mac, run the following commands to set the PATH and JAVA_HOME environment variables:
 ```
 export JAVA_HOME=`/usr/libexec/java_home`
 export PATH=$PATH:$JAVA_HOME/bin 
