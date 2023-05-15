@@ -78,7 +78,7 @@ To add a new version, follow these steps:
 2. Check out the version from the tag, e.g. `git checkout 0.15.50`
 3. Make sure dev dependencies are installed `pip install -c constraints-dev.txt -e ".[test]"`
 4. Install API docs dependencies `pip install -r docs/sphinx_api_docs_source/requirements-dev-api-docs.txt`
-5. Build API docs `invoke docs` from the repo root.
+5. Build API docs `invoke api-docs` from the repo root.
 6. Run `yarn install` from `docs/docusaurus/`.
 7. Run `yarn build` from `docs/docusaurus/`.
 8. Create the version e.g. `yarn docusaurus docs:version 0.15.50` from `docs/docusaurus/`.

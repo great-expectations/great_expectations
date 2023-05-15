@@ -594,10 +594,9 @@ def _exit_with_error_if_not_in_repo_root(task_name: str):
             code=1,
         )
 
-
-@invoke.task
-def docs(ctx):
-    """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
+@invoke.task(aliases=["api-docs"])
+def api_docs(ctx):
+    """Build api documentation."""
 
     repo_root = pathlib.Path(__file__).parent
 
@@ -611,6 +610,17 @@ def docs(ctx):
     )
 
     doc_builder.build_docs()
+
+@invoke.task
+def docs(ctx):
+    """Build documentation. Note: Currently only builds the sphinx based api docs, please build docusaurus docs separately."""
+
+    repo_root = pathlib.Path(__file__).parent
+
+    _exit_with_error_if_not_run_from_correct_dir(
+        task_name="docs", correct_dir=repo_root
+    )
+    print("running invoke docs")
 
 
 @invoke.task(

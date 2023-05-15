@@ -73,7 +73,7 @@ echo -e "${ORANGE}Installing api docs dependencies.${NC}"
 (cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
 echo -e "${ORANGE}Building API docs for current version.${NC}"
-(cd ../../; invoke docs)
+(cd ../../; invoke api-docs)
 
 echo -e "${ORANGE}Check back out current commit before building the rest of the docs.${NC}"
 git checkout "$CURRENT_COMMIT"
