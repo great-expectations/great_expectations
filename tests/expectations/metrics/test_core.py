@@ -78,7 +78,7 @@ def test_basic_metric_pd():
 
 
 @pytest.mark.parametrize(
-    "dataframe,result",
+    "dataframe,expected_result",
     [
         [pd.DataFrame({"a": [1, 2, 3, None]}), 2],
         [
@@ -87,7 +87,7 @@ def test_basic_metric_pd():
         ],
     ],
 )
-def test_mean_metric_pd(dataframe, result):
+def test_mean_metric_pd(dataframe, expected_result):
     engine = build_pandas_engine(dataframe)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
@@ -110,11 +110,11 @@ def test_mean_metric_pd(dataframe, result):
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert results == {desired_metric.id: result}
+    assert results == {desired_metric.id: expected_result}
 
 
 @pytest.mark.parametrize(
-    "dataframe,result",
+    "dataframe,expected_result",
     [
         [pd.DataFrame({"a": [1, 2, 3, None]}), 2],
         [
@@ -123,7 +123,7 @@ def test_mean_metric_pd(dataframe, result):
         ],
     ],
 )
-def test_mean_metric_spark(spark_session, dataframe, result):
+def test_mean_metric_spark(spark_session, dataframe, expected_result):
     engine = build_spark_engine(spark=spark_session, df=dataframe, batch_id="my_id")
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
@@ -158,22 +158,16 @@ def test_mean_metric_spark(spark_session, dataframe, result):
         metrics_to_resolve=(desired_metric,), metrics=results
     )
 
-    assert results == {desired_metric.id: result}
+    assert results == {desired_metric.id: expected_result}
 
 
 @pytest.mark.parametrize(
-    "build_engine,dataframe,result",
+    "build_engine,dataframe,expected_result",
     [
         [build_pandas_engine, pd.DataFrame({"a": [1, 2, 3, None]}), 1],
-        # Does not work with Decimals now. MetricResolutionError: unsupported operand type(s) for -: 'float' and 'decimal.Decimal'
-        # [
-        #     build_pandas_engine,
-        #     pd.DataFrame({"a": [Decimal(2.0), Decimal(0.18781)]}),
-        #     1.093905,
-        # ],
     ],
 )
-def test_stdev_metric_pd(build_engine, dataframe, result):
+def test_stdev_metric_pd(build_engine, dataframe, expected_result):
     engine = build_engine(dataframe)
 
     metrics: Dict[Tuple[str, str, str], MetricValue] = {}
@@ -196,10 +190,7 @@ def test_stdev_metric_pd(build_engine, dataframe, result):
         metrics_to_resolve=(desired_metric,), metrics=metrics
     )
     metrics.update(results)
-    assert results == {desired_metric.id: result}
-
-
-# Add tests SQLAlchemy Spark for stdev and mean
+    assert results == {desired_metric.id: expected_result}
 
 
 def test_column_value_lengths_min_metric_pd():
