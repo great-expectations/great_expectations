@@ -66,8 +66,8 @@ Great Expectations allows you to connect to data in a wide variety of sources, a
 * [How to connect to a Snowflake database](../guides/connecting_to_your_data/database/snowflake.md)
 * [How to connect to a SQLite database](../guides/connecting_to_your_data/database/sqlite.md)
 * [How to connect to data on a filesystem using Spark](../guides/connecting_to_your_data/filesystem/spark.md)
-* [How to connect to data on S3 using Spark](../guides/connecting_to_your_data/cloud/s3/spark.md)
-* [How to connect to data on GCS using Spark](../guides/connecting_to_your_data/cloud/gcs/spark.md)
+* [How to connect to data on S3 using Spark](/docs/0.15.50/guides/connecting_to_your_data/cloud/s3/pandas)
+* [How to connect to data on GCS using Spark](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/spark)
 
 ## Options for hosting Data Docs
 By default, Data Docs are stored locally, in an uncommitted directory. This is great for individual work, but not good for collaboration. A better pattern is usually to deploy to a cloud-based blob store (S3, GCS, or Azure Blob Storage), configured to share a static website.
