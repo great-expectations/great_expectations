@@ -87,6 +87,6 @@ A `checkpoint_name` references a checkpoint in the project CheckpointStore defin
 
 For a full list of parameters, see the `GreatExpectationsOperator` [documentation](https://registry.astronomer.io/providers/great-expectations/modules/greatexpectationsoperator).
 
-### Connections and Backends
+### Connections and backends
 
-The `GreatExpectationsOperator` can run a checkpoint on a dataset stored in any backend compatible with Great Expectations. All that’s needed to get the Operator to point at an external dataset is to set up an [Airflow Connection](https://www.astronomer.io/guides/connections) to the datasource, and add the connection to your Great Expectations project, e.g. [using the CLI to add a Postgres backend](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/postgres). Then, if using a `DataContextConfig` or `CheckpointConfig`, ensure that the `"datasources"` field refers to your backend connection name.
+The `GreatExpectationsOperator` can run a checkpoint on a dataset stored in any backend compatible with Great Expectations. All that’s needed to get the Operator to point at an external dataset is to set up an [Airflow Connection](https://www.astronomer.io/guides/connections) to the datasource, and add the connection to your Great Expectations project. For example, [using the CLI to add a Postgres backend](/docs/0.15.50/guides/connecting_to_your_data/database/postgres). If you're using a `DataContextConfig` or `CheckpointConfig`, ensure that the `"datasources"` field references the backend connection name.
