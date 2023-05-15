@@ -532,3 +532,11 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             id=id,
             resource_name=name,
         )
+
+    def _validate_key(self, key) -> None:
+        if not isinstance(key, tuple) or len(key) != 3:
+            raise TypeError()
+
+        resource_type, id, resource_name = key
+        if not isinstance(resource_type, GXCloudRESTResource):
+            raise TypeError()
