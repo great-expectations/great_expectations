@@ -497,7 +497,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
                 response.raise_for_status()
                 return True
             # delete by name
-            else:
+            elif resource_object_name:
                 url = construct_url(
                     base_url=self.ge_cloud_base_url,
                     organization_id=self.ge_cloud_credentials["organization_id"],
