@@ -616,10 +616,11 @@ def api_docs(ctx: Context):
     help={
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
         "clean": "Remove directories and files from versioned docs and code. Default False.",
-        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing."
+        "start": "Only run yarn start, do not process versions. For example if you have already run invoke docs and just want to serve docs locally for editing.",
+        "lint": "Run the linter",
     },
 )
-def docs(ctx: Context, build: bool = False, clean: bool = False, start: bool = False):
+def docs(ctx: Context, build: bool = False, clean: bool = False, start: bool = False, lint: bool = False):
     """Build documentation site, including api documentation and earlier doc versions. Note: Internet access required to download earlier versions."""
 
     repo_root = pathlib.Path(__file__).parent
@@ -637,6 +638,8 @@ def docs(ctx: Context, build: bool = False, clean: bool = False, start: bool = F
         ctx.run(" ".join(rm_cmds), echo=True)
         rm_rf_cmds = ["rm", "-rf", "versioned_code", "versioned_docs", "versioned_sidebars"]
         ctx.run(" ".join(rm_rf_cmds), echo=True)
+    elif lint:
+        ctx.run(" ".join(["yarn lint"]), echo=True)
     else:
         if start:
             ctx.run(" ".join(["yarn start"]), echo=True)
