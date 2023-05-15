@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Build API docs then build docusaurus docs.
-# Currently used in our netlify pipeline.
-
 print_orange () {
     ORANGE='\033[38;5;208m'
     NC='\033[0m' # No Color
@@ -22,5 +19,5 @@ print_orange_header () {
 print_orange_header "Preparing to build docs..."
 ./prepare_to_build_docs
 
-print_orange_header "Building docusaurus docs..."
-yarn build
+print_orange_header "Running yarn start to serve docs locally..."
+yarn start
