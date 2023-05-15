@@ -1,4 +1,4 @@
-from unittest.mock import Mock, ANY
+from unittest.mock import ANY, Mock
 
 import pytest
 

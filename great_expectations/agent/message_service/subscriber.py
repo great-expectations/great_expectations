@@ -2,13 +2,12 @@ from functools import partial
 from typing import Callable
 
 import pydantic
-from pika.exceptions import AMQPError, ChannelError
-
-from great_expectations.agent.message_service.rabbit_mq_client import RabbitMQClient
 from pika.channel import Channel
+from pika.exceptions import AMQPError, ChannelError
 from pika.spec import Basic, BasicProperties
 from pydantic import parse_raw_as
 
+from great_expectations.agent.message_service.rabbit_mq_client import RabbitMQClient
 from great_expectations.agent.models import Event
 
 OnMessageCallback = Callable[[Event, str], None]

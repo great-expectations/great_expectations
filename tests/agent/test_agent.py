@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from great_expectations.agent.agent import GXAgentConfig, GXAgent
+from great_expectations.agent.agent import GXAgent, GXAgentConfig
 from great_expectations.agent.message_service.rabbit_mq_client import ClientError
 from great_expectations.agent.message_service.subscriber import SubscriberError
 

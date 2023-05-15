@@ -3,8 +3,8 @@ from unittest.mock import patch
 import pytest
 
 from great_expectations.agent.message_service.rabbit_mq_client import (
-    RabbitMQClient,
     ClientError,
+    RabbitMQClient,
 )
 from tests.agent.message_service.conftest import AMQP_CHANNEL_AND_CONNECTION_ERRORS
 

@@ -1,24 +1,26 @@
 import os
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
-from pydantic.dataclasses import dataclass
 from pydantic import AmqpDsn
+from pydantic.dataclasses import dataclass
+
 from great_expectations import get_context
 from great_expectations.agent.event_handler import EventHandler
 from great_expectations.agent.message_service.rabbit_mq_client import (
-    RabbitMQClient,
     ClientError,
+    RabbitMQClient,
 )
 from great_expectations.agent.message_service.subscriber import (
-    Subscriber,
     OnMessageCallback,
-    SubscriberError,
     RequeueMessageError,
+    Subscriber,
+    SubscriberError,
 )
 from great_expectations.agent.models import Event
-from great_expectations.data_context import CloudDataContext
 
+if TYPE_CHECKING:
+    from great_expectations.data_context import CloudDataContext
 
 HandlerMap = Dict[str, OnMessageCallback]
 
