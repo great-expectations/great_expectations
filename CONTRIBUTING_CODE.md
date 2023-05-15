@@ -289,7 +289,7 @@ Run the following command to install PySpark and Apache Spark:
 pip install pyspark
 ```
 
-## If you want to build documentation locally:
+## Build documentation locally
 
 `pip install -r docs/requirements.txt`
 
