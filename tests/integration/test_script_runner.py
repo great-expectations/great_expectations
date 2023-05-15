@@ -234,6 +234,11 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
+    IntegrationTestFixture(
+        name="setup_overview",
+        user_flow_script="tests/integration/docusaurus/setup/setup_overview.py",
+        data_context_dir=None,
+    ),
 ]
 
 quickstart = [
