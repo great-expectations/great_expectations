@@ -54,7 +54,7 @@ assert my_batch_request.data_asset_name == "my_asset"
 assert my_batch_request.options == {}
 
 # Python
-# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources my_batch_request">
+# <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources my_batch_list">
 batches = my_asset.get_batch_list_from_batch_request(my_batch_request)
 # </snippet>
 

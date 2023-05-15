@@ -60,7 +60,12 @@ We will use the `build_batch_request(...)` method of our Data Asset to generate 
 
 ### 5. Verify that the correct Batches were returned
 
-The `get_batch_list_from_batch_request(...)` method will return a list of the Batches a given Batch Request returns.  Because Batch definitions are quite verbose, it is easiest to determine what data the Batch Request will return by printing just the `batch_spec` of each Batch.
+The `get_batch_list_from_batch_request(...)` method will return a list of the Batches a given Batch Request returns.
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py my_batches"
+```
+
+Because Batch definitions are quite verbose, it is easiest to determine what data the Batch Request will return by printing just the `batch_spec` of each Batch.
 
 ```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py print_batch_spec"
 ```
