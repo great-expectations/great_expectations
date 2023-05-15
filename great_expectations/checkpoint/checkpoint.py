@@ -1042,7 +1042,10 @@ constructor arguments.
             if value is not None:
                 config[key] = value
 
-        config = filter_properties_dict(properties=config, clean_falsy=True)
+        config = filter_properties_dict(  # type: ignore[assignment] # filter could return None
+            properties=config,
+            clean_falsy=True,
+        )
 
         checkpoint: Checkpoint = instantiate_class_from_config(
             config=config,
