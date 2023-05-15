@@ -260,6 +260,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, str] = ...,
+        create_temp_table: bool = True,
     ) -> SQLDatasource: ...
     def update_sql(
         self,
@@ -268,6 +269,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, str] = ...,
+        create_temp_table: bool = True,
     ) -> SQLDatasource: ...
     def add_or_update_sql(
         self,
@@ -276,6 +278,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, str] = ...,
+        create_temp_table: bool = True,
     ) -> SQLDatasource: ...
     def delete_sql(
         self,
@@ -288,6 +291,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> PostgresDatasource: ...
     def update_postgres(
         self,
@@ -296,6 +300,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> PostgresDatasource: ...
     def add_or_update_postgres(
         self,
@@ -304,6 +309,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, pydantic.networks.PostgresDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> PostgresDatasource: ...
     def delete_postgres(
         self,
@@ -523,6 +529,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> SqliteDatasource: ...
     def update_sqlite(
         self,
@@ -531,6 +538,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> SqliteDatasource: ...
     def add_or_update_sqlite(
         self,
@@ -539,6 +547,7 @@ class _SourceFactories:
         datasource: Optional[Datasource] = None,
         *,
         connection_string: Union[ConfigStr, SqliteDsn, str] = ...,
+        create_temp_table: bool = True,
     ) -> SqliteDatasource: ...
     def delete_sqlite(
         self,

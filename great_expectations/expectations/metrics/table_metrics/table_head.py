@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.compatibility.sqlalchemy_and_pandas import (
     pandas_read_sql,
@@ -75,9 +76,9 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
         df_chunk_iterator: Iterator[pd.DataFrame]
-        if (
-            isinstance(table_name, sa.sql.elements._anonymous_label)
-            or table_name is None
+        if (table_name is None) or (
+            sqlalchemy._anonymous_label
+            and isinstance(table_name, sqlalchemy._anonymous_label)
         ):
             # if a custom query was passed
             try:
@@ -126,7 +127,6 @@ class TableHead(TableMetricProvider):
                     df = TableHead._get_head_df_from_df_iterator(
                         df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                     )
-
             except (ValueError, NotImplementedError):
                 # MetaData that is used by pd.read_sql_table
                 # cannot work on a temp table with pandas < 1.4.0.
@@ -161,6 +161,7 @@ class TableHead(TableMetricProvider):
             else:
                 if n_rows > 0:
                     stmt = stmt.limit(n_rows)
+
                 sql = stmt.compile(
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
@@ -175,7 +176,7 @@ class TableHead(TableMetricProvider):
                     df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                 )
             else:
-                df = pandas_read_sql(sql=sql, con=execution_engine.engine)
+                df = pandas_read_sql_query(sql=sql, con=execution_engine.engine)
 
         return df
 
