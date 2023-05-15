@@ -289,22 +289,6 @@ Run the following command to install PySpark and Apache Spark:
 pip install pyspark
 ```
 
-## Build documentation locally
-
-Run the following command to review the documentation requirements text file:
-
-```console
-pip install -r docs/requirements.txt
-
-Run the follwoing command to build the documentation:
-
-```console
-cd docs; make html
-
-Documentation will be generated in `docs/build/html/` with the index.html as the index page.
-
-AutoAPI is used to generate API reference documentation, but it’s not compatible with pandas 1.1.0. To  build the API documentation, install pandas 1.0.5 or earlier.
-
 ## Test code changes
 
 Great Expectations production code must be thoroughly tested, and you must perform unit testing on all branches of every method, including likely error states. Most new feature contributions should include multiple unit tests. Contributions that modify or extend existing features should include a test of the new behavior.
