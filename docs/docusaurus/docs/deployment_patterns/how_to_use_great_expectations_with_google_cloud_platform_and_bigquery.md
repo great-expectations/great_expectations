@@ -132,7 +132,7 @@ If successful, the `gcloud` CLI will provide the URL to your app and launch it i
 
 ### 4. Connect to your Data
 
-The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that will be migrated to Cloud Composer. 
+The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](https://docs.greatexpectations.io/docs/guides/connecting_to_your_data/database/bigquery) and eventually build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that will be migrated to Cloud Composer. 
 
 More details can be found in the corresponding How to Guides, which have been linked.
 
@@ -153,7 +153,7 @@ Using the  <TechnicalTag relative="../../../" tag="data_context" text="Data Cont
 In the example, we have added a Datasource that connects to data in GCS using a Pandas dataframe. The name of the new datasource is `gcs_datasource` and it refers to a GCS bucket named `test_docs_data`.
 
 For more details on how to configure the Datasource, and additional information on authentication, please refer to [How to connect to data on GCS using Pandas
-](../guides/connecting_to_your_data/cloud/gcs/pandas.md)
+](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas)
 
 </TabItem>
 <TabItem value="bigquery">
@@ -254,7 +254,7 @@ Lastly, save the ExpectationSuite, which now contains our two Expectations.
 ```python name="tests/integration/docusaurus/deployment_patterns/gcp_deployment_patterns_file_gcs.py save_expectation_suite"
 ```
 
-For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas](../guides/connecting_to_your_data/cloud/gcs/pandas.md)
+For more details on how to configure the RuntimeBatchRequest, as well as an example of how you can load data by specifying a GCS path to a single CSV, please refer to [How to connect to data on GCS using Pandas](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas)
 
 </TabItem>
 <TabItem value="bigquery">
