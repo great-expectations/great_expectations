@@ -845,7 +845,7 @@ constructor arguments.
         run_id: Optional[Union[str, int, float]] = None,
         run_name: Optional[str] = None,
         run_time: Optional[datetime.datetime] = None,
-        result_format: Optional[str] = None,
+        result_format: str | dict | None = None,  # TODO: type-dict?
         expectation_suite_ge_cloud_id: Optional[str] = None,
         **kwargs,
     ) -> CheckpointResult:
