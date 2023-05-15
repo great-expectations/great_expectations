@@ -297,7 +297,7 @@ To build documentation, the command is `cd docs; make html`
 
 Documentation will be generated in `docs/build/html/` with the index.html as the index page.
 
-Note: we use autoapi to generate API reference docs, but it’s not compatible with pandas 1.1.0. You’ll need to have pandas 1.0.5 (or a previous version) installed in order to successfully build docs.
+AutoAPI is used to generate API reference documentation, but it’s not compatible with pandas 1.1.0. To  build the API documentation, install pandas 1.0.5 or earlier.
 
 ## Test code changes
 
