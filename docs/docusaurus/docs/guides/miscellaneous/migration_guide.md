@@ -273,9 +273,9 @@ Please check out the following docs for examples of V3-style Datasource configur
 - [How to connect to a Athena database](/docs/0.15.50/guides/connecting_to_your_data/database/athena)
 - [How to connect to a BigQuery database](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery)
 - [How to connect to a MySQL database](/docs/0.15.50/guides/connecting_to_your_data/database/mysql)
-- [How to connect to a Redshift database](/docs/0.15.50/connecting_to_your_data/database/redshift)
-- [How to connect to a Snowflake database](/docs/0.15.50/connecting_to_your_data/database/snowflake)
-- [How to connect to a SQLite database](/docs/0.15.50/connecting_to_your_data/database/sqlite)
+- [How to connect to a Redshift database](/docs/0.15.50/guides/connecting_to_your_data/database/redshift)
+- [How to connect to a Snowflake database](/docs/0.15.50/guides/connecting_to_your_data/database/snowflake)
+- [How to connect to a SQLite database](/docs/0.15.50/guides/connecting_to_your_data/database/sqlite)
 
 </TabItem>
 </Tabs>
