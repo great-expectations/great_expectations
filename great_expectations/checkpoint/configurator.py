@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import copy
 import logging
-from typing import Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Optional
 
 from ruamel.yaml.comments import CommentedMap
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import TypedDict
 
 from great_expectations.checkpoint.util import (
     does_batch_request_in_validations_contain_batch_data,
@@ -20,6 +20,9 @@ from great_expectations.data_context.types.base import (
     checkpointConfigSchema,
 )
 from great_expectations.util import is_list_of_strings, is_sane_slack_webhook
+
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired
 
 logger = logging.getLogger(__name__)
 
