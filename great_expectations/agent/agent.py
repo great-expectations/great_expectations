@@ -143,14 +143,10 @@ class GXAgent:
     def _get_config_from_env(cls) -> GXAgentConfig:
         """Construct GXAgentConfig from available environment variables"""
         url = os.environ.get("BROKER_URL", None)
-        if url is None:
-            raise GXAgentError("Missing required environment variable: BROKER_URL")
-        org_id = os.environ.get("GE_CLOUD_ORGANIZATION_ID", None)
-        if org_id is None:
-            raise GXAgentError(
-                "Missing required environment variable: GE_CLOUD_ORGANIZATION_ID"
-            )
-        return GXAgentConfig(organization_id=org_id, broker_url=url)
+        try:
+            return GXAgentConfig(organization_id=org_id, broker_url=url)
+        except pydantic.ValidationError as validation_err:
+            raise GXAgentError(f"Missing or badly formed environment variable\n{validation_err.errors()}") from validation_err
 
 
 class GXAgentError(Exception):
