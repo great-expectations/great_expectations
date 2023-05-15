@@ -52,6 +52,7 @@ If you're using a Custom Expectation from the `Great Expectations Experimental` 
 
 When you instantiate your <TechnicalTag tag="data_context" text="Data Context"/>, all plugins in the directory are automatically available,
 and this allows you to import your Custom Expectation from other locations.
+
 This import will be needed when an <TechnicalTag tag="expectation_suite" text="Expectation Suite"/> is created, *and* when a <TechnicalTag tag="checkpoint" text="Checkpoint"/> is defined and run.
 
 <Tabs
