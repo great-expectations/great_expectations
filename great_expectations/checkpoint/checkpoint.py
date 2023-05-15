@@ -453,7 +453,7 @@ class BaseCheckpoint(ConfigPeer):
             )
 
             batch_request: Union[
-                BatchRequest, FluentBatchRequest, RuntimeBatchRequest
+                BatchRequest, FluentBatchRequest, RuntimeBatchRequest, None
             ] = substituted_validation_dict.get("batch_request")
             expectation_suite_name: str | None = substituted_validation_dict.get(
                 "expectation_suite_name"
