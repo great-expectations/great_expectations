@@ -291,7 +291,10 @@ pip install pyspark
 
 ## Build documentation locally
 
-`pip install -r docs/requirements.txt`
+Run the following command to review the documentation requirements text file:
+
+```console
+pip install -r docs/requirements.txt
 
 To build documentation, the command is `cd docs; make html`
 
