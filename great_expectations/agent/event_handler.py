@@ -21,10 +21,13 @@ class EventHandler:
     def _handle_run_data_assistant(
         self, event: RunOnboardingDataAssistantEvent, correlation_id: str
     ) -> None:
-        """Action that occurs when a RunDataAssistant event is received."""
+        """Action that occurs when a RunOnboardingDataAssistantEvent is received."""
 
-        checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
+        # todo: this action should create a checkpoint as well as a suite, but
+        #       that workflow is still in progress.
+        print("Starting Onboarding Data Assistant")
         suite_name = f"{event.data_asset_name} onboarding assistant suite"
+        # checkpoint_name = f"{event.data_asset_name} onboarding assistant checkpoint"
 
         # ensure resources we create don't already exist
         try:
@@ -37,15 +40,15 @@ class EventHandler:
             # resource is unique
             pass
 
-        try:
-            self._context.get_checkpoint(name=checkpoint_name)
-            raise ValueError(
-                f"Onboarding Assistant Checkpoint `{checkpoint_name}` already exists. "
-                + "Please rename or delete Checkpoint and try again"
-            )
-        except StoreBackendError:
-            # resource is unique
-            pass
+        # try:
+        #     self._context.get_checkpoint(name=checkpoint_name)
+        #     raise ValueError(
+        #         f"Onboarding Assistant Checkpoint `{checkpoint_name}` already exists. "
+        #         + "Please rename or delete Checkpoint and try again"
+        #     )
+        # except StoreBackendError:
+        #     # resource is unique
+        #     pass
 
         datasource = self._context.get_datasource(datasource_name=event.datasource_name)
         asset = datasource.get_asset(asset_name=event.data_asset_name)
@@ -60,3 +63,6 @@ class EventHandler:
         self._context.add_or_update_expectation_suite(
             expectation_suite=expectation_suite
         )
+        print(f"Onboarding Data Assistant created the following resources:")
+        print(f"    Expectation Suite: {suite_name}")
+        # print(f"    Checkpoint: {checkpoint_name}")
