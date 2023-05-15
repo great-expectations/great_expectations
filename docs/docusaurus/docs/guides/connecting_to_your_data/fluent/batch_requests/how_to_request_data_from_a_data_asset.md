@@ -21,6 +21,8 @@ If you are using a Datasource that was created by using the block-config method 
 
 ## Prerequisites
 
+<Prerequisites> 
+
 - An installation of GX
 - A Datasource with a configured Data Asset
 
