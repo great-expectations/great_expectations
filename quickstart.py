@@ -16,7 +16,7 @@ validator.expect_column_values_to_not_be_null("pickup_datetime")
 validator.expect_column_values_to_be_between("passenger_count", auto=True)
 
 validator.expectation_suite_name = "taxi_suite"
-expectation_suite = validator.expectation_suite
+context.add_expectation_suite(expectation_suite=validator.expectation_suite)
 
 
 # Validate data
@@ -25,7 +25,7 @@ checkpoint = gx.checkpoint.SimpleCheckpoint(
     data_context=context,
     validations=[
         {
-            "expectation_suite_name": expectation_suite.expectation_suite_name,
+            "expectation_suite_name": "taxi_suite",
             "batch_request": {
                 "datasource_name": "default_pandas_datasource",
                 "data_asset_name": "taxi_asset",
