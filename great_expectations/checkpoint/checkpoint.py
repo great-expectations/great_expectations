@@ -359,7 +359,7 @@ class BaseCheckpoint(ConfigPeer):
         if runtime_kwargs is None:
             runtime_kwargs = {}
 
-        config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)
+        config_kwargs: dict = self.get_config(mode=ConfigOutputModes.JSON_DICT)  # type: ignore[assignment] # always returns a dict
 
         template_name: Optional[str] = runtime_kwargs.get("template_name")
         if template_name:
