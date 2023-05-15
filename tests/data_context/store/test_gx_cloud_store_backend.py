@@ -280,7 +280,7 @@ def test_list_keys(
 
 @pytest.mark.cloud
 @pytest.mark.unit
-def test_remove_key(
+def test_remove_key_with_only_id(
     construct_ge_cloud_store_backend: Callable[
         [GXCloudRESTResource], GXCloudStoreBackend
     ],
@@ -309,6 +309,58 @@ def test_remove_key(
                     "attributes": {"deleted": True},
                 }
             },
+        )
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+def test_remove_key_with_id_and_name(
+    construct_ge_cloud_store_backend: Callable[
+        [GXCloudRESTResource], GXCloudStoreBackend
+    ],
+) -> None:
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
+
+    with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
+        mock_response = mock_delete.return_value
+        mock_response.status_code = 200
+
+        store_backend.remove_key(
+            ("checkpoint", "0ccac18e-7631-4bdd-8a42-3c35cce574c6", "checkpoint_name")
+        )
+        mock_delete.assert_called_with(
+            mock.ANY,  # requests.Session object
+            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints/0ccac18e-7631"
+            "-4bdd"
+            "-8a42-3c35cce574c6",
+            json={
+                "data": {
+                    "type": "checkpoint",
+                    "id": "0ccac18e-7631-4bdd-8a42-3c35cce574c6",
+                    "attributes": {"deleted": True},
+                }
+            },
+        )
+
+
+@pytest.mark.cloud
+@pytest.mark.unit
+def test_remove_key_with_only_name(
+    construct_ge_cloud_store_backend: Callable[
+        [GXCloudRESTResource], GXCloudStoreBackend
+    ],
+) -> None:
+    store_backend = construct_ge_cloud_store_backend(GXCloudRESTResource.CHECKPOINT)
+
+    with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
+        mock_response = mock_delete.return_value
+        mock_response.status_code = 200
+
+        store_backend.remove_key(("checkpoint", "", "checkpoint_name"))
+        mock_delete.assert_called_with(
+            mock.ANY,  # requests.Session object
+            f"{CLOUD_DEFAULT_BASE_URL}organizations/51379b8b-86d3-4fe7-84e9-e1a52f4a414c/checkpoints",
+            params={"name": "checkpoint_name"},
         )
 
 
