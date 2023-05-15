@@ -962,7 +962,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             verify_dynamic_loading_support(module_name=module_name)
             class_name = kwargs.get("class_name", "Datasource")
             datasource_class = load_class(
-                module_name=module_name, class_name=class_name
+                class_name=class_name, module_name=module_name
             )
 
             # For any class that should be loaded, it may control its configuration construction
