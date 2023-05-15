@@ -8,7 +8,7 @@ from great_expectations.agent.message_service.subscriber import (
     SubscriberError,
 )
 from great_expectations.agent.models import Event
-from tests.agent.message_service.conftest import AMQP_CHANNEL_AND_CONNECTION_ERRORS
+from tests.agent.message_service.amqp_errors import AMQP_CHANNEL_AND_CONNECTION_ERRORS
 
 
 def test_subscriber_has_client_attribute():

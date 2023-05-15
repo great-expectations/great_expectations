@@ -4,7 +4,7 @@ from great_expectations.agent.message_service.rabbit_mq_client import (
     ClientError,
     RabbitMQClient,
 )
-from tests.agent.message_service.conftest import AMQP_CHANNEL_AND_CONNECTION_ERRORS
+from tests.agent.message_service.amqp_errors import AMQP_CHANNEL_AND_CONNECTION_ERRORS
 
 
 @pytest.fixture
