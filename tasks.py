@@ -615,7 +615,7 @@ def api_docs(ctx: Context):
     name="docs",
     help={
         "build": "Build docs via yarn build instead of serve via yarn start. Default False.",
-        "clean": "Remove directories and files from versioned code. Default False."
+        "clean": "Remove directories and files from versioned docs and code. Default False."
     },
 )
 def docs(ctx: Context, build: bool=False, clean: bool=False):
@@ -632,20 +632,21 @@ def docs(ctx: Context, build: bool=False, clean: bool=False):
     docusaurus_dir = repo_root / "docs/docusaurus"
     os.chdir(docusaurus_dir)
     if clean:
-        rm_cmds = ["rm", "-f", "oss_docs_versions.zip"]
+        rm_cmds = ["rm", "-f", "oss_docs_versions.zip", "versions.json"]
         ctx.run(" ".join(rm_cmds), echo=True)
         rm_rf_cmds = ["rm", "-rf", "versioned_code", "versioned_docs", "versioned_sidebars"]
         ctx.run(" ".join(rm_rf_cmds), echo=True)
-    print("Making sure docusaurus dependencies are installed.")
-    ctx.run(" ".join(["yarn install"]), echo=True)
-
-    if build:
-        build_docs_cmd = "../build_docs"
     else:
-        build_docs_cmd = "../build_docs_locally.sh"
+        print("Making sure docusaurus dependencies are installed.")
+        ctx.run(" ".join(["yarn install"]), echo=True)
 
-    print(f"Running {build_docs_cmd} from:", docusaurus_dir)
-    ctx.run(build_docs_cmd, echo=True)
+        if build:
+            build_docs_cmd = "../build_docs"
+        else:
+            build_docs_cmd = "../build_docs_locally.sh"
+
+        print(f"Running {build_docs_cmd} from:", docusaurus_dir)
+        ctx.run(build_docs_cmd, echo=True)
 
     os.chdir(old_pwd)
 
