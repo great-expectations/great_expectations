@@ -3,7 +3,7 @@ services:
     image: postgres
     restart: always
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: example_user
       POSTGRES_HOST_AUTH_METHOD: trust
       POSTGRES_DB: gx_example_db
     networks:
@@ -19,7 +19,7 @@ services:
     depends_on:
       - db
     environment:
-      CONNECTION_STRING: postgresql://postgres@db/gx_example_db
+      CONNECTION_STRING: postgresql://example_user@db/gx_example_db
     networks:
       - dbnet
     entrypoint: python load_data.py
@@ -30,7 +30,7 @@ services:
       context: .
       dockerfile: ./jupyter.Dockerfile
     environment:
-      CONNECTION_STRING: postgresql://postgres@db/gx_example_db
+      CONNECTION_STRING: postgresql://example_user@db/gx_example_db
     depends_on:
       - db
       - db_setup

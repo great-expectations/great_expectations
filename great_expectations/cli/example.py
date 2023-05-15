@@ -55,6 +55,8 @@ def example_postgres(shutdown: bool) -> None:
         cli_message("<green>Done shutting down...</green>")
     else:
         cli_message("<green>Setting up postgres database example...</green>")
-        cli_message("<green>Postgres db will be available at postgresql://postgres@db/gx_example_db</green>")
+        outside = "postgresql://example_user@localhost/gx_example_db"
+        inside = "postgresql://example_user@db/gx_example_db"
+        cli_message(f"<green>Postgres db will be available outside the container at {outside} and inside the container at {inside}</green>")
         setup_commands = ["docker", "compose", "up"]
         subprocess.run(setup_commands, cwd=example_directory)
