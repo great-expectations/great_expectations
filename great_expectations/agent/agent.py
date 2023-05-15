@@ -146,9 +146,10 @@ class GXAgent:
         url = os.environ.get("BROKER_URL", None)
         org_id = os.environ.get("GE_CLOUD_ORGANIZATION_ID", None)
         try:
+            # pydantic will coerce the url to the correct type
             return GXAgentConfig(
-                organization_id=org_id, broker_url=url
-            )  # noqa - mypy doesnt know pydantic handles url type
+                organization_id=org_id, broker_url=url  # type: ignore[arg-type]
+            )
         except pydantic.ValidationError as validation_err:
             raise GXAgentError(
                 f"Missing or badly formed environment variable\n{validation_err.errors()}"
