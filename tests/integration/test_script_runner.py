@@ -238,6 +238,11 @@ local_tests = [
         name="how_to_edit_expectations_suite",
         user_flow_script="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py",
     ),
+    IntegrationTestFixture(
+        name="setup_overview",
+        user_flow_script="tests/integration/docusaurus/setup/setup_overview.py",
+        data_context_dir=None,
+    ),
 ]
 
 quickstart = [
