@@ -132,7 +132,7 @@ If successful, the `gcloud` CLI will provide the URL to your app and launch it i
 
 ### 4. Connect to your Data
 
-The remaining sections in Part 1 contain a simplified description of [how to connect to your data in GCS](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery) and eventually build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that will be migrated to Cloud Composer. 
+The remaining sections in Part 1 contain descriptions of [how to connect to your data in Google Cloud Storage (GCS)](/docs/0.15.50/guides/connecting_to_your_data/cloud/gcs/pandas) or [BigQuery](/docs/0.15.50/guides/connecting_to_your_data/database/bigquery) and build a <TechnicalTag tag="checkpoint" text="Checkpoint"/> that you'll migrate to Google Cloud Composer. 
 
 More details can be found in the corresponding How to Guides, which have been linked.
 
