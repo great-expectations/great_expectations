@@ -1,10 +1,9 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/mysql_yaml_example.py imports">
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
 
-yaml: YAMLHandler = YAMLHandler()
+yaml = YAMLHandler()
 # </snippet>
 
 CONNECTION_STRING = "mysql+pymysql://root@localhost/test_ci"

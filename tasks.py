@@ -14,6 +14,7 @@ import json
 import os
 import pathlib
 import shutil
+import sys
 from typing import TYPE_CHECKING, Union
 
 import invoke
@@ -131,7 +132,10 @@ def lint(
     watch: bool = False,
     pty: bool = True,
 ):
-    """Run code linter"""
+    """Run formatter (black) and linter (ruff)"""
+    fmt(ctx, path, check=not fix, pty=pty)
+
+    # Run code linter (ruff)
     cmds = ["ruff", path]
     if fix:
         cmds.append("--fix")
@@ -215,6 +219,11 @@ def docstrings(ctx: Context, paths: list[str] | None = None):
         " The daemon will be started and re-used for subsequent calls."
         " For detailed usage see `dmypy --help`.",
         "clear-cache": "Clear the local mypy cache directory.",
+        "check-stub-sources": "Check the implementation `.py` files for any `.pyi`"
+        " stub files in `great_expectations`."
+        " By default `mypy` will not check implementation files if a `.pyi` stub file exists."
+        " This should be run in CI in addition to the normal type-checking step.",
+        "python-version": "Type check as if running a specific python version. Default 3.8",
     },
 )
 def type_check(
@@ -226,7 +235,9 @@ def type_check(
     daemon: bool = False,
     clear_cache: bool = False,
     report: bool = False,
+    check_stub_sources: bool = False,
     ci: bool = False,
+    python_version: str = "3.8",
 ):
     """Run mypy static type-checking on select packages."""
     mypy_cache = pathlib.Path(".mypy_cache")
@@ -244,7 +255,9 @@ def type_check(
             daemon=daemon,
             clear_cache=clear_cache,
             report=report,
+            check_stub_sources=check_stub_sources,
             ci=False,
+            python_version=python_version,
         )
         return  # don't run twice
 
@@ -262,6 +275,16 @@ def type_check(
         bin = "mypy"
 
     ge_pkgs = [f"great_expectations.{p}" for p in packages]
+
+    if check_stub_sources:
+        # see --help docs for explanation of this flag
+        for stub_file in GX_ROOT_DIR.glob("**/*.pyi"):
+            source_file = stub_file.with_name(  # TODO:py3.9 .with_stem()
+                f"{stub_file.name[:-1]}"
+            )
+            relative_path = source_file.relative_to(GX_ROOT_DIR.parent)
+            ge_pkgs.append(str(relative_path))
+
     cmds = [
         bin,
         *ge_pkgs,
@@ -277,6 +300,8 @@ def type_check(
         cmds.extend(["--pretty"])
     if warn_unused_ignores:
         cmds.extend(["--warn-unused-ignores"])
+    if python_version:
+        cmds.extend(["--python-version", python_version])
     # use pseudo-terminal for colorized output
     ctx.run(" ".join(cmds), echo=True, pty=True)
 
@@ -488,6 +513,7 @@ def type_schema(
 
     from great_expectations.datasource.fluent import (
         _PANDAS_SCHEMA_VERSION,
+        BatchRequest,
         Datasource,
     )
     from great_expectations.datasource.fluent.sources import (
@@ -509,8 +535,13 @@ def type_schema(
     if not sync:
         print("--------------------\nRegistered Fluent types\n--------------------\n")
 
-    for name, model in _iter_all_registered_types():
+    name_model = [
+        ("BatchRequest", BatchRequest),
+        (Datasource.__name__, Datasource),
+        *_iter_all_registered_types(),
+    ]
 
+    for name, model in name_model:
         if issubclass(model, Datasource):
             datasource_dir = schema_dir_root.joinpath(model.__name__)
             datasource_dir.mkdir(exist_ok=True)
@@ -582,8 +613,16 @@ def docs(ctx):
     doc_builder.build_docs()
 
 
-@invoke.task(name="public-api")
-def public_api_task(ctx):
+@invoke.task(
+    name="public-api",
+    help={
+        "write_to_file": "Write items to be addressed to public_api_report.txt, default False",
+    },
+)
+def public_api_task(
+    ctx: Context,
+    write_to_file: bool = False,
+):
     """Generate a report to determine the state of our Public API. Lists classes, methods and functions that are used in examples in our documentation, and any manual includes or excludes (see public_api_report.py). Items listed when generating this report need the @public_api decorator (and a good docstring) or to be excluded from consideration if they are not applicable to our Public API."""
 
     repo_root = pathlib.Path(__file__).parent
@@ -592,7 +631,11 @@ def public_api_task(ctx):
         task_name="public-api", correct_dir=repo_root
     )
 
-    public_api_report.main()
+    # Docs folder is not reachable from install of Great Expectations
+    api_docs_dir = repo_root / "docs" / "sphinx_api_docs_source"
+    sys.path.append(str(api_docs_dir.resolve()))
+
+    public_api_report.generate_public_api_report(write_to_file=write_to_file)
 
 
 def _exit_with_error_if_not_run_from_correct_dir(
@@ -608,3 +651,24 @@ def _exit_with_error_if_not_run_from_correct_dir(
             exit_message,
             code=1,
         )
+
+
+@invoke.task(
+    aliases=("links",),
+    help={"skip_external": "Skip external link checks (is slow), default is True"},
+)
+def link_checker(ctx: Context, skip_external: bool = True):
+    """Checks the Docusaurus docs for broken links"""
+    import docs.checks.docs_link_checker as checker
+
+    path: str = "docs/docusaurus/docs"
+    docs_root: str = "docs/docusaurus/docs"
+    site_prefix: str = "docs"
+
+    code, message = checker.scan_docs(
+        path=path,
+        docs_root=docs_root,
+        site_prefix=site_prefix,
+        skip_external=skip_external,
+    )
+    raise invoke.Exit(message, code)

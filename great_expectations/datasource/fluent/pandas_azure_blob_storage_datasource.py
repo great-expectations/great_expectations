@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 
 import pydantic
-from typing_extensions import Literal
+from typing_extensions import Final, Literal
 
+from great_expectations.compatibility import azure
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -16,40 +18,29 @@ from great_expectations.datasource.fluent.interfaces import TestConnectionError
 from great_expectations.datasource.fluent.pandas_datasource import (
     PandasDatasourceError,
 )
-from great_expectations.datasource.fluent.pandas_file_path_datasource import (
-    CSVAsset,
-    ExcelAsset,
-    JSONAsset,
-    ParquetAsset,
-)
-from great_expectations.datasource.fluent.signatures import _merge_signatures
 
 if TYPE_CHECKING:
-    from great_expectations.datasource.fluent.interfaces import (
-        Sorter,
-        SortersDefinition,
+    from great_expectations.datasource.fluent.file_path_data_asset import (
+        _FilePathDataAsset,
     )
-
 
 logger = logging.getLogger(__name__)
 
 
-ABS_IMPORTED = False
-try:
-    from azure.storage.blob import (
-        BlobServiceClient,  # noqa: disable=E0602
-    )
-
-    ABS_IMPORTED = True
-except ImportError:
-    pass
+_MISSING: Final = object()
 
 
 class PandasAzureBlobStorageDatasourceError(PandasDatasourceError):
     pass
 
 
+@public_api
 class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
+    # class attributes
+    data_connector_type: ClassVar[
+        Type[AzureBlobStorageDataConnector]
+    ] = AzureBlobStorageDataConnector
+
     # instance attributes
     type: Literal["pandas_abs"] = "pandas_abs"
 
@@ -57,10 +48,12 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     azure_options: Dict[str, Any] = {}
 
     _account_name: str = pydantic.PrivateAttr(default="")
-    _azure_client: Union[BlobServiceClient, None] = pydantic.PrivateAttr(default=None)
+    _azure_client: Union[azure.BlobServiceClient, None] = pydantic.PrivateAttr(
+        default=None
+    )
 
-    def _get_azure_client(self) -> BlobServiceClient:
-        azure_client: Union[BlobServiceClient, None] = self._azure_client
+    def _get_azure_client(self) -> azure.BlobServiceClient:
+        azure_client: Union[azure.BlobServiceClient, None] = self._azure_client
         if not azure_client:
             # Thanks to schema validation, we are guaranteed to have one of `conn_str` or `account_url` to
             # use in authentication (but not both). If the format or content of the provided keys is invalid,
@@ -73,20 +66,20 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
                 )
 
             # Validate that "azure" libararies were successfully imported and attempt to create "azure_client" handle.
-            if ABS_IMPORTED:
+            if azure.BlobServiceClient:
                 try:
                     if conn_str is not None:
                         self._account_name = re.search(  # type: ignore[union-attr]
                             r".*?AccountName=(.+?);.*?", conn_str
                         ).group(1)
-                        azure_client = BlobServiceClient.from_connection_string(
+                        azure_client = azure.BlobServiceClient.from_connection_string(
                             **self.azure_options
                         )
                     elif account_url is not None:
                         self._account_name = re.search(  # type: ignore[union-attr]
                             r"(?:https?://)?(.+?).blob.core.windows.net", account_url
                         ).group(1)
-                        azure_client = BlobServiceClient(**self.azure_options)
+                        azure_client = azure.BlobServiceClient(**self.azure_options)
                 except Exception as e:
                     # Failure to create "azure_client" is most likely due invalid "azure_options" dictionary.
                     raise PandasAzureBlobStorageDatasourceError(
@@ -119,234 +112,47 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
             ) from e
 
         if self.assets and test_assets:
-            for asset in self.assets.values():
+            for asset in self.assets:
                 asset.test_connection()
 
-    def add_csv_asset(
+    def _build_data_connector(
         self,
-        name: str,
-        batching_regex: Union[re.Pattern, str],
-        container: str,
-        name_starts_with: str = "",
-        delimiter: str = "/",
-        order_by: Optional[SortersDefinition] = None,
+        data_asset: _FilePathDataAsset,
+        abs_container: str = _MISSING,  # type: ignore[assignment] # _MISSING is used as sentinel value
+        abs_name_starts_with: str = "",
+        abs_delimiter: str = "/",
         **kwargs,
-    ) -> CSVAsset:  # type: ignore[valid-type]
-        """Adds a CSV DataAsst to the present "PandasAzureBlobStorageDatasource" object.
+    ) -> None:
+        """Builds and attaches the `AzureBlobStorageDataConnector` to the asset."""
+        if kwargs:
+            raise TypeError(
+                f"_build_data_connector() got unexpected keyword arguments {list(kwargs.keys())}"
+            )
+        if abs_container is _MISSING:
+            raise TypeError(
+                f"'{data_asset.name}' is missing required argument 'abs_container'"
+            )
 
-        Args:
-            name: The name of the CSV asset
-            batching_regex: regex pattern that matches CSV filenames that is used to label the batches
-            container: container name for Microsoft Azure Blob Storage
-            name_starts_with: Microsoft Azure Blob Storage object name prefix
-            delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
-            kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
-        """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-
-        asset = CSVAsset(
-            name=name,
-            batching_regex=batching_regex_pattern,
-            order_by=order_by_sorters,
-            **kwargs,
-        )
-
-        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
+        data_asset._data_connector = self.data_connector_type.build_data_connector(
             datasource_name=self.name,
-            data_asset_name=name,
+            data_asset_name=data_asset.name,
             azure_client=self._get_azure_client(),
-            batching_regex=batching_regex_pattern,
+            batching_regex=data_asset.batching_regex,
             account_name=self._account_name,
-            container=container,
-            name_starts_with=name_starts_with,
-            delimiter=delimiter,
+            container=abs_container,
+            name_starts_with=abs_name_starts_with,
+            delimiter=abs_delimiter,
             file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
         )
-        asset._test_connection_error_message = (
-            AzureBlobStorageDataConnector.build_test_connection_error_message(
-                data_asset_name=name,
-                batching_regex=batching_regex_pattern,
+
+        # build a more specific `_test_connection_error_message`
+        data_asset._test_connection_error_message = (
+            self.data_connector_type.build_test_connection_error_message(
+                data_asset_name=data_asset.name,
+                batching_regex=data_asset.batching_regex,
                 account_name=self._account_name,
-                container=container,
-                name_starts_with=name_starts_with,
-                delimiter=delimiter,
+                container=abs_container,
+                name_starts_with=abs_name_starts_with,
+                delimiter=abs_delimiter,
             )
         )
-        return self.add_asset(asset=asset)
-
-    def add_excel_asset(
-        self,
-        name: str,
-        batching_regex: Union[re.Pattern, str],
-        container: str,
-        name_starts_with: str = "",
-        delimiter: str = "/",
-        order_by: Optional[SortersDefinition] = None,
-        **kwargs,
-    ) -> ExcelAsset:  # type: ignore[valid-type]
-        """Adds an Excel DataAsst to the present "PandasAzureBlobStorageDatasource" object.
-
-        Args:
-            name: The name of the Excel asset
-            batching_regex: regex pattern that matches Excel filenames that is used to label the batches
-            container: container name for Microsoft Azure Blob Storage
-            name_starts_with: Microsoft Azure Blob Storage object name prefix
-            delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
-            kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
-        """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-
-        asset = ExcelAsset(
-            name=name,
-            batching_regex=batching_regex_pattern,
-            order_by=order_by_sorters,
-            **kwargs,
-        )
-
-        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
-            datasource_name=self.name,
-            data_asset_name=name,
-            azure_client=self._get_azure_client(),
-            batching_regex=batching_regex_pattern,
-            account_name=self._account_name,
-            container=container,
-            name_starts_with=name_starts_with,
-            delimiter=delimiter,
-            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
-        )
-        asset._test_connection_error_message = (
-            AzureBlobStorageDataConnector.build_test_connection_error_message(
-                data_asset_name=name,
-                batching_regex=batching_regex_pattern,
-                account_name=self._account_name,
-                container=container,
-                name_starts_with=name_starts_with,
-                delimiter=delimiter,
-            )
-        )
-        return self.add_asset(asset=asset)
-
-    def add_json_asset(
-        self,
-        name: str,
-        batching_regex: Union[re.Pattern, str],
-        container: str,
-        name_starts_with: str = "",
-        delimiter: str = "/",
-        order_by: Optional[SortersDefinition] = None,
-        **kwargs,
-    ) -> JSONAsset:  # type: ignore[valid-type]
-        """Adds a JSON DataAsst to the present "PandasAzureBlobStorageDatasource" object.
-
-        Args:
-            name: The name of the JSON asset
-            batching_regex: regex pattern that matches JSON filenames that is used to label the batches
-            container: container name for Microsoft Azure Blob Storage
-            name_starts_with: Microsoft Azure Blob Storage object name prefix
-            delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
-            kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
-        """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-
-        asset = JSONAsset(
-            name=name,
-            batching_regex=batching_regex_pattern,
-            order_by=order_by_sorters,
-            **kwargs,
-        )
-
-        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
-            datasource_name=self.name,
-            data_asset_name=name,
-            azure_client=self._get_azure_client(),
-            batching_regex=batching_regex_pattern,
-            account_name=self._account_name,
-            container=container,
-            name_starts_with=name_starts_with,
-            delimiter=delimiter,
-            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
-        )
-        asset._test_connection_error_message = (
-            AzureBlobStorageDataConnector.build_test_connection_error_message(
-                data_asset_name=name,
-                batching_regex=batching_regex_pattern,
-                account_name=self._account_name,
-                container=container,
-                name_starts_with=name_starts_with,
-                delimiter=delimiter,
-            )
-        )
-        return self.add_asset(asset=asset)
-
-    def add_parquet_asset(
-        self,
-        name: str,
-        batching_regex: Union[re.Pattern, str],
-        container: str,
-        name_starts_with: str = "",
-        delimiter: str = "/",
-        order_by: Optional[SortersDefinition] = None,
-        **kwargs,
-    ) -> ParquetAsset:  # type: ignore[valid-type]
-        """Adds a Parquet DataAsst to the present "PandasAzureBlobStorageDatasource" object.
-
-        Args:
-            name: The name of the Parquet asset
-            batching_regex: regex pattern that matches Parquet filenames that is used to label the batches
-            container: container name for Microsoft Azure Blob Storage
-            name_starts_with: Microsoft Azure Blob Storage object name prefix
-            delimiter: Microsoft Azure Blob Storage object name delimiter
-            order_by: sorting directive via either list[Sorter] or "+/- key" syntax: +/- (a/de)scending; + default
-            kwargs: Extra keyword arguments should correspond to ``pandas.read_csv`` keyword args
-        """
-        batching_regex_pattern: re.Pattern = self.parse_batching_regex_string(
-            batching_regex=batching_regex
-        )
-        order_by_sorters: list[Sorter] = self.parse_order_by_sorters(order_by=order_by)
-        asset = ParquetAsset(
-            name=name,
-            batching_regex=batching_regex_pattern,
-            order_by=order_by_sorters,
-            **kwargs,
-        )
-        asset._data_connector = AzureBlobStorageDataConnector.build_data_connector(
-            datasource_name=self.name,
-            data_asset_name=name,
-            azure_client=self._get_azure_client(),
-            batching_regex=batching_regex_pattern,
-            account_name=self._account_name,
-            container=container,
-            name_starts_with=name_starts_with,
-            delimiter=delimiter,
-            file_path_template_map_fn=AzureUrl.AZURE_BLOB_STORAGE_HTTPS_URL_TEMPLATE.format,
-        )
-        asset._test_connection_error_message = (
-            AzureBlobStorageDataConnector.build_test_connection_error_message(
-                data_asset_name=name,
-                batching_regex=batching_regex_pattern,
-                account_name=self._account_name,
-                container=container,
-                name_starts_with=name_starts_with,
-                delimiter=delimiter,
-            )
-        )
-        return self.add_asset(asset=asset)
-
-    # attr-defined issue
-    # https://github.com/python/mypy/issues/12472
-    add_csv_asset.__signature__ = _merge_signatures(add_csv_asset, CSVAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_excel_asset.__signature__ = _merge_signatures(add_excel_asset, ExcelAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_json_asset.__signature__ = _merge_signatures(add_json_asset, JSONAsset, exclude={"type"})  # type: ignore[attr-defined]
-    add_parquet_asset.__signature__ = _merge_signatures(add_parquet_asset, ParquetAsset, exclude={"type"})  # type: ignore[attr-defined]

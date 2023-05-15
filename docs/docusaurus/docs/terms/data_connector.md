@@ -149,14 +149,6 @@ A **Batch Spec** is an Execution Engine-specific description of the Batch define
 
 A Data Connector is responsible for working with an Execution Engine to translate Batch Definitions into a Batch Spec that enables Great Expectations to access the data using that Execution Engine.
 
-
-
-## API basics
-
-:::info API note
-In the updated V3 Great Expectations API, Data Connectors replace the Batch Kwargs Generators from the V2 Great Expectations API.
-:::
-
 ### How to access
 
 Other than specifying a Data Connector when you configure a Datasource, you will not need to directly interact with one.  Great Expectations will handle using them behind the scenes.

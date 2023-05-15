@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import os
 from typing import List
@@ -54,6 +56,8 @@ MULTIPLE_DATE_PART_DATE_PARTS += [
         id="year_month getting date parts from SqlAlchemyDataSplitter.date_part",
     )
 ]
+
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
 
 
 @mock.patch(
@@ -407,8 +411,8 @@ def test_get_splitter_method(underscore_prefix: str, splitter_method_name: str):
 
 def ten_trips_per_month_df() -> pd.DataFrame:
     csv_path: str = file_relative_path(
-        os.path.dirname(os.path.dirname(__file__)),
-        os.path.join(
+        os.path.dirname(os.path.dirname(__file__)),  # noqa: PTH120
+        os.path.join(  # noqa: PTH118
             "test_sets",
             "taxi_yellow_tripdata_samples",
             "ten_trips_from_each_month",
@@ -559,7 +563,7 @@ def test_sqlite_split(
 
         # Right number of rows?
         num_rows: int = batch_data.execution_engine.engine.execute(
-            sa.select([sa.func.count()]).select_from(batch_data.selectable)
+            sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
         # noinspection PyUnresolvedReferences
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
@@ -589,14 +593,18 @@ def test_sqlite_split_on_year(
 
     # Right number of rows?
     num_rows: int = batch_data.execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+        sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
-    rows: sa.Row = batch_data.execution_engine.engine.execute(
-        sa.select([sa.text("*")]).select_from(batch_data.selectable)
-    ).fetchall()
+    rows: list[sa.RowMapping] = (
+        batch_data.execution_engine.engine.execute(
+            sa.select(sa.text("*")).select_from(batch_data.selectable)
+        )
+        .mappings()
+        .fetchall()
+    )
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
     for row_date in row_dates:
@@ -631,14 +639,18 @@ def test_sqlite_split_and_sample_using_limit(
 
     # Right number of rows?
     num_rows: int = batch_data.execution_engine.engine.execute(
-        sa.select([sa.func.count()]).select_from(batch_data.selectable)
+        sa.select(sa.func.count()).select_from(batch_data.selectable)
     ).scalar()
     assert num_rows == n
 
     # Right rows?
-    rows: sa.Row = batch_data.execution_engine.engine.execute(
-        sa.select([sa.text("*")]).select_from(batch_data.selectable)
-    ).fetchall()
+    rows: list[sa.RowMapping] = (
+        batch_data.execution_engine.engine.execute(
+            sa.select(sa.text("*")).select_from(batch_data.selectable)
+        )
+        .mappings()
+        .fetchall()
+    )
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
     for row_date in row_dates:

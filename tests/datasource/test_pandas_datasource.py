@@ -7,11 +7,11 @@ import boto3
 import pandas as pd
 import pytest
 from moto import mock_s3
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import Batch, BatchMarkers
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.util import nested_update
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfigSchema,
     DatasourceConfig,
@@ -27,7 +27,7 @@ from great_expectations.exceptions import BatchKwargsError
 from great_expectations.util import is_library_loadable
 from great_expectations.validator.validator import BridgeValidator
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 def test_standalone_pandas_datasource(test_folder_connection_path_csv):
@@ -170,13 +170,14 @@ def test_pandas_datasource_custom_data_asset(
     data_context_parameterized_expectation_suite.add_expectation_suite(
         expectation_suite_name="test"
     )
-    with pytest.deprecated_call():  # "name being deprecated as a batch_parameter. Please use data_asset_name instead.
-        batch = data_context_parameterized_expectation_suite.get_batch(
-            expectation_suite_name="test",
-            batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
-                datasource=name, batch_kwargs_generator="subdir_reader", name="test"
-            ),
-        )
+    batch = data_context_parameterized_expectation_suite.get_batch(
+        expectation_suite_name="test",
+        batch_kwargs=data_context_parameterized_expectation_suite.build_batch_kwargs(
+            datasource=name,
+            batch_kwargs_generator="subdir_reader",
+            data_asset_name="test",
+        ),
+    )
     assert type(batch).__name__ == "CustomPandasDataset"
     res = batch.expect_column_values_to_have_odd_lengths("col_2")
     assert res.success is True

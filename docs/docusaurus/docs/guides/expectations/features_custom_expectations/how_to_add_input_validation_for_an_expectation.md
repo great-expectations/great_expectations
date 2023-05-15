@@ -5,6 +5,8 @@ title: How to add input validation and type checking for a Custom Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+## Prerequisites
+
 <Prerequisites>
 
  - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
@@ -105,7 +107,7 @@ Congratulations!<br/>&#127881; You've successfully added input validation & type
 
 ### 5. Contribution (Optional)
 
-The method implemented in this guide is an optional feature for Experimental Expectations, and a requirement for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at Beta and Production levels.
+The method implemented in this guide is an optional feature for Experimental Expectations, and a requirement for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at Beta and Production levels.
 
 If you would like to contribute your Custom Expectation to the Great Expectations codebase, please submit a [Pull Request](https://github.com/great-expectations/great_expectations/pulls).
 

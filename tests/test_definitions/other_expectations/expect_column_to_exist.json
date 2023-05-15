@@ -1,6 +1,7 @@
 {
   "expectation_type": "expect_column_to_exist",
   "datasets": [{
+    "dataset_name": "expect_column_to_exist_1",
     "data": {
       "c1": [4, 5, 6, 7],
       "c2": ["a", "b", "c", "d"],

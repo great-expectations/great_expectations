@@ -1,9 +1,10 @@
 import os
 
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.datasource.new_datasource import Datasource
+
+yaml = YAMLHandler()
 
 """
 # <snippet name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_yaml">
@@ -105,7 +106,7 @@ try:
         context.GX_UNCOMMITTED_DIR, "config_variables.yml"
     )
     assert (
-        yaml.safe_load(config_variables_file_path)["config_variables_file_path"]
+        yaml.load(config_variables_file_path)["config_variables_file_path"]
         == context_config_variables_relative_file_path
     )
     context_config_variables_file_path = os.path.join(
@@ -115,7 +116,7 @@ try:
         f.write(config_variables_yaml)
 
     # add datsources now that variables are configured
-    datasources = yaml.safe_load(datasources_yaml)
+    datasources = yaml.load(datasources_yaml)
     my_postgres_db = context.add_datasource(
         name="my_postgres_db", **datasources["datasources"]["my_postgres_db"]
     )

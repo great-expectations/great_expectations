@@ -81,7 +81,8 @@ long_description = "Always know what to expect from your data. (See https://gith
 config = {
     "description": "Always know what to expect from your data.",
     "author": "The Great Expectations Team",
-    "url": "https://github.com/great-expectations/great_expectations",
+    "url": "https://greatexpectations.io",
+    "download_url": "https://github.com/great-expectations/great_expectations",
     "author_email": "team@greatexpectations.io",
     "version": versioneer.get_version(),
     "cmdclass": versioneer.get_cmdclass(),
@@ -93,7 +94,7 @@ config = {
     "entry_points": {
         "console_scripts": ["great_expectations=great_expectations.cli:main"]
     },
-    "package_data": {"great_expectations": ["py.typed", "**/*.pyi"]},
+    "package_data": {"great_expectations": ["**/py.typed", "**/*.pyi"]},
     "name": "great_expectations",
     "long_description": long_description,
     "license": "Apache-2.0",

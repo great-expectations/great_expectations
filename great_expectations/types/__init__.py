@@ -4,23 +4,18 @@ from enum import Enum
 from typing import ClassVar, Dict, Optional, Set
 
 import pandas as pd
+import pydantic
+
+from great_expectations.compatibility import pyspark
 
 from ..alias_types import JSONValues  # noqa: TCH001
-from ..core._docs_decorators import public_api
+from ..core._docs_decorators import public_api  # noqa: F401
 from .base import SerializableDotDict
 from .colors import ColorPalettes, PrimaryColors, SecondaryColors, TintsAndShades
 from .configurations import ClassConfig
 from .fonts import FontFamily, FontFamilyURL
 
 logger = logging.getLogger(__name__)
-
-try:
-    import pyspark
-except ImportError:
-    pyspark = None  # type: ignore[assignment]
-    logger.debug(
-        "Unable to load pyspark; install optional spark dependency if you will be working with Spark dataframes"
-    )
 
 
 class DictDot:
@@ -146,6 +141,9 @@ class DictDot:
             )
         }
         for key, value in new_dict.items():
+            if isinstance(value, pydantic.BaseModel):
+                new_dict[key] = value.dict()
+
             if isinstance(value, DictDot):
                 new_dict[key] = value.to_dict()
 
@@ -155,6 +153,9 @@ class DictDot:
             if isinstance(value, list) or isinstance(value, tuple):
                 new_dict[key] = [temp_element for temp_element in value]
                 for i, element in enumerate(value):
+                    if isinstance(value, pydantic.BaseModel):
+                        new_dict[key][i] = element.dict()
+
                     if isinstance(element, DictDot):
                         new_dict[key][i] = element.to_dict()
 
@@ -258,7 +259,7 @@ def safe_deep_copy(data, memo=None):
     This method makes a copy of a dictionary, applying deep copy to attribute values, except for non-pickleable objects.
     """
     if isinstance(data, (pd.Series, pd.DataFrame)) or (
-        pyspark and isinstance(data, pyspark.sql.DataFrame)
+        pyspark.pyspark and isinstance(data, pyspark.DataFrame)
     ):
         return data
 

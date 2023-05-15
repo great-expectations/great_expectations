@@ -9,6 +9,10 @@ import pandas as pd
 import pytest
 
 import great_expectations as gx
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch import Batch, RuntimeBatchRequest
 from great_expectations.core.util import get_or_create_spark_application
 from great_expectations.data_context.types.base import ProgressBarsConfig
@@ -33,8 +37,7 @@ from great_expectations.validator.validator import Validator
 from tests.profile.conftest import get_set_of_columns_and_expectations_from_suite
 
 try:
-    import sqlalchemy as sqlalchemy
-    import sqlalchemy.dialects.postgresql as postgresqltypes
+    postgresqltypes = sqlalchemy.dialects.postgresql
 
     POSTGRESQL_TYPES = {
         "TEXT": postgresqltypes.TEXT,
@@ -48,8 +51,7 @@ try:
         "BOOLEAN": postgresqltypes.BOOLEAN,
         "NUMERIC": postgresqltypes.NUMERIC,
     }
-except ImportError:
-    sqlalchemy = None
+except (ImportError, AttributeError):
     postgresqltypes = None
     POSTGRESQL_TYPES = {}
 
@@ -111,10 +113,10 @@ def get_sqlalchemy_runtime_validator_postgresql(
     db_hostname = os.getenv("GE_TEST_LOCAL_DB_HOSTNAME", "localhost")
     # noinspection PyUnresolvedReferences
     try:
-        engine = connection_manager.get_engine(
+        engine = connection_manager.get_connection(
             f"postgresql://postgres@{db_hostname}/test_ci"
         )
-    except (sqlalchemy.exc.OperationalError, ModuleNotFoundError):
+    except (sqlalchemy.OperationalError, ModuleNotFoundError):
         return None
 
     sql_dtypes = {}
@@ -158,7 +160,8 @@ def get_sqlalchemy_runtime_validator_postgresql(
         table_name = "test_data_" + "".join(
             [random.choice(string.ascii_letters + string.digits) for _ in range(8)]
         )
-    df.to_sql(
+    add_dataframe_to_db(
+        df=df,
         name=table_name,
         con=engine,
         index=False,

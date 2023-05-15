@@ -3,7 +3,10 @@ from unittest import mock
 
 import pytest
 
-from great_expectations.core.expectation_suite import ExpectationSuite
+from great_expectations.core.expectation_suite import (
+    ExpectationConfiguration,
+    ExpectationSuite,
+)
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.data_context.cloud_data_context import (
     CloudDataContext,
@@ -14,6 +17,7 @@ from great_expectations.data_context.store.gx_cloud_store_backend import (
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
 from great_expectations.exceptions.exceptions import DataContextError, StoreBackendError
+from great_expectations.render import RenderedAtomicContent, RenderedAtomicValue
 from great_expectations.util import get_context
 from tests.data_context.conftest import MockResponse
 
@@ -278,12 +282,12 @@ def test_list_expectation_suites(
     assert suites == [
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=suite_1.id,
+            id=suite_1.id,
             resource_name=suite_1.name,
         ),
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=suite_2.id,
+            id=suite_2.id,
             resource_name=suite_2.name,
         ),
     ]
@@ -331,7 +335,7 @@ def test_create_expectation_suite_overwrites_existing_suite(
         mock_list_expectation_suites.return_value = [
             GXCloudIdentifier(
                 resource_type=GXCloudRESTResource.EXPECTATION,
-                cloud_id=suite_id,
+                id=suite_id,
                 resource_name=suite_name,
             )
         ]
@@ -555,7 +559,7 @@ def test_save_expectation_suite_no_overwrite_id_collision_raises_error(
     mock_expectations_store_has_key.assert_called_once_with(
         GXCloudIdentifier(
             GXCloudRESTResource.EXPECTATION_SUITE,
-            cloud_id=suite_id,
+            id=suite_id,
             resource_name=suite_name,
         )
     )
@@ -607,3 +611,72 @@ def test_add_or_update_expectation_suite_updates_existing_obj(
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
     mock_update.assert_called_once()
+
+
+@pytest.mark.integration
+def test_get_expectation_suite_include_rendered_content_prescriptive(
+    empty_data_context,
+):
+    context = empty_data_context
+
+    expectation_suite_name = "validating_taxi_data"
+
+    expectation_configuration = ExpectationConfiguration(
+        expectation_type="expect_column_max_to_be_between",
+        kwargs={
+            "column": "passenger_count",
+            "min_value": {"$PARAMETER": "upstream_column_min"},
+            "max_value": {"$PARAMETER": "upstream_column_max"},
+        },
+    )
+
+    context.add_expectation_suite(
+        expectation_suite_name=expectation_suite_name,
+        expectations=[expectation_configuration],
+    )
+
+    expectation_suite_exclude_rendered_content: ExpectationSuite = (
+        context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+        )
+    )
+    assert (
+        expectation_suite_exclude_rendered_content.expectations[0].rendered_content
+        is None
+    )
+
+    expected_expectation_configuration_prescriptive_rendered_content = [
+        RenderedAtomicContent(
+            value_type="StringValueType",
+            value=RenderedAtomicValue(
+                schema={"type": "com.superconductive.rendered.string"},
+                template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+                params={
+                    "column": {
+                        "schema": {"type": "string"},
+                        "value": "passenger_count",
+                    },
+                    "min_value": {
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_min"},
+                    },
+                    "max_value": {
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_max"},
+                    },
+                },
+            ),
+            name="atomic.prescriptive.summary",
+        )
+    ]
+
+    expectation_suite_include_rendered_content: ExpectationSuite = (
+        context.get_expectation_suite(
+            expectation_suite_name=expectation_suite_name,
+            include_rendered_content=True,
+        )
+    )
+    assert (
+        expectation_suite_include_rendered_content.expectations[0].rendered_content
+        == expected_expectation_configuration_prescriptive_rendered_content
+    )

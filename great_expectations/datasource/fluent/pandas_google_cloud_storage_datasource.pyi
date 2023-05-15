@@ -16,7 +16,7 @@ from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api as public_api
 from great_expectations.core.util import GCSUrl as GCSUrl
-from great_expectations.datasource.fluent import Sorter, _PandasFilePathDatasource
+from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilesystemDataConnector as FilesystemDataConnector,
 )
@@ -46,8 +46,7 @@ from great_expectations.datasource.fluent.pandas_file_path_datasource import (
 )
 
 if TYPE_CHECKING:
-    from google.cloud.storage.client import Client as GoogleCloudStorageClient
-
+    from great_expectations.compatibility import google
     from great_expectations.datasource.fluent.dynamic_pandas import (
         CompressionOptions,
         CSVEngine,
@@ -55,6 +54,7 @@ if TYPE_CHECKING:
         IndexLabel,
         StorageOptions,
     )
+    from great_expectations.datasource.fluent.interfaces import BatchMetadata
     from great_expectations.datasource.fluent.pandas_file_path_datasource import (
         CSVAsset,
         ExcelAsset,
@@ -67,7 +67,7 @@ if TYPE_CHECKING:
         PickleAsset,
         SASAsset,
         SPSSAsset,
-        STATAAsset,
+        StataAsset,
         XMLAsset,
     )
 
@@ -81,15 +81,19 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     bucket_or_name: str
     gcs_options: Dict[str, Any]
 
-    _gcs_client: Union[GoogleCloudStorageClient, None]
+    _gcs_client: Union[google.Client, None]
 
     def test_connection(self, test_assets: bool = ...) -> None: ...
     def add_csv_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
-        glob_directive: str = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         sep: typing.Union[str, None] = ...,
         delimiter: typing.Union[str, None] = ...,
         header: Union[int, Sequence[int], None, Literal["infer"]] = "infer",
@@ -144,9 +148,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_excel_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
-        glob_directive: str = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         sheet_name: typing.Union[str, int, None] = 0,
         header: Union[int, Sequence[int], None] = 0,
         names: typing.Union[typing.List[str], None] = ...,
@@ -174,8 +182,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_feather_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
-        batching_regex: typing.Pattern = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
+        order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         columns: Union[Sequence[Hashable], None] = ...,
         use_threads: bool = ...,
         storage_options: StorageOptions = ...,
@@ -183,8 +196,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_hdf_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
-        batching_regex: typing.Pattern = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
+        order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         key: typing.Any = ...,
         mode: str = "r",
         errors: str = "strict",
@@ -199,8 +217,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_html_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
-        batching_regex: typing.Pattern = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
+        order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         match: Union[str, typing.Pattern] = ".+",
         flavor: typing.Union[str, None] = ...,
         header: Union[int, Sequence[int], None] = ...,
@@ -219,9 +242,13 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_json_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
-        glob_directive: str = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         orient: typing.Union[str, None] = ...,
         dtype: typing.Union[dict, None] = ...,
         convert_axes: typing.Any = ...,
@@ -241,17 +268,26 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_orc_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
-        batching_regex: typing.Pattern = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
+        order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         columns: typing.Union[typing.List[str], None] = ...,
         kwargs: typing.Union[dict, None] = ...,
     ) -> ORCAsset: ...
     def add_parquet_asset(
         self,
         name: str,
-        batching_regex: Optional[Union[str, re.Pattern]] = ...,
-        glob_directive: str = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
         order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         engine: str = "auto",
         columns: typing.Union[typing.List[str], None] = ...,
         storage_options: StorageOptions = ...,
@@ -261,16 +297,26 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_pickle_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
-        batching_regex: typing.Pattern = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
+        order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
     ) -> PickleAsset: ...
     def add_sas_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
-        batching_regex: typing.Pattern = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
+        order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         format: typing.Union[str, None] = ...,
         index: Union[Hashable, None] = ...,
         encoding: typing.Union[str, None] = ...,
@@ -281,16 +327,26 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
     def add_spss_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
-        batching_regex: typing.Pattern = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
+        order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         usecols: typing.Union[int, str, typing.Sequence[int], None] = ...,
         convert_categoricals: bool = ...,
     ) -> SPSSAsset: ...
     def add_stata_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
-        batching_regex: typing.Pattern = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
+        order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         convert_dates: bool = ...,
         convert_categoricals: bool = ...,
         index_col: typing.Union[str, None] = ...,
@@ -302,12 +358,17 @@ class PandasGoogleCloudStorageDatasource(_PandasFilePathDatasource):
         iterator: bool = ...,
         compression: CompressionOptions = "infer",
         storage_options: StorageOptions = ...,
-    ) -> STATAAsset: ...
+    ) -> StataAsset: ...
     def add_xml_asset(
         self,
         name: str,
-        order_by: typing.List[Sorter] = ...,
-        batching_regex: typing.Pattern = ...,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: Union[re.Pattern, str] = ...,
+        order_by: Optional[SortersDefinition] = ...,
+        gcs_prefix: str = "",
+        gcs_delimiter: str = "/",
+        gcs_max_results: int = 1000,
         xpath: str = "./*",
         namespaces: typing.Union[typing.Dict[str, str], None] = ...,
         elems_only: bool = ...,

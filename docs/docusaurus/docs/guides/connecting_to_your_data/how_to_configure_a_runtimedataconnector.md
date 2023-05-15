@@ -6,12 +6,13 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-This guide demonstrates how to configure a RuntimeDataConnector and only applies to the V3 (Batch Request) API. A `RuntimeDataConnector` allows you to specify a <TechnicalTag tag="batch" text="Batch" /> using a Runtime <TechnicalTag tag="batch_request" text="Batch Request" />, which is used to create a Validator. A <TechnicalTag tag="validator" text="Validator" /> is the key object used to create <TechnicalTag tag="expectation" text="Expectations" /> and <TechnicalTag tag="validation" text="Validate" /> datasets.
+This guide demonstrates how to configure a RuntimeDataConnector. A `RuntimeDataConnector` allows you to specify a <TechnicalTag tag="batch" text="Batch" /> using a Runtime <TechnicalTag tag="batch_request" text="Batch Request" />, which is used to create a Validator. A <TechnicalTag tag="validator" text="Validator" /> is the key object used to create <TechnicalTag tag="expectation" text="Expectations" /> and <TechnicalTag tag="validation" text="Validate" /> datasets.
+
+## Prerequisites
 
 <Prerequisites>
 
-- [Understand the basics of Datasources in the V3 (Batch Request) API](../../terms/datasource.md)
-- Learned how to configure a [Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
+- [An understanding of Datasource basics](../../terms/datasource.md)
 
 </Prerequisites>
 
@@ -98,8 +99,6 @@ context.test_yaml_config(yaml.dump(datasource_config))
 </TabItem>
 
 </Tabs>
-
-If you’re not familiar with the `test_yaml_config` method, please check out: [How to configure Data Context components using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
 
 ### 3. Add a RuntimeDataConnector to a Datasource configuration
 

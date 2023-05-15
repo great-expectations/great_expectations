@@ -5,18 +5,15 @@ import unittest
 
 import pandas as pd
 import pytest
-from freezegun import freeze_time
 
 import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import (
     ExpectationConfiguration,
     expectationSuiteSchema,
-    expectationSuiteValidationResultSchema,
 )
 from great_expectations.core.expectation_suite import ExpectationSuite
 from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,
     ExpectationValidationResult,
 )
 from great_expectations.data_asset.data_asset import (
@@ -184,91 +181,6 @@ def test_base_class_expectation():
     )
 
 
-@freeze_time("11/05/1955")
-def test_validate(empty_data_context):
-    context: DataContext = empty_data_context
-    with open(
-        file_relative_path(__file__, "./test_sets/titanic_expectations.json")
-    ) as f:
-        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
-        my_expectation_suite = ExpectationSuite(
-            **my_expectation_suite_dict, data_context=context
-        )
-
-    with mock.patch("uuid.uuid1") as uuid:
-        uuid.return_value = "1234"
-        my_df = gx.read_csv(
-            file_relative_path(__file__, "./test_sets/Titanic.csv"),
-            expectation_suite=my_expectation_suite,
-        )
-    my_df.set_default_expectation_argument("result_format", "COMPLETE")
-
-    results = my_df.validate(catch_exceptions=False)
-
-    with open(
-        file_relative_path(
-            __file__, "./test_sets/titanic_expected_data_asset_validate_results.json"
-        )
-    ) as f:
-        expected_results = expectationSuiteValidationResultSchema.loads(f.read())
-
-    del results.meta["great_expectations_version"]
-    del results.meta["expectation_suite_meta"]["great_expectations_version"]
-    assert results.to_json_dict() == expected_results.to_json_dict()
-
-    # Now, change the results and ensure they are no longer equal
-    results.results[0] = ExpectationValidationResult()
-    assert results.to_json_dict() != expected_results.to_json_dict()
-
-    # Finally, confirm that only_return_failures works
-    # and does not affect the "statistics" field.
-    validation_results = my_df.validate(only_return_failures=True)
-    del validation_results.meta["great_expectations_version"]
-    del validation_results.meta["expectation_suite_meta"]["great_expectations_version"]
-    expected_results = ExpectationSuiteValidationResult(
-        meta={
-            "expectation_suite_name": "titanic",
-            "run_id": {"run_name": None, "run_time": "1955-11-05T00:00:00+00:00"},
-            "validation_time": "19551105T000000.000000Z",
-            "batch_kwargs": {"ge_batch_id": "1234"},
-            "expectation_suite_meta": {},
-            "batch_markers": {},
-            "batch_parameters": {},
-        },
-        results=[
-            ExpectationValidationResult(
-                expectation_config=ExpectationConfiguration(
-                    expectation_type="expect_column_values_to_be_in_set",
-                    kwargs={"column": "PClass", "value_set": ["1st", "2nd", "3rd"]},
-                ),
-                success=False,
-                exception_info={
-                    "exception_message": None,
-                    "exception_traceback": None,
-                    "raised_exception": False,
-                },
-                result={
-                    "partial_unexpected_index_list": [456],
-                    "unexpected_count": 1,
-                    "unexpected_list": ["*"],
-                    "unexpected_percent": 0.07616146230007616,
-                    "element_count": 1313,
-                    "missing_percent": 0.0,
-                    "partial_unexpected_counts": [{"count": 1, "value": "*"}],
-                    "partial_unexpected_list": ["*"],
-                    "unexpected_percent_total": 0.07616146230007616,
-                    "unexpected_percent_nonmissing": 0.07616146230007616,
-                    "missing_count": 0,
-                    "unexpected_index_list": [456],
-                },
-            )
-        ],
-        success=expected_results.success,  # unaffected
-        statistics=expected_results["statistics"],  # unaffected
-    )
-    assert validation_results.to_json_dict() == expected_results.to_json_dict()
-
-
 @mock.patch(
     "great_expectations.core.ExpectationValidationResult.validate_result_dict",
     return_value=False,
@@ -294,48 +206,6 @@ def test_validate_with_invalid_result_catch_exceptions_false(empty_data_context)
     with pytest.raises(InvalidCacheValueError):
         with pytest.warns(Warning, match=r"No great_expectations version found"):
             my_df.validate(catch_exceptions=False)
-
-
-@freeze_time("11/05/1955")
-@mock.patch(
-    "great_expectations.core.ExpectationValidationResult.validate_result_dict",
-    return_value=False,
-)
-def test_validate_with_invalid_result(empty_data_context):
-    context: DataContext = empty_data_context
-    with open(
-        file_relative_path(__file__, "./test_sets/titanic_expectations.json")
-    ) as f:
-        my_expectation_suite_dict: dict = expectationSuiteSchema.loads(f.read())
-        my_expectation_suite = ExpectationSuite(
-            **my_expectation_suite_dict, data_context=context
-        )
-
-    with mock.patch("uuid.uuid1") as uuid:
-        uuid.return_value = "1234"
-        my_df = gx.read_csv(
-            file_relative_path(__file__, "./test_sets/Titanic.csv"),
-            expectation_suite=my_expectation_suite,
-        )
-    my_df.set_default_expectation_argument("result_format", "COMPLETE")
-
-    results = my_df.validate()  # catch_exceptions=True is default
-
-    with open(
-        file_relative_path(
-            __file__,
-            "./test_sets/titanic_expected_data_asset_validate_results_with_exceptions.json",
-        )
-    ) as f:
-        expected_results = expectationSuiteValidationResultSchema.loads(f.read())
-
-    del results.meta["great_expectations_version"]
-    del results.meta["expectation_suite_meta"]["great_expectations_version"]
-
-    for result in results.results:
-        result.exception_info.pop("exception_traceback")
-
-    assert results.to_json_dict() == expected_results.to_json_dict()
 
 
 def test_validate_catch_non_existent_expectation(empty_data_context):

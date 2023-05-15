@@ -942,7 +942,7 @@ def test_validator_docstrings(multi_batch_taxi_validator):
 
 
 @pytest.mark.integration
-def test_validator_include_rendered_content(
+def test_validator_include_rendered_content_diagnostic(
     yellow_trip_pandas_data_context,
 ):
     context = yellow_trip_pandas_data_context
@@ -1007,45 +1007,53 @@ def test_validator_include_rendered_content(
         )
     )
 
-    expected_expectation_validation_result_rendered_content = RenderedAtomicContent(
-        name="atomic.diagnostic.observed_value",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={},
-            template="6",
-        ),
-        value_type="StringValueType",
+    expected_expectation_validation_result_diagnostic_rendered_content = (
+        RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=RenderedAtomicValue(
+                schema={"type": "com.superconductive.rendered.string"},
+                params={},
+                template="6",
+            ),
+            value_type="StringValueType",
+        )
     )
 
     assert (
-        expected_expectation_validation_result_rendered_content
+        expected_expectation_validation_result_diagnostic_rendered_content
         in validation_result.rendered_content
     )
 
-    expected_expectation_configuration_rendered_content = RenderedAtomicContent(
+    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
         name="atomic.prescriptive.summary",
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
             params={
                 "column": {"schema": {"type": "string"}, "value": "passenger_count"},
-                "min_value": {"schema": {"type": "number"}, "value": 1},
-                "max_value": {"schema": {"type": "number"}, "value": 8},
-                "eval_param__0": {
-                    "schema": {"type": "string"},
-                    "value": "min_value: upstream_column_min",
+                "min_value": {
+                    "schema": {"type": "number"},
+                    "value": 1,
+                    "evaluation_parameter": {
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_min"},
+                    },
                 },
-                "eval_param__1": {
-                    "schema": {"type": "string"},
-                    "value": "max_value: upstream_column_max",
+                "max_value": {
+                    "schema": {"type": "number"},
+                    "value": 8,
+                    "evaluation_parameter": {
+                        "schema": {"type": "object"},
+                        "value": {"$PARAMETER": "upstream_column_max"},
+                    },
                 },
             },
-            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.   $eval_param__0, $eval_param__1",
+            template="$column maximum value must be greater than or equal to $min_value and less than or equal to $max_value.",
         ),
         value_type="StringValueType",
     )
 
     assert (
-        expected_expectation_configuration_rendered_content
+        expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
 
@@ -1060,22 +1068,24 @@ def test_validator_include_rendered_content(
         )
     )
 
-    expected_expectation_validation_result_rendered_content = RenderedAtomicContent(
-        name="atomic.diagnostic.observed_value",
-        value=RenderedAtomicValue(
-            schema={"type": "com.superconductive.rendered.string"},
-            params={},
-            template="0",
-        ),
-        value_type="StringValueType",
+    expected_expectation_validation_result_diagnostic_rendered_content = (
+        RenderedAtomicContent(
+            name="atomic.diagnostic.observed_value",
+            value=RenderedAtomicValue(
+                schema={"type": "com.superconductive.rendered.string"},
+                params={},
+                template="0",
+            ),
+            value_type="StringValueType",
+        )
     )
 
     assert (
-        expected_expectation_validation_result_rendered_content
+        expected_expectation_validation_result_diagnostic_rendered_content
         in validation_result.rendered_content
     )
 
-    expected_expectation_configuration_rendered_content = RenderedAtomicContent(
+    expected_expectation_configuration_diagnostic_rendered_content = RenderedAtomicContent(
         name="atomic.prescriptive.summary",
         value=RenderedAtomicValue(
             schema={"type": "com.superconductive.rendered.string"},
@@ -1088,13 +1098,13 @@ def test_validator_include_rendered_content(
                     "value": "passenger_count>0",
                 },
             },
-            template="if $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
+            template="If $row_condition__0, then $column minimum value must be greater than or equal to $min_value and less than or equal to $max_value.",
         ),
         value_type="StringValueType",
     )
 
     assert (
-        expected_expectation_configuration_rendered_content
+        expected_expectation_configuration_diagnostic_rendered_content
         in validation_result.expectation_config.rendered_content
     )
 
@@ -1147,7 +1157,7 @@ def test___get_attr___retrieves_existing_expectation(
 
     # Does not raise error if properly registered
     # Avoiding invocation to only test registration (and not actual expectation)
-    validator.expect_column_max_to_be_between
+    _ = validator.expect_column_max_to_be_between
 
 
 @pytest.mark.unit
@@ -1157,7 +1167,7 @@ def test__get_attr___raises_attribute_error_with_invalid_attr(
     validator = validator_with_mock_execution_engine
 
     with pytest.raises(AttributeError) as e:
-        validator.my_fake_attr
+        _ = validator.my_fake_attr
 
     assert "'Validator'  object has no attribute 'my_fake_attr'" in str(e.value)
 

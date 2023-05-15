@@ -35,10 +35,8 @@ from great_expectations.validator.metric_configuration import (
 )
 
 if TYPE_CHECKING:
-    # noinspection PyPep8Naming
-    import pyspark.sql.functions as F
-    import sqlalchemy as sa
-
+    from great_expectations.compatibility.pyspark import functions as F
+    from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
     from great_expectations.core.batch import (
         BatchData,
         BatchDataType,
@@ -49,16 +47,6 @@ if TYPE_CHECKING:
     from great_expectations.validator.validator import Validator
 
 logger = logging.getLogger(__name__)
-
-
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 
 class NoOpDict:
@@ -206,7 +194,9 @@ class ExecutionEngine(ABC):
         }
         filter_properties_dict(properties=self._config, clean_falsy=True, inplace=True)
 
-    def configure_validator(self, validator) -> None:
+    def configure_validator(  # noqa: B027 # empty-method-without-abstract-decorator
+        self, validator
+    ) -> None:
         """Optionally configure the validator as appropriate for the execution engine."""
         pass
 

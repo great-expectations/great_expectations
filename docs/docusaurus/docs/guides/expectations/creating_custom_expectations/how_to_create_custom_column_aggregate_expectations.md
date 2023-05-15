@@ -4,14 +4,16 @@ title: How to create a Custom Column Aggregate Expectation
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
-**`ColumnExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation" />. 
+**`ColumnAggregateExpectations`** are one of the most common types of <TechnicalTag tag="expectation" text="Expectation" />. 
 They are evaluated for a single column, and produce an aggregate <TechnicalTag tag="metric" text="Metric" />, such as a mean, standard deviation, number of unique values, column type, etc. If that Metric meets the conditions you set, the Expectation considers that data valid.
 
-This guide will walk you through the process of creating your own custom `ColumnExpectation`.
+This guide will walk you through the process of creating your own custom `ColumnAggregateExpectation`.
+
+## Prerequisites
 
 <Prerequisites>
 
-- Read the [overview for creating Custom Expectations](./overview.md).
+- Completion of the [overview for creating Custom Expectations](./overview.md).
 
 </Prerequisites>
 
@@ -19,7 +21,7 @@ This guide will walk you through the process of creating your own custom `Column
 
 ### 1. Choose a name for your Expectation
 
-First, decide on a name for your own Expectation. By convention, `ColumnExpectations` always start with `expect_column_`. 
+First, decide on a name for your own Expectation. By convention, `ColumnAggregateExpectations` always start with `expect_column_`. 
 For more on Expectation naming conventions, see the [Expectations section](../../../contributing/style_guides/code_style.md#expectations) of the Code Style Guide.
 
 Your Expectation will have two versions of the same name: a `CamelCaseName` and a `snake_case_name`. For example, this tutorial will use:
@@ -31,7 +33,7 @@ Your Expectation will have two versions of the same name: a `CamelCaseName` and 
 
 By convention, each Expectation is kept in its own python file, named with the snake_case version of the Expectation's name.
 
-You can find the template file for a custom [ColumnExpectation here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py).
+You can find the template file for a custom [ColumnAggregateExpectation here](https://github.com/great-expectations/great_expectations/blob/develop/examples/expectations/column_aggregate_expectation_template.py).
 Download the file, place it in the appropriate directory, and rename it to the appropriate name.
 
 ```bash 
@@ -283,7 +285,7 @@ Completeness checklist for ExpectColumnMaxToBeBetweenCustom:
 
 Finally, we need to lint our now-functioning Custom Expectation. Our CI system will test your code using `black`, and `ruff`.
 
-If you've [set up your dev environment](../../../contributing/contributing_setup.md) as recommended in the Prerequisites, these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
+If you've [set up your dev environment](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_CODE.md), these libraries will already be available to you, and can be invoked from your command line to automatically lint your code:
 
 ```console
 black <PATH/TO/YOUR/EXPECTATION.py>
@@ -316,7 +318,7 @@ Congratulations!<br/>&#127881; You've just built your first Custom Expectation! 
 
 ### 9. Contribution (Optional)
 
-This guide will leave you with a Custom Expectation sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.
+This guide will leave you with a Custom Expectation sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) to Great Expectations at an Experimental level.
 
 If you plan to contribute your Expectation to the public open source project, you should update the `library_metadata` object before submitting your [Pull Request](https://github.com/great-expectations/great_expectations/pulls). For example:
 

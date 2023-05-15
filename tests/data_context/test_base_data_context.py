@@ -177,7 +177,7 @@ def prepare_validator_for_cloud_e2e() -> Callable[
     def _closure(context: CloudDataContext) -> Tuple[Validator, str]:
         # Create a suite to be used in Validator instantiation
         suites = context.list_expectation_suites()
-        expectation_suite_ge_cloud_id = suites[0].cloud_id
+        expectation_suite_ge_cloud_id = suites[0].id
 
         # To ensure we don't accidentally impact parallel test runs in Azure, we randomly generate a suite name in this E2E test.
         # To limit the number of generated suites, we limit the randomization to 20 numbers.

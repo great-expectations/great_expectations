@@ -1,9 +1,9 @@
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from tests.test_utils import load_data_into_test_database
 
+yaml = YAMLHandler()
 CONNECTION_STRING = "trino://test@localhost:8088/memory/schema"
 
 # This utility is not for general use. It is only to support testing.

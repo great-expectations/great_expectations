@@ -200,7 +200,7 @@ def test_get_checkpoint_no_identifier_raises_error(
     context = empty_cloud_data_context
 
     with pytest.raises(ValueError):
-        checkpoint = context.get_checkpoint()
+        context.get_checkpoint()
 
 
 @pytest.mark.cloud
@@ -435,7 +435,7 @@ def test_cloud_data_context_run_checkpoint_e2e():
     checkpoint_identifiers = context.list_checkpoints()
     for identifier in checkpoint_identifiers:
         if identifier.resource_name == checkpoint_name:
-            cloud_id = identifier.cloud_id
+            cloud_id = identifier.id
             break
 
     assert cloud_id, f"Could not find checkpoint '{checkpoint_name}' in Cloud"
@@ -590,12 +590,12 @@ def test_list_checkpoints(
     assert checkpoints == [
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.CHECKPOINT,
-            cloud_id=checkpoint_id_1,
+            id=checkpoint_id_1,
             resource_name=checkpoint_name_1,
         ),
         GXCloudIdentifier(
             resource_type=GXCloudRESTResource.CHECKPOINT,
-            cloud_id=checkpoint_id_2,
+            id=checkpoint_id_2,
             resource_name=checkpoint_name_2,
         ),
     ]

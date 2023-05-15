@@ -3,9 +3,11 @@ title: How to add support for the auto-initializing framework to a custom Expect
 ---
 import Prerequisites from '../creating_custom_expectations/components/prerequisites.jsx'
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Created a custom Expectation](./overview.md).
+- [A custom Expectation](./overview.md).
 
 </Prerequisites>
 
@@ -40,7 +42,7 @@ Key-value pairs defined in the `variables` portion of a Rule Based Profiler Conf
 The `DomainBuilder` configuration requries a `class_name` and `module_name`.  In this example, we will be using the `ColumnDomainBuilder` which outputs the column of interest (for example: `trip_distance` in the NYC taxi data) which is then accessed by the `ExpectationConfigurationBuilder` using the variable `$domain.domain_kwargs.column`.
 
 - **`class_name`:** is the name of the DomainBuilder class that is to be used.  Additional Domain Builders are:
-  - `ColumnDomainBuilder`: This `DomainBuilder` outputs column Domains, which are required by `ColumnExpectations` like (`expect_column_median_to_be_between`).
+  - `ColumnDomainBuilder`: This `DomainBuilder` outputs column Domains, which are required by `ColumnAggregateExpectations` like (`expect_column_median_to_be_between`).
   - `MultiColumnDomainBuilder`: This DomainBuilder outputs `multicolumn` Domains by taking in a column list in the `include_column_names` parameter.
   - `ColumnPairDomainBuilder`: This DomainBuilder outputs columnpair domains by taking in a column pair list in the include_column_names parameter.
   - `TableDomainBuilder`: This `DomainBuilder` outputs table `Domains`, which is required by `Expectations` that act on tables, like (`expect_table_row_count_to_equal`, or `expect_table_columns_to_match_set`).

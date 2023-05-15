@@ -1,6 +1,5 @@
 # TODO: <Alex>This module should be broken up -- please see suggestions below.</Alex>
 import pytest
-from ruamel.yaml import YAML
 
 from great_expectations.core.batch import (
     BatchDefinition,
@@ -8,6 +7,7 @@ from great_expectations.core.batch import (
     BatchRequestBase,
     IDDict,
 )
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
@@ -19,7 +19,7 @@ from great_expectations.datasource.data_connector.util import (
 from great_expectations.execution_engine import PandasExecutionEngine
 from tests.test_utils import create_files_in_directory
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture

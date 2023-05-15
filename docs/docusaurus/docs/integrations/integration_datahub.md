@@ -5,23 +5,26 @@ authors:
     url: https://datahubproject.io
 ---
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+
 :::info
 * Maintained By: DataHub
 * Status: Beta
 * Support/Contact: https://slack.datahubproject.io/
 :::
 
-### Introduction
 This integration allows you to push the results of running Expectations into DataHub (https://datahubproject.io/). DataHub is a metadata platform which enables search & discovery, federated governance, and data observability for the Modern Data Stack.
 
 
 ### Technical background
 There is a custom Action named `DataHubValidationAction` which allows you to view Expectation Results inside of DataHub.
 
-:::note Prerequisites
- - Create a [Great Expectations Checkpoint](https://docs.greatexpectations.io/docs/terms/checkpoint)
- - [Deploy an instance of DataHub](https://datahubproject.io/docs/quickstart)
-:::
+### Prerequisites
+
+ - A [Great Expectations Checkpoint](https://docs.greatexpectations.io/docs/terms/checkpoint)
+ - [A DataHub instance](https://datahubproject.io/docs/quickstart)
 
 `DataHubValidationAction` pushes Expectations metadata to DataHub. This includes
 
@@ -93,12 +96,9 @@ The Validation Results would show up in Validation tab on Dataset page in DataHu
 ## Further discussion
 
 ### Things to consider
-Currently this integration only supports v3 API Datasources using `SqlAlchemyExecutionEngine`.
-
 This integration does not support
 
-- v2 Datasources such as `SqlAlchemyDataset`
-- v3 Datasources using an Execution Engine other than `SqlAlchemyExecutionEngine` (Spark, Pandas)
+- Datasources using an Execution Engine other than `SqlAlchemyExecutionEngine` (Spark, Pandas)
 - Cross-dataset Expectations (those involving > 1 table)
 
 ### When things don't work

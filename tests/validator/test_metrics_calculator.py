@@ -73,6 +73,7 @@ def test_column_partition_metric(
     """
     validator_with_data: Validator = get_test_validator_with_data(
         execution_engine=backend,
+        table_name="column_partition_metric_test",
         data=integer_and_datetime_sample_dataset,
         context=in_memory_runtime_context,
     )

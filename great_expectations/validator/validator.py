@@ -24,7 +24,7 @@ from typing import (
     Union,
 )
 
-from dateutil.parser import parse
+import pandas as pd
 from marshmallow import ValidationError
 
 from great_expectations import __version__ as ge_version
@@ -44,10 +44,6 @@ from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
 from great_expectations.dataset.pandas_dataset import PandasDataset
 from great_expectations.dataset.sparkdf_dataset import SparkDFDataset
-from great_expectations.dataset.sqlalchemy_dataset import (
-    SqlAlchemyBatchReference,
-    SqlAlchemyDataset,
-)
 from great_expectations.exceptions import (
     GreatExpectationsError,
     InvalidExpectationConfigurationError,
@@ -79,14 +75,6 @@ from great_expectations.validator.validation_graph import (
 logger = logging.getLogger(__name__)
 logging.captureWarnings(True)
 
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-
-    logger.debug(
-        "Unable to load pandas; install optional pandas dependency for support."
-    )
 
 if TYPE_CHECKING:
     from great_expectations.core.batch import (
@@ -1544,21 +1532,7 @@ class Validator:
             assert not (run_id and run_name) and not (
                 run_id and run_time
             ), "Please provide either a run_id or run_name and/or run_time."
-            if isinstance(run_id, str) and not run_name:
-                # deprecated-v0.13.0
-                warnings.warn(
-                    "String run_ids are deprecated as of v0.13.0 and support will be removed in v0.16. Please provide a run_id of type "
-                    "RunIdentifier(run_name=None, run_time=None), or a dictionary containing run_name "
-                    "and run_time (both optional). Instead of providing a run_id, you may also provide"
-                    "run_name and run_time separately.",
-                    DeprecationWarning,
-                )
-                try:
-                    run_time = parse(run_id)
-                except (ValueError, TypeError):
-                    pass
-                run_id = RunIdentifier(run_name=run_id, run_time=run_time)
-            elif isinstance(run_id, dict):
+            if isinstance(run_id, dict):
                 run_id = RunIdentifier(**run_id)
             elif not isinstance(run_id, RunIdentifier):
                 run_id = RunIdentifier(run_name=run_name, run_time=run_time)
@@ -1996,18 +1970,10 @@ class BridgeValidator:
                     self.expectation_engine = PandasDataset
 
         if self.expectation_engine is None:
-            if isinstance(batch.data, SqlAlchemyBatchReference):
-                self.expectation_engine = SqlAlchemyDataset
+            from great_expectations.compatibility import pyspark
 
-        if self.expectation_engine is None:
-            try:
-                import pyspark
-
-                if isinstance(batch.data, pyspark.sql.DataFrame):
-                    self.expectation_engine = SparkDFDataset
-            except ImportError:
-                # noinspection PyUnusedLocal
-                pyspark = None
+            if pyspark.DataFrame and isinstance(batch.data, pyspark.DataFrame):
+                self.expectation_engine = SparkDFDataset
 
         if self.expectation_engine is None:
             raise ValueError(
@@ -2038,28 +2004,12 @@ class BridgeValidator:
                 **self.batch.batch_kwargs.get("dataset_options", {}),
             )
 
-        elif issubclass(self.expectation_engine, SqlAlchemyDataset):
-            if not isinstance(self.batch.data, SqlAlchemyBatchReference):
-                raise ValueError(
-                    "SqlAlchemyDataset expectation_engine requires a SqlAlchemyBatchReference for its batch"
-                )
-
-            init_kwargs = self.batch.data.get_init_kwargs()
-            init_kwargs.update(self.init_kwargs)
-            return self.expectation_engine(
-                batch_kwargs=self.batch.batch_kwargs,
-                batch_parameters=self.batch.batch_parameters,
-                batch_markers=self.batch.batch_markers,
-                data_context=self.batch.data_context,
-                expectation_suite=self._expectation_suite,
-                **init_kwargs,
-                **self.batch.batch_kwargs.get("dataset_options", {}),
-            )
-
         elif issubclass(self.expectation_engine, SparkDFDataset):
-            import pyspark
+            from great_expectations.compatibility import pyspark
 
-            if not isinstance(self.batch.data, pyspark.sql.DataFrame):
+            if not (
+                pyspark.DataFrame and isinstance(self.batch.data, pyspark.DataFrame)
+            ):
                 raise ValueError(
                     "SparkDFDataset expectation_engine requires a spark DataFrame for its batch"
                 )

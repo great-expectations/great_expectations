@@ -2,23 +2,31 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+
+import pydantic
 
 from great_expectations.core.batch_spec import GCSBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
     list_gcs_keys,
+    sanitize_prefix_for_gcs_and_s3,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     FilePathDataConnector,
 )
 
 if TYPE_CHECKING:
-    from google.cloud.storage.client import Client as GCSClient
-
+    from great_expectations.compatibility import google
     from great_expectations.core.batch import BatchDefinition
 
 
 logger = logging.getLogger(__name__)
+
+
+class _GCSOptions(pydantic.BaseModel):
+    gcs_prefix: str = ""
+    gcs_delimiter: str = "/"
+    gcs_max_results: int = 1000
 
 
 class GoogleCloudStorageDataConnector(FilePathDataConnector):
@@ -36,9 +44,16 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
-        file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
         # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Format function mapping path to fully-qualified resource on GCS
     """
+
+    asset_level_option_keys: ClassVar[tuple[str, ...]] = (
+        "gcs_prefix",
+        "gcs_delimiter",
+        "gcs_max_results",
+    )
+    asset_options_type: ClassVar[Type[_GCSOptions]] = _GCSOptions
 
     def __init__(
         self,
@@ -46,7 +61,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         data_asset_name: str,
         batching_regex: re.Pattern,
         # TODO: <Alex>ALEX</Alex>
-        gcs_client: GCSClient,
+        gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
@@ -57,17 +72,22 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
-        self._gcs_client: GCSClient = gcs_client
+        self._gcs_client: google.Client = gcs_client
 
         self._bucket_or_name = bucket_or_name
-        self._prefix = prefix
+
+        self._prefix: str = prefix
+        self._sanitized_prefix: str = sanitize_prefix_for_gcs_and_s3(text=prefix)
+
         self._delimiter = delimiter
         self._max_results = max_results
 
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
+            batching_regex=re.compile(
+                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
+            ),
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
@@ -81,7 +101,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
         datasource_name: str,
         data_asset_name: str,
         batching_regex: re.Pattern,
-        gcs_client: GCSClient,
+        gcs_client: google.Client,
         bucket_or_name: str,
         prefix: str = "",
         delimiter: str = "/",
@@ -106,8 +126,8 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters: optional list of sorters for sorting data_references
-            file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
             # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn: Format function mapping path to fully-qualified resource on GCS
 
         Returns:
             Instantiated "GoogleCloudStorageDataConnector" object
@@ -179,7 +199,7 @@ class GoogleCloudStorageDataConnector(FilePathDataConnector):
     def get_data_references(self) -> List[str]:
         query_options: dict = {
             "bucket_or_name": self._bucket_or_name,
-            "prefix": self._prefix,
+            "prefix": self._sanitized_prefix,
             "delimiter": self._delimiter,
             "max_results": self._max_results,
         }

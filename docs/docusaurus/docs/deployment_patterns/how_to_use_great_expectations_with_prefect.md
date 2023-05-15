@@ -4,14 +4,20 @@ title: How to Use Great Expectations with Prefect
 
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This guide will help you run a Great Expectations with [Prefect](https://prefect.io/)
+
+## Prerequisites
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../tutorials/getting_started/tutorial_overview.md)
-- [Created an Expectation Suite](../tutorials/getting_started/tutorial_create_expectations.md)
-- [Connecting to Data](../tutorials/getting_started/tutorial_connect_to_data.md)
-- [Prefect Quick Start guide](https://docs.prefect.io/core/getting_started/quick-start.html)
+- [A Great Expectations instance](/docs/guides/setup/setup_overview)
+- [A Data Connection](/docs/guides/connecting_to_your_data/connect_to_data_overview)
+- [An Expectation Suite](/docs/guides/expectations/create_expectations_overview)
+- A Prefect instance. See [Prefect Quick Start guide](https://docs.prefect.io/core/getting_started/quick-start.html)
 
 </Prerequisites>
 

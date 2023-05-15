@@ -168,7 +168,7 @@ if __name__ == "test_script_module":
         ].execution_engine.get_batch_data(batch_spec=batch_spec)
 
         num_rows: int = batch_data.execution_engine.engine.execute(
-            sa.select([sa.func.count()]).select_from(batch_data.selectable)
+            sa.select(sa.func.count()).select_from(batch_data.selectable)
         ).scalar()
         assert num_rows == test_case.num_expected_rows_in_first_batch_definition
 

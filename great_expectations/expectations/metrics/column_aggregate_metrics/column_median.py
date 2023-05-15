@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 import numpy as np
 import pandas as pd
 
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
 from great_expectations.core import ExpectationConfiguration  # noqa: TCH001
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
@@ -15,7 +16,6 @@ from great_expectations.expectations.metrics.column_aggregate_metric_provider im
     ColumnAggregateMetricProvider,
     column_aggregate_value,
 )
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.validator.metric_configuration import MetricConfiguration
 
@@ -57,7 +57,7 @@ class ColumnMedian(ColumnAggregateMetricProvider):
             return None
 
         element_values = sqlalchemy_engine.execute(
-            sa.select([column])
+            sa.select(column)
             .order_by(column)
             .where(column != None)  # noqa: E711
             .offset(max(nonnull_count // 2 - 1, 0))

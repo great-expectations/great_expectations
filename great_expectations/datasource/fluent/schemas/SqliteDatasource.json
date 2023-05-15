@@ -1,6 +1,6 @@
 {
     "title": "SqliteDatasource",
-    "description": "Adds a sqlite datasource to the data context.\n\nArgs:\n    name: The name of this sqlite datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the sqlite database.\n        For example: \"sqlite:///path/to/file.db\"\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
+    "description": "--Public API--Adds a sqlite datasource to the data context.\n\nArgs:\n    name: The name of this sqlite datasource.\n    connection_string: The SQLAlchemy connection string used to connect to the sqlite database.\n        For example: \"sqlite:///path/to/file.db\"\n    create_temp_table: Whether to leverage temporary tables during metric computation.\n    assets: An optional dictionary whose keys are TableAsset names and whose values\n        are TableAsset objects.",
     "type": "object",
     "properties": {
         "type": {
@@ -15,11 +15,17 @@
             "title": "Name",
             "type": "string"
         },
+        "id": {
+            "title": "Id",
+            "description": "Datasource id",
+            "type": "string",
+            "format": "uuid"
+        },
         "assets": {
             "title": "Assets",
-            "default": {},
-            "type": "object",
-            "additionalProperties": {
+            "default": [],
+            "type": "array",
+            "items": {
                 "anyOf": [
                     {
                         "$ref": "#/definitions/TableAsset"
@@ -45,6 +51,27 @@
                     "format": "uri"
                 }
             ]
+        },
+        "create_temp_table": {
+            "title": "Create Temp Table",
+            "default": true,
+            "type": "boolean"
+        },
+        "kwargs": {
+            "title": "Kwargs",
+            "description": "Optional dictionary of `kwargs` will be passed to the SQLAlchemy Engine as part of `create_engine(connection_string, **kwargs)`",
+            "default": {},
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [
@@ -293,12 +320,22 @@
                     ],
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Sorter"
                     }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
                 },
                 "splitter": {
                     "title": "Splitter",
@@ -361,12 +398,22 @@
                     ],
                     "type": "string"
                 },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "order_by": {
                     "title": "Order By",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Sorter"
                     }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
                 },
                 "splitter": {
                     "title": "Splitter",

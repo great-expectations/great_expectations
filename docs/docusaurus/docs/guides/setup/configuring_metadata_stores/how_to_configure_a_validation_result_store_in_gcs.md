@@ -6,11 +6,13 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 By default, <TechnicalTag tag="validation_result" text="Validation Results" /> are stored in JSON format in the ``uncommitted/validations/`` subdirectory of your ``great_expectations/`` folder.  Since Validation Results may include examples of data (which could be sensitive or regulated) they should not be committed to a source control system.  This guide will help you configure a new storage location for Validation Results in a Google Cloud Storage (GCS) bucket.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Configured a Data Context](../../../tutorials/getting_started/tutorial_setup.md).
-- [Configured an Expectations Suite](../../../tutorials/getting_started/tutorial_create_expectations.md).
-- [Configured a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md).
+- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [Configured a Checkpoint](/docs/guides/validation/checkpoints/how_to_create_a_new_checkpoint).
 - Configured a Google Cloud Platform (GCP) [service account](https://cloud.google.com/iam/docs/service-accounts) with credentials that can access the appropriate GCP resources, which include Storage Objects.
 - Identified the GCP project, GCS bucket, and prefix where Validation Results will be stored.
 
@@ -60,19 +62,13 @@ One way to copy Validation Results into GCS is by using the ``gsutil cp`` comman
 
 
 
-### 5. Confirm that the new Validation Results Store has been added by running
+### 5. Reference the new configuration
 
-```bash name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py list_validation_stores_command"
-```
-
-Only the active Stores will be listed. Great Expectations will look for Validation Results in GCS as long as we set the ``validations_store_name`` variable to ``validations_GCS_store``, and the config for ``validations_store`` can be removed if you would like.
-
-```bash name="tests/integration/docusaurus/setup/configuring_metadata_stores/how_to_configure_a_validation_result_store_in_gcs.py list_validation_stores_output"
-```
+To make Great Expectations look for Validation Results on the GCS store, you must set the ``validations_store_name`` variable to the name of your GCS Validations Store, which in our example is `validations_GCS_store`.
 
 ### 6. Confirm that the Validation Results Store has been correctly configured
 
-[Run a Checkpoint](../../../tutorials/getting_started/tutorial_validate_data.md) to store results in the new Validation Results Store on GCS then visualize the results by [re-building Data Docs](../../../tutorials/getting_started/tutorial_validate_data.md).
+[Run a Checkpoint](/docs/guides/validation/how_to_validate_data_by_running_a_checkpoint) to store results in the new Validation Results Store on GCS then visualize the results by [re-building Data Docs](/docs/terms/data_docs).
 
 
 ## Additional Notes

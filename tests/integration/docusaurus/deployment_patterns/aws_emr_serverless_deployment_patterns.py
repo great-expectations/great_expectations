@@ -1,23 +1,24 @@
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py imports">
 import boto3
-import yaml
-from pyspark import SQLContext
 
+from great_expectations.compatibility import pyspark
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.types.base import (
     DataContextConfig,
     S3StoreBackendDefaults,
 )
 from great_expectations.util import get_context
 
+yaml = YAMLHandler()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py initialize spark">
 if __name__ == "__main__":
     ### critical part to reinitialize spark context
     sc = gx.core.util.get_or_create_spark_application()
-    spark = SQLContext(sc)
+    spark = pyspark.SQLContext(sc)
 
     spark_file = "pyspark_df.parquet"
     suite_name = "pandas_spark_suite"
@@ -27,7 +28,7 @@ if __name__ == "__main__":
         Bucket="bucket_name",
         Key="bucket_name/great_expectations/great_expectations.yml",
     )
-    config_file = yaml.safe_load(response["Body"])
+    config_file = yaml.load(response["Body"])
     # </snippet>
     # <snippet name="tests/integration/docusaurus/deployment_patterns/aws_emr_serverless_deployment_patterns.py connect to data">
     df_spark = spark.read.parquet("s3://bucket_name/data_folder/" + spark_file)

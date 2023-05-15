@@ -1,10 +1,14 @@
+from great_expectations.compatibility import pyspark, sqlalchemy
+from great_expectations.compatibility.pyspark import functions as F
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.metric_function_types import MetricPartialFunctionTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
     SparkDFExecutionEngine,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import F, Window, sa
 from great_expectations.expectations.metrics.map_metric_provider import (
     ColumnMapMetricProvider,
     column_condition_partial,
@@ -25,7 +29,7 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
     # )
     # def _sqlalchemy(cls, column, _table, **kwargs):
     #     dup_query = (
-    #         sa.select([column])
+    #         sa.select(column)
     #         .select_from(_table)
     #         .group_by(column)
     #         .having(sa.func.count(column) > 1)
@@ -58,16 +62,23 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 source_table=_table,
                 column_name=column.name,
             )
-            sql_engine.execute(temp_table_stmt)
+            if sqlalchemy.Engine and isinstance(sql_engine, sqlalchemy.Engine):
+                with sql_engine.connect() as connection:
+                    with connection.begin():
+                        connection.execute(sa.text(temp_table_stmt))
+            else:
+                # sql_engine is a connection
+                with sql_engine.begin():
+                    sql_engine.execute(sa.text(temp_table_stmt))
             dup_query = (
-                sa.select([column])
+                sa.select(column)
                 .select_from(sa.text(temp_table_name))
                 .group_by(column)
                 .having(sa.func.count(column) > 1)
             )
         else:
             dup_query = (
-                sa.select([column])
+                sa.select(column)
                 .select_from(_table)
                 .group_by(column)
                 .having(sa.func.count(column) > 1)
@@ -79,4 +90,4 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
         partial_fn_type=MetricPartialFunctionTypes.WINDOW_CONDITION_FN,
     )
     def _spark(cls, column, **kwargs):
-        return F.count(F.lit(1)).over(Window.partitionBy(column)) <= 1
+        return F.count(F.lit(1)).over(pyspark.Window.partitionBy(column)) <= 1

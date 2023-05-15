@@ -1,14 +1,14 @@
 import os
 from typing import List
 
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import Batch, BatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
+
+yaml = YAMLHandler()
+context = gx.get_context()
 
 CREDENTIAL = os.getenv("AZURE_ACCESS_KEY", "")
-
-context = gx.get_context()
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/cloud/azure/spark/inferred_and_runtime_python_example.py datasource config">
 datasource_config = {

@@ -1,11 +1,11 @@
 import os
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/database/snowflake_yaml_example.py imports">
-from ruamel import yaml
-
 import great_expectations as gx
 from great_expectations.core.batch import BatchRequest, RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 # </snippet>
 
 sfAccount = os.environ.get("SNOWFLAKE_ACCOUNT")

@@ -37,7 +37,12 @@ if TYPE_CHECKING:
 
 
 class ColumnDomainBuilder(DomainBuilder):
+    """
+    This DomainBuilder emits "Domain" object for every column in table and can serve as parent of other column-focused DomainBuilder implementations.
+    """
+
     exclude_field_names: ClassVar[Set[str]] = DomainBuilder.exclude_field_names | {
+        "table_column_names",
         "semantic_type_filter",
     }
 
@@ -92,6 +97,8 @@ class ColumnDomainBuilder(DomainBuilder):
         self._exclude_semantic_types = exclude_semantic_types
 
         self._semantic_type_filter = None
+
+        self._table_column_names: List[str] = []
 
     @property
     def domain_type(self) -> MetricDomainTypes:
@@ -192,23 +199,17 @@ class ColumnDomainBuilder(DomainBuilder):
     def semantic_type_filter(self) -> Optional[SemanticTypeFilter]:
         return self._semantic_type_filter
 
-    def get_effective_column_names(
+    def get_table_column_names(
         self,
         batch_ids: Optional[List[str]] = None,
         validator: Optional[Validator] = None,
         variables: Optional[ParameterContainer] = None,
     ) -> List[str]:
         """
-        This method applies multiple directives to obtain columns to be included as part of returned "Domain" objects.
+        This method returns all column names available (i.e., prior to any inclusions/exclusions filtering is applied).
         """
-        include_column_names: List[str] = cast(
-            List[str],
-            self._resolve_list_type_property(
-                property_name="include_column_names",
-                property_value_type=list,
-                variables=variables,
-            ),
-        )
+        if self._table_column_names:
+            return self._table_column_names
 
         if batch_ids is None:
             batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[no-redef]
@@ -226,8 +227,30 @@ class ColumnDomainBuilder(DomainBuilder):
                 metric_value_kwargs=None,
             )
         )
+        self._table_column_names = table_columns
 
-        effective_column_names: List[str] = include_column_names or table_columns
+        return self._table_column_names
+
+    def get_filtered_column_names(
+        self,
+        column_names: List[str],
+        batch_ids: Optional[List[str]] = None,
+        validator: Optional[Validator] = None,
+        variables: Optional[ParameterContainer] = None,
+    ) -> List[str]:
+        """
+        This method returns list of column names, filtered according to directives supplied via instance attributes.
+        """
+        include_column_names: List[str] = cast(
+            List[str],
+            self._resolve_list_type_property(
+                property_name="include_column_names",
+                property_value_type=list,
+                variables=variables,
+            ),
+        )
+
+        filtered_column_names: List[str] = include_column_names or column_names
 
         exclude_column_names: List[str] = cast(
             List[str],
@@ -240,14 +263,14 @@ class ColumnDomainBuilder(DomainBuilder):
 
         column_name: str
 
-        effective_column_names = [
+        filtered_column_names = [
             column_name
-            for column_name in effective_column_names
+            for column_name in filtered_column_names
             if column_name not in exclude_column_names
         ]
 
-        for column_name in effective_column_names:
-            if column_name not in table_columns:
+        for column_name in filtered_column_names:
+            if column_name not in column_names:
                 raise gx_exceptions.ProfilerExecutionError(
                     message=f'Error: The column "{column_name}" in BatchData does not exist.'
                 )
@@ -261,12 +284,12 @@ class ColumnDomainBuilder(DomainBuilder):
             ),
         )
         if include_column_name_suffixes:
-            effective_column_names = list(
+            filtered_column_names = list(
                 filter(
                     lambda candidate_column_name: candidate_column_name.endswith(
                         tuple(include_column_name_suffixes)
                     ),
-                    effective_column_names,
+                    filtered_column_names,
                 )
             )
 
@@ -279,12 +302,12 @@ class ColumnDomainBuilder(DomainBuilder):
             ),
         )
         if exclude_column_name_suffixes:
-            effective_column_names = list(
+            filtered_column_names = list(
                 filter(
                     lambda candidate_column_name: not candidate_column_name.endswith(
                         tuple(exclude_column_name_suffixes)
                     ),
-                    effective_column_names,
+                    filtered_column_names,
                 )
             )
 
@@ -322,7 +345,7 @@ class ColumnDomainBuilder(DomainBuilder):
             runtime_environment={
                 "batch_ids": batch_ids,
                 "validator": validator,
-                "column_names": effective_column_names,
+                "column_names": filtered_column_names,
             },
             config_defaults={},
         )
@@ -341,13 +364,13 @@ class ColumnDomainBuilder(DomainBuilder):
         )
 
         if include_semantic_types:
-            effective_column_names = list(
+            filtered_column_names = list(
                 filter(
                     lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr,arg-type]
                         candidate_column_name
                     ]
                     in include_semantic_types,
-                    effective_column_names,
+                    filtered_column_names,
                 )
             )
 
@@ -364,15 +387,45 @@ class ColumnDomainBuilder(DomainBuilder):
         )
 
         if exclude_semantic_types:
-            effective_column_names = list(
+            filtered_column_names = list(
                 filter(
                     lambda candidate_column_name: self.semantic_type_filter.table_column_name_to_inferred_semantic_domain_type_map[  # type: ignore[union-attr,arg-type] # lambda missing type details
                         candidate_column_name
                     ]
                     not in exclude_semantic_types,
-                    effective_column_names,
+                    filtered_column_names,
                 )
             )
+
+        return filtered_column_names
+
+    def get_effective_column_names(
+        self,
+        batch_ids: Optional[List[str]] = None,
+        validator: Optional[Validator] = None,
+        variables: Optional[ParameterContainer] = None,
+    ) -> List[str]:
+        """
+        This method applies multiple directives to obtain columns to be included as part of returned "Domain" objects.
+        """
+        if batch_ids is None:
+            batch_ids: List[str] = self.get_batch_ids(variables=variables)  # type: ignore[no-redef]
+
+        if validator is None:
+            validator = self.get_validator(variables=variables)
+
+        table_columns: List[str] = self.get_table_column_names(
+            batch_ids=batch_ids,
+            validator=validator,
+            variables=variables,
+        )
+
+        effective_column_names: List[str] = self.get_filtered_column_names(
+            column_names=table_columns,
+            batch_ids=batch_ids,
+            validator=validator,
+            variables=variables,
+        )
 
         return effective_column_names
 
@@ -403,7 +456,6 @@ class ColumnDomainBuilder(DomainBuilder):
             variables=variables,
         )
 
-        column_name: str
         domains: List[Domain] = build_domains_from_column_names(
             rule_name=rule_name,
             column_names=effective_column_names,

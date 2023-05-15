@@ -7,9 +7,11 @@ import ConnectionStringAthena from './components/_connection_string_athena.md'
 
 This guide will help you add an Athena instance (or a database) as a <TechnicalTag tag="datasource" text="Datasource" />. This will allow you to <TechnicalTag tag="validation" text="Validate" /> tables and queries within this instance. When you use an Athena Datasource, the validation is done in Athena itself. Your data is not downloaded.
 
+## Prerequisites
+
 <Prerequisites>
 
-  - [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+  - [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
   - Installed the pyathena package for the Athena SQLAlchemy dialect (``pip install "pyathena[SQLAlchemy]"``)
 
 </Prerequisites>

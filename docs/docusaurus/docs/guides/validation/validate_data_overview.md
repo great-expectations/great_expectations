@@ -5,20 +5,21 @@ title: "Validate Data: Overview"
 
 import UniversalMap from '/docs/images/universal_map/_universal_map.mdx';
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 <!--Use 'inactive' or 'active' to indicate which Universal Map steps this term has a use case within.-->
 
 <UniversalMap setup='inactive' connect='inactive' create='inactive' validate='active'/>
 
-:::note Prerequisites
-- Completing [Step 4: Validate data](../../tutorials/getting_started/tutorial_validate_data.md) of the Getting Started tutorial is recommended.
-:::
+Prerequisites
 
-When you complete this step for the first time, you will have created and run a <TechnicalTag tag="checkpoint" text="Checkpoint" />.  This Checkpoint can then be reused to <TechnicalTag tag="validation" text="Validate" /> data in the future, and you can also create and configure additional Checkpoints to cover different use cases, should you have them.
+- Completion of the [Quickstart guide](tutorials/quickstart/quickstart.md)
 
 ## The Validate Data process
 
-The recommended workflow for validating data is through **the use of Checkpoints.**  Checkpoints handle the rest of the Validation process for you: They will Validate data, save <TechnicalTag tag="validation_result" text="Validation Results" />, run any <TechnicalTag tag="action" text="Actions" /> you have specified, and finally create <TechnicalTag tag="data_docs" text="Data Docs" /> with their results.  
+The recommended workflow for validating data is through **the use of Checkpoints.**  Checkpoints handle the rest of the Validation process for you: They will Validate data, save <TechnicalTag tag="validation_result" text="Validation Results" />, run any <TechnicalTag tag="action" text="Actions" /> you have specified, and finally create <TechnicalTag tag="data_docs" text="Data Docs" /> with their results.  A Checkpoint can then be reused to <TechnicalTag tag="validation" text="Validate" /> data in the future, and you can also create and configure additional Checkpoints to cover different use cases, should you have them.
 
 ![How a Checkpoint works](../../images/universal_map/overviews/how_a_checkpoint_works.png)
 

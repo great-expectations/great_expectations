@@ -31,8 +31,8 @@ def test_cli_athena_datasource_new_connection_string(
     monkeypatch.chdir(os.path.dirname(context.root_directory))
     result = runner.invoke(
         cli,
-        "--v3-api datasource new",
-        input="2\n7\n",
+        "datasource new",
+        input="Y\n2\n7\n",
         catch_exceptions=False,
     )
     stdout = result.stdout

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import copy
 import inspect
 import logging
 import pathlib
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Any, Callable, Type
 
-import pandas as pd
 import pydantic
 import pytest
 from pytest import MonkeyPatch, param
@@ -294,7 +294,7 @@ class TestDynamicPandasAssets:
             .build_batch_request()
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # expects BatchRequestBase
+            empty_data_context.get_validator(batch_request=batch_request)
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")
@@ -375,9 +375,9 @@ class TestDynamicPandasAssets:
         )
         _ = read_method(*positional_args.values())
         # read_* returns a validator, but we just want to inspect the asset
-        asset = empty_data_context.sources.pandas_default.assets[
-            DEFAULT_PANDAS_DATA_ASSET_NAME
-        ]
+        asset = empty_data_context.sources.pandas_default.get_asset(
+            asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
+        )
         for positional_arg_name, positional_arg in positional_args.items():
             assert getattr(asset, positional_arg_name) == positional_arg
 
@@ -394,7 +394,9 @@ def test_default_pandas_datasource_get_and_set(
         filepath_or_buffer=valid_file_path,
     )
     assert isinstance(validator, Validator)
-    csv_data_asset_1 = pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    csv_data_asset_1 = pandas_datasource.get_asset(
+        asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
+    )
     assert isinstance(csv_data_asset_1, _PandasDataAsset)
     assert csv_data_asset_1.name == DEFAULT_PANDAS_DATA_ASSET_NAME
     assert len(pandas_datasource.assets) == 1
@@ -403,7 +405,7 @@ def test_default_pandas_datasource_get_and_set(
     pandas_datasource = empty_data_context.sources.pandas_default
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
     assert len(pandas_datasource.assets) == 1
-    assert pandas_datasource.assets[DEFAULT_PANDAS_DATA_ASSET_NAME]
+    assert pandas_datasource.get_asset(asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME)
 
     # ensure we overwrite the ephemeral data asset if no name is passed
     _ = pandas_datasource.read_csv(filepath_or_buffer=valid_file_path)
@@ -416,9 +418,18 @@ def test_default_pandas_datasource_get_and_set(
         asset_name=expected_csv_data_asset_name,
         filepath_or_buffer=valid_file_path,
     )
-    csv_data_asset_2 = pandas_datasource.assets[expected_csv_data_asset_name]
+    csv_data_asset_2 = pandas_datasource.get_asset(
+        asset_name=expected_csv_data_asset_name
+    )
     assert csv_data_asset_2.name == expected_csv_data_asset_name
     assert len(pandas_datasource.assets) == 2
+
+    # ensure ephemeral data assets are not serialized
+    config_as_dict = empty_data_context.fluent_config.dict()["fluent_datasources"]
+    print(f"{pf(config_as_dict)}")
+    for ds in config_as_dict:
+        for asset in ds.get("assets", []):
+            assert asset["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
 
 
 def test_default_pandas_datasource_name_conflict(
@@ -438,7 +449,7 @@ def test_default_pandas_datasource_name_conflict(
     assert pandas_datasource.name == DEFAULT_PANDAS_DATASOURCE_NAME
 
 
-def test_dataframe_asset(empty_data_context: AbstractDataContext):
+def test_dataframe_asset(empty_data_context: AbstractDataContext, test_df_pandas):
     # validates that a dataframe object is passed
     with pytest.raises(pydantic.ValidationError) as exc_info:
         _ = empty_data_context.sources.pandas_default.read_dataframe(dataframe={})
@@ -446,34 +457,67 @@ def test_dataframe_asset(empty_data_context: AbstractDataContext):
     errors_dict = exc_info.value.errors()[0]
     assert errors_dict["loc"][0] == "dataframe"
 
-    df = pd.DataFrame(
-        data={
-            "foo": [1, 2, 3],
-            "bar": [4, 5, 6],
-        }
-    )
-
     # correct working behavior with read method
-    validator = empty_data_context.sources.pandas_default.read_dataframe(dataframe=df)
+    validator = empty_data_context.sources.pandas_default.read_dataframe(
+        dataframe=test_df_pandas
+    )
     assert isinstance(validator, Validator)
     assert isinstance(
-        empty_data_context.sources.pandas_default.assets[
-            DEFAULT_PANDAS_DATA_ASSET_NAME
-        ],
+        empty_data_context.sources.pandas_default.get_asset(
+            asset_name=DEFAULT_PANDAS_DATA_ASSET_NAME
+        ),
         DataFrameAsset,
     )
 
     # correct working behavior with add method
     dataframe_asset_name = "my_dataframe_asset"
     dataframe_asset = empty_data_context.sources.pandas_default.add_dataframe_asset(
-        name=dataframe_asset_name, dataframe=df
+        name=dataframe_asset_name, dataframe=test_df_pandas
     )
     assert isinstance(dataframe_asset, DataFrameAsset)
     assert dataframe_asset.name == "my_dataframe_asset"
     assert len(empty_data_context.sources.pandas_default.assets) == 2
     assert all(
-        [
-            asset.dataframe.equals(df)  # type: ignore[attr-defined]
-            for asset in empty_data_context.sources.pandas_default.assets.values()
-        ]
+        asset.dataframe.equals(test_df_pandas)  # type: ignore[attr-defined]
+        for asset in empty_data_context.sources.pandas_default.assets
     )
+
+
+def test_pandas_data_asset_batch_metadata(
+    empty_data_context: AbstractDataContext, valid_file_path: pathlib.Path
+):
+    my_config_variables = {"pipeline_filename": __file__}
+    empty_data_context.config_variables.update(my_config_variables)
+
+    pandas_datasource = empty_data_context.sources.pandas_default
+
+    batch_metadata = {
+        "no_curly_pipeline_filename": "$pipeline_filename",
+        "curly_pipeline_filename": "${pipeline_filename}",
+        "pipeline_step": "transform_3",
+    }
+
+    csv_asset = pandas_datasource.add_csv_asset(
+        name="my_csv_asset",
+        filepath_or_buffer=valid_file_path,
+        batch_metadata=batch_metadata,
+    )
+    assert csv_asset.batch_metadata == batch_metadata
+
+    batch_list = csv_asset.get_batch_list_from_batch_request(
+        csv_asset.build_batch_request()
+    )
+    assert len(batch_list) == 1
+
+    # allow mutation of this attribute
+    batch_list[0].metadata["also_this_one"] = "other_batch-level_value"
+
+    substituted_batch_metadata = copy.deepcopy(batch_metadata)
+    substituted_batch_metadata.update(
+        {
+            "no_curly_pipeline_filename": __file__,
+            "curly_pipeline_filename": __file__,
+            "also_this_one": "other_batch-level_value",
+        }
+    )
+    assert batch_list[0].metadata == substituted_batch_metadata

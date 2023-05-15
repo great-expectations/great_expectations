@@ -3,6 +3,7 @@ from string import Template
 
 from marshmallow import Schema, ValidationError, fields, post_load
 
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.datasource.batch_kwargs_generator.batch_kwargs_generator import (
     BatchKwargsGenerator,
 )
@@ -11,16 +12,6 @@ from great_expectations.exceptions import BatchKwargsError, GreatExpectationsErr
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 
 logger = logging.getLogger(__name__)
-
-try:
-    import sqlalchemy
-    from sqlalchemy import create_engine
-    from sqlalchemy.engine import reflection
-except ImportError:
-    sqlalchemy = None
-    create_engine = None
-    reflection = None
-    logger.debug("Unable to import sqlalchemy.")
 
 
 class AssetConfigurationSchema(Schema):
@@ -97,9 +88,9 @@ class TableBatchKwargsGenerator(BatchKwargsGenerator):
         if datasource is not None:
             self.engine = datasource.engine
             try:
-                self.inspector = sqlalchemy.inspect(self.engine)
+                self.inspector = sqlalchemy.Inspector.inspect(self.engine)
 
-            except sqlalchemy.exc.OperationalError:
+            except sqlalchemy.OperationalError:
                 logger.warning(
                     f"Unable to create inspector from engine in batch kwargs generator '{name}'"
                 )

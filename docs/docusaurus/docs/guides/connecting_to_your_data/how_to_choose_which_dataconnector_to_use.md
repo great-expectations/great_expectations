@@ -8,10 +8,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide demonstrates how to choose which <TechnicalTag tag="data_connector" text="Data Connectors" /> to configure within your <TechnicalTag tag="datasource" text="Datasources" />.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Understand the basics of Datasources in the V3 (Batch Request) API](../../terms/datasource.md)
-- Learned how to configure a [Data Context using test_yaml_config](../setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md)
+- [An understanding of Datasource basics](../../terms/datasource.md)
 
 </Prerequisites>
 
@@ -36,7 +37,7 @@ The third type of `DataConnector` class is for providing a <TechnicalTag tag="ba
 
 - A `RuntimeDataConnector` enables you to use a `RuntimeBatchRequest` to wrap either an in-memory dataframe, filepath, or SQL query, and must include batch identifiers that uniquely identify the data (e.g. a `run_id` from an AirFlow DAG run).
 
-If you know for example, that your Pipeline Runner will already have your batch data in memory at runtime, you can choose to configure a `RuntimeDataConnector` with unique batch identifiers. Reference the documents on [How to configure a RuntimeDataConnector](guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector.md) and [How to create a Batch of data from an in-memory Spark or Pandas dataframe](guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe.md) to get started with `RuntimeDataConnectors`.
+If you know for example, that your Pipeline Runner will already have your batch data in memory at runtime, you can choose to configure a `RuntimeDataConnector` with unique batch identifiers. Reference the documents on [How to configure a RuntimeDataConnector](/docs/guides/connecting_to_your_data/how_to_configure_a_runtimedataconnector) and [How to create a Batch of data from an in-memory Spark or Pandas dataframe](/docs/guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe) to get started with `RuntimeDataConnectors`.
 
 If you aren't sure which type of the remaining `DataConnector`s to use, the following examples will use `DataConnector` classes designed to connect to files on disk, namely `InferredAssetFilesystemDataConnector` and `ConfiguredAssetFilesystemDataConnector` to demonstrate the difference between these types of `DataConnectors`.
 

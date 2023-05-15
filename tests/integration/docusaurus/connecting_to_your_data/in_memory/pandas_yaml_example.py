@@ -1,10 +1,11 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py imports">
 import pandas as pd
-from ruamel import yaml
 
 import great_expectations as gx
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 # </snippet>
 
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/in_memory/pandas_yaml_example.py get_context">

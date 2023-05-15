@@ -22,10 +22,8 @@ from great_expectations.execution_engine.sqlalchemy_execution_engine import (
     SqlAlchemyBatchData,
     SqlAlchemyExecutionEngine,
 )
-from great_expectations.expectations.metrics.import_manager import (
-    pyspark_sql_Column,
-    quoted_name,
-)
+from great_expectations.compatibility import pyspark
+from great_expectations.compatibility import sqlalchemy
 from great_expectations.expectations.metrics.util import (
     get_dbms_compatible_column_names,
 )
@@ -39,6 +37,10 @@ from great_expectations.util import isclose
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from tests.expectations.test_util import get_table_columns_metric
+
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 
 
 def test_metric_loads_pd():
@@ -204,7 +206,7 @@ def test_column_quoted_name_type_sa(sa):
 
     column_name: str
     quoted_batch_column_list = [
-        quoted_name(value=str(column_name), quote=True)
+        sqlalchemy.quoted_name(value=str(column_name), quote=True)
         for column_name in batch_column_list
     ]
 
@@ -220,7 +222,9 @@ def test_column_quoted_name_type_sa(sa):
         column_names=column_name,
         batch_columns_list=quoted_batch_column_list,
     )
-    assert isinstance(quoted_column_name, sa.sql.elements.quoted_name)
+    assert sqlalchemy.quoted_name and isinstance(
+        quoted_column_name, sqlalchemy.quoted_name
+    )
     assert quoted_column_name.quote is True
 
     for column_name in [
@@ -241,7 +245,7 @@ def test_column_quoted_name_type_sa(sa):
         )
 
     quoted_batch_column_list = [
-        quoted_name(value=str(column_name), quote=True)
+        sqlalchemy.quoted_name(value=str(column_name), quote=True)
         for column_name in [
             "Names",
             "names",
@@ -1229,8 +1233,6 @@ def test_column_partition_metric_spark(spark_session):
 
     Expected partition boundaries are pre-computed algorithmically and asserted to be "close" to actual metric values.
     """
-    from great_expectations.expectations.metrics.import_manager import sparktypes
-
     week_idx: int
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
@@ -1257,10 +1259,10 @@ def test_column_partition_metric_spark(spark_session):
                 ],
             },
         ),
-        schema=sparktypes.StructType(
+        schema=pyspark.types.StructType(
             [
-                sparktypes.StructField("a", sparktypes.IntegerType(), True),
-                sparktypes.StructField("b", sparktypes.TimestampType(), True),
+                pyspark.types.StructField("a", pyspark.types.IntegerType(), True),
+                pyspark.types.StructField("b", pyspark.types.TimestampType(), True),
             ]
         ),
         batch_id="my_id",
@@ -1729,7 +1731,7 @@ def test_map_value_set_sa(sa):
 def test_map_of_type_sa(sa):
     eng = sa.create_engine("sqlite://")
     df = pd.DataFrame({"a": [1, 2, 3, 3, None]})
-    df.to_sql(name="test", con=eng, index=False)
+    add_dataframe_to_db(df=df, name="test", con=eng, index=False)
     batch_data = SqlAlchemyBatchData(
         execution_engine=eng, table_name="test", source_table_name="test"
     )
@@ -1991,9 +1993,7 @@ def test_map_column_values_increasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [4], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([4], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-02-21"]
 
 
@@ -2180,9 +2180,7 @@ def test_map_column_values_decreasing_pd():
     )
     metrics.update(results)
 
-    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Int64Index(
-        [3], dtype="int64"
-    )
+    assert metrics[unexpected_rows_metric.id]["a"].index == pd.Index([3], dtype="int64")
     assert metrics[unexpected_rows_metric.id]["a"].values == ["2021-03-20"]
 
 
@@ -4332,8 +4330,6 @@ def test_value_counts_metric_sa(sa):
 
 @pytest.mark.integration
 def test_value_counts_metric_spark(spark_session):
-    from great_expectations.expectations.metrics.import_manager import sparktypes
-
     engine: SparkDFExecutionEngine = build_spark_engine(
         spark=spark_session,
         df=pd.DataFrame(
@@ -4342,10 +4338,10 @@ def test_value_counts_metric_spark(spark_session):
                 "b": [None, None, None, None, None, None, None],
             },
         ),
-        schema=sparktypes.StructType(
+        schema=pyspark.types.StructType(
             [
-                sparktypes.StructField("a", sparktypes.FloatType(), True),
-                sparktypes.StructField("b", sparktypes.NullType(), True),
+                pyspark.types.StructField("a", pyspark.types.FloatType(), True),
+                pyspark.types.StructField("b", pyspark.types.NullType(), True),
             ]
         ),
         batch_id="my_id",
@@ -4428,9 +4424,9 @@ def test_distinct_metric_spark(
         metrics=metrics,
     )
     metrics.update(results)
-    assert isinstance(
+    assert pyspark.Column and isinstance(
         metrics[column_distinct_values_count_metric_partial_fn.id][0],
-        pyspark_sql_Column,
+        pyspark.Column,
     )
 
     column_distinct_values_count_metric = MetricConfiguration(

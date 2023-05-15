@@ -6,14 +6,17 @@ from schwifty.exceptions import SchwiftyException
 from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
-    SparkDFExecutionEngine,
 )
+
+# SparkDFExecutionEngine,
 from great_expectations.expectations.expectation import ColumnMapExpectation
 from great_expectations.expectations.metrics import (
     ColumnMapMetricProvider,
     column_condition_partial,
 )
-from great_expectations.expectations.metrics.import_manager import F, sparktypes
+
+# from great_expectations.compatibility.pyspark import functions as F
+# from great_expectations.compatibility import pyspark
 
 
 def is_valid_bic(bic_code: str) -> bool:
@@ -24,9 +27,9 @@ def is_valid_bic(bic_code: str) -> bool:
         return False
 
 
-@F.udf(sparktypes.BooleanType())
-def is_valid_bic_udf(bic: str) -> bool:
-    return is_valid_bic(bic)
+# @F.udf(pyspark.types.BooleanType())
+# def is_valid_bic_udf(bic: str) -> bool:
+#     return is_valid_bic(bic)
 
 
 class ColumnValuesToBeValidBic(ColumnMapMetricProvider):
@@ -36,9 +39,9 @@ class ColumnValuesToBeValidBic(ColumnMapMetricProvider):
     def _pandas(cls, column, **kwargs):
         return column.apply(is_valid_bic)
 
-    @column_condition_partial(engine=SparkDFExecutionEngine)
-    def _spark(cls, column, **kwargs):
-        return is_valid_bic_udf(column)
+    # @column_condition_partial(engine=SparkDFExecutionEngine)
+    # def _spark(cls, column, **kwargs):
+    #     return is_valid_bic_udf(column)
 
     # This method defines the business logic for evaluating your metric when using a SqlAlchemyExecutionEngine
     # @column_condition_partial(engine=SqlAlchemyExecutionEngine)

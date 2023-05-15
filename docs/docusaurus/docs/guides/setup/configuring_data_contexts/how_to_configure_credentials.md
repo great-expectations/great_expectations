@@ -5,10 +5,13 @@ import Prerequisites from '../../connecting_to_your_data/components/prerequisite
 import Tabs from '@theme/Tabs'
 import TabItem from '@theme/TabItem'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 This guide will explain how to configure your ``great_expectations.yml`` project config to populate credentials from either a YAML file or a secret manager.
 
-If your Great Expectations deployment is in an environment without a file system, refer to [How to instantiate a Data Context without a yml file](./how_to_instantiate_a_data_context_without_a_yml_file.md) for credential configuration examples.
+If your Great Expectations deployment is in an environment without a file system, refer to [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context).
 
 <Tabs
   groupId="yaml-or-secret-manager"
@@ -20,11 +23,11 @@ If your Great Expectations deployment is in an environment without a file system
 
 <TabItem value="yaml">
 
+## Prerequisites
+
 <Prerequisites></Prerequisites>
 
-## Steps
-
-### 1. Save credentials and config
+## 1. Save credentials and config
 
 Decide where you would like to save the desired credentials or config values - in a YAML file, environment variables, or a combination - then save the values.
 
@@ -55,14 +58,14 @@ If using environment variables, set values by entering ``export ENV_VAR_NAME=env
 ```bash name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py export_env_vars"
 ```
 
-### 2. Set ``config_variables_file_path``
+## 2. Set ``config_variables_file_path``
 
 If using a YAML file, set the ``config_variables_file_path`` key in your ``great_expectations.yml`` or leave the default.
 
 ```yaml name="tests/integration/docusaurus/setup/configuring_data_contexts/how_to_configure_credentials.py config_variables_file_path"
 ```
 
-### 3. Replace credentials with placeholders
+## 3. Replace credentials with placeholders
 
 Replace credentials or other values in your ``great_expectations.yml`` with ``${}``-wrapped variable names (i.e. ``${ENVIRONMENT_VARIABLE}`` or ``${YAML_KEY}``).
 
@@ -79,7 +82,7 @@ Replace credentials or other values in your ``great_expectations.yml`` with ``${
 </TabItem>
 <TabItem value="secret-manager">
 
-Choose which secret manager you are using:
+Select one of the following secret manager applications:
 <Tabs
   groupId="secret-manager"
   defaultValue='aws'
@@ -91,11 +94,13 @@ Choose which secret manager you are using:
 
 <TabItem value="aws">
 
-This guide will explain how to configure your ``great_expectations.yml`` project config to substitute variables from AWS Secrets Manager.
+Configure your ``great_expectations.yml`` project config to substitute variables from the AWS Secrets Manager.
+
+## Prerequisites
 
 <Prerequisites>
 
-- Configured a secret manager and secrets in the cloud with [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html)
+- An AWS Secrets Manager instance. See [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/tutorials_basic.html).
 
 </Prerequisites>
 
@@ -109,12 +114,12 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-**Setup**
+## Setup
 
 To use AWS Secrets Manager, you may need to install the ``great_expectations`` package with its ``aws_secrets`` extra requirement:
 
 ```bash
-pip install great_expectations[aws_secrets]
+pip install 'great_expectations[aws_secrets]'
 ```
 
 In order to substitute your value by a secret in AWS Secrets Manager, you need to provide an arn of the secret like this one:
@@ -171,7 +176,9 @@ datasources:
 </TabItem>
 <TabItem value="gcp">
 
-This guide will explain how to configure your ``great_expectations.yml`` project config to substitute variables from GCP Secrets Manager.
+Configure your ``great_expectations.yml`` project config to substitute variables from GCP Secrets Manager.
+
+## Prerequisites
 
 <Prerequisites>
 
@@ -189,12 +196,12 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-**Setup**
+## Setup
 
 To use GCP Secret Manager, you may need to install the ``great_expectations`` package with its ``gcp`` extra requirement:
 
 ```bash
-pip install great_expectations[gcp]
+pip install 'great_expectations[gcp]'
 ```
 
 In order to substitute your value by a secret in GCP Secret Manager, you need to provide a name of the secret like this one:
@@ -245,11 +252,13 @@ datasources:
 </TabItem>
 <TabItem value="azure">
 
-This guide will explain how to configure your ``great_expectations.yml`` project config to substitute variables from Azure Key Vault.
+Configure your ``great_expectations.yml`` project config to substitute variables from Azure Key Vault.
+
+## Prerequisites
 
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../../../tutorials/getting_started/tutorial_overview.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
 - Configured a secret manager and secrets in the cloud with [Azure Key Vault](https://docs.microsoft.com/en-us/azure/key-vault/general/overview)
 
 </Prerequisites>
@@ -264,12 +273,12 @@ The secrets store substitution works based on keywords. It tries to retrieve sec
 
 :::
 
-**Setup**
+## Setup
 
 To use Azure Key Vault, you may need to install the ``great_expectations`` package with its ``azure_secrets`` extra requirement:
 
 ```bash
-pip install great_expectations[azure_secrets]
+pip install 'great_expectations[azure_secrets]'
 ```
 
 In order to substitute your value by a secret in Azure Key Vault, you need to provide a name of the secret like this one:

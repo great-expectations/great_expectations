@@ -84,7 +84,7 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
                 "success": False,
                 "result": {
                     "info": f"Expected {expected_num_of_distinct_values} but found {actual_num_of_distinct_values} distinct values",
-                    "observed_value": query_result,
+                    "observed_value": query_result[:10],
                 },
             }
 
@@ -108,7 +108,6 @@ class ExpectQueriedColumnToHaveNDistinctValuesWithCondition(QueryExpectation):
         {
             "data": [
                 {
-                    "dataset_name": "test",
                     "data": {
                         "uuid": [1, 2, 2, 3, 4, 4],
                         "is_open": [True, False, True, True, True, True],

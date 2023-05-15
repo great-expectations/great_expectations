@@ -43,7 +43,6 @@ from great_expectations.core.usage_statistics.usage_statistics import (
 )
 from great_expectations.data_asset import DataAsset
 from great_expectations.data_context.cloud_constants import (
-    CLOUD_APP_DEFAULT_BASE_URL,
     GXCloudRESTResource,
 )
 from great_expectations.data_context.types.base import (
@@ -64,6 +63,9 @@ from great_expectations.validation_operators.types.validation_operator_result im
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchRequest as FluentBatchRequest,
+    )
     from great_expectations.validator.validator import Validator
 
 
@@ -135,12 +137,14 @@ class BaseCheckpoint(ConfigPeer):
         version="0.13.33",
         message="Used in cloud deployments.",
     )
-    def run(
+    def run(  # noqa: C901 - complexity 19
         self,
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -315,23 +319,29 @@ class BaseCheckpoint(ConfigPeer):
                 run_result: dict
                 validation_result: Optional[ExpectationSuiteValidationResult]
                 meta: ExpectationSuiteValidationResultMeta
+                validation_result_url: str | None = None
                 for run_result in run_results.values():
                     validation_result = run_result.get("validation_result")  # type: ignore[assignment] # could be dict
                     if validation_result:
                         meta = validation_result.meta  # type: ignore[assignment] # could be dict
                         id = self.ge_cloud_id
                         meta["checkpoint_id"] = id
+                    # TODO: We only currently support 1 validation_result_url per checkpoint and use the first one we
+                    #       encounter. Since checkpoints can have more than 1 validation result, we will need to update
+                    #       this and the consumers.
+                    if not validation_result_url:
+                        if (
+                            "actions_results" in run_result
+                            and "store_validation_result"
+                            in run_result["actions_results"]
+                            and "validation_result_url"
+                            in run_result["actions_results"]["store_validation_result"]
+                        ):
+                            validation_result_url = run_result["actions_results"][
+                                "store_validation_result"
+                            ]["validation_result_url"]
 
                 checkpoint_run_results.update(run_results)
-
-        # Generate a URL to the validation result details page in GX Cloud
-        validation_result_url: str | None = None
-        for key in checkpoint_run_results:
-            if isinstance(key, GXCloudIdentifier) and key.cloud_id:
-                validation_result_url = (
-                    f"{CLOUD_APP_DEFAULT_BASE_URL}?validationResultId={key.cloud_id}"
-                )
-                break
 
         return CheckpointResult(
             validation_result_url=validation_result_url,
@@ -441,7 +451,7 @@ class BaseCheckpoint(ConfigPeer):
             )
 
             batch_request: Union[
-                BatchRequest, RuntimeBatchRequest
+                BatchRequest, FluentBatchRequest, RuntimeBatchRequest
             ] = substituted_validation_dict.get("batch_request")
             expectation_suite_name: str = substituted_validation_dict.get(
                 "expectation_suite_name"
@@ -495,7 +505,7 @@ class BaseCheckpoint(ConfigPeer):
             if self._using_cloud_context:
                 checkpoint_identifier = GXCloudIdentifier(
                     resource_type=GXCloudRESTResource.CHECKPOINT,
-                    cloud_id=self.ge_cloud_id,
+                    id=self.ge_cloud_id,
                 )
 
             operator_run_kwargs = {}
@@ -578,14 +588,12 @@ class BaseCheckpoint(ConfigPeer):
         ) or (
             validations_present
             and all(
-                [
-                    (
-                        validation.get("action_list")
-                        and isinstance(validation["action_list"], list)
-                        and len(validation["action_list"]) > 0
-                    )
-                    for validation in self.validations
-                ]
+                (
+                    validation.get("action_list")
+                    and isinstance(validation["action_list"], list)
+                    and len(validation["action_list"]) > 0
+                )
+                for validation in self.validations
             )
         )
         if pretty_print:
@@ -738,7 +746,9 @@ class Checkpoint(BaseCheckpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -818,7 +828,9 @@ constructor arguments.
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -890,8 +902,9 @@ constructor arguments.
 
         return self.run(**checkpoint_run_arguments)
 
-    @staticmethod
+    @classmethod
     def construct_from_config_args(
+        cls,
         data_context: AbstractDataContext,
         checkpoint_store_name: str,
         name: str,
@@ -954,18 +967,43 @@ constructor arguments.
             "runtime_configuration": runtime_configuration,
             "validations": validations,
             "profilers": profilers,
-            # Next two fields are for LegacyCheckpoint configuration
-            "validation_operator_name": validation_operator_name,
-            "batches": batches,
-            # the following four keys are used by SimpleCheckpoint
-            "site_names": site_names,
-            "slack_webhook": slack_webhook,
-            "notify_on": notify_on,
-            "notify_with": notify_with,
             "ge_cloud_id": ge_cloud_id,
             "expectation_suite_ge_cloud_id": expectation_suite_ge_cloud_id,
             "default_validation_id": default_validation_id,
         }
+
+        detault_checkpoints_module_name = "great_expectations.checkpoint"
+
+        klass = load_class(
+            class_name=class_name,
+            module_name=module_name or detault_checkpoints_module_name,
+        )
+        if issubclass(klass, SimpleCheckpoint):
+            checkpoint_config.update(
+                {
+                    # the following four keys are used by SimpleCheckpoint
+                    "site_names": site_names,
+                    "slack_webhook": slack_webhook,
+                    "notify_on": notify_on,
+                    "notify_with": notify_with,
+                }
+            )
+        elif klass == LegacyCheckpoint:
+            checkpoint_config.update(
+                {
+                    # Next two fields are for LegacyCheckpoint configuration
+                    "validation_operator_name": validation_operator_name,
+                    "batches": batches,
+                }
+            )
+        elif issubclass(klass, LegacyCheckpoint):
+            raise gx_exceptions.InvalidCheckpointConfigError(
+                'Extending "LegacyCheckpoint" is not allowed, because "LegacyCheckpoint" is deprecated.'
+            )
+        elif not issubclass(klass, Checkpoint):
+            raise gx_exceptions.InvalidCheckpointConfigError(
+                f'Custom class "{klass.__name__}" must extend either "Checkpoint" or "SimpleCheckpoint" (exclusively).'
+            )
 
         checkpoint_config = deep_filter_properties_iterable(
             properties=checkpoint_config,
@@ -978,7 +1016,7 @@ constructor arguments.
                 "data_context": data_context,
             },
             config_defaults={
-                "module_name": "great_expectations.checkpoint",
+                "module_name": detault_checkpoints_module_name,
             },
         )
 
@@ -1350,7 +1388,9 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
@@ -1417,7 +1457,9 @@ class SimpleCheckpoint(Checkpoint):
         template_name: Optional[str] = None,
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
-        batch_request: Optional[Union[BatchRequestBase, dict]] = None,
+        batch_request: Optional[
+            Union[BatchRequestBase, FluentBatchRequest, dict]
+        ] = None,
         validator: Optional[Validator] = None,
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,

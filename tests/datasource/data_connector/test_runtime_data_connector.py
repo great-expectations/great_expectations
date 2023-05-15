@@ -3,7 +3,6 @@ from typing import List
 
 import pandas as pd
 import pytest
-from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core.batch import (
@@ -19,11 +18,12 @@ from great_expectations.core.batch_spec import (
     S3BatchSpec,
 )
 from great_expectations.core.id_dict import IDDict
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.datasource import Datasource
 from great_expectations.datasource.data_connector import RuntimeDataConnector
 
-yaml = YAML()
+yaml = YAMLHandler()
 
 
 @pytest.fixture

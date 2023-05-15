@@ -2,13 +2,18 @@
 title: How to Use Great Expectations with Airflow
 ---
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
 
 This guide will help you run a Great Expectations checkpoint in Apache Airflow, which allows you to trigger validation of a data asset using an Expectation Suite directly within an Airflow DAG.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Set up a working deployment of Great Expectations](../tutorials/getting_started/tutorial_overview.md)
-- [Created an Expectation Suite](../tutorials/getting_started/tutorial_create_expectations.md)
+- [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
+- [Created an Expectation Suite](/docs/guides/expectations/create_expectations_overview)
 - [Created a checkpoint for that Expectation Suite and a data asset](../guides/validation/checkpoints/how_to_create_a_new_checkpoint.md)
 - Created an Airflow DAG file
 
@@ -32,9 +37,9 @@ To import the GreatExpectationsOperator in your Airflow project, run the followi
 pip install airflow-provider-great-expectations==0.1.1
 ```
 
-It’s recommended to specify a version when installing the package. To make use of the latest Great Expectations V3 API, you need to specify a version >= `0.1.0`.
+It’s recommended to specify a version when installing the package. To make use of the latest Great Expectations provider for Airflow, you need to specify a version >= `0.1.0`.
 
-> *The Great Expectations V3 API requires Airflow 2.1+. If you're still running Airflow 1.x, you need to upgrade to at least 2.1 before using v0.1.0+ of the GreatExpectationsOperator.*
+> *The current Great Expectations release requires Airflow 2.1+. If you're still running Airflow 1.x, you need to upgrade to at least 2.1 before using v0.1.0+ of the GreatExpectationsOperator.*
 
 
 ## Using the `GreatExpectationsOperator`

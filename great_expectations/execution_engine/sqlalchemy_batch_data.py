@@ -1,20 +1,13 @@
 import logging
 from typing import Optional
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
 from great_expectations.core.batch import BatchData
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
 from great_expectations.util import generate_temporary_table_name
-
-try:
-    import sqlalchemy as sa
-    from sqlalchemy.engine.default import DefaultDialect
-    from sqlalchemy.exc import DatabaseError
-    from sqlalchemy.sql.elements import quoted_name
-except ImportError:
-    sa = None
-    quoted_name = None
-    DefaultDialect = None
-    DatabaseError = None
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +114,7 @@ class SqlAlchemyBatchData(BatchData):
         if table_name:
             # Suggestion: pull this block out as its own _function
             if use_quoted_name:
-                table_name = quoted_name(table_name, quote=True)
+                table_name = sqlalchemy.quoted_name(table_name, quote=True)
             if dialect == GXSqlDialect.BIGQUERY:
                 if schema_name is not None:
                     logger.warning(
@@ -179,7 +172,7 @@ class SqlAlchemyBatchData(BatchData):
         return self._dialect
 
     @property
-    def sql_engine_dialect(self) -> DefaultDialect:
+    def sql_engine_dialect(self) -> sqlalchemy.DefaultDialect:
         """Returns the Batches' current engine dialect"""
         return self._engine.dialect
 
@@ -205,14 +198,14 @@ class SqlAlchemyBatchData(BatchData):
 
     def _create_temporary_table(  # noqa: C901 - 18
         self, temp_table_name, query, temp_table_schema_name=None
-    ) -> None:
+    ) -> str:
         """
         Create Temporary table based on sql query. This will be used as a basis for executing expectations.
         :param query:
         """
 
         dialect: GXSqlDialect = self.dialect
-
+        stmt: str = ""
         # dialects that support temp schemas
         if temp_table_schema_name is not None and dialect in [
             GXSqlDialect.BIGQUERY,
@@ -287,9 +280,22 @@ class SqlAlchemyBatchData(BatchData):
         else:
             stmt = f'CREATE TEMPORARY TABLE "{temp_table_name}" AS {query}'
         if dialect == GXSqlDialect.ORACLE:
-            try:
-                self._engine.execute(stmt_1)
-            except DatabaseError:
-                self._engine.execute(stmt_2)
+            with self._engine.connect() as connection:
+                with connection.begin():
+                    try:
+                        connection.execute(sa.text(stmt_1))
+                    except sqlalchemy.DatabaseError:
+                        connection.execute(sa.text(stmt_2))
         else:
-            self._engine.execute(stmt)
+            # Since currently self._engine can also be a connection we need to
+            # check first that it is an engine before creating a connection from it.
+            # Otherwise, we use the connection.
+            if isinstance(self._engine, sqlalchemy.Engine):
+                with self._engine.connect() as connection:
+                    with connection.begin():
+                        connection.execute(sa.text(stmt))
+            else:
+                # self._engine is already a connection
+                with self._engine.begin():
+                    self._engine.execute(sa.text(stmt))
+        return stmt

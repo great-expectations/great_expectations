@@ -7,6 +7,10 @@ import pandas as pd
 import pytest
 
 from great_expectations import DataContext
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    SQLALCHEMY_NOT_IMPORTED,
+)
 from great_expectations.execution_engine.pandas_batch_data import PandasBatchData
 from great_expectations.execution_engine.sparkdf_batch_data import SparkDFBatchData
 from great_expectations.execution_engine.sqlalchemy_batch_data import (
@@ -16,16 +20,24 @@ from great_expectations.self_check.util import (
     BigQueryDialect,
     candidate_test_is_on_temporary_notimplemented_list_v3_api,
     evaluate_json_test_v3_api,
+    generate_dataset_name_from_expectation_name,
     generate_sqlite_db_path,
     get_test_validator_with_data,
     mssqlDialect,
     mysqlDialect,
-    postgresqlDialect,
-    sqliteDialect,
+    pgDialect,
+    snowflakeDialect,
     trinoDialect,
 )
 from great_expectations.util import build_in_memory_runtime_context
 from tests.conftest import build_test_backends_list_v3_api
+
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
+
+try:
+    sqliteDialect = sqlalchemy.sqlite.dialect
+except (ImportError, AttributeError):
+    sqliteDialect = SQLALCHEMY_NOT_IMPORTED
 
 
 def pytest_generate_tests(metafunc):  # noqa C901 - 35
@@ -40,48 +52,60 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
     ids = []
     backends = build_test_backends_list_v3_api(metafunc)
     validator_with_data = None
-    for expectation_category in expectation_dirs:
 
+    for expectation_category in expectation_dirs:
         test_configuration_files = glob.glob(
             dir_path + "/" + expectation_category + "/*.json"
         )
-        for c in backends:
+        for backend in backends:
             for filename in test_configuration_files:
                 pk_column: bool = False
                 file = open(filename)
                 test_configuration = json.load(file)
-
-                for d in test_configuration["datasets"]:
+                expectation_type = filename.split(".json")[0].split("/")[-1]
+                for index, test_config in enumerate(test_configuration["datasets"], 1):
                     datasets = []
                     # optional only_for and suppress_test flag at the datasets-level that can prevent data being
                     # added to incompatible backends. Currently only used by expect_column_values_to_be_unique
-                    only_for = d.get("only_for")
+                    only_for = test_config.get("only_for")
                     if only_for and not isinstance(only_for, list):
                         # coerce into list if passed in as string
                         only_for = [only_for]
-                    suppress_test_for = d.get("suppress_test_for")
+                    suppress_test_for = test_config.get("suppress_test_for")
                     if suppress_test_for and not isinstance(suppress_test_for, list):
                         # coerce into list if passed in as string
                         suppress_test_for = [suppress_test_for]
                     if candidate_test_is_on_temporary_notimplemented_list_v3_api(
-                        c, test_configuration["expectation_type"]
+                        backend, test_configuration["expectation_type"]
                     ):
                         skip_expectation = True
-                    elif suppress_test_for and c in suppress_test_for:
+                    elif suppress_test_for and backend in suppress_test_for:
                         continue
-                    elif only_for and c not in only_for:
+                    elif only_for and backend not in only_for:
                         continue
                     else:
                         skip_expectation = False
-                        if isinstance(d["data"], list):
+                        if isinstance(test_config["data"], list):
                             sqlite_db_path = generate_sqlite_db_path()
-                            for dataset in d["data"]:
+                            sub_index: int = (
+                                1  # additional index needed when dataset is a list
+                            )
+                            for dataset in test_config["data"]:
+                                dataset_name = (
+                                    generate_dataset_name_from_expectation_name(
+                                        dataset=dataset,
+                                        expectation_type=expectation_type,
+                                        index=index,
+                                        sub_index=sub_index,
+                                    )
+                                )
+
                                 datasets.append(
                                     get_test_validator_with_data(
-                                        c,
-                                        dataset["data"],
-                                        dataset.get("schemas"),
-                                        table_name=dataset.get("dataset_name"),
+                                        execution_engine=backend,
+                                        data=dataset["data"],
+                                        table_name=dataset_name,
+                                        schemas=dataset.get("schemas"),
                                         sqlite_db_path=sqlite_db_path,
                                         context=cast(
                                             DataContext,
@@ -99,10 +123,21 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
 
                                 pk_column: bool = True
 
-                            schemas = d["schemas"] if "schemas" in d else None
+                            schemas = (
+                                test_config["schemas"]
+                                if "schemas" in test_config
+                                else None
+                            )
+                            dataset = test_config["data"]
+                            dataset_name = generate_dataset_name_from_expectation_name(
+                                dataset=dataset,
+                                expectation_type=expectation_type,
+                                index=index,
+                            )
                             validator_with_data = get_test_validator_with_data(
-                                c,
-                                d["data"],
+                                execution_engine=backend,
+                                data=dataset,
+                                table_name=dataset_name,
                                 schemas=schemas,
                                 context=cast(
                                     DataContext, build_in_memory_runtime_context()
@@ -110,7 +145,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 pk_column=pk_column,
                             )
 
-                    for test in d["tests"]:
+                    for test in test_config["tests"]:
                         generate_test = True
                         skip_test = False
                         only_for = test.get("only_for")
@@ -138,10 +173,10 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     generate_test = True
                                 elif (
                                     "postgresql" in only_for
-                                    and postgresqlDialect is not None
+                                    and pgDialect is not None
                                     and isinstance(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
-                                        postgresqlDialect,
+                                        pgDialect,
                                     )
                                 ):
                                     generate_test = True
@@ -151,6 +186,15 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     and isinstance(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
                                         mysqlDialect,
+                                    )
+                                ):
+                                    generate_test = True
+                                elif (
+                                    "snowflake" in only_for
+                                    and snowflakeDialect is not None
+                                    and isinstance(
+                                        validator_with_data.active_batch_data.sql_engine_dialect,
+                                        snowflakeDialect.SnowflakeDialect,
                                     )
                                 ):
                                     generate_test = True
@@ -264,7 +308,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                 )
                                 or (
                                     "postgresql" in suppress_test_for
-                                    and postgresqlDialect is not None
+                                    and pgDialect is not None
                                     and validator_with_data
                                     and isinstance(
                                         validator_with_data.active_batch_data,
@@ -272,7 +316,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     )
                                     and isinstance(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
-                                        postgresqlDialect,
+                                        pgDialect,
                                     )
                                 )
                                 or (
@@ -299,6 +343,19 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                                     and isinstance(
                                         validator_with_data.active_batch_data.sql_engine_dialect,
                                         mssqlDialect,
+                                    )
+                                )
+                                or (
+                                    "snowflake" in suppress_test_for
+                                    and snowflakeDialect is not None
+                                    and validator_with_data
+                                    and isinstance(
+                                        validator_with_data.active_batch_data,
+                                        SqlAlchemyBatchData,
+                                    )
+                                    and isinstance(
+                                        validator_with_data.active_batch_data.sql_engine_dialect,
+                                        snowflakeDialect.SnowflakeDialect,
                                     )
                                 )
                                 or (
@@ -396,7 +453,7 @@ def pytest_generate_tests(metafunc):  # noqa C901 - 35
                         )
 
                         ids.append(
-                            c
+                            backend
                             + "/"
                             + expectation_category
                             + "/"

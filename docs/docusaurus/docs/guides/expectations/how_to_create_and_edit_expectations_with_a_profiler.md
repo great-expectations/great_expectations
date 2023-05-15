@@ -2,17 +2,17 @@
 title: How to create and edit Expectations with the User Configurable Profiler
 ---
 
-import Prerequisites from '../../guides/connecting_to_your_data/components/prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you create a new <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> by profiling your data with the User Configurable <TechnicalTag tag="profiler" text="Profiler" />.
 
-<Prerequisites>
+## Prerequisites
 
-- [Configured a Data Context](../../tutorials/getting_started/tutorial_setup.md).
-- Configured a [Datasource](../../tutorials/getting_started/tutorial_connect_to_data.md)
+- [A Great Expectations instance](/docs/guides/setup/setup_overview)
+- Completion of the [Quickstart](tutorials/quickstart/quickstart.md)
+- [A configured Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
+- [A configured Datasource](/docs/guides/connecting_to_your_data/connect_to_data_overview)
 
-</Prerequisites>
 
 :::note
 
@@ -35,113 +35,62 @@ Thus, the intention is for this Expectation Suite to be edited and updated to be
 
 :::
 
-:::note
-
-You can access this same functionality from the Great Expectations <TechnicalTag tag="cli" text="CLI" /> by running
-
-```console
-great_expectations suite new --profile rule_based_profiler
-```
-
-If you go that route, you can follow along in the resulting Jupyter Notebook instead of using this guide.
-
-:::
-
-
 ## Steps
 
 ### 1. Load or create your Data Context
 
-Load an on-disk <TechnicalTag tag="data_context" text="Data Context" /> via:
+In this guide we will use an on-disk data context with a pandas <TechnicalTag tag="datasource" text="Datasource" />
+and a csv data asset. If you don't already have one you can create one:
 
-```python
-import great_expectations as gx
-
-context = gx.get_context(
-    context_root_dir='path/to/my/context/root/directory/great_expectations'
-)
+```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler create_asset"
 ```
 
-Alternatively, [you can instantiate a Data Context without a .yml file](../setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
+If a <TechnicalTag tag="datasource" text="Datasource" /> and data asset already exist, you can load 
+an on-disk <TechnicalTag tag="data_context" text="Data Context" /> via:
+```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler get_asset"
+```
 
 ### 2. Set your expectation_suite_name and create your Batch Request
 
-The <TechnicalTag tag="batch_request" text="Batch Request" /> specifies which <TechnicalTag tag="batch" text="Batch" /> of data you would like to <TechnicalTag tag="profiling" text="Profile" /> in order to create your Expectation Suite. We will pass it into a <TechnicalTag tag="validator" text="Validator" /> in the next step.
+The <TechnicalTag tag="batch_request" text="Batch Request" /> specifies which 
+<TechnicalTag tag="batch" text="Batch" /> of data you would like to 
+<TechnicalTag tag="profiling" text="Profile" /> in order to create your Expectation Suite.
+We will pass it into a <TechnicalTag tag="validator" text="Validator" /> in the next step.
 
-```python
-expectation_suite_name = "insert_the_name_of_your_suite_here"
-
-batch_request = {
-    "datasource_name": "my_datasource",
-    "data_connector_name": "default_inferred_data_connector_name",
-    "data_asset_name": "yellow_tripdata_sample_2020-05.csv",
-}
+```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler name_suite"
 ```
 
 ### 3. Instantiate your Validator
 
 We use a Validator to access and interact with your data. We will be passing the Validator to our Profiler in the next step.
 
-```python
-from great_expectations.core.batch import BatchRequest
-
-validator = context.get_validator(
-    batch_request=BatchRequest(**batch_request),
-    expectation_suite_name=expectation_suite_name
-)
+```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler create_validator"
 ```
 
 After you get your Validator, you can call `validator.head()` to confirm that it contains the data that you expect.
 
 ### 4. Instantiate a UserConfigurableProfiler
 
-Next, we instantiate a UserConfigurableProfiler, passing in the Validator with our data
+Next, we instantiate a UserConfigurableProfiler, passing in the Validator with our data:
 
-```python
-from great_expectations.profile.user_configurable_profiler import UserConfigurableProfiler
-profiler = UserConfigurableProfiler(profile_dataset=validator)
+```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler create_profiler"
 ```
 
 ### 5. Use the profiler to build a suite
 
-Once we have our Profiler set up with our Batch, we call `profiler.build_suite()`. This will print a list of all the Expectations created by column, and return the Expectation Suite object.
+Once we have our Profiler set up with our Batch, we call `profiler.build_suite()`. 
+This will print a list of all the Expectations created by column, and return the Expectation Suite object.
 
-```python
-suite = profiler.build_suite()
+```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler build_suite"
 ```
 
 ### 6. (Optional) Running validation, saving your suite, and building Data Docs
 
-If you'd like, you can <TechnicalTag tag="validation" text="Validate" /> your data with the new Expectation Suite, save your Expectation Suite, and build <TechnicalTag tag="data_docs" text="Data Docs" /> to take a closer look at the output
+If you'd like, you can <TechnicalTag tag="validation" text="Validate" /> your data with the new Expectation Suite, 
+save your Expectation Suite, and build <TechnicalTag tag="data_docs" text="Data Docs" /> to take a closer look 
+at the output:
 
-```python
-from great_expectations.checkpoint.checkpoint import SimpleCheckpoint
-
-# Review and save our Expectation Suite
-print(validator.get_expectation_suite(discard_failed_expectations=False))
-validator.save_expectation_suite(discard_failed_expectations=False)
-
-# Set up and run a Simple Checkpoint for ad hoc validation of our data
-checkpoint_config = {
-    "class_name": "SimpleCheckpoint",
-    "validations": [
-        {
-            "batch_request": batch_request,
-            "expectation_suite_name": expectation_suite_name,
-        }
-    ],
-}
-checkpoint = SimpleCheckpoint(
-    f"{validator.active_batch_definition.data_asset_name}_{expectation_suite_name}", context, **checkpoint_config
-)
-checkpoint_result = checkpoint.run()
-
-# Build Data Docs
-context.build_data_docs()
-
-# Get the only validation_result_identifier from our SimpleCheckpoint run, and open Data Docs to that page
-validation_result_identifier = checkpoint_result.list_validation_result_identifiers()[0]
-context.open_data_docs(resource_identifier=validation_result_identifier)
+```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler e2e"
 ```
 
 And you're all set!
@@ -160,27 +109,7 @@ The UserConfigurableProfiler can take a few different parameters to further hone
 
 If you would like to make use of these parameters, you can specify them while instantiating your Profiler.
 
-```python
-excluded_expectations = ["expect_column_quantile_values_to_be_between"]
-ignored_columns = ['comment', 'acctbal', 'mktsegment', 'name', 'nationkey', 'phone']
-not_null_only = True
-table_expectations_only = False
-value_set_threshold = "unique"
-
-validator = context.get_validator(
-    batch_request=BatchRequest(**batch_request),
-    expectation_suite_name=expectation_suite_name
-)
-
-profiler = UserConfigurableProfiler(
-    profile_dataset=validator,
-    excluded_expectations=excluded_expectations,
-    ignored_columns=ignored_columns,
-    not_null_only=not_null_only,
-    table_expectations_only=table_expectations_only,
-    value_set_threshold=value_set_threshold)
-
-suite = profiler.build_suite()
+```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler optional_params"
 ```
 
 **Once you have instantiated a Profiler with parameters specified, you must re-instantiate the Profiler if you wish to change any of the parameters.**
@@ -193,22 +122,7 @@ The available semantic types that can be specified in the UserConfigurableProfil
 
 When you pass in a `semantic_types_dict`, the Profiler will still create table-level expectations, and will create certain expectations for all columns (around nullity and column proportions of unique values). It will then only create semantic-type-specific Expectations for those columns specified in the semantic_types dict.
 
-```python
-semantic_types_dict = {
-    "numeric": ["acctbal"],
-    "value_set": ["nationkey","mktsegment", 'custkey', 'name', 'address', 'phone', "acctbal"]
-}
-
-validator = context.get_validator(
-    batch_request=BatchRequest(**batch_request),
-    expectation_suite_name=expectation_suite_name
-)
-
-profiler = UserConfigurableProfiler(
-    profile_dataset=validator,
-    semantic_types_dict=semantic_types_dict
-)
-suite = profiler.build_suite()
+```python name="tests/integration/docusaurus/expectations/how_to_create_and_edit_expectations_with_a_profiler semantic"
 ```
 
 These are the Expectations added when using a `semantics_type_dict`:

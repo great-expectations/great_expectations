@@ -1,12 +1,10 @@
 import os
 
-from ruamel import yaml
-
 import great_expectations as gx
+from great_expectations.core.yaml_handler import YAMLHandler
 
+yaml = YAMLHandler()
 context = gx.get_context()
-
-yaml = yaml.YAML(typ="safe")
 
 # parse great_expectations.yml for comparison
 great_expectations_yaml_file_path = os.path.join(

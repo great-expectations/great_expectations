@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import TYPE_CHECKING, Callable, List, Optional
+from typing import TYPE_CHECKING, Callable, ClassVar, List, Optional, Type
+
+import pydantic
 
 from great_expectations.core.batch_spec import AzureBatchSpec, PathBatchSpec
 from great_expectations.datasource.data_connector.util import (
@@ -14,12 +16,17 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 )
 
 if TYPE_CHECKING:
-    from azure.storage.blob import BlobServiceClient
-
+    from great_expectations.compatibility import azure
     from great_expectations.core.batch import BatchDefinition
 
 
 logger = logging.getLogger(__name__)
+
+
+class _AzureOptions(pydantic.BaseModel):
+    abs_container: str
+    abs_name_starts_with: str = ""
+    abs_delimiter: str = "/"
 
 
 class AzureBlobStorageDataConnector(FilePathDataConnector):
@@ -37,16 +44,23 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
         # TODO: <Alex>ALEX</Alex>
         # sorters (list): optional list of sorters for sorting data_references
-        file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
         # TODO: <Alex>ALEX</Alex>
+        file_path_template_map_fn: Format function mapping path to fully-qualified resource on ABS
     """
+
+    asset_level_option_keys: ClassVar[tuple[str, ...]] = (
+        "abs_container",
+        "abs_name_starts_with",
+        "abs_delimiter",
+    )
+    asset_options_type: ClassVar[Type[_AzureOptions]] = _AzureOptions
 
     def __init__(
         self,
         datasource_name: str,
         data_asset_name: str,
         batching_regex: re.Pattern,
-        azure_client: BlobServiceClient,
+        azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
         name_starts_with: str = "",
@@ -57,17 +71,22 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         # TODO: <Alex>ALEX</Alex>
         file_path_template_map_fn: Optional[Callable] = None,
     ) -> None:
-        self._azure_client: BlobServiceClient = azure_client
+        self._azure_client: azure.BlobServiceClient = azure_client
 
         self._account_name = account_name
         self._container = container
-        self._name_starts_with = sanitize_prefix(name_starts_with)
+
+        self._prefix: str = name_starts_with
+        self._sanitized_prefix: str = sanitize_prefix(text=name_starts_with)
+
         self._delimiter = delimiter
 
         super().__init__(
             datasource_name=datasource_name,
             data_asset_name=data_asset_name,
-            batching_regex=batching_regex,
+            batching_regex=re.compile(
+                f"{re.escape(self._sanitized_prefix)}{batching_regex.pattern}"
+            ),
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters=sorters,
@@ -81,7 +100,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
         datasource_name: str,
         data_asset_name: str,
         batching_regex: re.Pattern,
-        azure_client: BlobServiceClient,
+        azure_client: azure.BlobServiceClient,
         account_name: str,
         container: str,
         name_starts_with: str = "",
@@ -106,8 +125,8 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
             # TODO: <Alex>ALEX_INCLUDE_SORTERS_FUNCTIONALITY_UNDER_PYDANTIC-MAKE_SURE_SORTER_CONFIGURATIONS_ARE_VALIDATED</Alex>
             # TODO: <Alex>ALEX</Alex>
             # sorters: optional list of sorters for sorting data_references
-            file_path_template_map_fn: Format function mapping path to fully-qualified resource on network file storage
             # TODO: <Alex>ALEX</Alex>
+            file_path_template_map_fn: Format function mapping path to fully-qualified resource on ABS
 
         Returns:
             Instantiated "AzureBlobStorageDataConnector" object
@@ -182,7 +201,7 @@ class AzureBlobStorageDataConnector(FilePathDataConnector):
     def get_data_references(self) -> List[str]:
         query_options: dict = {
             "container": self._container,
-            "name_starts_with": self._name_starts_with,
+            "name_starts_with": self._sanitized_prefix,
             "delimiter": self._delimiter,
         }
         path_list: List[str] = list_azure_keys(

@@ -4,6 +4,10 @@ title: How to Use Great Expectations in EMR Serverless
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import Congratulations from '../guides/connecting_to_your_data/components/congratulations.md'
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 This Guide demonstrates how to set up, initialize and run validations against your data on AWS EMR Serverless.
 We will cover case with RuntimeDataConnector and use S3 as metadata store.
 

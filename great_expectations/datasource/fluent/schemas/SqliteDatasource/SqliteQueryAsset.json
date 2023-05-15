@@ -9,11 +9,17 @@
         },
         "type": {
             "title": "Type",
-            "default": "sqlite_query",
+            "default": "query",
             "enum": [
-                "sqlite_query"
+                "query"
             ],
             "type": "string"
+        },
+        "id": {
+            "title": "Id",
+            "description": "DataAsset id",
+            "type": "string",
+            "format": "uuid"
         },
         "order_by": {
             "title": "Order By",
@@ -21,6 +27,10 @@
             "items": {
                 "$ref": "#/definitions/Sorter"
             }
+        },
+        "batch_metadata": {
+            "title": "Batch Metadata",
+            "type": "object"
         },
         "splitter": {
             "title": "Splitter",

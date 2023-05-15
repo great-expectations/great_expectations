@@ -1,11 +1,13 @@
 from typing import List
 
-from ruamel import yaml
-
+import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationConfiguration
+from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.rule_based_profiler import RuleBasedProfilerResult
 from great_expectations.rule_based_profiler.rule_based_profiler import RuleBasedProfiler
+
+yaml = YAMLHandler()
 
 profiler_config = r"""
 # <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py full profiler_config">
@@ -100,32 +102,39 @@ rules:
 """
 
 
-# <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py set up">
-data_context = DataContext()
+# <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py init">
+context = gx.get_context()
+
+context.sources.add_pandas_filesystem(
+    "taxi_multi_batch_datasource",
+    base_directory="./data",
+).add_csv_asset(
+    "all_years",
+    batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+)
 
 full_profiler_config_dict: dict = yaml.load(profiler_config)
 # </snippet>
 
 # Instantiate RuleBasedProfiler
 # <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py instantiate">
+full_profiler_config_dict: dict = yaml.load(profiler_config)
+
 rule_based_profiler: RuleBasedProfiler = RuleBasedProfiler(
     name=full_profiler_config_dict["name"],
     config_version=full_profiler_config_dict["config_version"],
     rules=full_profiler_config_dict["rules"],
     variables=full_profiler_config_dict["variables"],
-    data_context=data_context,
+    data_context=context,
 )
 # </snippet>
 
 
 # <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py run">
 batch_request: dict = {
-    "datasource_name": "taxi_pandas",
-    "data_connector_name": "monthly",
-    "data_asset_name": "my_reports",
-    "data_connector_query": {
-        "index": "-6:-1",
-    },
+    "datasource_name": "taxi_multi_batch_datasource",
+    "data_asset_name": "all_years",
+    "options": {},
 }
 
 result: RuleBasedProfilerResult = rule_based_profiler.run(batch_request=batch_request)
@@ -141,7 +150,7 @@ print(expectation_configurations)
 # <snippet name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py row_count_rule_suite">
 row_count_rule_suite = """
     {
-        "meta": {"great_expectations_version": "0.13.19+58.gf8a650720.dirty"},
+        "meta": {"great_expectations_version": "0.16.7"},
         "data_asset_type": None,
         "expectations": [
             {

@@ -120,9 +120,9 @@ def test_find_datasource_with_asset_on_context_with_a_datasource_with_a_dataconn
 
 
 def test_find_datasource_with_asset_on_happy_path_context(
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
 ):
-    context = deterministic_asset_dataconnector_context
+    context = deterministic_asset_data_connector_context
     assert len(context.list_datasources()) == 1
 
     renderer = CheckpointNewNotebookRenderer(context, "foo")
@@ -136,9 +136,9 @@ def test_find_datasource_with_asset_on_happy_path_context(
 
 
 def test_find_datasource_with_asset_on_context_with_a_full_datasource_and_one_with_no_dataconnectors(
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
 ):
-    context = deterministic_asset_dataconnector_context
+    context = deterministic_asset_data_connector_context
     assert len(context.list_datasources()) == 1
     context.add_datasource(
         "aaa_datasource",
@@ -175,6 +175,8 @@ def checkpoint_new_notebook_assets():
             "metadata": {},
             "execution_count": None,
             "source": "from ruamel.yaml import YAML\nimport great_expectations as gx\nfrom pprint import pprint\n\nyaml = YAML()\ncontext = gx.get_context()",
+            # Use this commented version once YAMLHandler is in place everywhere (not just tests and docs)
+            # "source": "import great_expectations as gx\nfrom great_expectations.core.yaml_handler import YAMLHandler\nfrom pprint import pprint\n\nyaml = YAMLHandler()\ncontext = gx.get_context()",
             "outputs": [],
         },
     ]
@@ -315,7 +317,7 @@ validations:
 
 @pytest.mark.slow  # 1.10s
 def test_render_checkpoint_new_notebook_with_available_data_asset(
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
     titanic_expectation_suite,
     checkpoint_new_notebook_assets,
 ):
@@ -324,7 +326,7 @@ def test_render_checkpoint_new_notebook_with_available_data_asset(
     The CheckpointNewNotebookRenderer should generate a notebook with an example SimpleCheckpoint yaml config based on the first available data asset.
     """
 
-    context: DataContext = deterministic_asset_dataconnector_context
+    context: DataContext = deterministic_asset_data_connector_context
 
     assert context.list_checkpoints() == []
     context.add_expectation_suite(expectation_suite=titanic_expectation_suite)

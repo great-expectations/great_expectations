@@ -2,6 +2,10 @@
 title: How to use the Great Expectations command line interface (CLI)
 ---
 
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+
+<CLIRemoval />
+
 The Great Expectations command line is organized using a **`<NOUN> <VERB>`** syntax.
 This guide is organized by nouns (datasource, suite, docs) then verbs (new, list, edit, etc).
 
@@ -30,8 +34,6 @@ Usage: great_expectations [OPTIONS] COMMAND [ARGS]...
 
 Options:
   --version                Show the version and exit.
-  --v3-api / --v2-api      Default to v3 (Batch Request) API. Use --v2-api for
-                           v2 (Batch Kwargs) API
 
   -v, --verbose            Set great_expectations to use verbose output.
   -c, --config TEXT        Path to great_expectations configuration file
@@ -55,7 +57,6 @@ You can further explore available options and commands with the `--help` flag, f
 
 ```bash
 $ great_expectations datasource --help
-Using v3 (Batch Request) API
 Usage: great_expectations datasource [OPTIONS] COMMAND [ARGS]...
 
   Datasource operations

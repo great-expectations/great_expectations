@@ -4,6 +4,15 @@ from typing import TYPE_CHECKING, Any, Iterator
 
 import pandas as pd
 
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import sqlalchemy as sa
+from great_expectations.compatibility.sqlalchemy_and_pandas import (
+    pandas_read_sql,
+    pandas_read_sql_query,
+)
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    read_sql_table_as_df,
+)
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.execution_engine import (
     PandasExecutionEngine,
@@ -11,7 +20,6 @@ from great_expectations.execution_engine import (
     SqlAlchemyExecutionEngine,
 )
 from great_expectations.execution_engine.sqlalchemy_dialect import GXSqlDialect
-from great_expectations.expectations.metrics.import_manager import sa
 from great_expectations.expectations.metrics.metric_provider import metric_value
 from great_expectations.expectations.metrics.table_metric_provider import (
     TableMetricProvider,
@@ -20,7 +28,7 @@ from great_expectations.validator.metric_configuration import MetricConfiguratio
 from great_expectations.validator.validator import Validator
 
 if TYPE_CHECKING:
-    from great_expectations.expectations.metrics.import_manager import pyspark_sql_Row
+    from great_expectations.compatibility import pyspark
 
 
 class TableHead(TableMetricProvider):
@@ -68,20 +76,20 @@ class TableHead(TableMetricProvider):
             else cls.default_kwarg_values["n_rows"]
         )
         df_chunk_iterator: Iterator[pd.DataFrame]
-        if (
-            isinstance(table_name, sa.sql.elements._anonymous_label)
-            or table_name is None
+        if (table_name is None) or (
+            sqlalchemy._anonymous_label
+            and isinstance(table_name, sqlalchemy._anonymous_label)
         ):
             # if a custom query was passed
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = pd.read_sql_query(
+                    df = pandas_read_sql_query(
                         sql=selectable,
                         con=execution_engine.engine,
                     )
                 else:
                     # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = pd.read_sql_query(
+                    df_chunk_iterator = pandas_read_sql_query(
                         sql=selectable,
                         con=execution_engine.engine,
                         chunksize=abs(n_rows),
@@ -103,14 +111,14 @@ class TableHead(TableMetricProvider):
         else:
             try:
                 if metric_value_kwargs["fetch_all"]:
-                    df = pd.read_sql_table(
+                    df = read_sql_table_as_df(
                         table_name=getattr(selectable, "name", None),
                         schema=getattr(selectable, "schema", None),
                         con=execution_engine.engine,
                     )
                 else:
                     # passing chunksize causes the Iterator to be returned
-                    df_chunk_iterator = pd.read_sql_table(
+                    df_chunk_iterator = read_sql_table_as_df(
                         table_name=getattr(selectable, "name", None),
                         schema=getattr(selectable, "schema", None),
                         con=execution_engine.engine,
@@ -119,7 +127,6 @@ class TableHead(TableMetricProvider):
                     df = TableHead._get_head_df_from_df_iterator(
                         df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                     )
-
             except (ValueError, NotImplementedError):
                 # MetaData that is used by pd.read_sql_table
                 # cannot work on a temp table with pandas < 1.4.0.
@@ -134,7 +141,7 @@ class TableHead(TableMetricProvider):
 
         if df is None:
             # we want to compile our selectable
-            stmt = sa.select(["*"]).select_from(selectable)
+            stmt = sa.select("*").select_from(selectable)
             fetch_all = metric_value_kwargs["fetch_all"]
             if fetch_all:
                 sql = stmt.compile(
@@ -154,6 +161,7 @@ class TableHead(TableMetricProvider):
             else:
                 if n_rows > 0:
                     stmt = stmt.limit(n_rows)
+
                 sql = stmt.compile(
                     dialect=execution_engine.engine.dialect,
                     compile_kwargs={"literal_binds": True},
@@ -161,14 +169,14 @@ class TableHead(TableMetricProvider):
 
             # if read_sql_query or read_sql_table failed, we try to use the read_sql convenience method
             if n_rows <= 0 and not fetch_all:
-                df_chunk_iterator = pd.read_sql(
+                df_chunk_iterator = pandas_read_sql(
                     sql=sql, con=execution_engine.engine, chunksize=abs(n_rows)
                 )
                 df = TableHead._get_head_df_from_df_iterator(
                     df_chunk_iterator=df_chunk_iterator, n_rows=n_rows
                 )
             else:
-                df = pd.read_sql(sql=sql, con=execution_engine.engine)
+                df = pandas_read_sql_query(sql=sql, con=execution_engine.engine)
 
         return df
 
@@ -204,7 +212,7 @@ class TableHead(TableMetricProvider):
         df, _, _ = execution_engine.get_compute_domain(
             metric_domain_kwargs, domain_type=MetricDomainTypes.TABLE
         )
-        rows: list[pyspark_sql_Row] | pyspark_sql_Row | list[dict]
+        rows: list[pyspark.Row] | pyspark.Row | list[dict]
         if metric_value_kwargs["fetch_all"]:
             rows = df.collect()
         else:

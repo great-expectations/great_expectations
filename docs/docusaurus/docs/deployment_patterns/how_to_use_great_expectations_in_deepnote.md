@@ -5,6 +5,10 @@ title: How to use Great Expectations in Deepnote
 import Prerequisites from './components/deployment_pattern_prerequisites.jsx'
 import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
+import InProgress from '/docs/components/warnings/_in_progress.md'
+
+<InProgress />
+
 _This piece of documentation was authored by [Allan Campopiano](https://www.linkedin.com/in/allan-campopiano-703394120)._
 
 This guide will help you get started with Great Expectations on Deepnote. You will learn how to validate columns in a Pandas DataFrame,
@@ -52,7 +56,7 @@ The following cell creates a Great Expectations folder in the filesystem
 which will hold all of the forthcoming project configurations. Note that if this folder already exists, Great Expectations gracefully allows us to continue.
 
 ```bash
-!great_expectations --yes --v3-api init
+!great_expectations --yes init
 ```
 
 ### 3. Validate a Pandas DataFrame

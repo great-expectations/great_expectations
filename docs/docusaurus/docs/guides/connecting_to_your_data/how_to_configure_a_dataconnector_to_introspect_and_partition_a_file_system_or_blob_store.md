@@ -16,10 +16,12 @@ File-based introspection and partitioning are useful for:
 
 `Partitioning` enables you to select the desired subsets of your dataset for <TechnicalTag tag="validation" text="Validation"/>>.
 
+## Prerequisites
+
 <Prerequisites>
 
-- [Configured and loaded a Data Context](../../tutorials/getting_started/tutorial_setup.md)
-- [Configured a Datasource and Data Connector](../../terms/datasource.md)
+- [A configured and loaded Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
+- [A configured Datasource and Data Connector](../../terms/datasource.md)
   
 </Prerequisites>
 

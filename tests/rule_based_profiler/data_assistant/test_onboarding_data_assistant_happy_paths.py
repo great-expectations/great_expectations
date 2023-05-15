@@ -8,6 +8,9 @@ import pytest
 
 import great_expectations as gx
 from great_expectations import DataContext
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import BatchRequest
 from great_expectations.core.yaml_handler import YAMLHandler
@@ -147,9 +150,9 @@ def test_spark_happy_path_onboarding_data_assistant(
     This test tests the code in `DataAssistants_Instantiation_And_Running-OnboardingAssistant-Spark.ipynb`
 
     """
-    from pyspark.sql.types import StructType
+    from great_expectations.compatibility import pyspark
 
-    schema: StructType = spark_df_taxi_data_schema
+    schema: pyspark.types.StructType = spark_df_taxi_data_schema
     data_context: gx.DataContext = empty_data_context
     taxi_data_path: str = file_relative_path(
         __file__, os.path.join("..", "..", "test_sets", "taxi_yellow_tripdata_samples")
@@ -420,7 +423,8 @@ def test_sql_happy_path_onboarding_data_assistant_mixed_decimal_float_and_boolea
         df["test_bool"] = df.apply(
             lambda row: True if row["test_bool"] == "t" else False, axis=1
         )
-        df.to_sql(
+        add_dataframe_to_db(
+            df=df,
             name=table_name,
             con=postgresql_engine,
             schema="public",
@@ -556,10 +560,11 @@ def load_data_into_postgres_database(sa):
     table_name: str = "yellow_tripdata_sample_2019"
 
     engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
-    connection: sa.engine.Connection = engine.connect()
 
     # ensure we aren't appending to an existing table
-    connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+    with engine.begin() as connection:
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+
     for data_path in data_paths:
         load_data_into_test_database(
             table_name=table_name,
@@ -580,10 +585,11 @@ def load_data_into_postgres_database(sa):
     table_name: str = "yellow_tripdata_sample_2020"
 
     engine: sa.engine.Engine = sa.create_engine(CONNECTION_STRING)
-    connection: sa.engine.Connection = engine.connect()
 
     # ensure we aren't appending to an existing table
-    connection.execute(f"DROP TABLE IF EXISTS {table_name}")
+    with engine.begin() as connection:
+        connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))
+
     for data_path in data_paths:
         load_data_into_test_database(
             table_name=table_name,

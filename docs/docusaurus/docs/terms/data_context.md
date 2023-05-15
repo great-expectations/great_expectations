@@ -59,13 +59,13 @@ The Data Context provides a primary entry point to all of Great Expectations' AP
 
 #### Configuration management
 
-The Data Context makes it easy to manage configuration of its own top-level components. It includes basic CRUD operations for all of the core components for a Great Expectations deployment (Datasources, Expectation Suites, Checkpoints) and provides access and default integrations with Data Docs, your Stores, Plugins, etc.  It also provides convenience methods such as `test_yaml_config()` for testing configurations.  For more information on configuring Data Context components and the `test_yaml_config()` method, please see our guide on [how to configure DataContext components using test_yaml_config](../guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
+A Data Context includes basic create, read, update, and delete (CRUD) operations for the core components of a Great Expectations deployment. This includes Datasources, Expectation Suites, and Checkpoints. In addition, a Data Context allows you to access and integrate Data Docs, Stores, Plugins, and so on.
 
 #### Component management and config storage
 
 The Data Context doesn't just give you convenient ways to access and configure components.  It also provides the ability to *create* top-level components such as Datasources, Checkpoints, and Expectation Suites and manage where the information about those components is stored.  
 
-In the Getting Started Tutorial, everything was created locally and stored.  This is a simple way to get started with Great Expectations.  For production deployments, however, you'll probably want to swap out some of the components that were used in the Getting Started Tutorial for others that correspond to your source data systems and production environment.  This may include storing information about those components in something other than your local environment.  You can see several soup-to-nuts examples of how to do this for specific environments and source data systems in the [Reference Architecture guides](../deployment_patterns/index.md).
+For production deployments you will want to define these components according to your source data systems and production environment.  This may include storing information about those components in something other than your local environment.  You can see several soup-to-nuts examples of how to do this for specific environments and source data systems in the [Reference Architecture guides](../deployment_patterns/index.md).
 
 If the exact deployment pattern you want to follow isn't documented in a Reference Architecture, you can see details for configuring specific components that component's related how-to guides.
 
@@ -80,65 +80,18 @@ Because your Data Context contains the entirety of your Great Expectations proje
 
 As a Great Expectations user, once you have created a Data Context, you will almost always start future work either by using <TechnicalTag relative="../" tag="cli" text="CLI" /> commands from your Data Context's root folder, or by instantiating a `DataContext` in Python:
 
-```python title="Python code"
-import great_expectations as gx
-context = gx.get_context()
+```python title="Import Great Expectations" name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import gx"
 ```
 
-Alternatively, you might call:
-
-```python title="Python code"
-import great_expectations as gx
-context = gx.get_context(filepath=”something”)
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py get_context"
 ```
 
-If you’re using Great Expectations Cloud, you’d call:
+Alternatively, you can use the `context_root_dir` parameter if you want to specify a specific directory
 
-```python title="Python code"
-import great_expectations as gx
-context = gx.get_context(API_KEY=”something”)
-```
+If you’re using Great Expectations Cloud, you’d set up cloud environment variables before calling `get_context`.
 
 That’s it! You now have access to all the goodness of a DataContext.
 
-### Interactively testing configurations from your Data Context
-
-Especially during the beginning of a Great Expecations project, it is often incredibly useful to rapidly iterate over
-configurations of key Data Context components. The `test_yaml_config()` feature makes that easy.
-
-`test_yaml_config()` is a convenience method for configuring the moving parts of a Great Expectations deployment. It
-allows you to quickly test out configs for Datasources, Checkpoints, and each type of Store (ExpectationStores,
-ValidationResultStores, and MetricsStores). For many deployments of Great Expectations, these components (plus
-Expectations) are the only ones you'll need.
-
-Here's a typical example:
-
-```python title="Python code"
-config = """
-class_name: Datasource
-execution_engine:
-    class_name: PandasExecutionEngine
-data_connectors:
-    my_data_connector:
-        class_name: InferredAssetFilesystemDataConnector
-        base_directory: {data_base_directory}
-        glob_directive: "*/*.csv"
-        default_regex:
-            pattern: (.+)/(.+)\\.csv
-            group_names:
-                - data_asset_name
-                - partition
-
-"""
-my_context.test_yaml_config(
-    config=config
-)
-```
-
-Running `test_yaml_config()` will show some feedback on the configuration. The helpful output can include any result 
-from the "self check" of an artifact produced using that configuration.  You should note, however, that `test_yaml_config()` never overwrites the underlying configuration.  If you make edits in the course of your work, you will have to explicitly save the configuration before running `test_yaml_config()`.
-
-For more detailed guidance on using the `test_yaml_config()` method, please see our guide on [how to configure DataContext components using test_yaml_config](../guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config.md).
 
 ## More details
 
@@ -146,30 +99,21 @@ For more detailed guidance on using the `test_yaml_config()` method, please see 
 
 #### Untyped inputs
 
-The code standards for Great Expectations strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you would call:
+The code standards for Great Expectations strive for strongly typed inputs.  However, the Data Context's convenience functions are a noted exception to this standard.  For example, to get a Batch with typed input, you could follow these steps:
 
-```python title="Python code"
-from great_expectations.core.batch import BatchRequest
 
-batch_request = BatchRequest(
-    datasource_name="my_azure_datasource",
-    data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="<YOUR_DATA_ASSET_NAME>",
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py import BatchRequest"
+```
 
-context.get_batch(
-    batch_request=batch_request
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with batch request"
 ```
 
 However, we can take some of the friction out of that process by allowing untyped inputs:
 
-```python title="Python code"
-context.get_batch(
-    datasource_name="my_azure_datasource",
-    data_connector_name="default_inferred_data_connector_name",
-    data_asset_name="<YOUR_DATA_ASSET_NAME>",
-)
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters data_asset_name"
+```
+
+```python name="tests/integration/docusaurus/connecting_to_your_data/filesystem/pandas_yaml_example.py context.get_batch with parameters"
 ```
 
 In this example, the `get_batch()` method takes on the responsibility for inferring your intended types, and passing it through to the correct internal methods.

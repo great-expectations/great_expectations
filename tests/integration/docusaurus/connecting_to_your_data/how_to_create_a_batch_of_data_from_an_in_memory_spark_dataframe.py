@@ -1,23 +1,23 @@
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py imports">
-import pyspark
-from ruamel import yaml
+from great_expectations.compatibility import pyspark
 
 import great_expectations as gx
 from great_expectations import DataContext
 from great_expectations.core import ExpectationSuite
 from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.yaml_handler import YAMLHandler
+
 from great_expectations.data_context.util import file_relative_path
 from great_expectations.validator.validator import Validator
 
+yaml = YAMLHandler()
 # </snippet>
+
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py get_context">
 context: DataContext = gx.get_context()
 # </snippet>
-yaml = yaml.YAML(typ="safe")
 
-spark_session: pyspark.sql.session.SparkSession = (
-    gx.core.util.get_or_create_spark_application()
-)
+spark_session: pyspark.SparkSession = gx.core.util.get_or_create_spark_application()
 
 # create and load Expectation Suite
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py create_expectation_suite">
@@ -58,7 +58,7 @@ path_to_file: str = file_relative_path(
     __file__, "data/yellow_tripdata_sample_2019-01.csv"
 )
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py pyspark_df">
-df: pyspark.sql.dataframe.DataFrame = spark_session.read.csv(path_to_file)
+df: pyspark.DataFrame = spark_session.read.csv(path_to_file)
 # </snippet>
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_dataframe.py runtime_batch_request">
 runtime_batch_request = RuntimeBatchRequest(

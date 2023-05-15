@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 from marshmallow import ValidationError
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.data_context_key import DataContextKey  # noqa: TCH001
 from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.store import ConfigurationStore
@@ -121,8 +122,8 @@ class CheckpointStore(ConfigurationStore):
         name: str | None = None,
         id: str | None = None,
     ) -> None:
-        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self.determine_key(
-            name=name, ge_cloud_id=id
+        key: Union[GXCloudIdentifier, ConfigurationIdentifier] = self._determine_key(
+            name=name, id=id
         )
         try:
             self.remove_key(key=key)
@@ -136,7 +137,7 @@ class CheckpointStore(ConfigurationStore):
     ) -> CheckpointConfig:
         key: GXCloudIdentifier | ConfigurationIdentifier
         if not isinstance(name, ConfigurationIdentifier):
-            key = self.determine_key(name=name, ge_cloud_id=id)
+            key = self._determine_key(name=name, id=id)
         else:
             key = name
 
@@ -240,8 +241,8 @@ class CheckpointStore(ConfigurationStore):
         name = checkpoint.name
         id = checkpoint.ge_cloud_id
         if id:
-            return self.determine_key(ge_cloud_id=id)
-        return self.determine_key(name=name)
+            return self._determine_key(id=id)
+        return self._determine_key(name=name)
 
     def _persist_checkpoint(
         self,
@@ -251,10 +252,11 @@ class CheckpointStore(ConfigurationStore):
     ) -> Checkpoint:
         checkpoint_ref = persistence_fn(key=key, value=checkpoint.get_config())
         if isinstance(checkpoint_ref, GXCloudIDAwareRef):
-            cloud_id = checkpoint_ref.cloud_id
+            cloud_id = checkpoint_ref.id
             checkpoint.config.ge_cloud_id = cloud_id
         return checkpoint
 
+    @public_api
     def create(self, checkpoint_config: CheckpointConfig) -> Optional[DataContextKey]:
         """Create a checkpoint config in the store using a store_backend-specific key.
 
@@ -273,7 +275,7 @@ class CheckpointStore(ConfigurationStore):
         # values that may have been added to the config by the StoreBackend (i.e. object ids)
         ref: Optional[Union[bool, GXCloudResourceRef]] = self.set(key, checkpoint_config)  # type: ignore[func-returns-value]
         if ref and isinstance(ref, GXCloudResourceRef):
-            key.cloud_id = ref.cloud_id  # type: ignore[attr-defined]
+            key.id = ref.id  # type: ignore[attr-defined]
 
         config = self.get(key=key)
 

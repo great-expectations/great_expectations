@@ -225,11 +225,6 @@ class BatchKwargsGenerator:
             return self._data_asset_iterators[data_asset_name][0]
 
     def build_batch_kwargs(self, data_asset_name=None, partition_id=None, **kwargs):
-        if (not kwargs.get("name") and not data_asset_name) or (
-            kwargs.get("name") and data_asset_name
-        ):
-            raise ValueError("Please provide either name or data_asset_name.")
-
         """The key workhorse. Docs forthcoming."""
         if data_asset_name is not None:
             batch_parameters = {"data_asset_name": data_asset_name}

@@ -2,11 +2,14 @@
 title: Deploying Great Expectations in a hosted environment without file system or CLI
 ---
 
-If you follow the steps of the [Getting Started](../tutorials/getting_started/tutorial_overview.md) tutorial, you create a standard deployment of Great Expectations. By default, this relies on two components:
+import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
 
-1. The Great Expectations [CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
-2. The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for Validation Results, etc.
+<CLIRemoval />
 
+By default, creating a standard deployment of Great Expectations relies on the following components:
+
+- The Great Expectations [CLI](../guides/miscellaneous/how_to_use_the_great_expectations_cli.md) to initialize a Data Context, create Expectation Suites, add Datasources, etc.
+- The ``great_expectations.yml`` file to configure your Data Context, e.g. to point at different Stores for Validation Results, etc.
 
 However, you might not have these components available in hosted environments, such as Databricks, AWS EMR, Google Cloud Composer, and others. This workflow guide will outline the main steps required to successfully use Great Expectations in a hosted environment.
 
@@ -21,7 +24,7 @@ Step 1: Configure your Data Context
 
 The following guide gives an overview of creating an in-code Data Context including defaults to help you more quickly set one up for common configurations:
 
-- [How to instantiate a DataContext without a YML file](../guides/setup/configuring_data_contexts/how_to_instantiate_a_data_context_without_a_yml_file.md)
+- [How to instantiate an Ephemeral Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_explicitly_instantiate_an_ephemeral_data_context)
 
 The following guides will contain examples for each environment we have tested out:
 
