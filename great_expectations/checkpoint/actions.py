@@ -912,11 +912,11 @@ class StoreValidationResultAction(ValidationAction):
 
         checkpoint_ge_cloud_id = None
         if self._using_cloud_context and checkpoint_identifier:
-            checkpoint_ge_cloud_id = checkpoint_identifier.id
+            checkpoint_ge_cloud_id = checkpoint_identifier.id or None
 
         expectation_suite_ge_cloud_id = None
         if self._using_cloud_context and expectation_suite_identifier:
-            expectation_suite_ge_cloud_id = expectation_suite_identifier.id
+            expectation_suite_ge_cloud_id = expectation_suite_identifier.id or None
 
         return self.target_store.set(
             validation_result_suite_identifier,
