@@ -5,7 +5,6 @@ import pydantic
 from pika.channel import Channel
 from pika.exceptions import AMQPError, ChannelError
 from pika.spec import Basic, BasicProperties
-from pydantic import parse_raw_as
 
 from great_expectations.agent.message_service.rabbit_mq_client import RabbitMQClient
 from great_expectations.agent.models import Event
@@ -68,7 +67,7 @@ class Subscriber:
             on_message: the caller-provided callback
         """
         try:
-            event = parse_raw_as(Event, body)
+            event = pydantic.parse_raw_as(Event, body)
             correlation_id = header_frame.correlation_id
             on_message(event, correlation_id)
             channel.basic_ack(delivery_tag=method_frame.delivery_tag)
