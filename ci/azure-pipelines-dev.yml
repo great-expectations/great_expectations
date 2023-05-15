@@ -588,3 +588,32 @@ stages:
 
           - script: ./ci/checks/run_gx_airflow_operator_tests.sh
             name: RunAirflowProviderTests
+
+
+  - stage: compatibility
+    dependsOn: [ scope_check, lint, import_ge, custom_checks, unit_tests ]
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    jobs:
+      - job: run_compatibility_tests
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: '3.8'
+            displayName: 'Use Python 3.8'
+
+          - bash: python -m pip install --upgrade pip
+            displayName: 'Update pip'
+
+          - script: |
+              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
+            displayName: 'Install dependencies'
+
+          - script: |
+              
+              pytest -m 'compatibility' --timeout=3.0
+            displayName: 'Compatibility Tests'
+            env:
+              GE_USAGE_STATISTICS_URL: ${{ variables.GE_USAGE_STATISTICS_URL }}
+              SQLALCHEMY_WARN_20: true

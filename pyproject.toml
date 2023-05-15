@@ -526,6 +526,7 @@ markers = [
     "unit: mark a test as a unit test.",
     "v2_api: mark test as specific to the v2 api (e.g. pre Data Connectors).",
     "sqlalchemy_version_compatibility: mark test as required for sqlalchemy version compatibility.",
+    "compatibility: mark test as an optional dependency compatibility test."
 ]
 testpaths = "tests"
 # use `pytest-mock` drop-in replacement for `unittest.mock`
