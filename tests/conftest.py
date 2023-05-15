@@ -917,6 +917,23 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "data_context",
+                    "fixtures",
+                    "plugins",
+                    "extended_checkpoint.py",
+                )
+            ),
+        ),
+        pathlib.Path(context_path) / "plugins" / "extended_checkpoint.py",
+    )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
@@ -1532,6 +1549,23 @@ def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with
             ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "data_context",
+                    "fixtures",
+                    "plugins",
+                    "extended_checkpoint.py",
+                )
+            ),
+        ),
+        pathlib.Path(context_path) / "plugins" / "extended_checkpoint.py",
     )
     shutil.copy(
         file_relative_path(
