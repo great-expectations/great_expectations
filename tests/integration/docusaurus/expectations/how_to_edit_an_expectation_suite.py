@@ -113,6 +113,11 @@ config_to_remove = ExpectationConfiguration(
 my_suite.remove_expectation(
     config_to_remove, match_type="domain", remove_multiple_matches=False
 )
+
+found_expectation = my_suite.find_expectations(config_to_remove, match_type="domain")
+
+# This assertion will fail because the ExpectationConfiguration has been removed.
+assert found_expectation != [updated_config]
 my_suite.show_expectations_by_expectation_type()
 # </snippet>
 

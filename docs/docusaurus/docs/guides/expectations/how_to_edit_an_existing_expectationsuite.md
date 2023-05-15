@@ -148,11 +148,7 @@ Finally, when you are done editing the `ExpectationSuite`, you can save it to yo
 
 ## Related Documentation
 
-If you would like to learn more about the functions available at the Expectation Suite-level, please refer to our [API Documentation for `ExpectationSuite`](https://docs.greatexpectations.io/docs/reference/api/core/ExpectationSuite_class). 
+* If you would like to learn more about the functions available at the Expectation Suite-level, please refer to our [API Documentation for `ExpectationSuite`](https://docs.greatexpectations.io/docs/reference/api/core/ExpectationSuite_class). 
 
-:::note Example Code
-
-To view the full script used for example code on this page, see it on GitHub:
+* To view the full script used for example code on this page, see it on GitHub:
 [how_to_edit_an_expectation_suite.py](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite.py)
-
-:::
