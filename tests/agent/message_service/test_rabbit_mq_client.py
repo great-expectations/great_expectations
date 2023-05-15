@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 import pytest
 
 from great_expectations.agent.message_service.rabbit_mq_client import (
@@ -10,11 +8,11 @@ from tests.agent.message_service.conftest import AMQP_CHANNEL_AND_CONNECTION_ERR
 
 
 @pytest.fixture
-def pika():
-    with patch(
+def pika(mocker):
+    pika = mocker.patch(
         "great_expectations.agent.message_service.rabbit_mq_client.pika"
-    ) as pika:
-        yield pika
+    )
+    yield pika
 
 
 def test_rabbit_mq_client_creates_connection(pika):
