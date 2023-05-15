@@ -642,11 +642,14 @@ is run), with each validation having its own defined "action_list" attribute.
             return []
 
     @property
-    def validations(self) -> List[CheckpointValidationConfig]:
+    def validations(
+        self,
+    ) -> list[CheckpointValidationConfig] | list[dict]:  # this always list[dict]
         try:
             return self.config.validations
         except AttributeError:
-            return []
+            result: list[dict] = []
+            return result
 
     @property
     def ge_cloud_id(self) -> Optional[str]:
