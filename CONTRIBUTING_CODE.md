@@ -281,7 +281,7 @@ export PATH=$PATH:$JAVA_HOME/bin
 
 #### Install PySpark
 
-- Installing PySpark will now install Spark for you. See [Spark Overview](https://spark.apache.org/docs/latest/index.html#downloading).
+When you install PySpark, Spark is also installed. See [Spark Overview](https://spark.apache.org/docs/latest/index.html#downloading).
 
 Run the following command to install the PySpark & Apache Spark:
 
