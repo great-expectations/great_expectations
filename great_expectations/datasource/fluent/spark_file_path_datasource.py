@@ -244,8 +244,8 @@ class DirectoryCSVAsset(_DirectoryDataAssetMixin, CSVAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-csv.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(CSVAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -300,8 +300,8 @@ class DirectoryParquetAsset(_DirectoryDataAssetMixin, ParquetAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-parquet.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(ParquetAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -340,8 +340,8 @@ class DirectoryORCAsset(_DirectoryDataAssetMixin, ORCAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-orc.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(ORCAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -499,8 +499,8 @@ class DirectoryJSONAsset(_DirectoryDataAssetMixin, JSONAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-json.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(JSONAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -540,8 +540,8 @@ class DirectoryTextAsset(_DirectoryDataAssetMixin, TextAsset):
         See https://spark.apache.org/docs/latest/sql-data-sources-text.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(TextAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
@@ -582,8 +582,8 @@ class DirectoryDeltaAsset(_DirectoryDataAssetMixin, DeltaAsset):
         See https://docs.databricks.com/delta/tutorial.html for more info.
         """
         return (
-            super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
-            | super(DeltaAsset, self)._get_reader_options_include()
+            super()._get_reader_options_include()
+            | super(_DirectoryDataAssetMixin, self)._get_reader_options_include()
         )
 
 
