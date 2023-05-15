@@ -34,10 +34,6 @@ from great_expectations.core.batch import (
     get_batch_request_as_dict,
 )
 from great_expectations.core.config_peer import ConfigOutputModes, ConfigPeer
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,  # noqa: TCH001
-    ExpectationSuiteValidationResultMeta,  # noqa: TCH001
-)
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.usage_statistics.usage_statistics import (
     get_checkpoint_run_usage_statistics,
@@ -59,14 +55,18 @@ from great_expectations.util import (
     load_class,
 )
 from great_expectations.validation_operators import ActionListValidationOperator
-from great_expectations.validation_operators.types.validation_operator_result import (
-    ValidationOperatorResult,  # noqa: TCH001
-)
 
 if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+        ExpectationSuiteValidationResultMeta,
+    )
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
+    )
+    from great_expectations.validation_operators.types.validation_operator_result import (
+        ValidationOperatorResult,
     )
     from great_expectations.validator.validator import Validator
 
