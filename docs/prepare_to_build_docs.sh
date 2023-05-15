@@ -87,7 +87,7 @@ print_orange_header "Installing Great Expectations library dev dependencies."
 print_orange_header "Installing api docs dependencies."
 (cd ../sphinx_api_docs_source; pip install -r requirements-dev-api-docs.txt)
 
-print_orange_header "Building API docs for current version."
+print_orange_header "Building API docs for current version. Please ignore sphinx docstring errors in red/pink, for example: ERROR: Unexpected indentation."
 (cd ../../; invoke api-docs)
 
 print_orange_header "Check back out current commit before building the rest of the docs."
