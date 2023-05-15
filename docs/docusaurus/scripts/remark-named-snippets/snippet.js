@@ -173,7 +173,7 @@ function getDirs() {
   return manualDirs.concat(versionDirs)
 }
 
-function main() {
+function main(verbose = false) {
   const snippets = parseSourceDirectories(getDirs())
   const targetFiles = process.argv.slice(2)
 
@@ -191,7 +191,9 @@ function main() {
     delete snippet.file // Remove duplicate filename to clean up stdout
     out[file].push(snippet)
   }
-  console.log(out)
+  if (verbose) {
+    console.log(out)
+  }
 }
 
 if (require.main === module) {
@@ -199,4 +201,3 @@ if (require.main === module) {
 }
 
 module.exports = constructSnippetMap
-
