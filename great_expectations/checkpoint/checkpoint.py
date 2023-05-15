@@ -6,8 +6,6 @@ import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union, cast
 
-from typing_extensions import Literal
-
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.checkpoint.configurator import SimpleCheckpointConfigurator
 from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
