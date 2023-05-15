@@ -2,6 +2,7 @@ import os
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import TYPE_CHECKING, Dict, Optional
 
+import pydantic
 from pydantic import AmqpDsn
 from pydantic.dataclasses import dataclass
 
@@ -143,10 +144,13 @@ class GXAgent:
     def _get_config_from_env(cls) -> GXAgentConfig:
         """Construct GXAgentConfig from available environment variables"""
         url = os.environ.get("BROKER_URL", None)
+        org_id = os.environ.get("GE_CLOUD_ORGANIZATION_ID", None)
         try:
             return GXAgentConfig(organization_id=org_id, broker_url=url)
         except pydantic.ValidationError as validation_err:
-            raise GXAgentError(f"Missing or badly formed environment variable\n{validation_err.errors()}") from validation_err
+            raise GXAgentError(
+                f"Missing or badly formed environment variable\n{validation_err.errors()}"
+            ) from validation_err
 
 
 class GXAgentError(Exception):
