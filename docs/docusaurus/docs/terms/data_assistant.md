@@ -78,7 +78,7 @@ To take advantage of the multi-batch awareness of Data Assistants, your <Technic
 - [How to configure a Spark Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource)
 - [How to configure a SQL Datasource](/docs/0.15.50/guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource)
 
-For guidance on how to request multiple Batches in a single Batch Request, please see the guide:
+For guidance on how to request multiple Batches in a single Batch Request, see:
 - [How to get one or more Batches of data from a configured Datasource](../guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource.md)
 
 For an overview of working with the Onboarding Data Assistant, please see the guide:
