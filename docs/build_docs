@@ -18,7 +18,9 @@ unzip -oq oss_docs_versions.zip -d .
 VERSIONS_JSON_PATH=../../../versions.json
 mv versions.json $VERSIONS_JSON_PATH
 
-for version in $(jq -r '.[]' $VERSIONS_JSON_PATH); do
+VERSIONS=$(cat $VERSIONS_JSON_PATH | python -c 'import json,sys;obj=json.load(sys.stdin);print(" ".join(obj))')
+
+for version in $VERSIONS; do
   echo -e "${ORANGE}Copying code referenced in docs from $version and writing to versioned_code/version-$version${NC}"
 
   git checkout "$version"
