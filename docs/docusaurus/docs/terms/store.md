@@ -69,11 +69,11 @@ Stores provide an API for Great Expectations to perform the retrieval and storag
 
 ### How to access
 
-You can find a list of almost all of your Stores in your `great_expectations.yml` file under the `stores` key.
+The `stores` key in your `great_expectations.yml` file lists your available Stores.
 
-For Data Docs Stores, they are configured under the `data_docs_sites` key in the `great_expectations.yml` file.  Each entry under `data_docs_sites` will have a `store_backend` key.  The information under `store_backend` will correspond to the Data Doc Store used by that site.
+The `data_docs_sites` key in your `great_expectations.yml` file defines your Data Docs Store configurations. `store_backend` keys below `data_docs_sites` identify the Data Doc Store used by the Data Docs site.
 
-You can also view your stores using Python as follows:
+Run the following Python command to view your Stores:
 
 ```python
 import great_expectations as gx

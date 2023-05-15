@@ -55,7 +55,7 @@ Your Data Context contains the entirety of your Great Expectations project and p
 
 ![what the data context does for you](../images/overview_illustrations/data_context_does_for_you.png)
 
-This code will retrieve your Data Context:
+The following code retrieves your Data Context:
 
 ```python name="tests/integration/docusaurus/setup/setup_overview.py setup"
 ```
@@ -84,6 +84,5 @@ Python files are treated as <TechnicalTag relative="../" tag="plugin" text="Plug
 
 ## Wrapping up
 
-That's all there is to the Setup step.
 
 From here you will move on to the next step of working with Great Expectations: Connecting to Data.
