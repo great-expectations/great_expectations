@@ -917,7 +917,7 @@ constructor arguments.
         config_version: Optional[Union[int, float]] = None,
         template_name: Optional[str] = None,
         module_name: Optional[str] = None,
-        class_name: Literal["Checkpoint", "SimpleCheckpoint"] = "Checkpoint",
+        class_name: str = "Checkpoint",
         run_name_template: Optional[str] = None,
         expectation_suite_name: Optional[str] = None,
         batch_request: Optional[dict] = None,
