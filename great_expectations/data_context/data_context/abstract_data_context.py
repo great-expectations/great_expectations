@@ -4847,7 +4847,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         # https://github.com/great-expectations/great_expectations/pull/3377
         # This revision was necessary due to breaking changes but will need to be brought back in a future ticket.
         for key in self.expectations_store.list_keys():
-            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))  # type: ignore[arg-type]
+            expectation_suite_dict: dict = cast(dict, self.expectations_store.get(key))
             if not expectation_suite_dict:
                 continue
             expectation_suite = ExpectationSuite(

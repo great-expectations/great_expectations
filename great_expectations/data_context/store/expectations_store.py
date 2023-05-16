@@ -172,7 +172,7 @@ class ExpectationsStore(Store):
         suite_data: Dict
         # if only the expectation_suite_name is passed, a list will be returned
         if isinstance(response_json["data"], list):
-            if len(response_json["data"] == 1):
+            if len(response_json["data"]) == 1:
                 suite_data = response_json["data"][0]
             else:
                 raise ValueError(
