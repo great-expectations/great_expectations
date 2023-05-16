@@ -237,7 +237,7 @@ class SlackNotificationAction(ValidationAction):
         self.notify_with = notify_with
         self.show_failed_expectations = show_failed_expectations
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -365,7 +365,7 @@ class PagerdutyAlertAction(ValidationAction):
         assert routing_key, "No Pagerduty routing_key found in action config."
         self.notify_on = notify_on
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -483,7 +483,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         ), "No Microsoft teams webhook found in action config."
         self.notify_on = notify_on
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -597,7 +597,7 @@ class OpsgenieAlertAction(ValidationAction):
         self.notify_on = notify_on
         self.tags = tags
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -759,7 +759,7 @@ class EmailAction(ValidationAction):
         self.notify_on = notify_on
         self.notify_with = notify_with
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -860,7 +860,7 @@ class StoreValidationResultAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -971,7 +971,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1058,7 +1058,7 @@ class StoreMetricsAction(ValidationAction):
                 "StoreMetricsAction must have a valid MetricsStore for its target store."
             )
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1134,7 +1134,7 @@ class UpdateDataDocsAction(ValidationAction):
         super().__init__(data_context)
         self._site_names = site_names
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1227,7 +1227,7 @@ class SNSNotificationAction(ValidationAction):
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
@@ -1268,7 +1268,7 @@ class APINotificationAction(ValidationAction):
         super().__init__(data_context)
         self.url = url
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
