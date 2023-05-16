@@ -191,7 +191,7 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-  gs_site:  # this is a user-selected name - you may select your own
+  new_site_name:  # this is a user-selected name - you may select your own
     class_name: SiteBuilder
     store_backend:
       class_name: TupleGCSStoreBackend
