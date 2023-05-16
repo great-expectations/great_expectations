@@ -95,7 +95,7 @@ Your output will look something similar to this:
 
 From the Expectation Suite, you will be able to create an ExpecationConfiguration object using the output from `show_expectations_by_expectation_type()` Here is the example output of the first Expectation in our suite.
 
-It runs the `expect_column_values_to_be_between` Expectation on the `passenger_count` column and expects and min and max values to be `1` and `6` respectively. 
+It runs the `expect_column_values_to_be_between` Expectation on the `passenger_count` column and expects the min and max values to be `1` and `6` respectively. 
 
 ```python name="tests/integration/docusaurus/expectations/how_to_edit_an_expectation_suite example_dict_1"
 ```
