@@ -10,7 +10,6 @@ import logging
 from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import requests
-from typing_extensions import Literal
 
 try:
     import pypd
@@ -1124,7 +1123,7 @@ class UpdateDataDocsAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
-        site_names: list[str] | Literal["all"] | None = None,
+        site_names: list[str] | str | None = None,
     ) -> None:
         """
         :param data_context: Data Context
@@ -1181,7 +1180,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet name="great_expectations/checkpoint/actions.py get_docs_sites_urls">
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names or [],
+            site_names=self._site_names,  # type: ignore[arg-type] # could be a `str`
         )
         # </snippet>
         # process payload
