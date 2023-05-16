@@ -607,7 +607,7 @@ stages:
             displayName: 'Update pip'
 
           - script: |
-              pip install --constraint constraints-dev.txt ".[test]" pytest-azurepipelines
+              pip install --constraint constraints-dev.txt "." pytest pytest-azurepipelines
             displayName: 'Install dependencies'
 
           - script: |
