@@ -22,7 +22,9 @@ if TYPE_CHECKING:
     )
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
         CSVAsset,
+        DeltaAsset,
         DirectoryCSVAsset,
+        DirectoryDeltaAsset,
         DirectoryJSONAsset,
         DirectoryORCAsset,
         DirectoryParquetAsset,
@@ -596,3 +598,32 @@ class SparkFilesystemDatasource(_SparkFilePathDatasource):
         # Spark Generic File Reader Options ^^^
         # ^^^ pyspark Docs <> Source Code mismatch
     ) -> DirectoryTextAsset: ...
+    def add_delta_asset(
+        self,
+        name: str,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: re.Pattern | str = r".*",
+        glob_directive: str = "**/*",
+        order_by: Optional[SortersDefinition] = ...,
+        # Delta Specific Options vvv
+        timestamp_as_of: Optional[str] = None,
+        version_as_of: Optional[str] = None,
+        # Delta Specific Options ^^^
+    ) -> DeltaAsset: ...
+    def add_delta_directory_asset(
+        self,
+        name: str,
+        *,
+        batch_metadata: Optional[BatchMetadata] = ...,
+        batching_regex: re.Pattern | str = r".*",
+        glob_directive: str = "**/*",
+        order_by: Optional[SortersDefinition] = ...,
+        # Spark Directory Reader Options vvv
+        data_directory: str | pathlib.Path = ...,
+        # Spark Directory Reader Options ^^^
+        # Delta Specific Options vvv
+        timestamp_as_of: Optional[str] = None,
+        version_as_of: Optional[str] = None,
+        # Delta Specific Options ^^^
+    ) -> DirectoryDeltaAsset: ...

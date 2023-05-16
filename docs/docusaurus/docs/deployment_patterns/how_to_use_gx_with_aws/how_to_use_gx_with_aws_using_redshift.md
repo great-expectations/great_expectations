@@ -67,6 +67,10 @@ import AddS3ExpectationsStoreConfiguration from '@site/docs/guides/setup/configu
 
 import OptionalCopyExistingExpectationsToS3 from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_copy_existing_expectation_json_files_to_the_s_bucket_this_step_is_optional.mdx'
 
+<!-- 1.4.4 (Optional) Verify that copied Expectations can be accessed from Amazon S3 -->
+
+import OptionalVerifyCopiedExpectationsAreAccessible from '@site/docs/guides/setup/configuring_metadata_stores/components_how_to_configure_an_expectation_store_in_amazon_s3/_confirm_list.mdx'
+
 <!-- 1.5 Configure your Validation Results Store on Amazon S3 -->
 
 <!-- 1.5.1 Identify your Data Context's Validation Results Store -->
@@ -221,6 +225,9 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 
 #### 1.4.3 (Optional) Copy existing Expectation JSON files to the Amazon S3 bucket
 <OptionalCopyExistingExpectationsToS3 />
+
+#### 1.4.4 (Optional) Verify that copied Expectations can be accessed from Amazon S3
+<OptionalVerifyCopiedExpectationsAreAccessible>
 
 ### 1.5 Configure your Validation Results Store on Amazon S3
 
