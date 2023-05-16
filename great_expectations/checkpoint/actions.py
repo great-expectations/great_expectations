@@ -932,7 +932,8 @@ class StoreValidationResultAction(ValidationAction):
     ):
         store_set_return_value: GXCloudResourceRef
         new_ge_cloud_id = gx_cloud_resource_ref.id
-        validation_result_suite_identifier.id = new_ge_cloud_id
+        # ValidationResultIdentifier has no `.id`
+        validation_result_suite_identifier.id = new_ge_cloud_id  # type: ignore[union-attr]
         return gx_cloud_resource_ref
 
 
