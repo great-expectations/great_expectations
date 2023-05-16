@@ -7,11 +7,6 @@ AZURE_BLOB_STORAGE_NOT_IMPORTED = NotImported(
 )
 
 try:
-    import azure
-except ImportError:
-    azure = AZURE_BLOB_STORAGE_NOT_IMPORTED
-
-try:
     from azure import storage
 except ImportError:
     storage = AZURE_BLOB_STORAGE_NOT_IMPORTED

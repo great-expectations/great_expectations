@@ -5,9 +5,9 @@ import pathlib
 import pytest
 
 from great_expectations.compatibility.aws import boto3, botocore
-from great_expectations.compatibility.azure import azure
+from great_expectations.compatibility.azure import storage as azure_storage
 from great_expectations.compatibility.docstring_parser import docstring_parser
-from great_expectations.compatibility.google import google
+from great_expectations.compatibility.google import storage as google_storage
 from great_expectations.compatibility.not_imported import NotImported
 from great_expectations.compatibility.pyarrow import pyarrow
 from great_expectations.compatibility.pyspark import pyspark
@@ -60,9 +60,9 @@ _OPTIONAL_IMPORTS = (
     pyspark,
     boto3,
     botocore,
-    azure,
+    azure_storage,
     docstring_parser,
-    google,
+    google_storage,
     pyarrow,
     sqlalchemy,
 )
