@@ -12,7 +12,6 @@ from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
-from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -171,8 +170,14 @@ class ExpectationsStore(Store):
         deserialization into a GX object
         """
         suite_data: Dict
+        # if only the expectation_suite_name is passed, a list will be returned
         if isinstance(response_json["data"], list):
-            suite_data = response_json["data"][0]
+            if len(response_json["data"] == 1):
+                suite_data = response_json["data"][0]
+            else:
+                raise ValueError(
+                    "More than one Expectation Suite was found with the expectation_suite_name."
+                )
         else:
             suite_data = response_json["data"]
         ge_cloud_suite_id: str = suite_data["id"]
@@ -196,16 +201,6 @@ class ExpectationsStore(Store):
             raise gx_exceptions.ExpectationSuiteError(
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             )
-
-    def get(  # type: ignore[override]
-        self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
-    ) -> ExpectationSuite:
-        if key == StoreBackend.STORE_BACKEND_ID_KEY:
-            return self._store_backend.get(key)
-
-        self._validate_key(key)
-        value = self._store_backend.get(self.key_to_tuple(key))
-        return self.deserialize(value)
 
     def _validate_key(  # type: ignore[override]
         self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
