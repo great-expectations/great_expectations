@@ -22,10 +22,9 @@ This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text=
 
 ### 1. Verify Checkpoint suitability
 
-First, verify that your Checkpoint is runnable via shell:
+First, verify that your Checkpoint is runnable. This Python code can retrieve and run a Checkpoint:
 
-```bash
-great_expectations checkpoint run my_checkpoint
+```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
 ```
 
 ### 2. Get `great_expectations` full path
