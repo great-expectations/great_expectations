@@ -7,8 +7,6 @@
       POSTGRES_DB: gx_example_db
     ports:
       - "5432:5432"
-    networks:
-      - dbnet
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
@@ -23,8 +21,6 @@
       - db
     environment:
       CONNECTION_STRING: postgresql://example_user@db/gx_example_db
-    networks:
-      - dbnet
     entrypoint: python load_data.py
 
   jupyter:
@@ -37,11 +33,5 @@
     depends_on:
       - db
       - db_setup
-    networks:
-      - dbnet
     ports:
       - "8888:8888"
-
-networks:
-  dbnet:
-    driver: bridge
