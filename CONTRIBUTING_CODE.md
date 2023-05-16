@@ -87,14 +87,16 @@ Python dependencies are required to modify Great Expectations code, submit a new
 3. Optional. If you're using PostgreSQL, run the following command to install PostgreSQL:
 
     ```sh
-    brew install unixodbc
+    brew install postgresql
     ```
+
 4. Optional. If you're using the `pyodbc`, `dremio`, or `mssql` modules to connect to ODBC databases, run one of the following commands:
 
     ```sh
     sudo apt-get install -y unixodbc-dev
     ```
-     ```sh
+    or
+    ```sh
      brew install unixodbc
     ```
     If your Mac computer has an Apple M1 chip, you might need to specify additional compiler or linker options. For example:
@@ -166,6 +168,8 @@ Run the following command in the root of the `great_expectations` repository to 
 ```sh
 pip install -e .
 ```
+
+`-e` will install Great Expectations in “editable” mode. This is not required, but is often very convenient as a developer.
 
 ## Configure backends for testing (optional)
 
@@ -266,19 +270,23 @@ Use the following information to use Spark for code testing.
 
 - Java. See [Java downloads](https://www.java.com/en/download/).
 
-- The PATH or JAVA_HOME environment variables set correctly. See [Setting Java variables in Windows](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-windows) or [Setting Java variables in Linux](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-linux).
+- The PATH or JAVA_HOME environment variables set correctly. See [Setting Java variables in Windows](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-windows) or [Setting Java variables in Linux](https://www.ibm.com/docs/en/b2b-integrator/5.2?topic=installation-setting-java-variables-in-linux). 
 
-- Apache Spark installed and configured correctly. See [Spark Overview](https://spark.apache.org/docs/latest/index.html#downloading).
+On Mac, run the following commands to set the PATH and JAVA_HOME environment variables:
+```
+export JAVA_HOME=`/usr/libexec/java_home`
+export PATH=$PATH:$JAVA_HOME/bin 
+```
+
 
 #### Install PySpark
 
-Run the following command to install the PySpark version that matches your version of Apache Spark:
+When you install PySpark, Spark is also installed. See [Spark Overview](https://spark.apache.org/docs/latest/index.html#downloading).
+
+Run the following command to install PySpark and Apache Spark:
 
 ```console
-spark-submit --version 2>&1 | grep -o "version [0-9][^ ]*$"
-version 3.2.0
-
-pip install "pyspark==3.2.0"
+pip install pyspark
 ```
 
 ## Test code changes
@@ -512,3 +520,4 @@ Additionally, Great Expectations adds the following tags to indicate issue statu
 - The `enhacement` and `expectation-request` tags identify new Great Expectations features that require additional investigation and discussion. 
 
 - The `good first issue` tag identifies issues that provide an introduction to the Great Expectations contribution process.
+
