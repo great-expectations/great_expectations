@@ -79,7 +79,7 @@ The Onboarding Data Assistant `run(...)` method can accept other parameters in a
 :::
 
 :::note
-If you would like to learn how to edit the Expectation Suite, please refer to follow [How to Guide on How to Edit an Expectation Suite](../../expectations/how_to_edit_an_existing_expectationsuite.md)
+If you would like to learn how to edit the Expectation Suite, please refer to [How to Guide on How to Edit an Expectation Suite](../../expectations/how_to_edit_an_existing_expectationsuite.md)
 :::
 
 ### 4. Save your Expectation Suite
