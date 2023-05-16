@@ -20,7 +20,7 @@ taxi_suite.expectation_suite_name = "taxi_suite"
 context.add_expectation_suite(expectation_suite=taxi_suite)
 
 checkpoint = SimpleCheckpoint(
-    name="my_quickstart_checkpoint",
+    name="taxi_checkpoint",
     data_context=context,
     batch_request=batch_request,
     expectation_suite_name="taxi_suite",
