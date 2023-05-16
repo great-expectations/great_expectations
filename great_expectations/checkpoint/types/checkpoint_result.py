@@ -211,7 +211,7 @@ class CheckpointResult(SerializableDictDot):
         if group_by is None:
             if self._validation_results is None:
                 self._validation_results = [
-                    run_result["validation_result"]
+                    run_result["validation_result"]  # type: ignore[misc] # List comprehension has incompatible type list[ExpectationSuiteValidationResult | dict | str]; expected list[ExpectationSuiteValidationResult]
                     for run_result in self.run_results.values()
                 ]
             return self._validation_results
@@ -236,7 +236,7 @@ class CheckpointResult(SerializableDictDot):
                 expectation_suite_name: [
                     run_result["validation_result"]
                     for run_result in self.run_results.values()
-                    if run_result["validation_result"].meta["expectation_suite_name"]
+                    if run_result["validation_result"].meta["expectation_suite_name"]  # type: ignore[union-attr] # .meta attribute
                     == expectation_suite_name
                 ]
                 for expectation_suite_name in self.list_expectation_suite_names()
@@ -338,7 +338,7 @@ class CheckpointResult(SerializableDictDot):
     def _list_validation_statistics(self) -> Dict[ValidationResultIdentifier, dict]:
         if self._validation_statistics is None:
             self._validation_statistics = {
-                validation_result_identifier: run_result["validation_result"].statistics
+                validation_result_identifier: run_result["validation_result"].statistics  # type: ignore[union-attr] # .statistics attribute
                 for validation_result_identifier, run_result in self.run_results.items()
             }
         return self._validation_statistics
