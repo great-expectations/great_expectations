@@ -96,7 +96,7 @@ class CheckpointResult(SerializableDictDot):
         self._data_asset_names = None
         self._validation_results_by_expectation_suite_name = None
         self._validation_results_by_data_asset_name = None
-        self._batch_identifiers = None
+        self._batch_identifiers: list[str] | None = None
         self._statistics = None
         self._validation_statistics = None
         self._validation_results_by_validation_result_identifier = None
@@ -130,7 +130,7 @@ class CheckpointResult(SerializableDictDot):
     def success(self) -> bool:
         return self._success
 
-    def list_batch_identifiers(self) -> List[str]:
+    def list_batch_identifiers(self) -> list[str]:
         if self._batch_identifiers is None:
             self._batch_identifiers = list(
                 {
