@@ -349,6 +349,7 @@ UNIT_TEST_DEFAULT_TIMEOUT: float = 2.0
         "unit": "Runs tests marked with the 'unit' marker. Default behavior.",
         "integration": "Runs integration tests and exclude unit-tests. By default only unit tests are run.",
         "ignore-markers": "Don't exclude any test by not passing any markers to pytest.",
+        "compatibility": "Run compatibility tests, default False",
         "slowest": "Report on the slowest n number of tests",
         "ci": "execute tests assuming a CI environment. Publish XML reports for coverage reporting etc.",
         "timeout": f"Fails unit-tests if calls take longer than this value. Default {UNIT_TEST_DEFAULT_TIMEOUT} seconds",
@@ -362,6 +363,7 @@ def tests(
     unit: bool = True,
     integration: bool = False,
     ignore_markers: bool = False,
+    compatibility: bool = False,
     ci: bool = False,
     html: bool = False,
     cloud: bool = True,
@@ -380,6 +382,11 @@ def tests(
         markers += ["integration"]
         unit = False
     markers += ["unit" if unit else "not unit"]
+
+    if compatibility:
+        markers += "compatibility"
+    else:
+        markers += "not compatibility"
 
     marker_text = " and ".join(markers)
 
