@@ -2,16 +2,14 @@ import pathlib
 
 import pytest
 
-from great_expectations.compatibility.pyarrow import pyarrow
-from great_expectations.compatibility.google import google
-from great_expectations.compatibility.docstring_parser import docstring_parser
+from great_expectations.compatibility.aws import boto3, botocore
 from great_expectations.compatibility.azure import azure
+from great_expectations.compatibility.docstring_parser import docstring_parser
+from great_expectations.compatibility.google import google
 from great_expectations.compatibility.not_imported import NotImported
-from great_expectations.compatibility.aws import boto3
-from great_expectations.compatibility.aws import botocore
+from great_expectations.compatibility.pyarrow import pyarrow
 from great_expectations.compatibility.pyspark import pyspark
 from great_expectations.compatibility.sqlalchemy import sqlalchemy
-
 
 libraries = [
     pyspark,
