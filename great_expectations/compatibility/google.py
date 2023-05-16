@@ -7,6 +7,11 @@ GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
 )
 
 try:
+    import google
+except (ImportError, AttributeError):
+    google = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
+
+try:
     from google.cloud import secretmanager
 except (ImportError, AttributeError):
     secretmanager = GOOGLE_CLOUD_STORAGE_NOT_IMPORTED  # type: ignore[assignment]
