@@ -59,6 +59,9 @@
                     },
                     {
                         "$ref": "#/definitions/DeltaAsset"
+                    },
+                    {
+                        "$ref": "#/definitions/DirectoryDeltaAsset"
                     }
                 ]
             }
@@ -2545,6 +2548,100 @@
             },
             "required": [
                 "name"
+            ],
+            "additionalProperties": false
+        },
+        "DirectoryDeltaAsset": {
+            "title": "DirectoryDeltaAsset",
+            "description": "Used for accessing all the files in a directory as a single batch.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "type": {
+                    "title": "Type",
+                    "default": "directory_delta",
+                    "enum": [
+                        "directory_delta"
+                    ],
+                    "type": "string"
+                },
+                "id": {
+                    "title": "Id",
+                    "description": "DataAsset id",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "order_by": {
+                    "title": "Order By",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Sorter"
+                    }
+                },
+                "batch_metadata": {
+                    "title": "Batch Metadata",
+                    "type": "object"
+                },
+                "batching_regex": {
+                    "title": "Batching Regex",
+                    "default": ".*",
+                    "type": "string",
+                    "format": "regex"
+                },
+                "connect_options": {
+                    "title": "Connect Options",
+                    "description": "Optional filesystem specific advanced parameters for connecting to data assets",
+                    "type": "object"
+                },
+                "splitter": {
+                    "title": "Splitter",
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/SplitterColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterMultiColumnValue"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDividedInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterModInteger"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYear"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonth"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterYearAndMonthAndDay"
+                        },
+                        {
+                            "$ref": "#/definitions/SplitterDatetimePart"
+                        }
+                    ]
+                },
+                "timestampAsOf": {
+                    "title": "Timestampasof",
+                    "type": "string"
+                },
+                "versionAsOf": {
+                    "title": "Versionasof",
+                    "type": "string"
+                },
+                "data_directory": {
+                    "title": "Data Directory",
+                    "type": "string",
+                    "format": "path"
+                }
+            },
+            "required": [
+                "name",
+                "data_directory"
             ],
             "additionalProperties": false
         }
