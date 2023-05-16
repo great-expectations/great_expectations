@@ -10,7 +10,6 @@ from great_expectations.compatibility.not_imported import NotImported
 def test_error_raised_when_optional_import_not_installed():
     from great_expectations.compatibility.pyspark import pyspark
 
-    breakpoint()
     assert isinstance(pyspark, NotImported)
     assert not pyspark
     with pytest.raises(ModuleNotFoundError):
