@@ -202,6 +202,9 @@ class ExpectationsStore(Store):
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             )
 
+    def get(self, key) -> ExpectationSuite:
+        return super().get(key)  # type: ignore[return-value]
+
     def _validate_key(  # type: ignore[override]
         self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
     ) -> None:
