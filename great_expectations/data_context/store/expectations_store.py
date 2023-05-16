@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import random
 import uuid
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
@@ -10,6 +12,7 @@ from great_expectations.data_context.store.database_store_backend import (
     DatabaseStoreBackend,
 )
 from great_expectations.data_context.store.store import Store
+from great_expectations.data_context.store.store_backend import StoreBackend
 from great_expectations.data_context.store.tuple_store_backend import TupleStoreBackend
 from great_expectations.data_context.types.resource_identifiers import (
     ExpectationSuiteIdentifier,
@@ -20,6 +23,9 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
+
+if TYPE_CHECKING:
+    from great_expectations.core.data_context_key import DataContextKey
 
 
 class ExpectationsStore(Store):
@@ -194,8 +200,21 @@ class ExpectationsStore(Store):
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             )
 
-    def get(self, key) -> ExpectationSuite:
-        return super().get(key)  # type: ignore[return-value]
+    def get(self, key: DataContextKey | GXCloudIdentifier) -> ExpectationSuite:
+        if key == StoreBackend.STORE_BACKEND_ID_KEY:
+            return self._store_backend.get(key)
+
+        self._validate_key(key)
+        value = self._store_backend.get(self.key_to_tuple(key))
+        return self.deserialize(value)
+
+    def _validate_key(self, key: DataContextKey | GXCloudIdentifier) -> None:
+        if isinstance(key, GXCloudIdentifier) and not key.id and not key.resource_name:
+            raise ValueError(
+                "GXCloudIdentifier for ExpectationsStore must contain either "
+                "an id or a resource_name, but neither are present."
+            )
+        return super()._validate_key(key=key)
 
     def remove_key(self, key):
         return self.store_backend.remove_key(key)
