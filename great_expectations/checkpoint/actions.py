@@ -274,9 +274,7 @@ class SlackNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         # Assemble complete GX Cloud URL for a specific validation result
-        data_docs_urls: list[
-            dict[str, str | None]
-        ] = self.data_context.get_docs_sites_urls(
+        data_docs_urls: list[dict[str, str]] = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier
         )
 
@@ -853,7 +851,7 @@ class StoreValidationResultAction(ValidationAction):
         self,
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
-    ) -> Optional[GXCloudResourceRef]:
+    ) -> None:
         super().__init__(data_context)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
@@ -1173,7 +1171,7 @@ class UpdateDataDocsAction(ValidationAction):
             ],
         )
         # <snippet name="great_expectations/checkpoint/actions.py empty dict">
-        data_docs_validation_results = {}
+        data_docs_validation_results: dict = {}
         # </snippet>
         if self._using_cloud_context:
             return data_docs_validation_results
@@ -1307,7 +1305,7 @@ class APINotificationAction(ValidationAction):
             f"Successfully Posted results to API, status code - {response.status_code}"
         )
 
-    def send_results(self, payload) -> None:
+    def send_results(self, payload) -> requests.Response:
         try:
             headers = {"Content-Type": "application/json"}
             return requests.post(self.url, headers=headers, data=payload)
