@@ -860,7 +860,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                             vals.append(float(val))
                     data[col] = vals
                 elif type_ in ["DecimalType"]:
-                    vals = []
+                    vals: List[Union[str, int, float, None, Decimal]] = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
