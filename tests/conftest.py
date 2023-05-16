@@ -10,10 +10,11 @@ import random
 import shutil
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 from unittest import mock
 
 import numpy as np
+import packaging
 import pandas as pd
 import pytest
 from freezegun import freeze_time
@@ -44,6 +45,7 @@ from great_expectations.data_context import (
     BaseDataContext,
     CloudDataContext,
 )
+from great_expectations.data_context._version_checker import _VersionChecker
 from great_expectations.data_context.cloud_constants import (
     GXCloudEnvironmentVariable,
     GXCloudRESTResource,
@@ -126,7 +128,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope="module")
 def spark_warehouse_session(tmp_path_factory):
     # Note this fixture will configure spark to use in-memory metastore
-    pyspark = pytest.importorskip("pyspark")  # noqa: F841
+    pyspark = pytest.importorskip("pyspark")
 
     spark_warehouse_path: str = str(tmp_path_factory.mktemp("spark-warehouse"))
     spark: pyspark.SparkSession = get_or_create_spark_application(
@@ -359,22 +361,40 @@ def no_usage_stats(monkeypatch):
     monkeypatch.setenv("GE_USAGE_STATS", "False")
 
 
+@pytest.fixture(scope="session", autouse=True)
+def preload_latest_gx_cache():
+    """
+    Pre-load the _VersionChecker version cache so that we don't attempt to call pypi
+    when creating contexts as part of normal testing.
+    """
+    # setup
+    import great_expectations as gx
+
+    current_version = packaging.version.Version(gx.__version__)
+    logger.info(
+        f"Seeding _VersionChecker._LATEST_GX_VERSION_CACHE with {current_version}"
+    )
+    _VersionChecker._LATEST_GX_VERSION_CACHE = current_version
+    yield current_version
+    # teardown
+    logger.info("Clearing _VersionChecker._LATEST_GX_VERSION_CACHE ")
+    _VersionChecker._LATEST_GX_VERSION_CACHE = None
+
+
 @pytest.fixture(scope="module")
 def sa(test_backends):
     if not any(
-        [
-            dbms in test_backends
-            for dbms in [
-                "postgresql",
-                "sqlite",
-                "mysql",
-                "mssql",
-                "bigquery",
-                "trino",
-                "redshift",
-                "athena",
-                "snowflake",
-            ]
+        dbms in test_backends
+        for dbms in [
+            "postgresql",
+            "sqlite",
+            "mysql",
+            "mssql",
+            "bigquery",
+            "trino",
+            "redshift",
+            "athena",
+            "snowflake",
         ]
     ):
         pytest.skip("No recognized sqlalchemy backend selected.")
@@ -412,7 +432,7 @@ def basic_spark_df_execution_engine(spark_session):
     from great_expectations.execution_engine import SparkDFExecutionEngine
 
     conf: List[tuple] = spark_session.sparkContext.getConf().getAll()
-    spark_config: Dict[str, str] = dict(conf)
+    spark_config: Dict[str, Any] = dict(conf)
     execution_engine = SparkDFExecutionEngine(
         spark_config=spark_config,
     )
@@ -876,7 +896,6 @@ def data_context_with_connection_to_metrics_db(
                         table_name: multi_column_sums
                         class_name: Asset
     """
-    # noinspection PyUnusedLocal
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
@@ -898,14 +917,33 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
     os.makedirs(  # noqa: PTH103
         os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
     )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "data_context",
+                    "fixtures",
+                    "plugins",
+                    "extended_checkpoint.py",
+                )
+            ),
+        ),
+        pathlib.Path(context_path) / "plugins" / "extended_checkpoint.py",
+    )
     data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
     os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
     shutil.copy(
         file_relative_path(
             __file__,
-            os.path.join(  # noqa: PTH118
-                "test_fixtures",
-                "great_expectations_v013_no_datasource_stats_enabled.yml",
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
             ),
         ),
         str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
@@ -1007,7 +1045,6 @@ def titanic_pandas_data_context_with_v013_datasource_with_checkpoints_v1_with_em
                     - airflow_run_id
     """
 
-    # noinspection PyUnusedLocal
     _: Datasource = context.test_yaml_config(
         name="my_datasource", yaml_config=datasource_config, pretty_print=False
     )
@@ -1044,7 +1081,6 @@ def titanic_v013_multi_datasource_pandas_data_context_with_checkpoints_v1_with_e
                         - data_asset_name
     """
 
-    # noinspection PyUnusedLocal
     _: BaseDatasource = context.add_datasource(
         "my_additional_datasource", **yaml.load(datasource_config)
     )
@@ -1067,10 +1103,7 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
 
     if (
         any(
-            [
-                dbms in test_backends
-                for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
-            ]
+            dbms in test_backends for dbms in ["postgresql", "sqlite", "mysql", "mssql"]
         )
         and (sa is not None)
         and is_library_loadable(library_name="sqlalchemy")
@@ -1103,7 +1136,6 @@ def titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_co
             name: whole_table
         """
 
-        # noinspection PyUnusedLocal
         _: BaseDatasource = context.add_datasource(
             "my_sqlite_db_datasource", **yaml.load(datasource_config)
         )
@@ -1121,83 +1153,6 @@ def titanic_v013_multi_datasource_multi_execution_engine_data_context_with_check
     monkeypatch,
 ):
     context = titanic_v013_multi_datasource_pandas_and_sqlalchemy_execution_engine_data_context_with_checkpoints_v1_with_empty_store_stats_enabled
-    return context
-
-
-@pytest.fixture
-def deterministic_asset_dataconnector_context(
-    tmp_path_factory,
-    monkeypatch,
-):
-    # Re-enable GE_USAGE_STATS
-    monkeypatch.delenv("GE_USAGE_STATS")
-
-    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
-    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
-    os.makedirs(  # noqa: PTH103
-        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
-    )
-    data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
-    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
-    shutil.copy(
-        file_relative_path(
-            __file__,
-            "./test_fixtures/great_expectations_v013_no_datasource_stats_enabled.yml",
-        ),
-        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
-    )
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_1911.csv"
-            )
-        ),
-    )
-    shutil.copy(
-        file_relative_path(__file__, "./test_sets/Titanic.csv"),
-        str(
-            os.path.join(  # noqa: PTH118
-                context_path, "..", "data", "titanic", "Titanic_1912.csv"
-            )
-        ),
-    )
-    context = get_context(context_root_dir=context_path)
-    assert context.root_directory == context_path
-
-    datasource_config = f"""
-        class_name: Datasource
-
-        execution_engine:
-            class_name: PandasExecutionEngine
-
-        data_connectors:
-            my_other_data_connector:
-                class_name: ConfiguredAssetFilesystemDataConnector
-                base_directory: {data_path}
-                glob_directive: "*.csv"
-
-                default_regex:
-                    pattern: (.+)\\.csv
-                    group_names:
-                        - name
-                assets:
-                    users: {{}}
-        """
-
-    context.test_yaml_config(
-        name="my_datasource", yaml_config=datasource_config, pretty_print=False
-    )
-    # noinspection PyProtectedMember
-    context._save_project_config()
     return context
 
 
@@ -1482,6 +1437,672 @@ def titanic_pandas_data_context_with_v013_datasource_stats_enabled_with_checkpoi
 
     # noinspection PyProtectedMember
     context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def deterministic_asset_data_connector_context(
+    tmp_path_factory,
+    monkeypatch,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path = str(tmp_path_factory.mktemp("titanic_data_context"))
+    context_path = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_v013_no_datasource_stats_enabled.yml",
+                )
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(__file__, "./test_sets/Titanic.csv"),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
+    )
+    context = get_context(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    datasource_config = f"""
+        class_name: Datasource
+
+        execution_engine:
+            class_name: PandasExecutionEngine
+
+        data_connectors:
+            my_other_data_connector:
+                class_name: ConfiguredAssetFilesystemDataConnector
+                base_directory: {data_path}
+                glob_directive: "*.csv"
+
+                default_regex:
+                    pattern: (.+)\\.csv
+                    group_names:
+                        - name
+                assets:
+                    users: {{}}
+        """
+
+    context.test_yaml_config(
+        name="my_datasource", yaml_config=datasource_config, pretty_print=False
+    )
+    # noinspection PyProtectedMember
+    context._save_project_config()
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    tmp_path_factory,
+    monkeypatch,
+):
+    # Re-enable GE_USAGE_STATS
+    monkeypatch.delenv("GE_USAGE_STATS")
+
+    project_path: str = str(tmp_path_factory.mktemp("titanic_data_context_013"))
+    context_path: str = os.path.join(project_path, "great_expectations")  # noqa: PTH118
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "expectations"), exist_ok=True  # noqa: PTH118
+    )
+    data_path: str = os.path.join(context_path, "..", "data", "titanic")  # noqa: PTH118
+    os.makedirs(os.path.join(data_path), exist_ok=True)  # noqa: PTH118, PTH103
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "test_fixtures",
+                    "great_expectations_no_block_no_fluent_datasources_stats_enabled.yml",
+                )
+            ),
+        ),
+        str(os.path.join(context_path, "great_expectations.yml")),  # noqa: PTH118
+    )
+    os.makedirs(  # noqa: PTH103
+        os.path.join(context_path, "plugins"), exist_ok=True  # noqa: PTH118
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__,
+            str(
+                pathlib.Path(
+                    "data_context",
+                    "fixtures",
+                    "plugins",
+                    "extended_checkpoint.py",
+                )
+            ),
+        ),
+        pathlib.Path(context_path) / "plugins" / "extended_checkpoint.py",
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_19120414_1313"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1911.csv"
+            )
+        ),
+    )
+    shutil.copy(
+        file_relative_path(
+            __file__, os.path.join("test_sets", "Titanic.csv")  # noqa: PTH118
+        ),
+        str(
+            os.path.join(  # noqa: PTH118
+                context_path, "..", "data", "titanic", "Titanic_1912.csv"
+            )
+        ),
+    )
+
+    context = get_context(context_root_dir=context_path)
+    assert context.root_directory == context_path
+
+    path_to_folder_containing_csv_files = pathlib.Path(data_path)
+
+    datasource_name = "my_pandas_filesystem_datasource"
+    datasource = context.sources.add_pandas_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_pandas_dataframes_datasource"
+    datasource = context.sources.add_pandas(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    df = pd.read_csv(filepath_or_buffer=csv_source_path)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    spark_df_from_pandas_df,
+    spark_session,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+    context_path: str = context.root_directory
+    path_to_folder_containing_csv_files = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+    )
+
+    datasource_name = "my_spark_filesystem_datasource"
+    datasource = context.sources.add_spark_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_spark_dataframes_datasource"
+    datasource = context.sources.add_spark(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    pandas_df = pd.read_csv(filepath_or_buffer=csv_source_path)
+    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_with_checkpoints_v1_with_empty_store_stats_enabled(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+    db_file,
+    sa,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    datasource_name = "my_sqlite_datasource"
+    connection_string = f"sqlite:///{db_file}"
+    datasource = context.sources.add_sqlite(
+        name=datasource_name,
+        connection_string=connection_string,
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates(
+    titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_with_checkpoints_v1_with_empty_store_stats_enabled
+
+    # add simple template config
+    simple_checkpoint_template_config = CheckpointConfig(
+        name="my_simple_template_checkpoint",
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template-$VAR",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+        },
+        runtime_configuration={
+            "result_format": {
+                "result_format": "BASIC",
+                "partial_unexpected_count": 20,
+            }
+        },
+    )
+    simple_checkpoint_template_config_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=simple_checkpoint_template_config.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_template_config_key,
+        value=simple_checkpoint_template_config,
+    )
+
+    # add nested template configs
+    nested_checkpoint_template_config_1 = CheckpointConfig(
+        name="my_nested_checkpoint_template_1",
+        config_version=1,
+        run_name_template="%Y-%M-foo-bar-template-$VAR",
+        expectation_suite_name="suite_from_template_1",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "StoreEvaluationParametersAction",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+        ],
+        evaluation_parameters={
+            "environment": "FOO",
+            "tolerance": "FOOBOO",
+            "aux_param_0": "FOOBARBOO",
+            "aux_param_1": "FOOBARBOO",
+            "template_1_key": 456,
+        },
+        runtime_configuration={
+            "result_format": "FOOBARBOO",
+            "partial_unexpected_count": "FOOBARBOO",
+            "template_1_key": 123,
+        },
+        validations=[
+            {
+                "batch_request": {
+                    "datasource_name": "my_datasource_template_1",
+                    "data_connector_name": "my_special_data_connector_template_1",
+                    "data_asset_name": "users_from_template_1",
+                    "data_connector_query": {"partition_index": -999},
+                }
+            }
+        ],
+    )
+    nested_checkpoint_template_config_1_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=nested_checkpoint_template_config_1.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=nested_checkpoint_template_config_1_key,
+        value=nested_checkpoint_template_config_1,
+    )
+
+    nested_checkpoint_template_config_2 = CheckpointConfig(
+        name="my_nested_checkpoint_template_2",
+        config_version=1,
+        template_name="my_nested_checkpoint_template_1",
+        run_name_template="%Y-%M-foo-bar-template-$VAR-template-2",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate2",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+            {
+                "name": "new_action_from_template_2",
+                "action": {"class_name": "Template2SpecialAction"},
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+        },
+        runtime_configuration={
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+        },
+    )
+    nested_checkpoint_template_config_2_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=nested_checkpoint_template_config_2.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=nested_checkpoint_template_config_2_key,
+        value=nested_checkpoint_template_config_2,
+    )
+
+    nested_checkpoint_template_config_3 = CheckpointConfig(
+        name="my_nested_checkpoint_template_3",
+        config_version=1,
+        template_name="my_nested_checkpoint_template_2",
+        run_name_template="%Y-%M-foo-bar-template-$VAR-template-3",
+        action_list=[
+            {
+                "name": "store_validation_result",
+                "action": {
+                    "class_name": "StoreValidationResultAction",
+                },
+            },
+            {
+                "name": "store_evaluation_params",
+                "action": {
+                    "class_name": "MyCustomStoreEvaluationParametersActionTemplate3",
+                },
+            },
+            {
+                "name": "update_data_docs",
+                "action": {
+                    "class_name": "UpdateDataDocsAction",
+                },
+            },
+            {
+                "name": "new_action_from_template_3",
+                "action": {"class_name": "Template3SpecialAction"},
+            },
+        ],
+        evaluation_parameters={
+            "environment": "$GE_ENVIRONMENT",
+            "tolerance": 1.0e-2,
+            "aux_param_0": "$MY_PARAM",
+            "aux_param_1": "1 + $MY_PARAM",
+            "template_3_key": 123,
+        },
+        runtime_configuration={
+            "result_format": "BASIC",
+            "partial_unexpected_count": 20,
+            "template_3_key": "bloopy!",
+        },
+    )
+    nested_checkpoint_template_config_3_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=nested_checkpoint_template_config_3.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=nested_checkpoint_template_config_3_key,
+        value=nested_checkpoint_template_config_3,
+    )
+
+    # add minimal SimpleCheckpoint
+    simple_checkpoint_config = CheckpointConfig(
+        name="my_minimal_simple_checkpoint",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+    )
+    simple_checkpoint_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_config_key,
+        value=simple_checkpoint_config,
+    )
+
+    # add SimpleCheckpoint with slack webhook
+    simple_checkpoint_with_slack_webhook_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_slack",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        slack_webhook="https://hooks.slack.com/foo/bar",
+    )
+    simple_checkpoint_with_slack_webhook_config_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=simple_checkpoint_with_slack_webhook_config.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_slack_webhook_config_key,
+        value=simple_checkpoint_with_slack_webhook_config,
+    )
+
+    # add SimpleCheckpoint with slack webhook and notify_with
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_slack_and_notify_with_all",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        slack_webhook="https://hooks.slack.com/foo/bar",
+        notify_with="all",
+    )
+    simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key = ConfigurationIdentifier(
+        configuration_key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config.name
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_slack_webhook_and_notify_with_all_config_key,
+        value=simple_checkpoint_with_slack_webhook_and_notify_with_all_config,
+    )
+
+    # add SimpleCheckpoint with site_names
+    simple_checkpoint_with_site_names_config = CheckpointConfig(
+        name="my_simple_checkpoint_with_site_names",
+        class_name="SimpleCheckpoint",
+        config_version=1,
+        site_names=["local_site"],
+    )
+    simple_checkpoint_with_site_names_config_key: ConfigurationIdentifier = (
+        ConfigurationIdentifier(
+            configuration_key=simple_checkpoint_with_site_names_config.name
+        )
+    )
+    context.checkpoint_store.set(
+        key=simple_checkpoint_with_site_names_config_key,
+        value=simple_checkpoint_with_site_names_config,
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_spark_datasources_stats_enabled_with_checkpoints_v1_with_templates(
+    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
+    spark_df_from_pandas_df,
+    spark_session,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates
+    context_path: str = context.root_directory
+    path_to_folder_containing_csv_files = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+    )
+
+    datasource_name = "my_spark_filesystem_datasource"
+    datasource = context.sources.add_spark_filesystem(
+        name=datasource_name, base_directory=path_to_folder_containing_csv_files
+    )
+
+    batching_regex = r"(?P<name>.+)\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="exploration", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    batching_regex = r"(.+)_(?P<timestamp>\d{8})_(?P<size>\d{4})\.csv"
+    glob_directive = "*.csv"
+    datasource.add_csv_asset(
+        name="users", batching_regex=batching_regex, glob_directive=glob_directive
+    )
+
+    datasource_name = "my_spark_dataframes_datasource"
+    datasource = context.sources.add_spark(name=datasource_name)
+
+    csv_source_path = pathlib.Path(
+        context_path,
+        "..",
+        "data",
+        "titanic",
+        "Titanic_1911.csv",
+    )
+    pandas_df = pd.read_csv(filepath_or_buffer=csv_source_path)
+    spark_df = spark_df_from_pandas_df(spark_session, pandas_df)
+
+    dataframe_asset_name = "my_dataframe_asset"
+    datasource.add_dataframe_asset(name=dataframe_asset_name, dataframe=spark_df)
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
+    return context
+
+
+@pytest.fixture
+def titanic_data_context_with_fluent_pandas_and_sqlite_datasources_stats_enabled_with_checkpoints_v1_with_templates(
+    titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates,
+    db_file,
+    sa,
+):
+    context = titanic_data_context_with_fluent_pandas_datasources_stats_enabled_with_checkpoints_v1_with_templates
+
+    datasource_name = "my_sqlite_datasource"
+    connection_string = f"sqlite:///{db_file}"
+    datasource = context.sources.add_sqlite(
+        name=datasource_name,
+        connection_string=connection_string,
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 5"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_5", query=query
+    )
+
+    query = "SELECT * from table_partitioned_by_date_column__A LIMIT 10"
+    datasource.add_query_asset(
+        name="table_partitioned_by_date_column__A_query_asset_limit_10", query=query
+    )
+
+    # noinspection PyProtectedMember
+    context._save_project_config()
+
     return context
 
 
@@ -1725,7 +2346,7 @@ def titanic_spark_db(tmp_path_factory, spark_warehouse_session):
 @pytest.fixture
 def titanic_sqlite_db(sa):
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -1742,7 +2363,7 @@ def titanic_sqlite_db(sa):
 @pytest.fixture
 def titanic_sqlite_db_connection_string(sa):
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         titanic_db_path = file_relative_path(__file__, "./test_sets/titanic.db")
@@ -1784,7 +2405,7 @@ def titanic_expectation_suite(empty_data_context_stats_enabled):
 def empty_sqlite_db(sa):
     """An empty in-memory sqlite db that always gets run."""
     try:
-        import sqlalchemy as sa  # noqa: F401
+        import sqlalchemy as sa
         from sqlalchemy import create_engine
 
         engine = create_engine("sqlite://")
@@ -2155,6 +2776,60 @@ def filesystem_csv_data_context(
     return empty_data_context
 
 
+@pytest.fixture()
+def data_context_with_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.add_datasource(
+        "rad_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_fluent_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_pandas_datasource", base_directory=filesystem_csv_2
+    )
+    # noinspection PyProtectedMember
+    empty_data_context._save_project_config()
+    return empty_data_context
+
+
+@pytest.fixture()
+def data_context_with_fluent_datasource_and_block_datasource(
+    empty_data_context,
+    filesystem_csv_2,
+) -> FileDataContext:
+    empty_data_context.sources.add_pandas_filesystem(
+        name="my_fluent_datasource", base_directory=filesystem_csv_2
+    )
+    empty_data_context.add_datasource(
+        name="my_block_datasource",
+        module_name="great_expectations.datasource",
+        class_name="PandasDatasource",
+        batch_kwargs_generators={
+            "subdir_reader": {
+                "class_name": "SubdirReaderBatchKwargsGenerator",
+                "base_directory": str(filesystem_csv_2),
+            }
+        },
+    )
+    return empty_data_context
+
+
 @pytest.fixture
 def filesystem_csv(tmp_path_factory):
     base_dir = tmp_path_factory.mktemp("filesystem_csv")
@@ -2168,11 +2843,11 @@ def filesystem_csv(tmp_path_factory):
     os.makedirs(os.path.join(base_dir, "f3"), exist_ok=True)  # noqa: PTH118, PTH103
     with open(
         os.path.join(base_dir, "f3", "f3_20190101.csv"), "w"  # noqa: PTH118
-    ) as outfile:  # noqa: PTH118
+    ) as outfile:
         outfile.writelines(["a,b,c\n"])
     with open(
         os.path.join(base_dir, "f3", "f3_20190102.csv"), "w"  # noqa: PTH118
-    ) as outfile:  # noqa: PTH118
+    ) as outfile:
         outfile.writelines(["a,b,c\n"])
 
     return base_dir

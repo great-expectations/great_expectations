@@ -9,7 +9,7 @@ from typing_extensions import Literal
 from great_expectations.compatibility import google
 from great_expectations.datasource.fluent import _SparkFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
-    ConfigStr,  # noqa: TCH001 # needed at runtime
+    ConfigStr,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
@@ -28,9 +28,7 @@ logger: Logger
 
 class SparkGoogleCloudStorageDatasource(_SparkFilePathDatasource):
     # class attributes
-    data_connector_type: ClassVar[
-        Type[GoogleCloudStorageDataConnector]
-    ] = GoogleCloudStorageDataConnector
+    data_connector_type: ClassVar[Type[GoogleCloudStorageDataConnector]] = ...
 
     # instance attributes
     type: Literal["spark_gcs"] = "spark_gcs"

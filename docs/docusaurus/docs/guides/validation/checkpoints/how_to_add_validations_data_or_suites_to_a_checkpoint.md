@@ -7,12 +7,13 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you add validation data or <TechnicalTag tag="expectation_suite" text="Expectation Suites" /> to an existing <TechnicalTag tag="checkpoint" text="Checkpoint" />. This is useful if you want to aggregate individual validations (across Expectation Suites or <TechnicalTag tag="datasource" text="Datasources" />) into a single Checkpoint.
 
+## Prerequisites
 
 <Prerequisites>
 
-- [Configured a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
-- [Configured an Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-- [Configured a Checkpoint](./how_to_create_a_new_checkpoint.md)
+- [A Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context).
+- [An Expectations Suite](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+- [A Checkpoint](./how_to_create_a_new_checkpoint.md).
 
 </Prerequisites>
 
@@ -30,10 +31,7 @@ run_name_template: "%Y-%m-foo-bar-template-$VAR"
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: -1
     expectation_suite_name: users.warning
     action_list:
         - name: store_validation_result
@@ -66,10 +64,7 @@ run_name_template: "%Y-%m-foo-bar-template-$VAR"
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: -1
     expectation_suite_name: users.warning
     action_list:
         - name: store_validation_result
@@ -137,25 +132,17 @@ action_list:
 validations:
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: 0
     expectation_suite_name: users.warning
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_special_data_connector
       data_asset_name: users
-      data_connector_query:
-        index: -1
     expectation_suite_name: users.error
   - batch_request:
       datasource_name: my_datasource
-      data_connector_name: my_other_data_connector
       data_asset_name: users
-      data_connector_query:
-        batch_filter_parameters:
-          name: Titanic
+      options:
+        name: Titanic
     action_list:
       - name: quarantine_failed_data
         action:

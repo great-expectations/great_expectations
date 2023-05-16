@@ -14,7 +14,7 @@ def _docs_dir() -> pathlib.Path:
     return pathlib.Path().absolute()
 
 
-def change_paths_for_docs_file_references():
+def change_paths_for_docs_file_references(verbose: bool = False) -> None:
     """Change file= style references to use versioned_docs paths.
 
     This is used in v0.14 docs like v0.14.13 since we moved to using named
@@ -32,10 +32,17 @@ def change_paths_for_docs_file_references():
             f.seek(0)
             f.truncate()
             f.write(contents)
-        print(f"processed {file_path}")
+        if verbose:
+            print(f"processed {file_path}")
 
 
 def _paths_to_versioned_docs() -> list[pathlib.Path]:
+    data_path = _docs_dir() / "docusaurus/versioned_docs"
+    paths = [f for f in data_path.iterdir() if f.is_dir()]
+    return paths
+
+
+def _paths_to_versioned_docs_after_v0_14_13() -> list[pathlib.Path]:
     data_path = _docs_dir() / "docusaurus/versioned_docs"
     paths = [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
     return paths
@@ -43,15 +50,26 @@ def _paths_to_versioned_docs() -> list[pathlib.Path]:
 
 def _paths_to_versioned_code() -> list[pathlib.Path]:
     data_path = _docs_dir() / "docusaurus/versioned_code"
+    paths = [f for f in data_path.iterdir() if f.is_dir()]
+    return paths
+
+
+def _paths_to_versioned_code_after_v0_14_13() -> list[pathlib.Path]:
+    data_path = _docs_dir() / "docusaurus/versioned_code"
     paths = [f for f in data_path.iterdir() if f.is_dir() and "0.14.13" not in str(f)]
     return paths
 
 
-def prepend_version_info_to_name_for_snippet_by_name_references():
+def prepend_version_info_to_name_for_snippet_by_name_references(
+    verbose: bool = False,
+) -> None:
     """Prepend version info e.g. name="snippet_name" -> name="version-0.15.50 snippet_name" """
 
     pattern = re.compile(r"((.*)(name *= *\"))(.*)")
-    paths = _paths_to_versioned_docs() + _paths_to_versioned_code()
+    paths = (
+        _paths_to_versioned_docs_after_v0_14_13()
+        + _paths_to_versioned_code_after_v0_14_13()
+    )
 
     for path in paths:
         version = path.name
@@ -65,9 +83,43 @@ def prepend_version_info_to_name_for_snippet_by_name_references():
                 f.seek(0)
                 f.truncate()
                 f.write(contents)
-            print(f"processed {file_path}")
+            if verbose:
+                print(f"processed {file_path}")
+
+
+def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) -> None:
+    """Prepend version info to absolute links: /docs/... becomes /docs/{version}/..."""
+
+    href_pattern = re.compile(r"(?P<href>href=[\"\']/docs/)(?P<link>\S*[\"\'])")
+    version_from_path_name_pattern = re.compile(
+        r"(?P<version>\d{1,2}\.\d{1,2}\.\d{1,2})"
+    )
+    paths = _paths_to_versioned_docs() + _paths_to_versioned_code()
+
+    for path in paths:
+        version = path.name
+        version_only = version_from_path_name_pattern.search(version).group("version")
+        if not version_only:
+            raise ValueError("Path does not contain a version number")
+
+        files = []
+        for extension in (".md", ".mdx"):
+            files.extend(glob.glob(f"{path}/**/*{extension}", recursive=True))
+        for file_path in files:
+            with open(file_path, "r+") as f:
+                contents = f.read()
+                # href="/docs/link" -> href="/docs/0.14.13/link"
+                contents = re.sub(
+                    href_pattern, rf"\g<href>{version_only}/\g<link>", contents
+                )
+                f.seek(0)
+                f.truncate()
+                f.write(contents)
+            if verbose:
+                print(f"processed {file_path}")
 
 
 if __name__ == "__main__":
     change_paths_for_docs_file_references()
     prepend_version_info_to_name_for_snippet_by_name_references()
+    prepend_version_info_to_name_for_href_absolute_links()

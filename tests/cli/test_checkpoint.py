@@ -14,6 +14,10 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
 
 from great_expectations.cli import cli
+from great_expectations.cli.cli_messages import (
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY,
+    CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES,
+)
 from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
     add_dataframe_to_db,
 )
@@ -732,6 +736,112 @@ def test_checkpoint_new_raises_error_on_existing_checkpoint(
 )
 @mock.patch("subprocess.call", return_value=True, side_effect=None)
 @mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_checkpoint_new_no_fluent_datasource_messages(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    data_context_with_block_datasource,
+):
+    """
+    What does this test and why?
+    The `checkpoint new` CLI flow should not print warnings/errors if all of the Datasources in the DataContext are configured with the block config style API.
+    """
+    context = data_context_with_block_datasource
+
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
+    result: Result = runner.invoke(
+        cli,
+        "checkpoint new my_checkpoint_name",
+        catch_exceptions=False,
+    )
+
+    stdout: str = result.stdout
+
+    assert result.exit_code == 0
+    assert CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY not in stdout
+    assert CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES not in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_checkpoint_new_raises_error_on_fluent_datasources_only(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    data_context_with_fluent_datasource,
+):
+    """
+    What does this test and why?
+    The `checkpoint new` CLI flow should raise an error if all of the Datasources in the DataContext are configured with the fluent API.
+    """
+    context = data_context_with_fluent_datasource
+
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
+    result: Result = runner.invoke(
+        cli,
+        "checkpoint new my_checkpoint_name",
+        catch_exceptions=False,
+    )
+
+    stdout: str = result.stdout
+
+    assert result.exit_code == 1
+    assert CHECKPOINT_NEW_FLUENT_DATASOURCES_ONLY in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
+def test_checkpoint_new_raises_warning_on_mixed_datasource_styles(
+    mock_emit,
+    mock_subp,
+    mock_web,
+    caplog,
+    monkeypatch,
+    data_context_with_fluent_datasource_and_block_datasource,
+):
+    """
+    What does this test and why?
+    The `checkpoint new` CLI flow should print a warning if some of the Datasources in the DataContext are configured with the fluent API.
+    """
+    context = data_context_with_fluent_datasource_and_block_datasource
+
+    monkeypatch.chdir(os.path.dirname(context.root_directory))
+
+    runner: CliRunner = CliRunner(mix_stderr=False)
+    # noinspection PyTypeChecker
+    result: Result = runner.invoke(
+        cli,
+        "checkpoint new my_checkpoint_name",
+        catch_exceptions=False,
+    )
+
+    stdout: str = result.stdout
+
+    assert result.exit_code == 0
+    assert CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES in stdout
+
+
+@mock.patch(
+    "great_expectations.core.usage_statistics.usage_statistics.UsageStatisticsHandler.emit"
+)
+@mock.patch("subprocess.call", return_value=True, side_effect=None)
+@mock.patch("webbrowser.open", return_value=True, side_effect=None)
 @pytest.mark.slow  # 6.69s
 def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     mock_webbroser,
@@ -739,7 +849,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     mock_emit,
     caplog,
     monkeypatch,
-    deterministic_asset_dataconnector_context,
+    deterministic_asset_data_connector_context,
     titanic_expectation_suite,
 ):
     """
@@ -748,7 +858,7 @@ def test_checkpoint_new_happy_path_generates_a_notebook_and_checkpoint(
     This test builds that notebook and runs it to generate a Checkpoint and then tests the resulting configuration in the Checkpoint file.
     The notebook that is generated does create a sample configuration using one of the available Data Assets, this is what is used to generate the Checkpoint configuration.
     """
-    context = deterministic_asset_dataconnector_context
+    context = deterministic_asset_data_connector_context
 
     root_dir: str = context.root_directory
     monkeypatch.chdir(os.path.dirname(root_dir))

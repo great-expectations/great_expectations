@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import logging
 import os
 import pathlib
@@ -10,6 +11,7 @@ from typing import TYPE_CHECKING, ClassVar, Optional, Union
 from ruamel.yaml import YAML
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.data_context.data_context.abstract_data_context import (
     AbstractDataContext,
 )
@@ -33,7 +35,7 @@ yaml.indent(mapping=2, sequence=4, offset=2)
 yaml.default_flow_style = False
 
 if TYPE_CHECKING:
-    from great_expectations.alias_types import JSONValues, PathStr
+    from great_expectations.alias_types import PathStr
 
 
 class SerializableDataContext(AbstractDataContext):
@@ -79,42 +81,13 @@ class SerializableDataContext(AbstractDataContext):
         """
         return self._context_root_directory
 
-    def _save_project_config(self) -> None:
+    @abc.abstractmethod
+    def _save_project_config(self, _fds_datasource=None) -> None:
         """
         See parent 'AbstractDataContext._save_project_config()` for more information.
-
         Explicitly override base class implementation to retain legacy behavior.
         """
-        config_filepath = os.path.join(self.root_directory, self.GX_YML)  # noqa: PTH118
-
-        logger.debug(
-            f"Starting DataContext._save_project_config; attempting to update {config_filepath}"
-        )
-
-        try:
-            with open(config_filepath, "w") as outfile:
-
-                fluent_datasources = self._synchronize_fluent_datasources()
-                if fluent_datasources:
-                    self.fluent_config.update_datasources(
-                        datasources=fluent_datasources
-                    )
-                    logger.info(
-                        f"Saving {len(self.fluent_config.datasources)} Fluent Datasources to {config_filepath}"
-                    )
-                    fluent_json_dict: dict[
-                        str, JSONValues
-                    ] = self.fluent_config._json_dict()
-                    fluent_json_dict = (
-                        self.fluent_config._exclude_name_fields_from_fluent_datasources(
-                            config=fluent_json_dict
-                        )
-                    )
-                    self.config._commented_map.update(fluent_json_dict)
-
-                self.config.to_yaml(outfile)
-        except PermissionError as e:
-            logger.warning(f"Could not save project config to disk: {e}")
+        raise NotImplementedError
 
     def _check_for_usage_stats_sync(self, project_config: DataContextConfig) -> bool:
         """
@@ -177,6 +150,7 @@ class SerializableDataContext(AbstractDataContext):
 
         return False
 
+    @public_api
     @classmethod
     def create(
         cls,
@@ -204,13 +178,18 @@ class SerializableDataContext(AbstractDataContext):
         Returns:
             DataContext
         """
+        gx_dir = cls._scaffold(
+            project_root_dir=project_root_dir,
+            usage_statistics_enabled=usage_statistics_enabled,
+        )
+        return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
 
-        if not os.path.isdir(project_root_dir):  # type: ignore[arg-type]  # noqa: PTH112
-            raise gx_exceptions.DataContextError(
-                "The project_root_dir must be an existing directory in which "
-                "to initialize a new DataContext"
-            )
-
+    @classmethod
+    def _scaffold(
+        cls,
+        project_root_dir: Optional[PathStr] = None,
+        usage_statistics_enabled: bool = True,
+    ) -> str:
         gx_dir = os.path.join(project_root_dir, cls.GX_DIR)  # type: ignore[arg-type]  # noqa: PTH118
         os.makedirs(gx_dir, exist_ok=True)  # noqa: PTH103
         cls._scaffold_directories(gx_dir)
@@ -234,7 +213,7 @@ class SerializableDataContext(AbstractDataContext):
         else:
             cls._write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
+        return gx_dir
 
     @classmethod
     def all_uncommitted_directories_exist(cls, gx_dir: PathStr) -> bool:
@@ -257,6 +236,8 @@ class SerializableDataContext(AbstractDataContext):
         with open(path_to_yml) as f:
             config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
+        if not config_var_path:
+            return False
         config_var_path = os.path.join(gx_dir, config_var_path)  # noqa: PTH118
         return os.path.isfile(config_var_path)  # noqa: PTH113
 
@@ -354,9 +335,7 @@ class SerializableDataContext(AbstractDataContext):
             if os.path.isdir(  # noqa: PTH112
                 gx_home_environment
             ) and os.path.isfile(  # noqa: PTH112, PTH113
-                os.path.join(  # noqa: PTH118
-                    gx_home_environment, "great_expectations.yml"
-                )
+                os.path.join(gx_home_environment, cls.GX_YML)  # noqa: PTH118
             ):
                 result = gx_home_environment
         else:
@@ -473,18 +452,30 @@ class SerializableDataContext(AbstractDataContext):
         Return True if the project is initialized.
 
         To be considered initialized, all of the following must be true:
+        - the project must be scaffolded (see cls.is_project_scaffolded)
+        - the project has at least one datasource
+        - the project has at least one suite
+        """
+        return (
+            cls.is_project_scaffolded(ge_dir)
+            and cls._does_context_have_at_least_one_datasource(ge_dir)
+            and cls._does_context_have_at_least_one_suite(ge_dir)
+        )
+
+    @classmethod
+    def is_project_scaffolded(cls, ge_dir: PathStr) -> bool:
+        """
+        Return True if the project is scaffolded (required filesystem changes have occurred).
+
+        To be considered scaffolded, all of the following must be true:
         - all project directories exist (including uncommitted directories)
         - a valid great_expectations.yml is on disk
         - a config_variables.yml is on disk
-        - the project has at least one datasource
-        - the project has at least one suite
         """
         return (
             cls.does_config_exist_on_disk(ge_dir)
             and cls.all_uncommitted_directories_exist(ge_dir)
             and cls.config_variables_yml_exist(ge_dir)
-            and cls._does_context_have_at_least_one_datasource(ge_dir)
-            and cls._does_context_have_at_least_one_suite(ge_dir)
         )
 
     @classmethod

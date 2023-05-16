@@ -6,7 +6,7 @@
 </summary>
 
 While some source data systems provide their own means of configuring credentials through environment variables, you can also configure GX to populate credentials from either a YAML file or a secret manager.  For more information, please see:
-- [How to configure credentials(/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
+- [How to configure credentials](/docs/guides/setup/configuring_data_contexts/how_to_configure_credentials)
 
 </details>
 
@@ -62,16 +62,5 @@ While some source data systems provide their own means of configuring credential
 - [How to host and share Data Docs on Azure Blob Storage](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_azure_blob_storage)
 - [How to host and share Data Docs on GCS](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_gcs)
 - [How to host and share Data Docs on a filesystem](/docs/guides/setup/configuring_data_docs/how_to_host_and_share_data_docs_on_a_filesystem)
-
-</details>
-
-<details>
-<summary>
-
-#### Validating Data Context configurations
-
-</summary>
-
-- [How to configure DataContext components using `test_yaml_config()`](/docs/guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config)
 
 </details>

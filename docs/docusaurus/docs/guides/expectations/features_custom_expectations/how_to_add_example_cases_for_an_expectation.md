@@ -6,9 +6,11 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 
 This guide will help you add example cases to document and test the behavior of your <TechnicalTag tag="expectation" text="Expectation" />. 
 
+## Prerequisites
+
 <Prerequisites>
 
- - [Created a Custom Expectation](../creating_custom_expectations/overview.md)
+ - [A Custom Expectation](../creating_custom_expectations/overview.md)
 
 </Prerequisites>
 
@@ -178,7 +180,7 @@ Congratulations!<br/>&#127881; You've successfully created example cases & tests
 
 ### 5. Contribution (Optional)
 
-This guide will leave you with test coverage sufficient for [contribution](../contributing/how_to_contribute_a_custom_expectation_to_great_expectations.md) back to Great Expectations at an Experimental level.  
+This guide will leave you with test coverage sufficient for [contribution](https://github.com/great-expectations/great_expectations/blob/develop/CONTRIBUTING_EXPECTATIONS.md) back to Great Expectations at an Experimental level.  
 
 If you're interested in having your contribution accepted at a Beta level, these tests will need to pass for all supported backends (Pandas, Spark, & SQLAlchemy).
 

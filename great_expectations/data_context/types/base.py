@@ -6,6 +6,7 @@ import enum
 import itertools
 import json
 import logging
+import pathlib
 import tempfile
 import uuid
 import warnings
@@ -146,7 +147,7 @@ class BaseYamlConfig(SerializableDictDot):
         commented_map.update(schema_validated_map)
         return commented_map
 
-    def to_yaml(self, outfile: Union[str, TextIOWrapper]) -> None:
+    def to_yaml(self, outfile: Union[str, pathlib.Path, TextIOWrapper]) -> None:
         """
         :returns None (but writes a YAML file containing the project configuration)
         """
@@ -1691,7 +1692,7 @@ class DataContextConfigSchema(Schema):
             exc
             and exc.messages
             and isinstance(exc.messages, dict)
-            and all([key is None for key in exc.messages.keys()])
+            and all(key is None for key in exc.messages.keys())
         ):
             exc.messages = list(itertools.chain.from_iterable(exc.messages.values()))
 
@@ -1720,10 +1721,8 @@ class DataContextConfigSchema(Schema):
 
         # When migrating from 0.7.x to 0.8.0
         if data["config_version"] == 0 and any(
-            [
-                store_config["class_name"] == "ValidationsStore"
-                for store_config in data["stores"].values()
-            ]
+            store_config["class_name"] == "ValidationsStore"
+            for store_config in data["stores"].values()
         ):
             raise gx_exceptions.UnsupportedConfigVersionError(
                 "You appear to be using a config version from the 0.7.x series. This version is no longer supported."
@@ -1748,10 +1747,8 @@ class DataContextConfigSchema(Schema):
         if data["config_version"] < CURRENT_GX_CONFIG_VERSION and (
             "checkpoint_store_name" in data
             or any(
-                [
-                    store_config["class_name"] == "CheckpointStore"
-                    for store_config in data["stores"].values()
-                ]
+                store_config["class_name"] == "CheckpointStore"
+                for store_config in data["stores"].values()
             )
         ):
             raise gx_exceptions.InvalidDataContextConfigError(
@@ -2470,6 +2467,7 @@ class DataContextConfig(BaseYamlConfig):
         if datasources is None:
             datasources = {}  # type: ignore[assignment]
         self.datasources = datasources
+        self.fluent_datasources = fluent_datasources or {}
         self.expectations_store_name = expectations_store_name
         self.validations_store_name = validations_store_name
         self.evaluation_parameter_store_name = evaluation_parameter_store_name
@@ -2813,7 +2811,7 @@ class CheckpointConfig(BaseYamlConfig):
         action_list: Optional[List[dict]] = None,
         evaluation_parameters: Optional[dict] = None,
         runtime_configuration: Optional[dict] = None,
-        validations: Optional[List[CheckpointValidationConfig]] = None,
+        validations: Optional[List[dict]] = None,
         default_validation_id: Optional[str] = None,
         profilers: Optional[List[dict]] = None,
         validation_operator_name: Optional[str] = None,
@@ -2925,11 +2923,11 @@ class CheckpointConfig(BaseYamlConfig):
         self._config_version = value
 
     @property
-    def validations(self) -> List[CheckpointValidationConfig]:
+    def validations(self) -> List[dict]:
         return self._validations
 
     @validations.setter
-    def validations(self, value: List[CheckpointValidationConfig]) -> None:
+    def validations(self, value: List[dict]) -> None:
         self._validations = value
 
     @property

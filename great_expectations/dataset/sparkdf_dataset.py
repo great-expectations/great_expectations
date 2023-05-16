@@ -1218,7 +1218,7 @@ class SparkDFDataset(MetaSparkDFDataset):
             types = []
             for type_ in type_list:
                 try:
-                    type_class = getattr(types, type_)
+                    type_class = getattr(pyspark.types, type_)
                     types.append(type_class)
                 except AttributeError:
                     logger.debug(f"Unrecognized type: {type_}")

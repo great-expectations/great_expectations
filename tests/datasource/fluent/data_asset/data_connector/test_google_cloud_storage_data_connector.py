@@ -9,10 +9,10 @@ from great_expectations.compatibility import google
 from great_expectations.core import IDDict
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.util import GCSUrl
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     GoogleCloudStorageDataConnector,
 )
-from great_expectations.datasource.fluent.interfaces import BatchRequest
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.data_asset.data_connector import (
@@ -21,6 +21,13 @@ if TYPE_CHECKING:
 
 
 logger = logging.getLogger(__name__)
+
+
+if not google.storage:
+    pytest.skip(
+        'Could not import "storage" from google.cloud in configured_asset_gcs_data_connector.py',
+        allow_module_level=True,
+    )
 
 
 class MockGCSClient:
@@ -72,16 +79,6 @@ def test_basic_instantiation(mock_list_keys):
     assert my_data_connector.get_unmatched_data_references()[:3] == []
     assert my_data_connector.get_unmatched_data_reference_count() == 0
 
-    # Missing "data_asset_name" argument.
-    with pytest.raises(TypeError):
-        # noinspection PyArgumentList
-        my_data_connector.get_batch_definition_list(
-            BatchRequest(
-                datasource_name="something",
-                options={},
-            )
-        )
-
 
 @pytest.mark.integration
 @mock.patch(
@@ -98,7 +95,7 @@ def test_instantiation_batching_regex_does_not_match_paths(mock_list_keys):
     my_data_connector: DataConnector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv"),
         gcs_client=gcs_client,
         bucket_or_name="my_bucket",
         prefix="",
@@ -142,7 +139,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
     my_data_connector: DataConnector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv"),
         gcs_client=gcs_client,
         bucket_or_name="my_bucket",
         prefix="",
@@ -334,7 +331,7 @@ def test_return_all_batch_definitions_unsorted(mock_list_keys):
 #     my_data_connector: DataConnector = GoogleCloudStorageDataConnector(
 #         datasource_name="my_file_path_datasource",
 #         data_asset_name="my_google_cloud_storage_data_asset",
-#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.+)\.csv"),
+#         batching_regex=re.compile(r"(?P<name>.+)_(?P<timestamp>.+)_(?P<price>.*)\.csv"),
 #         gcs_client=gcs_client,
 #         bucket_or_name = "my_bucket",
 #         prefix = "",
@@ -469,7 +466,7 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
     my_data_connector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        batching_regex=re.compile(r"(?P<name>.+)/.+\.csv"),
+        batching_regex=re.compile(r"(?P<name>.+).*\.csv"),
         gcs_client=gcs_client,
         bucket_or_name="my_bucket",
         prefix="A",
@@ -500,24 +497,20 @@ def test_return_only_unique_batch_definitions(mock_list_keys):
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_google_cloud_storage_data_asset",
-            batch_identifiers=IDDict(
-                {"path": "B/file_1.csv", "directory": "B", "filename": "file_1.csv"}
-            ),
+            batch_identifiers=IDDict({"path": "B/file_1.csv", "filename": "file_1"}),
         ),
         BatchDefinition(
             datasource_name="my_file_path_datasource",
             data_connector_name="fluent",
             data_asset_name="my_google_cloud_storage_data_asset",
-            batch_identifiers=IDDict(
-                {"path": "B/file_2.csv", "directory": "B", "filename": "file_2.csv"}
-            ),
+            batch_identifiers=IDDict({"path": "B/file_2.csv", "filename": "file_2"}),
         ),
     ]
 
     my_data_connector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        batching_regex=re.compile(r"(?P<directory>.+)/(?P<filename>.+\.csv)"),
+        batching_regex=re.compile(r"(?P<filename>.+).*\.csv"),
         gcs_client=gcs_client,
         bucket_or_name="my_bucket",
         prefix="B",
@@ -552,7 +545,7 @@ def test_alpha(mock_list_keys):
     my_data_connector: DataConnector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.*)\.csv"),
         gcs_client=gcs_client,
         bucket_or_name="my_bucket",
         prefix="test_dir_alpha",
@@ -590,7 +583,7 @@ def test_alpha(mock_list_keys):
     my_batch_request = BatchRequest(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        options={"part_1": "test_dir_alpha/B"},
+        options={"part_1": "B"},
     )
     my_batch_definition_list = my_data_connector.get_batch_definition_list(
         batch_request=my_batch_request
@@ -612,7 +605,7 @@ def test_foxtrot(mock_list_keys):
     my_data_connector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv"),
         gcs_client=gcs_client,
         bucket_or_name="my_bucket",
         prefix="",
@@ -634,7 +627,7 @@ def test_foxtrot(mock_list_keys):
     my_data_connector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv"),
         gcs_client=gcs_client,
         bucket_or_name="my_bucket",
         prefix="test_dir_foxtrot/A",
@@ -665,7 +658,7 @@ def test_foxtrot(mock_list_keys):
     my_data_connector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.txt"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.txt"),
         gcs_client=gcs_client,
         bucket_or_name="my_bucket",
         prefix="test_dir_foxtrot/B",
@@ -696,7 +689,7 @@ def test_foxtrot(mock_list_keys):
     my_data_connector = GoogleCloudStorageDataConnector(
         datasource_name="my_file_path_datasource",
         data_asset_name="my_google_cloud_storage_data_asset",
-        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.+)\.csv"),
+        batching_regex=re.compile(r"(?P<part_1>.+)-(?P<part_2>.*)\.csv"),
         gcs_client=gcs_client,
         bucket_or_name="my_bucket",
         prefix="test_dir_foxtrot/C",

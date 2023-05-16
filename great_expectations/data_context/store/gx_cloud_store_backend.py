@@ -339,6 +339,7 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
         # Chetan - 20220713 - DataContextVariables are a special edge case for the Cloud product
         # and always necessitate a PUT.
         if id or resource is GXCloudRESTResource.DATA_CONTEXT_VARIABLES:
+            # _update returns a bool
             return self._update(id=id, value=value)
 
         resource_type = self.ge_cloud_resource_type
@@ -369,10 +370,14 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
 
             object_id = response_json["data"]["id"]
             object_url = self.get_url_for_key((self.ge_cloud_resource_type, object_id))
+            # This method is where posts get made for all cloud store endpoints. We pass
+            # the response_json back up to the caller because the specific resource may
+            # want to parse resource specific data out of the response.
             return GXCloudResourceRef(
                 resource_type=resource_type,
                 id=object_id,
                 url=object_url,
+                response_json=response_json,
             )
         except requests.HTTPError as http_exc:
             raise StoreBackendError(
@@ -464,28 +469,45 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             key = key.to_tuple()
 
         id = key[1]
-
-        data = {
-            "data": {
-                "type": self.ge_cloud_resource_type,
-                "id": id,
-                "attributes": {
-                    "deleted": True,
-                },
-            }
-        }
-
-        url = construct_url(
-            base_url=self.ge_cloud_base_url,
-            organization_id=self.ge_cloud_credentials["organization_id"],
-            resource_name=self.ge_cloud_resource_name,
-            id=id,
-        )
+        if len(key) == 3:
+            resource_object_name = key[2]
+        else:
+            resource_object_name = None
 
         try:
-            response = self._session.delete(url, json=data)
-            response.raise_for_status()
-            return True
+            # prefer deletion by id if id present
+            if id:
+                data = {
+                    "data": {
+                        "type": self.ge_cloud_resource_type,
+                        "id": id,
+                        "attributes": {
+                            "deleted": True,
+                        },
+                    }
+                }
+
+                url = construct_url(
+                    base_url=self.ge_cloud_base_url,
+                    organization_id=self.ge_cloud_credentials["organization_id"],
+                    resource_name=self.ge_cloud_resource_name,
+                    id=id,
+                )
+                response = self._session.delete(url, json=data)
+                response.raise_for_status()
+                return True
+            # delete by name
+            elif resource_object_name:
+                url = construct_url(
+                    base_url=self.ge_cloud_base_url,
+                    organization_id=self.ge_cloud_credentials["organization_id"],
+                    resource_name=self.ge_cloud_resource_name,
+                )
+                response = self._session.delete(
+                    url, params={"name": resource_object_name}
+                )
+                response.raise_for_status()
+                return True
         except requests.HTTPError as http_exc:
             logger.exception(http_exc)
             raise StoreBackendError(
