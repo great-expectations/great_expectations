@@ -96,8 +96,7 @@ For this guide, we will use a previously defined Datasource named `"my_datasourc
 
 To retrieve this Datasource, we will supply the `get_datasource(...)` method of our Data Context with the name of the Datasource we wish to retrieve:
 
-```python title="Python code"
-my_datasource = context.get_datasource("my_datasource")
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_datasource"
 ```
 
 ### 3. Create a `batching_regex`
@@ -111,8 +110,7 @@ For this example, our Datasource points to a folder that contains the following 
 
 To create a `batching_regex` that matches multiple files, we will include a named group in our regular expression:
 
-```python title="Python code"
-my_batching_regex = "taxi_data_(?P<year>\d{4})\.csv"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_batching_regex"
 ```
 
 In the above example, the named group "`year`" will match any four numeric characters in a file name.  This will result in each of our source data files matching the regular expression.
@@ -133,8 +131,7 @@ For more information on how to format regular expressions, we recommend referenc
 
 Now that we have put together a regular expression that will match one or more of the files in our Datasource's `base_folder`, we can use it to create our Data Asset.  Since the files in this particular Datasource's `base_folder` are csv files, we will use the `add_pandas_csv(...)` method of our Datasource to create the new Data Asset:
 
-```python title="Python code"
-my_asset = my_datasource.add_csv_asset(name="my_taxi_data_asset", batching_regex=my_batching_regex)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_asset"
 ```
 
 :::tip What if I don't provide a `batching_regex`?
@@ -149,12 +146,11 @@ We will now add a Batch Sorter to our Data Asset.  This will allow us to explici
 
 The items in our list of sorters will correspond to the names of the groups in our `batching_regex` that we want to sort our Batches on.  The names are prefixed with a `+` or a `-` depending on if we want to sort our Batches in ascending or descending order based on the given group.
 
-If there were multiple named groups we could include multiple items in our sorter list and our Batches would be returned in the order specified by the list: sorted first according to the first item, then the second, and so forth.
+When there are multiple named groups we can include multiple items in our sorter list and our Batches will be returned in the order specified by the list: sorted first according to the first item, then the second, and so forth.
 
-However, in this example we only have one named group, `"year"`, so our list of sorters will only have one element.  We will add an ascending sorter based on the contents of the regex group `"year"`:
+In this example we have two named groups, `"year"` and `"month"`, so our list of sorters can have up to two elements.  We will add an ascending sorter based on the contents of the regex group `"year"` and a descending sorter based on the contents of the regex group `"month"`:
 
-```python title="Python code"
-my_asset.add_sorters(["+year"])
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py add_sorters"
 ```
 
 ### 6. Use a Batch Request to verify the Data Asset works as desired
