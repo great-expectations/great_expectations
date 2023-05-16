@@ -267,6 +267,34 @@ def _put_db_datasources_callback(
     return result
 
 
+def _get_db_datasources_callback(
+    request: PreparedRequest,
+) -> _CallbackResult:
+    url = request.url
+    logger.info(f"{request.method} {url}")
+
+    item = _CLOUD_API_FAKE_DB.get(url, MISSING)
+    if not request.body:
+        errors = ErrorPayload(
+            errors=[{"code": "mock 400", "detail": "missing body", "source": None}]
+        )
+        result = _CallbackResult(400, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+    elif item is not MISSING:
+        payload = json.loads(request.body)
+        _CLOUD_API_FAKE_DB[url] = payload
+        result = _CallbackResult(
+            200, headers=_DEFAULT_HEADERS, body=json.dumps(payload)
+        )
+    else:
+        errors = ErrorPayload(
+            errors=[{"code": "mock 404", "detail": None, "source": None}]
+        )
+        result = _CallbackResult(404, headers=_DEFAULT_HEADERS, body=json.dumps(errors))
+
+    logger.info(f"Response {result.status}")
+    return result
+
+
 @pytest.fixture
 def cloud_api_fake():
     org_url_base = f"{GX_CLOUD_MOCK_BASE_URL}/organizations/{FAKE_ORG_ID}"
@@ -308,6 +336,11 @@ def cloud_api_fake():
         )
         resp_mocker.add_callback(
             responses.POST, datasources_url, _post_fake_db_datasources_callback
+        )
+        resp_mocker.add_callback(
+            responses.GET,
+            f"{datasources_url}",
+            _get_db_datasources_callback,
         )
 
         yield resp_mocker
