@@ -5,10 +5,6 @@ authors:
     url: https://datahubproject.io
 ---
 
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
-
 :::info
 * Maintained By: DataHub
 * Status: Beta
@@ -85,8 +81,9 @@ action_list:
 
 #### 3. Run the GX checkpoint
 
-```bash
-great_expectations checkpoint run my_checkpoint #replace my_checkpoint with your checkpoint name
+This Python code can retrieve and run a Checkpoint:
+
+```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
 ```
 
 #### 4. Hurray!
