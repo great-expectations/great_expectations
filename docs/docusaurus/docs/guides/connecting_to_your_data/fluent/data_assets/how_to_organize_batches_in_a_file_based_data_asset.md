@@ -104,9 +104,9 @@ To retrieve this Datasource, we will supply the `get_datasource(...)` method of 
 In a file-based Data Asset, any file that matches a provided regular expression (the `batching_regex` parameter) will be included as a Batch in the Data Asset.  Therefore, to organize multiple files into Batches in a single Data Asset we must define a regular expression that will match one or more of our source data files.
 
 For this example, our Datasource points to a folder that contains the following files:
-- "taxi_data_2019.csv"
-- "taxi_data_2020.csv"
-- "taxi_data_2021.csv"
+- "yellow_tripdata_sample_2019-03.csv"
+- "yellow_tripdata_sample_2020-07.csv"
+- "yellow_tripdata_sample_2021-02.csv"
 
 To create a `batching_regex` that matches multiple files, we will include a named group in our regular expression:
 
