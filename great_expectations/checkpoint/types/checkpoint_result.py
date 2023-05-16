@@ -88,18 +88,24 @@ class CheckpointResult(SerializableDictDot):
         else:
             self._success = success
 
-        self._validation_results = None
-        self._data_assets_validated = None
-        self._data_assets_validated_by_batch_id = None
-        self._validation_result_identifiers = None
-        self._expectation_suite_names = None
-        self._data_asset_names = None
-        self._validation_results_by_expectation_suite_name = None
-        self._validation_results_by_data_asset_name = None
+        self._validation_results: list[
+            ExpectationSuiteValidationResult
+        ] | dict | None = None
+        self._data_assets_validated: list[dict] | dict | None = None
+        self._data_assets_validated_by_batch_id: dict | None = None
+        self._validation_result_identifiers: list[
+            ValidationResultIdentifier
+        ] | None = None
+        self._expectation_suite_names: list[str] | None = None
+        self._data_asset_names: list[str] | None = None
+        self._validation_results_by_expectation_suite_name: dict | None = None
+        self._validation_results_by_data_asset_name: dict | None = None
         self._batch_identifiers: list[str] | None = None
-        self._statistics = None
-        self._validation_statistics = None
-        self._validation_results_by_validation_result_identifier = None
+        self._statistics: dict | None = None
+        self._validation_statistics: dict[
+            ValidationResultIdentifier, dict
+        ] | None = None
+        self._validation_results_by_validation_result_identifier: dict | None = None
 
     @property
     def name(self) -> str:
