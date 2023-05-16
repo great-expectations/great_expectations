@@ -82,7 +82,7 @@ class CheckpointResult(SerializableDictDot):
         self._checkpoint_config = checkpoint_config
         if success is None:
             self._success = all(
-                run_result["validation_result"].success
+                run_result["validation_result"].success  # type: ignore[union-attr] # no `.success` attr for ExpectationSuiteValidationResult | dict | str
                 for run_result in run_results.values()
             )
         else:
