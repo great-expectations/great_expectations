@@ -2,12 +2,16 @@ from __future__ import annotations
 
 import logging
 import pathlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 from great_expectations.core.batch import BatchDefinition
 from great_expectations.core.id_dict import IDDict
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
+)
+from great_expectations.datasource.fluent.data_asset.data_connector.file_path_data_connector import (
+    FilePathDataConnector,
+    make_directory_get_unfiltered_batch_definition_list_fn,
 )
 from great_expectations.datasource.fluent.file_path_data_asset import _FilePathDataAsset
 
@@ -19,7 +23,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class _DirectoryDataAsset(_FilePathDataAsset):
+class _DirectoryDataAssetMixin(_FilePathDataAsset):
     """Used for accessing all the files in a directory as a single batch."""
 
     data_directory: pathlib.Path
@@ -33,7 +37,7 @@ class _DirectoryDataAsset(_FilePathDataAsset):
             batch_request: Batch request used to generate batch definitions.
 
         Returns:
-            List of batch definitions, in the case of a _DirectoryDataAsset the list contains a single item.
+            List of batch definitions, in the case of a _DirectoryDataAssetMixin the list contains a single item.
         """
         if self.splitter:
             # Currently non-sql asset splitters do not introspect the datasource for available
@@ -55,6 +59,14 @@ class _DirectoryDataAsset(_FilePathDataAsset):
             )
         return batch_definition_list
 
+    def get_unfiltered_batch_definition_list_fn(
+        self,
+    ) -> Callable[[FilePathDataConnector, BatchRequest], list[BatchDefinition]]:
+        """Get the asset specific function for retrieving the unfiltered list of batch definitions."""
+        return make_directory_get_unfiltered_batch_definition_list_fn(
+            self.data_directory
+        )
+
     def _get_reader_method(self) -> str:
         raise NotImplementedError(
             """One needs to explicitly provide "reader_method" for File-Path style DataAsset extensions as temporary \
@@ -62,7 +74,6 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
 
     def _get_reader_options_include(self) -> set[str]:
-        raise NotImplementedError(
-            """One needs to explicitly provide set(str)-valued reader options for "pydantic.BaseModel.dict()" method \
-to use as its "include" directive for File-Path style DataAsset processing."""
-        )
+        return {
+            "data_directory",
+        }

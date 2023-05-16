@@ -819,7 +819,10 @@ def clean_up_tables_with_prefix(connection_string: str, table_prefix: str) -> Li
         if table["table_name"].startswith(table_prefix):
             tables_to_drop.append(table["table_name"])
 
-    connection = execution_engine.engine.connect()
+    if isinstance(execution_engine.engine, sqlalchemy.Connection):
+        connection = execution_engine.engine
+    else:
+        connection = execution_engine.engine.connect()
     for table_name in tables_to_drop:
         print(f"Dropping table {table_name}")
         connection.execute(sa.text(f"DROP TABLE IF EXISTS {table_name}"))

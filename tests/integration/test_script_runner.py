@@ -234,6 +234,11 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
+    IntegrationTestFixture(
+        name="setup_overview",
+        user_flow_script="tests/integration/docusaurus/setup/setup_overview.py",
+        data_context_dir=None,
+    ),
 ]
 
 quickstart = [
@@ -303,6 +308,18 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py",
         data_context_dir=None,
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTestFixture(
+        name="how_to_create_and_edit_an_expectation_with_domain_knowledge",
+        user_flow_script="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py",
+        data_context_dir=None,
+    ),
+    IntegrationTestFixture(
+        name="how_to_request_data_from_a_data_asset",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.PANDAS],
     ),
 ]
 
