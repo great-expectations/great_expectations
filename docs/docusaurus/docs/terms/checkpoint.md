@@ -79,7 +79,7 @@ At runtime, a Checkpoint configuration has three required and three optional key
 - `template_name`: the name of another Checkpoint to use as a base template
 - `run_name_template`: a template to create run names, using environment variables and datetime-template syntax (e.g. "%Y-%M-staging-$MY_ENV_VAR")
 
-### Configuration defaults and parameter override behavior
+### Configure defaults and parameter override behavior
 
 Checkpoint configurations follow a nested pattern, where more general keys provide defaults for more specific ones. For instance, any required validation dictionary keys (e.g. `expectation_suite_name`) can be specified at the top-level (i.e. at the same level as the validations list), serving as runtime defaults. Starting at the earliest reference template, if a configuration key is re-specified, its value can be appended, updated, replaced, or cause an error when redefined.
 

@@ -60,7 +60,7 @@ Data Docs Stores are the one exception to the above.  They are instead configure
 
 ## Configure
 
-Configuration of your Stores is located in your `great_expectations.yml` file under the `stores` key.  Three stores are required: an Expectation Store, a Validation Result Store, and an Evaluation Parameter Store must always have a valid entry in the `great_expectations.yml` file.  Additional Stores can be configured for uses such as Data Docs and Checkpoints (and a Checkpoint Store configuration entry will automatically be added if one does not exist when you attempt to save a Checkpoint for the first time.)
+Your Stores configurations are located in your `great_expectations.yml` file below the `stores` key.  Three stores are required: an Expectation Store, a Validation Result Store, and an Evaluation Parameter Store must always have a valid entry in the `great_expectations.yml` file.  Additional Stores can be configured for uses such as Data Docs and Checkpoints (and a Checkpoint Store configuration entry will automatically be added if one does not exist when you attempt to save a Checkpoint for the first time.)
 
 Note that unlike other Stores, your Data Docs Stores are configured under each individual site under the `data_docs_sites` key in the `great_expectations.yml` file.
 

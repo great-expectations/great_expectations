@@ -64,7 +64,7 @@ There are additional parameters that can be passed to a `UserConfigurableProfile
 
 It is unlikely that you will need to create a custom Profiler by extending an existing Profiler with a subclass.  Instead, you should work with a Rule-Based Profiler which can be fully configured in a YAML configuration file.
 
-Configuring a custom Rule-Based Profiler is covered in more detail in the [Configuration](#configuration) section below.  You can also read our guide on [how to create a new expectation suite using Rule-Based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md) to be walked through the process, or view [the full source code for that guide](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py) on our GitHub as an example.
+Configuring a custom Rule-Based Profiler is covered in the following section.  See also [How to create a new expectation suite using Rule-Based Profilers](../guides/expectations/advanced/how_to_create_a_new_expectation_suite_using_rule_based_profilers.md), or [the full source code for that guide](https://github.com/great-expectations/great_expectations/blob/develop/tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py) on our GitHub as an example.
 
 ## Configure rule-based Profilers
 
