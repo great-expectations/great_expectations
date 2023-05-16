@@ -75,7 +75,7 @@ You may also replace the default ``local_site`` if you would only like to mainta
 
 The following Python code will run and open your Data Docs:
 
-``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs"
+``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```
 
 ### 8. Test that everything was configured properly by launching your App Engine app

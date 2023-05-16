@@ -52,7 +52,7 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-  az_site:  # this is a user-selected name - you may select your own
+  new_site_name:  # this is a user-selected name - you may select your own
     class_name: SiteBuilder
     store_backend:
        class_name: TupleAzureBlobStoreBackend
@@ -97,7 +97,7 @@ You can create or modify an <TechnicalTag tag="expectation_suite" text="Expectat
 
 The following Python code will run and open your Data Docs:
 
-``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs"
+``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```
 
 ### 5. Limit the access to your company
