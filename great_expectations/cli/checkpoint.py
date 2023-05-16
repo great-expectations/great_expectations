@@ -1,13 +1,9 @@
 import os
 import sys
-from typing import List
+from typing import TYPE_CHECKING, List
 
 import click
 
-from great_expectations import DataContext  # noqa: TCH001
-from great_expectations.checkpoint.types.checkpoint_result import (
-    CheckpointResult,  # noqa: TCH001
-)
 from great_expectations.cli import toolkit
 from great_expectations.cli.cli_messages import (
     CHECKPOINT_NEW_FLUENT_DATASOURCES_AND_BLOCK_DATASOURCES,
@@ -22,6 +18,10 @@ from great_expectations.render.renderer.checkpoint_new_notebook_renderer import 
     CheckpointNewNotebookRenderer,
 )
 from great_expectations.util import lint_code
+
+if TYPE_CHECKING:
+    from great_expectations.checkpoint.types.checkpoint_result import CheckpointResult
+    from great_expectations.data_context import FileDataContext
 
 """
 --ge-feature-maturity-info--
@@ -96,8 +96,7 @@ def checkpoint_new(ctx: click.Context, name: str, jupyter: bool) -> None:
 
 
 def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> None:
-
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
     has_fluent_datasource: bool = len(context.fluent_datasources) > 0
     has_block_datasource: bool = (
@@ -159,7 +158,7 @@ If you wish to avoid this you can add the `--no-jupyter` flag.</green>\n\n"""
 
 
 def _verify_checkpoint_does_not_exist(
-    context: DataContext, checkpoint_name: str, usage_event: str
+    context: FileDataContext, checkpoint_name: str, usage_event: str
 ) -> None:
     try:
         if checkpoint_name in context.list_checkpoints():
@@ -174,7 +173,7 @@ def _verify_checkpoint_does_not_exist(
         )
 
 
-def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
+def _get_notebook_path(context: FileDataContext, notebook_name: str) -> str:
     return os.path.abspath(  # noqa: PTH100
         os.path.join(  # noqa: PTH118
             context.root_directory, context.GX_EDIT_NOTEBOOK_DIR, notebook_name
@@ -186,7 +185,7 @@ def _get_notebook_path(context: DataContext, notebook_name: str) -> str:
 @click.pass_context
 def checkpoint_list(ctx: click.Context) -> None:
     """List configured checkpoints."""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     checkpoints: List[str] = context.list_checkpoints()
@@ -219,7 +218,7 @@ def checkpoint_list(ctx: click.Context) -> None:
 @click.pass_context
 def checkpoint_delete(ctx: click.Context, checkpoint: str) -> None:
     """Delete a Checkpoint."""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -251,7 +250,7 @@ def checkpoint_delete(ctx: click.Context, checkpoint: str) -> None:
 @click.pass_context
 def checkpoint_run(ctx: click.Context, checkpoint: str) -> None:
     """Run a Checkpoint."""
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     try:
@@ -329,7 +328,7 @@ def checkpoint_script(ctx: click.Context, checkpoint: str) -> None:
 
     This script is provided for those who wish to run Checkpoints via python.
     """
-    context: DataContext = ctx.obj.data_context
+    context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
     toolkit.validate_checkpoint(
