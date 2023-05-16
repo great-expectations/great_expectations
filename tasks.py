@@ -384,9 +384,9 @@ def tests(
     markers += ["unit" if unit else "not unit"]
 
     if compatibility:
-        markers += "compatibility"
+        markers += ["compatibility"]
     else:
-        markers += "not compatibility"
+        markers += ["not compatibility"]
 
     marker_text = " and ".join(markers)
 
