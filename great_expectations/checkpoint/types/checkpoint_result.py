@@ -216,7 +216,7 @@ class CheckpointResult(SerializableDictDot):
         if group_by is None:
             if self._validation_results is None:
                 self._validation_results = [
-                    run_result["validation_result"]  # type: ignore[misc] # List comprehension has incompatible type list[ExpectationSuiteValidationResult | dict | str]; expected list[ExpectationSuiteValidationResult]
+                    run_result["validation_result"]  # type: ignore[misc] # List comprehension has incompatible type `list | dict | str`; expected `list``
                     for run_result in self.run_results.values()
                 ]
             return self._validation_results
