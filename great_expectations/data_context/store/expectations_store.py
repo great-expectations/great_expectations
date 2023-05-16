@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import random
 import uuid
-from typing import TYPE_CHECKING, Dict
+from typing import Dict
 
 import great_expectations.exceptions as gx_exceptions
 from great_expectations.core import ExpectationSuite
@@ -23,9 +23,6 @@ from great_expectations.util import (
     filter_properties_dict,
     verify_dynamic_loading_support,
 )
-
-if TYPE_CHECKING:
-    from great_expectations.core.data_context_key import DataContextKey
 
 
 class ExpectationsStore(Store):
@@ -200,7 +197,9 @@ class ExpectationsStore(Store):
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             )
 
-    def get(self, key: DataContextKey | GXCloudIdentifier) -> ExpectationSuite:
+    def get(
+        self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
+    ) -> ExpectationSuite:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
             return self._store_backend.get(key)
 
@@ -208,7 +207,9 @@ class ExpectationsStore(Store):
         value = self._store_backend.get(self.key_to_tuple(key))
         return self.deserialize(value)
 
-    def _validate_key(self, key: DataContextKey | GXCloudIdentifier) -> None:
+    def _validate_key(
+        self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
+    ) -> None:
         if isinstance(key, GXCloudIdentifier) and not key.id and not key.resource_name:
             raise ValueError(
                 "GXCloudIdentifier for ExpectationsStore must contain either "
