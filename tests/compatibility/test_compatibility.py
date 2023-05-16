@@ -57,16 +57,16 @@ def test_optional_import_fixture_completeness(expected_files: set[str]):
     ), "Please add representative import to _OPTIONAL_IMPORTS and the filename to expected_files"
 
 
-_OPTIONAL_IMPORTS = (
-    pyspark,
-    boto3,
-    botocore,
-    azure_storage,
-    docstring_parser,
-    google_storage,
-    pyarrow,
-    sqlalchemy,
-)
+_OPTIONAL_IMPORTS = {
+    "pyspark": pyspark,
+    "boto3": boto3,
+    "botocore": botocore,
+    "azure_storage": azure_storage,
+    "docstring_parser": docstring_parser,
+    "google_storage": google_storage,
+    "pyarrow": pyarrow,
+    "sqlalchemy": sqlalchemy,
+}
 
 
 @pytest.mark.unit
@@ -75,8 +75,9 @@ _OPTIONAL_IMPORTS = (
     [
         pytest.param(
             library,
+            id=name,
         )
-        for library in _OPTIONAL_IMPORTS
+        for name, library in _OPTIONAL_IMPORTS.items()
     ],
 )
 @pytest.mark.compatibility
