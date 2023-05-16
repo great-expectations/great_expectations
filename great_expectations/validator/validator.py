@@ -1260,10 +1260,10 @@ class Validator:
 
         Args:
             expectation_configuration: A potentially incomplete (partial) Expectation Configuration to match against.
-            match_type: This determines what kwargs to use when matching. Options are 'domain' to match based
-                on the data evaluated by that expectation, 'success' to match based on all configuration parameters
-                that influence whether an expectation succeeds based on a given batch of data, and 'runtime' to match
-                based on all configuration parameters.
+            match_type: This determines what kwargs to use when matching. Options are:
+                - 'domain' to match based on the data evaluated by that expectation
+                - 'success' to match based on all configuration parameters that influence whether an expectation succeeds on a given batch of data
+                - 'runtime' to match based on all configuration parameters.
             remove_multiple_matches: If True, will remove multiple matching expectations.
             ge_cloud_id: Great Expectations Cloud id for an Expectation.
 
