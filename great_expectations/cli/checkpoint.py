@@ -68,7 +68,7 @@ def checkpoint(ctx: click.Context) -> None:
         end_event_name,
     ) = UsageStatsEvents.get_cli_begin_and_end_event_names(
         noun=cli_event_noun,
-        verb=ctx.invoked_subcommand,
+        verb=ctx.invoked_subcommand,  # type: ignore[arg-type]
     )
     send_usage_message(
         data_context=ctx.obj.data_context,
@@ -104,7 +104,6 @@ def _checkpoint_new(ctx: click.Context, checkpoint_name: str, jupyter: bool) -> 
     ) > 0
 
     try:
-
         if has_fluent_datasource and not has_block_datasource:
             toolkit.exit_with_failure_message_and_stats(
                 data_context=context,
@@ -188,7 +187,7 @@ def checkpoint_list(ctx: click.Context) -> None:
     context: FileDataContext = ctx.obj.data_context
     usage_event_end: str = ctx.obj.usage_event_end
 
-    checkpoints: List[str] = context.list_checkpoints()
+    checkpoints: List[str] = context.list_checkpoints()  # type: ignore[assignment]
     if not checkpoints:
         cli_message(
             "No Checkpoints found.\n"
@@ -297,18 +296,18 @@ def print_validation_operator_results_details(
     )
     for result_id, result_item in result.run_results.items():
         vr = result_item["validation_result"]
-        stats = vr.statistics
+        stats = vr.statistics  # type: ignore[union-attr]
         passed = stats["successful_expectations"]
         evaluated = stats["evaluated_expectations"]
         percentage_slug = (
             f"{round(passed / evaluated * 100, 2) if evaluated > 0 else 100} %"
         )
         stats_slug = f"{passed} of {evaluated} ({percentage_slug})"
-        if vr.success:
+        if vr.success:  # type: ignore[union-attr]
             status_slug = "<green>✔ Passed</green>"
         else:
             status_slug = "<red>✖ Failed</red>"
-        suite_name: str = str(vr.meta["expectation_suite_name"])
+        suite_name: str = str(vr.meta["expectation_suite_name"])  # type: ignore[union-attr]
         if len(suite_name) > max_suite_display_width:
             suite_name = suite_name[0:max_suite_display_width]
             suite_name = f"{suite_name[:-1]}…"
