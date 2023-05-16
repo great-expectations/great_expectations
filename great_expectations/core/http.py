@@ -1,9 +1,17 @@
+import logging
+
 import requests
 from requests.adapters import HTTPAdapter, Retry
 
 from great_expectations import __version__
 
 DEFAULT_TIMEOUT = 20
+
+LOGGER = logging.getLogger(__name__)
+
+
+def _log_request_method_and_response(r: requests.Response, *args, **kwargs):
+    LOGGER.info(f"{r.request.method} {r.request.url} - {r}")
 
 
 class _TimeoutHTTPAdapter(HTTPAdapter):
@@ -33,6 +41,9 @@ def create_session(
         retry_count=retry_count,
         backoff_factor=backoff_factor,
     )
+    # add an event hook to log outgoing http requests
+    # https://requests.readthedocs.io/en/latest/user/advanced/#event-hooks
+    session.hooks["response"].append(_log_request_method_and_response)
     return session
 
 
