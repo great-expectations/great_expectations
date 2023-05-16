@@ -231,6 +231,11 @@ def pytest_addoption(parser):
         help="If set, execute tests against snowflake",
     )
     parser.addoption(
+        "--clickhouse",
+        action="store_true",
+        help="If set, execute tests against clickhouse",
+    )
+    parser.addoption(
         "--aws-integration",
         action="store_true",
         help="If set, run aws integration tests for usage_statistics",
@@ -295,6 +300,7 @@ def build_test_backends_list_v3_api(metafunc):
     include_redshift: bool = metafunc.config.getoption("--redshift")
     include_athena: bool = metafunc.config.getoption("--athena")
     include_snowflake: bool = metafunc.config.getoption("--snowflake")
+    include_clickhouse: bool = metafunc.config.getoption("--clickhouse")
     test_backend_names: List[str] = build_test_backends_list_v3(
         include_pandas=include_pandas,
         include_spark=include_spark,
@@ -309,6 +315,7 @@ def build_test_backends_list_v3_api(metafunc):
         include_redshift=include_redshift,
         include_athena=include_athena,
         include_snowflake=include_snowflake,
+        include_clickhouse=include_clickhouse,
     )
     return test_backend_names
 
