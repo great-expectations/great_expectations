@@ -81,7 +81,7 @@ action_list:
 
 #### 3. Run the GX checkpoint
 
-This Python code can retrieve and run a Checkpoint:
+Run the following command to retrieve and run a Checkpoint:
 
 ```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
 ```

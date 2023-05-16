@@ -19,7 +19,7 @@ This guide will help you deploy a scheduled <TechnicalTag tag="checkpoint" text=
 
 ### 1. Verify Checkpoint suitability
 
-First, verify that your Checkpoint is runnable. This Python code can retrieve and run a Checkpoint:
+Run the following command to verify that your Checkpoint runs:
 
 ```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
 ```

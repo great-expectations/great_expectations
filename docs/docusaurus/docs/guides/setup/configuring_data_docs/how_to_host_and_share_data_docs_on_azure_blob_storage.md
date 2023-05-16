@@ -52,7 +52,7 @@ data_docs_sites:
       base_directory: uncommitted/data_docs/local_site/
     site_index_builder:
       class_name: DefaultSiteIndexBuilder
-  new_site_name:  # this is a user-selected name - you may select your own
+  new_site_name:  # this is a user-selected name - you can select your own
     class_name: SiteBuilder
     store_backend:
        class_name: TupleAzureBlobStoreBackend
@@ -95,7 +95,7 @@ The most common authentication methods are supported:
 
 You can create or modify an <TechnicalTag tag="expectation_suite" text="Expectation Suite" /> and this will build the Data Docs website.
 
-The following Python code will run and open your Data Docs:
+Run the the following Python code to build and open your Data Docs:
 
 ``` python name="tests/integration/docusaurus/reference/glossary/data_docs.py data_docs_site"
 ```

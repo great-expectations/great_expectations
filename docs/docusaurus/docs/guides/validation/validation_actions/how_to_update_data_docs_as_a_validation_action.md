@@ -70,7 +70,7 @@ The ``StoreValidationResultAction`` Action must appear before  ``UpdateDataDocsA
 
 Test that your new Action is configured correctly:
 
-Run the Checkpoint from your code to verify that no errors are thrown.
+Run the following command to run the Checkpoint and verify that no errors are returned:
 
 ```python
 import great_expectations as gx

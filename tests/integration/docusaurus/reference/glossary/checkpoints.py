@@ -8,7 +8,7 @@ import great_expectations as gx
 context = gx.get_context()
 # </snippet>
 
-# to open data docs, we need validation results which we get by creating a suite and running a checkpoint
+# to open Data Docs, we need validation results which we get by creating a suite and running a checkpoint
 datasource: Datasource = context.get_datasource("taxi_datasource")
 asset: DataAsset = datasource.get_asset("yellow_tripdata")
 batch_request = asset.build_batch_request()

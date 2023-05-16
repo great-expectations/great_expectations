@@ -54,7 +54,7 @@ action_list:
 
 ### 3.  Test your Action by Validating a Batch of data.
 
-Run your Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and emit lineage events to the OpenLineage backend. This Python code can retrieve and run a Checkpoint:
+Run the following command to retrieve and run a Checkpoint to Validate a <TechnicalTag tag="batch" text="Batch" /> of data and then emit lineage events to the OpenLineage backend:
 
 ```python name="tests/integration/docusaurus/reference/glossary/checkpoints.py retrieve_and_run"
 ```
