@@ -6,7 +6,6 @@ GOOGLE_CLOUD_STORAGE_NOT_IMPORTED = NotImported(
     "google cloud storage components are not installed, please 'pip install google-cloud-storage google-cloud-secret-manager'"
 )
 
-
 try:
     from google.cloud import secretmanager
 except (ImportError, AttributeError):
