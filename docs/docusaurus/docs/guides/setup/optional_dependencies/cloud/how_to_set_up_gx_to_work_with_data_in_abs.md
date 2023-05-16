@@ -9,9 +9,6 @@ keywords: [Great Expectations, Data Context, Filesystem, ABS, Azure Blob Storage
 
 import TechnicalTag from '/docs/term_tags/_tag.mdx';
 import Prerequisites from '/docs/components/_prerequisites.jsx'
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
-
-<CLIRemoval />
 
 <!-- ## Prerequisites -->
 import PrereqAbsConfiguredAnAbsAccount from '/docs/components/prerequisites/_abs_configured_an_azure_storage_account_and_kept_connection_string.md'
@@ -70,16 +67,6 @@ This guide will walk you through best practices for creating your GX Python envi
 ### 4. Verify that GX has been installed correctly
 
 <GxVerifyInstallation />
-
-### 5. Initialize a Data Context to store your Azure Storage credentials
-
-<InitializeDataContextFromCli />
-
-:::info Verifying the Data Context initialized successfully
-
-<VerifyDataContextInitializedFromCli />
-
-:::
 
 ### 6. Configure the `config_variables.yml` file with your Azure Storage credentials
 
