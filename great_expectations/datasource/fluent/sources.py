@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import uuid
 from enum import Enum
 from typing import (
     TYPE_CHECKING,
@@ -555,6 +556,12 @@ class _SourceFactories:
             self._validate_current_datasource_type(
                 datasource_name, datasource_type, raise_if_none=False  # type: ignore[arg-type] # expected str only
             )
+            # get any existing id
+            id_: uuid.UUID | None = None
+            old_datasource = self._data_context.datasources.get(datasource_name)
+            if old_datasource:
+                id_ = old_datasource.id
+
             # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
                 datasource_name=datasource_name, _call_store=False  # type: ignore[arg-type] # expected str only
@@ -562,7 +569,7 @@ class _SourceFactories:
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
             return self.create_add_crud_method(datasource_type)(
-                name_or_datasource, **kwargs
+                name_or_datasource, id=id_, **kwargs
             )
 
         add_or_update_datasource.__doc__ = doc_string
