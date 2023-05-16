@@ -914,7 +914,7 @@ def materialize_batch_request(
 
 
 def batch_request_contains_batch_data(
-    batch_request: Optional[Union[BatchRequestBase, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, FluentBatchRequest, dict]] = None
 ) -> bool:
     return (
         batch_request_contains_runtime_parameters(batch_request=batch_request)
