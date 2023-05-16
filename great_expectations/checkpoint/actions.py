@@ -41,7 +41,7 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext, DataContext
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class ValidationAction:
         data_context: Data Context that is used by the Action.
     """
 
-    def __init__(self, data_context: DataContext) -> None:
+    def __init__(self, data_context: AbstractDataContext) -> None:
         """Create a ValidationAction"""
         self.data_context = data_context
 
@@ -201,7 +201,7 @@ class SlackNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         slack_webhook: Optional[str] = None,
         slack_token: Optional[str] = None,
@@ -350,7 +350,7 @@ class PagerdutyAlertAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         api_key: str,
         routing_key: str,
         notify_on: str = "failure",
@@ -458,7 +458,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         microsoft_teams_webhook: str,
         notify_on: str = "all",
@@ -567,7 +567,7 @@ class OpsgenieAlertAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         api_key: str,
         region: Optional[str] = None,
@@ -707,7 +707,7 @@ class EmailAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         smtp_address: str,
         smtp_port: str,
@@ -1218,7 +1218,7 @@ class SNSNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         sns_topic_arn: str,
         sns_message_subject: Optional[str],
     ) -> None:
