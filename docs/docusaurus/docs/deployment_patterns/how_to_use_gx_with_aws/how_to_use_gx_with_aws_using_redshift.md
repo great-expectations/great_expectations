@@ -227,7 +227,7 @@ This guide will demonstrate each of the steps necessary to go from installing a 
 <OptionalCopyExistingExpectationsToS3 />
 
 #### 1.4.4 (Optional) Verify that copied Expectations can be accessed from Amazon S3
-<OptionalVerifyCopiedExpectationsAreAccessible>
+<OptionalVerifyCopiedExpectationsAreAccessible />
 
 ### 1.5 Configure your Validation Results Store on Amazon S3
 
