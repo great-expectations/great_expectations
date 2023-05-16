@@ -795,7 +795,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     pk_column: bool,
 ) -> Validator:
 
-    spark_types: dict = {
+    spark_types: Dict[str, callable] = {
         "StringType": pyspark.types.StringType,
         "IntegerType": pyspark.types.IntegerType,
         "LongType": pyspark.types.LongType,
@@ -806,6 +806,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
         "BooleanType": pyspark.types.BooleanType,
         "DataType": pyspark.types.DataType,
         "NullType": pyspark.types.NullType,
+        # When inferring schema from decimal.Decimal objects, pyspark uses DecimalType(38, 18).
         "DecimalType": partial(pyspark.types.DecimalType, 38, 18),
     }
 
