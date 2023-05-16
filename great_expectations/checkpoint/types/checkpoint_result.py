@@ -68,9 +68,9 @@ class CheckpointResult(SerializableDictDot):
     def __init__(
         self,
         run_id: RunIdentifier,
-        run_results: Dict[
+        run_results: dict[
             ValidationResultIdentifier,
-            Dict[str, Union[ExpectationSuiteValidationResult, dict, str]],
+            dict[str, ExpectationSuiteValidationResult | dict | str],
         ],
         checkpoint_config: CheckpointConfig,
         validation_result_url: Optional[str] = None,
@@ -112,9 +112,9 @@ class CheckpointResult(SerializableDictDot):
     @property
     def run_results(
         self,
-    ) -> Dict[
+    ) -> dict[
         ValidationResultIdentifier,
-        Dict[str, Union[ExpectationSuiteValidationResult, dict]],
+        dict[str, ExpectationSuiteValidationResult | dict | str],
     ]:
         return self._run_results
 
