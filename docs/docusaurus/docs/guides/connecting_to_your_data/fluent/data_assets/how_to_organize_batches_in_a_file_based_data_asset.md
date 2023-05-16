@@ -146,7 +146,7 @@ We will now add a Batch Sorter to our Data Asset.  This will allow us to explici
 
 The items in our list of sorters will correspond to the names of the groups in our `batching_regex` that we want to sort our Batches on.  The names are prefixed with a `+` or a `-` depending on if we want to sort our Batches in ascending or descending order based on the given group.
 
-When there are multiple named groups we can include multiple items in our sorter list and our Batches will be returned in the order specified by the list: sorted first according to the first item, then the second, and so forth.
+When there are multiple named groups, we can include multiple items in our sorter list and our Batches will be returned in the order specified by the list: sorted first according to the first item, then the second, and so forth.
 
 In this example we have two named groups, `"year"` and `"month"`, so our list of sorters can have up to two elements.  We will add an ascending sorter based on the contents of the regex group `"year"` and a descending sorter based on the contents of the regex group `"month"`:
 
