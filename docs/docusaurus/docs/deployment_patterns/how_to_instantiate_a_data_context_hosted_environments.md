@@ -15,7 +15,7 @@ To configure a Data Context for a specific environment, see one of the following
 
 ## Create Expectation Suites and add Expectations
 
-To add a Datasource and an Expectation Suite, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres.md#5-configure-your-datasource).
+To add a Datasource and an Expectation Suite, see [How to connect to a PostgreSQL database](/docs/0.15.50/guides/connecting_to_your_data/database/postgres#5-configure-your-datasource).
 
 To add Expectations to your Suite individually, use the following code:
 
