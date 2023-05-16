@@ -842,9 +842,9 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                 print(schema)
             for col in schema:
                 type_ = schema[col]
+                # Ints cannot be None...but None can be valid in Spark (as Null)
+                vals: List[Union[str, int, float, None, Decimal]] = []
                 if type_ in ["IntegerType", "LongType"]:
-                    # Ints cannot be None...but None can be valid in Spark (as Null)
-                    vals: List[Union[str, int, float, None]] = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
@@ -852,7 +852,6 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                             vals.append(int(val))
                     data[col] = vals
                 elif type_ in ["FloatType", "DoubleType"]:
-                    vals = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
@@ -860,7 +859,6 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                             vals.append(float(val))
                     data[col] = vals
                 elif type_ in ["DecimalType"]:
-                    vals: List[Union[str, int, float, None, Decimal]] = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
@@ -868,7 +866,6 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                             vals.append(Decimal(val))
                     data[col] = vals
                 elif type_ in ["DateType", "TimestampType"]:
-                    vals = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
