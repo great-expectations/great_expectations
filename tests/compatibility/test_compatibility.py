@@ -32,6 +32,7 @@ def expected_files() -> set[str, ...]:
     }
 
 
+@pytest.mark.unit
 @pytest.mark.compatibility
 def test_optional_import_fixture_completeness(expected_files: set[str, ...]):
     """What does this test and why?
