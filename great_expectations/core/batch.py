@@ -602,10 +602,12 @@ class RuntimeBatchRequest(BatchRequestBase):
         batch_identifiers: Optional[dict],
         batch_spec_passthrough: Optional[dict] = None,
     ) -> None:
-        # we either have both runtime_parameters and batch_identifiers, or neither
-        if not (
-            (not runtime_parameters and not batch_identifiers)
-            or (runtime_parameters and batch_identifiers)
+        """
+        We must have both or neither of runtime_parameters and batch_identifiers (but not either one of them).
+        This is strict equivalence ("if-and-only") condition ("exclusive NOR"); otherwise, ("exclusive OR") means error.
+        """
+        if (not runtime_parameters and batch_identifiers) or (
+            runtime_parameters and not batch_identifiers
         ):
             raise ValueError(
                 "It must be that either both runtime_parameters and batch_identifiers are present, or both are missing"
@@ -912,7 +914,7 @@ def materialize_batch_request(
 
 
 def batch_request_contains_batch_data(
-    batch_request: Optional[Union[BatchRequestBase, dict]] = None
+    batch_request: Optional[Union[BatchRequestBase, FluentBatchRequest, dict]] = None
 ) -> bool:
     return (
         batch_request_contains_runtime_parameters(batch_request=batch_request)
