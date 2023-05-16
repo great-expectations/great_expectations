@@ -197,7 +197,7 @@ class ExpectationsStore(Store):
                 f"Could not find an existing ExpectationSuite named {value.expectation_suite_name}."
             )
 
-    def get(
+    def get(  # type: ignore[override]
         self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
     ) -> ExpectationSuite:
         if key == StoreBackend.STORE_BACKEND_ID_KEY:
@@ -207,7 +207,7 @@ class ExpectationsStore(Store):
         value = self._store_backend.get(self.key_to_tuple(key))
         return self.deserialize(value)
 
-    def _validate_key(
+    def _validate_key(  # type: ignore[override]
         self, key: ExpectationSuiteIdentifier | GXCloudIdentifier
     ) -> None:
         if isinstance(key, GXCloudIdentifier) and not key.id and not key.resource_name:
