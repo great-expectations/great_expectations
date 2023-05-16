@@ -2106,7 +2106,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 config_version=config_version,
                 template_name=template_name,
                 module_name=module_name,
-                class_name=class_name,
+                class_name=class_name,  # type: ignore[arg-type] # should be specific Literal str.
                 run_name_template=run_name_template,
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,
