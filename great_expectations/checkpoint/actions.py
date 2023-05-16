@@ -26,9 +26,6 @@ from great_expectations.checkpoint.util import (
     send_sns_notification,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,  # noqa: TCH001
-)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.refs import GXCloudResourceRef
@@ -41,6 +38,9 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 if TYPE_CHECKING:
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
     from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
