@@ -26,9 +26,6 @@ from great_expectations.checkpoint.util import (
     send_sns_notification,
 )
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,  # noqa: TCH001
-)
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_context.store.metric_store import MetricStore
 from great_expectations.data_context.types.refs import GXCloudResourceRef
@@ -41,7 +38,10 @@ from great_expectations.data_context.util import instantiate_class_from_config
 from great_expectations.exceptions import ClassInstantiationError, DataContextError
 
 if TYPE_CHECKING:
-    from great_expectations.data_context import AbstractDataContext, DataContext
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
+    from great_expectations.data_context import AbstractDataContext
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class ValidationAction:
         data_context: Data Context that is used by the Action.
     """
 
-    def __init__(self, data_context: DataContext) -> None:
+    def __init__(self, data_context: AbstractDataContext) -> None:
         """Create a ValidationAction"""
         self.data_context = data_context
 
@@ -201,7 +201,7 @@ class SlackNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         slack_webhook: Optional[str] = None,
         slack_token: Optional[str] = None,
@@ -237,7 +237,7 @@ class SlackNotificationAction(ValidationAction):
         self.notify_with = notify_with
         self.show_failed_expectations = show_failed_expectations
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -274,9 +274,7 @@ class SlackNotificationAction(ValidationAction):
                     data_docs_pages = payload[action_names]
 
         # Assemble complete GX Cloud URL for a specific validation result
-        data_docs_urls: list[
-            dict[str, str | None]
-        ] = self.data_context.get_docs_sites_urls(
+        data_docs_urls: list[dict[str, str]] = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier
         )
 
@@ -350,7 +348,7 @@ class PagerdutyAlertAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         api_key: str,
         routing_key: str,
         notify_on: str = "failure",
@@ -365,7 +363,7 @@ class PagerdutyAlertAction(ValidationAction):
         assert routing_key, "No Pagerduty routing_key found in action config."
         self.notify_on = notify_on
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -458,7 +456,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         microsoft_teams_webhook: str,
         notify_on: str = "all",
@@ -483,7 +481,7 @@ class MicrosoftTeamsNotificationAction(ValidationAction):
         ), "No Microsoft teams webhook found in action config."
         self.notify_on = notify_on
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -567,7 +565,7 @@ class OpsgenieAlertAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         api_key: str,
         region: Optional[str] = None,
@@ -597,7 +595,7 @@ class OpsgenieAlertAction(ValidationAction):
         self.notify_on = notify_on
         self.tags = tags
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -707,7 +705,7 @@ class EmailAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         renderer: dict,
         smtp_address: str,
         smtp_port: str,
@@ -759,7 +757,7 @@ class EmailAction(ValidationAction):
         self.notify_on = notify_on
         self.notify_with = notify_with
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -853,14 +851,14 @@ class StoreValidationResultAction(ValidationAction):
         self,
         data_context: AbstractDataContext,
         target_store_name: Optional[str] = None,
-    ) -> Optional[GXCloudResourceRef]:
+    ) -> None:
         super().__init__(data_context)
         if target_store_name is None:
             self.target_store = data_context.stores[data_context.validations_store_name]
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -934,7 +932,8 @@ class StoreValidationResultAction(ValidationAction):
     ):
         store_set_return_value: GXCloudResourceRef
         new_ge_cloud_id = gx_cloud_resource_ref.id
-        validation_result_suite_identifier.id = new_ge_cloud_id
+        # ValidationResultIdentifier has no `.id`
+        validation_result_suite_identifier.id = new_ge_cloud_id  # type: ignore[union-attr]
         return gx_cloud_resource_ref
 
 
@@ -971,7 +970,7 @@ class StoreEvaluationParametersAction(ValidationAction):
         else:
             self.target_store = data_context.stores[target_store_name]
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1058,7 +1057,7 @@ class StoreMetricsAction(ValidationAction):
                 "StoreMetricsAction must have a valid MetricsStore for its target store."
             )
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1134,7 +1133,7 @@ class UpdateDataDocsAction(ValidationAction):
         super().__init__(data_context)
         self._site_names = site_names
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: Union[
@@ -1173,7 +1172,7 @@ class UpdateDataDocsAction(ValidationAction):
             ],
         )
         # <snippet name="great_expectations/checkpoint/actions.py empty dict">
-        data_docs_validation_results = {}
+        data_docs_validation_results: dict = {}
         # </snippet>
         if self._using_cloud_context:
             return data_docs_validation_results
@@ -1182,7 +1181,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet name="great_expectations/checkpoint/actions.py get_docs_sites_urls">
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,
+            site_names=self._site_names,  # type: ignore[arg-type] # ._site_names could be None
         )
         # </snippet>
         # process payload
@@ -1218,7 +1217,7 @@ class SNSNotificationAction(ValidationAction):
 
     def __init__(
         self,
-        data_context: DataContext,
+        data_context: AbstractDataContext,
         sns_topic_arn: str,
         sns_message_subject: Optional[str],
     ) -> None:
@@ -1227,7 +1226,7 @@ class SNSNotificationAction(ValidationAction):
         self.sns_topic_arn = sns_topic_arn
         self.sns_message_subject = sns_message_subject
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
@@ -1268,7 +1267,7 @@ class APINotificationAction(ValidationAction):
         super().__init__(data_context)
         self.url = url
 
-    def _run(
+    def _run(  # type: ignore[override] # signature does not match parent
         self,
         validation_result_suite: ExpectationSuiteValidationResult,
         validation_result_suite_identifier: ValidationResultIdentifier,
@@ -1307,7 +1306,7 @@ class APINotificationAction(ValidationAction):
             f"Successfully Posted results to API, status code - {response.status_code}"
         )
 
-    def send_results(self, payload) -> None:
+    def send_results(self, payload) -> requests.Response:
         try:
             headers = {"Content-Type": "application/json"}
             return requests.post(self.url, headers=headers, data=payload)
