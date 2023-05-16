@@ -2,3 +2,6 @@
 docker-compose.yaml
 logs/
 plugins/
+
+# Data
+*.csv
