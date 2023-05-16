@@ -43,10 +43,17 @@ When Validating data, you may store new <TechnicalTag relative="../" tag="checkp
 
 ## Access
 
-You can find a list of almost all of your Stores in your `great_expectations.yml` file under the `stores` key.  Alternatively, from the root folder of your Data Context you can retrieve a list of Stores with a CLI command:
+The `stores` key in your `great_expectations.yml` file lists your available Stores.
 
-```markdown title="Console command"
-great_expectations store list
+The `data_docs_sites` key in your `great_expectations.yml` file defines your Data Docs Store configurations. `store_backend` keys below `data_docs_sites` identify the Data Doc Store used by the Data Docs site.
+
+Run the following Python command to view your Stores:
+
+```python
+import great_expectations as gx
+
+context = gx.get_context()
+context.stores
 ```
 
 Data Docs Stores are the one exception to the above.  They are instead configured under the `data_docs_sites` key in the `great_expectations.yml` file.  Each entry under `data_docs_sites` will have a `store_backend` key.  The information under `store_backend` will correspond to the Data Doc Store used by that site. Data Doc Stores are not listed by the `great_expectations store list` command.
