@@ -30,10 +30,6 @@ my_datasource.add_table_asset(
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py my_datasource">
-import great_expectations as gx
-
-context = gx.get_context()
-
 my_datasource = context.get_datasource("my_datasource")
 my_table_asset = my_datasource.get_asset(asset_name="my_table_asset")
 # </snippet>
