@@ -1181,7 +1181,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet name="great_expectations/checkpoint/actions.py get_docs_sites_urls">
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,
+            site_names=self._site_names,  # type: ignore[arg-type] # ._site_names could be None
         )
         # </snippet>
         # process payload
