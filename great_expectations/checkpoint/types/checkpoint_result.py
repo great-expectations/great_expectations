@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import copy
 import json
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from marshmallow import Schema, fields, post_load, pre_dump
+from typing_extensions import Literal
 
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
@@ -190,8 +191,12 @@ class CheckpointResult(SerializableDictDot):
 
     @public_api
     def list_validation_results(
-        self, group_by=None
-    ) -> Union[List[ExpectationSuiteValidationResult], dict]:
+        self,
+        group_by: Literal[
+            "validation_result_identifier", "expectation_suite_name", "data_asset_name"
+        ]
+        | None = None,
+    ) -> list[ExpectationSuiteValidationResult] | dict:
         """Obtain the ExpectationValidationResults belonging to this CheckpointResult.
 
         Args:
@@ -266,8 +271,8 @@ class CheckpointResult(SerializableDictDot):
         return self._validation_results_by_data_asset_name
 
     def list_data_assets_validated(
-        self, group_by: Optional[str] = None
-    ) -> Union[List[dict], dict]:
+        self, group_by: Optional[Literal["batch_id"]] = None
+    ) -> list[dict] | dict:
         if group_by is None:
             if self._data_assets_validated is None:
                 self._data_assets_validated = list(
