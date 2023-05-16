@@ -9,7 +9,7 @@ services:
     networks:
       - dbnet
     ports:
-      - 5432:5432
+      - "5432:5432"
 
   db_setup:
     image: gx/db_setup
@@ -37,7 +37,7 @@ services:
     networks:
       - dbnet
     ports:
-      - 8888:8888
+      - "8888:8888"
 
 networks:
   dbnet:
