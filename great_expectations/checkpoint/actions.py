@@ -7,16 +7,16 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import requests
+from typing_extensions import Literal
 
 try:
     import pypd
 except ImportError:
     pypd = None
 
-from typing import Optional
 
 from great_expectations.checkpoint.util import (
     send_email,
@@ -1124,15 +1124,13 @@ class UpdateDataDocsAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
-        site_names: Optional[Union[List[str], str]] = None,
+        site_names: list[str] | Literal["all"] | None = None,
     ) -> None:
         """
         :param data_context: Data Context
         :param site_names: *optional* List of site names for building data docs
         """
         super().__init__(data_context)
-        if isinstance(site_names, str):
-            site_names = [site_names]
         self._site_names = site_names
 
     def _run(  # type: ignore[override] # signature does not match parent
