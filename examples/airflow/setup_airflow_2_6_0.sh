@@ -30,5 +30,16 @@ echo -e "AIRFLOW_UID=$(id -u)\nAIRFLOW_GID=0" > .env
 print_orange_header "Initializing airflow"
 docker compose up airflow-init
 
+print_orange_header "Adding postgres setup files"
+cp ../postgres/db_setup.Dockerfile .
+cp ../postgres/load_data.py .
+
+print_orange_header "Downloading example data"
+curl -LfO 'https://raw.githubusercontent.com/great-expectations/gx_tutorials/main/data/yellow_tripdata_sample_2019-01.csv'
+
+print_orange_header "Insert postgres_services.yaml in airflow docker-compose.yaml"
+sed -e '$!N;P;/\nvolumes:/r postgres_services.yaml' -e D docker-compose.yaml > temp
+mv temp docker-compose.yaml
+
 print_orange_header "Starting airflow containers"
 docker compose up
