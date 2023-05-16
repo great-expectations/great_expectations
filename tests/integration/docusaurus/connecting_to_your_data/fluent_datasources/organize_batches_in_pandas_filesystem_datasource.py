@@ -26,10 +26,6 @@ context.sources.add_pandas_filesystem(
 
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_datasource">
-import great_expectations as gx
-
-context = gx.get_context()
-
 my_datasource = context.get_datasource("my_datasource")
 # </snippet>
 
@@ -41,8 +37,7 @@ my_batching_regex = r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2}).cs
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_asset">
 my_asset = my_datasource.add_csv_asset(
-    name="my_taxi_data_asset",
-    batching_regex=my_batching_regex,
+    name="my_taxi_data_asset", batching_regex=my_batching_regex
 )
 # </snippet>
 
