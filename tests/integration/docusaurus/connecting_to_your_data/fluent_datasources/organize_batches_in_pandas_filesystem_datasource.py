@@ -14,16 +14,23 @@ data_directory = pathlib.Path(
     "first_3_files",
 ).resolve(strict=True)
 
+import great_expectations as gx
+
+context = gx.get_context()
+
+# data_directory is the full path to a directory containing csv files
+context.sources.add_pandas_filesystem(
+    name="my_datasource", base_directory=data_directory
+)
+# </snippet>
+
 # Python
 # <snippet name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_datasource">
 import great_expectations as gx
 
 context = gx.get_context()
 
-# data_directory is the full path to a directory containing csv files
-my_datasource = context.sources.add_pandas_filesystem(
-    name="my_datasource", base_directory=data_directory
-)
+my_datasource = context.get_datasource("my_datasource")
 # </snippet>
 
 # Python

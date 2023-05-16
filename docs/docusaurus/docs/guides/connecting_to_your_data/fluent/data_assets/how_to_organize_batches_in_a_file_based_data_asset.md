@@ -157,16 +157,12 @@ In this example we have two named groups, `"year"` and `"month"`, so our list of
 
 To verify that our Data Asset will return the desired files as Batches, we will define a quick Batch Request that will include all the Batches available in the Data asset.  Then we will use that Batch Request to get a list of the returned Batches.
 
-```python title="Python code"
-my_batch_request = my_asset.build_batch_request()
-batches = datasource.get_batch_list_from_batch_request(my_batch_request)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py my_batch_list"
 ```
 
 Because a Batch List contains a lot of metadata, it will be easiest to verify which files were included in the returned Batches if we only look at the `batch_spec` of each returned Batch:
 
-```python title="Python code"
-for batch in batches:
-    print(batch.batch_spec)
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py print_batch_spec"
 ```
 
 ## Next steps
