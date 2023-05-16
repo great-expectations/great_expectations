@@ -24,23 +24,20 @@ libraries = [
     sqlalchemy,
 ]
 
-expected_files = [
+expected_files = {
     "pyarrow",
     "azure",
     "sqlalchemy_compatibility_wrappers",
-    "__init__",
     "google",
     "numpy",
-    "__pycache__",
     "pandas_compatibility",
     "aws",
-    "README",
     "sqlalchemy",
     "sqlalchemy_and_pandas",
     "not_imported",
     "pyspark",
     "docstring_parser",
-]
+}
 
 
 @pytest.mark.compatibility
@@ -51,10 +48,14 @@ def test_optional_import_fixture_completeness():
     """
     repo_root = pathlib.Path(__file__).parents[2]
     compatibility_dir = repo_root / "great_expectations" / "compatibility"
-    for filename in compatibility_dir.iterdir():
-        assert (
-            filename.stem in expected_files
-        ), "Please add representative import to libraries and the filename to expected_files"
+    py_files_no_dunders = {
+        filename.stem
+        for filename in compatibility_dir.iterdir()
+        if not filename.stem.startswith("__") and filename.suffix == ".py"
+    }
+    assert (
+        py_files_no_dunders == expected_files
+    ), "Please add representative import to libraries and the filename to expected_files"
 
 
 @pytest.mark.unit
