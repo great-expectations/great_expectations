@@ -18,6 +18,7 @@ from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     Iterable,
     List,
@@ -795,7 +796,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     pk_column: bool,
 ) -> Validator:
 
-    spark_types: Dict[str, callable] = {
+    spark_types: Dict[str, Callable] = {
         "StringType": pyspark.types.StringType,
         "IntegerType": pyspark.types.IntegerType,
         "LongType": pyspark.types.LongType,
