@@ -67,7 +67,6 @@ from great_expectations.core.usage_statistics.events import UsageStatsEvents
 from great_expectations.core.util import nested_update
 from great_expectations.core.yaml_handler import YAMLHandler
 from great_expectations.data_asset import DataAsset
-from great_expectations.data_context.cloud_constants import GXCloudRESTResource
 from great_expectations.data_context.config_validator.yaml_config_validator import (
     _YamlConfigValidator,
 )
@@ -96,7 +95,6 @@ from great_expectations.data_context.types.refs import (
 from great_expectations.data_context.types.resource_identifiers import (
     ConfigurationIdentifier,
     ExpectationSuiteIdentifier,
-    GXCloudIdentifier,
     ValidationMetricIdentifier,
     ValidationResultIdentifier,
 )
@@ -161,6 +159,9 @@ if TYPE_CHECKING:
     )
     from great_expectations.data_context.store.store import StoreConfigTypedDict
     from great_expectations.data_context.store.validations_store import ValidationsStore
+    from great_expectations.data_context.types.resource_identifiers import (
+        GXCloudIdentifier,
+    )
     from great_expectations.datasource.fluent.interfaces import (
         BatchRequest as FluentBatchRequest,
     )
@@ -748,20 +749,10 @@ class AbstractDataContext(ConfigPeer, ABC):
         # Without this we end up with duplicate entries for datasources in both
         # "fluent_datasources" and "datasources" config/yaml entries.
         if self._datasource_store.cloud_mode and not from_config:
-            if datasource.id:
-                logger.info(f"Datasource id - {datasource.id}")
-                key = GXCloudIdentifier(
-                    GXCloudRESTResource.DATASOURCE,
-                    id=str(datasource.id),
-                    resource_name=datasource.name,
-                )
-                self._datasource_store.update(key, datasource)
-            else:
-                logger.warning("No Datasource id!!")
-                set_datasource = self._datasource_store.set(key=None, value=datasource)
-                if set_datasource.id:
-                    logger.debug(f"Assigning `id` to '{datasource_name}'")
-                    datasource.id = set_datasource.id
+            set_datasource = self._datasource_store.set(key=None, value=datasource)
+            if set_datasource.id:
+                logger.debug(f"Assigning `id` to '{datasource_name}'")
+                datasource.id = set_datasource.id
         self.datasources[datasource_name] = datasource
         return datasource
 
@@ -4379,6 +4370,7 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
     def _apply_global_config_overrides(
         self, config: DataContextConfig
     ) -> DataContextConfig:
+
         """
         Applies global configuration overrides for
             - usage_statistics being enabled
