@@ -14,7 +14,7 @@ def _docs_dir() -> pathlib.Path:
     return pathlib.Path().absolute()
 
 
-def change_paths_for_docs_file_references():
+def change_paths_for_docs_file_references(verbose: bool = False) -> None:
     """Change file= style references to use versioned_docs paths.
 
     This is used in v0.14 docs like v0.14.13 since we moved to using named
@@ -32,7 +32,8 @@ def change_paths_for_docs_file_references():
             f.seek(0)
             f.truncate()
             f.write(contents)
-        print(f"processed {file_path}")
+        if verbose:
+            print(f"processed {file_path}")
 
 
 def _paths_to_versioned_docs() -> list[pathlib.Path]:
@@ -59,7 +60,9 @@ def _paths_to_versioned_code_after_v0_14_13() -> list[pathlib.Path]:
     return paths
 
 
-def prepend_version_info_to_name_for_snippet_by_name_references():
+def prepend_version_info_to_name_for_snippet_by_name_references(
+    verbose: bool = False,
+) -> None:
     """Prepend version info e.g. name="snippet_name" -> name="version-0.15.50 snippet_name" """
 
     pattern = re.compile(r"((.*)(name *= *\"))(.*)")
@@ -80,10 +83,11 @@ def prepend_version_info_to_name_for_snippet_by_name_references():
                 f.seek(0)
                 f.truncate()
                 f.write(contents)
-            print(f"processed {file_path}")
+            if verbose:
+                print(f"processed {file_path}")
 
 
-def prepend_version_info_to_name_for_href_absolute_links():
+def prepend_version_info_to_name_for_href_absolute_links(verbose: bool = False) -> None:
     """Prepend version info to absolute links: /docs/... becomes /docs/{version}/..."""
 
     href_pattern = re.compile(r"(?P<href>href=[\"\']/docs/)(?P<link>\S*[\"\'])")
@@ -111,7 +115,8 @@ def prepend_version_info_to_name_for_href_absolute_links():
                 f.seek(0)
                 f.truncate()
                 f.write(contents)
-            print(f"processed {file_path}")
+            if verbose:
+                print(f"processed {file_path}")
 
 
 if __name__ == "__main__":
