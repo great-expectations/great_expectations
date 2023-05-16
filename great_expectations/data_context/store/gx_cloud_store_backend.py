@@ -469,28 +469,45 @@ class GXCloudStoreBackend(StoreBackend, metaclass=ABCMeta):
             key = key.to_tuple()
 
         id = key[1]
-
-        data = {
-            "data": {
-                "type": self.ge_cloud_resource_type,
-                "id": id,
-                "attributes": {
-                    "deleted": True,
-                },
-            }
-        }
-
-        url = construct_url(
-            base_url=self.ge_cloud_base_url,
-            organization_id=self.ge_cloud_credentials["organization_id"],
-            resource_name=self.ge_cloud_resource_name,
-            id=id,
-        )
+        if len(key) == 3:
+            resource_object_name = key[2]
+        else:
+            resource_object_name = None
 
         try:
-            response = self._session.delete(url, json=data)
-            response.raise_for_status()
-            return True
+            # prefer deletion by id if id present
+            if id:
+                data = {
+                    "data": {
+                        "type": self.ge_cloud_resource_type,
+                        "id": id,
+                        "attributes": {
+                            "deleted": True,
+                        },
+                    }
+                }
+
+                url = construct_url(
+                    base_url=self.ge_cloud_base_url,
+                    organization_id=self.ge_cloud_credentials["organization_id"],
+                    resource_name=self.ge_cloud_resource_name,
+                    id=id,
+                )
+                response = self._session.delete(url, json=data)
+                response.raise_for_status()
+                return True
+            # delete by name
+            elif resource_object_name:
+                url = construct_url(
+                    base_url=self.ge_cloud_base_url,
+                    organization_id=self.ge_cloud_credentials["organization_id"],
+                    resource_name=self.ge_cloud_resource_name,
+                )
+                response = self._session.delete(
+                    url, params={"name": resource_object_name}
+                )
+                response.raise_for_status()
+                return True
         except requests.HTTPError as http_exc:
             logger.exception(http_exc)
             raise StoreBackendError(
