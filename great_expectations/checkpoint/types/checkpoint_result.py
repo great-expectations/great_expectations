@@ -1,22 +1,26 @@
+from __future__ import annotations
+
 import copy
 import json
-from typing import Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from marshmallow import Schema, fields, post_load, pre_dump
 
-from great_expectations.alias_types import JSONValues  # noqa: TCH001
 from great_expectations.core._docs_decorators import public_api
-from great_expectations.core.expectation_validation_result import (
-    ExpectationSuiteValidationResult,  # noqa: TCH001
-)
 from great_expectations.core.run_identifier import RunIdentifier, RunIdentifierSchema
 from great_expectations.core.util import convert_to_json_serializable
 from great_expectations.data_asset.util import recursively_convert_to_json_serializable
-from great_expectations.data_context.types.base import CheckpointConfig  # noqa: TCH001
-from great_expectations.data_context.types.resource_identifiers import (
-    ValidationResultIdentifier,  # noqa: TCH001
-)
 from great_expectations.types import SerializableDictDot, safe_deep_copy
+
+if TYPE_CHECKING:
+    from great_expectations.alias_types import JSONValues
+    from great_expectations.core.expectation_validation_result import (
+        ExpectationSuiteValidationResult,
+    )
+    from great_expectations.data_context.types.base import CheckpointConfig
+    from great_expectations.data_context.types.resource_identifiers import (
+        ValidationResultIdentifier,
+    )
 
 
 @public_api
