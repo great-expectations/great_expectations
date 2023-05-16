@@ -112,10 +112,6 @@ function parseFile(file) {
 
   snippets = snippets.filter((s) => s.name)
 
-  const length = snippets.length
-  if (length) {
-    console.log(`Collected ${length} reference(s) from ${file}`)
-  }
   return snippets
 }
 
@@ -177,9 +173,22 @@ function getDirs() {
   return manualDirs.concat(versionDirs)
 }
 
-function main() {
+function processVerbose() {
+  const args = process.argv.slice(2)
+
+  let verbose = false
+  if (args.includes('verbose') || args.includes('-v') || args.includes('--verbose')) {
+    verbose = true
+    console.log('Using verbose mode. Printing all snippets.')
+  }
+  return verbose
+}
+
+function main(verbose = false) {
   const snippets = parseSourceDirectories(getDirs())
-  const targetFiles = process.argv.slice(2)
+  let argNum = 2
+  if (verbose) { argNum = 3 }
+  const targetFiles = process.argv.slice(argNum)
 
   const out = {}
   for (const snippet of snippets) {
@@ -195,12 +204,14 @@ function main() {
     delete snippet.file // Remove duplicate filename to clean up stdout
     out[file].push(snippet)
   }
-  console.log(out)
+  if (verbose) {
+    console.log(out)
+  }
 }
 
 if (require.main === module) {
-  main()
+  const verbose = processVerbose()
+  main(verbose)
 }
 
 module.exports = constructSnippetMap
-

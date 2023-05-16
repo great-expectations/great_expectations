@@ -67,9 +67,7 @@ exclude = [
     # TODO: complete typing for the following modules and remove from exclude list
     # number is the current number of typing errors for the excluded pattern
     'checkpoint/actions\.py',  # 18
-    'checkpoint/checkpoint\.py',  # 22
     'checkpoint/types/checkpoint_result\.py',  # 34
-    'checkpoint/util\.py',  # 5
     'cli/checkpoint\.py',  # 9
     'cli/suite\.py',  # 24
     'cli/upgrade_helpers/upgrade_helper_v11\.py',  # 59

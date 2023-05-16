@@ -1,22 +1,3 @@
-import VerifyStoreConfig from '@site/docs/components/cli/_store_list_verify_active_configs.md'
-
-import ExplainActiveStores from '@site/docs/components/cli/_store_list_info_active_stores.md'
-
-<VerifyStoreConfig />
-
-This will list the currently configured Stores that Great Expectations has access to.  If you added a new S3 Validation Results Store, the output should include the following `ValidationStore` entry:
-
-```bash title="Terminal output"
-- name: validations_S3_store
- class_name: ValidationsStore
- store_backend:
-   class_name: TupleS3StoreBackend
-   bucket: '<your_s3_bucket_name>'
-   prefix: '<your_s3_bucket_folder_name>'
-```
-
-<ExplainActiveStores />
-
 To make Great Expectations look for Validation Results on the S3 bucket, you must set the ``validations_store_name`` variable to the name of your S3 Validations Store, which in our example is `validations_s3_store`.
 
 Additional options are available for a more fine-grained customization of the TupleS3StoreBackend.
