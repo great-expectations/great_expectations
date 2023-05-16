@@ -1131,6 +1131,8 @@ class UpdateDataDocsAction(ValidationAction):
         :param site_names: *optional* List of site names for building data docs
         """
         super().__init__(data_context)
+        if isinstance(site_names, str):
+            site_names = [site_names]
         self._site_names = site_names
 
     def _run(  # type: ignore[override] # signature does not match parent
@@ -1181,7 +1183,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet name="great_expectations/checkpoint/actions.py get_docs_sites_urls">
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,  # type: ignore[arg-type] # ._site_names could be None
+            site_names=self._site_names or [],
         )
         # </snippet>
         # process payload
