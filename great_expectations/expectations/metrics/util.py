@@ -59,7 +59,7 @@ except ImportError:
 try:
     import clickhouse_sqlalchemy
 except ImportError:
-    clickhouse = None
+    clickhouse_sqlalchemy = None
 
 _BIGQUERY_MODULE_NAME = "sqlalchemy_bigquery"
 try:
