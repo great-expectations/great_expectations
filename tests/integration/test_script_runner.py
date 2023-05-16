@@ -235,6 +235,12 @@ local_tests = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
     IntegrationTestFixture(
+        name="data_docs",
+        user_flow_script="tests/integration/docusaurus/reference/glossary/data_docs.py",
+        data_context_dir="tests/integration/fixtures/yellow_trip_data_fluent_pandas/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+    ),
+    IntegrationTestFixture(
         name="setup_overview",
         user_flow_script="tests/integration/docusaurus/setup/setup_overview.py",
         data_context_dir=None,
@@ -373,10 +379,6 @@ pandas_integration_tests = [
                 ".gcs/my_example_creds.json",
             ),
         ),
-    ),
-    IntegrationTestFixture(
-        name="build_data_docs",
-        user_flow_script="tests/integration/common_workflows/simple_build_data_docs.py",
     ),
 ]
 
