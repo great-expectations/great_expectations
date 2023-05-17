@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, Optional, Union
 
 import requests
 
@@ -16,7 +16,6 @@ try:
 except ImportError:
     pypd = None
 
-from typing import Optional
 
 from great_expectations.checkpoint.util import (
     send_email,
@@ -1124,7 +1123,7 @@ class UpdateDataDocsAction(ValidationAction):
     def __init__(
         self,
         data_context: AbstractDataContext,
-        site_names: Optional[Union[List[str], str]] = None,
+        site_names: list[str] | str | None = None,
     ) -> None:
         """
         :param data_context: Data Context
@@ -1181,7 +1180,7 @@ class UpdateDataDocsAction(ValidationAction):
         # <snippet name="great_expectations/checkpoint/actions.py get_docs_sites_urls">
         docs_site_urls_list = self.data_context.get_docs_sites_urls(
             resource_identifier=validation_result_suite_identifier,
-            site_names=self._site_names,  # type: ignore[arg-type] # ._site_names could be None
+            site_names=self._site_names,  # type: ignore[arg-type] # could be a `str`
         )
         # </snippet>
         # process payload
