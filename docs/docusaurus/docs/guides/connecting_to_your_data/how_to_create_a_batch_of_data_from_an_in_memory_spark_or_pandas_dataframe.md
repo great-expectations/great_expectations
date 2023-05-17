@@ -29,7 +29,7 @@ What used to be called a “Batch” in the old API was replaced with <Technical
 
 - [A working Great Expectations deployment](/docs/guides/setup/setup_overview)
 - [An initialized Data Context](/docs/guides/setup/configuring_data_contexts/initializing_data_contexts/how_to_initialize_a_filesystem_data_context_in_python)
-- [A configured Spark Datasource](../../guides/connecting_to_your_data/filesystem/spark.md)
+- [A configured Spark Datasource](/docs/0.15.50/guides/connecting_to_your_data/filesystem/spark)
 - An in-memory Spark DataFrame to use as the data to validate **OR**
 - A file system or S3 path to a file that contains the data to validate.
   
