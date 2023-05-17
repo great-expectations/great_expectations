@@ -366,7 +366,7 @@ def test_create_expectation_suite_namespace_collision_raises_error(
 
 @pytest.mark.unit
 @pytest.mark.cloud
-def test_delete_expectation_suite_deletes_suite_in_cloud(
+def test_delete_expectation_suite_by_id_deletes_suite_in_cloud(
     empty_base_data_context_in_cloud_mode: CloudDataContext,
     suite_1: SuiteIdentifierTuple,
 ) -> None:
@@ -383,6 +383,26 @@ def test_delete_expectation_suite_deletes_suite_in_cloud(
             "attributes": {"deleted": True},
         }
     }
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_delete_expectation_suite_by_name_deletes_suite_in_cloud(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+    suite_1: SuiteIdentifierTuple,
+) -> None:
+    context = empty_base_data_context_in_cloud_mode
+    suite_name = suite_1.name
+
+    with mock.patch("requests.Session.delete", autospec=True) as mock_delete:
+        context.delete_expectation_suite(expectation_suite_name=suite_name)
+
+    assert (
+        mock_delete.call_args[0][1]
+        == "https://app.test.greatexpectations.io/organizations/bd20fead-2c31-4392"
+        "-bcd1-f1e87ad5a79c/expectation-suites"
+    )
+    assert mock_delete.call_args[1]["params"] == {"name": suite_name}
 
 
 @pytest.mark.unit
@@ -588,6 +608,30 @@ def test_add_or_update_expectation_suite_adds_new_obj(
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
     mock_add.assert_called_once()
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_add_expectation_suite_without_name_raises_error(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+):
+    context = empty_base_data_context_in_cloud_mode
+
+    with pytest.raises(ValueError):
+        context.add_expectation_suite(expectation_suite_name=None)
+
+
+@pytest.mark.unit
+@pytest.mark.cloud
+def test_expectation_suite_gx_cloud_identifier_requires_id_or_resource_name(
+    empty_base_data_context_in_cloud_mode: CloudDataContext,
+):
+    context = empty_base_data_context_in_cloud_mode
+
+    key = GXCloudIdentifier(resource_type=GXCloudRESTResource.EXPECTATION_SUITE)
+
+    with pytest.raises(ValueError):
+        context.expectations_store._validate_key(key=key)
 
 
 @pytest.mark.unit

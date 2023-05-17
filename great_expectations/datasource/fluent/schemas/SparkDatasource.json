@@ -117,8 +117,7 @@
                 }
             },
             "required": [
-                "name",
-                "dataframe"
+                "name"
             ],
             "additionalProperties": false
         }
