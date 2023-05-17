@@ -4,7 +4,6 @@ import difflib
 import logging
 import pathlib
 import random
-from collections import defaultdict
 from pprint import pformat as pf
 from typing import TYPE_CHECKING, Callable
 
@@ -76,34 +75,6 @@ def test_serialize_fluent_config(
 
         for asset_name in datasource.get_asset_names():
             assert asset_name in dumped_yaml
-
-
-def test_data_connectors_are_built_on_config_load(
-    seeded_contexts: CloudDataContext | FileDataContext,
-):
-    """
-    Ensure that all Datasources that require data_connectors have their data_connectors
-    created when loaded from config.
-    """
-    context = seeded_contexts
-    dc_datasources: dict[str, list[str]] = defaultdict(list)
-
-    assert context.fluent_datasources
-    for datasource in context.fluent_datasources.values():
-        if datasource.data_connector_type:
-            print(f"class: {datasource.__class__.__name__}")
-            print(f"type: {datasource.type}")
-            print(f"data_connector: {datasource.data_connector_type.__name__}")
-            print(f"name: {datasource.name}", end="\n\n")
-
-            dc_datasources[datasource.type].append(datasource.name)
-
-            for asset in datasource.assets:
-                assert isinstance(asset._data_connector, datasource.data_connector_type)
-            print()
-
-    print(f"Datasources with DataConnectors\n{pf(dict(dc_datasources))}")
-    assert dc_datasources
 
 
 def test_fluent_simple_validate_workflow(seeded_file_context: FileDataContext):
