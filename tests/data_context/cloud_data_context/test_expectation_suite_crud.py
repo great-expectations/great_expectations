@@ -13,6 +13,8 @@ from great_expectations.data_context.data_context.cloud_data_context import (
 )
 from great_expectations.data_context.store.gx_cloud_store_backend import (
     GXCloudStoreBackend,
+    PayloadDataField,
+    ResponsePayload,
 )
 from great_expectations.data_context.types.base import DataContextConfig, GXCloudConfig
 from great_expectations.data_context.types.resource_identifiers import GXCloudIdentifier
@@ -604,7 +606,9 @@ def test_add_or_update_expectation_suite_adds_new_obj(
         return_value=False,
     ), mock.patch(
         f"{GXCloudStoreBackend.__module__}.{GXCloudStoreBackend.__name__}.add",
-    ) as mock_add:
+    ) as mock_add, mock.patch(
+        "requests.Session.get", autospec=True, side_effect=DataContextError("not found")
+    ):
         context.add_or_update_expectation_suite(expectation_suite=suite)
 
     mock_add.assert_called_once()
