@@ -26,16 +26,17 @@ git pull
 print_orange_header "Copying previous versioned docs"
 curl "https://superconductive-public.s3.us-east-2.amazonaws.com/oss_docs_versions_20230404.zip" -o "oss_docs_versions.zip"
 unzip -oq oss_docs_versions.zip -d .
+rm oss_docs_versions.zip
 
-VERSIONS_JSON_PATH=../../../versions.json
-VERSIONS=$(cat $VERSIONS_JSON_PATH | python -c 'import json,sys;obj=json.load(sys.stdin);print(" ".join(obj))')
+VERSIONS=$(cat versions.json | python -c 'import json,sys;obj=json.load(sys.stdin);print(" ".join(obj))')
+mkdir versioned_code
 
 for version in $VERSIONS; do
   print_orange_header "Copying code referenced in docs from $version and writing to versioned_code/version-$version"
 
   curl -LJO "https://github.com/great-expectations/great_expectations/archive/refs/tags/$version.zip"
-  mkdir -p versioned_code/version-"$version"
-  unzip -oq "great_expectations-$version.zip" -d versioned_code/version-"$version"
+  unzip -oq "great_expectations-$version.zip" -d versioned_code
+  mv versioned_code/"great_expectations-$version" versioned_code/version-"$version"
   rm "great_expectations-$version.zip"
 
 done
@@ -69,9 +70,7 @@ then
   git pull
   print_orange_header "Not in a pull request. Using latest released version ${GX_LATEST} at $(git rev-parse HEAD) to build API docs."
 else
-  print_orange_header "Building from within a pull request, using the latest commit to build API docs so changes can be viewed in the Netlify deploy preview."
-  git checkout "$CURRENT_BRANCH"
-  git pull
+  print_orange_header "Building locally or from within a pull request, using the latest commit to build API docs so changes can be viewed in the Netlify deploy preview."
 fi
 
 # Build current docs
