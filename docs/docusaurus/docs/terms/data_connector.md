@@ -137,7 +137,7 @@ like `some_bucket/(\d{4})/(\d{2})/(\d{2})/log_file_\d+.txt.gz`.
 
 The Wildcard Data Reference is how Data Connectors deal with that problem, making it easy to search external stores and understand data.
 
-When defining a Data Connector for your Datasource, you may include wildcard Data References as part of the configuration for the Datasource.  This is done by including wildcards in the default regex defined in the Data Connector's portion of the Datasource's configuration.  Typically, you will see this used for `InferredAssetFilesystemDataConnector`s in Datasources connecting to a filesystem.  For an example of this, please see [our guide on how to connect to data on a filesystem using Pandas](../guides/connecting_to_your_data/filesystem/pandas.md).
+When defining a Data Connector for your Datasource, you may include wildcard Data References as part of the configuration for the Datasource.  This is done by including wildcards in the default regex defined in the Data Connector's portion of the Datasource's configuration.  Typically, you will see this used for `InferredAssetFilesystemDataConnector`s in Datasources connecting to a filesystem.  For an example of this, please see [our guide on how to connect to data on a filesystem using Pandas](/docs/0.15.50/guides/connecting_to_your_data/filesystem/pandas).
 
 Under the hood, when processing a Batch Request, the Data Connector may find multiple matching Batches. Generally, the Data Connector will simply return a list of all matching Batch Identifiers.
 

@@ -303,3 +303,6 @@ docs/guides/expectations/contributing/how_to_contribute_a_custom_expectation_to_
 
 /docs/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource /docs/0.15.50/guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource
 /docs/guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe /docs/0.15.50/guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe
+
+/docs/guides/connecting_to_your_data/filesystem/pandas /docs/0.15.50/guides/connecting_to_your_data/filesystem/pandas
+/docs/guides/connecting_to_your_data/filesystem/spark /docs/0.15.50/guides/connecting_to_your_data/filesystem/spark

@@ -38,7 +38,7 @@ While the contents of this document accurately reflect the state of the feature,
 
 ### 3. Create a context and add your Datasource
 
-- Follow the steps in the [How to connect to data on a filesystem using Pandas](../../../guides/connecting_to_your_data/filesystem/pandas.md). The following code snippet adds a Pandas Filesystem asset for our taxi data.
+- Follow the steps in the [How to connect to data on a filesystem using Pandas](/docs/0.15.50/guides/connecting_to_your_data/filesystem/pandas). The following code snippet adds a Pandas Filesystem asset for our taxi data.
 
 ```python name="tests/integration/docusaurus/expectations/advanced/multi_batch_rule_based_profiler_example.py init"
 ```

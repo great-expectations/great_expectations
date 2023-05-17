@@ -126,7 +126,7 @@ What used to be called a “Batch” in the old API was replaced with <Technical
 
 - [Set up a working deployment of Great Expectations](/docs/guides/setup/setup_overview)
 - [Created a Data Context](/docs/guides/setup/configuring_data_contexts/instantiating_data_contexts/how_to_quickly_instantiate_a_data_context)
-- Configured a [Pandas/filesystem Datasource](../../guides/connecting_to_your_data/filesystem/pandas.md)
+- Configured a [Pandas/filesystem Datasource](/docs/0.15.50/guides/connecting_to_your_data/filesystem/pandas)
 - Identified a Pandas DataFrame that you would like to use as the data to validate.
   
 </Prerequisites>
