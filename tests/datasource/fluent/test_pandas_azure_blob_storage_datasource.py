@@ -12,6 +12,7 @@ import great_expectations.execution_engine.pandas_execution_engine
 from great_expectations.compatibility import azure
 from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import PandasAzureBlobStorageDatasource
+from great_expectations.datasource.fluent.config_str import ConfigStr
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
 )
@@ -140,6 +141,28 @@ def test_construct_pandas_abs_datasource_with_account_url_and_credential():
             "credential": "my_credential",
         },
     )
+    azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
+    assert azure_client is not None
+    assert pandas_abs_datasource.name == "pandas_abs_datasource"
+
+
+@pytest.mark.integration
+def test_construct_pandas_abs_datasource_with_account_url_and_config_credential(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    monkeypatch.setenv("MY_CRED", "my_secret_credential")
+
+    pandas_abs_datasource = PandasAzureBlobStorageDatasource(
+        name="pandas_abs_datasource",
+        azure_options={
+            "account_url": "my_account_url.blob.core.windows.net",
+            "credential": r"${MY_CRED}",
+        },
+    )
+
+    credential = pandas_abs_datasource.azure_options["credential"]
+    assert isinstance(credential, ConfigStr)
+
     azure_client: azure.BlobServiceClient = pandas_abs_datasource._get_azure_client()
     assert azure_client is not None
     assert pandas_abs_datasource.name == "pandas_abs_datasource"
