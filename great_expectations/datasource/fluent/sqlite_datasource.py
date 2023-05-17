@@ -144,7 +144,7 @@ class _SQLiteAssetMixin:
     ) -> Self:
         """Associates a converted datetime splitter with this sqlite data asset.
         Args:
-            column_name: A column name of the date column where year and month will be parsed out.
+            column_name: The column name of the date column where year and month will be parsed out.
             date_format_string: Format for converting string representation of datetime to actual datetime object.
         Returns:
             This sql asset so we can use this method fluently.
