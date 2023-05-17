@@ -561,6 +561,11 @@ class _SourceFactories:
             id_: uuid.UUID | None = getattr(
                 self._data_context.datasources.get(datasource_name), "id", None
             )
+            if id_ and name_or_datasource:
+                if isinstance(name_or_datasource, str):
+                    kwargs["id"] = id_
+                else:
+                    name_or_datasource.id = id_
 
             # local delete only, don't update the persisted store entry
             self._data_context._delete_fluent_datasource(
@@ -569,7 +574,7 @@ class _SourceFactories:
             # Now that the input is validated and the old datasource is deleted we pass the
             # original arguments to the add method (ie name and not datasource_name).
             return self.create_add_crud_method(datasource_type)(
-                name_or_datasource, id=id_, **kwargs
+                name_or_datasource, **kwargs
             )
 
         add_or_update_datasource.__doc__ = doc_string
