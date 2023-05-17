@@ -9,8 +9,10 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from contextlib import AbstractContextManager
 from typing import Generic, Optional, TypeVar
 
+import requests
 from urllib3 import connectionpool, poolmanager
 
+from great_expectations.compatibility.google import bigquery
 from great_expectations.data_context.types.base import ConcurrencyConfig
 
 T = TypeVar("T")
@@ -130,10 +132,14 @@ def patch_https_connection_pool(concurrency_config: ConcurrencyConfig) -> None:
     ###
     # NOTE: 20210907 - jdimatteo: The python requests pool size can bottleneck concurrency and result in warnings
     # like "WARNING  urllib3.connectionpool:connectionpool.py:304 Connection pool is full, discarding connection:
-    # bigquery.googleapis.com". To remove this bottleneck, patch the https connection pool as described at
-    # https://stackoverflow.com/a/22253656/1007353. After upgrading from the deprecated packages pybigquery and
-    # google-cloud-python to python-bigquery-sqlalchemy and python-bigquery, this patching code can be replaced
-    # following the instructions at https://github.com/googleapis/python-bigquery/issues/59#issuecomment-619047244.
+    # bigquery.googleapis.com". To remove this bottleneck, following the instructions at
+    # https://github.com/googleapis/python-bigquery/issues/59#issuecomment-619047244.
+    bq = bigquery.Client(project=concurrency_config.GOOGLE_CLOUD_PROJECT)
+
+    # Increase the HTTP pool size to avoid the "Connection pool is full, discarding connection: bigquery.googleapis.com"
+    adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
+    bq._http.mount("https://", adapter)
+
     class HTTPSConnectionPoolWithHigherMaxSize(connectionpool.HTTPSConnectionPool):
         def __init__(self, *args, **kwargs) -> None:
             kwargs.update(maxsize=concurrency_config.max_database_query_concurrency)

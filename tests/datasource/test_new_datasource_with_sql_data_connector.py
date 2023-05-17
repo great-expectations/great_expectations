@@ -28,14 +28,7 @@ try:
 except ImportError:
     sqlalchemy = None
 
-try:
-    import sqlalchemy_bigquery as sqla_bigquery
-except ImportError:
-    try:
-        import pybigquery.sqlalchemy_bigquery as sqla_bigquery
-    except ImportError:
-        sqla_bigquery = None
-
+from great_expectations.compatibility.sqlalchemy_bigquery import sqlalchemy_bigquery as sqla_bigquery
 
 yaml = YAMLHandler()
 
@@ -737,7 +730,7 @@ tables:
 
 @pytest.mark.skipif(
     sqla_bigquery is None,
-    reason="sqlalchemy_bigquery/pybigquery is not installed",
+    reason="sqlalchemy_bigquery is not installed",
 )
 @pytest.mark.integration
 def test_basic_instantiation_with_bigquery_creds(sa):
