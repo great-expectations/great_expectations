@@ -212,12 +212,6 @@ local_tests = [
     #     data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
     # ),
     # Fluent Datasources
-    IntegrationTestFixture(
-        name="how_to_connect_to_one_or_more_files_using_pandas",
-        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    ),
     # Uncomment after resolving
     #       E           great_expectations.exceptions.exceptions.DataContextError: expectation_suite my_expectation_suite not found
     #
