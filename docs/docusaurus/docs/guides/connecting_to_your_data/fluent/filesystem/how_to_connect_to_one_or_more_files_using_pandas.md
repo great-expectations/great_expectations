@@ -42,7 +42,9 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 
 ### 1. Import the Great Expectations module and instantiate a Data Context
 
-<ImportGxAndInstantiateADataContext />
+
+```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py get_context"
+```
 
 ### 2. Create a Datasource
 
@@ -52,17 +54,14 @@ A Filesystem Datasource can be created with two pieces of information:
 
 In our example, we will define these in advance by storing them in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
-```python title="Python code"
-datasource_name = "my_new_datasource"
-path_to_folder_containing_csv_files = "../taxi_data"
+```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py define_add_pandas_filesystem_args"
 ```
 
 <InfoFilesystemDatasourceRelativeBasePaths />
 
 Once we have determined our `name` and `base_directory`, we pass them in as parameters when we create our Datasource:
 
-```python title = "Python code"
-datasource = context.sources.add_pandas_filesystem(name=datasource_name, base_directory=path_to_folder_containing_csv_files)
+```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource"
 ```
 
 <TipFilesystemDatasourceNestedSourceDataFolders />
@@ -75,20 +74,14 @@ A Data Asset requires two pieces of information to be defined:
 
 <TipFilesystemDataAssetWhatIfBatchingRegexMatchesMultipleFiles />
 
-For this example, we will define these two values in advance by storing them in the Python variables `asset_name` and (since we are connecting to NYC taxi data in this example) `taxi_batching_regex`:
+For this example, we will define these two values in advance by storing them in the Python variables `asset_name` and (since we are connecting to NYC taxi data in this example) `batching_regex`:
 
-```python title="Python code"
-name = "my_taxi_data_asset"
-batching_regex = "yellow_tripdata_sample_2023_01\.csv"
+```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py define_add_csv_asset_args"
 ```
 
 Once we have determined those two values, we will pass them in as parameters when we create our Data Asset:
 
-```python title="Python code"
-data_asset = datasource.add_csv_asset(
-    name=name, batching_regex=batching_regex
-)
-# optionally can accept the same parameters as `pandas.read_csv()`
+```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py add_asset"
 ```
 
 <TipUsingPandasToConnectToDifferentFileTypes this_example_file_extension="csv" />
