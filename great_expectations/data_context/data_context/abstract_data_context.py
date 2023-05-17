@@ -774,8 +774,6 @@ class AbstractDataContext(ConfigPeer, ABC):
             update_datasource = datasource
 
         update_datasource._data_context = self
-        # config provider needed for config substitution
-        update_datasource._config_provider = self.config_provider
 
         update_datasource._rebuild_asset_data_connectors()
 
