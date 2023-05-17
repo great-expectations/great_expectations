@@ -69,7 +69,7 @@ class ConfigStr(SecretStr):
         yield cls.validate
 
 
-def check_config_substitutions_needed(
+def _check_config_substitutions_needed(
     datasource: Datasource,
     options: Mapping,
     raise_warning_if_provider_not_present: bool,

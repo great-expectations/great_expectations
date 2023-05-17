@@ -13,7 +13,7 @@ from great_expectations.core.util import AzureUrl
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
     ConfigStr,  # noqa: TCH001 # used by pydantic
-    check_config_substitutions_needed,
+    _check_config_substitutions_needed,
 )
 from great_expectations.datasource.fluent.data_asset.data_connector import (
     AzureBlobStorageDataConnector,
@@ -59,7 +59,7 @@ class PandasAzureBlobStorageDatasource(_PandasFilePathDatasource):
     def _get_azure_client(self) -> azure.BlobServiceClient:
         azure_client: Union[azure.BlobServiceClient, None] = self._azure_client
         if not azure_client:
-            check_config_substitutions_needed(
+            _check_config_substitutions_needed(
                 self, self.azure_options, raise_warning_if_provider_not_present=True
             )
             # pull in needed config substitutions using the `_config_provider`
