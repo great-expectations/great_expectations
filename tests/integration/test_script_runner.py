@@ -340,6 +340,11 @@ fluent_datasources = [
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
         backend_dependencies=[BackendDependencies.PANDAS],
     ),
+    IntegrationTestFixture(
+        name="how_to_organize_batches_in_a_sql_based_data_asset",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_sqlite_datasource.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+    ),
 ]
 
 
