@@ -35,9 +35,6 @@ from great_expectations.compatibility import sqlalchemy
 from great_expectations.compatibility.sqlalchemy import (
     sqlalchemy as sa,
 )
-from great_expectations.compatibility.sqlalchemy import (
-    sqlalchemy_version_check,
-)
 from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.metric_domain_types import MetricDomainTypes
 from great_expectations.core.usage_statistics.events import UsageStatsEvents
@@ -97,7 +94,6 @@ logger = logging.getLogger(__name__)
 
 
 if sa:
-    sqlalchemy_version_check(sa.__version__)
     make_url = import_make_url()
 
 
@@ -1320,43 +1316,43 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if self._connection:
             self._connection.close()
 
-    def get_connection(self):
-        # TODO: Turn this into a context manager to make sure it closes the connection
-        # TODO: Docstring
+    @contextmanager
+    def get_connection(self) -> sqlalchemy.Connection:
+        """Get a connection for executing queries.
+
+        Some databases sqlite/mssql temp tables only persist within a connection,
+        so we need to keep the connection alive.
+
+        Returns:
+            Sqlalchemy connection
+        """
         if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
-            if not self._connection:
-                self._connection = self.engine.connect()
-            return self._connection
+            try:
+                if not self._connection:
+                    self._connection = self.engine.connect()
+                yield self._connection
+            finally:
+                # Temp tables only persist within a connection for some dialects,
+                # so we need to keep the connection alive.
+                pass
         else:
             with self.engine.connect() as connection:
-                return connection
+                yield connection
 
-    # TODO: What is return type, docstring
-    def execute_query(self, query: Selectable):
+    def execute_query(self, query: sqlalchemy.Selectable) -> sqlalchemy.CursorResult | sqlalchemy.LegacyCursorResult:
         """Execute a query using the underlying database engine.
 
         Some databases sqlite/mssql temp tables only persist within a connection,
         so we need to keep the connection alive.
 
         Args:
-            query:
+            query: Sqlalchemy selectable query.
 
         Returns:
-
+            CursorResult for sqlalchemy 2.0+ or LegacyCursorResult for earlier versions.
         """
 
-        # TODO: Add docstring
-
-        if self.dialect_name in _PERSISTED_CONNECTION_DIALECTS:
-            # Temp tables only persist within a connection for some dialects,
-            # so we need to keep the connection alive.
-            if not self._connection:
-                self._connection = self.engine.connect()
-            result = self._connection.execute(query)
-
-        else:
-            # Get a connection from the engine and close it after executing the query.
-            with self.engine.connect() as connection:
-                result = connection.execute(query)
+        with self.get_connection() as connection:
+            result = connection.execute(query)
 
         return result

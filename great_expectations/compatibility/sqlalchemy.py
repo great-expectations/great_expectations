@@ -241,3 +241,14 @@ try:
     from sqlalchemy.sql.operators import custom_op
 except (ImportError, AttributeError):
     custom_op = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy.engine.cursor import LegacyCursorResult
+except (ImportError, AttributeError):
+    LegacyCursorResult = SQLALCHEMY_NOT_IMPORTED
+
+try:
+    from sqlalchemy.engine.cursor import CursorResult
+except (ImportError, AttributeError):
+    CursorResult = SQLALCHEMY_NOT_IMPORTED
+
