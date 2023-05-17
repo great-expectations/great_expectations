@@ -153,24 +153,6 @@ local_tests = [
         data_dir="tests/test_sets/dataconnector_docs",
     ),
     IntegrationTestFixture(
-        name="how_to_pass_an_in_memory_dataframe_to_a_checkpoint",
-        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    ),
-    IntegrationTestFixture(
-        name="how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint",
-        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_yaml_configured_in_memory_checkpoint.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    ),
-    IntegrationTestFixture(
-        name="how_to_validate_data_with_a_python_configured_in_memory_checkpoint",
-        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_with_a_python_configured_in_memory_checkpoint.py",
-        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
-        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
-    ),
-    IntegrationTestFixture(
         name="auto_initializing_expect_column_mean_to_be_between",
         user_flow_script="tests/integration/docusaurus/expectations/auto_initializing_expectations/auto_initializing_expect_column_mean_to_be_between.py",
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
@@ -252,6 +234,11 @@ local_tests = [
         data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
     ),
+    IntegrationTestFixture(
+        name="setup_overview",
+        user_flow_script="tests/integration/docusaurus/setup/setup_overview.py",
+        data_context_dir=None,
+    ),
 ]
 
 quickstart = [
@@ -281,6 +268,12 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/expectations/advanced/how_to_create_expectations_that_span_multiple_batches_using_evaluation_parameters.py",
     ),
     IntegrationTestFixture(
+        name="how_to_pass_an_in_memory_dataframe_to_a_checkpoint",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_pass_an_in_memory_dataframe_to_a_checkpoint.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTestFixture(
         name="rule_base_profiler_multi_batch_example",
         data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
@@ -305,10 +298,35 @@ fluent_datasources = [
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_create_a_new_checkpoint.py",
     ),
     IntegrationTestFixture(
+        name="how_to_configure_a_new_checkpoint_using_test_yaml_config",
+        data_context_dir="tests/integration/fixtures/yellow_tripdata_pandas_fixture/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples",
+        user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_configure_a_new_checkpoint_using_test_yaml_config.py",
+    ),
+    IntegrationTestFixture(
         name="validate_data_by_running_a_checkpoint",
         user_flow_script="tests/integration/docusaurus/validation/checkpoints/how_to_validate_data_by_running_a_checkpoint.py",
         data_context_dir=None,
         data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+    ),
+    IntegrationTestFixture(
+        name="how_to_create_and_edit_an_expectation_with_domain_knowledge",
+        user_flow_script="tests/integration/docusaurus/expectations/how_to_create_and_edit_an_expectationsuite_domain_knowledge.py",
+        data_context_dir=None,
+    ),
+    IntegrationTestFixture(
+        name="how_to_request_data_from_a_data_asset",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/get_existing_data_asset_from_existing_datasource_pandas_filesystem_example.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.PANDAS],
+    ),
+    IntegrationTestFixture(
+        name="how_to_organize_batches_in_a_file_based_data_asset",
+        user_flow_script="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/organize_batches_in_pandas_filesystem_datasource.py",
+        data_context_dir="tests/integration/fixtures/no_datasources/great_expectations",
+        data_dir="tests/test_sets/taxi_yellow_tripdata_samples/first_3_files",
+        backend_dependencies=[BackendDependencies.PANDAS],
     ),
 ]
 

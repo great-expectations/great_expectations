@@ -793,6 +793,7 @@ class AbstractDataContext(ConfigPeer, ABC):
         _call_store = False allows for local deletes without deleting the persisted storage datasource.
         This should generally be avoided.
         """
+        self.fluent_config.pop(datasource_name, None)
         datasource = self.datasources.get(datasource_name)
         if datasource:
             if self._datasource_store.cloud_mode and _call_store:
@@ -961,7 +962,7 @@ class AbstractDataContext(ConfigPeer, ABC):
             verify_dynamic_loading_support(module_name=module_name)
             class_name = kwargs.get("class_name", "Datasource")
             datasource_class = load_class(
-                module_name=module_name, class_name=class_name
+                class_name=class_name, module_name=module_name
             )
 
             # For any class that should be loaded, it may control its configuration construction
@@ -1690,11 +1691,17 @@ class AbstractDataContext(ConfigPeer, ABC):
 
         datasource = self.get_datasource(datasource_name=datasource_name)
 
-        if save_changes and not isinstance(datasource, FluentDatasource):
+        if isinstance(datasource, FluentDatasource):
+            # Note: this results in some unnecessary dict lookups
+            self._delete_fluent_datasource(datasource_name)
+        elif save_changes:
             datasource_config = datasourceConfigSchema.load(datasource.config)
             self._datasource_store.delete(datasource_config)
         self._cached_datasources.pop(datasource_name, None)
         self.config.datasources.pop(datasource_name, None)  # type: ignore[union-attr]
+
+        if save_changes:
+            self._save_project_config()
 
     @overload
     def add_checkpoint(
@@ -2099,7 +2106,7 @@ class AbstractDataContext(ConfigPeer, ABC):
                 config_version=config_version,
                 template_name=template_name,
                 module_name=module_name,
-                class_name=class_name,
+                class_name=class_name,  # type: ignore[arg-type] # should be specific Literal str.
                 run_name_template=run_name_template,
                 expectation_suite_name=expectation_suite_name,
                 batch_request=batch_request,

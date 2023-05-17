@@ -11,12 +11,14 @@ import string
 import time
 import traceback
 import warnings
-from functools import wraps
+from decimal import Decimal
+from functools import partial, wraps
 from logging import Logger
 from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
     Iterable,
     List,
@@ -794,7 +796,7 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
     pk_column: bool,
 ) -> Validator:
 
-    spark_types: dict = {
+    spark_types: Dict[str, Callable] = {
         "StringType": pyspark.types.StringType,
         "IntegerType": pyspark.types.IntegerType,
         "LongType": pyspark.types.LongType,
@@ -805,6 +807,8 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
         "BooleanType": pyspark.types.BooleanType,
         "DataType": pyspark.types.DataType,
         "NullType": pyspark.types.NullType,
+        # When inferring schema from decimal.Decimal objects, pyspark uses DecimalType(38, 18).
+        "DecimalType": partial(pyspark.types.DecimalType, 38, 18),
     }
 
     spark = get_or_create_spark_application(
@@ -840,9 +844,9 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                 print(schema)
             for col in schema:
                 type_ = schema[col]
+                # Ints cannot be None...but None can be valid in Spark (as Null)
+                vals: List[Union[str, int, float, None, Decimal]] = []
                 if type_ in ["IntegerType", "LongType"]:
-                    # Ints cannot be None...but None can be valid in Spark (as Null)
-                    vals: List[Union[str, int, float, None]] = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
@@ -850,15 +854,20 @@ def _get_test_validator_with_data_spark(  # noqa: C901 - 19
                             vals.append(int(val))
                     data[col] = vals
                 elif type_ in ["FloatType", "DoubleType"]:
-                    vals = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)
                         else:
                             vals.append(float(val))
                     data[col] = vals
+                elif type_ in ["DecimalType"]:
+                    for val in data[col]:
+                        if val is None:
+                            vals.append(val)
+                        else:
+                            vals.append(Decimal(val))
+                    data[col] = vals
                 elif type_ in ["DateType", "TimestampType"]:
-                    vals = []
                     for val in data[col]:
                         if val is None:
                             vals.append(val)

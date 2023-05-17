@@ -178,13 +178,18 @@ class SerializableDataContext(AbstractDataContext):
         Returns:
             DataContext
         """
+        gx_dir = cls._scaffold(
+            project_root_dir=project_root_dir,
+            usage_statistics_enabled=usage_statistics_enabled,
+        )
+        return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
 
-        if not os.path.isdir(project_root_dir):  # type: ignore[arg-type]  # noqa: PTH112
-            raise gx_exceptions.DataContextError(
-                "The project_root_dir must be an existing directory in which "
-                "to initialize a new DataContext"
-            )
-
+    @classmethod
+    def _scaffold(
+        cls,
+        project_root_dir: Optional[PathStr] = None,
+        usage_statistics_enabled: bool = True,
+    ) -> str:
         gx_dir = os.path.join(project_root_dir, cls.GX_DIR)  # type: ignore[arg-type]  # noqa: PTH118
         os.makedirs(gx_dir, exist_ok=True)  # noqa: PTH103
         cls._scaffold_directories(gx_dir)
@@ -208,7 +213,7 @@ class SerializableDataContext(AbstractDataContext):
         else:
             cls._write_config_variables_template_to_disk(uncommitted_dir)
 
-        return cls(context_root_dir=gx_dir, runtime_environment=runtime_environment)
+        return gx_dir
 
     @classmethod
     def all_uncommitted_directories_exist(cls, gx_dir: PathStr) -> bool:
@@ -231,6 +236,8 @@ class SerializableDataContext(AbstractDataContext):
         with open(path_to_yml) as f:
             config = yaml.load(f)
         config_var_path = config.get("config_variables_file_path")
+        if not config_var_path:
+            return False
         config_var_path = os.path.join(gx_dir, config_var_path)  # noqa: PTH118
         return os.path.isfile(config_var_path)  # noqa: PTH113
 
@@ -328,9 +335,7 @@ class SerializableDataContext(AbstractDataContext):
             if os.path.isdir(  # noqa: PTH112
                 gx_home_environment
             ) and os.path.isfile(  # noqa: PTH112, PTH113
-                os.path.join(  # noqa: PTH118
-                    gx_home_environment, "great_expectations.yml"
-                )
+                os.path.join(gx_home_environment, cls.GX_YML)  # noqa: PTH118
             ):
                 result = gx_home_environment
         else:
@@ -447,18 +452,30 @@ class SerializableDataContext(AbstractDataContext):
         Return True if the project is initialized.
 
         To be considered initialized, all of the following must be true:
+        - the project must be scaffolded (see cls.is_project_scaffolded)
+        - the project has at least one datasource
+        - the project has at least one suite
+        """
+        return (
+            cls.is_project_scaffolded(ge_dir)
+            and cls._does_context_have_at_least_one_datasource(ge_dir)
+            and cls._does_context_have_at_least_one_suite(ge_dir)
+        )
+
+    @classmethod
+    def is_project_scaffolded(cls, ge_dir: PathStr) -> bool:
+        """
+        Return True if the project is scaffolded (required filesystem changes have occurred).
+
+        To be considered scaffolded, all of the following must be true:
         - all project directories exist (including uncommitted directories)
         - a valid great_expectations.yml is on disk
         - a config_variables.yml is on disk
-        - the project has at least one datasource
-        - the project has at least one suite
         """
         return (
             cls.does_config_exist_on_disk(ge_dir)
             and cls.all_uncommitted_directories_exist(ge_dir)
             and cls.config_variables_yml_exist(ge_dir)
-            and cls._does_context_have_at_least_one_datasource(ge_dir)
-            and cls._does_context_have_at_least_one_suite(ge_dir)
         )
 
     @classmethod

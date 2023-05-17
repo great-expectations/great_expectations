@@ -95,7 +95,6 @@ module.exports = {
               value: '<h4>Data Context Configuration</h4>',
               defaultStyle: true
             },
-            'guides/setup/configuring_data_contexts/how_to_configure_datacontext_components_using_test_yaml_config',
             'guides/setup/configuring_data_contexts/how_to_configure_credentials'
           ]
         },
@@ -239,64 +238,6 @@ module.exports = {
             'guides/connecting_to_your_data/fluent/data_assets/how_to_organize_batches_in_a_sql_based_data_asset'
           ]
         },
-        {
-          type: 'category',
-          label: 'Advanced Datasource configuration',
-          items: [
-            {
-              type: 'category',
-              label: 'Filesystem block-configuration',
-              items: [
-                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_pandas_datasource',
-                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_spark_datasource'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'In-memory block-configuration',
-              items: [
-                'guides/connecting_to_your_data/in_memory/pandas',
-                'guides/connecting_to_your_data/in_memory/spark'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Cloud block-configuration',
-              items: [
-                'guides/connecting_to_your_data/cloud/s3/pandas',
-                'guides/connecting_to_your_data/cloud/s3/spark',
-                'guides/connecting_to_your_data/cloud/gcs/pandas',
-                'guides/connecting_to_your_data/cloud/gcs/spark',
-                'guides/connecting_to_your_data/cloud/azure/pandas',
-                'guides/connecting_to_your_data/cloud/azure/spark'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'SQL database block-configuration',
-              items: [
-                'guides/connecting_to_your_data/datasource_configuration/how_to_configure_a_sql_datasource',
-                'guides/connecting_to_your_data/database/athena',
-                'guides/connecting_to_your_data/database/bigquery',
-                'guides/connecting_to_your_data/database/mssql',
-                'guides/connecting_to_your_data/database/mysql',
-                'guides/connecting_to_your_data/database/postgres',
-                'guides/connecting_to_your_data/database/redshift',
-                'guides/connecting_to_your_data/database/snowflake',
-                'guides/connecting_to_your_data/database/sqlite',
-                'guides/connecting_to_your_data/database/trino'
-              ]
-            },
-            {
-              type: 'category',
-              label: 'Block-configuration compatible Batch Requests',
-              items: [
-                'guides/connecting_to_your_data/how_to_get_one_or_more_batches_of_data_from_a_configured_datasource',
-                'guides/connecting_to_your_data/how_to_create_a_batch_of_data_from_an_in_memory_spark_or_pandas_dataframe'
-              ]
-            }
-          ]
-        },
         { type: 'doc', id: 'guides/connecting_to_your_data/index', label: 'Index' }
       ]
     },
@@ -403,8 +344,7 @@ module.exports = {
           items: [
             'guides/validation/advanced/how_to_deploy_a_scheduled_checkpoint_with_cron',
             'guides/validation/advanced/how_to_get_data_docs_urls_for_custom_validation_actions',
-            'guides/validation/advanced/how_to_validate_data_without_a_checkpoint',
-            'guides/validation/advanced/how_to_validate_data_with_an_in_memory_checkpoint'
+            'guides/validation/advanced/how_to_validate_data_without_a_checkpoint'
           ]
         },
         { type: 'doc', id: 'guides/validation/index', label: 'Index' }

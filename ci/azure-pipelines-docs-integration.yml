@@ -5,6 +5,11 @@
 # The pipeline is run under the following conditions:
 #   - On any PR
 
+trigger:
+  branches:
+    include:
+    - develop
+
 resources:
   containers:
   - container: postgres
