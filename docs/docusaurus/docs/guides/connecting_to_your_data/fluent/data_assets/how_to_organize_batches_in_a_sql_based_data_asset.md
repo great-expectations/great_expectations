@@ -91,7 +91,7 @@ Our table has a datetime column called "`pickup_datetime`" which we will use to 
 
 ### 4. (Optional) Add Batch Sorters to the Data Asset
 
-We will now add a Batch Sorter to our Data Asset.  This will allow us to explicitly state the order in which our Batches are returned when we request data from the Data Asset.  To do this, we will pass a list of sorters to the `add_sorters(...)` method of our Data Asset.
+We will now add Batch Sorters to our Data Asset.  This will allow us to explicitly state the order in which our Batches are returned when we request data from the Data Asset.  To do this, we will pass a list of sorters to the `add_sorters(...)` method of our Data Asset.
 
 In this example we split `"pickup_datetime"` column on `"year"` and `"month"`, so our list of sorters can have up to two elements.  We will add an ascending sorter based on the contents of the splitter group `"year"` and a descending sorter based on the contents of the splitter group `"month"`:
 
