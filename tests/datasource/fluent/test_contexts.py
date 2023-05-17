@@ -143,6 +143,11 @@ def test_context_add_or_update_datasource(
         print(pf(response.json(), depth=4))
         assert response.json()["data"]["attributes"]["datasource_config"].get("assets")
 
+    # add_or_update should be idempotent
+    datasource = context.sources.add_or_update_pandas_filesystem(
+        name="save_ds_test", base_directory=taxi_data_samples_dir
+    )
+
 
 @pytest.mark.cloud
 def test_cloud_context_delete_datasource(
