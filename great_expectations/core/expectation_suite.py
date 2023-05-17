@@ -207,10 +207,8 @@ class ExpectationSuite(SerializableDictDot):
                 return NotImplemented
 
         return len(self.expectations) == len(other.expectations) and all(
-            [
-                mine.isEquivalentTo(theirs)
-                for (mine, theirs) in zip(self.expectations, other.expectations)
-            ]
+            mine.isEquivalentTo(theirs)
+            for (mine, theirs) in zip(self.expectations, other.expectations)
         )
 
     def __eq__(self, other):
@@ -248,7 +246,7 @@ class ExpectationSuite(SerializableDictDot):
         for key in attributes_to_copy:
             setattr(result, key, deepcopy(getattr(self, key)))
 
-        setattr(result, "_data_context", self._data_context)
+        result._data_context = self._data_context
 
         return result
 

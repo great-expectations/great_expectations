@@ -6,16 +6,8 @@ from typing import Any, Dict, List, Optional, Union
 import pandas as pd
 import pytest
 
-from great_expectations.util import is_candidate_subset_of_target
-
-try:
-    pyspark = pytest.importorskip("pyspark")
-    from pyspark.sql.types import Row
-except ImportError:
-    pyspark = None
-    Row = None
-
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import pyspark
 from great_expectations.core.batch import (
     Batch,
     BatchDefinition,
@@ -32,6 +24,7 @@ from great_expectations.datasource.data_connector import (
     ConfiguredAssetFilesystemDataConnector,
 )
 from great_expectations.datasource.new_datasource import Datasource
+from great_expectations.util import is_candidate_subset_of_target
 from tests.test_utils import create_files_in_directory
 
 yaml = YAMLHandler()
@@ -244,7 +237,7 @@ def test_basic_spark_datasource_self_check_spark_config(basic_spark_datasource):
 
     # The structure of this config is dynamic based on PySpark version;
     # we deem asserting certain key-value pairs sufficient for purposes of this test
-    expected_spark_config: Dict[str, str] = {
+    expected_spark_config: Dict[str, Any] = {
         "spark.app.name": "default_great_expectations_spark_application",
         "spark.default.parallelism": 4,
         "spark.driver.memory": "6g",
@@ -500,7 +493,7 @@ def test_get_batch_with_pipeline_style_batch_request_missing_data_connector_quer
         },
         "batch_identifiers": None,
     }
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         batch_request = RuntimeBatchRequest(**batch_request)
 
         # noinspection PyUnusedLocal
@@ -949,7 +942,7 @@ def test_spark_with_batch_spec_passthrough(tmp_path_factory, spark_session):
         BatchRequest(**batch_request)
     )
     # check that the batch_spec_passthrough has worked
-    assert batch[0].data.dataframe.head() == Row(x="1", y="2")
+    assert batch[0].data.dataframe.head() == pyspark.Row(x="1", y="2")
 
 
 @pytest.mark.integration

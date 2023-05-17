@@ -105,7 +105,7 @@ class MetaFileDataAsset(DataAsset):
                         (boolean_mapped_null_lines == False).sum()  # noqa: E712
                     )
                     boolean_mapped_success_lines = np.array(
-                        func(self, _lines=nonnull_lines, *args, **kwargs)
+                        func(self, _lines=nonnull_lines, *args, **kwargs)  # noqa: B026
                     )
                     success_count = np.count_nonzero(boolean_mapped_success_lines)
                     unexpected_list = list(

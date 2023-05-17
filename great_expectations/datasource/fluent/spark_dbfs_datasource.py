@@ -16,7 +16,7 @@ from great_expectations.datasource.fluent.data_asset.data_connector import (
 
 if TYPE_CHECKING:
     from great_expectations.datasource.fluent.spark_file_path_datasource import (
-        CSVAsset,
+        _SPARK_FILE_PATH_ASSET_TYPES_UNION,
     )
 
 logger = logging.getLogger(__name__)
@@ -34,7 +34,10 @@ class SparkDBFSDatasource(SparkFilesystemDatasource):
     type: Literal["spark_dbfs"] = "spark_dbfs"  # type: ignore[assignment] # base class has different type
 
     def _build_data_connector(
-        self, data_asset: CSVAsset, glob_directive: str = "**/*", **kwargs
+        self,
+        data_asset: _SPARK_FILE_PATH_ASSET_TYPES_UNION,
+        glob_directive: str = "**/*",
+        **kwargs,
     ) -> None:
         """Builds and attaches the `DBFSDataConnector` to the asset."""
         if kwargs:

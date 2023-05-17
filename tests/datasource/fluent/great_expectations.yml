@@ -27,8 +27,21 @@ fluent_datasources:
         order_by:
           - year
           - -month
-  sqlite_taxi:
+  sql_taxi:
     type: sql
+    connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
+    assets:
+      my_asset:
+        type: table
+        table_name: yellow_tripdata_sample_2019_01
+        splitter:
+            column_name: pickup_datetime
+            method_name: split_on_year_and_month
+        order_by:
+            - key: year
+            - key: month
+  sqlite_taxi:
+    type: sqlite
     connection_string: "sqlite:///./tests/test_sets/taxi_yellow_tripdata_samples/sqlite/yellow_tripdata.db"
     assets:
       my_asset:
@@ -104,7 +117,7 @@ fluent_datasources:
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
-        InferSchema: True
+        inferSchema: True
         connect_options:
           glob_directive: "**/*.csv"
       my_csv_asset_with_default_connect_options:

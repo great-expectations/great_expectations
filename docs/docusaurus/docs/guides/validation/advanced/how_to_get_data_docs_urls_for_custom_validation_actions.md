@@ -7,12 +7,14 @@ import TechnicalTag from '@site/docs/term_tags/_tag.mdx';
 If you would like to a custom Validation Action that includes a link to <TechnicalTag tag="data_docs" text="Data Docs"/>,
 you can access the Data Docs URL for the respective <TechnicalTag tag="validation_result" text="Validation Results"/> page from your Validation Results following a <TechnicalTag tag="checkpoint" text="Checkpoint"/> run following the steps below.
 
-This will work to get the URLs for any type of Data Docs site setup, e.g. S3 or local setup.
+This will work to get the URLs for any type of Data Docs site setup. For example, S3 or a local setup.
+
+## Prerequisites
 
 <Prerequisites>
 
-  - [Created an Expectation Suite to use for Validation](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data)
-  - [Reviewed our guidance on Validation Actions](../../../terms/action.md)
+  - [An Expectation Suite for Validation](/docs/guides/expectations/how_to_create_and_edit_expectations_with_instant_feedback_from_a_sample_batch_of_data).
+  - [Familiarity with Validation Actions](../../../terms/action.md)
 
 </Prerequisites>
 

@@ -111,7 +111,7 @@ The most important ABCs are [BatchAggregateStatisticTimeSeriesExpectation](link)
 
 The full class hiereachy is:
 
-    *TableExpectation* (ABC)
+    *BatchExpectation* (ABC)
         BatchAggregateStatisticExpectation (ABC)
             ExpectBatchAggregateStatisticToBeBetween (ABC)
                 expect_batch_update_time_to_be_between

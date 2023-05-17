@@ -64,7 +64,7 @@ See the script that creates examples (`assets/generate_test_time_series_data.py`
 
 As all of those use cases are realized, we imagine the full class hierarchy for time series Expectations to evolve into this:
 
-    *TableExpectation* (ABC)
+    *BatchExpectation* (ABC)
         *BatchAggregateStatisticExpectation* (ABC)
             BatchAggregateStatisticTimeSeriesExpectation (ABC)
                 ExpectBatchAggregateStatisticToMatchProphetDateModel (ABC)

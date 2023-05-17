@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import dataclasses
 import logging
 import sqlite3
 from pprint import pformat as pf
@@ -10,11 +9,10 @@ from typing import (
     Any,
     Callable,
     ClassVar,
-    Dict,
     Generic,
     List,
     Mapping,
-    MutableMapping,
+    MutableSequence,
     Optional,
     Sequence,
     Set,
@@ -25,10 +23,16 @@ from typing import (
 
 import pandas as pd
 import pydantic
-from typing_extensions import Literal
+from typing_extensions import Literal, TypeAlias
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility import sqlalchemy
+from great_expectations.compatibility.sqlalchemy import (
+    sqlalchemy as sa,
+)
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.batch_spec import PandasBatchSpec, RuntimeDataBatchSpec
+from great_expectations.datasource.fluent import BatchRequest
 from great_expectations.datasource.fluent.constants import (
     _DATA_CONNECTOR_NAME,
     _FIELDS_ALWAYS_SET,
@@ -38,7 +42,6 @@ from great_expectations.datasource.fluent.dynamic_pandas import (
 )
 from great_expectations.datasource.fluent.interfaces import (
     Batch,
-    BatchRequest,
     DataAsset,
     Datasource,
     _DataAssetT,
@@ -47,23 +50,21 @@ from great_expectations.datasource.fluent.signatures import _merge_signatures
 from great_expectations.datasource.fluent.sources import (
     DEFAULT_PANDAS_DATA_ASSET_NAME,
 )
-from great_expectations.optional_imports import sqlalchemy
 
 _EXCLUDE_TYPES_FROM_JSON: list[Type] = [sqlite3.Connection]
 
-if sqlalchemy:
-    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.engine.Engine]
+if sa:
+    _EXCLUDE_TYPES_FROM_JSON = _EXCLUDE_TYPES_FROM_JSON + [sqlalchemy.Engine]
 
 
 if TYPE_CHECKING:
     import os
 
-    MappingIntStrAny = Mapping[Union[int, str], Any]
-    AbstractSetIntStr = AbstractSet[Union[int, str]]
+    MappingIntStrAny: TypeAlias = Mapping[Union[int, str], Any]
+    AbstractSetIntStr: TypeAlias = AbstractSet[Union[int, str]]
 
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
-        BatchRequestOptions,
     )
     from great_expectations.execution_engine import PandasExecutionEngine
     from great_expectations.validator.validator import Validator
@@ -168,17 +169,14 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
         )
         return batch_list
 
-    def build_batch_request(
-        self, options: Optional[BatchRequestOptions] = None
-    ) -> BatchRequest:
-        if options:
-            actual_keys = set(options.keys())
-            raise gx_exceptions.InvalidBatchRequestError(
-                "Data Assets associated with PandasDatasource can only contain a single batch,\n"
-                "therefore BatchRequest options cannot be supplied. BatchRequest options with keys:\n"
-                f"{actual_keys}\nwere passed.\n"
-            )
+    @public_api
+    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+        """A batch request that can be used to obtain batches for this DataAsset.
 
+        Returns:
+            A BatchRequest object that can be used to obtain a batch list from a Datasource by calling the
+            get_batch_list_from_batch_request method.
+        """
         return BatchRequest(
             datasource_name=self.datasource.name,
             data_asset_name=self.name,
@@ -200,11 +198,12 @@ work-around, until "type" naming convention and method for obtaining 'reader_met
                 datasource_name=self.datasource.name,
                 data_asset_name=self.name,
                 options={},
+                batch_slice=batch_request._batch_slice_input,
             )
             raise gx_exceptions.InvalidBatchRequestError(
                 "BatchRequest should have form:\n"
-                f"{pf(dataclasses.asdict(expect_batch_request_form))}\n"
-                f"but actually has form:\n{pf(dataclasses.asdict(batch_request))}\n"
+                f"{pf(expect_batch_request_form.dict())}\n"
+                f"but actually has form:\n{pf(batch_request.dict())}\n"
             )
 
     def json(
@@ -328,7 +327,9 @@ XMLAsset: Type[_PandasDataAsset] = _PANDAS_ASSET_MODELS.get(
 class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
     # instance attributes
     type: Literal["dataframe"] = "dataframe"
-    dataframe: _PandasDataFrameT = pydantic.Field(..., exclude=True, repr=False)
+    dataframe: Optional[_PandasDataFrameT] = pydantic.Field(
+        default=None, exclude=True, repr=False
+    )
 
     class Config:
         extra = pydantic.Extra.forbid
@@ -344,10 +345,19 @@ class DataFrameAsset(_PandasDataAsset, Generic[_PandasDataFrameT]):
             """Pandas DataFrameAsset does not implement "_get_reader_method()" method, because DataFrame is already available."""
         )
 
-    def _get_reader_options_include(self) -> set[str] | None:
+    def _get_reader_options_include(self) -> set[str]:
         raise NotImplementedError(
             """Pandas DataFrameAsset does not implement "_get_reader_options_include()" method, because DataFrame is already available."""
         )
+
+    @public_api
+    def build_batch_request(self) -> BatchRequest:  # type: ignore[override]
+        if self.dataframe is None:
+            raise ValueError(
+                "Cannot build batch request for dataframe asset without a dataframe"
+            )
+
+        return super().build_batch_request()
 
     def get_batch_list_from_batch_request(
         self, batch_request: BatchRequest
@@ -403,10 +413,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = []
 
     # instance attributes
-    assets: MutableMapping[
-        str,
-        _DataAssetT,
-    ] = {}
+    assets: MutableSequence[_DataAssetT] = []
 
     # Abstract Methods
     @property
@@ -465,7 +472,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
         )
         if "assets" in self.__fields_set__:
             exclude_assets = {}
-            for asset_name, asset in self.assets.items():
+            for asset in self.assets:
                 # don't check fields that should always be set
                 check_fields: set[str] = asset.__fields_set__.copy().difference(
                     _FIELDS_ALWAYS_SET
@@ -474,7 +481,7 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
                     if isinstance(
                         getattr(asset, field), tuple(_EXCLUDE_TYPES_FROM_JSON)
                     ):
-                        exclude_assets[asset_name] = {field: True}
+                        exclude_assets[asset.name] = {field: True}
             if exclude_assets:
                 exclude_fields["assets"] = exclude_assets
 
@@ -491,11 +498,40 @@ class _PandasDatasource(Datasource, Generic[_DataAssetT]):
             **dumps_kwargs,
         )
 
+    def _add_asset(
+        self, asset: _DataAssetT, connect_options: dict | None = None
+    ) -> _DataAssetT:
+        """Adds an asset to this "_PandasDatasource" object.
+
+        The reserved asset name "DEFAULT_PANDAS_DATA_ASSET_NAME" undergoes replacement (rather than signaling error).
+
+        Args:
+            asset: The DataAsset to be added to this datasource.
+        """
+        asset_name: str = asset.name
+
+        asset_names: Set[str] = self.get_asset_names()
+
+        if asset_name == DEFAULT_PANDAS_DATA_ASSET_NAME:
+            if asset_name in asset_names:
+                self.delete_asset(asset_name=asset_name)
+
+        return super()._add_asset(asset=asset, connect_options=connect_options)
+
 
 _DYNAMIC_ASSET_TYPES = list(_PANDAS_ASSET_MODELS.values())
 
 
+@public_api
 class PandasDatasource(_PandasDatasource):
+    """Adds a single-batch pandas datasource to the data context.
+
+    Args:
+        name: The name of this datasource.
+        assets: An optional dictionary whose keys are Pandas DataAsset names and whose values
+            are Pandas DataAsset objects.
+    """
+
     # class attributes
     asset_types: ClassVar[Sequence[Type[DataAsset]]] = _DYNAMIC_ASSET_TYPES + [
         DataFrameAsset
@@ -503,7 +539,22 @@ class PandasDatasource(_PandasDatasource):
 
     # instance attributes
     type: Literal["pandas"] = "pandas"
-    assets: Dict[str, _PandasDataAsset] = {}
+    assets: List[_PandasDataAsset] = []
+
+    def dict(self, _exclude_default_asset_names: bool = True, **kwargs):
+        """Overriding `.dict()` so that `DEFAULT_PANDAS_DATA_ASSET_NAME` is always excluded on serialization."""
+        # Overriding `.dict()` instead of `.json()` because `.json()`is only called from the outermost model,
+        # .dict() is called for deeply nested models.
+        ds_dict = super().dict(**kwargs)
+        if _exclude_default_asset_names:
+            assets = ds_dict.pop("assets", None)
+            if assets:
+                assets = [
+                    a for a in assets if a["name"] != DEFAULT_PANDAS_DATA_ASSET_NAME
+                ]
+                if assets:
+                    ds_dict["assets"] = assets
+        return ds_dict
 
     def test_connection(self, test_assets: bool = True) -> None:
         ...
@@ -520,32 +571,57 @@ class PandasDatasource(_PandasDatasource):
 
     def _get_validator(self, asset: _PandasDataAsset) -> Validator:
         batch_request: BatchRequest = asset.build_batch_request()
-        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # got BatchRequest expected BatchRequestBase
+        # TODO: raise error if `_data_context` not set
+        return self._data_context.get_validator(batch_request=batch_request)  # type: ignore[union-attr] # self._data_context must be set
 
+    @public_api
     def add_dataframe_asset(
         self,
         name: str,
         dataframe: pd.DataFrame,
-        **kwargs,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> DataFrameAsset:
-        asset = DataFrameAsset(
+        """Adds a Dataframe DataAsset to this PandasDatasource object.
+
+        Args:
+            name: The name of the Dataframe asset. This can be any arbitrary string.
+            dataframe: The Dataframe containing the data for this data asset.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            The DataFameAsset that has been added to this datasource.
+        """
+        asset: DataFrameAsset = DataFrameAsset(
             name=name,
             dataframe=dataframe,
-            **kwargs,
+            batch_metadata=batch_metadata or {},
         )
         return self._add_asset(asset=asset)
 
+    @public_api
     def read_dataframe(
         self,
         dataframe: pd.DataFrame,
         asset_name: Optional[str] = None,
-        **kwargs,
+        batch_metadata: Optional[BatchMetadata] = None,
     ) -> Validator:
+        """Reads a Dataframe and returns a Validator associated with it.
+
+        Args:
+            dataframe: The Dataframe containing the data for this data asset.
+            asset_name: The name of the Dataframe asset, should you wish to use it again.
+            batch_metadata: An arbitrary user defined dictionary with string keys which will get inherited by any
+                            batches created from the asset.
+
+        Returns:
+            A Validator using an ephemeral DataFrameAsset and the "default" Expectation Suite.
+        """
         name: str = self._validate_asset_name(asset_name=asset_name)
         asset: DataFrameAsset = self.add_dataframe_asset(
             name=name,
             dataframe=dataframe,
-            **kwargs,
+            batch_metadata=batch_metadata or {},
         )
         return self._get_validator(asset=asset)
 
@@ -899,8 +975,8 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_asset(
         self,
         name: str,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLAsset:  # type: ignore[valid-type]
         asset = SQLAsset(
@@ -913,8 +989,8 @@ class PandasDatasource(_PandasDatasource):
 
     def read_sql(
         self,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -930,8 +1006,8 @@ class PandasDatasource(_PandasDatasource):
     def add_sql_query_asset(
         self,
         name: str,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         **kwargs,
     ) -> SQLQueryAsset:  # type: ignore[valid-type]
         asset = SQLQueryAsset(
@@ -944,8 +1020,8 @@ class PandasDatasource(_PandasDatasource):
 
     def read_sql_query(
         self,
-        sql: sqlalchemy.select | sqlalchemy.text | str,
-        con: sqlalchemy.engine.Engine | sqlite3.Connection | str,
+        sql: sa.select | sa.text | str,
+        con: sqlalchemy.Engine | sqlite3.Connection | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:
@@ -962,7 +1038,7 @@ class PandasDatasource(_PandasDatasource):
         self,
         name: str,
         table_name: str,
-        con: sqlalchemy.engine.Engine | str,
+        con: sqlalchemy.Engine | str,
         **kwargs,
     ) -> SQLTableAsset:  # type: ignore[valid-type]
         asset = SQLTableAsset(
@@ -976,7 +1052,7 @@ class PandasDatasource(_PandasDatasource):
     def read_sql_table(
         self,
         table_name: str,
-        con: sqlalchemy.engine.Engine | str,
+        con: sqlalchemy.Engine | str,
         asset_name: Optional[str] = None,
         **kwargs,
     ) -> Validator:

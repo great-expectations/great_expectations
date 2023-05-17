@@ -19,9 +19,9 @@
         },
         "assets": {
             "title": "Assets",
-            "default": {},
-            "type": "object",
-            "additionalProperties": {
+            "default": [],
+            "type": "array",
+            "items": {
                 "$ref": "#/definitions/DataAsset"
             }
         }

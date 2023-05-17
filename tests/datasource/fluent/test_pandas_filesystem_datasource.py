@@ -33,6 +33,7 @@ if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
     from great_expectations.datasource.fluent.interfaces import (
         BatchMetadata,
+        BatchSlice,
         SortersDefinition,
     )
 
@@ -305,7 +306,7 @@ class TestDynamicPandasAssets:
             .build_batch_request({"year": "2018"})
         )
         with pytest.raises(SpyInterrupt):
-            empty_data_context.get_validator(batch_request=batch_request)  # type: ignore[arg-type] # BatchRequest vs Optional[BatchRequestBase]
+            empty_data_context.get_validator(batch_request=batch_request)
 
         captured_args, captured_kwargs = capture_reader_fn_params
         print(f"positional args:\n{pf(captured_args[-1])}\n")
@@ -561,7 +562,7 @@ def test_get_batch_list_from_partially_specified_batch_request(
         )
     ]
     # assert there are files that are not csv files
-    assert any([not file_name.endswith("csv") for file_name in all_files])
+    assert any(not file_name.endswith("csv") for file_name in all_files)
     # assert there are 12 files from 2018
     files_for_2018 = [
         file_name for file_name in all_files if file_name.find("2018") >= 0
@@ -677,6 +678,42 @@ def test_pandas_sorter(
             assert metadata[key2] == range2
 
 
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "batch_slice,expected_batch_count",
+    [
+        ("[-3:]", 3),
+        ("[5:9]", 4),
+        ("[:10:2]", 5),
+        (slice(-3, None), 3),
+        (slice(5, 9), 4),
+        (slice(0, 10, 2), 5),
+        ("-5", 1),
+        ("-1", 1),
+        (11, 1),
+        (0, 1),
+        ([3], 1),
+        (None, 12),
+        ("", 12),
+    ],
+)
+def test_pandas_slice_batch_count(
+    pandas_filesystem_datasource: PandasFilesystemDatasource,
+    batch_slice: BatchSlice,
+    expected_batch_count: int,
+) -> None:
+    asset = pandas_filesystem_datasource.add_csv_asset(
+        name="csv_asset",
+        batching_regex=r"yellow_tripdata_sample_(?P<year>\d{4})-(?P<month>\d{2})\.csv",
+    )
+    batch_request = asset.build_batch_request(
+        options={"year": "2019"},
+        batch_slice=batch_slice,
+    )
+    batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
+    assert len(batches) == expected_batch_count
+
+
 def bad_batching_regex_config(
     csv_path: pathlib.Path,
 ) -> tuple[re.Pattern, TestConnectionError]:
@@ -704,7 +741,9 @@ def datasource_test_connection_error_messages(
         batching_regex=batching_regex,
     )
     csv_asset._datasource = pandas_filesystem_datasource
-    pandas_filesystem_datasource.assets = {"csv_asset": csv_asset}
+    pandas_filesystem_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = FilesystemDataConnector(
         datasource_name=pandas_filesystem_datasource.name,
         data_asset_name=csv_asset.name,
@@ -737,7 +776,7 @@ def test_csv_asset_batch_metadata(
     pandas_filesystem_datasource: PandasFilesystemDatasource,
 ):
     my_config_variables = {"pipeline_filename": __file__}
-    pandas_filesystem_datasource._data_context.config_variables.update(
+    pandas_filesystem_datasource._data_context.config_variables.update(  # type: ignore[union-attr] # `_data_context`
         my_config_variables
     )
 

@@ -21,9 +21,11 @@ from typing_extensions import TypeAlias
 
 import great_expectations.exceptions as ge_exceptions
 from great_expectations.core.batch_spec import SqlAlchemyDatasourceBatchSpec
-from great_expectations.datasource.fluent.interfaces import (
+from great_expectations.datasource.fluent.batch_request import (
     BatchRequest,
     BatchRequestOptions,
+)
+from great_expectations.datasource.fluent.interfaces import (
     Sorter,
     TestConnectionError,
 )
@@ -41,7 +43,10 @@ from tests.sqlalchemy_test_doubles import Dialect, MockSaEngine, MockSaInspector
 
 if TYPE_CHECKING:
     from great_expectations.data_context import AbstractDataContext
-    from great_expectations.datasource.fluent.interfaces import BatchMetadata
+    from great_expectations.datasource.fluent.interfaces import (
+        BatchMetadata,
+        BatchSlice,
+    )
 
 # We set a default time range that we use for testing.
 _DEFAULT_TEST_YEARS = list(range(2021, 2022 + 1))
@@ -102,7 +107,7 @@ def test_construct_postgres_datasource(create_source: CreateSourceFixture):
     ) as source:
         assert source.name == "my_datasource"
         assert source.execution_engine_type is SqlAlchemyExecutionEngine
-        assert source.assets == {}
+        assert source.assets == []
 
 
 def assert_table_asset(
@@ -147,7 +152,7 @@ def test_add_table_asset_with_splitter(mocker, create_source: CreateSourceFixtur
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         asset.add_splitter_year_and_month(column_name="my_col")
         assert len(source.assets) == 1
-        assert asset == list(source.assets.values())[0]
+        assert asset == source.assets[0]
         assert_table_asset(
             asset=asset,
             name="my_asset",
@@ -174,7 +179,7 @@ def test_add_table_asset_with_no_splitter(mocker, create_source: CreateSourceFix
 
         asset = source.add_table_asset(name="my_asset", table_name="my_table")
         assert len(source.assets) == 1
-        assert asset == list(source.assets.values())[0]
+        assert asset == source.assets[0]
         assert_table_asset(
             asset=asset,
             name="my_asset",
@@ -221,7 +226,7 @@ def create_and_add_table_asset_without_testing_connection(
     )
     # TODO: asset custom init
     table_asset._datasource = source
-    source.assets[table_asset.name] = table_asset
+    source.assets.append(table_asset)
     return source, table_asset
 
 
@@ -736,6 +741,47 @@ def test_table_asset_sorter_parsing(order_by: list):
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    "batch_slice,expected_batch_count",
+    [
+        ("[-3:]", 3),
+        ("[5:9]", 4),
+        ("[:10:2]", 5),
+        (slice(-3, None), 3),
+        (slice(5, 9), 4),
+        (slice(0, 10, 2), 5),
+        ("-5", 1),
+        ("-1", 1),
+        (11, 1),
+        (0, 1),
+        ([3], 1),
+        (None, 12),
+        ("", 12),
+    ],
+)
+def test_postgres_slice_batch_count(
+    empty_data_context,
+    create_source: CreateSourceFixture,
+    batch_slice: BatchSlice,
+    expected_batch_count: int,
+) -> None:
+    with create_source(
+        validate_batch_spec=lambda _: None,
+        dialect="postgresql",
+        data_context=empty_data_context,
+    ) as source:
+        source, asset = create_and_add_table_asset_without_testing_connection(
+            source=source, name="my_asset", table_name="my_table"
+        )
+        asset.splitter = year_month_splitter(column_name="my_col")
+        batch_request = asset.build_batch_request(
+            options={"year": 2021}, batch_slice=batch_slice
+        )
+        batches = asset.get_batch_list_from_batch_request(batch_request=batch_request)
+        assert len(batches) == expected_batch_count
+
+
+@pytest.mark.unit
 def test_data_source_json_has_properties(create_source: CreateSourceFixture):
     with create_source(
         validate_batch_spec=lambda _: None, dialect="postgresql"
@@ -780,9 +826,25 @@ def test_datasource_dict_has_properties(create_source):
         asset.add_sorters(["year", "month"])
         source_dict = source.dict()
         pprint(source_dict)
-        assert isinstance(source_dict["assets"]["my_asset"]["order_by"], list)
+        assert isinstance(
+            list(
+                filter(
+                    lambda element: element["name"] == "my_asset",
+                    source_dict["assets"],
+                )
+            )[0]["order_by"],
+            list,
+        )
         # type should be in dumped dict even if not explicitly set
-        assert "type" in source_dict["assets"]["my_asset"]
+        assert (
+            "type"
+            in list(
+                filter(
+                    lambda element: element["name"] == "my_asset",
+                    source_dict["assets"],
+                )
+            )[0]
+        )
 
 
 @pytest.mark.unit
@@ -889,7 +951,9 @@ def bad_configuration_datasource(
     return PostgresDatasource(
         name="postgres_datasource",
         connection_string=connection_string,
-        assets={"table_asset": table_asset},
+        assets=[
+            table_asset,
+        ],
     )
 
 

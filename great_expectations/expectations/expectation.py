@@ -304,7 +304,7 @@ class Expectation(metaclass=MetaExpectation):
         2. `success_keys`: a tuple of the *keys* used to determine the success of
            the expectation.
 
-    In some cases, subclasses of Expectation (such as TableExpectation) can
+    In some cases, subclasses of Expectation (such as BatchExpectation) can
     inherit these properties from their parent class.
 
     They *may* optionally override `runtime_keys` and `default_kwarg_values`, and
@@ -1408,36 +1408,17 @@ class Expectation(metaclass=MetaExpectation):
             )
         )
 
-        # Set a coverage_score
-        _total_passed = 0
-        _total_failed = 0
-        _num_backends = 0
-        _num_engines = sum([x for x in introspected_execution_engines.values() if x])
-        for result in backend_test_result_counts:
-            _num_backends += 1
-            _total_passed += result.num_passed
-            _total_failed += result.num_failed
-        coverage_score = (
-            _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
-        )
-        _debug(
-            f"coverage_score: {coverage_score} for {self.expectation_type} ... "
-            f"engines: {_num_engines}, backends: {_num_backends}, "
-            f"passing tests: {_total_passed}, failing tests:{_total_failed}"
+        coverage_score: float = Expectation._get_coverage_score(
+            backend_test_result_counts=backend_test_result_counts,
+            execution_engines=introspected_execution_engines,
         )
 
+        _debug(f"coverage_score: {coverage_score} for {self.expectation_type}")
+
         # Set final maturity level based on status of all checks
-        all_experimental = all(
-            [check.passed for check in maturity_checklist.experimental]
+        library_metadata.maturity = Expectation._get_final_maturity_level(
+            maturity_checklist=maturity_checklist
         )
-        all_beta = all([check.passed for check in maturity_checklist.beta])
-        all_production = all([check.passed for check in maturity_checklist.production])
-        if all_production and all_beta and all_experimental:
-            library_metadata.maturity = Maturity.PRODUCTION
-        elif all_beta and all_experimental:
-            library_metadata.maturity = Maturity.BETA
-        else:
-            library_metadata.maturity = Maturity.EXPERIMENTAL
 
         # Set the errors found when running tests
         errors = [
@@ -1447,11 +1428,13 @@ class Expectation(metaclass=MetaExpectation):
         ]
 
         # If run for the gallery, don't include a bunch of stuff
+        #   - Don't set examples and test_results to empty lists here since these
+        #     returned attributes will be needed to re-calculate the maturity
+        #     checklist later (after merging results from different runs of the
+        #     build_gallery.py script per backend)
         if for_gallery:
-            examples = []
             gallery_examples = []
             renderers = []
-            test_results = []
             errors = []
 
         return ExpectationDiagnostics(
@@ -2239,20 +2222,61 @@ class Expectation(metaclass=MetaExpectation):
             production=production_checks,
         )
 
+    @staticmethod
+    def _get_coverage_score(
+        backend_test_result_counts: List[ExpectationBackendTestResultCounts],
+        execution_engines: ExpectationExecutionEngineDiagnostics,
+    ) -> float:
+        """Generate coverage score"""
+        _total_passed = 0
+        _total_failed = 0
+        _num_backends = 0
+        _num_engines = sum([x for x in execution_engines.values() if x])
+        for result in backend_test_result_counts:
+            _num_backends += 1
+            _total_passed += result.num_passed
+            _total_failed += result.num_failed
+
+        coverage_score = (
+            _num_backends + _num_engines + _total_passed - (1.5 * _total_failed)
+        )
+
+        return coverage_score
+
+    @staticmethod
+    def _get_final_maturity_level(
+        maturity_checklist: ExpectationDiagnosticMaturityMessages,
+    ) -> Maturity:
+        """Get final maturity level based on status of all checks"""
+        maturity = ""
+        all_experimental = all(
+            check.passed for check in maturity_checklist.experimental
+        )
+        all_beta = all(check.passed for check in maturity_checklist.beta)
+        all_production = all(check.passed for check in maturity_checklist.production)
+        if all_production and all_beta and all_experimental:
+            maturity = Maturity.PRODUCTION
+        elif all_beta and all_experimental:
+            maturity = Maturity.BETA
+        else:
+            maturity = Maturity.EXPERIMENTAL
+
+        return maturity
+
 
 @public_api
-class TableExpectation(Expectation, ABC):
-    """Base class for TableExpectations.
+class BatchExpectation(Expectation, ABC):
+    """Base class for BatchExpectations.
 
-    TableExpectations answer a semantic question about the table itself.
+    BatchExpectations answer a semantic question about a Batch of data.
 
     For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer
     how many columns and rows are in your table.
 
-    TableExpectations must implement a `_validate(...)` method containing logic
+    BatchExpectations must implement a `_validate(...)` method containing logic
     for determining whether the Expectation is successfully validated.
 
-    TableExpectations may optionally provide implementations of `validate_configuration`,
+    BatchExpectations may optionally provide implementations of `validate_configuration`,
     which should raise an error if the configuration will not be usable for the Expectation.
 
     Raises:
@@ -2433,7 +2457,33 @@ representation."""
 
 
 @public_api
-class QueryExpectation(TableExpectation, ABC):
+class TableExpectation(BatchExpectation, ABC):
+    """Base class for TableExpectations.
+
+    WARNING: TableExpectation will be deprecated in a future release. Please use BatchExpectation instead.
+
+    TableExpectations answer a semantic question about the table itself.
+
+    For example, `expect_table_column_count_to_equal` and `expect_table_row_count_to_equal` answer
+    how many columns and rows are in your table.
+
+    TableExpectations must implement a `_validate(...)` method containing logic
+    for determining whether the Expectation is successfully validated.
+
+    TableExpectations may optionally provide implementations of `validate_configuration`,
+    which should raise an error if the configuration will not be usable for the Expectation.
+
+    Raises:
+        InvalidExpectationConfigurationError: The configuration does not contain the values required by the Expectation.
+
+    Args:
+        domain_keys (tuple): A tuple of the keys used to determine the domain of the
+            expectation.
+    """
+
+
+@public_api
+class QueryExpectation(BatchExpectation, ABC):
     """Base class for QueryExpectations.
 
     QueryExpectations facilitate the execution of SQL or Spark-SQL queries as the core logic for an Expectation.
@@ -2525,7 +2575,7 @@ class QueryExpectation(TableExpectation, ABC):
                 "By not parameterizing your query with `{active_batch}`, "
                 "you may not be validating against your intended data asset, or the expectation may fail."
             )
-            assert all([re.match("{.*?}", x) for x in parsed_query]), (
+            assert all(re.match("{.*?}", x) for x in parsed_query), (
                 "Your query appears to have hard-coded references to your data. "
                 "By not parameterizing your query with `{active_batch}`, {col}, etc., "
                 "you may not be validating against your intended data asset, or the expectation may fail."
@@ -2542,7 +2592,7 @@ class QueryExpectation(TableExpectation, ABC):
 
 
 @public_api
-class ColumnAggregateExpectation(TableExpectation, ABC):
+class ColumnAggregateExpectation(BatchExpectation, ABC):
     """Base class for column aggregate Expectations.
 
     These types of Expectation produce an aggregate metric for a column, such as the mean, standard deviation,
@@ -2613,7 +2663,7 @@ class ColumnExpectation(ColumnAggregateExpectation, ABC):
 
 
 @public_api
-class ColumnMapExpectation(TableExpectation, ABC):
+class ColumnMapExpectation(BatchExpectation, ABC):
     """Base class for ColumnMapExpectations.
 
     ColumnMapExpectations are evaluated for a column and ask a yes/no question about every row in the column.
@@ -2898,7 +2948,7 @@ class ColumnMapExpectation(TableExpectation, ABC):
 
 
 @public_api
-class ColumnPairMapExpectation(TableExpectation, ABC):
+class ColumnPairMapExpectation(BatchExpectation, ABC):
     """Base class for ColumnPairMapExpectations.
 
     ColumnPairMapExpectations are evaluated for a pair of columns and ask a yes/no question about the row-wise
@@ -3164,7 +3214,7 @@ class ColumnPairMapExpectation(TableExpectation, ABC):
 
 
 @public_api
-class MulticolumnMapExpectation(TableExpectation, ABC):
+class MulticolumnMapExpectation(BatchExpectation, ABC):
     """Base class for MulticolumnMapExpectations.
 
     MulticolumnMapExpectations are evaluated for a set of columns and ask a yes/no question about the

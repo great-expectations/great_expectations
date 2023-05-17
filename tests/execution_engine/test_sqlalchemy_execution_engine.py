@@ -6,6 +6,9 @@ import pandas as pd
 import pytest
 
 import great_expectations.exceptions as gx_exceptions
+from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
+    add_dataframe_to_db,
+)
 from great_expectations.core.batch_spec import (
     RuntimeQueryBatchSpec,
     SqlAlchemyDatasourceBatchSpec,
@@ -32,10 +35,6 @@ from great_expectations.expectations.row_conditions import (
 )
 from great_expectations.self_check.util import build_sa_engine
 from great_expectations.util import get_sqlalchemy_domain_data
-from great_expectations.compatibility.sqlalchemy_compatibility_wrappers import (
-    add_dataframe_to_db,
-)
-
 from great_expectations.validator.computed_metric import MetricValue
 from great_expectations.validator.metric_configuration import MetricConfiguration
 from great_expectations.validator.validator import Validator
@@ -47,14 +46,16 @@ try:
 except ImportError:
     sqlalchemy = None
 
+pytestmark = pytest.mark.sqlalchemy_version_compatibility
+
 
 def test_instantiation_via_connection_string(sa, test_db_connection_string):
     my_execution_engine = SqlAlchemyExecutionEngine(
         connection_string=test_db_connection_string
     )
     assert my_execution_engine.connection_string == test_db_connection_string
-    assert my_execution_engine.credentials == None
-    assert my_execution_engine.url == None
+    assert my_execution_engine.credentials is None
+    assert my_execution_engine.url is None
 
     my_execution_engine.get_batch_data_and_markers(
         batch_spec=SqlAlchemyDatasourceBatchSpec(
@@ -69,7 +70,9 @@ def test_instantiation_via_connection_string(sa, test_db_connection_string):
 def test_instantiation_via_url(sa):
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
     assert my_execution_engine.connection_string is None
@@ -92,7 +95,9 @@ def test_instantiation_via_url_and_retrieve_data_with_other_dialect(sa):
     # 1. Create engine with sqlite db
     db_file = file_relative_path(
         __file__,
-        os.path.join("..", "test_sets", "test_cases_for_sql_data_connector.db"),
+        os.path.join(  # noqa: PTH118
+            "..", "test_sets", "test_cases_for_sql_data_connector.db"
+        ),
     )
     my_execution_engine = SqlAlchemyExecutionEngine(url="sqlite:///" + db_file)
     assert my_execution_engine.connection_string is None
@@ -327,7 +332,7 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()',
+                    condition='col("b").notnull()',
                     condition_type=RowConditionParserType.GE,
                 )
             ],
@@ -360,7 +365,7 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
             "condition_parser": "great_expectations__experimental__",
             "filter_conditions": [
                 RowCondition(
-                    condition=f'col("b").notnull()',
+                    condition='col("b").notnull()',
                     condition_type=RowConditionParserType.GE,
                 )
             ],
@@ -388,19 +393,19 @@ def test_get_domain_records_with_column_domain_and_filter_conditions_raises_erro
         {"a": [1, 2, 3, 4, 5], "b": [2, 3, 4, 5, None], "c": [1, 2, 3, 4, None]}
     )
     engine = build_sa_engine(df, sa)
-    with pytest.raises(gx_exceptions.GreatExpectationsError) as e:
-        data = engine.get_domain_records(
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
+        engine.get_domain_records(
             domain_kwargs={
                 "column": "a",
                 "row_condition": 'col("a")<2',
                 "condition_parser": "great_expectations__experimental__",
                 "filter_conditions": [
                     RowCondition(
-                        condition=f'col("b").notnull()',
+                        condition='col("b").notnull()',
                         condition_type=RowConditionParserType.GE,
                     ),
                     RowCondition(
-                        condition=f'col("c").notnull()',
+                        condition='col("c").notnull()',
                         condition_type=RowConditionParserType.GE,
                     ),
                 ],
@@ -802,7 +807,7 @@ def test_get_compute_domain_with_nonexistent_condition_parser(sa):
     )
 
     # Expect GreatExpectationsError because parser doesn't exist
-    with pytest.raises(gx_exceptions.GreatExpectationsError) as e:
+    with pytest.raises(gx_exceptions.GreatExpectationsError):
         data, compute_kwargs, accessor_kwargs = engine.get_compute_domain(
             domain_kwargs={
                 "row_condition": "b > 24",
@@ -842,7 +847,7 @@ def test_resolve_metric_bundle_with_nonexistent_metric(sa):
     # Ensuring a metric provider error is raised if metric does not exist
     with pytest.raises(gx_exceptions.MetricProviderError) as e:
         # noinspection PyUnusedLocal
-        res = engine.resolve_metrics(
+        engine.resolve_metrics(
             metrics_to_resolve=(
                 desired_metric_1,
                 desired_metric_2,

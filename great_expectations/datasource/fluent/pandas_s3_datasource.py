@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Dict, Type, Union
 import pydantic
 from typing_extensions import Literal
 
+from great_expectations.core._docs_decorators import public_api
 from great_expectations.core.util import S3Url
 from great_expectations.datasource.fluent import _PandasFilePathDatasource
 from great_expectations.datasource.fluent.config_str import (
@@ -43,6 +44,7 @@ class PandasS3DatasourceError(PandasDatasourceError):
     pass
 
 
+@public_api
 class PandasS3Datasource(_PandasFilePathDatasource):
     # class attributes
     data_connector_type: ClassVar[Type[S3DataConnector]] = S3DataConnector
@@ -95,7 +97,7 @@ class PandasS3Datasource(_PandasFilePathDatasource):
             ) from e
 
         if self.assets and test_assets:
-            for asset in self.assets.values():
+            for asset in self.assets:
                 asset.test_connection()
 
     def _build_data_connector(

@@ -33,19 +33,17 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__file__)
 
-
-try:
-    import boto3
-except ImportError:
-    logger.debug("Unable to load boto3; install optional boto3 dependency for support.")
-    boto3 = None
-
+from great_expectations.compatibility import aws
 
 # apply markers to entire test module
 pytestmark = [
     pytest.mark.skipif(
         PANDAS_VERSION < 1.2, reason=f"Fluent pandas not supported on {PANDAS_VERSION}"
-    )
+    ),
+    pytest.mark.skipif(
+        not aws.boto3,
+        reason="Unable to load AWS connection object. Please install boto3 and botocore.",
+    ),
 ]
 
 
@@ -68,10 +66,11 @@ def aws_credentials() -> None:
     os.environ["AWS_SESSION_TOKEN"] = "testing"
 
 
+@pytest.mark.skipif(not aws.boto3)
 @pytest.fixture
 def s3_mock(aws_credentials, aws_region_name: str) -> BaseClient:
     with mock_s3():
-        client = boto3.client("s3", region_name=aws_region_name)
+        client = aws.boto3.client("s3", region_name=aws_region_name)
         yield client
 
 
@@ -389,7 +388,9 @@ def test_test_connection_failures(
         batching_regex=regex,
     )
     csv_asset._datasource = pandas_s3_datasource
-    pandas_s3_datasource.assets = {"csv_asset": csv_asset}
+    pandas_s3_datasource.assets = [
+        csv_asset,
+    ]
     csv_asset._data_connector = S3DataConnector(
         datasource_name=pandas_s3_datasource.name,
         data_asset_name=csv_asset.name,
