@@ -5,9 +5,9 @@ title: Data Docs
 
 import TechnicalTag from '../term_tags/_tag.mdx';
 
-import CLIRemoval from '/docs/components/warnings/_cli_removal.md'
+Automatically compiling your data test documentation into Data Docs keeps your documentation current.
 
-<CLIRemoval />
+## Relationship to other objects
 
 Data Docs are human readable documentation generated from Great Expectations metadata detailing <TechnicalTag relative="../" tag="expectation" text="Expectations" />, <TechnicalTag relative="../" tag="validation_result" text="Validation Results" />, etc.
 
@@ -27,11 +27,11 @@ Saved Validation Results will be displayed in any Data Docs site that is configu
 
 ## Readability
 
-Data Docs provide a clean, human-readable way to view your Expectation Suites and Validation Results without you having to manually parse their stored values and configurations.  You can also [add comments to your Expectations that will be displayed in your Data Docs](../guides/expectations/advanced/how_to_add_comments_to_expectations_and_display_them_in_data_docs.md), if you feel they need further explanation.
+The following are the most common use cases for displaying information in your Data Docs:
 
 ## Versatility
 
-There are multiple use cases for displaying information in your Data Docs.  Three common ones are:
+To support these use cases, ultiple sites can be configured inside a project, each suitable for a particular data documentation use case.
 
 - Visualize all Great Expectations artifacts from the local repository of a project as HTML: Expectation Suites,
    Validation Results and profiling results.
@@ -43,7 +43,7 @@ There are multiple use cases for displaying information in your Data Docs.  Thre
    data looks like, and one or more Expectation Suites that encode what is expected from the data to be considered
    valid.
 
-To support these (and possibly other) use cases Great Expectations has a concept of a "data documentation site". Multiple sites can be configured inside a project, each suitable for a particular data documentation use case.
+Data Docs are rendered as HTML files, and you can open them in any browser.
 
 ## Access
 
