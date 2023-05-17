@@ -32,7 +32,17 @@
         "azure_options": {
             "title": "Azure Options",
             "default": {},
-            "type": "object"
+            "type": "object",
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "type": "string",
+                        "writeOnly": true,
+                        "format": "password"
+                    },
+                    {}
+                ]
+            }
         }
     },
     "required": [

@@ -405,7 +405,10 @@ class Datasource(
     _data_context: Union[GXDataContext, None] = pydantic.PrivateAttr(None)
     _cached_execution_engine_kwargs: Dict[str, Any] = pydantic.PrivateAttr({})
     _execution_engine: Union[_ExecutionEngineT, None] = pydantic.PrivateAttr(None)
-    _config_provider: Union[_ConfigurationProvider, None] = pydantic.PrivateAttr(None)
+
+    @property
+    def _config_provider(self) -> Union[_ConfigurationProvider, None]:
+        return getattr(self._data_context, "config_provider", None)
 
     @pydantic.validator("assets", each_item=True)
     @classmethod
