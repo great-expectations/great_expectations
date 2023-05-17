@@ -43,7 +43,7 @@ import AfterCreateNonSqlDatasource from '/docs/components/connect_to_data/next_s
 ### 1. Import the Great Expectations module and instantiate a Data Context
 
 
-```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py get_context"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py get_context"
 ```
 
 ### 2. Create a Datasource
@@ -54,14 +54,14 @@ A Filesystem Datasource can be created with two pieces of information:
 
 In our example, we will define these in advance by storing them in the Python variables `datasource_name` and `path_to_folder_containing_csv_files`:
 
-```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py define_add_pandas_filesystem_args"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py define_add_pandas_filesystem_args"
 ```
 
 <InfoFilesystemDatasourceRelativeBasePaths />
 
 Once we have determined our `name` and `base_directory`, we pass them in as parameters when we create our Datasource:
 
-```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py create_datasource"
 ```
 
 <TipFilesystemDatasourceNestedSourceDataFolders />
@@ -76,12 +76,12 @@ A Data Asset requires two pieces of information to be defined:
 
 For this example, we will define these two values in advance by storing them in the Python variables `asset_name` and (since we are connecting to NYC taxi data in this example) `batching_regex`:
 
-```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py define_add_csv_asset_args"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py define_add_csv_asset_args"
 ```
 
 Once we have determined those two values, we will pass them in as parameters when we create our Data Asset:
 
-```python name="tests/integration/docusaurus/tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py add_asset"
+```python name="tests/integration/docusaurus/connecting_to_your_data/fluent_datasources/how_to_connect_to_one_or_more_files_using_pandas.py add_asset"
 ```
 
 <TipUsingPandasToConnectToDifferentFileTypes this_example_file_extension="csv" />
