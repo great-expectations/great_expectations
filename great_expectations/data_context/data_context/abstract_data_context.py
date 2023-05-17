@@ -3136,12 +3136,12 @@ class AbstractDataContext(ConfigPeer, ABC):
             got_expectation_suite = self.get_expectation_suite(
                 expectation_suite_name=expectation_suite.name
             )
-            # The suite object must have an ID in order to request a PUT to GX Cloud.
-            expectation_suite.ge_cloud_id = got_expectation_suite.ge_cloud_id
         except gx_exceptions.DataContextError:
             # not found
             return self._add_expectation_suite(expectation_suite=expectation_suite)
 
+        # The suite object must have an ID in order to request a PUT to GX Cloud.
+        expectation_suite.ge_cloud_id = got_expectation_suite.ge_cloud_id
         return self.update_expectation_suite(expectation_suite=expectation_suite)
 
     @public_api
