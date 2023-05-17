@@ -57,7 +57,26 @@ def db_file() -> pathlib.Path:
 
 
 @pytest.fixture
-def fluent_only_config(fluent_gx_config_yml_str: str) -> GxConfig:
+def seed_ds_env_vars(
+    monkeypatch: pytest.MonkeyPatch, db_file: pathlib.Path
+) -> dict[str, str]:
+    """Seed a collection of ENV variables for use in testing config substitution."""
+    config_sub_dict = {
+        "MY_CONN_STR": f"sqlite:///{db_file}",
+        "MY_URL": "http://example.com",
+    }
+
+    for name, value in config_sub_dict.items():
+        monkeypatch.setenv(name, value)
+        logger.info(f"Setting ENV - {name} = '{value}'")
+
+    return config_sub_dict
+
+
+@pytest.fixture
+def fluent_only_config(
+    fluent_gx_config_yml_str: str, seed_ds_env_vars: dict
+) -> GxConfig:
     """Creates a fluent `GxConfig` object and ensures it contains at least one `Datasource`"""
     fluent_config = GxConfig.parse_yaml(fluent_gx_config_yml_str)
     assert fluent_config.datasources
