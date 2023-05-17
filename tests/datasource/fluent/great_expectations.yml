@@ -71,6 +71,8 @@ fluent_datasources:
   my_pandas_s3_ds:
     type: pandas_s3
     bucket: "test_bucket"
+    boto3_options:
+      endpoint_url: "${MY_URL}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
@@ -126,6 +128,8 @@ fluent_datasources:
   my_spark_s3_ds:
     type: spark_s3
     bucket: "test_bucket"
+    boto3_options:
+      endpoint_url: "${MY_URL}"
     assets:
       my_csv_asset_w_custom_connect_options:
         type: csv
