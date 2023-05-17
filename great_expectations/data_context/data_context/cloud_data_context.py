@@ -512,7 +512,7 @@ class CloudDataContext(SerializableDataContext):
             DeprecationWarning,
         )
         if not isinstance(overwrite_existing, bool):
-            raise ValueError("Parameter overwrite_existing must be of type BOOL")
+            raise ValueError("overwrite_existing must be of type bool.")
 
         expectation_suite = ExpectationSuite(
             expectation_suite_name=expectation_suite_name, data_context=self
