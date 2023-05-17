@@ -12,6 +12,7 @@ import warnings
 import webbrowser
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from pprint import pformat as pf
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -4675,9 +4676,17 @@ Generated, evaluated, and stored {total_expectations} Expectations during profil
         """Initialize the datasources in store"""
         config: DataContextConfig = self.config
 
+        logger.warning(
+            f"config.fluent_datasources ->\n{pf(config.fluent_datasources, depth=2)}"
+        )
+        logger.warning(f"config.datasources ->\n{pf(config.datasources, depth=2)}")
+
         if self._datasource_store.cloud_mode:
             for fds in config.fluent_datasources.values():
                 self._add_fluent_datasource(**fds)._rebuild_asset_data_connectors()
+            for ds in config.datasources.values():
+                if isinstance(ds, FluentDatasource):
+                    self._add_fluent_datasource(**ds)._rebuild_asset_data_connectors()
 
         datasources: Dict[str, DatasourceConfig] = cast(
             Dict[str, DatasourceConfig], config.datasources
